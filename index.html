@@ -23,16 +23,54 @@
 
   /* ── Filters ── */
   .filters{
-    display:flex;flex-wrap:wrap;justify-content:center;gap:0.45rem;
-    padding:0 1rem 1.2rem;max-width:1000px;
+    display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-end;
+    gap:0.7rem 1rem;padding:0 1rem 1.4rem;max-width:1100px;
   }
-  .filter-btn{
-    padding:0.35rem 0.9rem;border-radius:20px;border:1px solid rgba(255,255,255,0.15);
-    background:rgba(255,255,255,0.05);color:var(--text);cursor:pointer;
-    font-size:0.78rem;transition:all 0.3s;user-select:none;
+  .filter-group{display:flex;flex-direction:column;gap:0.2rem;min-width:0}
+  .filter-label{font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;opacity:0.5;padding-left:2px}
+  .filter-select{
+    padding:0.4rem 2rem 0.4rem 0.7rem;border-radius:8px;
+    border:1px solid rgba(255,255,255,0.15);
+    background:rgba(255,255,255,0.07);color:var(--text);
+    font-size:0.8rem;cursor:pointer;
+    appearance:none;-webkit-appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23f0e6d3'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 0.6rem center;
+    transition:all 0.2s;
   }
-  .filter-btn:hover{background:rgba(255,255,255,0.12)}
-  .filter-btn.active{background:var(--accent);color:#1a1a2e;border-color:var(--accent);font-weight:600}
+  .filter-select:hover{background-color:rgba(255,255,255,0.12)}
+  .filter-select:focus{outline:none;border-color:var(--accent)}
+  .filter-select option{background:#2a2a3e;color:var(--text)}
+
+  .filter-slider-wrap{display:flex;align-items:center;gap:0.5rem}
+  .filter-slider{
+    -webkit-appearance:none;appearance:none;
+    width:120px;height:4px;border-radius:2px;
+    background:rgba(255,255,255,0.15);outline:none;cursor:pointer;
+  }
+  .filter-slider::-webkit-slider-thumb{
+    -webkit-appearance:none;width:16px;height:16px;border-radius:50%;
+    background:var(--accent);cursor:pointer;border:2px solid var(--bg);
+  }
+  .filter-slider::-moz-range-thumb{
+    width:16px;height:16px;border-radius:50%;
+    background:var(--accent);cursor:pointer;border:2px solid var(--bg);
+  }
+  .filter-slider-value{
+    font-size:0.75rem;min-width:48px;text-align:center;
+    opacity:0.8;font-variant-numeric:tabular-nums;
+  }
+
+  .filter-reset{
+    padding:0.4rem 0.9rem;border-radius:8px;border:1px solid var(--accent);
+    background:transparent;color:var(--accent);cursor:pointer;
+    font-size:0.75rem;transition:all 0.2s;align-self:flex-end;
+  }
+  .filter-reset:hover{background:var(--accent);color:#1a1a2e}
+  .filter-active-count{
+    font-size:0.6rem;background:var(--accent);color:#1a1a2e;
+    border-radius:10px;padding:1px 6px;margin-left:4px;font-weight:700;
+  }
 
   /* ── Shelf ── */
   .shelf-wrapper{
@@ -209,6 +247,9 @@
   /* ── Responsive ── */
   @media(max-width:900px){
     h1{font-size:1.5rem}
+    .filters{gap:0.5rem 0.6rem}
+    .filter-select{font-size:0.72rem;padding:0.35rem 1.6rem 0.35rem 0.5rem}
+    .filter-slider{width:90px}
     .game-spine.box-xl{flex-basis:32px;min-width:32px}
     .game-spine.box-lg{flex-basis:24px;min-width:24px}
     .game-spine.box-md{flex-basis:18px;min-width:18px}
@@ -227,7 +268,43 @@
 <h1>Board Game Library</h1>
 <p class="subtitle">Click a game to see details &middot; Use filters to find what to play</p>
 
-<div class="filters" id="filters"></div>
+<div class="filters" id="filters">
+  <div class="filter-group">
+    <span class="filter-label">Category</span>
+    <select class="filter-select" id="f-category"><option value="">All</option></select>
+  </div>
+  <div class="filter-group">
+    <span class="filter-label">Type</span>
+    <select class="filter-select" id="f-coop">
+      <option value="">All</option>
+      <option value="coop">Co-op</option>
+      <option value="competitive">Competitive</option>
+    </select>
+  </div>
+  <div class="filter-group">
+    <span class="filter-label">Players</span>
+    <select class="filter-select" id="f-players"><option value="">Any</option></select>
+  </div>
+  <div class="filter-group">
+    <span class="filter-label">Difficulty</span>
+    <select class="filter-select" id="f-difficulty">
+      <option value="">All</option>
+      <option value="easy">Easy</option>
+      <option value="medium">Medium</option>
+      <option value="hard">Hard</option>
+      <option value="expert">Expert</option>
+    </select>
+  </div>
+  <div class="filter-group">
+    <span class="filter-label">Max Play Time</span>
+    <div class="filter-slider-wrap">
+      <input type="range" class="filter-slider" id="f-time" min="15" max="240" value="240" step="15">
+      <span class="filter-slider-value" id="f-time-val">Any</span>
+    </div>
+  </div>
+  <button class="filter-reset" id="f-reset">Reset</button>
+  <span id="f-count"></span>
+</div>
 
 <div class="shelf-wrapper">
   <div class="shelf" id="shelf"></div>
@@ -1408,42 +1485,120 @@ const CATEGORIES = [
   "Solo","Puzzle","Party","Abstract","Adventure","Racing"
 ];
 
+// ── Filter helpers ──
+function parseMaxTime(playTime) {
+  // "60-120 min" → 120, "40 min" → 40
+  const nums = playTime.replace(/[^0-9-]/g,'').split('-').map(Number);
+  return Math.max(...nums);
+}
+function parseMinTime(playTime) {
+  const nums = playTime.replace(/[^0-9-]/g,'').split('-').map(Number);
+  return Math.min(...nums);
+}
+function parsePlayers(pStr) {
+  // "2-4" → [2,3,4], "1" → [1], "2-6" → [2,3,4,5,6]
+  const parts = pStr.split('-').map(Number);
+  if (parts.length === 1) return [parts[0]];
+  const arr = [];
+  for (let i = parts[0]; i <= parts[1]; i++) arr.push(i);
+  return arr;
+}
+function difficultyBucket(complexity) {
+  if (complexity <= 2.0) return 'easy';
+  if (complexity <= 3.0) return 'medium';
+  if (complexity <= 4.0) return 'hard';
+  return 'expert';
+}
+function isCoop(game) {
+  return game.categories.includes('Co-op');
+}
+
 // ── Render filters ──
 function renderFilters() {
-  const el = document.getElementById('filters');
+  // Populate category dropdown
+  const catSel = document.getElementById('f-category');
   const usedCats = new Set();
   GAMES.forEach(g => g.categories.forEach(c => usedCats.add(c)));
-  const cats = CATEGORIES.filter(c => usedCats.has(c));
+  CATEGORIES.filter(c => usedCats.has(c)).forEach(cat => {
+    const opt = document.createElement('option');
+    opt.value = cat; opt.textContent = cat;
+    catSel.appendChild(opt);
+  });
 
-  el.innerHTML = cats.map(cat =>
-    `<button class="filter-btn" data-cat="${cat}">${cat}</button>`
-  ).join('') + `<button class="filter-btn" data-cat="__all" style="border-color:var(--accent)">Show All</button>`;
+  // Populate player count dropdown (1-8+)
+  const pSel = document.getElementById('f-players');
+  for (let i = 1; i <= 8; i++) {
+    const opt = document.createElement('option');
+    opt.value = i; opt.textContent = i === 8 ? '8+' : i;
+    pSel.appendChild(opt);
+  }
 
-  el.addEventListener('click', e => {
-    const btn = e.target.closest('.filter-btn');
-    if (!btn) return;
-    const cat = btn.dataset.cat;
-    if (cat === '__all') {
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      applyFilter(null);
-      return;
-    }
-    btn.classList.toggle('active');
-    el.querySelector('[data-cat="__all"]')?.classList.remove('active');
-    const activeCats = [...el.querySelectorAll('.filter-btn.active')].map(b => b.dataset.cat);
-    applyFilter(activeCats.length ? activeCats : null);
+  // Time slider
+  const timeSlider = document.getElementById('f-time');
+  const timeVal = document.getElementById('f-time-val');
+  timeSlider.addEventListener('input', () => {
+    const v = Number(timeSlider.value);
+    timeVal.textContent = v >= 240 ? 'Any' : v + ' min';
+    applyFilters();
+  });
+
+  // Wire up all dropdowns
+  ['f-category','f-coop','f-players','f-difficulty'].forEach(id => {
+    document.getElementById(id).addEventListener('change', applyFilters);
+  });
+
+  // Reset
+  document.getElementById('f-reset').addEventListener('click', () => {
+    catSel.value = '';
+    document.getElementById('f-coop').value = '';
+    pSel.value = '';
+    document.getElementById('f-difficulty').value = '';
+    timeSlider.value = 240;
+    timeVal.textContent = 'Any';
+    applyFilters();
   });
 }
 
-function applyFilter(activeCats) {
+function applyFilters() {
+  const cat = document.getElementById('f-category').value;
+  const coop = document.getElementById('f-coop').value;
+  const players = document.getElementById('f-players').value;
+  const diff = document.getElementById('f-difficulty').value;
+  const maxTime = Number(document.getElementById('f-time').value);
+  const timeActive = maxTime < 240;
+
+  const anyActive = cat || coop || players || diff || timeActive;
+  let matchCount = 0;
+
   document.querySelectorAll('.game-spine').forEach(el => {
-    if (!activeCats) { el.classList.remove('faded'); return; }
-    const gameId = el.dataset.gameId;
-    const game = GAMES.find(g => g.id === gameId);
+    if (!anyActive) { el.classList.remove('faded'); matchCount++; return; }
+    const game = GAMES.find(g => g.id === el.dataset.gameId);
     if (!game) { el.classList.add('faded'); return; }
-    const matches = activeCats.every(cat => game.categories.includes(cat));
-    el.classList.toggle('faded', !matches);
+
+    let pass = true;
+    if (cat && !game.categories.includes(cat)) pass = false;
+    if (pass && coop) {
+      if (coop === 'coop' && !isCoop(game)) pass = false;
+      if (coop === 'competitive' && isCoop(game)) pass = false;
+    }
+    if (pass && players) {
+      const supported = parsePlayers(game.players);
+      if (!supported.includes(Number(players)) && !(Number(players) === 8 && Math.max(...supported) >= 8)) pass = false;
+    }
+    if (pass && diff && difficultyBucket(game.complexity) !== diff) pass = false;
+    if (pass && timeActive && parseMinTime(game.playTime) > maxTime) pass = false;
+
+    el.classList.toggle('faded', !pass);
+    if (pass) matchCount++;
   });
+
+  // Show count badge
+  const countEl = document.getElementById('f-count');
+  if (anyActive) {
+    countEl.innerHTML = `<span class="filter-active-count">${matchCount} game${matchCount !== 1 ? 's' : ''}</span>`;
+  } else {
+    countEl.innerHTML = '';
+  }
 }
 
 // ── Render shelf ──
