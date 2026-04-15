@@ -12,10 +12,12 @@
     --wood:#c9a66b;--wood-dark:#a07840;--wood-light:#dfc89a;--wood-shadow:#7a5a30;
     --bg:#363636;--text:#f0e6d3;--accent:#e2b04a;--modal-bg:#3a3a3a;
   }
+  html{overflow-x:hidden}
   body{
     font-family:'Roboto','Segoe UI',system-ui,-apple-system,sans-serif;
     background:var(--bg);color:var(--text);
     min-height:100vh;display:flex;flex-direction:column;align-items:center;
+    overflow-x:hidden;max-width:100vw;
   }
   h1{
     font-size:2.2rem;margin:1.5rem 0 0.3rem;text-align:center;
@@ -217,32 +219,33 @@
   /* ── Modal ── */
   .modal-overlay{
     display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);
-    z-index:100;justify-content:center;align-items:center;padding:1rem;
+    z-index:100;justify-content:center;align-items:center;padding:0;
     backdrop-filter:blur(6px);
   }
   .modal-overlay.open{display:flex}
   .modal{
-    background:var(--modal-bg);border-radius:16px;max-width:520px;width:100%;
-    max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.5);
+    background:var(--modal-bg);border-radius:0;width:100%;height:100%;
+    overflow-y:auto;box-shadow:none;
     position:relative;
   }
   .modal-close{
-    position:absolute;top:12px;right:14px;background:rgba(0,0,0,0.5);border:none;
-    color:#fff;font-size:1.3rem;cursor:pointer;opacity:0.8;
-    z-index:2;line-height:1;width:32px;height:32px;border-radius:50%;
+    position:fixed;top:12px;right:14px;background:rgba(0,0,0,0.6);border:none;
+    color:#fff;font-size:1.5rem;cursor:pointer;opacity:0.9;
+    z-index:102;line-height:1;width:36px;height:36px;border-radius:50%;
     display:flex;align-items:center;justify-content:center;
   }
   .modal-close:hover{opacity:1;background:rgba(0,0,0,0.7)}
 
   /* Modal cover image */
   .modal-cover{
-    width:100%;border-radius:16px 16px 0 0;
+    width:100%;border-radius:0;
     overflow:hidden;
     display:flex;align-items:center;justify-content:center;
     background:#1a1a28;
   }
   .modal-cover-img{
-    display:block;width:100%;height:auto;
+    display:block;width:100%;height:auto;max-height:60vh;
+    object-fit:contain;
     transition:opacity 0.3s;
   }
   .modal-cover-fallback{
@@ -253,7 +256,7 @@
     background-size:cover;background-position:center;
   }
 
-  .modal-body{padding:1.5rem}
+  .modal-body{padding:1.5rem 2rem;max-width:700px;margin:0 auto}
 
   /* Title + year row */
   .modal-header{display:flex;align-items:baseline;gap:0.6rem;margin-bottom:0.3rem;flex-wrap:wrap}
@@ -537,7 +540,7 @@
     .game-spine.box-md{flex-basis:18px;min-width:18px}
     .game-spine.box-sm{flex-basis:14px;min-width:14px}
     .game-spine .spine-text{font-size:0.45rem}
-    .modal-cover-img{max-height:50vh}
+    .modal-cover-img{max-height:40vh}
     .cubby.horizontal-layout .game-spine.box-sm{height:18px}
     .cubby.horizontal-layout .game-spine.box-md{height:24px}
     .cubby.horizontal-layout .game-spine.box-lg{height:35px}
@@ -949,25 +952,26 @@ const GAMES = [
    ,description:"A cooperative detective game set during the Paris 1900 World's Fair. Players use a companion app to scan QR codes on physical character and location cards, unlocking clues, dialogue, and evidence. You travel across Paris, interrogate suspects, and piece together the crime before time runs out. The app tracks your performance and scores your investigation. For players who enjoy narrative-driven puzzle-solving and the atmosphere of Belle Epoque Paris."},
 
   {id:"rove",name:"Rove"
-   ,row:1,col:5,categories:["Solo", "Puzzle"]
-   ,players:"1",playTime:"10-15 min"
-   ,complexity:3.5,bggId:365670
+   ,row:1,col:5,categories:["Card Game", "Puzzle"]
+   ,players:"1-2",playTime:"10-20 min"
+   ,complexity:1.6,bggId:365670
    ,spineColor:"#3d5e7f",boxSize:"md"
-   ,designer:"Motti Eisenbach, Tyvan Grossi"
-   ,year:2023
-   ,bggRating:8.2
-   ,mechanics:["Campaign / Battle Card Driven", "Cooperative Game", "Grid Movement", "Hand Management", "Scenario / Mission / Campaign Game", "Solo / Solitaire Game"]
-   ,description:"A solo card puzzle set on the alien world of Chorus. You control a Rover represented by a grid of cards, and each mission asks you to rearrange them into a specific pattern by sliding cards according to movement rules. Completing missions unlocks new abilities and harder challenges. Compact enough for travel, with enough depth for repeated solo sessions. Appeals to puzzle lovers who enjoy spatial reasoning."},
+   ,designer:"Dustin Dobson"
+   ,year:2022
+   ,bggRating:7.3
+   ,mechanics:["Grid Movement", "Hand Management", "Pattern Building", "Solo / Solitaire Game"]
+   ,description:"A compact card puzzle game set on the alien world of Chorus. Players control a Rover represented by a grid of module cards and must rearrange them into specific patterns by sliding cards according to movement rules. Each mission card shows a target configuration, and you chain moves to solve it before running out of actions. Includes a two-player competitive variant. Compact enough for travel, with enough depth for repeated play. Appeals to puzzle lovers who enjoy spatial reasoning."},
 
   {id:"rove_xulc",name:"Rove: Xulc Expansion"
-   ,row:1,col:5,categories:["Solo", "Puzzle"]
-   ,players:"1",playTime:"10-15 min"
+   ,row:1,col:5,categories:["Card Game", "Puzzle"]
+   ,players:"1-2",playTime:"10-20 min"
    ,complexity:1.8,bggId:439995
    ,spineColor:"#4e546f",boxSize:"md"
-   ,designer:"Motti Eisenbach, Tyvan Grossi"
-   ,year:2025
-   ,bggRating:8.3
-   ,mechanics:["Campaign / Battle Card Driven", "Hexagon Grid", "Narrative Choice / Paragraph"],description:"An expansion for Rove adding 10 new Rover classes and two additional quest chains. The new classes introduce different movement rules and abilities, expanding the puzzle space considerably. Requires the base game. For players who have exhausted the original missions and want fresh challenges in the same compact format."},
+   ,designer:"Dustin Dobson"
+   ,year:2023
+   ,bggRating:7.5
+   ,mechanics:["Grid Movement", "Hand Management", "Pattern Building"]
+   ,description:"An expansion for Rove that introduces the alien world of Xulc with new mission cards and module types. Adds fresh puzzle configurations and new movement rules that expand the challenge space. Can be mixed with the base game for more variety or played as a standalone set of missions. Requires the Rove base game. For players who have enjoyed the original and want new spatial puzzles to solve."},
 
   {id:"detective_coa",name:"Detective: City of Angels"
    ,row:1,col:6,categories:["Thematic", "Deduction"]
