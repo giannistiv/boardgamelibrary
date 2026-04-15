@@ -72,6 +72,15 @@
     border-radius:10px;padding:1px 6px;margin-left:4px;font-weight:700;
   }
 
+  .filter-checks{display:flex;gap:0.6rem;align-items:center}
+  .filter-check{
+    display:flex;align-items:center;gap:0.3rem;cursor:pointer;
+    font-size:0.78rem;user-select:none;
+  }
+  .filter-check input[type="checkbox"]{
+    accent-color:var(--accent);width:14px;height:14px;cursor:pointer;
+  }
+
   /* ── Shelf ── */
   .shelf-wrapper{
     padding:0 0.5rem 2rem;width:100%;max-width:1200px;overflow-x:auto;
@@ -296,10 +305,24 @@
     </select>
   </div>
   <div class="filter-group">
+    <span class="filter-label">Game</span>
+    <select class="filter-select" id="f-expansion">
+      <option value="">All</option>
+      <option value="core">Core Games</option>
+      <option value="expansion">Expansions</option>
+    </select>
+  </div>
+  <div class="filter-group">
     <span class="filter-label">Max Play Time</span>
     <div class="filter-slider-wrap">
       <input type="range" class="filter-slider" id="f-time" min="15" max="240" value="240" step="15">
       <span class="filter-slider-value" id="f-time-val">Any</span>
+    </div>
+  </div>
+  <div class="filter-group">
+    <span class="filter-label">Include</span>
+    <div class="filter-checks">
+      <label class="filter-check"><input type="checkbox" id="f-campaign" checked> Campaign / Legacy</label>
     </div>
   </div>
   <button class="filter-reset" id="f-reset">Reset</button>
@@ -327,7 +350,7 @@ const GAMES = [
    ,row:1,col:1,categories:["Co-op", "Thematic", "Family"]
    ,players:"1-4",playTime:"40 min"
    ,complexity:2.19,bggId:302668
-   ,spineColor:"#1a4a7a",boxSize:"md"
+   ,spineColor:"#195436",boxSize:"md"
    ,designer:"Andrea Chiarvesio, Eric M. Lang"
    ,year:2021
    ,bggRating:7.9
@@ -338,7 +361,7 @@ const GAMES = [
    ,row:1,col:1,categories:["Co-op", "Thematic", "Family"]
    ,players:"1-4",playTime:"40 min"
    ,complexity:2.14,bggId:302669
-   ,spineColor:"#2a1a3a",boxSize:"md"
+   ,spineColor:"#6a1f1f",boxSize:"md"
    ,designer:"Andrea Chiarvesio, Eric M. Lang"
    ,year:2021
    ,bggRating:7.9
@@ -349,7 +372,7 @@ const GAMES = [
    ,row:1,col:1,categories:["Co-op", "Thematic", "Family"]
    ,players:"1-4",playTime:"40 min"
    ,complexity:2.2,bggId:303600
-   ,spineColor:"#8a1a2a",boxSize:"md"
+   ,spineColor:"#65597f",boxSize:"md"
    ,designer:"Andrea Chiarvesio, Eric M. Lang"
    ,year:2021
    ,bggRating:7.9
@@ -360,7 +383,7 @@ const GAMES = [
    ,row:1,col:1,categories:["Co-op", "Thematic", "Family"]
    ,players:"1-4",playTime:"40 min"
    ,complexity:1.8,bggId:339131
-   ,spineColor:"#cc2233",boxSize:"md"
+   ,spineColor:"#3f2c2c",boxSize:"md"
    ,designer:"Andrea Chiarvesio, Eric M. Lang, Francesco Rugerfred Sedda"
    ,year:2022
    ,bggRating:7.7
@@ -370,7 +393,7 @@ const GAMES = [
    ,row:1,col:1,categories:["Co-op", "Thematic", "Family"]
    ,players:"1-4",playTime:"40 min"
    ,complexity:1.8,bggId:339128
-   ,spineColor:"#c4a020",boxSize:"md"
+   ,spineColor:"#132b3f",boxSize:"md"
    ,designer:"Andrea Chiarvesio, Eric M. Lang, Francesco Rugerfred Sedda"
    ,year:2022
    ,bggRating:8.3
@@ -380,7 +403,7 @@ const GAMES = [
    ,row:1,col:1,categories:["Co-op", "Thematic", "Family"]
    ,players:"1-4",playTime:"40 min"
    ,complexity:2.07,bggId:302670
-   ,spineColor:"#2060a0",boxSize:"md"
+   ,spineColor:"#1b1b3f",boxSize:"md"
    ,designer:"Andrea Chiarvesio, Eric M. Lang"
    ,year:2021
    ,bggRating:8.0
@@ -390,7 +413,7 @@ const GAMES = [
    ,row:1,col:1,categories:["Co-op", "Thematic", "Family"]
    ,players:"1-4",playTime:"40 min"
    ,complexity:2.0,bggId:339129
-   ,spineColor:"#1a3a8a",boxSize:"md"
+   ,spineColor:"#142643",boxSize:"md"
    ,designer:"Andrea Chiarvesio, Eric M. Lang, Francesco Rugerfred Sedda"
    ,year:2022
    ,bggRating:8.3
@@ -400,7 +423,7 @@ const GAMES = [
    ,row:1,col:2,categories:["Strategy", "Euro", "Engine Building"]
    ,players:"1-4",playTime:"80-150 min"
    ,complexity:3.59,bggId:247763
-   ,spineColor:"#1a5a8a",boxSize:"lg"
+   ,spineColor:"#2c3f2c",boxSize:"lg"
    ,designer:"Vladimír Suchý"
    ,year:2018
    ,bggRating:8.0
@@ -411,7 +434,7 @@ const GAMES = [
    ,row:1,col:2,categories:["Co-op", "Family", "Thematic"]
    ,players:"1-5",playTime:"60 min"
    ,complexity:2.02,bggId:282524
-   ,spineColor:"#7a1a2a",boxSize:"md"
+   ,spineColor:"#3f243f",boxSize:"md"
    ,designer:"Prospero Hall, Peter Lee"
    ,year:2019
    ,bggRating:7.6
@@ -422,7 +445,7 @@ const GAMES = [
    ,row:1,col:2,categories:["Strategy", "Area Control", "Worker Placement"]
    ,players:"2-6",playTime:"120-240 min"
    ,complexity:4.04,bggId:62219
-   ,spineColor:"#2a5a2a",boxSize:"lg"
+   ,spineColor:"#3f3f24",boxSize:"lg"
    ,designer:"Chad Jensen"
    ,year:2010
    ,bggRating:7.8
@@ -433,7 +456,7 @@ const GAMES = [
    ,row:1,col:2,categories:["Strategy", "Euro", "Engine Building"]
    ,players:"2-4",playTime:"60-120 min"
    ,complexity:3.86,bggId:224517
-   ,spineColor:"#1a1a1a",boxSize:"lg"
+   ,spineColor:"#3f2c2c",boxSize:"lg"
    ,designer:"Gavan Brown, Matt Tolman, Martin Wallace"
    ,year:2018
    ,bggRating:8.6
@@ -444,7 +467,7 @@ const GAMES = [
    ,row:1,col:3,categories:["Strategy", "Thematic", "Adventure"]
    ,players:"1-4",playTime:"30-120 min"
    ,complexity:2.89,bggId:231581
-   ,spineColor:"#c07030",boxSize:"md"
+   ,spineColor:"#3f2c2c",boxSize:"md"
    ,designer:"Martin Wallace"
    ,year:2018
    ,bggRating:7.3
@@ -455,7 +478,7 @@ const GAMES = [
    ,row:1,col:3,categories:["Strategy", "Abstract"]
    ,players:"2",playTime:"15-30 min"
    ,complexity:2.33,bggId:344258
-   ,spineColor:"#e8d5b0",boxSize:"md"
+   ,spineColor:"#7f6859",boxSize:"md"
    ,designer:"Peter C. Hayward"
    ,year:2021
    ,bggRating:7.3
@@ -466,7 +489,7 @@ const GAMES = [
    ,row:1,col:3,categories:["Strategy", "Euro", "Worker Placement"]
    ,players:"1-4",playTime:"45-75 min"
    ,complexity:2.7,bggId:275974
-   ,spineColor:"#6a3a8a",boxSize:"md"
+   ,spineColor:"#26697f",boxSize:"md"
    ,designer:"Isaias Vallejo"
    ,year:2020
    ,bggRating:7.4
@@ -477,7 +500,7 @@ const GAMES = [
    ,row:1,col:3,categories:["Co-op", "Thematic", "Campaign"]
    ,players:"1-6",playTime:"45-120 min"
    ,complexity:3.33,bggId:188920
-   ,spineColor:"#3a3a3a",boxSize:"lg"
+   ,spineColor:"#2c2c3f",boxSize:"lg"
    ,designer:"Michał Oracz, Jakub Wiśniewski"
    ,year:2017
    ,bggRating:7.8
@@ -488,7 +511,7 @@ const GAMES = [
    ,row:1,col:4,categories:["Strategy", "Thematic"]
    ,players:"2",playTime:"30-45 min"
    ,complexity:2.4,bggId:374595
-   ,spineColor:"#1a6a5a",boxSize:"md"
+   ,spineColor:"#154848",boxSize:"md"
    ,designer:"Carl Robinson"
    ,year:2024
    ,bggRating:7.5
@@ -499,7 +522,7 @@ const GAMES = [
    ,row:1,col:4,categories:["Strategy", "Worker Placement"]
    ,players:"1-4",playTime:"60-80 min"
    ,complexity:2.77,bggId:301880
-   ,spineColor:"#8a6a30",boxSize:"md"
+   ,spineColor:"#543c2d",boxSize:"md"
    ,designer:"Shem Phillips"
    ,year:2020
    ,bggRating:7.7
@@ -510,7 +533,7 @@ const GAMES = [
    ,row:1,col:4,categories:["Card Game", "Strategy"]
    ,players:"1-4",playTime:"30-60 min"
    ,complexity:2.81,bggId:424981
-   ,spineColor:"#5a3a6a",boxSize:"md"
+   ,spineColor:"#62597f",boxSize:"md"
    ,designer:"Hiroken"
    ,year:2025
    ,bggRating:8.3
@@ -520,7 +543,7 @@ const GAMES = [
    ,row:1,col:4,categories:["Family", "Strategy", "Thematic"]
    ,players:"1-5",playTime:"40-70 min"
    ,complexity:2.12,bggId:266524
-   ,spineColor:"#2a6a4a",boxSize:"md"
+   ,spineColor:"#3f3927",boxSize:"md"
    ,designer:"Henry Audubon"
    ,year:2019
    ,bggRating:7.6
@@ -531,7 +554,7 @@ const GAMES = [
    ,row:1,col:4,categories:["Co-op", "Deduction", "Thematic"]
    ,players:"1-4",playTime:"60-90 min"
    ,complexity:1.91,bggId:302098
-   ,spineColor:"#7a5a30",boxSize:"md"
+   ,spineColor:"#3f1313",boxSize:"md"
    ,designer:"David Cicurel, Wojciech Grajkowski"
    ,year:2021
    ,bggRating:7.9
@@ -542,7 +565,7 @@ const GAMES = [
    ,row:1,col:5,categories:["Solo", "Puzzle"]
    ,players:"1",playTime:"10-15 min"
    ,complexity:3.5,bggId:365670
-   ,spineColor:"#3070a0",boxSize:"md"
+   ,spineColor:"#3d5e7f",boxSize:"md"
    ,designer:"Motti Eisenbach, Tyvan Grossi"
    ,year:2023
    ,bggRating:8.2
@@ -553,7 +576,7 @@ const GAMES = [
    ,row:1,col:5,categories:["Solo", "Puzzle"]
    ,players:"1",playTime:"10-15 min"
    ,complexity:1.8,bggId:439995
-   ,spineColor:"#4080b0",boxSize:"md"
+   ,spineColor:"#4e546f",boxSize:"md"
    ,designer:"Motti Eisenbach, Tyvan Grossi"
    ,year:2025
    ,bggRating:8.3
@@ -563,7 +586,7 @@ const GAMES = [
    ,row:1,col:6,categories:["Thematic", "Deduction"]
    ,players:"1-5",playTime:"90-150 min"
    ,complexity:2.36,bggId:218074
-   ,spineColor:"#1a1a3a",boxSize:"lg"
+   ,spineColor:"#2c2c3f",boxSize:"lg"
    ,designer:"Evan Derrick"
    ,year:2019
    ,bggRating:7.9
@@ -574,7 +597,7 @@ const GAMES = [
    ,row:1,col:6,categories:["Co-op", "Deck Building", "Campaign"]
    ,players:"1-4",playTime:"45-90 min"
    ,complexity:2.87,bggId:241451
-   ,spineColor:"#4a2060",boxSize:"lg"
+   ,spineColor:"#24323f",boxSize:"lg"
    ,designer:"Jenny Iglesias, Nick Little (I), Kevin Riley"
    ,year:2019
    ,bggRating:8.0
@@ -585,7 +608,7 @@ const GAMES = [
    ,row:1,col:6,categories:["Strategy", "Co-op", "Campaign", "Thematic"]
    ,players:"1-4",playTime:"30-120 min"
    ,complexity:3.9,bggId:365186
-   ,spineColor:"#8a1a1a",boxSize:"lg"
+   ,spineColor:"#3f321d",boxSize:"lg"
    ,designer:"Motti Eisenbach"
    ,year:2021
    ,bggRating:9.2
@@ -596,7 +619,7 @@ const GAMES = [
    ,row:2,col:1,categories:["Puzzle", "Deduction"]
    ,players:"1-4",playTime:"20 min"
    ,complexity:2.55,bggId:356123
-   ,spineColor:"#e0d0a0",boxSize:"md"
+   ,spineColor:"#2f7b4b",boxSize:"md"
    ,designer:"Fabien Gridel, Yoann Levet"
    ,year:2022
    ,bggRating:7.6
@@ -607,7 +630,7 @@ const GAMES = [
    ,row:2,col:1,categories:["Strategy", "Euro", "Deck Building"]
    ,players:"1-4",playTime:"75-150 min"
    ,complexity:3.71,bggId:341169
-   ,spineColor:"#c47a30",boxSize:"lg"
+   ,spineColor:"#17173f",boxSize:"lg"
    ,designer:"Alexander Pfister"
    ,year:2021
    ,bggRating:8.3
@@ -618,7 +641,7 @@ const GAMES = [
    ,row:2,col:1,categories:["Co-op", "Family", "Card Game"]
    ,players:"2-6",playTime:"15-30 min"
    ,complexity:2.0,bggId:413246
-   ,spineColor:"#e05050",boxSize:"md"
+   ,spineColor:"#7f2a34",boxSize:"md"
    ,designer:"Hisashi Hayashi"
    ,year:2024
    ,bggRating:8.0
@@ -628,7 +651,7 @@ const GAMES = [
    ,row:2,col:1,categories:["Co-op", "Family", "Puzzle"]
    ,players:"1-8",playTime:"15 min"
    ,complexity:1.75,bggId:209778
-   ,spineColor:"#e05030",boxSize:"md"
+   ,spineColor:"#7f597f",boxSize:"md"
    ,designer:"Kasper Lapp"
    ,year:2017
    ,bggRating:6.9
@@ -639,7 +662,7 @@ const GAMES = [
    ,row:2,col:1,categories:["Strategy", "Euro", "Area Control"]
    ,players:"2-5",playTime:"45-90 min"
    ,complexity:2.96,bggId:286749
-   ,spineColor:"#d0c090",boxSize:"md"
+   ,spineColor:"#3f362c",boxSize:"md"
    ,designer:"Andreas Steding"
    ,year:2020
    ,bggRating:8.4
@@ -650,7 +673,7 @@ const GAMES = [
    ,row:2,col:2,categories:["Strategy", "Euro", "Engine Building"]
    ,players:"1-6",playTime:"30-60 min"
    ,complexity:3.17,bggId:304783
-   ,spineColor:"#8a7a5a",boxSize:"md"
+   ,spineColor:"#7f6659",boxSize:"md"
    ,designer:"Bobby Hill"
    ,year:2021
    ,bggRating:7.9
@@ -661,7 +684,7 @@ const GAMES = [
    ,row:2,col:2,categories:["Deduction", "Solo", "Puzzle"]
    ,players:"1-4",playTime:"60 min"
    ,complexity:2.44,bggId:279537
-   ,spineColor:"#0a1a3a",boxSize:"md"
+   ,spineColor:"#24323f",boxSize:"md"
    ,designer:"Matthew O'Malley, Ben Rosset"
    ,year:2020
    ,bggRating:7.9
@@ -672,7 +695,7 @@ const GAMES = [
    ,row:2,col:2,categories:["Dice", "Card Game", "Thematic"]
    ,players:"2-6",playTime:"20-40 min"
    ,complexity:2.15,bggId:348406
-   ,spineColor:"#cc1122",boxSize:"lg"
+   ,spineColor:"#141f3f",boxSize:"lg"
    ,designer:"Gavan Brown, Nate Chatellier, Manny Trembley"
    ,year:2022
    ,bggRating:8.0
@@ -683,7 +706,7 @@ const GAMES = [
    ,row:2,col:2,categories:["Co-op", "Strategy", "Thematic"]
    ,players:"1-3",playTime:"90-120 min"
    ,complexity:3.57,bggId:367498
-   ,spineColor:"#2a6050",boxSize:"md"
+   ,spineColor:"#2a2a3f",boxSize:"md"
    ,designer:"R. Eric Reuss"
    ,year:2022
    ,bggRating:8.1
@@ -694,7 +717,7 @@ const GAMES = [
    ,row:2,col:2,categories:["Strategy", "Euro", "Engine Building"]
    ,players:"2-6",playTime:"60-120 min"
    ,complexity:3.01,bggId:256916
-   ,spineColor:"#d4a050",boxSize:"lg"
+   ,spineColor:"#39213f",boxSize:"lg"
    ,designer:"Mac Gerdts"
    ,year:2018
    ,bggRating:8.3
@@ -705,7 +728,7 @@ const GAMES = [
    ,row:2,col:3,categories:["Strategy", "Puzzle"]
    ,players:"1-6",playTime:"60-80 min"
    ,complexity:2.5,bggId:393509
-   ,spineColor:"#2a2a5a",boxSize:"md"
+   ,spineColor:"#1c475f",boxSize:"md"
    ,designer:"Ryan Lambert, Adam Rehberg"
    ,year:2025
    ,bggRating:7.6
@@ -715,7 +738,7 @@ const GAMES = [
    ,row:2,col:3,categories:["Strategy", "Euro", "Worker Placement", "Thematic"]
    ,players:"2-4",playTime:"60-180 min"
    ,complexity:4.26,bggId:163068
-   ,spineColor:"#3a1a4a",boxSize:"lg"
+   ,spineColor:"#7f6a45",boxSize:"lg"
    ,designer:"Richard Ámann, Viktor Péter"
    ,year:2015
    ,bggRating:8.0
@@ -726,7 +749,7 @@ const GAMES = [
    ,row:2,col:3,categories:["Co-op", "Thematic", "Dice"]
    ,players:"1-4",playTime:"45-75 min"
    ,complexity:2.36,bggId:380135
-   ,spineColor:"#1a4a3a",boxSize:"lg"
+   ,spineColor:"#221d3f",boxSize:"lg"
    ,designer:"Antoine Bauza, Corentin Lebrat, Ludovic Maublanc"
    ,year:2024
    ,bggRating:7.6
@@ -737,7 +760,7 @@ const GAMES = [
    ,row:3,col:1,categories:["Strategy", "Co-op", "Campaign", "Thematic"]
    ,players:"1-4",playTime:"30-120 min"
    ,complexity:4.41,bggId:295770
-   ,spineColor:"#4a7090",boxSize:"xl"
+   ,spineColor:"#59727f",boxSize:"xl"
    ,designer:"Isaac Childres"
    ,year:2022
    ,bggRating:8.7
@@ -748,7 +771,7 @@ const GAMES = [
    ,row:3,col:1,categories:["Strategy", "Co-op", "Campaign", "Thematic"]
    ,players:"1-4",playTime:"60-120 min"
    ,complexity:3.92,bggId:174430
-   ,spineColor:"#1a3050",boxSize:"xl"
+   ,spineColor:"#3f1f14",boxSize:"xl"
    ,designer:"Isaac Childres"
    ,year:2017
    ,bggRating:8.5
@@ -759,7 +782,7 @@ const GAMES = [
    ,row:3,col:3,categories:["Strategy", "Engine Building", "Dice"]
    ,players:"1-6",playTime:"30-60 min"
    ,complexity:1.93,bggId:340677
-   ,spineColor:"#e05050",boxSize:"md"
+   ,spineColor:"#5f422f",boxSize:"md"
    ,designer:"Kenneth Minde, Kristian Amundsen Østby, Eilif Svensson"
    ,year:2021
    ,bggRating:7.2
@@ -770,7 +793,7 @@ const GAMES = [
    ,row:3,col:3,categories:["Co-op", "Deduction", "Thematic"]
    ,players:"1-4",playTime:"60-90 min"
    ,complexity:2.06,bggId:239188
-   ,spineColor:"#3a3a3a",boxSize:"md"
+   ,spineColor:"#2c2c3f",boxSize:"md"
    ,designer:"David Cicurel"
    ,year:2018
    ,bggRating:7.5
@@ -781,7 +804,7 @@ const GAMES = [
    ,row:3,col:3,categories:["Strategy", "Euro"]
    ,players:"1-8",playTime:"90-120 min"
    ,complexity:3.21,bggId:361545
-   ,spineColor:"#0a1a3a",boxSize:"md"
+   ,spineColor:"#13133f",boxSize:"md"
    ,designer:"James Kniffen"
    ,year:2022
    ,bggRating:7.4
@@ -792,7 +815,7 @@ const GAMES = [
    ,row:3,col:3,categories:["Strategy", "Card Game", "Thematic"]
    ,players:"3-5",playTime:"60-120 min"
    ,complexity:2.68,bggId:422780
-   ,spineColor:"#3a3a4a",boxSize:"md"
+   ,spineColor:"#2c2c3f",boxSize:"md"
    ,designer:"John D. Clair"
    ,year:2024
    ,bggRating:7.7
@@ -803,7 +826,7 @@ const GAMES = [
    ,row:3,col:3,categories:["Strategy", "Euro", "Engine Building", "Card Game"]
    ,players:"1-4",playTime:"45-90 min"
    ,complexity:2.81,bggId:270844
-   ,spineColor:"#3a5070",boxSize:"lg"
+   ,spineColor:"#436f7f",boxSize:"lg"
    ,designer:"Joanna Kijanka, Ignacy Trzewiczek"
    ,year:2019
    ,bggRating:7.4
@@ -814,7 +837,7 @@ const GAMES = [
    ,row:3,col:4,categories:["Strategy", "Euro", "Deck Building", "Worker Placement"]
    ,players:"1-4",playTime:"30-120 min"
    ,complexity:2.93,bggId:312484
-   ,spineColor:"#5a7a3a",boxSize:"lg"
+   ,spineColor:"#2a3f34",boxSize:"lg"
    ,designer:"Elwen, Mín"
    ,year:2020
    ,bggRating:8.1
@@ -825,7 +848,7 @@ const GAMES = [
    ,row:3,col:4,categories:["Strategy", "Euro", "Engine Building"]
    ,players:"1-4",playTime:"90-150 min"
    ,complexity:3.8,bggId:342942
-   ,spineColor:"#2a7a4a",boxSize:"lg"
+   ,spineColor:"#267b7f",boxSize:"lg"
    ,designer:"Mathias Wigge"
    ,year:2021
    ,bggRating:8.5
@@ -836,7 +859,7 @@ const GAMES = [
    ,row:3,col:4,categories:["Thematic", "Dice", "Family"]
    ,players:"2-4",playTime:"45-75 min"
    ,complexity:1.97,bggId:342070
-   ,spineColor:"#d04020",boxSize:"lg"
+   ,spineColor:"#432b30",boxSize:"lg"
    ,designer:"Dave Chalker, Brett Myers, Noah Cohen"
    ,year:2023
    ,bggRating:7.9
@@ -847,7 +870,7 @@ const GAMES = [
    ,row:3,col:5,categories:["Strategy", "Card Game", "Thematic"]
    ,players:"2-4",playTime:"30-60 min"
    ,complexity:2.32,bggId:155987
-   ,spineColor:"#0a2a5a",boxSize:"md"
+   ,spineColor:"#13213f",boxSize:"md"
    ,designer:"Bruno Cathala, Charles Chevallier"
    ,year:2014
    ,bggRating:7.3
@@ -858,7 +881,7 @@ const GAMES = [
    ,row:3,col:5,categories:["Card Game", "Strategy", "Engine Building"]
    ,players:"2-4",playTime:"45-60 min"
    ,complexity:2.26,bggId:194607
-   ,spineColor:"#2a5a2a",boxSize:"md"
+   ,spineColor:"#2c3f2c",boxSize:"md"
    ,designer:"John D. Clair"
    ,year:2016
    ,bggRating:7.2
@@ -869,7 +892,7 @@ const GAMES = [
    ,row:3,col:5,categories:["Co-op", "Strategy", "Thematic"]
    ,players:"1-6",playTime:"90-120 min"
    ,complexity:4.52,bggId:262722
-   ,spineColor:"#5a3a1a",boxSize:"lg"
+   ,spineColor:"#2c2c3f",boxSize:"lg"
    ,designer:"R. Eric Reuss"
    ,year:2020
    ,bggRating:9.3
@@ -880,7 +903,7 @@ const GAMES = [
    ,row:3,col:5,categories:["Co-op", "Strategy", "Thematic"]
    ,players:"1-4",playTime:"90-120 min"
    ,complexity:4.07,bggId:162886
-   ,spineColor:"#3a6040",boxSize:"xl"
+   ,spineColor:"#26667f",boxSize:"xl"
    ,designer:"R. Eric Reuss"
    ,year:2017
    ,bggRating:8.3
@@ -891,7 +914,7 @@ const GAMES = [
    ,row:3,col:6,categories:["Strategy", "Euro", "Thematic"]
    ,players:"2-4",playTime:"90-180 min"
    ,complexity:4.26,bggId:321608
-   ,spineColor:"#8a2a2a",boxSize:"xl"
+   ,spineColor:"#2c363f",boxSize:"xl"
    ,designer:"Vangelis Bagiartakis, Varnavas Timotheou"
    ,year:2023
    ,bggRating:8.4
@@ -902,7 +925,7 @@ const GAMES = [
    ,row:3,col:6,categories:["Strategy", "Euro", "Worker Placement"]
    ,players:"1-7",playTime:"30-210 min"
    ,complexity:3.79,bggId:245932
-   ,spineColor:"#6a5a3a",boxSize:"md"
+   ,spineColor:"#2c2c3f",boxSize:"md"
    ,designer:"Uwe Rosenberg, Alex Wilber"
    ,year:2018
    ,bggRating:8.2
@@ -913,7 +936,7 @@ const GAMES = [
    ,row:3,col:6,categories:["Strategy", "Euro", "Worker Placement"]
    ,players:"1-7",playTime:"30-210 min"
    ,complexity:3.78,bggId:102794
-   ,spineColor:"#5a4a30",boxSize:"xl"
+   ,spineColor:"#2c2c3f",boxSize:"xl"
    ,designer:"Uwe Rosenberg"
    ,year:2013
    ,bggRating:7.9
@@ -924,7 +947,7 @@ const GAMES = [
    ,row:3,col:6,categories:["Strategy", "Card Game", "Euro"]
    ,players:"2-5",playTime:"60 min"
    ,complexity:2.31,bggId:75547
-   ,spineColor:"#2a5a7a",boxSize:"md"
+   ,spineColor:"#41707f",boxSize:"md"
    ,designer:"Shem Phillips"
    ,year:2014
    ,bggRating:6.3
@@ -935,7 +958,7 @@ const GAMES = [
    ,row:4,col:2,categories:["Family", "Card Game", "Strategy"]
    ,players:"2-7",playTime:"25 min"
    ,complexity:1.37,bggId:346703
-   ,spineColor:"#c0943a",boxSize:"md"
+   ,spineColor:"#2f557f",boxSize:"md"
    ,designer:"Antoine Bauza"
    ,year:2021
    ,bggRating:7.0
@@ -946,7 +969,7 @@ const GAMES = [
    ,row:4,col:2,categories:["Strategy", "Euro", "Worker Placement"]
    ,players:"2-5",playTime:"45-75 min"
    ,complexity:2.72,bggId:97842
-   ,spineColor:"#306a30",boxSize:"md"
+   ,spineColor:"#4e3123",boxSize:"md"
    ,designer:"Vladimír Suchý"
    ,year:2011
    ,bggRating:7.2
@@ -957,7 +980,7 @@ const GAMES = [
    ,row:4,col:2,categories:["Strategy", "Euro", "Worker Placement"]
    ,players:"1-4",playTime:"30-120 min"
    ,complexity:3.99,bggId:216788
-   ,spineColor:"#4a3a2a",boxSize:"md"
+   ,spineColor:"#596c7f",boxSize:"md"
    ,designer:"Gernot Köpke, Uwe Rosenberg"
    ,year:2018
    ,bggRating:8.9
@@ -968,7 +991,7 @@ const GAMES = [
    ,row:4,col:2,categories:["Strategy", "Euro", "Worker Placement", "Engine Building"]
    ,players:"1-4",playTime:"120-180 min"
    ,complexity:3.82,bggId:310873
-   ,spineColor:"#2a4a2a",boxSize:"lg"
+   ,spineColor:"#36464e",boxSize:"lg"
    ,designer:"Xavier Georges"
    ,year:2022
    ,bggRating:8.0
@@ -979,7 +1002,7 @@ const GAMES = [
    ,row:4,col:3,categories:["Co-op", "Campaign", "Strategy", "Thematic"]
    ,players:"1-5",playTime:"60-90 min"
    ,complexity:2.54,bggId:268504
-   ,spineColor:"#d4b060",boxSize:"xl"
+   ,spineColor:"#133f3f",boxSize:"xl"
    ,designer:"Nicholas Yu"
    ,year:2021
    ,bggRating:7.8
@@ -990,7 +1013,7 @@ const GAMES = [
    ,row:4,col:4,categories:["Racing", "Thematic", "Family"]
    ,players:"1-6",playTime:"30-60 min"
    ,complexity:2.4,bggId:410291
-   ,spineColor:"#4a6a8a",boxSize:"md"
+   ,spineColor:"#22303f",boxSize:"md"
    ,designer:"Asger Aleksandrov Granerud, Daniel Skjold Pedersen"
    ,year:2024
    ,bggRating:8.1
@@ -1000,7 +1023,7 @@ const GAMES = [
    ,row:4,col:4,categories:["Strategy", "Deck Building", "Worker Placement", "Thematic"]
    ,players:"1-4",playTime:"60-120 min"
    ,complexity:3.08,bggId:316554
-   ,spineColor:"#c4940a",boxSize:"lg"
+   ,spineColor:"#3f2c3f",boxSize:"lg"
    ,designer:"Paul Dennen"
    ,year:2020
    ,bggRating:8.4
@@ -1011,7 +1034,7 @@ const GAMES = [
    ,row:4,col:4,categories:["Strategy", "Euro", "Worker Placement"]
    ,players:"1-4",playTime:"30-120 min"
    ,complexity:3.87,bggId:177736
-   ,spineColor:"#3a3a5a",boxSize:"xl"
+   ,spineColor:"#59727f",boxSize:"xl"
    ,designer:"Uwe Rosenberg"
    ,year:2016
    ,bggRating:8.2
@@ -1022,7 +1045,7 @@ const GAMES = [
    ,row:4,col:4,categories:["Co-op", "Thematic", "Family"]
    ,players:"1-4",playTime:"45-75 min"
    ,complexity:2.48,bggId:160610
-   ,spineColor:"#2050a0",boxSize:"md"
+   ,spineColor:"#38557b",boxSize:"md"
    ,designer:"Matt Leacock"
    ,year:2015
    ,bggRating:7.5
@@ -1033,7 +1056,7 @@ const GAMES = [
    ,row:4,col:6,categories:["Strategy", "Area Control"]
    ,players:"1-2",playTime:"20 min"
    ,complexity:1.91,bggId:258210
-   ,spineColor:"#5a5a5a",boxSize:"md"
+   ,spineColor:"#641e1e",boxSize:"md"
    ,designer:"Paolo Mori"
    ,year:2019
    ,bggRating:7.5
@@ -1044,7 +1067,7 @@ const GAMES = [
    ,row:4,col:6,categories:["Dice", "Card Game", "Thematic"]
    ,players:"2",playTime:"20-40 min"
    ,complexity:2.0,bggId:403511
-   ,spineColor:"#cc2233",boxSize:"md"
+   ,spineColor:"#3f1313",boxSize:"md"
    ,designer:"Gavan Brown, Nate Chatellier, Manny Trembley"
    ,year:2025
    ,bggRating:8.4
@@ -1054,7 +1077,7 @@ const GAMES = [
    ,row:4,col:6,categories:["Dice", "Card Game", "Thematic"]
    ,players:"2",playTime:"20-40 min"
    ,complexity:2.4,bggId:360061
-   ,spineColor:"#2a2a6a",boxSize:"md"
+   ,spineColor:"#3f2d1b",boxSize:"md"
    ,designer:"Gavan Brown, Nate Chatellier, Manny Trembley"
    ,year:2022
    ,bggRating:7.7
@@ -1064,7 +1087,7 @@ const GAMES = [
    ,row:4,col:6,categories:["Co-op", "Thematic", "Dice"]
    ,players:"1-5",playTime:"90-120 min"
    ,complexity:2.5,bggId:253344
-   ,spineColor:"#1a3a1a",boxSize:"xl"
+   ,spineColor:"#3f2c2c",boxSize:"xl"
    ,designer:"Rob Daviau, Eric M. Lang"
    ,year:2019
    ,bggRating:8.2
@@ -1075,7 +1098,7 @@ const GAMES = [
    ,row:5,col:1,categories:["Party", "Card Game"]
    ,players:"3-8",playTime:"15-30 min"
    ,complexity:1.0,bggId:335204
-   ,spineColor:"#8a7a50",boxSize:"md"
+   ,spineColor:"#645b1e",boxSize:"md"
    ,designer:"(Uncredited)"
    ,year:2021
    ,bggRating:6.9
@@ -1085,7 +1108,7 @@ const GAMES = [
    ,row:5,col:5,categories:["Co-op", "Family", "Worker Placement"]
    ,players:"1-4",playTime:"20-60 min"
    ,complexity:2.12,bggId:287938
-   ,spineColor:"#d07030",boxSize:"md"
+   ,spineColor:"#56567b",boxSize:"md"
    ,designer:"Vangelis Bagiartakis, Dávid Turczi"
    ,year:2019
    ,bggRating:7.4
@@ -1096,7 +1119,7 @@ const GAMES = [
    ,row:5,col:5,categories:["Co-op", "Deduction", "Thematic", "Campaign"]
    ,players:"1-5",playTime:"120-180 min"
    ,complexity:2.74,bggId:223321
-   ,spineColor:"#1a1a3a",boxSize:"lg"
+   ,spineColor:"#13213f",boxSize:"lg"
    ,designer:"Jakub Łapot, Przemysław Rymer, Ignacy Trzewiczek"
    ,year:2018
    ,bggRating:7.6
@@ -1107,7 +1130,7 @@ const GAMES = [
    ,row:5,col:5,categories:["Dice", "Card Game", "Thematic"]
    ,players:"2-6",playTime:"20-40 min"
    ,complexity:2.14,bggId:403494
-   ,spineColor:"#c0a020",boxSize:"md"
+   ,spineColor:"#34193f",boxSize:"md"
    ,designer:"Gavan Brown, Nate Chatellier, Manny Trembley"
    ,year:2025
    ,bggRating:8.4
@@ -1117,7 +1140,7 @@ const GAMES = [
    ,row:5,col:5,categories:["Strategy", "Thematic"]
    ,players:"2",playTime:"30-45 min"
    ,complexity:2.25,bggId:405987
-   ,spineColor:"#2a7a6a",boxSize:"md"
+   ,spineColor:"#314e36",boxSize:"md"
    ,designer:"Carl Robinson"
    ,year:2024
    ,bggRating:7.9,description:"Six mini-expansions for Kelp, each adding a new mechanical twist to the asymmetric Shark vs Octopus duel. Modules include a rideable jellyfish, board-manipulating zones for the Shark, and new ability cards. They can be used individually, combined, or stacked for increasingly complex games. Requires the base game. For players who want more variety and replayability in their Kelp matches."},
@@ -1126,7 +1149,7 @@ const GAMES = [
    ,row:5,col:6,categories:["Strategy", "Deck Building", "Worker Placement", "Thematic"]
    ,players:"1-4",playTime:"60-120 min"
    ,complexity:3.33,bggId:367466
-   ,spineColor:"#b08a0a",boxSize:"md"
+   ,spineColor:"#1b1b3f",boxSize:"md"
    ,designer:"Paul Dennen"
    ,year:2022
    ,bggRating:8.5
@@ -1137,7 +1160,7 @@ const GAMES = [
    ,row:5,col:6,categories:["Co-op", "Strategy", "Thematic"]
    ,players:"1-6",playTime:"90-120 min"
    ,complexity:4.55,bggId:356510
-   ,spineColor:"#a05020",boxSize:"md"
+   ,spineColor:"#7f6e2d",boxSize:"md"
    ,designer:"R. Eric Reuss"
    ,year:2022
    ,bggRating:9.0
@@ -1147,7 +1170,7 @@ const GAMES = [
    ,row:5,col:6,categories:["Co-op", "Strategy", "Thematic"]
    ,players:"1-4",playTime:"90-120 min"
    ,complexity:4.24,bggId:193065
-   ,spineColor:"#4a6a2a",boxSize:"md"
+   ,spineColor:"#2c3f3f",boxSize:"md"
    ,designer:"R. Eric Reuss"
    ,year:2017
    ,bggRating:9.0
@@ -1158,7 +1181,7 @@ const GAMES = [
    ,row:5,col:6,categories:["Solo", "Strategy"]
    ,players:"1",playTime:"10-30 min"
    ,complexity:2.17,bggId:196526
-   ,spineColor:"#5a3a1a",boxSize:"md"
+   ,spineColor:"#7f6c54",boxSize:"md"
    ,designer:"Saashi"
    ,year:2015
    ,bggRating:7.3
@@ -1169,7 +1192,7 @@ const GAMES = [
    ,row:5,col:6,categories:["Strategy", "Abstract"]
    ,players:"2",playTime:"15-30 min"
    ,complexity:1.56,bggId:260180
-   ,spineColor:"#4a4a6a",boxSize:"md"
+   ,spineColor:"#24667b",boxSize:"md"
    ,designer:"Michal Mikeš, Jan Soukal, Adam Španěl"
    ,year:2020
    ,bggRating:7.4
@@ -1179,7 +1202,7 @@ const GAMES = [
    ,row:5,col:6,categories:["Strategy", "Euro", "Worker Placement"]
    ,players:"2",playTime:"60 min"
    ,complexity:2.34,bggId:118048
-   ,spineColor:"#c4a060",boxSize:"md"
+   ,spineColor:"#24323f",boxSize:"md"
    ,designer:"Andreas Steiger"
    ,year:2012
    ,bggRating:7.6
@@ -1190,7 +1213,7 @@ const GAMES = [
    ,row:6,col:1,categories:["Strategy", "Euro"]
    ,players:"2-4",playTime:"45-75 min"
    ,complexity:2.54,bggId:245934
-   ,spineColor:"#7a5a30",boxSize:"md"
+   ,spineColor:"#59707f",boxSize:"md"
    ,designer:"Stefan Feld"
    ,year:2018
    ,bggRating:7.5
@@ -1201,7 +1224,7 @@ const GAMES = [
    ,row:6,col:1,categories:["Strategy", "Euro", "Worker Placement"]
    ,players:"1-4",playTime:"50-140 min"
    ,complexity:3.29,bggId:300322
-   ,spineColor:"#5a8a3a",boxSize:"lg"
+   ,spineColor:"#132c3f",boxSize:"lg"
    ,designer:"Uwe Rosenberg"
    ,year:2020
    ,bggRating:7.8
@@ -1212,7 +1235,7 @@ const GAMES = [
    ,row:6,col:1,categories:["Co-op", "Thematic", "Family"]
    ,players:"1-4",playTime:"40 min"
    ,complexity:1.99,bggId:336382
-   ,spineColor:"#2050a0",boxSize:"md"
+   ,spineColor:"#14343f",boxSize:"md"
    ,designer:"Andrea Chiarvesio, Eric M. Lang, Francesco Rugerfred Sedda"
    ,year:2021
    ,bggRating:8.0
@@ -1223,7 +1246,7 @@ const GAMES = [
    ,row:6,col:1,categories:["Co-op", "Thematic", "Family"]
    ,players:"1-4",playTime:"40 min"
    ,complexity:1.84,bggId:298047
-   ,spineColor:"#cc2244",boxSize:"md"
+   ,spineColor:"#32243f",boxSize:"md"
    ,designer:"Andrea Chiarvesio, Eric M. Lang"
    ,year:2020
    ,bggRating:7.5
@@ -1234,7 +1257,7 @@ const GAMES = [
    ,row:6,col:2,categories:["Strategy", "Deck Building", "Thematic", "Adventure"]
    ,players:"2-4",playTime:"45-90 min"
    ,complexity:2.48,bggId:365717
-   ,spineColor:"#3a3050",boxSize:"lg"
+   ,spineColor:"#362c3f",boxSize:"lg"
    ,designer:"Paul Dennen"
    ,year:2022
    ,bggRating:8.2
@@ -1245,7 +1268,7 @@ const GAMES = [
    ,row:6,col:2,categories:["Strategy", "Thematic"]
    ,players:"2-4",playTime:"60-90 min"
    ,complexity:2.33,bggId:340529
-   ,spineColor:"#3a5a7a",boxSize:"md"
+   ,spineColor:"#1f343f",boxSize:"md"
    ,designer:"Łukasz Woźniak"
    ,year:2023
    ,bggRating:8.2
@@ -1255,7 +1278,7 @@ const GAMES = [
    ,row:6,col:2,categories:["Strategy", "Thematic", "Adventure"]
    ,players:"1-5",playTime:"90-150 min"
    ,complexity:3.2,bggId:340983
-   ,spineColor:"#2a3a2a",boxSize:"lg"
+   ,spineColor:"#1b2d3f",boxSize:"lg"
    ,designer:"Łukasz Woźniak"
    ,year:2023
    ,bggRating:8.3
@@ -1266,7 +1289,7 @@ const GAMES = [
    ,row:6,col:2,categories:["Strategy", "Puzzle"]
    ,players:"1-6",playTime:"60-80 min"
    ,complexity:2.25,bggId:258779
-   ,spineColor:"#1a3a5a",boxSize:"lg"
+   ,spineColor:"#1f3f34",boxSize:"lg"
    ,designer:"Ryan Lambert, Adam Rehberg"
    ,year:2022
    ,bggRating:7.8
@@ -1277,7 +1300,7 @@ const GAMES = [
    ,row:6,col:3,categories:["Strategy", "Euro", "Engine Building"]
    ,players:"2-6",playTime:"120 min"
    ,complexity:3.25,bggId:2651
-   ,spineColor:"#2a6a2a",boxSize:"md"
+   ,spineColor:"#353f2c",boxSize:"md"
    ,designer:"Friedemann Friese"
    ,year:2004
    ,bggRating:7.8
@@ -1288,7 +1311,7 @@ const GAMES = [
    ,row:6,col:3,categories:["Strategy", "Deduction", "Thematic"]
    ,players:"1-5",playTime:"45-75 min"
    ,complexity:2.92,bggId:284653
-   ,spineColor:"#7050a0",boxSize:"md"
+   ,spineColor:"#7f7358",boxSize:"md"
    ,designer:"Jay Cormier, Sen-Foong Lim"
    ,year:2021
    ,bggRating:7.8
@@ -1299,7 +1322,7 @@ const GAMES = [
    ,row:6,col:3,categories:["Strategy", "Euro", "Deduction"]
    ,players:"2-4",playTime:"120 min"
    ,complexity:3.92,bggId:161970
-   ,spineColor:"#6a3a1a",boxSize:"lg"
+   ,spineColor:"#3f2213",boxSize:"lg"
    ,designer:"Matúš Kotry"
    ,year:2014
    ,bggRating:7.6
@@ -1310,7 +1333,7 @@ const GAMES = [
    ,row:6,col:3,categories:["Strategy", "Euro", "Engine Building"]
    ,players:"1-4",playTime:"30-120 min"
    ,complexity:3.47,bggId:216132
-   ,spineColor:"#4a7a3a",boxSize:"md"
+   ,spineColor:"#3f4822",boxSize:"md"
    ,designer:"Juma Al-JouJou"
    ,year:2017
    ,bggRating:7.9
@@ -1321,7 +1344,7 @@ const GAMES = [
    ,row:6,col:3,categories:["Strategy", "Area Control", "Card Game"]
    ,players:"2",playTime:"120-180 min"
    ,complexity:3.61,bggId:12333
-   ,spineColor:"#3a2a1a",boxSize:"md"
+   ,spineColor:"#6f2621",boxSize:"md"
    ,designer:"Ananda Gupta, Jason Matthews"
    ,year:2005
    ,bggRating:8.2
@@ -1332,7 +1355,7 @@ const GAMES = [
    ,row:6,col:4,categories:["Strategy", "Euro", "Engine Building"]
    ,players:"1-5",playTime:"60-90 min"
    ,complexity:2.81,bggId:246684
-   ,spineColor:"#3090c0",boxSize:"md"
+   ,spineColor:"#3f2c2c",boxSize:"md"
    ,designer:"Ivan Lashin"
    ,year:2018
    ,bggRating:7.6
@@ -1343,7 +1366,7 @@ const GAMES = [
    ,row:6,col:4,categories:["Strategy", "Euro"]
    ,players:"2-4",playTime:"60-90 min"
    ,complexity:3.79,bggId:181260
-   ,spineColor:"#e0a050",boxSize:"md"
+   ,spineColor:"#7b422f",boxSize:"md"
    ,designer:"Yu-Chen Tseng, Eros Lin"
    ,year:2015
    ,bggRating:6.7
@@ -1354,7 +1377,7 @@ const GAMES = [
    ,row:6,col:4,categories:["Family", "Abstract", "Puzzle"]
    ,players:"2-4",playTime:"30-45 min"
    ,complexity:1.77,bggId:230802
-   ,spineColor:"#2070b0",boxSize:"md"
+   ,spineColor:"#7f2926",boxSize:"md"
    ,designer:"Michael Kiesling"
    ,year:2017
    ,bggRating:7.7
@@ -1365,7 +1388,7 @@ const GAMES = [
    ,row:6,col:4,categories:["Strategy", "Euro"]
    ,players:"1-4",playTime:"90-120 min"
    ,complexity:4.12,bggId:214032
-   ,spineColor:"#4a5a3a",boxSize:"lg"
+   ,spineColor:"#3f3828",boxSize:"lg"
    ,designer:"Isaac Childres"
    ,year:2018
    ,bggRating:6.6
@@ -1376,7 +1399,7 @@ const GAMES = [
    ,row:6,col:5,categories:["Strategy", "Euro", "Worker Placement"]
    ,players:"1-4",playTime:"90-150 min"
    ,complexity:4.63,bggId:184267
-   ,spineColor:"#b05020",boxSize:"xl"
+   ,spineColor:"#431414",boxSize:"xl"
    ,designer:"Vital Lacerda"
    ,year:2020
    ,bggRating:8.2
@@ -1387,7 +1410,7 @@ const GAMES = [
    ,row:6,col:5,categories:["Strategy", "Euro"]
    ,players:"1-4",playTime:"60-120 min"
    ,complexity:4.57,bggId:161533
-   ,spineColor:"#c4a040",boxSize:"xl"
+   ,spineColor:"#7f7259",boxSize:"xl"
    ,designer:"Vital Lacerda"
    ,year:2017
    ,bggRating:8.2
@@ -1398,7 +1421,7 @@ const GAMES = [
    ,row:6,col:5,categories:["Strategy", "Euro", "Area Control"]
    ,players:"2-5",playTime:"60-150 min"
    ,complexity:3.97,bggId:120677
-   ,spineColor:"#3a4a2a",boxSize:"xl"
+   ,spineColor:"#384b59",boxSize:"xl"
    ,designer:"Jens Drögemüller, Helge Ostertag"
    ,year:2012
    ,bggRating:8.0
@@ -1409,7 +1432,7 @@ const GAMES = [
    ,row:6,col:5,categories:["Co-op", "Card Game", "Family"]
    ,players:"2-5",playTime:"20 min"
    ,complexity:2.05,bggId:324856
-   ,spineColor:"#1a4a7a",boxSize:"md"
+   ,spineColor:"#133f3f",boxSize:"md"
    ,designer:"Thomas Sing"
    ,year:2021
    ,bggRating:8.1
@@ -1420,7 +1443,7 @@ const GAMES = [
    ,row:6,col:6,categories:["Co-op", "Thematic", "Card Game"]
    ,players:"1-4",playTime:"45-60 min"
    ,complexity:2.66,bggId:300531
-   ,spineColor:"#8a6a30",boxSize:"md"
+   ,spineColor:"#596c7f",boxSize:"md"
    ,designer:"Peter Rustemeyer"
    ,year:2020
    ,bggRating:7.7
@@ -1431,7 +1454,7 @@ const GAMES = [
    ,row:6,col:6,categories:["Strategy", "Euro", "Dice"]
    ,players:"1-4",playTime:"60-90 min"
    ,complexity:4.19,bggId:281442
-   ,spineColor:"#5a3a6a",boxSize:"md"
+   ,spineColor:"#3f3f2c",boxSize:"md"
    ,designer:"Federico Pierlorenzi, Daniele Tascini"
    ,year:2019
    ,bggRating:7.5
@@ -1442,7 +1465,7 @@ const GAMES = [
    ,row:6,col:6,categories:["Co-op", "Card Game", "Thematic", "Deck Building"]
    ,players:"1-4",playTime:"45-90 min"
    ,complexity:2.96,bggId:285774
-   ,spineColor:"#1a3a8a",boxSize:"lg"
+   ,spineColor:"#2c2c3f",boxSize:"lg"
    ,designer:"Michael Boggs, Nate French, Caleb Grace"
    ,year:2019
    ,bggRating:8.1
@@ -1453,7 +1476,7 @@ const GAMES = [
    ,row:6,col:6,categories:["Co-op", "Deck Building", "Thematic"]
    ,players:"1-4",playTime:"60 min"
    ,complexity:2.8,bggId:191189
-   ,spineColor:"#4a2060",boxSize:"lg"
+   ,spineColor:"#2b3943",boxSize:"lg"
    ,designer:"Jenny Iglesias, Nick Little (I), Kevin Riley"
    ,year:2016
    ,bggRating:7.9
@@ -1479,11 +1502,13 @@ const CUBBY_CONFIG = {
 };
 
 const CATEGORIES = [
-  "Strategy","Co-op","Euro","Thematic","Family","Campaign",
+  "Strategy","Euro","Thematic","Family",
   "Deck Building","Worker Placement","Engine Building",
   "Card Game","Deduction","Area Control","Dice",
   "Solo","Puzzle","Party","Abstract","Adventure","Racing"
 ];
+const EXPANSION_IDS = new Set(["mu_asgard", "mu_panther", "mu_spider", "mu_deadpool", "mu_xmen_gold", "mu_gotg", "mu_xmen_blue", "rove_xulc", "crimson_scales", "caverna_forgotten", "spirit_island_je", "spirit_ff", "spirit_bc", "feast_for_odin_exp", "heat_heavy_rain", "dune_immortality", "witcher_skellige", "witcher_wild_hunt", "kelp_expansion", "planet_unknown_super", "mdt_deadpool"]);
+
 
 // ── Filter helpers ──
 function parseMaxTime(playTime) {
@@ -1504,13 +1529,19 @@ function parsePlayers(pStr) {
   return arr;
 }
 function difficultyBucket(complexity) {
-  if (complexity <= 2.0) return 'easy';
-  if (complexity <= 3.0) return 'medium';
-  if (complexity <= 4.0) return 'hard';
+  if (complexity <= 2.1) return 'easy';
+  if (complexity <= 3.1) return 'medium';
+  if (complexity <= 4.1) return 'hard';
   return 'expert';
 }
 function isCoop(game) {
   return game.categories.includes('Co-op');
+}
+function isExpansion(game) {
+  return EXPANSION_IDS.has(game.id);
+}
+function isCampaign(game) {
+  return game.categories.includes('Campaign') || (game.mechanics && game.mechanics.includes('Legacy Game'));
 }
 
 // ── Render filters ──
@@ -1543,9 +1574,12 @@ function renderFilters() {
   });
 
   // Wire up all dropdowns
-  ['f-category','f-coop','f-players','f-difficulty'].forEach(id => {
+  ['f-category','f-coop','f-players','f-difficulty','f-expansion'].forEach(id => {
     document.getElementById(id).addEventListener('change', applyFilters);
   });
+
+  // Wire up checkboxes
+  document.getElementById('f-campaign').addEventListener('change', applyFilters);
 
   // Reset
   document.getElementById('f-reset').addEventListener('click', () => {
@@ -1553,6 +1587,8 @@ function renderFilters() {
     document.getElementById('f-coop').value = '';
     pSel.value = '';
     document.getElementById('f-difficulty').value = '';
+    document.getElementById('f-expansion').value = '';
+    document.getElementById('f-campaign').checked = true;
     timeSlider.value = 240;
     timeVal.textContent = 'Any';
     applyFilters();
@@ -1564,10 +1600,12 @@ function applyFilters() {
   const coop = document.getElementById('f-coop').value;
   const players = document.getElementById('f-players').value;
   const diff = document.getElementById('f-difficulty').value;
+  const expansion = document.getElementById('f-expansion').value;
+  const showCampaign = document.getElementById('f-campaign').checked;
   const maxTime = Number(document.getElementById('f-time').value);
   const timeActive = maxTime < 240;
 
-  const anyActive = cat || coop || players || diff || timeActive;
+  const anyActive = cat || coop || players || diff || expansion || !showCampaign || timeActive;
   let matchCount = 0;
 
   document.querySelectorAll('.game-spine').forEach(el => {
@@ -1586,6 +1624,11 @@ function applyFilters() {
       if (!supported.includes(Number(players)) && !(Number(players) === 8 && Math.max(...supported) >= 8)) pass = false;
     }
     if (pass && diff && difficultyBucket(game.complexity) !== diff) pass = false;
+    if (pass && expansion) {
+      if (expansion === 'core' && isExpansion(game)) pass = false;
+      if (expansion === 'expansion' && !isExpansion(game)) pass = false;
+    }
+    if (pass && !showCampaign && isCampaign(game)) pass = false;
     if (pass && timeActive && parseMinTime(game.playTime) > maxTime) pass = false;
 
     el.classList.toggle('faded', !pass);
