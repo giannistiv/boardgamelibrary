@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Board Game Library</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --wood:#c9a66b;--wood-dark:#a07840;--wood-light:#dfc89a;--wood-shadow:#7a5a30;
+    --bg:#1a1a2e;--text:#f0e6d3;--accent:#e2b04a;--modal-bg:#2a2a3e;
+  }
+  body{
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    background:var(--bg);color:var(--text);
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  }
+  h1{
+    font-size:2.2rem;margin:1.5rem 0 0.3rem;text-align:center;
+    font-weight:300;letter-spacing:0.05em;color:var(--accent);
+  }
+  .subtitle{font-size:0.85rem;opacity:0.5;margin-bottom:1.2rem;text-align:center}
+
+  /* ── Filters ── */
+  .filters{
+    display:flex;flex-wrap:wrap;justify-content:center;gap:0.45rem;
+    padding:0 1rem 1.2rem;max-width:1000px;
+  }
+  .filter-btn{
+    padding:0.35rem 0.9rem;border-radius:20px;border:1px solid rgba(255,255,255,0.15);
+    background:rgba(255,255,255,0.05);color:var(--text);cursor:pointer;
+    font-size:0.78rem;transition:all 0.3s;user-select:none;
+  }
+  .filter-btn:hover{background:rgba(255,255,255,0.12)}
+  .filter-btn.active{background:var(--accent);color:#1a1a2e;border-color:var(--accent);font-weight:600}
+
+  /* ── Shelf ── */
+  .shelf-wrapper{
+    padding:0 0.5rem 2rem;width:100%;max-width:1200px;overflow-x:auto;
+  }
+  .shelf{
+    display:grid;
+    grid-template-columns:repeat(6,1fr);
+    gap:0;
+    background:var(--wood);
+    border:6px solid var(--wood-dark);
+    border-radius:4px;
+    box-shadow:0 8px 40px rgba(0,0,0,0.5),inset 0 0 20px rgba(0,0,0,0.15);
+    min-width:850px;
+  }
+  .cubby{
+    border:3px solid var(--wood-dark);
+    background:linear-gradient(180deg,#3a3020 0%,#2a2218 60%,#1e1810 100%);
+    min-height:85px;padding:5px 4px 3px;
+    display:flex;align-items:stretch;gap:2px;
+    position:relative;overflow:hidden;
+    box-shadow:inset 0 3px 8px rgba(0,0,0,0.5),inset 0 -1px 3px rgba(0,0,0,0.3);
+  }
+  .cubby.tall{grid-row:span 2;min-height:175px}
+  .cubby.filler-cubby{
+    justify-content:center;align-items:center;
+    opacity:0.15;font-size:0.65rem;font-style:italic;letter-spacing:0.05em;
+  }
+
+  /* ── Game spines ── */
+  .game-spine{
+    flex-shrink:0;
+    border-radius:2px 2px 0 0;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    position:relative;transition:all 0.4s ease;
+    box-shadow:1px 0 3px rgba(0,0,0,0.4),-1px 0 2px rgba(0,0,0,0.2);
+    overflow:hidden;
+  }
+  .game-spine .spine-text{
+    writing-mode:vertical-rl;text-orientation:mixed;
+    font-size:0.55rem;font-weight:600;letter-spacing:0.03em;
+    color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.7);
+    padding:4px 1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    max-height:100%;
+  }
+  .game-spine.box-lg .spine-text{font-size:0.65rem}
+  .game-spine.box-xl .spine-text{font-size:0.7rem}
+  .game-spine:hover{
+    transform:translateY(-4px) scale(1.04);
+    box-shadow:0 4px 15px rgba(226,176,74,0.4),1px 0 3px rgba(0,0,0,0.4);
+    z-index:5;
+  }
+  .game-spine.faded{
+    opacity:0.1 !important;filter:grayscale(1);pointer-events:none;
+    transform:none !important;box-shadow:1px 0 3px rgba(0,0,0,0.2) !important;
+  }
+
+  /* Box sizes - width only, height stretches to fill cubby */
+  .game-spine.box-sm{width:18px}
+  .game-spine.box-md{width:28px}
+  .game-spine.box-lg{width:40px}
+  .game-spine.box-xl{width:55px}
+  .game-spine.box-flat{width:12px}
+
+  /* ── Modal ── */
+  .modal-overlay{
+    display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);
+    z-index:100;justify-content:center;align-items:center;padding:1rem;
+    backdrop-filter:blur(6px);
+  }
+  .modal-overlay.open{display:flex}
+  .modal{
+    background:var(--modal-bg);border-radius:16px;max-width:480px;width:100%;
+    max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.5);
+    position:relative;
+  }
+  .modal-close{
+    position:absolute;top:12px;right:14px;background:rgba(0,0,0,0.3);border:none;
+    color:#fff;font-size:1.3rem;cursor:pointer;opacity:0.7;
+    z-index:2;line-height:1;width:32px;height:32px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .modal-close:hover{opacity:1;background:rgba(0,0,0,0.5)}
+  .modal-cover-placeholder{
+    width:100%;height:200px;display:flex;align-items:center;justify-content:center;
+    font-size:1.6rem;font-weight:700;border-radius:16px 16px 0 0;
+    color:rgba(255,255,255,0.85);text-shadow:0 2px 8px rgba(0,0,0,0.5);
+    text-align:center;padding:1rem;letter-spacing:0.02em;
+    background-size:cover;background-position:center;
+  }
+  .modal-body{padding:1.5rem}
+  .modal-title{font-size:1.5rem;font-weight:700;margin-bottom:0.5rem;color:var(--accent)}
+  .modal-stats{
+    display:flex;flex-wrap:wrap;gap:0.7rem;margin-bottom:1rem;font-size:0.82rem;opacity:0.8;
+  }
+  .modal-stat{display:flex;align-items:center;gap:0.3rem}
+  .modal-stat .icon{font-size:1rem;opacity:0.6}
+  .modal-categories{display:flex;flex-wrap:wrap;gap:0.35rem;margin-bottom:1rem}
+  .modal-cat{
+    padding:0.2rem 0.6rem;border-radius:12px;font-size:0.7rem;
+    background:rgba(226,176,74,0.15);color:var(--accent);
+  }
+  .modal-desc{font-size:0.85rem;line-height:1.6;opacity:0.75;margin-bottom:1.2rem}
+  .modal-bgg-link{
+    display:inline-block;padding:0.5rem 1.2rem;border-radius:8px;
+    background:var(--accent);color:#1a1a2e;text-decoration:none;
+    font-weight:600;font-size:0.85rem;transition:opacity 0.2s;
+  }
+  .modal-bgg-link:hover{opacity:0.85}
+
+  /* ── Responsive ── */
+  @media(max-width:900px){
+    h1{font-size:1.5rem}
+    .game-spine.box-xl{width:42px;height:95px}
+    .game-spine.box-lg{width:32px;height:85px}
+    .game-spine.box-md{width:22px;height:78px}
+    .game-spine.box-sm{width:14px;height:65px}
+    .game-spine .spine-text{font-size:0.45rem}
+  }
+</style>
+</head>
+<body>
+
+<h1>Board Game Library</h1>
+<p class="subtitle">Click a game to see details &middot; Use filters to find what to play</p>
+
+<div class="filters" id="filters"></div>
+
+<div class="shelf-wrapper">
+  <div class="shelf" id="shelf"></div>
+</div>
+
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal" id="modal">
+    <button class="modal-close" id="modal-close">&times;</button>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<script>
+// =============================================
+// GAME DATA - All games mapped to shelf positions
+// Row 1-6 (top to bottom), Col 1-6 (left to right)
+// Merged cubbies: R1C5/R2C5 (tall), R3C1/R4C1 (tall), R4C3/R5C3 (tall)
+// =============================================
+
+const GAMES = [
+  // ══════════════════════════════════════
+  // ROW 1
+  // ══════════════════════════════════════
+
+  // R1C1 - Marvel United collection
+  {id:"mu_asgard",name:"Marvel United: Tales of Asgard",row:1,col:1,categories:["Co-op","Thematic","Family"],players:"1-4",playTime:"40 min",complexity:1.7,bggId:342127,spineColor:"#1a4a7a",boxSize:"sm",description:"An expansion for Marvel United featuring Asgardian heroes and villains."},
+  {id:"mu_panther",name:"Marvel United: Rise of the Black Panther",row:1,col:1,categories:["Co-op","Thematic","Family"],players:"1-4",playTime:"40 min",complexity:1.7,bggId:341645,spineColor:"#2a1a3a",boxSize:"sm",description:"An expansion for Marvel United featuring Black Panther and Wakandan heroes."},
+  {id:"mu_spider",name:"Marvel United: Enter the Spider-Verse",row:1,col:1,categories:["Co-op","Thematic","Family"],players:"1-4",playTime:"40 min",complexity:1.7,bggId:342129,spineColor:"#8a1a2a",boxSize:"sm",description:"An expansion for Marvel United featuring Spider-Verse characters."},
+  {id:"mu_deadpool",name:"Marvel United: Deadpool",row:1,col:1,categories:["Co-op","Thematic","Family"],players:"1-4",playTime:"40 min",complexity:1.7,bggId:0,spineColor:"#cc2233",boxSize:"sm",description:"An expansion for Marvel United featuring the Merc with a Mouth."},
+  {id:"mu_xmen_gold",name:"Marvel United: X-Men Gold Team",row:1,col:1,categories:["Co-op","Thematic","Family"],players:"1-4",playTime:"40 min",complexity:1.7,bggId:0,spineColor:"#c4a020",boxSize:"sm",description:"An expansion for Marvel United X-Men featuring the Gold Team."},
+  {id:"mu_gotg",name:"Marvel United: Guardians of the Galaxy Remix",row:1,col:1,categories:["Co-op","Thematic","Family"],players:"1-4",playTime:"40 min",complexity:1.7,bggId:0,spineColor:"#2060a0",boxSize:"sm",description:"An expansion for Marvel United featuring the Guardians of the Galaxy."},
+  {id:"mu_xmen_blue",name:"Marvel United: X-Men Blue Team",row:1,col:1,categories:["Co-op","Thematic","Family"],players:"1-4",playTime:"40 min",complexity:1.7,bggId:0,spineColor:"#1a3a8a",boxSize:"sm",description:"An expansion for Marvel United X-Men featuring the Blue Team. Stored sideways on top."},
+
+  // R1C2
+  {id:"underwater_cities",name:"Underwater Cities",row:1,col:2,categories:["Strategy","Euro","Engine Building"],players:"1-4",playTime:"80-150 min",complexity:3.55,bggId:247763,spineColor:"#1a5a8a",boxSize:"lg",description:"Lead the development of underwater cities in a Euro-style game combining card play with worker placement."},
+  {id:"horrified",name:"Horrified",row:1,col:2,categories:["Co-op","Family","Thematic"],players:"1-5",playTime:"60 min",complexity:1.79,bggId:282524,spineColor:"#7a1a2a",boxSize:"md",description:"Work together to defeat classic Universal Monsters threatening your village."},
+  {id:"dominant_species",name:"Dominant Species",row:1,col:2,categories:["Strategy","Area Control","Worker Placement"],players:"2-6",playTime:"120-240 min",complexity:4.05,bggId:62219,spineColor:"#2a5a2a",boxSize:"lg",description:"An award-winning game about animal survival during an impending ice age."},
+  {id:"brass_birmingham",name:"Brass: Birmingham",row:1,col:2,categories:["Strategy","Euro","Engine Building"],players:"2-4",playTime:"60-120 min",complexity:3.91,bggId:224517,spineColor:"#1a1a1a",boxSize:"lg",description:"Build networks, develop industries, and navigate the economic landscape of Birmingham during the Industrial Revolution."},
+
+  // R1C3
+  {id:"auztralia",name:"Auztralia",row:1,col:3,categories:["Strategy","Thematic","Adventure"],players:"1-4",playTime:"30-120 min",complexity:2.77,bggId:248073,spineColor:"#c07030",boxSize:"md",description:"Explore, build, and fight in an alternate-history 1930s Australia overrun with Lovecraftian Old Ones."},
+  {id:"that_time_you_killed_me",name:"That Time You Killed Me",row:1,col:3,categories:["Strategy","Abstract"],players:"2",playTime:"15-30 min",complexity:1.98,bggId:331684,spineColor:"#e8d5b0",boxSize:"md",description:"A two-player abstract game of time travel and paradoxes played across three boards."},
+  {id:"margraves_of_valeria",name:"Margraves of Valeria",row:1,col:3,categories:["Strategy","Euro","Worker Placement"],players:"1-4",playTime:"45-75 min",complexity:2.55,bggId:282256,spineColor:"#6a3a8a",boxSize:"md",description:"Recruit citizens and build the kingdom in the Valeria universe."},
+  {id:"this_war_of_mine",name:"This War of Mine",row:1,col:3,categories:["Co-op","Thematic","Campaign"],players:"1-6",playTime:"45-120 min",complexity:3.40,bggId:188920,spineColor:"#3a3a3a",boxSize:"lg",description:"Based on the video game, survive as civilians in a besieged city during modern warfare."},
+
+  // R1C4
+  {id:"kelp",name:"Kelp",row:1,col:4,categories:["Strategy","Thematic"],players:"2",playTime:"30-45 min",complexity:2.3,bggId:393659,spineColor:"#1a6a5a",boxSize:"md",description:"An asymmetric game of underwater hide-and-seek between a shark and an octopus."},
+  {id:"raiders_of_scythia",name:"Raiders of Scythia",row:1,col:4,categories:["Strategy","Worker Placement"],players:"1-4",playTime:"60-80 min",complexity:2.77,bggId:301880,spineColor:"#8a6a30",boxSize:"md",description:"Assemble a crew of warriors and raid settlements along the Black Sea."},
+  {id:"eternal_decks",name:"Eternal Decks",row:1,col:4,categories:["Card Game","Strategy"],players:"1-4",playTime:"30-60 min",complexity:2.0,bggId:0,spineColor:"#5a3a6a",boxSize:"sm",description:"A card-based strategic game."},
+  {id:"parks",name:"PARKS",row:1,col:4,categories:["Family","Strategy","Thematic"],players:"1-5",playTime:"40-70 min",complexity:2.16,bggId:266524,spineColor:"#2a6a4a",boxSize:"md",description:"Hike through beautifully illustrated national parks, collecting memories and visiting destinations."},
+  {id:"chronicles_1900",name:"Chronicles of Crime: 1900",row:1,col:4,categories:["Co-op","Deduction","Thematic"],players:"1-4",playTime:"60-90 min",complexity:2.19,bggId:315852,spineColor:"#7a5a30",boxSize:"md",description:"Solve crimes in Belle Epoque Paris using a companion app and deduction skills."},
+
+  // R1C5 + R2C5 (tall merged cubby)
+  {id:"rove",name:"ROVE",row:1,col:5,categories:["Solo","Puzzle"],players:"1",playTime:"10-15 min",complexity:1.73,bggId:342562,spineColor:"#3070a0",boxSize:"sm",description:"A solo spatial puzzle game about maneuvering a Mars rover into position."},
+  {id:"rove_xulc",name:"ROVE: XULC Expansion",row:1,col:5,categories:["Solo","Puzzle"],players:"1",playTime:"10-15 min",complexity:1.8,bggId:0,spineColor:"#4080b0",boxSize:"sm",description:"Expansion for ROVE adding new module challenges."},
+
+  // R1C6
+  {id:"detective_coa",name:"Detective: City of Angels",row:1,col:6,categories:["Thematic","Deduction"],players:"1-5",playTime:"90-150 min",complexity:2.90,bggId:218074,spineColor:"#1a1a3a",boxSize:"lg",description:"Solve crimes in 1940s Los Angeles in this noir-themed detective game with a unique chisel system."},
+  {id:"aeons_end_legacy",name:"Aeon's End: Legacy",row:1,col:6,categories:["Co-op","Deck Building","Campaign"],players:"1-4",playTime:"45-90 min",complexity:2.83,bggId:256024,spineColor:"#4a2060",boxSize:"lg",description:"A legacy deck-building game where you defend Gravehold from nameless horrors."},
+  {id:"crimson_scales",name:"Crimson Scales",row:1,col:6,categories:["Strategy","Co-op","Campaign","Thematic"],players:"1-4",playTime:"30-120 min",complexity:3.7,bggId:349892,spineColor:"#8a1a1a",boxSize:"lg",description:"A fan-made Gloomhaven expansion featuring new classes, scenarios, and items."},
+
+  // ══════════════════════════════════════
+  // ROW 2
+  // ══════════════════════════════════════
+
+  // R2C1
+  {id:"turing_machine",name:"Turing Machine",row:2,col:1,categories:["Puzzle","Deduction"],players:"1-4",playTime:"20 min",complexity:2.08,bggId:356123,spineColor:"#e0d0a0",boxSize:"md",description:"A unique deduction game using analog punch cards to crack a secret code."},
+  {id:"great_western_trail",name:"Great Western Trail",row:2,col:1,categories:["Strategy","Euro","Deck Building"],players:"1-4",playTime:"75-150 min",complexity:3.69,bggId:341169,spineColor:"#c47a30",boxSize:"lg",description:"Drive your cattle from Texas to Kansas City, building your deck and improving your herd."},
+  {id:"bomb_busters",name:"Bomb Busters",row:2,col:1,categories:["Co-op","Family","Card Game"],players:"2-6",playTime:"15-30 min",complexity:1.2,bggId:0,spineColor:"#e05050",boxSize:"sm",description:"A fast cooperative card game about defusing bombs."},
+  {id:"magic_maze",name:"Magic Maze",row:2,col:1,categories:["Co-op","Family","Puzzle"],players:"1-8",playTime:"15 min",complexity:1.78,bggId:209778,spineColor:"#e05030",boxSize:"md",description:"A real-time cooperative game where you guide heroes through a mall without communicating."},
+  {id:"hansa_teutonica",name:"Hansa Teutonica",row:2,col:1,categories:["Strategy","Euro","Area Control"],players:"2-5",playTime:"45-90 min",complexity:3.12,bggId:43015,spineColor:"#d0c090",boxSize:"md",description:"Establish trade routes and offices across medieval Germany in this classic Euro game."},
+
+  // R2C2
+  {id:"hadrians_wall",name:"Hadrian's Wall",row:2,col:2,categories:["Strategy","Euro","Engine Building"],players:"1-6",playTime:"30-60 min",complexity:3.01,bggId:304783,spineColor:"#8a7a5a",boxSize:"md",description:"Build the famous Roman wall using a unique flip-and-write mechanism."},
+  {id:"search_planet_x",name:"The Search for Planet X",row:2,col:2,categories:["Deduction","Solo","Puzzle"],players:"1-4",playTime:"60 min",complexity:2.26,bggId:279537,spineColor:"#0a1a3a",boxSize:"md",description:"Use logic and deduction with a companion app to locate the mysterious Planet X."},
+  {id:"marvel_dice_throne_box1",name:"Marvel Dice Throne",row:2,col:2,categories:["Dice","Card Game","Thematic"],players:"2-6",playTime:"20-40 min",complexity:2.11,bggId:351526,spineColor:"#cc1122",boxSize:"lg",description:"Loki, Thor, Spider-Man Miles Morales, and Scarlet Witch battle in this dice combat game."},
+  {id:"horizons_spirit_island",name:"Horizons of Spirit Island",row:2,col:2,categories:["Co-op","Strategy","Thematic"],players:"1-3",playTime:"90-120 min",complexity:2.79,bggId:367498,spineColor:"#2a6050",boxSize:"md",description:"A streamlined standalone version of Spirit Island, perfect as an entry point."},
+  {id:"concordia_venus",name:"Concordia Venus",row:2,col:2,categories:["Strategy","Euro","Engine Building"],players:"2-6",playTime:"60-120 min",complexity:3.16,bggId:256916,spineColor:"#d4a050",boxSize:"lg",description:"A peaceful strategy game of Roman merchants expanding across the Mediterranean."},
+
+  // R2C3
+  {id:"planet_unknown_super",name:"Planet Unknown: Supermoon",row:2,col:3,categories:["Strategy","Puzzle"],players:"1-6",playTime:"60-80 min",complexity:2.4,bggId:0,spineColor:"#2a2a5a",boxSize:"md",description:"Expansion for Planet Unknown adding new planets and modules."},
+  {id:"trickerion",name:"Trickerion",row:2,col:3,categories:["Strategy","Euro","Worker Placement","Thematic"],players:"2-4",playTime:"60-180 min",complexity:4.08,bggId:163068,spineColor:"#3a1a4a",boxSize:"lg",description:"Compete as rival magicians in a Victorian-era city, performing increasingly spectacular tricks."},
+  {id:"dead_cells",name:"Dead Cells",row:2,col:3,categories:["Co-op","Thematic","Dice"],players:"1-4",playTime:"45-75 min",complexity:2.5,bggId:383326,spineColor:"#1a4a3a",boxSize:"lg",description:"Based on the hit video game, fight through procedurally generated levels in this cooperative board game."},
+
+  // R2C4 - Comics (filler)
+  // handled specially as filler cubby
+
+  // R2C5 - merged with R1C5 (tall cubby)
+
+  // R2C6 - Comics (filler)
+
+  // ══════════════════════════════════════
+  // ROW 3
+  // ══════════════════════════════════════
+
+  // R3C1 + R4C1 (tall merged cubby)
+  {id:"frosthaven",name:"Frosthaven",row:3,col:1,categories:["Strategy","Co-op","Campaign","Thematic"],players:"1-4",playTime:"30-120 min",complexity:3.97,bggId:295770,spineColor:"#4a7090",boxSize:"xl",description:"The follow-up to Gloomhaven. Build and defend the outpost of Frosthaven while exploring the frozen wilderness."},
+  {id:"gloomhaven",name:"Gloomhaven",row:3,col:1,categories:["Strategy","Co-op","Campaign","Thematic"],players:"1-4",playTime:"60-120 min",complexity:3.86,bggId:174430,spineColor:"#1a3050",boxSize:"xl",description:"A game of Euro-inspired tactical combat in a persistent world of shifting motives."},
+
+  // R3C2 - Comics (filler)
+
+  // R3C3
+  {id:"bad_company",name:"Bad Company",row:3,col:3,categories:["Strategy","Engine Building","Dice"],players:"1-6",playTime:"30-60 min",complexity:2.09,bggId:339789,spineColor:"#e05050",boxSize:"md",description:"Build your criminal gang and plan heists in this engine-building dice game."},
+  {id:"chronicles_of_crime",name:"Chronicles of Crime",row:3,col:3,categories:["Co-op","Deduction","Thematic"],players:"1-4",playTime:"60-90 min",complexity:1.99,bggId:239188,spineColor:"#3a3a3a",boxSize:"md",description:"Solve crimes using your smartphone, scanning QR codes to interrogate suspects and search locations."},
+  {id:"twilight_inscription",name:"Twilight Inscription",row:3,col:3,categories:["Strategy","Euro"],players:"1-8",playTime:"90-120 min",complexity:2.88,bggId:361545,spineColor:"#0a1a3a",boxSize:"md",description:"A roll-and-write game set in the Twilight Imperium universe."},
+  {id:"mistborn",name:"Mistborn: House War",row:3,col:3,categories:["Strategy","Card Game","Thematic"],players:"3-5",playTime:"60-120 min",complexity:2.52,bggId:212423,spineColor:"#3a3a4a",boxSize:"md",description:"A board game based on Brandon Sanderson's Mistborn novels where players are rival noble houses."},
+  {id:"empires_of_the_north",name:"Empires of the North",row:3,col:3,categories:["Strategy","Euro","Engine Building","Card Game"],players:"1-4",playTime:"45-90 min",complexity:2.72,bggId:270844,spineColor:"#3a5070",boxSize:"lg",description:"Lead your clan of Vikings, Japanese, or Inuit as you expand your empire."},
+
+  // R3C4
+  {id:"lost_ruins_of_arnak",name:"Lost Ruins of Arnak",row:3,col:4,categories:["Strategy","Euro","Deck Building","Worker Placement"],players:"1-4",playTime:"30-120 min",complexity:2.92,bggId:312484,spineColor:"#5a7a3a",boxSize:"lg",description:"Explore a mysterious island, discover lost artifacts, and face fearsome guardians."},
+  {id:"ark_nova",name:"Ark Nova",row:3,col:4,categories:["Strategy","Euro","Engine Building"],players:"1-4",playTime:"90-150 min",complexity:3.68,bggId:342942,spineColor:"#2a7a4a",boxSize:"lg",description:"Plan and build a modern zoo to support conservation projects worldwide."},
+  {id:"thunder_road",name:"Thunder Road: Vendetta",row:3,col:4,categories:["Thematic","Dice","Family"],players:"2-4",playTime:"45-75 min",complexity:1.94,bggId:354458,spineColor:"#d04020",boxSize:"lg",description:"Race and wreck your way through a post-apocalyptic desert in this revival of the classic game."},
+
+  // R3C5
+  {id:"abyss",name:"Abyss",row:3,col:5,categories:["Strategy","Card Game","Thematic"],players:"2-4",playTime:"30-60 min",complexity:2.45,bggId:155987,spineColor:"#0a2a5a",boxSize:"md",description:"Explore the depths of the ocean to recruit allies and control the underwater realm."},
+  {id:"mystic_vale",name:"Mystic Vale",row:3,col:5,categories:["Card Game","Strategy","Engine Building"],players:"2-4",playTime:"45-60 min",complexity:2.20,bggId:194607,spineColor:"#2a5a2a",boxSize:"md",description:"A unique card-crafting game where you build cards by adding transparent overlays."},
+  {id:"spirit_island_je",name:"Spirit Island: Jagged Earth",row:3,col:5,categories:["Co-op","Strategy","Thematic"],players:"1-6",playTime:"90-120 min",complexity:4.0,bggId:296208,spineColor:"#5a3a1a",boxSize:"lg",description:"A massive expansion for Spirit Island adding new spirits, scenarios, and adversaries."},
+  {id:"spirit_island",name:"Spirit Island",row:3,col:5,categories:["Co-op","Strategy","Thematic"],players:"1-4",playTime:"90-120 min",complexity:4.06,bggId:162886,spineColor:"#3a6040",boxSize:"xl",description:"Play as powerful spirits of the land, working to drive off colonial invaders."},
+
+  // R3C6
+  {id:"hegemony",name:"Hegemony",row:3,col:6,categories:["Strategy","Euro","Thematic"],players:"2-4",playTime:"90-180 min",complexity:4.08,bggId:321608,spineColor:"#8a2a2a",boxSize:"xl",description:"An asymmetric politico-economic game where players take on roles of different social classes."},
+  {id:"caverna_forgotten",name:"Caverna: The Forgotten Folk",row:3,col:6,categories:["Strategy","Euro","Worker Placement"],players:"1-7",playTime:"30-210 min",complexity:3.0,bggId:260060,spineColor:"#6a5a3a",boxSize:"md",description:"An expansion for Caverna adding eight new playable races with unique abilities."},
+  {id:"caverna",name:"Caverna",row:3,col:6,categories:["Strategy","Euro","Worker Placement"],players:"1-7",playTime:"30-210 min",complexity:3.77,bggId:102794,spineColor:"#5a4a30",boxSize:"xl",description:"Farm, mine, and furnish your home cave in this deep resource management game."},
+  {id:"shipwrights",name:"Shipwrights of the North Sea",row:3,col:6,categories:["Strategy","Card Game","Euro"],players:"2-5",playTime:"60 min",complexity:2.29,bggId:190020,spineColor:"#2a5a7a",boxSize:"md",description:"Collect resources and build Viking longships faster than your rivals."},
+
+  // ══════════════════════════════════════
+  // ROW 4
+  // ══════════════════════════════════════
+
+  // R4C1 - merged with R3C1 (tall cubby)
+
+  // R4C2
+  {id:"seven_wonders_architects",name:"7 Wonders Architects",row:4,col:2,categories:["Family","Card Game","Strategy"],players:"2-7",playTime:"25 min",complexity:1.38,bggId:346703,spineColor:"#c0943a",boxSize:"md",description:"A streamlined version of the classic 7 Wonders, perfect for new gamers and families."},
+  {id:"last_will",name:"Last Will",row:4,col:2,categories:["Strategy","Euro","Worker Placement"],players:"2-5",playTime:"45-75 min",complexity:2.86,bggId:97842,spineColor:"#306a30",boxSize:"md",description:"Spend your uncle's inheritance as fast as possible to prove you deserve the rest of his fortune."},
+  {id:"feast_for_odin_exp",name:"A Feast for Odin: The Norwegians",row:4,col:2,categories:["Strategy","Euro","Worker Placement"],players:"1-4",playTime:"30-120 min",complexity:4.0,bggId:216788,spineColor:"#4a3a2a",boxSize:"md",description:"Expansion for A Feast for Odin with new islands, actions, and alternative boards."},
+  {id:"carnegie",name:"Carnegie",row:4,col:2,categories:["Strategy","Euro","Worker Placement","Engine Building"],players:"1-4",playTime:"120-180 min",complexity:3.82,bggId:310873,spineColor:"#2a4a2a",boxSize:"lg",description:"Build your business empire across America in this deep Euro strategy game."},
+
+  // R4C3 + R5C3 (tall merged cubby)
+  {id:"adventure_tactics",name:"Adventure Tactics: Domianne's Tower",row:4,col:3,categories:["Co-op","Campaign","Strategy","Thematic"],players:"1-5",playTime:"60-90 min",complexity:2.72,bggId:268504,spineColor:"#d4b060",boxSize:"xl",description:"A cooperative tactical combat campaign where your characters level up and change classes."},
+
+  // R4C4
+  {id:"heat_heavy_rain",name:"Heat: Heavy Rain",row:4,col:4,categories:["Racing","Thematic","Family"],players:"1-6",playTime:"30-60 min",complexity:2.1,bggId:0,spineColor:"#4a6a8a",boxSize:"md",description:"Expansion for Heat: Pedal to the Metal adding rain and night driving conditions."},
+  {id:"dune_imperium",name:"Dune: Imperium",row:4,col:4,categories:["Strategy","Deck Building","Worker Placement","Thematic"],players:"1-4",playTime:"60-120 min",complexity:3.01,bggId:316554,spineColor:"#c4940a",boxSize:"lg",description:"Combine deck-building and worker placement in the universe of Frank Herbert's Dune."},
+  {id:"feast_for_odin",name:"A Feast for Odin",row:4,col:4,categories:["Strategy","Euro","Worker Placement"],players:"1-4",playTime:"30-120 min",complexity:3.86,bggId:177736,spineColor:"#3a3a5a",boxSize:"xl",description:"A saga in the form of a board game about the cultural achievements and explorations of the Norsemen."},
+  {id:"thunderbirds",name:"Thunderbirds",row:4,col:4,categories:["Co-op","Thematic","Family"],players:"1-4",playTime:"45-75 min",complexity:2.17,bggId:160610,spineColor:"#2050a0",boxSize:"md",description:"A cooperative game based on the classic TV series celebrating 50 years of Thunderbirds."},
+
+  // R4C5 - Comics (filler)
+
+  // R4C6
+  {id:"blitzkrieg",name:"Blitzkrieg!",row:4,col:6,categories:["Strategy","Area Control"],players:"1-2",playTime:"20 min",complexity:1.91,bggId:258210,spineColor:"#5a5a5a",boxSize:"sm",description:"Relive WW2 in 20 minutes in this quick-playing tile-placement game."},
+  {id:"mdt_deadpool",name:"Marvel Dice Throne: Deadpool",row:4,col:6,categories:["Dice","Card Game","Thematic"],players:"2",playTime:"20-40 min",complexity:2.1,bggId:0,spineColor:"#cc2233",boxSize:"sm",description:"Deadpool hero pack for Marvel Dice Throne."},
+  {id:"mdt_cap_panther",name:"Marvel Dice Throne: Captain Marvel + Black Panther",row:4,col:6,categories:["Dice","Card Game","Thematic"],players:"2",playTime:"20-40 min",complexity:2.1,bggId:0,spineColor:"#2a2a6a",boxSize:"md",description:"Captain Marvel and Black Panther hero pack for Marvel Dice Throne."},
+  {id:"cthulhu_dmd",name:"Cthulhu: Death May Die",row:4,col:6,categories:["Co-op","Thematic","Dice"],players:"1-5",playTime:"90-120 min",complexity:2.44,bggId:253344,spineColor:"#1a3a1a",boxSize:"xl",description:"Fight eldritch horrors in this scenario-based cooperative game designed by Rob Daviau and Eric Lang."},
+
+  // ══════════════════════════════════════
+  // ROW 5
+  // ══════════════════════════════════════
+
+  // R5C1
+  {id:"kill_hitler",name:"I Would Kill Hitler",row:5,col:1,categories:["Party","Card Game"],players:"3-8",playTime:"15-30 min",complexity:1.2,bggId:0,spineColor:"#8a7a50",boxSize:"md",description:"A party card game about absurd hypothetical dilemmas involving time travel."},
+
+  // R5C2 - Books (filler)
+
+  // R5C3 - merged with R4C3 (tall cubby)
+
+  // R5C4 - Books (filler)
+
+  // R5C5
+  {id:"kitchen_rush",name:"Kitchen Rush",row:5,col:5,categories:["Co-op","Family","Worker Placement"],players:"1-4",playTime:"20-60 min",complexity:2.01,bggId:223953,spineColor:"#d07030",boxSize:"md",description:"A real-time cooperative game where you run a restaurant using sand timers as workers."},
+  {id:"detective",name:"Detective: A Modern Crime Board Game",row:5,col:5,categories:["Co-op","Deduction","Thematic","Campaign"],players:"1-5",playTime:"120-180 min",complexity:3.25,bggId:223321,spineColor:"#1a1a3a",boxSize:"lg",description:"Solve a complex case using your wits, the game system, and real internet research."},
+  {id:"mdt_xmen",name:"Marvel Dice Throne: X-Men",row:5,col:5,categories:["Dice","Card Game","Thematic"],players:"2-6",playTime:"20-40 min",complexity:2.1,bggId:0,spineColor:"#c0a020",boxSize:"md",description:"X-Men hero pack for Marvel Dice Throne."},
+  {id:"kelp_expansion",name:"Kelp: Brilliant Behaviours",row:5,col:5,categories:["Strategy","Thematic"],players:"2",playTime:"30-45 min",complexity:2.4,bggId:0,spineColor:"#2a7a6a",boxSize:"sm",description:"Expansion for Kelp adding new behaviour cards and abilities."},
+
+  // R5C6
+  {id:"dune_immortality",name:"Dune: Imperium - Immortality",row:5,col:6,categories:["Strategy","Deck Building","Worker Placement","Thematic"],players:"1-4",playTime:"60-120 min",complexity:3.2,bggId:382927,spineColor:"#b08a0a",boxSize:"md",description:"Expansion for Dune Imperium adding Tleilaxu and research mechanics."},
+  {id:"spirit_ff",name:"Spirit Island: Feather & Flame",row:5,col:6,categories:["Co-op","Strategy","Thematic"],players:"1-6",playTime:"90-120 min",complexity:4.1,bggId:0,spineColor:"#a05020",boxSize:"md",description:"Expansion for Spirit Island with new spirits and scenarios."},
+  {id:"spirit_bc",name:"Spirit Island: Branch & Claw",row:5,col:6,categories:["Co-op","Strategy","Thematic"],players:"1-4",playTime:"90-120 min",complexity:4.0,bggId:193065,spineColor:"#4a6a2a",boxSize:"md",description:"First expansion for Spirit Island adding events, new spirits, and tokens."},
+  {id:"coffee_roaster",name:"Coffee Roaster",row:5,col:6,categories:["Solo","Strategy"],players:"1",playTime:"10-30 min",complexity:2.18,bggId:196526,spineColor:"#5a3a1a",boxSize:"sm",description:"A solo bag-building game about roasting the perfect cup of coffee."},
+  {id:"l_project",name:"L Project",row:5,col:6,categories:["Strategy","Abstract"],players:"2",playTime:"15-30 min",complexity:1.5,bggId:0,spineColor:"#4a4a6a",boxSize:"sm",description:"A two-player abstract strategy game."},
+  {id:"targi",name:"Targi",row:5,col:6,categories:["Strategy","Euro","Worker Placement"],players:"2",playTime:"60 min",complexity:2.36,bggId:118048,spineColor:"#c4a060",boxSize:"sm",description:"A two-player-only Euro game of Tuareg traders in the Sahara desert."},
+
+  // ══════════════════════════════════════
+  // ROW 6
+  // ══════════════════════════════════════
+
+  // R6C1
+  {id:"carpe_diem",name:"Carpe Diem",row:6,col:1,categories:["Strategy","Euro"],players:"2-4",playTime:"45-75 min",complexity:2.71,bggId:245934,spineColor:"#7a5a30",boxSize:"md",description:"Build a Roman city district by selecting tiles and fulfilling scoring conditions."},
+  {id:"hallertau",name:"Hallertau",row:6,col:1,categories:["Strategy","Euro","Worker Placement"],players:"1-4",playTime:"50-140 min",complexity:3.46,bggId:300322,spineColor:"#5a8a3a",boxSize:"lg",description:"Develop your Bavarian village and manage your farmyard in this worker placement game."},
+  {id:"mu_xmen",name:"Marvel United: X-Men",row:6,col:1,categories:["Co-op","Thematic","Family"],players:"1-4",playTime:"40 min",complexity:1.67,bggId:340937,spineColor:"#2050a0",boxSize:"md",description:"Unite as Marvel's X-Men to defeat powerful villains in this cooperative card game."},
+  {id:"marvel_united",name:"Marvel United",row:6,col:1,categories:["Co-op","Thematic","Family"],players:"1-4",playTime:"40 min",complexity:1.53,bggId:298047,spineColor:"#cc2244",boxSize:"md",description:"A cooperative game where Marvel heroes combine their efforts to defeat iconic villains."},
+
+  // R6C2
+  {id:"clank_catacombs",name:"Clank! Catacombs",row:6,col:2,categories:["Strategy","Deck Building","Thematic","Adventure"],players:"2-4",playTime:"45-90 min",complexity:2.51,bggId:365717,spineColor:"#3a3050",boxSize:"lg",description:"Explore procedurally generated dungeon tiles in this standalone Clank! adventure."},
+  {id:"witcher_skellige",name:"The Witcher: Skellige",row:6,col:2,categories:["Strategy","Thematic"],players:"2-4",playTime:"60-90 min",complexity:2.5,bggId:0,spineColor:"#3a5a7a",boxSize:"md",description:"A Witcher-themed board game set on the isles of Skellige."},
+  {id:"witcher_wild_hunt",name:"The Witcher: Old World Wild Hunt",row:6,col:2,categories:["Strategy","Thematic","Adventure"],players:"1-5",playTime:"90-150 min",complexity:3.07,bggId:331776,spineColor:"#2a3a2a",boxSize:"lg",description:"Become a witcher, slay monsters, and make morally ambiguous decisions in the world of The Witcher."},
+  {id:"planet_unknown",name:"Planet Unknown",row:6,col:2,categories:["Strategy","Puzzle"],players:"1-6",playTime:"60-80 min",complexity:2.38,bggId:258779,spineColor:"#1a3a5a",boxSize:"lg",description:"Simultaneously polyomino-place to terraform your unique planet."},
+
+  // R6C3
+  {id:"power_grid",name:"Power Grid",row:6,col:3,categories:["Strategy","Euro","Engine Building"],players:"2-6",playTime:"120 min",complexity:3.28,bggId:2651,spineColor:"#2a6a2a",boxSize:"md",description:"A classic game about supplying power to cities by purchasing plants and resources."},
+  {id:"mind_mgmt",name:"Mind MGMT",row:6,col:3,categories:["Strategy","Deduction","Thematic"],players:"1-5",playTime:"45-75 min",complexity:2.53,bggId:284653,spineColor:"#7050a0",boxSize:"md",description:"Based on the comic series, one player is a rogue agent while others try to track them down."},
+  {id:"alchemists",name:"Alchemists",row:6,col:3,categories:["Strategy","Euro","Deduction"],players:"2-4",playTime:"120 min",complexity:3.57,bggId:161970,spineColor:"#6a3a1a",boxSize:"lg",description:"Use an app-driven deduction system to publish alchemical theories and earn reputation."},
+  {id:"clans_of_caledonia",name:"Clans of Caledonia",row:6,col:3,categories:["Strategy","Euro","Engine Building"],players:"1-4",playTime:"30-120 min",complexity:3.33,bggId:216132,spineColor:"#4a7a3a",boxSize:"md",description:"Lead a Scottish clan to economic prosperity during the 19th century."},
+  {id:"twilight_struggle",name:"Twilight Struggle",row:6,col:3,categories:["Strategy","Area Control","Card Game"],players:"2",playTime:"120-180 min",complexity:3.58,bggId:12333,spineColor:"#3a2a1a",boxSize:"md",description:"The classic two-player Cold War game of geopolitical influence and brinkmanship."},
+
+  // R6C4
+  {id:"smartphone",name:"Smartphone Inc.",row:6,col:4,categories:["Strategy","Euro","Engine Building"],players:"1-5",playTime:"60-90 min",complexity:2.89,bggId:246684,spineColor:"#3090c0",boxSize:"md",description:"Build a smartphone manufacturing empire through innovative production planning."},
+  {id:"burano",name:"Burano",row:6,col:4,categories:["Strategy","Euro"],players:"2-4",playTime:"60-90 min",complexity:2.86,bggId:272498,spineColor:"#e0a050",boxSize:"md",description:"Build colorful buildings on the island of Burano in this pattern-building Euro game."},
+  {id:"azul",name:"Azul",row:6,col:4,categories:["Family","Abstract","Puzzle"],players:"2-4",playTime:"30-45 min",complexity:1.78,bggId:230802,spineColor:"#2070b0",boxSize:"md",description:"Draft beautiful tiles and create stunning mosaic patterns in this award-winning game."},
+  {id:"founders_of_gloomhaven",name:"Founders of Gloomhaven",row:6,col:4,categories:["Strategy","Euro"],players:"1-4",playTime:"90-120 min",complexity:4.06,bggId:214032,spineColor:"#4a5a3a",boxSize:"lg",description:"Build the city of Gloomhaven by managing resources and competing for prestige."},
+
+  // R6C5
+  {id:"on_mars",name:"On Mars",row:6,col:5,categories:["Strategy","Euro","Worker Placement"],players:"1-4",playTime:"90-150 min",complexity:4.67,bggId:184267,spineColor:"#b05020",boxSize:"xl",description:"Lacerda's complex Euro about colonizing Mars, managing resources between orbit and surface."},
+  {id:"lisboa",name:"Lisboa",row:6,col:5,categories:["Strategy","Euro"],players:"1-4",playTime:"60-120 min",complexity:4.41,bggId:161533,spineColor:"#c4a040",boxSize:"xl",description:"Rebuild Lisbon after the devastating 1755 earthquake in this deep Lacerda Euro."},
+  {id:"terra_mystica",name:"Terra Mystica: Big Box",row:6,col:5,categories:["Strategy","Euro","Area Control"],players:"2-5",playTime:"60-150 min",complexity:3.96,bggId:120677,spineColor:"#3a4a2a",boxSize:"xl",description:"Transform terrain and build your civilization in this asymmetric strategy classic."},
+  {id:"the_crew_deep_sea",name:"The Crew: Mission Deep Sea",row:6,col:5,categories:["Co-op","Card Game","Family"],players:"2-5",playTime:"20 min",complexity:2.07,bggId:324856,spineColor:"#1a4a7a",boxSize:"sm",description:"A cooperative trick-taking game with 32 underwater missions to complete."},
+  {id:"skoteines",name:"Skoteines Ypotheseis",row:6,col:5,categories:["Deduction","Party"],players:"2-6",playTime:"30-60 min",complexity:1.5,bggId:0,spineColor:"#2a2a3a",boxSize:"sm",description:"A Greek deduction/mystery game."},
+
+  // R6C6
+  {id:"paleo",name:"Paleo",row:6,col:6,categories:["Co-op","Thematic","Card Game"],players:"1-4",playTime:"45-60 min",complexity:2.55,bggId:300531,spineColor:"#8a6a30",boxSize:"md",description:"Lead your Stone Age tribe through challenges in this cooperative adventure."},
+  {id:"trismegistus",name:"Trismegistus",row:6,col:6,categories:["Strategy","Euro","Dice"],players:"1-4",playTime:"60-90 min",complexity:3.68,bggId:281442,spineColor:"#5a3a6a",boxSize:"md",description:"Draft dice and transmute materials in this alchemical Euro game."},
+  {id:"marvel_champions",name:"Marvel Champions",row:6,col:6,categories:["Co-op","Card Game","Thematic","Deck Building"],players:"1-4",playTime:"45-90 min",complexity:2.88,bggId:285774,spineColor:"#1a3a8a",boxSize:"lg",description:"A cooperative Living Card Game where each player takes the role of a Marvel hero."},
+  {id:"aeons_end",name:"Aeon's End",row:6,col:6,categories:["Co-op","Deck Building","Thematic"],players:"1-4",playTime:"60 min",complexity:2.75,bggId:191189,spineColor:"#4a2060",boxSize:"lg",description:"A cooperative deck-building game where breach mages defend Gravehold from The Nameless."},
+];
+
+// Cubby configuration - which cubbies are tall or filler
+const CUBBY_CONFIG = {
+  // tall merged cubbies (span 2 rows)
+  "1-5": {tall:true}, // R1C5 + R2C5 (Rove)
+  "3-1": {tall:true}, // R3C1 + R4C1 (Gloomhaven/Frosthaven)
+  "4-3": {tall:true}, // R4C3 + R5C3 (Adventure Tactics)
+  // skip these (bottom half of tall cubbies)
+  "2-5": {skip:true},
+  "4-1": {skip:true},
+  "5-3": {skip:true},
+  // filler cubbies (comics/books)
+  "2-4": {filler:"Comics"},
+  "2-6": {filler:"Comics"},
+  "3-2": {filler:"Comics"},
+  "4-5": {filler:"Comics"},
+  "5-2": {filler:"Books"},
+  "5-4": {filler:"Books"},
+};
+
+const CATEGORIES = [
+  "Strategy","Co-op","Euro","Thematic","Family","Campaign",
+  "Deck Building","Worker Placement","Engine Building",
+  "Card Game","Deduction","Area Control","Dice",
+  "Solo","Puzzle","Party","Abstract","Adventure","Racing"
+];
+
+// ── Render filters ──
+function renderFilters() {
+  const el = document.getElementById('filters');
+  const usedCats = new Set();
+  GAMES.forEach(g => g.categories.forEach(c => usedCats.add(c)));
+  const cats = CATEGORIES.filter(c => usedCats.has(c));
+
+  el.innerHTML = cats.map(cat =>
+    `<button class="filter-btn" data-cat="${cat}">${cat}</button>`
+  ).join('') + `<button class="filter-btn" data-cat="__all" style="border-color:var(--accent)">Show All</button>`;
+
+  el.addEventListener('click', e => {
+    const btn = e.target.closest('.filter-btn');
+    if (!btn) return;
+    const cat = btn.dataset.cat;
+    if (cat === '__all') {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      applyFilter(null);
+      return;
+    }
+    btn.classList.toggle('active');
+    el.querySelector('[data-cat="__all"]')?.classList.remove('active');
+    const activeCats = [...el.querySelectorAll('.filter-btn.active')].map(b => b.dataset.cat);
+    applyFilter(activeCats.length ? activeCats : null);
+  });
+}
+
+function applyFilter(activeCats) {
+  document.querySelectorAll('.game-spine').forEach(el => {
+    if (!activeCats) { el.classList.remove('faded'); return; }
+    const gameId = el.dataset.gameId;
+    const game = GAMES.find(g => g.id === gameId);
+    if (!game) { el.classList.add('faded'); return; }
+    const matches = activeCats.every(cat => game.categories.includes(cat));
+    el.classList.toggle('faded', !matches);
+  });
+}
+
+// ── Render shelf ──
+function renderShelf() {
+  const shelfEl = document.getElementById('shelf');
+  shelfEl.innerHTML = '';
+
+  for (let row = 1; row <= 6; row++) {
+    for (let col = 1; col <= 6; col++) {
+      const key = `${row}-${col}`;
+      const cfg = CUBBY_CONFIG[key] || {};
+
+      // Skip bottom-half of tall cubbies
+      if (cfg.skip) continue;
+
+      const cubby = document.createElement('div');
+      cubby.className = 'cubby';
+      if (cfg.tall) cubby.classList.add('tall');
+
+      // Filler cubbies (comics/books)
+      if (cfg.filler) {
+        cubby.classList.add('filler-cubby');
+        cubby.textContent = cfg.filler;
+        shelfEl.appendChild(cubby);
+        continue;
+      }
+
+      // Get games for this cubby
+      // For tall cubbies, also include games from the merged row
+      let cubbyGames = GAMES.filter(g => g.row === row && g.col === col);
+      if (cfg.tall) {
+        const nextRowGames = GAMES.filter(g => g.row === row + 1 && g.col === col);
+        cubbyGames = [...cubbyGames, ...nextRowGames];
+      }
+
+      cubbyGames.forEach(game => {
+        const spine = document.createElement('div');
+        spine.className = `game-spine box-${game.boxSize}`;
+        spine.style.background = game.spineColor;
+        spine.dataset.gameId = game.id;
+        spine.title = game.name;
+
+        const text = document.createElement('span');
+        text.className = 'spine-text';
+        text.textContent = game.name;
+        spine.appendChild(text);
+
+        spine.addEventListener('click', () => openModal(game));
+        cubby.appendChild(spine);
+      });
+
+      shelfEl.appendChild(cubby);
+    }
+  }
+}
+
+// ── Modal ──
+function openModal(game) {
+  const overlay = document.getElementById('modal-overlay');
+  const content = document.getElementById('modal-content');
+
+  // Generate a gradient based on spine color
+  const c = game.spineColor;
+  const bg = `linear-gradient(135deg, ${c}, ${adjustColor(c, -30)})`;
+
+  content.innerHTML = `
+    <div class="modal-cover-placeholder" style="background:${bg}">
+      ${game.name}
+    </div>
+    <div class="modal-body">
+      <div class="modal-title">${game.name}</div>
+      <div class="modal-stats">
+        <span class="modal-stat"><span class="icon">👥</span> ${game.players} players</span>
+        <span class="modal-stat"><span class="icon">⏱️</span> ${game.playTime}</span>
+        ${game.complexity > 0 ? `<span class="modal-stat"><span class="icon">⚖️</span> ${game.complexity}/5 weight</span>` : ''}
+      </div>
+      <div class="modal-categories">
+        ${game.categories.map(c => `<span class="modal-cat">${c}</span>`).join('')}
+      </div>
+      <div class="modal-desc">${game.description}</div>
+      ${game.bggId > 0
+        ? `<a class="modal-bgg-link" href="https://boardgamegeek.com/boardgame/${game.bggId}" target="_blank" rel="noopener">View on BoardGameGeek →</a>`
+        : `<a class="modal-bgg-link" href="https://boardgamegeek.com/geeksearch.php?action=search&objecttype=boardgame&q=${encodeURIComponent(game.name)}" target="_blank" rel="noopener">Search on BoardGameGeek →</a>`
+      }
+    </div>
+  `;
+  overlay.classList.add('open');
+}
+
+function adjustColor(hex, amount) {
+  let r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  r = Math.max(0,Math.min(255,r+amount));
+  g = Math.max(0,Math.min(255,g+amount));
+  b = Math.max(0,Math.min(255,b+amount));
+  return `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;
+}
+
+// Close modal
+document.getElementById('modal-close').addEventListener('click', () => {
+  document.getElementById('modal-overlay').classList.remove('open');
+});
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.getElementById('modal-overlay').classList.remove('open');
+});
+
+// ── Init ──
+renderFilters();
+renderShelf();
+</script>
+</body>
+</html>
