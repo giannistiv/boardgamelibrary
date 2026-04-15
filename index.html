@@ -10,7 +10,7 @@
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   :root{
     --wood:#c9a66b;--wood-dark:#a07840;--wood-light:#dfc89a;--wood-shadow:#7a5a30;
-    --bg:#2c2c2c;--text:#f0e6d3;--accent:#e2b04a;--modal-bg:#3a3a3a;
+    --bg:#363636;--text:#f0e6d3;--accent:#e2b04a;--modal-bg:#3a3a3a;
   }
   body{
     font-family:'Roboto','Segoe UI',system-ui,-apple-system,sans-serif;
@@ -29,13 +29,13 @@
   }
   .search-input{
     width:100%;padding:0.5rem 0.9rem 0.5rem 2.2rem;border-radius:10px;
-    border:1px solid rgba(255,255,255,0.15);
-    background:rgba(255,255,255,0.07);color:var(--text);
+    border:1px solid rgba(255,255,255,0.22);
+    background:rgba(255,255,255,0.12);color:var(--text);
     font-family:inherit;font-size:0.85rem;transition:all 0.2s;
     outline:none;
   }
   .search-input::placeholder{color:rgba(240,230,211,0.35)}
-  .search-input:focus{border-color:var(--accent);background:rgba(255,255,255,0.10)}
+  .search-input:focus{border-color:var(--accent);background:rgba(255,255,255,0.16)}
   .search-wrap{position:relative}
   .search-icon{
     position:absolute;left:1.55rem;top:50%;transform:translateY(-50%);
@@ -51,15 +51,15 @@
   .filter-label{font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;opacity:0.5;padding-left:2px}
   .filter-select{
     padding:0.4rem 2rem 0.4rem 0.7rem;border-radius:8px;
-    border:1px solid rgba(255,255,255,0.18);
-    background:rgba(255,255,255,0.10);color:var(--text);
+    border:1px solid rgba(255,255,255,0.22);
+    background:rgba(255,255,255,0.14);color:var(--text);
     font-family:inherit;font-size:0.8rem;cursor:pointer;
     appearance:none;-webkit-appearance:none;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23f0e6d3'/%3E%3C/svg%3E");
     background-repeat:no-repeat;background-position:right 0.6rem center;
     transition:all 0.2s;
   }
-  .filter-select:hover{background-color:rgba(255,255,255,0.16)}
+  .filter-select:hover{background-color:rgba(255,255,255,0.20)}
   .filter-select:focus{outline:none;border-color:var(--accent)}
   .filter-select option{background:#444;color:var(--text)}
 
@@ -83,8 +83,8 @@
   }
 
   .filter-reset{
-    padding:0.4rem 0.9rem;border-radius:8px;border:1px solid rgba(255,255,255,0.18);
-    background:rgba(255,255,255,0.10);color:var(--text);cursor:pointer;
+    padding:0.4rem 0.9rem;border-radius:8px;border:1px solid rgba(255,255,255,0.22);
+    background:rgba(255,255,255,0.14);color:var(--text);cursor:pointer;
     font-family:inherit;font-size:0.75rem;transition:all 0.2s;align-self:flex-end;
   }
   .filter-reset:hover{background:var(--accent);color:#1a1a2e;border-color:var(--accent)}
@@ -105,13 +105,13 @@
   .filter-multi{position:relative}
   .filter-multi-btn{
     padding:0.4rem 2rem 0.4rem 0.7rem;border-radius:8px;
-    border:1px solid rgba(255,255,255,0.18);
-    background:rgba(255,255,255,0.10);color:var(--text);
+    border:1px solid rgba(255,255,255,0.22);
+    background:rgba(255,255,255,0.14);color:var(--text);
     font-family:inherit;font-size:0.8rem;cursor:pointer;
     text-align:left;white-space:nowrap;transition:all 0.2s;
     min-width:90px;position:relative;
   }
-  .filter-multi-btn:hover{background:rgba(255,255,255,0.16)}
+  .filter-multi-btn:hover{background:rgba(255,255,255,0.20)}
   .filter-arrow{position:absolute;right:0.6rem;top:50%;transform:translateY(-50%);font-size:0.6rem;opacity:0.7}
   .filter-multi-dropdown{
     display:none;position:absolute;top:calc(100% + 4px);left:0;
@@ -165,7 +165,7 @@
     border-radius:2px 2px 0 0;cursor:pointer;
     display:flex;align-items:center;justify-content:center;
     position:relative;transition:all 0.4s ease;
-    box-shadow:1px 0 3px rgba(0,0,0,0.4),-1px 0 2px rgba(0,0,0,0.2);
+    box-shadow:1px 0 3px rgba(0,0,0,0.4),-1px 0 2px rgba(0,0,0,0.2),inset 0 0 0 1px rgba(255,255,255,0.06);
     overflow:hidden;
   }
   .game-spine .spine-text{
@@ -2276,8 +2276,8 @@ function openModal(game) {
         ? `<a class="modal-bgg-link" href="https://boardgamegeek.com/boardgame/${game.bggId}" target="_blank" rel="noopener">View on BoardGameGeek &#8594;</a>`
         : `<a class="modal-bgg-link" href="https://boardgamegeek.com/geeksearch.php?action=search&objecttype=boardgame&q=${encodeURIComponent(game.name)}" target="_blank" rel="noopener">Search on BoardGameGeek &#8594;</a>`
       }
-      ${playHistoryHtml}
       ${game.bggId > 0 ? buildStarRatingHtml(game.bggId) : ''}
+      ${playHistoryHtml}
     </div>
   `;
   overlay.classList.add('open');
@@ -2440,6 +2440,7 @@ function showStatsView(playerName) {
         score: playerEntry.s,
         role: playerEntry.r || '',
         board: play.b || '',
+        allScores: play.sc,
         players: play.sc.length
       });
     }
@@ -2536,14 +2537,24 @@ function showStatsView(playerName) {
       ${recentPlays.slice(0, 15).map(p => {
         const resultClass = p.won ? 'won' : (p.noWinner ? 'lost' : '');
         const resultText = p.won ? '&#9733; Won' : (p.noWinner ? '&#127866; Lost' : '');
-        const extras = [p.role, p.board].filter(Boolean).join(' &middot; ');
+        const boardHtml = p.board ? `<span class="stats-recent-result">&nbsp;&middot; &#9876; ${p.board}</span>` : '';
+        const playersHtml = p.allScores.map(s => {
+          const isSelf = s.n === playerName;
+          const cls = s.w ? ' winner' : '';
+          const trophy = s.w ? '<span class="trophy">&#9733;</span>' : '';
+          const score = s.s ? ` (${s.s})` : '';
+          const roleHtml = s.r ? `<span class="play-role">${s.r}</span>` : '';
+          const style = isSelf ? 'font-weight:600' : '';
+          return `<span class="play-score${cls}" style="${style}"><span class="play-player"><span class="play-player-name">${trophy}${s.n}${score}</span>${roleHtml}</span></span>`;
+        }).join('');
+        const noWinnerHtml = p.noWinner ? '<div class="play-no-winner">&#127866; The game won</div>' : '';
         return `<div class="stats-recent-play">
           <div class="stats-recent-top">
             <span class="stats-recent-game">${p.game.name}</span>
             <span class="stats-recent-date">${fmtDate(p.date)}</span>
           </div>
-          <span class="stats-recent-result ${resultClass}">${resultText}${p.score ? ' (' + p.score + ' pts)' : ''}</span>
-          ${extras ? '<span class="stats-recent-result">&nbsp;&middot; ' + extras + '</span>' : ''}
+          <div class="play-scores" style="margin-top:0.3rem">${playersHtml}</div>
+          ${boardHtml}${noWinnerHtml}
         </div>`;
       }).join('')}
     </div>
