@@ -97,6 +97,26 @@
   .game-spine.box-xl{flex:55 0 40px;min-width:40px}
   .game-spine.box-flat{flex:12 0 12px;min-width:12px}
 
+  /* Horizontal layout for cubbies with 1-2 games */
+  .cubby.horizontal-layout{
+    flex-direction:column;justify-content:flex-end;align-items:stretch;
+  }
+  .cubby.horizontal-layout .game-spine{
+    flex:0 0 auto !important;width:100%;min-width:unset !important;
+  }
+  .cubby.horizontal-layout .game-spine.box-sm{height:22px}
+  .cubby.horizontal-layout .game-spine.box-md{height:30px}
+  .cubby.horizontal-layout .game-spine.box-lg{height:45px}
+  .cubby.horizontal-layout .game-spine.box-xl{height:60px}
+  .cubby.horizontal-layout .game-spine .spine-text{
+    writing-mode:horizontal-tb;text-orientation:initial;
+    font-size:0.6rem;padding:2px 8px;
+    max-height:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    max-width:100%;
+  }
+  .cubby.horizontal-layout .game-spine.box-lg .spine-text,
+  .cubby.horizontal-layout .game-spine.box-xl .spine-text{font-size:0.7rem}
+
   /* ── Modal ── */
   .modal-overlay{
     display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);
@@ -195,6 +215,10 @@
     .game-spine.box-sm{flex-basis:14px;min-width:14px}
     .game-spine .spine-text{font-size:0.45rem}
     .modal-cover-img{max-height:50vh}
+    .cubby.horizontal-layout .game-spine.box-sm{height:18px}
+    .cubby.horizontal-layout .game-spine.box-md{height:24px}
+    .cubby.horizontal-layout .game-spine.box-lg{height:35px}
+    .cubby.horizontal-layout .game-spine.box-xl{height:48px}
   }
 </style>
 </head>
@@ -1449,6 +1473,10 @@ function renderShelf() {
       if (cfg.tall) {
         const nextRowGames = GAMES.filter(g => g.row === row + 1 && g.col === col);
         cubbyGames = [...cubbyGames, ...nextRowGames];
+      }
+
+      if (cubbyGames.length <= 2) {
+        cubby.classList.add('horizontal-layout');
       }
 
       cubbyGames.forEach(game => {
