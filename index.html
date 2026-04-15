@@ -12,12 +12,11 @@
     --wood:#c9a66b;--wood-dark:#a07840;--wood-light:#dfc89a;--wood-shadow:#7a5a30;
     --bg:#363636;--text:#f0e6d3;--accent:#e2b04a;--modal-bg:#3a3a3a;
   }
-  html{overflow-x:hidden}
   body{
     font-family:'Roboto','Segoe UI',system-ui,-apple-system,sans-serif;
     background:var(--bg);color:var(--text);
     min-height:100vh;display:flex;flex-direction:column;align-items:center;
-    overflow-x:hidden;max-width:100vw;
+    width:100%;
   }
   h1{
     font-size:2.2rem;margin:1.5rem 0 0.3rem;text-align:center;
@@ -132,6 +131,8 @@
   .filter-multi-dropdown input[type="checkbox"]{
     accent-color:var(--accent);width:14px;height:14px;cursor:pointer;
   }
+
+  #library-view{width:100%;display:flex;flex-direction:column;align-items:center}
 
   /* ── Shelf ── */
   .shelf-wrapper{
