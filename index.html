@@ -2156,6 +2156,17 @@ function renderShelf() {
 }
 
 // ── Modal ──
+function closeModal() {
+  const overlay = document.getElementById('modal-overlay');
+  if (overlay.classList.contains('open')) {
+    overlay.classList.remove('open');
+    if (history.state && history.state.modal) history.back();
+  }
+}
+window.addEventListener('popstate', e => {
+  document.getElementById('modal-overlay').classList.remove('open');
+});
+
 function openModal(game) {
   const overlay = document.getElementById('modal-overlay');
   const content = document.getElementById('modal-content');
@@ -2290,6 +2301,7 @@ function openModal(game) {
     </div>
   `;
   overlay.classList.add('open');
+  history.pushState({modal: true}, '');
   wireStarRating();
 }
 
@@ -2312,15 +2324,13 @@ function ratingColor(rating) {
 }
 
 // Close modal
-document.getElementById('modal-close').addEventListener('click', () => {
-  document.getElementById('modal-overlay').classList.remove('open');
-});
+document.getElementById('modal-close').addEventListener('click', () => closeModal());
 document.getElementById('modal-overlay').addEventListener('click', e => {
-  if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+  if (e.target === e.currentTarget) closeModal();
 });
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
-    document.getElementById('modal-overlay').classList.remove('open');
+    closeModal();
     document.getElementById('picker-overlay').classList.remove('open');
   }
 });
