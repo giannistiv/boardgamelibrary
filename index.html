@@ -10,7 +10,7 @@
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   :root{
     --wood:#c9a66b;--wood-dark:#a07840;--wood-light:#dfc89a;--wood-shadow:#7a5a30;
-    --bg:#1a1a2e;--text:#f0e6d3;--accent:#e2b04a;--modal-bg:#2a2a3e;
+    --bg:#2c2c2c;--text:#f0e6d3;--accent:#e2b04a;--modal-bg:#3a3a3a;
   }
   body{
     font-family:'Roboto','Segoe UI',system-ui,-apple-system,sans-serif;
@@ -19,7 +19,7 @@
   }
   h1{
     font-size:2.2rem;margin:1.5rem 0 0.3rem;text-align:center;
-    font-weight:300;letter-spacing:0.05em;color:var(--accent);
+    font-weight:300;letter-spacing:0.05em;color:#f5f0ea;
   }
   .subtitle{font-size:0.85rem;opacity:0.5;margin-bottom:1.2rem;text-align:center}
 
@@ -42,7 +42,7 @@
   }
   .filter-select:hover{background-color:rgba(255,255,255,0.16)}
   .filter-select:focus{outline:none;border-color:var(--accent)}
-  .filter-select option{background:#363650;color:var(--text)}
+  .filter-select option{background:#444;color:var(--text)}
 
   .filter-slider-wrap{display:flex;align-items:center;gap:0.5rem}
   .filter-slider{
@@ -52,11 +52,11 @@
   }
   .filter-slider::-webkit-slider-thumb{
     -webkit-appearance:none;width:16px;height:16px;border-radius:50%;
-    background:var(--accent);cursor:pointer;border:2px solid var(--bg);
+    background:var(--accent);cursor:pointer;border:2px solid #2c2c2c;
   }
   .filter-slider::-moz-range-thumb{
     width:16px;height:16px;border-radius:50%;
-    background:var(--accent);cursor:pointer;border:2px solid var(--bg);
+    background:var(--accent);cursor:pointer;border:2px solid #2c2c2c;
   }
   .filter-slider-value{
     font-size:0.75rem;min-width:48px;text-align:center;
@@ -96,7 +96,7 @@
   .filter-arrow{position:absolute;right:0.6rem;top:50%;transform:translateY(-50%);font-size:0.6rem;opacity:0.7}
   .filter-multi-dropdown{
     display:none;position:absolute;top:calc(100% + 4px);left:0;
-    background:#363650;border:1px solid rgba(255,255,255,0.18);
+    background:#444;border:1px solid rgba(255,255,255,0.18);
     border-radius:8px;padding:0.4rem 0;z-index:100;
     min-width:160px;max-height:260px;overflow-y:auto;
     box-shadow:0 8px 24px rgba(0,0,0,0.4);
@@ -137,7 +137,7 @@
   .cubby.tall{grid-row:span 2;min-height:175px}
   .cubby.filler-cubby{
     justify-content:center;align-items:center;
-    opacity:0.15;font-size:0.65rem;font-style:italic;letter-spacing:0.05em;
+    opacity:0.2;font-size:0.65rem;font-style:italic;letter-spacing:0.05em;
   }
 
   /* ── Game spines ── */
@@ -326,7 +326,10 @@
   </div>
   <div class="filter-group">
     <span class="filter-label">Players</span>
-    <select class="filter-select" id="f-players"><option value="">Any</option></select>
+    <div class="filter-multi" id="f-players-wrap">
+      <button class="filter-multi-btn" id="f-players-btn">Any <span class="filter-arrow">&#9662;</span></button>
+      <div class="filter-multi-dropdown" id="f-players-dd"></div>
+    </div>
   </div>
   <div class="filter-group">
     <span class="filter-label">Difficulty</span>
@@ -1595,13 +1598,36 @@ function renderFilters() {
     catDD.appendChild(label);
   });
 
-  // Toggle dropdown open/close
-  catBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    catDD.classList.toggle('open');
+  // Populate player count multi-select checkboxes
+  const pDD = document.getElementById('f-players-dd');
+  const pBtn = document.getElementById('f-players-btn');
+  for (let i = 1; i <= 8; i++) {
+    const label = document.createElement('label');
+    const cb = document.createElement('input');
+    cb.type = 'checkbox'; cb.value = i;
+    cb.addEventListener('change', () => { updatePBtn(); applyFilters(); });
+    label.appendChild(cb);
+    label.appendChild(document.createTextNode(i === 8 ? '8+' : String(i)));
+    pDD.appendChild(label);
+  }
+
+  // Toggle dropdowns open/close
+  const allDropdowns = [
+    { btn: catBtn, dd: catDD },
+    { btn: pBtn, dd: pDD }
+  ];
+  allDropdowns.forEach(({ btn, dd }) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      // Close other dropdowns
+      allDropdowns.forEach(o => { if (o.dd !== dd) o.dd.classList.remove('open'); });
+      dd.classList.toggle('open');
+    });
   });
   document.addEventListener('click', (e) => {
-    if (!catDD.contains(e.target) && e.target !== catBtn) catDD.classList.remove('open');
+    allDropdowns.forEach(({ btn, dd }) => {
+      if (!dd.contains(e.target) && e.target !== btn) dd.classList.remove('open');
+    });
   });
 
   function updateCatBtn() {
@@ -1615,12 +1641,16 @@ function renderFilters() {
     }
   }
 
-  // Populate player count dropdown (1-8+)
-  const pSel = document.getElementById('f-players');
-  for (let i = 1; i <= 8; i++) {
-    const opt = document.createElement('option');
-    opt.value = i; opt.textContent = i === 8 ? '8+' : i;
-    pSel.appendChild(opt);
+  function updatePBtn() {
+    const checked = pDD.querySelectorAll('input:checked');
+    if (checked.length === 0) {
+      pBtn.innerHTML = 'Any <span class="filter-arrow">&#9662;</span>';
+    } else if (checked.length === 1) {
+      const v = checked[0].value;
+      pBtn.innerHTML = (v === '8' ? '8+' : v) + ' <span class="filter-arrow">&#9662;</span>';
+    } else {
+      pBtn.innerHTML = checked.length + ' selected <span class="filter-arrow">&#9662;</span>';
+    }
   }
 
   // Time slider
@@ -1633,7 +1663,7 @@ function renderFilters() {
   });
 
   // Wire up all dropdowns
-  ['f-coop','f-players','f-difficulty','f-expansion'].forEach(id => {
+  ['f-coop','f-difficulty','f-expansion'].forEach(id => {
     document.getElementById(id).addEventListener('change', applyFilters);
   });
 
@@ -1644,14 +1674,15 @@ function renderFilters() {
   document.getElementById('f-reset').addEventListener('click', () => {
     catDD.querySelectorAll('input:checked').forEach(cb => cb.checked = false);
     updateCatBtn();
+    pDD.querySelectorAll('input:checked').forEach(cb => cb.checked = false);
+    updatePBtn();
     document.getElementById('f-coop').value = '';
-    pSel.value = '';
     document.getElementById('f-difficulty').value = '';
     document.getElementById('f-expansion').value = '';
     document.getElementById('f-campaign').checked = true;
     timeSlider.value = 240;
     timeVal.textContent = 'Any';
-    catDD.classList.remove('open');
+    allDropdowns.forEach(({ dd }) => dd.classList.remove('open'));
     applyFilters();
   });
 }
@@ -1659,14 +1690,14 @@ function renderFilters() {
 function applyFilters() {
   const selectedCats = Array.from(document.querySelectorAll('#f-category-dd input:checked')).map(cb => cb.value);
   const coop = document.getElementById('f-coop').value;
-  const players = document.getElementById('f-players').value;
+  const selectedPlayers = Array.from(document.querySelectorAll('#f-players-dd input:checked')).map(cb => Number(cb.value));
   const diff = document.getElementById('f-difficulty').value;
   const expansion = document.getElementById('f-expansion').value;
   const showCampaign = document.getElementById('f-campaign').checked;
   const maxTime = Number(document.getElementById('f-time').value);
   const timeActive = maxTime < 240;
 
-  const anyActive = selectedCats.length > 0 || coop || players || diff || expansion || !showCampaign || timeActive;
+  const anyActive = selectedCats.length > 0 || coop || selectedPlayers.length > 0 || diff || expansion || !showCampaign || timeActive;
   let matchCount = 0;
 
   document.querySelectorAll('.game-spine').forEach(el => {
@@ -1680,9 +1711,9 @@ function applyFilters() {
       if (coop === 'coop' && !isCoop(game)) pass = false;
       if (coop === 'competitive' && isCoop(game)) pass = false;
     }
-    if (pass && players) {
+    if (pass && selectedPlayers.length > 0) {
       const supported = parsePlayers(game.players);
-      if (!supported.includes(Number(players)) && !(Number(players) === 8 && Math.max(...supported) >= 8)) pass = false;
+      if (!selectedPlayers.some(p => supported.includes(p) || (p === 8 && Math.max(...supported) >= 8))) pass = false;
     }
     if (pass && diff && difficultyBucket(game.complexity) !== diff) pass = false;
     if (pass && expansion) {
