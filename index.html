@@ -119,13 +119,14 @@
 
   /* Modal cover image */
   .modal-cover{
-    width:100%;height:240px;border-radius:16px 16px 0 0;
+    width:100%;min-height:200px;max-height:340px;border-radius:16px 16px 0 0;
     position:relative;overflow:hidden;
     display:flex;align-items:center;justify-content:center;
+    background:#1a1a28;
   }
   .modal-cover-img{
-    width:100%;height:100%;object-fit:cover;
-    transition:opacity 0.3s;
+    width:100%;height:100%;object-fit:contain;
+    transition:opacity 0.3s;padding:0;
   }
   .modal-cover-fallback{
     width:100%;height:100%;display:flex;align-items:center;justify-content:center;
@@ -151,10 +152,10 @@
     padding:0.6rem 0.8rem;border-radius:10px;background:rgba(255,255,255,0.04);
   }
   .rating-badge{
-    font-size:1.3rem;font-weight:800;color:var(--accent);min-width:2.5rem;text-align:center;
+    font-size:1.3rem;font-weight:800;min-width:2.5rem;text-align:center;
   }
   .rating-bar-wrap{flex:1;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden}
-  .rating-bar{height:100%;border-radius:3px;background:var(--accent);transition:width 0.4s ease}
+  .rating-bar{height:100%;border-radius:3px;transition:width 0.4s ease}
   .rating-label{font-size:0.7rem;opacity:0.45;white-space:nowrap}
 
   /* Stats row */
@@ -257,30 +258,42 @@ const GAMES = [
   {id:"mu_deadpool",name:"Marvel United: Deadpool"
    ,row:1,col:1,categories:["Co-op", "Thematic", "Family"]
    ,players:"1-4",playTime:"40 min"
-   ,complexity:1.7,bggId:0
+   ,complexity:1.8,bggId:339131
    ,spineColor:"#cc2233",boxSize:"sm"
-   ,description:"An expansion for Marvel United featuring the Merc with a Mouth."},
+   ,designer:"Andrea Chiarvesio, Eric M. Lang, Francesco Rugerfred Sedda"
+   ,year:2022
+   ,bggRating:7.7
+   ,mechanics:["Cooperative Game", "Hand Management", "Modular Board", "Solo / Solitaire Game", "Variable Player Powers"],description:"The Deadpool expansion brings you a whopping three flavors of the Merc with a Mouth, as well as his not so trusty sidekick Bob, Agent of Hydra. These most unusual characters can all be played as either Heroes or Villains, always with tongue stuck firmly in cheek. Not content with being just a 4th wall-breaking Hero and unbeatable Villain, Deadpool can also crash into any game, riding his plush unicorn, in the form of a Challenge that sows chaos wherever he goes! —description from the publisher"},
 
   {id:"mu_xmen_gold",name:"Marvel United: X-Men Gold Team"
    ,row:1,col:1,categories:["Co-op", "Thematic", "Family"]
    ,players:"1-4",playTime:"40 min"
-   ,complexity:1.7,bggId:0
+   ,complexity:1.8,bggId:339128
    ,spineColor:"#c4a020",boxSize:"sm"
-   ,description:"An expansion for Marvel United X-Men featuring the Gold Team."},
+   ,designer:"Andrea Chiarvesio, Eric M. Lang, Francesco Rugerfred Sedda"
+   ,year:2022
+   ,bggRating:8.3
+   ,mechanics:["Cooperative Game", "Hand Management", "Modular Board", "Solo / Solitaire Game", "Team-Based Game", "Variable Player Powers"],description:"The X-Men: Gold Team expansion brings another iconic X-Men team, featuring classic Heroes that will each bring their own twist to the game. It also features a Villain that will bring the full power of the Hellfire Club to bear against the X-Men. That is, if the X-Men can stop fighting against each other long enough to take care of this menace, as this expansion also contains all the contents and rules necessary to play the Team vs Team Mode. —description from the publisher"},
 
   {id:"mu_gotg",name:"Marvel United: Guardians of the Galaxy Remix"
    ,row:1,col:1,categories:["Co-op", "Thematic", "Family"]
    ,players:"1-4",playTime:"40 min"
-   ,complexity:1.7,bggId:0
+   ,complexity:2.07,bggId:302670
    ,spineColor:"#2060a0",boxSize:"sm"
-   ,description:"An expansion for Marvel United featuring the Guardians of the Galaxy."},
+   ,designer:"Andrea Chiarvesio, Eric M. Lang"
+   ,year:2021
+   ,bggRating:8.0
+   ,mechanics:["Cooperative Game"],description:"The Guardians of the Galaxy have made a name for themselves traveling the stars, fighting for the helpless, righting wrongs, and occasionally wronging a few rights. But, by and large, their good deeds outshine the bad, and Ronan the Accuser has had enough! The Guardians have interfered with Ronan’s people, the Kree, in their self-proclaimed righteous wars for the last time! Ronan ranks among the most formidable villains the Guardians have ever faced, and his master plan is as simple as can be: p"},
 
   {id:"mu_xmen_blue",name:"Marvel United: X-Men Blue Team"
    ,row:1,col:1,categories:["Co-op", "Thematic", "Family"]
    ,players:"1-4",playTime:"40 min"
-   ,complexity:1.7,bggId:0
+   ,complexity:2.0,bggId:339129
    ,spineColor:"#1a3a8a",boxSize:"sm"
-   ,description:"An expansion for Marvel United X-Men featuring the Blue Team. Stored sideways on top."},
+   ,designer:"Andrea Chiarvesio, Eric M. Lang, Francesco Rugerfred Sedda"
+   ,year:2022
+   ,bggRating:8.3
+   ,mechanics:["Cooperative Game", "Hand Management", "Modular Board", "Solo / Solitaire Game", "Team-Based Game", "Variable Player Powers"],description:"The X-Men: Blue Team expansion would be awesome enough if it only added to the game this beloved team of X-Men, each with their own unique abilities, and fighting against a Villain with a most sinister plan to extract mutant DNA. But it also carries the new Team vs Team mode and all it brings to the table. —description from the publisher"},
 
   {id:"underwater_cities",name:"Underwater Cities"
    ,row:1,col:2,categories:["Strategy", "Euro", "Engine Building"]
@@ -395,9 +408,12 @@ const GAMES = [
   {id:"eternal_decks",name:"Eternal Decks"
    ,row:1,col:4,categories:["Card Game", "Strategy"]
    ,players:"1-4",playTime:"30-60 min"
-   ,complexity:2.0,bggId:0
+   ,complexity:2.81,bggId:424981
    ,spineColor:"#5a3a6a",boxSize:"sm"
-   ,description:"A card-based strategic game."},
+   ,designer:"Hiroken"
+   ,year:2025
+   ,bggRating:8.3
+   ,mechanics:["Communication Limits", "Cooperative Game", "Deck, Bag, and Pool Building", "Hand Management", "Once-Per-Game Abilities", "Ordering"],description:"Eternal Decks is a limited communication co-operative game in which players try to complete the stage objectives before any one player cannot take an action. Players start the game with five cards in their deck, but will quickly look to acquire more cards from the various Eternals (characters within the game) who each have their own unique eight-card deck. On your turn, you must perform one action: Play a card (on the field, on the river, or by using an ability) Generate a jewel Give a card to a"},
 
   {id:"parks",name:"PARKS"
    ,row:1,col:4,categories:["Family", "Strategy", "Thematic"]
@@ -424,20 +440,23 @@ const GAMES = [
   {id:"rove",name:"ROVE"
    ,row:1,col:5,categories:["Solo", "Puzzle"]
    ,players:"1",playTime:"10-15 min"
-   ,complexity:1.97,bggId:342562
+   ,complexity:3.5,bggId:365670
    ,spineColor:"#3070a0",boxSize:"sm"
-   ,designer:"Dustin Dobson, Milan Zivkovic"
-   ,year:2021
-   ,bggRating:7.5
-   ,mechanics:["Hand Management", "Pattern Movement", "Pattern Recognition", "Solo / Solitaire Game", "Square Grid"]
-   ,description:"As a ROVE (Results-Oriented Versatile Explorer) you're used to surveying the fringes of space, but now you've crash-landed on an unfamiliar planet. You'll need to reconfigure your reusable modules to get to safety! ROVE is a solo spatial puzzle game. In each game of ROVE, the player will face a series of mishaps that can only be solved by arranging the 6 module cards in a specific pattern. Moving a module requires Movement Points gained by discarding cards from hand for the listed amount. Player"},
+   ,designer:"Motti Eisenbach, Tyvan Grossi"
+   ,year:2023
+   ,bggRating:8.2
+   ,mechanics:["Campaign / Battle Card Driven", "Cooperative Game", "Grid Movement", "Hand Management", "Scenario / Mission / Campaign Game", "Solo / Solitaire Game"]
+   ,description:"Ah, another Rover! Another pilgrim of change and purveyor of death who seeks to wrest the fate of Chorus away from the untamed wilds. Will you perish there in the hinterlands or will you make it out with the Artifacts you seek?"},
 
   {id:"rove_xulc",name:"ROVE: XULC Expansion"
    ,row:1,col:5,categories:["Solo", "Puzzle"]
    ,players:"1",playTime:"10-15 min"
-   ,complexity:1.8,bggId:0
+   ,complexity:1.8,bggId:439995
    ,spineColor:"#4080b0",boxSize:"sm"
-   ,description:"Expansion for ROVE adding new module challenges."},
+   ,designer:"Motti Eisenbach, Tyvan Grossi"
+   ,year:2025
+   ,bggRating:8.3
+   ,mechanics:["Campaign / Battle Card Driven", "Hexagon Grid", "Narrative Choice / Paragraph"],description:"Gain an additional 10 Prime and Apex classes for a total of 25 different Rover evolutions to explore, along with two new full Quest Chains further exploring the wilds of Chorus. Flex your tactical team-building to its limits as you explore Chorus."},
 
   {id:"detective_coa",name:"Detective: City of Angels"
    ,row:1,col:6,categories:["Thematic", "Deduction"]
@@ -497,9 +516,12 @@ const GAMES = [
   {id:"bomb_busters",name:"Bomb Busters"
    ,row:2,col:1,categories:["Co-op", "Family", "Card Game"]
    ,players:"2-6",playTime:"15-30 min"
-   ,complexity:1.2,bggId:0
+   ,complexity:2.0,bggId:413246
    ,spineColor:"#e05050",boxSize:"sm"
-   ,description:"A fast cooperative card game about defusing bombs."},
+   ,designer:"Hisashi Hayashi"
+   ,year:2024
+   ,bggRating:8.0
+   ,mechanics:["Communication Limits", "Cooperative Game", "Deduction", "Memory", "Once-Per-Game Abilities", "Real-Time"],description:"There is a bomb full of wires and the countdown has started... Who are you gonna call? YOU! To clear the bomb, you need to collaborate with your team of bomb disposal experts! Using the wires on the tile holder in front of you, try and figure out your teammates’ wires. Find and cut identical wires, but watch out, if you cut a red wire: BOOM! Use your equipment wisely to meet the varied challenges which get harder and harder. Tick tock tick tock... Will you figure it out before it’s too late? In "},
 
   {id:"magic_maze",name:"Magic Maze"
    ,row:2,col:1,categories:["Co-op", "Family", "Puzzle"]
@@ -515,13 +537,13 @@ const GAMES = [
   {id:"hansa_teutonica",name:"Hansa Teutonica"
    ,row:2,col:1,categories:["Strategy", "Euro", "Area Control"]
    ,players:"2-5",playTime:"45-90 min"
-   ,complexity:3.09,bggId:43015
+   ,complexity:2.96,bggId:286749
    ,spineColor:"#d0c090",boxSize:"md"
    ,designer:"Andreas Steding"
-   ,year:2009
-   ,bggRating:7.7
+   ,year:2020
+   ,bggRating:8.4
    ,mechanics:["Action Points", "Area Majority / Influence", "End Game Bonuses", "Network and Route Building", "Ownership", "Take That"]
-   ,description:"The players act as traders trying to get victory points for building a network of offices, controlling cities, collecting bonus markers, or when other traders use the cities they control. After controlling a line between two cities with your pawns, you can decide to build an office (and maybe also establish control and/or get a bonus marker) or to get a skill improvement from some of the cities. Players have to improve their traders' \"skills\" for the following effects: getting more VP from offic"},
+   ,description:"The multi-award-winning strategy game Hansa Teutonica is back in a Big Box edition including the base game and all expansions. In the game, players attempt to increase their standing as merchants in the Hanseatic League by gaining prestige points in various ways. For instance, they can try to establish a network of counting offices in new Hansa cities by occupying an entire trade route between two cities — but before that happens, player markers can also be displaced by other players. Players ma"},
 
   {id:"hadrians_wall",name:"Hadrian's Wall"
    ,row:2,col:2,categories:["Strategy", "Euro", "Engine Building"]
@@ -581,9 +603,12 @@ const GAMES = [
   {id:"planet_unknown_super",name:"Planet Unknown: Supermoon"
    ,row:2,col:3,categories:["Strategy", "Puzzle"]
    ,players:"1-6",playTime:"60-80 min"
-   ,complexity:2.4,bggId:0
+   ,complexity:2.5,bggId:393509
    ,spineColor:"#2a2a5a",boxSize:"md"
-   ,description:"Expansion for Planet Unknown adding new planets and modules."},
+   ,designer:"Ryan Lambert, Adam Rehberg"
+   ,year:2025
+   ,bggRating:7.6
+   ,mechanics:["Multiple Maps", "Open Drafting", "Tile Placement", "Track Movement", "Variable Set-up"],description:"The meteor strikes have caused great damage. We’ve gathered as much wreckage as possible so please use the salvage carefully. Complete the primary objective and build the planet that will preserve humanity. Expand your developments onto the Supermoon in case the meteorite hazards get out of hand. Planet Unknown is a polyomino tile-laying game that mixes tile-placement, engine-building, simultaneous play, and resource and rover management for a unique and competitive gameplay experience. Supermoo"},
 
   {id:"trickerion",name:"Trickerion"
    ,row:2,col:3,categories:["Strategy", "Euro", "Worker Placement", "Thematic"]
@@ -665,13 +690,13 @@ const GAMES = [
   {id:"mistborn",name:"Mistborn: House War"
    ,row:3,col:3,categories:["Strategy", "Card Game", "Thematic"]
    ,players:"3-5",playTime:"60-120 min"
-   ,complexity:2.76,bggId:182626
+   ,complexity:2.68,bggId:422780
    ,spineColor:"#3a3a4a",boxSize:"md"
-   ,designer:"Kevin Wilson"
-   ,year:2017
-   ,bggRating:6.8
-   ,mechanics:["Hand Management", "Take That", "Variable Player Powers"]
-   ,description:"Become the head of a Great House of Luthadel in this game of negotiation and betrayal set in the world of Brandon Sanderson's Mistborn novels. Contend with myriad problems plaguing the Final Empire — rampaging koloss, disease, social unrest, even the heroes of the novels — and with every step jockey for the Lord Ruler's favor. At the end of the story, will you rise to power and prestige — or fall in ruin and disgrace? Mistborn: House War is a resource-management game set during the events of the"},
+   ,designer:"John D. Clair"
+   ,year:2024
+   ,bggRating:7.7
+   ,mechanics:["Cooperative Game", "Deck, Bag, and Pool Building", "Market", "Player Elimination", "Race", "Solo / Solitaire Game"]
+   ,description:"Based on the hit Mistborn novel series by Brandon Sanderson, Mistborn: The Deckbuilding Game takes players into the world of Scadrial! From designer John D Clair, players get to control iconic characters from the series and \"burn\" metals to unlock Allomantic powers in fast-paced battles. Mistborn is a standalone deck-building game in which you \"purchase\" cards as you play to build and improve your deck. \"Burn\" metals to activate cards. Each metal has its own strengths: damaging opponents, earnin"},
 
   {id:"empires_of_the_north",name:"Empires of the North"
    ,row:3,col:3,categories:["Strategy", "Euro", "Engine Building", "Card Game"]
@@ -863,9 +888,12 @@ const GAMES = [
   {id:"heat_heavy_rain",name:"Heat: Heavy Rain"
    ,row:4,col:4,categories:["Racing", "Thematic", "Family"]
    ,players:"1-6",playTime:"30-60 min"
-   ,complexity:2.1,bggId:0
+   ,complexity:2.4,bggId:410291
    ,spineColor:"#4a6a8a",boxSize:"md"
-   ,description:"Expansion for Heat: Pedal to the Metal adding rain and night driving conditions."},
+   ,designer:"Asger Aleksandrov Granerud, Daniel Skjold Pedersen"
+   ,year:2024
+   ,bggRating:8.1
+   ,mechanics:["Catch the Leader", "Hand Management", "Push Your Luck", "Race", "Simulation", "Simultaneous Action Selection"],description:"This expansion introduces: One new driver w/ all essential player specific components in orange (now allows up to 7 racers) Two new maps (Japan & Mexico) New upgrade cards (introducing the purple drop - a different cooldown that allows the player to take a heat card from their discard pile and place it back into their engine) Submerged track sections (must spend an extra heat for down shifting gears in these sections) More heat, stress, championship, sponsorship, and event cards. —description fr"},
 
   {id:"dune_imperium",name:"Dune: Imperium"
    ,row:4,col:4,categories:["Strategy", "Deck Building", "Worker Placement", "Thematic"]
@@ -914,16 +942,22 @@ const GAMES = [
   {id:"mdt_deadpool",name:"Marvel Dice Throne: Deadpool"
    ,row:4,col:6,categories:["Dice", "Card Game", "Thematic"]
    ,players:"2",playTime:"20-40 min"
-   ,complexity:2.1,bggId:0
+   ,complexity:2.0,bggId:403511
    ,spineColor:"#cc2233",boxSize:"sm"
-   ,description:"Deadpool hero pack for Marvel Dice Throne."},
+   ,designer:"Gavan Brown, Nate Chatellier, Manny Trembley"
+   ,year:2025
+   ,bggRating:8.4
+   ,mechanics:["Dice Rolling", "Variable Player Powers"],description:"It's not a party without a Wade! You become one of Marvel's most (in)famous heroes in Marvel Dice Throne: Deadpool, which includes the Deadpool Hero, 10 Acrylic Tokens, pre-painted Hero Sculpt, and 50 premium card sleeves. Note: Other Marvel Dice Throne sets will be required to play a full game with Marvel Dice Throne: Deadpool."},
 
   {id:"mdt_cap_panther",name:"Marvel Dice Throne: Captain Marvel + Black Panther"
    ,row:4,col:6,categories:["Dice", "Card Game", "Thematic"]
    ,players:"2",playTime:"20-40 min"
-   ,complexity:2.1,bggId:0
+   ,complexity:2.4,bggId:360061
    ,spineColor:"#2a2a6a",boxSize:"md"
-   ,description:"Captain Marvel and Black Panther hero pack for Marvel Dice Throne."},
+   ,designer:"Gavan Brown, Nate Chatellier, Manny Trembley"
+   ,year:2022
+   ,bggRating:7.7
+   ,mechanics:["Dice Rolling"],description:"In Marvel Dice Throne, you become one of eight of Marvel's most famous heroes, including Black Panther, Captain Marvel, Black Widow, Scarlet Witch, Loki, Thor, Doctor Strange, and Miles Morales Spider-man! Every Marvel Dice Throne hero was painstakingly designed and balanced to provide the most thematic experience possible, allowing you to truly embody your favorite heroes like no other game. Featuring all-new mechanisms and asymmetrical designs, these are our most innovative and exciting heroes"},
 
   {id:"cthulhu_dmd",name:"Cthulhu: Death May Die"
    ,row:4,col:6,categories:["Co-op", "Thematic", "Dice"]
@@ -939,20 +973,23 @@ const GAMES = [
   {id:"kill_hitler",name:"I Would Kill Hitler"
    ,row:5,col:1,categories:["Party", "Card Game"]
    ,players:"3-8",playTime:"15-30 min"
-   ,complexity:1.2,bggId:0
+   ,complexity:1.0,bggId:335204
    ,spineColor:"#8a7a50",boxSize:"md"
-   ,description:"A party card game about absurd hypothetical dilemmas involving time travel."},
+   ,designer:"(Uncredited)"
+   ,year:2021
+   ,bggRating:6.9
+   ,mechanics:["Player Judge", "Storytelling"],description:"The first game made out of spite! The game is simple! Players answer \"What Would You Do?\" to original hypotheticals using cards in their hands to complete their story! Play is similar to other party card games (rotating judge, point based system) 1. All players have 5 Plot Cards in hand. 2. Plot Cards are items, POVs, dialogue, people, or story elements you MUST include in your story if played. 3. There will be one judge per round who will read the Hypothetical Card to the group. 4. Players then"},
 
   {id:"kitchen_rush",name:"Kitchen Rush"
    ,row:5,col:5,categories:["Co-op", "Family", "Worker Placement"]
    ,players:"1-4",playTime:"20-60 min"
-   ,complexity:2.19,bggId:223953
+   ,complexity:2.12,bggId:287938
    ,spineColor:"#d07030",boxSize:"md"
    ,designer:"Vangelis Bagiartakis, Dávid Turczi"
-   ,year:2017
-   ,bggRating:7.2
-   ,mechanics:["Action Timer", "Cooperative Game", "Real-Time", "Simulation", "Solo / Solitaire Game", "Worker Placement"]
-   ,description:"You've just inherited an old restaurant and you must turn it into a successful business! Hire personnel, order the right ingredients and be ready to serve the customers that enter your restaurant. The success will depend entirely on your efficiency in the kitchen! Kitchen Rush is an innovative real-time cooperative game that simulates the excitement of a high-pressure kitchen environment. It does so through worker placement, using hourglasses as your workers. These hourglasses are used to take o"},
+   ,year:2019
+   ,bggRating:7.4
+   ,mechanics:["Action Timer", "Cooperative Game", "Modular Board", "Real-Time", "Variable Phase Order", "Worker Placement"]
+   ,description:"The great world of cooking awaits you! Together with your friends you have purchased an old restaurant and are now responsible for its fate and success. Use only the best ingredients, the freshest herbs and don't let your guests wait - then your restaurant will develop splendidly and you will have a golden future! Kitchen Rush is a cooperative real-time game. Receive your guests, take their orders, use the right ingredients and prepare tasty meals. Over the course of 8 scenarios, your restaurant"},
 
   {id:"detective",name:"Detective: A Modern Crime Board Game"
    ,row:5,col:5,categories:["Co-op", "Deduction", "Thematic", "Campaign"]
@@ -968,16 +1005,21 @@ const GAMES = [
   {id:"mdt_xmen",name:"Marvel Dice Throne: X-Men"
    ,row:5,col:5,categories:["Dice", "Card Game", "Thematic"]
    ,players:"2-6",playTime:"20-40 min"
-   ,complexity:2.1,bggId:0
+   ,complexity:2.14,bggId:403494
    ,spineColor:"#c0a020",boxSize:"md"
-   ,description:"X-Men hero pack for Marvel Dice Throne."},
+   ,designer:"Gavan Brown, Nate Chatellier, Manny Trembley"
+   ,year:2025
+   ,bggRating:8.4
+   ,mechanics:["Dice Rolling", "Take That", "Team-Based Game", "Variable Player Powers"],description:"In Marvel Dice Throne: X-Men, you become one of eight of Marvel's iconic X-Men, including Wolverine, Storm, Cyclops, Rogue, Gambit, Psylocke, Iceman, and Jean Grey! Featuring all-new mechanisms and asymmetrical designs, these are some of our most innovative and exciting heroes yet! Marvel Dice Throne: X-Men is a game of skilled card play and dice manipulation supporting multiple modes of play, including 1v1, 2v2, 3v3, 2v2v2, or free-for-all. Attack your opponents and activate abilities by rollin"},
 
   {id:"kelp_expansion",name:"Kelp: Brilliant Behaviours"
    ,row:5,col:5,categories:["Strategy", "Thematic"]
    ,players:"2",playTime:"30-45 min"
-   ,complexity:2.4,bggId:0
+   ,complexity:2.25,bggId:405987
    ,spineColor:"#2a7a6a",boxSize:"sm"
-   ,description:"Expansion for Kelp adding new behaviour cards and abilities."},
+   ,designer:"Carl Robinson"
+   ,year:2024
+   ,bggRating:7.9,description:"Dive even deeper into the world of Kelp! A set of 6 mini-expansions adding new strategies, shenanigans and tons of replayability. They can be mixed and matched or even stacked. Change the board. Ride a jellyfish. Feel the thrill. The Brilliant Behaviours Set consists of 6 different Mini Expansions: The Jellyfish - Ride a Jellyfish and let it steal energy from the Shark. The Zones - Now it's your turn as the Shark to manipulate the board. Obstruct the plans of the Octopus, but raise the stakes fo"},
 
   {id:"dune_immortality",name:"Dune: Imperium - Immortality"
    ,row:5,col:6,categories:["Strategy", "Deck Building", "Worker Placement", "Thematic"]
@@ -993,9 +1035,12 @@ const GAMES = [
   {id:"spirit_ff",name:"Spirit Island: Feather & Flame"
    ,row:5,col:6,categories:["Co-op", "Strategy", "Thematic"]
    ,players:"1-6",playTime:"90-120 min"
-   ,complexity:4.1,bggId:0
+   ,complexity:4.55,bggId:356510
    ,spineColor:"#a05020",boxSize:"md"
-   ,description:"Expansion for Spirit Island with new spirits and scenarios."},
+   ,designer:"R. Eric Reuss"
+   ,year:2022
+   ,bggRating:9.0
+   ,mechanics:["Cooperative Game", "Hand Management", "Modular Board", "Open Drafting", "Simultaneous Action Selection", "Variable Player Powers"],description:"Contains: Promo Pack 1 Promo Pack 2 With the onset of the dangerous invaders, blighting the lands with their harmful practices and aggression, we spirits have had to grow and change in ways unanticipated. Whether we are water, fire, beneath, or beyond, we answer — these white-sailed ships must turn and go, or be broken on the rocks of our discontent. Fire and flood, flame and feather; ancient powers waken to free their home from a unique adversary’s influence. Can the island survive such turmoil"},
 
   {id:"spirit_bc",name:"Spirit Island: Branch & Claw"
    ,row:5,col:6,categories:["Co-op", "Strategy", "Thematic"]
@@ -1022,9 +1067,12 @@ const GAMES = [
   {id:"l_project",name:"L Project"
    ,row:5,col:6,categories:["Strategy", "Abstract"]
    ,players:"2",playTime:"15-30 min"
-   ,complexity:1.5,bggId:0
+   ,complexity:1.56,bggId:260180
    ,spineColor:"#4a4a6a",boxSize:"sm"
-   ,description:"A two-player abstract strategy game."},
+   ,designer:"Michal Mikeš, Jan Soukal, Adam Španěl"
+   ,year:2020
+   ,bggRating:7.4
+   ,mechanics:["Action Points", "Contracts", "Open Drafting", "Pattern Building", "Resource Queue", "Solo / Solitaire Game"],description:"Build pieces, develop an engine, perfect your strategy, and win the game! Project L is a fast-paced, tile-matching brain burner with triple-layer 3D puzzles and acrylic pieces. Challenge your friends to a game of simple design but intricate gameplay that makes a lasting impression! The core of the game lies in using your pieces to complete puzzles. Starting with just two basic pieces, you use three actions every turn to develop a powerful engine. With more pieces of various types, you can effici"},
 
   {id:"targi",name:"Targi"
    ,row:5,col:6,categories:["Strategy", "Euro", "Worker Placement"]
@@ -1095,20 +1143,23 @@ const GAMES = [
   {id:"witcher_skellige",name:"The Witcher: Skellige"
    ,row:6,col:2,categories:["Strategy", "Thematic"]
    ,players:"2-4",playTime:"60-90 min"
-   ,complexity:2.5,bggId:0
+   ,complexity:2.33,bggId:340529
    ,spineColor:"#3a5a7a",boxSize:"md"
-   ,description:"A Witcher-themed board game set on the isles of Skellige."},
+   ,designer:"Łukasz Woźniak"
+   ,year:2023
+   ,bggRating:8.2
+   ,mechanics:["Card Play Conflict Resolution", "Deck, Bag, and Pool Building", "Dice Rolling", "Events", "Hand Management", "Increase Value of Unchosen Resources"],description:"Inhabited by different Clans, Islands on the Great Sea breed traders, warriors, and leaders. One might see the Islands as an opportunity for political connections, but a witcher or a mage would rather travel there to train, hunt monsters, and seek an adventure. It may be of great benefit to visit Skellige Islands, as well as other, unexplored ones, but such travels rarely come without a cost. You get a sizable Board extension with all-new locations and location tokens. Your map gets bigger and m"},
 
   {id:"witcher_wild_hunt",name:"The Witcher: Old World Wild Hunt"
    ,row:6,col:2,categories:["Strategy", "Thematic", "Adventure"]
    ,players:"1-5",playTime:"90-150 min"
-   ,complexity:2.88,bggId:331106
+   ,complexity:3.2,bggId:340983
    ,spineColor:"#2a3a2a",boxSize:"lg"
    ,designer:"Łukasz Woźniak"
    ,year:2023
-   ,bggRating:7.9
-   ,mechanics:["Card Play Conflict Resolution", "Deck, Bag, and Pool Building", "Dice Rolling", "Events", "Hand Management", "Increase Value of Unchosen Resources"]
-   ,description:"In The Witcher: Old World, you become a witcher — a professional monster slayer — and immerse yourself in the legendary universe of The Witcher franchise. Set years before the saga of Geralt of Rivia, The Witcher: Old World explores a time when monsters roamed the Continent in greater numbers, creating a constant peril that required the attention of expertly trained monster slayers, known as witchers. Five competing schools trained their adepts through brutal regimes, and once fully prepared, th"},
+   ,bggRating:8.3
+   ,mechanics:["Card Play Conflict Resolution", "Cooperative Game", "Deck, Bag, and Pool Building", "Dice Rolling", "Events", "Hand Management"]
+   ,description:"Rumors of the Wild Hunt riders are spreading more and more often from various sides. A ghostly cavalcade traverses the night sky, spreading fear in people's hearts. There are rumors of missing children. Stories about the impending plague of crop failure. And about the upcoming war. The Wild Hunt is a large expansion, introducing a completely new mode of the game - cooperative mode. It allows also for a full solo experience. This time, players will have to face off against fearsome warriors from "},
 
   {id:"planet_unknown",name:"Planet Unknown"
    ,row:6,col:2,categories:["Strategy", "Puzzle"]
@@ -1451,14 +1502,15 @@ function openModal(game) {
     coverHtml = `<div class="modal-cover"><div class="modal-cover-fallback" style="background:${fallbackBg}">${game.name}</div></div>`;
   }
 
-  // Rating section
+  // Rating section with dynamic color
   let ratingHtml = '';
   if (game.bggRating) {
     const pct = ((game.bggRating / 10) * 100).toFixed(0);
+    const rColor = ratingColor(game.bggRating);
     ratingHtml = `
       <div class="modal-rating-row">
-        <span class="rating-badge">${game.bggRating}</span>
-        <div class="rating-bar-wrap"><div class="rating-bar" style="width:${pct}%"></div></div>
+        <span class="rating-badge" style="color:${rColor}">${game.bggRating}</span>
+        <div class="rating-bar-wrap"><div class="rating-bar" style="width:${pct}%;background:${rColor}"></div></div>
         <span class="rating-label">BGG Rating</span>
       </div>`;
   }
@@ -1503,6 +1555,16 @@ function adjustColor(hex, amount) {
   g = Math.max(0,Math.min(255,g+amount));
   b = Math.max(0,Math.min(255,b+amount));
   return `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;
+}
+
+function ratingColor(rating) {
+  if (rating >= 8.5) return '#22c55e';  // Emerald green - outstanding
+  if (rating >= 8.0) return '#4ade80';  // Green - excellent
+  if (rating >= 7.5) return '#a3e635';  // Lime - very good
+  if (rating >= 7.0) return '#e2b04a';  // Amber/gold - good
+  if (rating >= 6.5) return '#f59e0b';  // Orange - decent
+  if (rating >= 6.0) return '#f97316';  // Deep orange - fair
+  return '#ef4444';                      // Red - below average
 }
 
 // Close modal
