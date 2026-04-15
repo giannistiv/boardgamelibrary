@@ -479,6 +479,52 @@
   .qr-canvas{margin:0.5rem auto;border-radius:12px;background:#fff;padding:10px;display:inline-block}
   .qr-label{font-size:0.7rem;opacity:0.35;margin-top:0.3rem}
 
+  /* Change Profile button */
+  .change-profile-btn{
+    display:block;margin:2rem auto 0;padding:0.5rem 1.2rem;
+    background:transparent;border:1px solid rgba(239,68,68,0.3);
+    color:#ef4444;border-radius:8px;font-family:inherit;
+    font-size:0.72rem;cursor:pointer;opacity:0.5;transition:all 0.2s;
+  }
+  .change-profile-btn:hover{opacity:1;background:rgba(239,68,68,0.1)}
+
+  /* ── Star Rating ── */
+  .star-rating-section{
+    margin-top:1.2rem;padding-top:1rem;
+    border-top:1px solid rgba(255,255,255,0.08);
+  }
+  .star-rating-label{font-size:0.8rem;font-weight:500;margin-bottom:0.5rem}
+  .star-rating-row{display:flex;align-items:center;gap:0.15rem;cursor:pointer}
+  .star-rating-row .star{
+    font-size:1.5rem;color:rgba(255,255,255,0.15);
+    transition:color 0.1s;user-select:none;
+  }
+  .star-rating-row .star.filled{color:#e2b04a}
+  .star-rating-row .star.hovered{color:#f0d080}
+  .star-rating-val{font-size:0.75rem;opacity:0.5;margin-left:0.5rem}
+  .star-rating-clear{
+    background:none;border:none;color:rgba(255,255,255,0.25);
+    font-size:0.68rem;cursor:pointer;margin-left:0.5rem;font-family:inherit;
+    transition:color 0.15s;
+  }
+  .star-rating-clear:hover{color:#ef4444}
+
+  /* Community Rating */
+  .community-rating-row{
+    display:flex;align-items:center;gap:0.6rem;margin-top:0.7rem;
+    padding:0.5rem 0.7rem;border-radius:10px;background:rgba(255,255,255,0.04);
+  }
+  .community-stars{display:flex;gap:0.1rem}
+  .community-stars .star{font-size:0.85rem;color:rgba(255,255,255,0.12)}
+  .community-stars .star.filled{color:#e2b04a}
+  .community-stars .star.half{
+    background:linear-gradient(90deg,#e2b04a 50%,rgba(255,255,255,0.12) 50%);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  }
+  .community-rating-text{font-size:0.78rem}
+  .community-rating-avg{font-weight:700;color:var(--accent)}
+  .community-rating-count{font-size:0.68rem;opacity:0.4}
+
   /* ── Responsive ── */
   @media(max-width:900px){
     .stats-grid{grid-template-columns:repeat(2,1fr)}
@@ -507,7 +553,6 @@
 <div class="player-bar" id="player-bar">
   <button class="player-bar-btn active" id="btn-library">Library</button>
   <button class="player-bar-btn" id="btn-mystats">My Stats</button>
-  <button class="player-bar-btn" id="btn-change-player">Choose Player</button>
 </div>
 
 <div id="library-view">
@@ -2232,9 +2277,11 @@ function openModal(game) {
         : `<a class="modal-bgg-link" href="https://boardgamegeek.com/geeksearch.php?action=search&objecttype=boardgame&q=${encodeURIComponent(game.name)}" target="_blank" rel="noopener">Search on BoardGameGeek &#8594;</a>`
       }
       ${playHistoryHtml}
+      ${game.bggId > 0 ? buildStarRatingHtml(game.bggId) : ''}
     </div>
   `;
   overlay.classList.add('open');
+  wireStarRating();
 }
 
 function adjustColor(hex, amount) {
@@ -2356,7 +2403,7 @@ function switchToStats() {
 
 document.getElementById('btn-library').addEventListener('click', switchToLibrary);
 document.getElementById('btn-mystats').addEventListener('click', switchToStats);
-document.getElementById('btn-change-player').addEventListener('click', openPicker);
+// Change profile click handled via event delegation inside stats view
 
 // ── Stats Dashboard ──
 function showStatsView(playerName) {
@@ -2522,6 +2569,8 @@ function showStatsView(playerName) {
       <div class="qr-canvas"><img id="qr-img" width="150" height="150" alt="QR Code" style="border-radius:8px"></div>
       <div class="qr-label">Scan to open on your phone</div>
     </div>
+
+    <button class="change-profile-btn" id="btn-change-profile">Change Profile</button>
   `;
 
   // Make game rows clickable
@@ -2532,11 +2581,146 @@ function showStatsView(playerName) {
     });
   });
 
+  // Change profile button
+  document.getElementById('btn-change-profile').addEventListener('click', () => {
+    localStorage.removeItem('bgl-player');
+    openPicker();
+  });
+
   // Generate QR code via API
   const qrImg = document.getElementById('qr-img');
   if (qrImg) {
     const url = encodeURIComponent(window.location.href.split('?')[0].split('#')[0]);
     qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${url}`;
+  }
+}
+
+// ── Rating System (localStorage) ──
+function getRatings() {
+  try { return JSON.parse(localStorage.getItem('bgl-ratings') || '{}'); }
+  catch { return {}; }
+}
+
+function saveRating(playerName, bggId, rating) {
+  const ratings = getRatings();
+  if (!ratings[playerName]) ratings[playerName] = {};
+  if (rating === 0) {
+    delete ratings[playerName][bggId];
+  } else {
+    ratings[playerName][bggId] = rating;
+  }
+  localStorage.setItem('bgl-ratings', JSON.stringify(ratings));
+}
+
+function getPlayerRating(playerName, bggId) {
+  const ratings = getRatings();
+  return (ratings[playerName] && ratings[playerName][bggId]) || 0;
+}
+
+function getCommunityRating(bggId) {
+  const ratings = getRatings();
+  const values = [];
+  for (const player in ratings) {
+    if (ratings[player][bggId]) values.push(ratings[player][bggId]);
+  }
+  if (values.length === 0) return null;
+  const avg = values.reduce((a, b) => a + b, 0) / values.length;
+  return { avg: Math.round(avg * 10) / 10, count: values.length };
+}
+
+function buildStarRatingHtml(bggId) {
+  const player = localStorage.getItem('bgl-player');
+  const current = player ? getPlayerRating(player, bggId) : 0;
+  const community = getCommunityRating(bggId);
+
+  let html = '<div class="star-rating-section">';
+
+  // Player rating
+  if (player) {
+    html += `<div class="star-rating-label">${current ? 'Your Rating' : 'Rate this game'}</div>`;
+    html += `<div style="display:flex;align-items:center">`;
+    html += `<div class="star-rating-row" id="star-row" data-bgg="${bggId}" data-current="${current}">`;
+    for (let i = 1; i <= 10; i++) {
+      html += `<span class="star${i <= current ? ' filled' : ''}" data-val="${i}">&#9733;</span>`;
+    }
+    html += `</div>`;
+    if (current) html += `<span class="star-rating-val">${current}/10</span>`;
+    if (current) html += `<button class="star-rating-clear" data-bgg="${bggId}">clear</button>`;
+    html += `</div>`;
+  }
+
+  // Community rating
+  if (community) {
+    const fullStars = Math.floor(community.avg);
+    const hasHalf = (community.avg - fullStars) >= 0.4;
+    html += `<div class="community-rating-row">`;
+    html += `<div class="community-stars">`;
+    for (let i = 1; i <= 10; i++) {
+      if (i <= fullStars) html += '<span class="star filled">&#9733;</span>';
+      else if (i === fullStars + 1 && hasHalf) html += '<span class="star half">&#9733;</span>';
+      else html += '<span class="star">&#9733;</span>';
+    }
+    html += `</div>`;
+    html += `<span class="community-rating-text"><span class="community-rating-avg">${community.avg}</span>/10</span>`;
+    html += `<span class="community-rating-count">(${community.count} rating${community.count !== 1 ? 's' : ''})</span>`;
+    html += `</div>`;
+  }
+
+  html += '</div>';
+  return html;
+}
+
+function wireStarRating() {
+  const row = document.getElementById('star-row');
+  if (!row) return;
+  const stars = row.querySelectorAll('.star');
+  const bggId = Number(row.dataset.bgg);
+  const player = localStorage.getItem('bgl-player');
+
+  // Hover effect
+  stars.forEach(star => {
+    star.addEventListener('mouseenter', () => {
+      const val = Number(star.dataset.val);
+      stars.forEach(s => {
+        s.classList.toggle('hovered', Number(s.dataset.val) <= val);
+      });
+    });
+  });
+  row.addEventListener('mouseleave', () => {
+    stars.forEach(s => s.classList.remove('hovered'));
+  });
+
+  // Click to rate
+  stars.forEach(star => {
+    star.addEventListener('click', () => {
+      const val = Number(star.dataset.val);
+      if (player) {
+        saveRating(player, bggId, val);
+        // Re-render the modal rating section
+        const section = row.closest('.star-rating-section');
+        const game = GAMES.find(g => g.bggId === bggId);
+        if (section && game) {
+          section.outerHTML = buildStarRatingHtml(bggId);
+          wireStarRating();
+        }
+      }
+    });
+  });
+
+  // Clear button
+  const clearBtn = document.querySelector('.star-rating-clear');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      if (player) {
+        saveRating(player, Number(clearBtn.dataset.bgg), 0);
+        const section = clearBtn.closest('.star-rating-section');
+        const game = GAMES.find(g => g.bggId === Number(clearBtn.dataset.bgg));
+        if (section) {
+          section.outerHTML = buildStarRatingHtml(Number(clearBtn.dataset.bgg));
+          wireStarRating();
+        }
+      }
+    });
   }
 }
 
