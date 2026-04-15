@@ -2544,8 +2544,11 @@ function showStatsView(playerName) {
 renderFilters();
 renderShelf();
 
-// Show picker on first visit
-if (!localStorage.getItem('bgl-player')) {
+// First visit: show picker. Return visit: go straight to their stats.
+const savedPlayer = localStorage.getItem('bgl-player');
+if (savedPlayer) {
+  showStatsView(savedPlayer);
+} else {
   openPicker();
 }
 </script>
