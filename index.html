@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 <title>Board Game Library</title>
 <style>
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -11,7 +13,7 @@
     --bg:#1a1a2e;--text:#f0e6d3;--accent:#e2b04a;--modal-bg:#2a2a3e;
   }
   body{
-    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    font-family:'Roboto','Segoe UI',system-ui,-apple-system,sans-serif;
     background:var(--bg);color:var(--text);
     min-height:100vh;display:flex;flex-direction:column;align-items:center;
   }
@@ -30,17 +32,17 @@
   .filter-label{font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;opacity:0.5;padding-left:2px}
   .filter-select{
     padding:0.4rem 2rem 0.4rem 0.7rem;border-radius:8px;
-    border:1px solid rgba(255,255,255,0.15);
-    background:rgba(255,255,255,0.07);color:var(--text);
-    font-size:0.8rem;cursor:pointer;
+    border:1px solid rgba(255,255,255,0.18);
+    background:rgba(255,255,255,0.10);color:var(--text);
+    font-family:inherit;font-size:0.8rem;cursor:pointer;
     appearance:none;-webkit-appearance:none;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23f0e6d3'/%3E%3C/svg%3E");
     background-repeat:no-repeat;background-position:right 0.6rem center;
     transition:all 0.2s;
   }
-  .filter-select:hover{background-color:rgba(255,255,255,0.12)}
+  .filter-select:hover{background-color:rgba(255,255,255,0.16)}
   .filter-select:focus{outline:none;border-color:var(--accent)}
-  .filter-select option{background:#2a2a3e;color:var(--text)}
+  .filter-select option{background:#363650;color:var(--text)}
 
   .filter-slider-wrap{display:flex;align-items:center;gap:0.5rem}
   .filter-slider{
@@ -62,11 +64,11 @@
   }
 
   .filter-reset{
-    padding:0.4rem 0.9rem;border-radius:8px;border:1px solid var(--accent);
-    background:transparent;color:var(--accent);cursor:pointer;
-    font-size:0.75rem;transition:all 0.2s;align-self:flex-end;
+    padding:0.4rem 0.9rem;border-radius:8px;border:1px solid rgba(255,255,255,0.18);
+    background:rgba(255,255,255,0.10);color:var(--text);cursor:pointer;
+    font-family:inherit;font-size:0.75rem;transition:all 0.2s;align-self:flex-end;
   }
-  .filter-reset:hover{background:var(--accent);color:#1a1a2e}
+  .filter-reset:hover{background:var(--accent);color:#1a1a2e;border-color:var(--accent)}
   .filter-active-count{
     font-size:0.6rem;background:var(--accent);color:#1a1a2e;
     border-radius:10px;padding:1px 6px;margin-left:4px;font-weight:700;
@@ -78,6 +80,35 @@
     font-size:0.78rem;user-select:none;
   }
   .filter-check input[type="checkbox"]{
+    accent-color:var(--accent);width:14px;height:14px;cursor:pointer;
+  }
+
+  .filter-multi{position:relative}
+  .filter-multi-btn{
+    padding:0.4rem 2rem 0.4rem 0.7rem;border-radius:8px;
+    border:1px solid rgba(255,255,255,0.18);
+    background:rgba(255,255,255,0.10);color:var(--text);
+    font-family:inherit;font-size:0.8rem;cursor:pointer;
+    text-align:left;white-space:nowrap;transition:all 0.2s;
+    min-width:90px;position:relative;
+  }
+  .filter-multi-btn:hover{background:rgba(255,255,255,0.16)}
+  .filter-arrow{position:absolute;right:0.6rem;top:50%;transform:translateY(-50%);font-size:0.6rem;opacity:0.7}
+  .filter-multi-dropdown{
+    display:none;position:absolute;top:calc(100% + 4px);left:0;
+    background:#363650;border:1px solid rgba(255,255,255,0.18);
+    border-radius:8px;padding:0.4rem 0;z-index:100;
+    min-width:160px;max-height:260px;overflow-y:auto;
+    box-shadow:0 8px 24px rgba(0,0,0,0.4);
+  }
+  .filter-multi-dropdown.open{display:block}
+  .filter-multi-dropdown label{
+    display:flex;align-items:center;gap:0.4rem;
+    padding:0.3rem 0.7rem;font-size:0.78rem;cursor:pointer;
+    transition:background 0.15s;
+  }
+  .filter-multi-dropdown label:hover{background:rgba(255,255,255,0.08)}
+  .filter-multi-dropdown input[type="checkbox"]{
     accent-color:var(--accent);width:14px;height:14px;cursor:pointer;
   }
 
@@ -280,7 +311,10 @@
 <div class="filters" id="filters">
   <div class="filter-group">
     <span class="filter-label">Category</span>
-    <select class="filter-select" id="f-category"><option value="">All</option></select>
+    <div class="filter-multi" id="f-category-wrap">
+      <button class="filter-multi-btn" id="f-category-btn">All <span class="filter-arrow">&#9662;</span></button>
+      <div class="filter-multi-dropdown" id="f-category-dd"></div>
+    </div>
   </div>
   <div class="filter-group">
     <span class="filter-label">Type</span>
@@ -1546,15 +1580,40 @@ function isCampaign(game) {
 
 // ── Render filters ──
 function renderFilters() {
-  // Populate category dropdown
-  const catSel = document.getElementById('f-category');
+  // Populate category multi-select checkboxes
+  const catDD = document.getElementById('f-category-dd');
+  const catBtn = document.getElementById('f-category-btn');
   const usedCats = new Set();
   GAMES.forEach(g => g.categories.forEach(c => usedCats.add(c)));
   CATEGORIES.filter(c => usedCats.has(c)).forEach(cat => {
-    const opt = document.createElement('option');
-    opt.value = cat; opt.textContent = cat;
-    catSel.appendChild(opt);
+    const label = document.createElement('label');
+    const cb = document.createElement('input');
+    cb.type = 'checkbox'; cb.value = cat;
+    cb.addEventListener('change', () => { updateCatBtn(); applyFilters(); });
+    label.appendChild(cb);
+    label.appendChild(document.createTextNode(cat));
+    catDD.appendChild(label);
   });
+
+  // Toggle dropdown open/close
+  catBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    catDD.classList.toggle('open');
+  });
+  document.addEventListener('click', (e) => {
+    if (!catDD.contains(e.target) && e.target !== catBtn) catDD.classList.remove('open');
+  });
+
+  function updateCatBtn() {
+    const checked = catDD.querySelectorAll('input:checked');
+    if (checked.length === 0) {
+      catBtn.innerHTML = 'All <span class="filter-arrow">&#9662;</span>';
+    } else if (checked.length === 1) {
+      catBtn.innerHTML = checked[0].value + ' <span class="filter-arrow">&#9662;</span>';
+    } else {
+      catBtn.innerHTML = checked.length + ' selected <span class="filter-arrow">&#9662;</span>';
+    }
+  }
 
   // Populate player count dropdown (1-8+)
   const pSel = document.getElementById('f-players');
@@ -1574,7 +1633,7 @@ function renderFilters() {
   });
 
   // Wire up all dropdowns
-  ['f-category','f-coop','f-players','f-difficulty','f-expansion'].forEach(id => {
+  ['f-coop','f-players','f-difficulty','f-expansion'].forEach(id => {
     document.getElementById(id).addEventListener('change', applyFilters);
   });
 
@@ -1583,7 +1642,8 @@ function renderFilters() {
 
   // Reset
   document.getElementById('f-reset').addEventListener('click', () => {
-    catSel.value = '';
+    catDD.querySelectorAll('input:checked').forEach(cb => cb.checked = false);
+    updateCatBtn();
     document.getElementById('f-coop').value = '';
     pSel.value = '';
     document.getElementById('f-difficulty').value = '';
@@ -1591,12 +1651,13 @@ function renderFilters() {
     document.getElementById('f-campaign').checked = true;
     timeSlider.value = 240;
     timeVal.textContent = 'Any';
+    catDD.classList.remove('open');
     applyFilters();
   });
 }
 
 function applyFilters() {
-  const cat = document.getElementById('f-category').value;
+  const selectedCats = Array.from(document.querySelectorAll('#f-category-dd input:checked')).map(cb => cb.value);
   const coop = document.getElementById('f-coop').value;
   const players = document.getElementById('f-players').value;
   const diff = document.getElementById('f-difficulty').value;
@@ -1605,7 +1666,7 @@ function applyFilters() {
   const maxTime = Number(document.getElementById('f-time').value);
   const timeActive = maxTime < 240;
 
-  const anyActive = cat || coop || players || diff || expansion || !showCampaign || timeActive;
+  const anyActive = selectedCats.length > 0 || coop || players || diff || expansion || !showCampaign || timeActive;
   let matchCount = 0;
 
   document.querySelectorAll('.game-spine').forEach(el => {
@@ -1614,7 +1675,7 @@ function applyFilters() {
     if (!game) { el.classList.add('faded'); return; }
 
     let pass = true;
-    if (cat && !game.categories.includes(cat)) pass = false;
+    if (selectedCats.length > 0 && !selectedCats.some(c => game.categories.includes(c))) pass = false;
     if (pass && coop) {
       if (coop === 'coop' && !isCoop(game)) pass = false;
       if (coop === 'competitive' && isCoop(game)) pass = false;
