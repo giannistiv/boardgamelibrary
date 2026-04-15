@@ -349,8 +349,139 @@
   }
   .play-show-more:hover{opacity:0.8;background:rgba(255,255,255,0.08)}
 
+  /* ── Player Picker Overlay ── */
+  .picker-overlay{
+    display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);
+    z-index:200;justify-content:center;align-items:center;padding:1rem;
+    backdrop-filter:blur(10px);
+  }
+  .picker-overlay.open{display:flex}
+  .picker-box{
+    background:var(--modal-bg);border-radius:20px;max-width:440px;width:100%;
+    max-height:85vh;display:flex;flex-direction:column;overflow:hidden;
+    box-shadow:0 20px 60px rgba(0,0,0,0.6);
+  }
+  .picker-header{padding:1.5rem 1.5rem 0;text-align:center}
+  .picker-title{font-size:1.3rem;font-weight:700;color:var(--accent);margin-bottom:0.3rem}
+  .picker-subtitle{font-size:0.8rem;opacity:0.45;margin-bottom:1rem}
+  .picker-search{
+    width:100%;padding:0.55rem 0.9rem;border-radius:10px;
+    border:1px solid rgba(255,255,255,0.15);
+    background:rgba(255,255,255,0.07);color:var(--text);
+    font-family:inherit;font-size:0.85rem;outline:none;
+    margin-bottom:0.5rem;
+  }
+  .picker-search::placeholder{color:rgba(240,230,211,0.35)}
+  .picker-search:focus{border-color:var(--accent)}
+  .picker-list{
+    flex:1;overflow-y:auto;padding:0.5rem;
+  }
+  .picker-player{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0.6rem 0.8rem;border-radius:10px;cursor:pointer;
+    transition:all 0.15s;border:1px solid transparent;
+    margin-bottom:0.25rem;
+  }
+  .picker-player:hover{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.1)}
+  .picker-player-name{font-size:0.9rem;font-weight:500}
+  .picker-player-meta{font-size:0.68rem;opacity:0.4}
+  .picker-skip{
+    display:block;width:100%;padding:0.8rem;text-align:center;
+    background:none;border:none;border-top:1px solid rgba(255,255,255,0.06);
+    color:var(--text);opacity:0.35;cursor:pointer;font-family:inherit;
+    font-size:0.78rem;transition:opacity 0.15s;
+  }
+  .picker-skip:hover{opacity:0.6}
+
+  /* ── Player Header Bar ── */
+  .player-bar{
+    display:flex;align-items:center;justify-content:center;
+    gap:0.6rem;margin-bottom:0.6rem;
+  }
+  .player-bar-btn{
+    padding:0.35rem 0.8rem;border-radius:8px;
+    border:1px solid rgba(255,255,255,0.12);
+    background:rgba(226,176,74,0.12);color:var(--accent);
+    font-family:inherit;font-size:0.78rem;cursor:pointer;
+    transition:all 0.15s;font-weight:500;
+  }
+  .player-bar-btn:hover{background:rgba(226,176,74,0.22)}
+  .player-bar-btn.active{background:var(--accent);color:#1a1a2e;border-color:var(--accent)}
+
+  /* ── Stats Dashboard ── */
+  .stats-view{
+    display:none;max-width:700px;width:100%;margin:0 auto;padding:0 1rem 2rem;
+  }
+  .stats-view.open{display:block}
+  .stats-header{
+    text-align:center;margin-bottom:1.5rem;
+  }
+  .stats-player-name{font-size:1.6rem;font-weight:700;color:var(--accent)}
+  .stats-player-sub{font-size:0.8rem;opacity:0.4;margin-top:0.2rem}
+  .stats-grid{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:0.6rem;margin-bottom:1.5rem;
+  }
+  .stats-card{
+    background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);
+    border-radius:12px;padding:0.8rem;text-align:center;
+  }
+  .stats-card-val{font-size:1.5rem;font-weight:700;color:var(--accent)}
+  .stats-card-label{font-size:0.6rem;opacity:0.4;text-transform:uppercase;letter-spacing:0.05em;margin-top:0.2rem}
+
+  .stats-section{margin-bottom:1.5rem}
+  .stats-section-title{
+    font-size:0.85rem;font-weight:600;color:var(--accent);
+    margin-bottom:0.6rem;padding-bottom:0.3rem;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+  }
+
+  .stats-game-row{
+    display:flex;align-items:center;gap:0.7rem;
+    padding:0.5rem 0.6rem;border-radius:8px;margin-bottom:0.3rem;
+    background:rgba(255,255,255,0.02);cursor:pointer;transition:background 0.15s;
+  }
+  .stats-game-row:hover{background:rgba(255,255,255,0.06)}
+  .stats-game-img{
+    width:40px;height:40px;border-radius:6px;object-fit:cover;
+    background:#2a2a2a;flex-shrink:0;
+  }
+  .stats-game-info{flex:1;min-width:0}
+  .stats-game-name{font-size:0.82rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .stats-game-detail{font-size:0.68rem;opacity:0.45}
+  .stats-game-wr{
+    font-size:0.82rem;font-weight:700;min-width:3rem;text-align:right;
+  }
+
+  .stats-recent-play{
+    padding:0.5rem 0.7rem;border-radius:8px;margin-bottom:0.3rem;
+    background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);
+  }
+  .stats-recent-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:0.2rem}
+  .stats-recent-game{font-size:0.8rem;font-weight:500}
+  .stats-recent-date{font-size:0.68rem;opacity:0.4}
+  .stats-recent-result{font-size:0.72rem;opacity:0.6}
+  .stats-recent-result.won{color:#22c55e;opacity:1;font-weight:600}
+  .stats-recent-result.lost{color:#f87171;opacity:0.8}
+
+  .stats-rec-row{
+    display:flex;align-items:center;gap:0.7rem;
+    padding:0.5rem 0.6rem;border-radius:8px;margin-bottom:0.3rem;
+    background:rgba(255,255,255,0.02);cursor:pointer;transition:background 0.15s;
+  }
+  .stats-rec-row:hover{background:rgba(255,255,255,0.06)}
+  .stats-rec-reason{font-size:0.65rem;opacity:0.4;font-style:italic}
+
+  /* ── QR Section ── */
+  .qr-section{
+    text-align:center;margin-top:1.5rem;padding-top:1rem;
+    border-top:1px solid rgba(255,255,255,0.06);
+  }
+  .qr-canvas{margin:0.5rem auto;border-radius:12px;background:#fff;padding:10px;display:inline-block}
+  .qr-label{font-size:0.7rem;opacity:0.35;margin-top:0.3rem}
+
   /* ── Responsive ── */
   @media(max-width:900px){
+    .stats-grid{grid-template-columns:repeat(2,1fr)}
     h1{font-size:1.5rem}
     .filters{gap:0.5rem 0.6rem}
     .filter-select{font-size:0.72rem;padding:0.35rem 1.6rem 0.35rem 0.5rem}
@@ -373,6 +504,13 @@
 <h1>Board Game Library</h1>
 <p class="subtitle">Click a game to see details &middot; Use filters to find what to play</p>
 
+<div class="player-bar" id="player-bar">
+  <button class="player-bar-btn active" id="btn-library">Library</button>
+  <button class="player-bar-btn" id="btn-mystats">My Stats</button>
+  <button class="player-bar-btn" id="btn-change-player">Choose Player</button>
+</div>
+
+<div id="library-view">
 <div class="search-wrap">
   <span class="search-icon">&#128269;</span>
   <input type="text" class="search-input" id="search-input" placeholder="Search games..." autocomplete="off">
@@ -438,6 +576,22 @@
 
 <div class="shelf-wrapper">
   <div class="shelf" id="shelf"></div>
+</div>
+</div><!-- /library-view -->
+
+<div class="stats-view" id="stats-view"></div>
+
+<!-- Player Picker Overlay -->
+<div class="picker-overlay" id="picker-overlay">
+  <div class="picker-box">
+    <div class="picker-header">
+      <div class="picker-title">Who's playing?</div>
+      <div class="picker-subtitle">Pick your name to see your stats</div>
+      <input type="text" class="picker-search" id="picker-search" placeholder="Search players..." autocomplete="off">
+    </div>
+    <div class="picker-list" id="picker-list"></div>
+    <button class="picker-skip" id="picker-skip">Just browse the library</button>
+  </div>
 </div>
 
 <div class="modal-overlay" id="modal-overlay">
@@ -2109,12 +2263,291 @@ document.getElementById('modal-overlay').addEventListener('click', e => {
   if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
 });
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') document.getElementById('modal-overlay').classList.remove('open');
+  if (e.key === 'Escape') {
+    document.getElementById('modal-overlay').classList.remove('open');
+    document.getElementById('picker-overlay').classList.remove('open');
+  }
 });
+
+// ── Player System ──
+function getAllPlayers() {
+  const playerMap = {};
+  for (const bggId in PLAY_HISTORY) {
+    const game = GAMES.find(g => g.bggId === Number(bggId));
+    if (!game) continue;
+    for (const play of PLAY_HISTORY[bggId]) {
+      for (const s of play.sc) {
+        if (!playerMap[s.n]) playerMap[s.n] = { plays: 0, wins: 0, games: new Set() };
+        playerMap[s.n].plays++;
+        if (s.w) playerMap[s.n].wins++;
+        playerMap[s.n].games.add(Number(bggId));
+      }
+    }
+  }
+  return Object.entries(playerMap)
+    .map(([name, d]) => ({ name, plays: d.plays, wins: d.wins, games: d.games.size }))
+    .sort((a, b) => b.plays - a.plays);
+}
+
+function renderPickerList(filter) {
+  const list = document.getElementById('picker-list');
+  const players = getAllPlayers().filter(p => p.plays >= 2);
+  const q = (filter || '').toLowerCase();
+  const filtered = q ? players.filter(p => p.name.toLowerCase().includes(q)) : players;
+
+  list.innerHTML = filtered.map(p => {
+    const wr = p.plays > 0 ? Math.round(p.wins / p.plays * 100) : 0;
+    return `<div class="picker-player" data-name="${p.name.replace(/"/g, '&quot;')}">
+      <span class="picker-player-name">${p.name}</span>
+      <span class="picker-player-meta">${p.plays} plays &middot; ${p.games} games &middot; ${wr}% WR</span>
+    </div>`;
+  }).join('');
+
+  list.querySelectorAll('.picker-player').forEach(el => {
+    el.addEventListener('click', () => {
+      selectPlayer(el.dataset.name);
+    });
+  });
+}
+
+function selectPlayer(name) {
+  localStorage.setItem('bgl-player', name);
+  document.getElementById('picker-overlay').classList.remove('open');
+  showStatsView(name);
+}
+
+function openPicker() {
+  document.getElementById('picker-search').value = '';
+  renderPickerList('');
+  document.getElementById('picker-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('picker-search').focus(), 100);
+}
+
+document.getElementById('picker-search').addEventListener('input', e => {
+  renderPickerList(e.target.value);
+});
+
+document.getElementById('picker-skip').addEventListener('click', () => {
+  document.getElementById('picker-overlay').classList.remove('open');
+  switchToLibrary();
+});
+
+document.getElementById('picker-overlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+});
+
+// ── View switching ──
+function switchToLibrary() {
+  document.getElementById('library-view').style.display = '';
+  document.getElementById('stats-view').classList.remove('open');
+  document.getElementById('btn-library').classList.add('active');
+  document.getElementById('btn-mystats').classList.remove('active');
+}
+
+function switchToStats() {
+  const player = localStorage.getItem('bgl-player');
+  if (!player) { openPicker(); return; }
+  document.getElementById('library-view').style.display = 'none';
+  document.getElementById('stats-view').classList.add('open');
+  document.getElementById('btn-library').classList.remove('active');
+  document.getElementById('btn-mystats').classList.add('active');
+  showStatsView(player);
+}
+
+document.getElementById('btn-library').addEventListener('click', switchToLibrary);
+document.getElementById('btn-mystats').addEventListener('click', switchToStats);
+document.getElementById('btn-change-player').addEventListener('click', openPicker);
+
+// ── Stats Dashboard ──
+function showStatsView(playerName) {
+  document.getElementById('library-view').style.display = 'none';
+  document.getElementById('stats-view').classList.add('open');
+  document.getElementById('btn-library').classList.remove('active');
+  document.getElementById('btn-mystats').classList.add('active');
+
+  // Gather all play data for this player
+  const gameStats = {};
+  const recentPlays = [];
+
+  for (const bggId in PLAY_HISTORY) {
+    const game = GAMES.find(g => g.bggId === Number(bggId));
+    if (!game) continue;
+
+    for (const play of PLAY_HISTORY[bggId]) {
+      const playerEntry = play.sc.find(s => s.n === playerName);
+      if (!playerEntry) continue;
+
+      if (!gameStats[bggId]) {
+        gameStats[bggId] = { game, plays: 0, wins: 0, lastPlayed: '' };
+      }
+      gameStats[bggId].plays++;
+      if (playerEntry.w) gameStats[bggId].wins++;
+      if (play.date > gameStats[bggId].lastPlayed) gameStats[bggId].lastPlayed = play.date;
+
+      const hasWinner = play.sc.some(s => s.w);
+      recentPlays.push({
+        game,
+        date: play.date,
+        won: playerEntry.w,
+        noWinner: !hasWinner,
+        score: playerEntry.s,
+        role: playerEntry.r || '',
+        board: play.b || '',
+        players: play.sc.length
+      });
+    }
+  }
+
+  recentPlays.sort((a, b) => b.date.localeCompare(a.date));
+
+  const totalPlays = recentPlays.length;
+  const totalWins = recentPlays.filter(p => p.won).length;
+  const winRate = totalPlays > 0 ? Math.round(totalWins / totalPlays * 100) : 0;
+  const uniqueGames = Object.keys(gameStats).length;
+
+  const fmtDate = (d) => {
+    const [y, m, day] = d.split('-');
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return `${months[parseInt(m)-1]} ${parseInt(day)}, ${y}`;
+  };
+
+  // Top games by plays
+  const topGames = Object.values(gameStats).sort((a, b) => b.plays - a.plays).slice(0, 10);
+
+  // Best win rates (min 3 plays)
+  const bestWR = Object.values(gameStats)
+    .filter(g => g.plays >= 3)
+    .map(g => ({ ...g, wr: Math.round(g.wins / g.plays * 100) }))
+    .sort((a, b) => b.wr - a.wr || b.plays - a.plays)
+    .slice(0, 8);
+
+  // Recommendations: games they haven't played, sorted by rating
+  const playedBggIds = new Set(Object.keys(gameStats).map(Number));
+  const recommendations = GAMES
+    .filter(g => !playedBggIds.has(g.bggId) && g.bggRating && g.bggRating > 0)
+    .sort((a, b) => (b.bggRating || 0) - (a.bggRating || 0))
+    .slice(0, 6);
+
+  const wrColor = (wr) => {
+    if (wr >= 70) return '#22c55e';
+    if (wr >= 50) return '#a3e635';
+    if (wr >= 35) return '#e2b04a';
+    return '#f87171';
+  };
+
+  const gameRowHtml = (gs) => {
+    const wr = gs.plays > 0 ? Math.round(gs.wins / gs.plays * 100) : 0;
+    const imgSrc = gs.game.bggId > 0 ? `images/${gs.game.bggId}.jpg` : '';
+    return `<div class="stats-game-row" data-game-id="${gs.game.id}">
+      ${imgSrc ? `<img class="stats-game-img" src="${imgSrc}" alt="" onerror="this.style.display='none'">` : ''}
+      <div class="stats-game-info">
+        <div class="stats-game-name">${gs.game.name}</div>
+        <div class="stats-game-detail">${gs.plays} play${gs.plays !== 1 ? 's' : ''} &middot; ${gs.wins} win${gs.wins !== 1 ? 's' : ''} &middot; Last: ${fmtDate(gs.lastPlayed)}</div>
+      </div>
+      <div class="stats-game-wr" style="color:${wrColor(wr)}">${wr}%</div>
+    </div>`;
+  };
+
+  const container = document.getElementById('stats-view');
+  container.innerHTML = `
+    <div class="stats-header">
+      <div class="stats-player-name">${playerName}</div>
+      <div class="stats-player-sub">Player Statistics</div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stats-card">
+        <div class="stats-card-val">${totalPlays}</div>
+        <div class="stats-card-label">Total Plays</div>
+      </div>
+      <div class="stats-card">
+        <div class="stats-card-val">${totalWins}</div>
+        <div class="stats-card-label">Wins</div>
+      </div>
+      <div class="stats-card">
+        <div class="stats-card-val" style="color:${wrColor(winRate)}">${winRate}%</div>
+        <div class="stats-card-label">Win Rate</div>
+      </div>
+      <div class="stats-card">
+        <div class="stats-card-val">${uniqueGames}</div>
+        <div class="stats-card-label">Games Played</div>
+      </div>
+    </div>
+
+    <div class="stats-section">
+      <div class="stats-section-title">Most Played Games</div>
+      ${topGames.map(gameRowHtml).join('')}
+    </div>
+
+    ${bestWR.length > 0 ? `<div class="stats-section">
+      <div class="stats-section-title">Best Win Rates (3+ plays)</div>
+      ${bestWR.map(gameRowHtml).join('')}
+    </div>` : ''}
+
+    <div class="stats-section">
+      <div class="stats-section-title">Recent Plays</div>
+      ${recentPlays.slice(0, 15).map(p => {
+        const resultClass = p.won ? 'won' : (p.noWinner ? 'lost' : '');
+        const resultText = p.won ? '&#9733; Won' : (p.noWinner ? '&#127866; Lost' : '');
+        const extras = [p.role, p.board].filter(Boolean).join(' &middot; ');
+        return `<div class="stats-recent-play">
+          <div class="stats-recent-top">
+            <span class="stats-recent-game">${p.game.name}</span>
+            <span class="stats-recent-date">${fmtDate(p.date)}</span>
+          </div>
+          <span class="stats-recent-result ${resultClass}">${resultText}${p.score ? ' (' + p.score + ' pts)' : ''}</span>
+          ${extras ? '<span class="stats-recent-result">&nbsp;&middot; ' + extras + '</span>' : ''}
+        </div>`;
+      }).join('')}
+    </div>
+
+    ${recommendations.length > 0 ? `<div class="stats-section">
+      <div class="stats-section-title">Recommended for You</div>
+      <div class="stats-player-sub" style="margin:-0.3rem 0 0.6rem">Top-rated games from the shelf you haven't tried yet</div>
+      ${recommendations.map(g => {
+        const imgSrc = g.bggId > 0 ? `images/${g.bggId}.jpg` : '';
+        return `<div class="stats-rec-row" data-game-id="${g.id}">
+          ${imgSrc ? `<img class="stats-game-img" src="${imgSrc}" alt="" onerror="this.style.display='none'">` : ''}
+          <div class="stats-game-info">
+            <div class="stats-game-name">${g.name}</div>
+            <div class="stats-game-detail">${g.players} players &middot; ${g.playTime} &middot; ${g.complexity}/5 weight</div>
+          </div>
+          <div class="stats-game-wr" style="color:${wrColor(Math.round((g.bggRating/10)*100))}">${g.bggRating}</div>
+        </div>`;
+      }).join('')}
+    </div>` : ''}
+
+    <div class="qr-section">
+      <div class="stats-section-title" style="border:none;text-align:center">Share This Library</div>
+      <div class="qr-canvas"><img id="qr-img" width="150" height="150" alt="QR Code" style="border-radius:8px"></div>
+      <div class="qr-label">Scan to open on your phone</div>
+    </div>
+  `;
+
+  // Make game rows clickable
+  container.querySelectorAll('[data-game-id]').forEach(el => {
+    el.addEventListener('click', () => {
+      const game = GAMES.find(g => g.id === el.dataset.gameId);
+      if (game) openModal(game);
+    });
+  });
+
+  // Generate QR code via API
+  const qrImg = document.getElementById('qr-img');
+  if (qrImg) {
+    const url = encodeURIComponent(window.location.href.split('?')[0].split('#')[0]);
+    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${url}`;
+  }
+}
 
 // ── Init ──
 renderFilters();
 renderShelf();
+
+// Show picker on first visit
+if (!localStorage.getItem('bgl-player')) {
+  openPicker();
+}
 </script>
 </body>
 </html>
