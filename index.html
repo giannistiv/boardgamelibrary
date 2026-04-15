@@ -2595,34 +2595,62 @@ function showStatsView(playerName) {
   }
 }
 
-// ── Rating System (localStorage) ──
-function getRatings() {
-  try { return JSON.parse(localStorage.getItem('bgl-ratings') || '{}'); }
-  catch { return {}; }
+// ── Rating System (Firebase Realtime Database) ──
+// PASTE YOUR FIREBASE REALTIME DATABASE URL BELOW:
+const FIREBASE_DB = '';
+// Example: const FIREBASE_DB = 'https://boardgamelibrary-abc12-default-rtdb.firebaseio.com';
+
+// In-memory cache of all ratings: { bggId: { playerName: rating } }
+let ratingsCache = {};
+let ratingsCacheReady = false;
+
+async function loadAllRatings() {
+  if (!FIREBASE_DB) { ratingsCacheReady = true; return; }
+  try {
+    const res = await fetch(`${FIREBASE_DB}/ratings.json`);
+    const data = await res.json();
+    ratingsCache = data || {};
+    ratingsCacheReady = true;
+  } catch (e) {
+    console.warn('Failed to load ratings from Firebase:', e);
+    ratingsCacheReady = true;
+  }
 }
 
-function saveRating(playerName, bggId, rating) {
-  const ratings = getRatings();
-  if (!ratings[playerName]) ratings[playerName] = {};
+async function saveRating(playerName, bggId, rating) {
+  // Update cache immediately
+  if (!ratingsCache[bggId]) ratingsCache[bggId] = {};
   if (rating === 0) {
-    delete ratings[playerName][bggId];
+    delete ratingsCache[bggId][playerName];
+    if (Object.keys(ratingsCache[bggId]).length === 0) delete ratingsCache[bggId];
   } else {
-    ratings[playerName][bggId] = rating;
+    ratingsCache[bggId][playerName] = rating;
   }
-  localStorage.setItem('bgl-ratings', JSON.stringify(ratings));
+
+  // Persist to Firebase
+  if (!FIREBASE_DB) return;
+  try {
+    if (rating === 0) {
+      await fetch(`${FIREBASE_DB}/ratings/${bggId}/${encodeURIComponent(playerName)}.json`, { method: 'DELETE' });
+    } else {
+      await fetch(`${FIREBASE_DB}/ratings/${bggId}/${encodeURIComponent(playerName)}.json`, {
+        method: 'PUT',
+        body: JSON.stringify(rating)
+      });
+    }
+  } catch (e) {
+    console.warn('Failed to save rating to Firebase:', e);
+  }
 }
 
 function getPlayerRating(playerName, bggId) {
-  const ratings = getRatings();
-  return (ratings[playerName] && ratings[playerName][bggId]) || 0;
+  return (ratingsCache[bggId] && ratingsCache[bggId][playerName]) || 0;
 }
 
 function getCommunityRating(bggId) {
-  const ratings = getRatings();
-  const values = [];
-  for (const player in ratings) {
-    if (ratings[player][bggId]) values.push(ratings[player][bggId]);
-  }
+  const gameRatings = ratingsCache[bggId];
+  if (!gameRatings) return null;
+  const values = Object.values(gameRatings).filter(v => typeof v === 'number' && v > 0);
   if (values.length === 0) return null;
   const avg = values.reduce((a, b) => a + b, 0) / values.length;
   return { avg: Math.round(avg * 10) / 10, count: values.length };
@@ -2692,14 +2720,12 @@ function wireStarRating() {
 
   // Click to rate
   stars.forEach(star => {
-    star.addEventListener('click', () => {
+    star.addEventListener('click', async () => {
       const val = Number(star.dataset.val);
       if (player) {
-        saveRating(player, bggId, val);
-        // Re-render the modal rating section
+        await saveRating(player, bggId, val);
         const section = row.closest('.star-rating-section');
-        const game = GAMES.find(g => g.bggId === bggId);
-        if (section && game) {
+        if (section) {
           section.outerHTML = buildStarRatingHtml(bggId);
           wireStarRating();
         }
@@ -2710,11 +2736,10 @@ function wireStarRating() {
   // Clear button
   const clearBtn = document.querySelector('.star-rating-clear');
   if (clearBtn) {
-    clearBtn.addEventListener('click', () => {
+    clearBtn.addEventListener('click', async () => {
       if (player) {
-        saveRating(player, Number(clearBtn.dataset.bgg), 0);
+        await saveRating(player, Number(clearBtn.dataset.bgg), 0);
         const section = clearBtn.closest('.star-rating-section');
-        const game = GAMES.find(g => g.bggId === Number(clearBtn.dataset.bgg));
         if (section) {
           section.outerHTML = buildStarRatingHtml(Number(clearBtn.dataset.bgg));
           wireStarRating();
@@ -2728,13 +2753,15 @@ function wireStarRating() {
 renderFilters();
 renderShelf();
 
-// First visit: show picker. Return visit: go straight to their stats.
-const savedPlayer = localStorage.getItem('bgl-player');
-if (savedPlayer) {
-  showStatsView(savedPlayer);
-} else {
-  openPicker();
-}
+// Load ratings from Firebase, then show the right view
+loadAllRatings().then(() => {
+  const savedPlayer = localStorage.getItem('bgl-player');
+  if (savedPlayer) {
+    showStatsView(savedPlayer);
+  } else {
+    openPicker();
+  }
+});
 </script>
 </body>
 </html>
