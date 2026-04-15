@@ -90,7 +90,7 @@
     transform:none !important;box-shadow:1px 0 3px rgba(0,0,0,0.2) !important;
   }
 
-  /* Box sizes - width only, height stretches to fill cubby */
+  /* Box sizes */
   .game-spine.box-sm{width:18px}
   .game-spine.box-md{width:28px}
   .game-spine.box-lg{width:40px}
@@ -105,36 +105,78 @@
   }
   .modal-overlay.open{display:flex}
   .modal{
-    background:var(--modal-bg);border-radius:16px;max-width:480px;width:100%;
+    background:var(--modal-bg);border-radius:16px;max-width:520px;width:100%;
     max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.5);
     position:relative;
   }
   .modal-close{
-    position:absolute;top:12px;right:14px;background:rgba(0,0,0,0.3);border:none;
-    color:#fff;font-size:1.3rem;cursor:pointer;opacity:0.7;
+    position:absolute;top:12px;right:14px;background:rgba(0,0,0,0.5);border:none;
+    color:#fff;font-size:1.3rem;cursor:pointer;opacity:0.8;
     z-index:2;line-height:1;width:32px;height:32px;border-radius:50%;
     display:flex;align-items:center;justify-content:center;
   }
-  .modal-close:hover{opacity:1;background:rgba(0,0,0,0.5)}
-  .modal-cover-placeholder{
-    width:100%;height:200px;display:flex;align-items:center;justify-content:center;
-    font-size:1.6rem;font-weight:700;border-radius:16px 16px 0 0;
+  .modal-close:hover{opacity:1;background:rgba(0,0,0,0.7)}
+
+  /* Modal cover image */
+  .modal-cover{
+    width:100%;height:240px;border-radius:16px 16px 0 0;
+    position:relative;overflow:hidden;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .modal-cover-img{
+    width:100%;height:100%;object-fit:cover;
+    transition:opacity 0.3s;
+  }
+  .modal-cover-fallback{
+    width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+    font-size:1.5rem;font-weight:700;
     color:rgba(255,255,255,0.85);text-shadow:0 2px 8px rgba(0,0,0,0.5);
     text-align:center;padding:1rem;letter-spacing:0.02em;
     background-size:cover;background-position:center;
   }
+
   .modal-body{padding:1.5rem}
-  .modal-title{font-size:1.5rem;font-weight:700;margin-bottom:0.5rem;color:var(--accent)}
+
+  /* Title + year row */
+  .modal-header{display:flex;align-items:baseline;gap:0.6rem;margin-bottom:0.3rem;flex-wrap:wrap}
+  .modal-title{font-size:1.4rem;font-weight:700;color:var(--accent)}
+  .modal-year{font-size:0.85rem;opacity:0.5;font-weight:400}
+
+  /* Designer */
+  .modal-designer{font-size:0.8rem;opacity:0.55;margin-bottom:0.8rem;font-style:italic}
+
+  /* Rating bar */
+  .modal-rating-row{
+    display:flex;align-items:center;gap:0.7rem;margin-bottom:1rem;
+    padding:0.6rem 0.8rem;border-radius:10px;background:rgba(255,255,255,0.04);
+  }
+  .rating-badge{
+    font-size:1.3rem;font-weight:800;color:var(--accent);min-width:2.5rem;text-align:center;
+  }
+  .rating-bar-wrap{flex:1;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden}
+  .rating-bar{height:100%;border-radius:3px;background:var(--accent);transition:width 0.4s ease}
+  .rating-label{font-size:0.7rem;opacity:0.45;white-space:nowrap}
+
+  /* Stats row */
   .modal-stats{
     display:flex;flex-wrap:wrap;gap:0.7rem;margin-bottom:1rem;font-size:0.82rem;opacity:0.8;
   }
   .modal-stat{display:flex;align-items:center;gap:0.3rem}
   .modal-stat .icon{font-size:1rem;opacity:0.6}
-  .modal-categories{display:flex;flex-wrap:wrap;gap:0.35rem;margin-bottom:1rem}
+
+  /* Category + mechanic tags */
+  .modal-categories{display:flex;flex-wrap:wrap;gap:0.35rem;margin-bottom:0.6rem}
   .modal-cat{
     padding:0.2rem 0.6rem;border-radius:12px;font-size:0.7rem;
     background:rgba(226,176,74,0.15);color:var(--accent);
   }
+  .modal-mechanics{display:flex;flex-wrap:wrap;gap:0.3rem;margin-bottom:1rem}
+  .modal-mech{
+    padding:0.15rem 0.55rem;border-radius:10px;font-size:0.65rem;
+    background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.55);
+    border:1px solid rgba(255,255,255,0.08);
+  }
+
   .modal-desc{font-size:0.85rem;line-height:1.6;opacity:0.75;margin-bottom:1.2rem}
   .modal-bgg-link{
     display:inline-block;padding:0.5rem 1.2rem;border-radius:8px;
@@ -151,6 +193,7 @@
     .game-spine.box-md{width:22px;height:78px}
     .game-spine.box-sm{width:14px;height:65px}
     .game-spine .spine-text{font-size:0.45rem}
+    .modal-cover{height:180px}
   }
 </style>
 </head>
@@ -174,227 +217,1114 @@
 
 <script>
 // =============================================
-// GAME DATA - All games mapped to shelf positions
-// Row 1-6 (top to bottom), Col 1-6 (left to right)
-// Merged cubbies: R1C5/R2C5 (tall), R3C1/R4C1 (tall), R4C3/R5C3 (tall)
+// GAME DATA - Enriched with BoardGameGeek data
 // =============================================
 
 const GAMES = [
-  // ══════════════════════════════════════
-  // ROW 1
-  // ══════════════════════════════════════
+  {id:"mu_asgard",name:"Marvel United: Tales of Asgard"
+   ,row:1,col:1,categories:["Co-op", "Thematic", "Family"]
+   ,players:"1-4",playTime:"40 min"
+   ,complexity:2.19,bggId:302668
+   ,spineColor:"#1a4a7a",boxSize:"sm"
+   ,designer:"Andrea Chiarvesio, Eric M. Lang"
+   ,year:2021
+   ,bggRating:7.9
+   ,mechanics:["Cooperative Game"]
+   ,description:"The Realm Eternal stands as a bastion of justice throughout the cosmos. Only Loki, the God of Mischief, dares threaten Asgard’s peace in his obsession with usurping the throne. Loki’s minions, all traitors and henchman mired in his tricks and illusions, work both secretly and openly to execute his master plan. It’s up to Thor, Valkyrie, and Korg to untangle the web of intrigue and bring Loki to justice. Trouble is, even knowing Loki’s ultimate goal, one can never be certain what traps the Tricks"},
 
-  // R1C1 - Marvel United collection
-  {id:"mu_asgard",name:"Marvel United: Tales of Asgard",row:1,col:1,categories:["Co-op","Thematic","Family"],players:"1-4",playTime:"40 min",complexity:1.7,bggId:342127,spineColor:"#1a4a7a",boxSize:"sm",description:"An expansion for Marvel United featuring Asgardian heroes and villains."},
-  {id:"mu_panther",name:"Marvel United: Rise of the Black Panther",row:1,col:1,categories:["Co-op","Thematic","Family"],players:"1-4",playTime:"40 min",complexity:1.7,bggId:341645,spineColor:"#2a1a3a",boxSize:"sm",description:"An expansion for Marvel United featuring Black Panther and Wakandan heroes."},
-  {id:"mu_spider",name:"Marvel United: Enter the Spider-Verse",row:1,col:1,categories:["Co-op","Thematic","Family"],players:"1-4",playTime:"40 min",complexity:1.7,bggId:342129,spineColor:"#8a1a2a",boxSize:"sm",description:"An expansion for Marvel United featuring Spider-Verse characters."},
-  {id:"mu_deadpool",name:"Marvel United: Deadpool",row:1,col:1,categories:["Co-op","Thematic","Family"],players:"1-4",playTime:"40 min",complexity:1.7,bggId:0,spineColor:"#cc2233",boxSize:"sm",description:"An expansion for Marvel United featuring the Merc with a Mouth."},
-  {id:"mu_xmen_gold",name:"Marvel United: X-Men Gold Team",row:1,col:1,categories:["Co-op","Thematic","Family"],players:"1-4",playTime:"40 min",complexity:1.7,bggId:0,spineColor:"#c4a020",boxSize:"sm",description:"An expansion for Marvel United X-Men featuring the Gold Team."},
-  {id:"mu_gotg",name:"Marvel United: Guardians of the Galaxy Remix",row:1,col:1,categories:["Co-op","Thematic","Family"],players:"1-4",playTime:"40 min",complexity:1.7,bggId:0,spineColor:"#2060a0",boxSize:"sm",description:"An expansion for Marvel United featuring the Guardians of the Galaxy."},
-  {id:"mu_xmen_blue",name:"Marvel United: X-Men Blue Team",row:1,col:1,categories:["Co-op","Thematic","Family"],players:"1-4",playTime:"40 min",complexity:1.7,bggId:0,spineColor:"#1a3a8a",boxSize:"sm",description:"An expansion for Marvel United X-Men featuring the Blue Team. Stored sideways on top."},
+  {id:"mu_panther",name:"Marvel United: Rise of the Black Panther"
+   ,row:1,col:1,categories:["Co-op", "Thematic", "Family"]
+   ,players:"1-4",playTime:"40 min"
+   ,complexity:2.14,bggId:302669
+   ,spineColor:"#2a1a3a",boxSize:"sm"
+   ,designer:"Andrea Chiarvesio, Eric M. Lang"
+   ,year:2021
+   ,bggRating:7.9
+   ,mechanics:["Cooperative Game"]
+   ,description:"Despite their technological supremacy and widespread prosperity, the kingdom of Wakanda finds itself embroiled in a struggle as old as time itself: a battle for the throne. Erik Killmonger’s oath of vengeance against the Wakandan king’s bloodline has fallen on T’Challa, the current Black Panther. Not content to simply eliminate the Black Panther and his allies, Killmonger wishes to seize Wakanda for himself. To that end, he seeks to radicalize the population against their king, smuggling weapons"},
 
-  // R1C2
-  {id:"underwater_cities",name:"Underwater Cities",row:1,col:2,categories:["Strategy","Euro","Engine Building"],players:"1-4",playTime:"80-150 min",complexity:3.55,bggId:247763,spineColor:"#1a5a8a",boxSize:"lg",description:"Lead the development of underwater cities in a Euro-style game combining card play with worker placement."},
-  {id:"horrified",name:"Horrified",row:1,col:2,categories:["Co-op","Family","Thematic"],players:"1-5",playTime:"60 min",complexity:1.79,bggId:282524,spineColor:"#7a1a2a",boxSize:"md",description:"Work together to defeat classic Universal Monsters threatening your village."},
-  {id:"dominant_species",name:"Dominant Species",row:1,col:2,categories:["Strategy","Area Control","Worker Placement"],players:"2-6",playTime:"120-240 min",complexity:4.05,bggId:62219,spineColor:"#2a5a2a",boxSize:"lg",description:"An award-winning game about animal survival during an impending ice age."},
-  {id:"brass_birmingham",name:"Brass: Birmingham",row:1,col:2,categories:["Strategy","Euro","Engine Building"],players:"2-4",playTime:"60-120 min",complexity:3.91,bggId:224517,spineColor:"#1a1a1a",boxSize:"lg",description:"Build networks, develop industries, and navigate the economic landscape of Birmingham during the Industrial Revolution."},
+  {id:"mu_spider",name:"Marvel United: Enter the Spider-Verse"
+   ,row:1,col:1,categories:["Co-op", "Thematic", "Family"]
+   ,players:"1-4",playTime:"40 min"
+   ,complexity:2.2,bggId:303600
+   ,spineColor:"#8a1a2a",boxSize:"sm"
+   ,designer:"Andrea Chiarvesio, Eric M. Lang"
+   ,year:2021
+   ,bggRating:7.9
+   ,mechanics:["Cooperative Game"]
+   ,description:"Marvel United: Enter the Spider-verse allows you to add multiple new Spiderpeople to your Marvel United game, with Green Goblin being included as a new villain to fight. The Kickstarter version (see different entry in the database) includes Spider-Ham as a bonus character, but this version doesn't."},
 
-  // R1C3
-  {id:"auztralia",name:"Auztralia",row:1,col:3,categories:["Strategy","Thematic","Adventure"],players:"1-4",playTime:"30-120 min",complexity:2.77,bggId:248073,spineColor:"#c07030",boxSize:"md",description:"Explore, build, and fight in an alternate-history 1930s Australia overrun with Lovecraftian Old Ones."},
-  {id:"that_time_you_killed_me",name:"That Time You Killed Me",row:1,col:3,categories:["Strategy","Abstract"],players:"2",playTime:"15-30 min",complexity:1.98,bggId:331684,spineColor:"#e8d5b0",boxSize:"md",description:"A two-player abstract game of time travel and paradoxes played across three boards."},
-  {id:"margraves_of_valeria",name:"Margraves of Valeria",row:1,col:3,categories:["Strategy","Euro","Worker Placement"],players:"1-4",playTime:"45-75 min",complexity:2.55,bggId:282256,spineColor:"#6a3a8a",boxSize:"md",description:"Recruit citizens and build the kingdom in the Valeria universe."},
-  {id:"this_war_of_mine",name:"This War of Mine",row:1,col:3,categories:["Co-op","Thematic","Campaign"],players:"1-6",playTime:"45-120 min",complexity:3.40,bggId:188920,spineColor:"#3a3a3a",boxSize:"lg",description:"Based on the video game, survive as civilians in a besieged city during modern warfare."},
+  {id:"mu_deadpool",name:"Marvel United: Deadpool"
+   ,row:1,col:1,categories:["Co-op", "Thematic", "Family"]
+   ,players:"1-4",playTime:"40 min"
+   ,complexity:1.7,bggId:0
+   ,spineColor:"#cc2233",boxSize:"sm"
+   ,description:"An expansion for Marvel United featuring the Merc with a Mouth."},
 
-  // R1C4
-  {id:"kelp",name:"Kelp",row:1,col:4,categories:["Strategy","Thematic"],players:"2",playTime:"30-45 min",complexity:2.3,bggId:393659,spineColor:"#1a6a5a",boxSize:"md",description:"An asymmetric game of underwater hide-and-seek between a shark and an octopus."},
-  {id:"raiders_of_scythia",name:"Raiders of Scythia",row:1,col:4,categories:["Strategy","Worker Placement"],players:"1-4",playTime:"60-80 min",complexity:2.77,bggId:301880,spineColor:"#8a6a30",boxSize:"md",description:"Assemble a crew of warriors and raid settlements along the Black Sea."},
-  {id:"eternal_decks",name:"Eternal Decks",row:1,col:4,categories:["Card Game","Strategy"],players:"1-4",playTime:"30-60 min",complexity:2.0,bggId:0,spineColor:"#5a3a6a",boxSize:"sm",description:"A card-based strategic game."},
-  {id:"parks",name:"PARKS",row:1,col:4,categories:["Family","Strategy","Thematic"],players:"1-5",playTime:"40-70 min",complexity:2.16,bggId:266524,spineColor:"#2a6a4a",boxSize:"md",description:"Hike through beautifully illustrated national parks, collecting memories and visiting destinations."},
-  {id:"chronicles_1900",name:"Chronicles of Crime: 1900",row:1,col:4,categories:["Co-op","Deduction","Thematic"],players:"1-4",playTime:"60-90 min",complexity:2.19,bggId:315852,spineColor:"#7a5a30",boxSize:"md",description:"Solve crimes in Belle Epoque Paris using a companion app and deduction skills."},
+  {id:"mu_xmen_gold",name:"Marvel United: X-Men Gold Team"
+   ,row:1,col:1,categories:["Co-op", "Thematic", "Family"]
+   ,players:"1-4",playTime:"40 min"
+   ,complexity:1.7,bggId:0
+   ,spineColor:"#c4a020",boxSize:"sm"
+   ,description:"An expansion for Marvel United X-Men featuring the Gold Team."},
 
-  // R1C5 + R2C5 (tall merged cubby)
-  {id:"rove",name:"ROVE",row:1,col:5,categories:["Solo","Puzzle"],players:"1",playTime:"10-15 min",complexity:1.73,bggId:342562,spineColor:"#3070a0",boxSize:"sm",description:"A solo spatial puzzle game about maneuvering a Mars rover into position."},
-  {id:"rove_xulc",name:"ROVE: XULC Expansion",row:1,col:5,categories:["Solo","Puzzle"],players:"1",playTime:"10-15 min",complexity:1.8,bggId:0,spineColor:"#4080b0",boxSize:"sm",description:"Expansion for ROVE adding new module challenges."},
+  {id:"mu_gotg",name:"Marvel United: Guardians of the Galaxy Remix"
+   ,row:1,col:1,categories:["Co-op", "Thematic", "Family"]
+   ,players:"1-4",playTime:"40 min"
+   ,complexity:1.7,bggId:0
+   ,spineColor:"#2060a0",boxSize:"sm"
+   ,description:"An expansion for Marvel United featuring the Guardians of the Galaxy."},
 
-  // R1C6
-  {id:"detective_coa",name:"Detective: City of Angels",row:1,col:6,categories:["Thematic","Deduction"],players:"1-5",playTime:"90-150 min",complexity:2.90,bggId:218074,spineColor:"#1a1a3a",boxSize:"lg",description:"Solve crimes in 1940s Los Angeles in this noir-themed detective game with a unique chisel system."},
-  {id:"aeons_end_legacy",name:"Aeon's End: Legacy",row:1,col:6,categories:["Co-op","Deck Building","Campaign"],players:"1-4",playTime:"45-90 min",complexity:2.83,bggId:256024,spineColor:"#4a2060",boxSize:"lg",description:"A legacy deck-building game where you defend Gravehold from nameless horrors."},
-  {id:"crimson_scales",name:"Crimson Scales",row:1,col:6,categories:["Strategy","Co-op","Campaign","Thematic"],players:"1-4",playTime:"30-120 min",complexity:3.7,bggId:349892,spineColor:"#8a1a1a",boxSize:"lg",description:"A fan-made Gloomhaven expansion featuring new classes, scenarios, and items."},
+  {id:"mu_xmen_blue",name:"Marvel United: X-Men Blue Team"
+   ,row:1,col:1,categories:["Co-op", "Thematic", "Family"]
+   ,players:"1-4",playTime:"40 min"
+   ,complexity:1.7,bggId:0
+   ,spineColor:"#1a3a8a",boxSize:"sm"
+   ,description:"An expansion for Marvel United X-Men featuring the Blue Team. Stored sideways on top."},
 
-  // ══════════════════════════════════════
-  // ROW 2
-  // ══════════════════════════════════════
+  {id:"underwater_cities",name:"Underwater Cities"
+   ,row:1,col:2,categories:["Strategy", "Euro", "Engine Building"]
+   ,players:"1-4",playTime:"80-150 min"
+   ,complexity:3.59,bggId:247763
+   ,spineColor:"#1a5a8a",boxSize:"lg"
+   ,designer:"Vladimír Suchý"
+   ,year:2018
+   ,bggRating:8.0
+   ,mechanics:["End Game Bonuses", "Hand Management", "Income", "Network and Route Building", "Solo / Solitaire Game", "Turn Order: Claim Action"]
+   ,description:"In Underwater Cities, which takes about 30-45 minutes per player, players represent the most powerful brains in the world, brains nominated due to the overpopulation of Earth to establish the best and most livable underwater areas possible. The main principle of the game is card placement. Three colored cards are placed along the edge of the main board into 3 x 5 slots, which are also colored. Ideally players can place cards into slots of the same color. Then they can take both actions and advan"},
 
-  // R2C1
-  {id:"turing_machine",name:"Turing Machine",row:2,col:1,categories:["Puzzle","Deduction"],players:"1-4",playTime:"20 min",complexity:2.08,bggId:356123,spineColor:"#e0d0a0",boxSize:"md",description:"A unique deduction game using analog punch cards to crack a secret code."},
-  {id:"great_western_trail",name:"Great Western Trail",row:2,col:1,categories:["Strategy","Euro","Deck Building"],players:"1-4",playTime:"75-150 min",complexity:3.69,bggId:341169,spineColor:"#c47a30",boxSize:"lg",description:"Drive your cattle from Texas to Kansas City, building your deck and improving your herd."},
-  {id:"bomb_busters",name:"Bomb Busters",row:2,col:1,categories:["Co-op","Family","Card Game"],players:"2-6",playTime:"15-30 min",complexity:1.2,bggId:0,spineColor:"#e05050",boxSize:"sm",description:"A fast cooperative card game about defusing bombs."},
-  {id:"magic_maze",name:"Magic Maze",row:2,col:1,categories:["Co-op","Family","Puzzle"],players:"1-8",playTime:"15 min",complexity:1.78,bggId:209778,spineColor:"#e05030",boxSize:"md",description:"A real-time cooperative game where you guide heroes through a mall without communicating."},
-  {id:"hansa_teutonica",name:"Hansa Teutonica",row:2,col:1,categories:["Strategy","Euro","Area Control"],players:"2-5",playTime:"45-90 min",complexity:3.12,bggId:43015,spineColor:"#d0c090",boxSize:"md",description:"Establish trade routes and offices across medieval Germany in this classic Euro game."},
+  {id:"horrified",name:"Horrified"
+   ,row:1,col:2,categories:["Co-op", "Family", "Thematic"]
+   ,players:"1-5",playTime:"60 min"
+   ,complexity:2.02,bggId:282524
+   ,spineColor:"#7a1a2a",boxSize:"md"
+   ,designer:"Prospero Hall, Peter Lee"
+   ,year:2019
+   ,bggRating:7.6
+   ,mechanics:["Action Points", "Cooperative Game", "Dice Rolling", "Pick-up and Deliver", "Point to Point Movement", "Solo / Solitaire Game"]
+   ,description:"Imagine living in a place so wretched that it's not plagued by one, two, or even three monsters — but seven of the most horrifying fiends! In this game, you'll come face to face with them all as you work together to rid the town of the maniacal or misunderstood creatures - before it's too late. Horrified is a co-operative game where players battle the classic Universal movie monsters. Players win or lose together. Players win when all Monsters are defeated but will lose if the Terror track reach"},
 
-  // R2C2
-  {id:"hadrians_wall",name:"Hadrian's Wall",row:2,col:2,categories:["Strategy","Euro","Engine Building"],players:"1-6",playTime:"30-60 min",complexity:3.01,bggId:304783,spineColor:"#8a7a5a",boxSize:"md",description:"Build the famous Roman wall using a unique flip-and-write mechanism."},
-  {id:"search_planet_x",name:"The Search for Planet X",row:2,col:2,categories:["Deduction","Solo","Puzzle"],players:"1-4",playTime:"60 min",complexity:2.26,bggId:279537,spineColor:"#0a1a3a",boxSize:"md",description:"Use logic and deduction with a companion app to locate the mysterious Planet X."},
-  {id:"marvel_dice_throne_box1",name:"Marvel Dice Throne",row:2,col:2,categories:["Dice","Card Game","Thematic"],players:"2-6",playTime:"20-40 min",complexity:2.11,bggId:351526,spineColor:"#cc1122",boxSize:"lg",description:"Loki, Thor, Spider-Man Miles Morales, and Scarlet Witch battle in this dice combat game."},
-  {id:"horizons_spirit_island",name:"Horizons of Spirit Island",row:2,col:2,categories:["Co-op","Strategy","Thematic"],players:"1-3",playTime:"90-120 min",complexity:2.79,bggId:367498,spineColor:"#2a6050",boxSize:"md",description:"A streamlined standalone version of Spirit Island, perfect as an entry point."},
-  {id:"concordia_venus",name:"Concordia Venus",row:2,col:2,categories:["Strategy","Euro","Engine Building"],players:"2-6",playTime:"60-120 min",complexity:3.16,bggId:256916,spineColor:"#d4a050",boxSize:"lg",description:"A peaceful strategy game of Roman merchants expanding across the Mediterranean."},
+  {id:"dominant_species",name:"Dominant Species"
+   ,row:1,col:2,categories:["Strategy", "Area Control", "Worker Placement"]
+   ,players:"2-6",playTime:"120-240 min"
+   ,complexity:4.04,bggId:62219
+   ,spineColor:"#2a5a2a",boxSize:"lg"
+   ,designer:"Chad Jensen"
+   ,year:2010
+   ,bggRating:7.8
+   ,mechanics:["Action Drafting", "Action Queue", "Area Majority / Influence", "End Game Bonuses", "Grid Movement", "Hexagon Grid"]
+   ,description:"90,000 B.C. — A great ice age is fast approaching. Another titanic struggle for global supremacy has unwittingly commenced between the varying animal species. Dominant Species is a game that abstractly recreates a tiny portion of ancient history: the ponderous encroachment of an ice age and what that entails for the living creatures trying to adapt to the slowly-changing earth. Each player will assume the role of one of six major animal classes—mammal, reptile, bird, amphibian, arachnid, or inse"},
 
-  // R2C3
-  {id:"planet_unknown_super",name:"Planet Unknown: Supermoon",row:2,col:3,categories:["Strategy","Puzzle"],players:"1-6",playTime:"60-80 min",complexity:2.4,bggId:0,spineColor:"#2a2a5a",boxSize:"md",description:"Expansion for Planet Unknown adding new planets and modules."},
-  {id:"trickerion",name:"Trickerion",row:2,col:3,categories:["Strategy","Euro","Worker Placement","Thematic"],players:"2-4",playTime:"60-180 min",complexity:4.08,bggId:163068,spineColor:"#3a1a4a",boxSize:"lg",description:"Compete as rival magicians in a Victorian-era city, performing increasingly spectacular tricks."},
-  {id:"dead_cells",name:"Dead Cells",row:2,col:3,categories:["Co-op","Thematic","Dice"],players:"1-4",playTime:"45-75 min",complexity:2.5,bggId:383326,spineColor:"#1a4a3a",boxSize:"lg",description:"Based on the hit video game, fight through procedurally generated levels in this cooperative board game."},
+  {id:"brass_birmingham",name:"Brass: Birmingham"
+   ,row:1,col:2,categories:["Strategy", "Euro", "Engine Building"]
+   ,players:"2-4",playTime:"60-120 min"
+   ,complexity:3.86,bggId:224517
+   ,spineColor:"#1a1a1a",boxSize:"lg"
+   ,designer:"Gavan Brown, Matt Tolman, Martin Wallace"
+   ,year:2018
+   ,bggRating:8.6
+   ,mechanics:["Chaining", "End Game Bonuses", "Hand Management", "Income", "Loans", "Market"]
+   ,description:"Brass: Birmingham is an economic strategy game sequel to Martin Wallace's 2007 masterpiece, Brass. Brass: Birmingham tells the story of competing entrepreneurs in Birmingham during the industrial revolution between the years of 1770 and 1870. It offers a very different story arc and experience from its predecessor. As in its predecessor, you must develop, build and establish your industries and network in an effort to exploit low or high market demands. The game is played over two halves: the ca"},
 
-  // R2C4 - Comics (filler)
-  // handled specially as filler cubby
+  {id:"auztralia",name:"Auztralia"
+   ,row:1,col:3,categories:["Strategy", "Thematic", "Adventure"]
+   ,players:"1-4",playTime:"30-120 min"
+   ,complexity:2.89,bggId:231581
+   ,spineColor:"#c07030",boxSize:"md"
+   ,designer:"Martin Wallace"
+   ,year:2018
+   ,bggRating:7.3
+   ,mechanics:["Action Retrieval", "Cooperative Game", "Hexagon Grid", "Network and Route Building", "Semi-Cooperative Game", "Solo / Solitaire Game"]
+   ,description:"AuZtralia is an adventure/exploration game for 1-4 players set in an alternate reality 1930s. The theme is inspired by Martin Wallace's A Study in Emerald. Following the Restorationist war, the northern hemisphere lands lay poisoned and starvation was the norm. Intrepid adventurers set out to explore and settle new lands. Little did they know, after the war, the surviving Old Ones and their remaining loyal human armies made their way to the outback of Australia to lick their wounds. Build a port"},
 
-  // R2C5 - merged with R1C5 (tall cubby)
+  {id:"that_time_you_killed_me",name:"That Time You Killed Me"
+   ,row:1,col:3,categories:["Strategy", "Abstract"]
+   ,players:"2",playTime:"15-30 min"
+   ,complexity:2.33,bggId:344258
+   ,spineColor:"#e8d5b0",boxSize:"md"
+   ,designer:"Peter C. Hayward"
+   ,year:2021
+   ,bggRating:7.3
+   ,mechanics:["Grid Movement", "King of the Hill", "Multiple Maps", "Scenario / Mission / Campaign Game", "Slide / Push", "Square Grid"]
+   ,description:"You and your opponent are rival time travelers trying to erase each other from history. To prove you are the one true inventor of time travel, you must use your invention to find your enemy in time and murder them — before they get you! Unfortunately, since your enemy has strewn many copies of themself across the timeline, you may have to do the terrible deed many, many times before it sticks. Just make sure you don't get erased first! That Time You Killed Me is an abstract narrative game of tim"},
 
-  // R2C6 - Comics (filler)
+  {id:"margraves_of_valeria",name:"Margraves of Valeria"
+   ,row:1,col:3,categories:["Strategy", "Euro", "Worker Placement"]
+   ,players:"1-4",playTime:"45-75 min"
+   ,complexity:2.7,bggId:275974
+   ,spineColor:"#6a3a8a",boxSize:"md"
+   ,designer:"Isaias Vallejo"
+   ,year:2020
+   ,bggRating:7.4
+   ,mechanics:["Area Movement", "Deck, Bag, and Pool Building", "Worker Placement"]
+   ,description:"Margraves of Valeria is a hand-building worker-placement game set in the fantasy world of Valeria. It's the fifth stand-alone game in the series that introduces new twists to Valeria world! You are a Margrave, a military commander tasked with defending the land of Valeria and building magical Ward Towers at cities. Knights in Valeria can be commanded by you or your fellow Margraves to slay monsters or activate locations in an effort to gain influence over the 4 Guilds: Worker, Soldier, Shadow, a"},
 
-  // ══════════════════════════════════════
-  // ROW 3
-  // ══════════════════════════════════════
+  {id:"this_war_of_mine",name:"This War of Mine"
+   ,row:1,col:3,categories:["Co-op", "Thematic", "Campaign"]
+   ,players:"1-6",playTime:"45-120 min"
+   ,complexity:3.33,bggId:188920
+   ,spineColor:"#3a3a3a",boxSize:"lg"
+   ,designer:"Michał Oracz, Jakub Wiśniewski"
+   ,year:2017
+   ,bggRating:7.8
+   ,mechanics:["Action Points", "Cooperative Game", "Dice Rolling", "Events", "Grid Movement", "Narrative Choice / Paragraph"]
+   ,description:"This War Of Mine: The Board Game is the tabletop adaptation of the award-winning video game that pictures the drama of civilians trapped in a war-torn city. You will enter this experience as a group of civilians trapped in a besieged and conflict-ridden city, enduring many hardships that often test the essence of humanity. During your struggle as the survivors, you will experience dramas connected with making extremely difficult decisions and choices and have to face the consequences of your act"},
 
-  // R3C1 + R4C1 (tall merged cubby)
-  {id:"frosthaven",name:"Frosthaven",row:3,col:1,categories:["Strategy","Co-op","Campaign","Thematic"],players:"1-4",playTime:"30-120 min",complexity:3.97,bggId:295770,spineColor:"#4a7090",boxSize:"xl",description:"The follow-up to Gloomhaven. Build and defend the outpost of Frosthaven while exploring the frozen wilderness."},
-  {id:"gloomhaven",name:"Gloomhaven",row:3,col:1,categories:["Strategy","Co-op","Campaign","Thematic"],players:"1-4",playTime:"60-120 min",complexity:3.86,bggId:174430,spineColor:"#1a3050",boxSize:"xl",description:"A game of Euro-inspired tactical combat in a persistent world of shifting motives."},
+  {id:"kelp",name:"Kelp"
+   ,row:1,col:4,categories:["Strategy", "Thematic"]
+   ,players:"2",playTime:"30-45 min"
+   ,complexity:2.4,bggId:374595
+   ,spineColor:"#1a6a5a",boxSize:"md"
+   ,designer:"Carl Robinson"
+   ,year:2024
+   ,bggRating:7.5
+   ,mechanics:["Area Movement", "Deck, Bag, and Pool Building", "Dice Rolling", "Hidden Movement", "Variable Player Powers"]
+   ,description:"Kelp is a two-player asymmetrical game that offers players a unique opportunity to delve into the natural world of Pyjama Sharks and Common Octopuses, set in a South African kelp forest. Hide and seek meets bluffing and manipulation. Deck builder meets dice bag builder. As players take on the roles of these iconic sea creatures, they will discover that the gameplay mechanics closely mirror their real-life counterparts. Each has a unique path to victory. The Octopus, known for its cunning and ada"},
 
-  // R3C2 - Comics (filler)
+  {id:"raiders_of_scythia",name:"Raiders of Scythia"
+   ,row:1,col:4,categories:["Strategy", "Worker Placement"]
+   ,players:"1-4",playTime:"60-80 min"
+   ,complexity:2.77,bggId:301880
+   ,spineColor:"#8a6a30",boxSize:"md"
+   ,designer:"Shem Phillips"
+   ,year:2020
+   ,bggRating:7.7
+   ,mechanics:["Contracts", "Dice Rolling", "Hand Management", "Open Drafting", "Solo / Solitaire Game", "Variable Player Powers"]
+   ,description:"Many centuries ago, the Greek, Persian and Assyrian empires controlled vast amounts of land and riches. Yet, despite their fortifications and imposing armies, rumours began spreading of a formidable foe in the lands above the Black Sea. They came on horseback. Fierce warriors, both male and female. Skilled with the sword, axe and bow. But they weren’t mindless savages. Their artisans were renowned for their ability to craft detailed trinkets of gold. They fashioned leather armour and improvised "},
 
-  // R3C3
-  {id:"bad_company",name:"Bad Company",row:3,col:3,categories:["Strategy","Engine Building","Dice"],players:"1-6",playTime:"30-60 min",complexity:2.09,bggId:339789,spineColor:"#e05050",boxSize:"md",description:"Build your criminal gang and plan heists in this engine-building dice game."},
-  {id:"chronicles_of_crime",name:"Chronicles of Crime",row:3,col:3,categories:["Co-op","Deduction","Thematic"],players:"1-4",playTime:"60-90 min",complexity:1.99,bggId:239188,spineColor:"#3a3a3a",boxSize:"md",description:"Solve crimes using your smartphone, scanning QR codes to interrogate suspects and search locations."},
-  {id:"twilight_inscription",name:"Twilight Inscription",row:3,col:3,categories:["Strategy","Euro"],players:"1-8",playTime:"90-120 min",complexity:2.88,bggId:361545,spineColor:"#0a1a3a",boxSize:"md",description:"A roll-and-write game set in the Twilight Imperium universe."},
-  {id:"mistborn",name:"Mistborn: House War",row:3,col:3,categories:["Strategy","Card Game","Thematic"],players:"3-5",playTime:"60-120 min",complexity:2.52,bggId:212423,spineColor:"#3a3a4a",boxSize:"md",description:"A board game based on Brandon Sanderson's Mistborn novels where players are rival noble houses."},
-  {id:"empires_of_the_north",name:"Empires of the North",row:3,col:3,categories:["Strategy","Euro","Engine Building","Card Game"],players:"1-4",playTime:"45-90 min",complexity:2.72,bggId:270844,spineColor:"#3a5070",boxSize:"lg",description:"Lead your clan of Vikings, Japanese, or Inuit as you expand your empire."},
+  {id:"eternal_decks",name:"Eternal Decks"
+   ,row:1,col:4,categories:["Card Game", "Strategy"]
+   ,players:"1-4",playTime:"30-60 min"
+   ,complexity:2.0,bggId:0
+   ,spineColor:"#5a3a6a",boxSize:"sm"
+   ,description:"A card-based strategic game."},
 
-  // R3C4
-  {id:"lost_ruins_of_arnak",name:"Lost Ruins of Arnak",row:3,col:4,categories:["Strategy","Euro","Deck Building","Worker Placement"],players:"1-4",playTime:"30-120 min",complexity:2.92,bggId:312484,spineColor:"#5a7a3a",boxSize:"lg",description:"Explore a mysterious island, discover lost artifacts, and face fearsome guardians."},
-  {id:"ark_nova",name:"Ark Nova",row:3,col:4,categories:["Strategy","Euro","Engine Building"],players:"1-4",playTime:"90-150 min",complexity:3.68,bggId:342942,spineColor:"#2a7a4a",boxSize:"lg",description:"Plan and build a modern zoo to support conservation projects worldwide."},
-  {id:"thunder_road",name:"Thunder Road: Vendetta",row:3,col:4,categories:["Thematic","Dice","Family"],players:"2-4",playTime:"45-75 min",complexity:1.94,bggId:354458,spineColor:"#d04020",boxSize:"lg",description:"Race and wreck your way through a post-apocalyptic desert in this revival of the classic game."},
+  {id:"parks",name:"PARKS"
+   ,row:1,col:4,categories:["Family", "Strategy", "Thematic"]
+   ,players:"1-5",playTime:"40-70 min"
+   ,complexity:2.12,bggId:266524
+   ,spineColor:"#2a6a4a",boxSize:"md"
+   ,designer:"Henry Audubon"
+   ,year:2019
+   ,bggRating:7.6
+   ,mechanics:["Contracts", "End Game Bonuses", "Events", "Modular Board", "Solo / Solitaire Game", "Track Movement"]
+   ,description:"PARKS is a celebration of the US National Parks featuring illustrious art from Fifty-Nine Parks. In PARKS, players will take on the role of two hikers as they trek through different trails across four seasons of the year. While on the trail, these hikers will take actions and collect memories of the places your hikers visit. These memories are represented by various resource tokens like mountains and forests. Collecting these memories in sets will allow players to trade them in to visit a Nation"},
 
-  // R3C5
-  {id:"abyss",name:"Abyss",row:3,col:5,categories:["Strategy","Card Game","Thematic"],players:"2-4",playTime:"30-60 min",complexity:2.45,bggId:155987,spineColor:"#0a2a5a",boxSize:"md",description:"Explore the depths of the ocean to recruit allies and control the underwater realm."},
-  {id:"mystic_vale",name:"Mystic Vale",row:3,col:5,categories:["Card Game","Strategy","Engine Building"],players:"2-4",playTime:"45-60 min",complexity:2.20,bggId:194607,spineColor:"#2a5a2a",boxSize:"md",description:"A unique card-crafting game where you build cards by adding transparent overlays."},
-  {id:"spirit_island_je",name:"Spirit Island: Jagged Earth",row:3,col:5,categories:["Co-op","Strategy","Thematic"],players:"1-6",playTime:"90-120 min",complexity:4.0,bggId:296208,spineColor:"#5a3a1a",boxSize:"lg",description:"A massive expansion for Spirit Island adding new spirits, scenarios, and adversaries."},
-  {id:"spirit_island",name:"Spirit Island",row:3,col:5,categories:["Co-op","Strategy","Thematic"],players:"1-4",playTime:"90-120 min",complexity:4.06,bggId:162886,spineColor:"#3a6040",boxSize:"xl",description:"Play as powerful spirits of the land, working to drive off colonial invaders."},
+  {id:"chronicles_1900",name:"Chronicles of Crime: 1900"
+   ,row:1,col:4,categories:["Co-op", "Deduction", "Thematic"]
+   ,players:"1-4",playTime:"60-90 min"
+   ,complexity:1.91,bggId:302098
+   ,spineColor:"#7a5a30",boxSize:"md"
+   ,designer:"David Cicurel, Wojciech Grajkowski"
+   ,year:2021
+   ,bggRating:7.9
+   ,mechanics:["Cooperative Game", "Scenario / Mission / Campaign Game", "Storytelling", "Variable Player Powers"]
+   ,description:"“You are Victor Lavel, a young ambitious journalist working for a major newspaper. It's the year 1900, the middle of the Belle &Eacute;poque, and Paris flourishes. There are so many stories to cover, the Exposition Universelle, the Summer Olympics, the opening of the first metro station, but as a Lavel, a family famous for solving crimes since the Middle Ages, you are much more interested in murders, kidnappings, and robberies. Being a journalist helps you be among the first ones to know about t"},
 
-  // R3C6
-  {id:"hegemony",name:"Hegemony",row:3,col:6,categories:["Strategy","Euro","Thematic"],players:"2-4",playTime:"90-180 min",complexity:4.08,bggId:321608,spineColor:"#8a2a2a",boxSize:"xl",description:"An asymmetric politico-economic game where players take on roles of different social classes."},
-  {id:"caverna_forgotten",name:"Caverna: The Forgotten Folk",row:3,col:6,categories:["Strategy","Euro","Worker Placement"],players:"1-7",playTime:"30-210 min",complexity:3.0,bggId:260060,spineColor:"#6a5a3a",boxSize:"md",description:"An expansion for Caverna adding eight new playable races with unique abilities."},
-  {id:"caverna",name:"Caverna",row:3,col:6,categories:["Strategy","Euro","Worker Placement"],players:"1-7",playTime:"30-210 min",complexity:3.77,bggId:102794,spineColor:"#5a4a30",boxSize:"xl",description:"Farm, mine, and furnish your home cave in this deep resource management game."},
-  {id:"shipwrights",name:"Shipwrights of the North Sea",row:3,col:6,categories:["Strategy","Card Game","Euro"],players:"2-5",playTime:"60 min",complexity:2.29,bggId:190020,spineColor:"#2a5a7a",boxSize:"md",description:"Collect resources and build Viking longships faster than your rivals."},
+  {id:"rove",name:"ROVE"
+   ,row:1,col:5,categories:["Solo", "Puzzle"]
+   ,players:"1",playTime:"10-15 min"
+   ,complexity:1.97,bggId:342562
+   ,spineColor:"#3070a0",boxSize:"sm"
+   ,designer:"Dustin Dobson, Milan Zivkovic"
+   ,year:2021
+   ,bggRating:7.5
+   ,mechanics:["Hand Management", "Pattern Movement", "Pattern Recognition", "Solo / Solitaire Game", "Square Grid"]
+   ,description:"As a ROVE (Results-Oriented Versatile Explorer) you're used to surveying the fringes of space, but now you've crash-landed on an unfamiliar planet. You'll need to reconfigure your reusable modules to get to safety! ROVE is a solo spatial puzzle game. In each game of ROVE, the player will face a series of mishaps that can only be solved by arranging the 6 module cards in a specific pattern. Moving a module requires Movement Points gained by discarding cards from hand for the listed amount. Player"},
 
-  // ══════════════════════════════════════
-  // ROW 4
-  // ══════════════════════════════════════
+  {id:"rove_xulc",name:"ROVE: XULC Expansion"
+   ,row:1,col:5,categories:["Solo", "Puzzle"]
+   ,players:"1",playTime:"10-15 min"
+   ,complexity:1.8,bggId:0
+   ,spineColor:"#4080b0",boxSize:"sm"
+   ,description:"Expansion for ROVE adding new module challenges."},
 
-  // R4C1 - merged with R3C1 (tall cubby)
+  {id:"detective_coa",name:"Detective: City of Angels"
+   ,row:1,col:6,categories:["Thematic", "Deduction"]
+   ,players:"1-5",playTime:"90-150 min"
+   ,complexity:2.36,bggId:218074
+   ,spineColor:"#1a1a3a",boxSize:"lg"
+   ,designer:"Evan Derrick"
+   ,year:2019
+   ,bggRating:7.9
+   ,mechanics:["Action Points", "Area Movement", "Cooperative Game", "Team-Based Game", "Traitor Game"]
+   ,description:"Detective: City of Angels, set in the dark and violent world of 1940s Los Angeles, is a game of mystery, deception, and investigation for 1–5 players. Most players will step into the shoes of LAPD homicide detectives, hungry for glory and willing to do whatever it takes to successfully close a case, even if that means intimidating suspects, concealing evidence, and hiring snitches to rat on their fellow detectives. One player, however, will take on the role of The Chisel, whose only goal is to s"},
 
-  // R4C2
-  {id:"seven_wonders_architects",name:"7 Wonders Architects",row:4,col:2,categories:["Family","Card Game","Strategy"],players:"2-7",playTime:"25 min",complexity:1.38,bggId:346703,spineColor:"#c0943a",boxSize:"md",description:"A streamlined version of the classic 7 Wonders, perfect for new gamers and families."},
-  {id:"last_will",name:"Last Will",row:4,col:2,categories:["Strategy","Euro","Worker Placement"],players:"2-5",playTime:"45-75 min",complexity:2.86,bggId:97842,spineColor:"#306a30",boxSize:"md",description:"Spend your uncle's inheritance as fast as possible to prove you deserve the rest of his fortune."},
-  {id:"feast_for_odin_exp",name:"A Feast for Odin: The Norwegians",row:4,col:2,categories:["Strategy","Euro","Worker Placement"],players:"1-4",playTime:"30-120 min",complexity:4.0,bggId:216788,spineColor:"#4a3a2a",boxSize:"md",description:"Expansion for A Feast for Odin with new islands, actions, and alternative boards."},
-  {id:"carnegie",name:"Carnegie",row:4,col:2,categories:["Strategy","Euro","Worker Placement","Engine Building"],players:"1-4",playTime:"120-180 min",complexity:3.82,bggId:310873,spineColor:"#2a4a2a",boxSize:"lg",description:"Build your business empire across America in this deep Euro strategy game."},
+  {id:"aeons_end_legacy",name:"Aeon's End: Legacy"
+   ,row:1,col:6,categories:["Co-op", "Deck Building", "Campaign"]
+   ,players:"1-4",playTime:"45-90 min"
+   ,complexity:2.87,bggId:241451
+   ,spineColor:"#4a2060",boxSize:"lg"
+   ,designer:"Jenny Iglesias, Nick Little (I), Kevin Riley"
+   ,year:2019
+   ,bggRating:8.0
+   ,mechanics:["Cooperative Game", "Deck, Bag, and Pool Building", "Hand Management", "Legacy Game", "Open Drafting", "Scenario / Mission / Campaign Game"]
+   ,description:"“You are not breach mages yet,” Brama lectures as she paces down the line of students, her frail form belying her immense power. “Breach mages have protected us since the beginning — since the burning of the world and our pilgrimage into the dark. It was they who founded Gravehold, our last bastion, and if you wish to stand beside these living legends, you must listen and learn. The Nameless shall come again, as they always have, and you will need to be ready. You are the hope of our future.” As"},
 
-  // R4C3 + R5C3 (tall merged cubby)
-  {id:"adventure_tactics",name:"Adventure Tactics: Domianne's Tower",row:4,col:3,categories:["Co-op","Campaign","Strategy","Thematic"],players:"1-5",playTime:"60-90 min",complexity:2.72,bggId:268504,spineColor:"#d4b060",boxSize:"xl",description:"A cooperative tactical combat campaign where your characters level up and change classes."},
+  {id:"crimson_scales",name:"Crimson Scales"
+   ,row:1,col:6,categories:["Strategy", "Co-op", "Campaign", "Thematic"]
+   ,players:"1-4",playTime:"30-120 min"
+   ,complexity:3.9,bggId:365186
+   ,spineColor:"#8a1a1a",boxSize:"lg"
+   ,designer:"Motti Eisenbach"
+   ,year:2021
+   ,bggRating:9.2
+   ,mechanics:["Action Retrieval", "Campaign / Battle Card Driven", "Communication Limits", "Deck, Bag, and Pool Building", "Grid Movement", "Hand Management"]
+   ,description:"The Crimson Scales is a comprehensive all-in-one custom unofficial fanmade expansion compatible with Gloomhaven, complete with a game box and the following materials. This is not an official product of Cephalofair Games. Adds 66 scenarios, 100 items, 11-14 classes, new monsters, new conditions and new overlay tiles and 120 new events. Requires Gloomhaven to play. —description from the designer"},
 
-  // R4C4
-  {id:"heat_heavy_rain",name:"Heat: Heavy Rain",row:4,col:4,categories:["Racing","Thematic","Family"],players:"1-6",playTime:"30-60 min",complexity:2.1,bggId:0,spineColor:"#4a6a8a",boxSize:"md",description:"Expansion for Heat: Pedal to the Metal adding rain and night driving conditions."},
-  {id:"dune_imperium",name:"Dune: Imperium",row:4,col:4,categories:["Strategy","Deck Building","Worker Placement","Thematic"],players:"1-4",playTime:"60-120 min",complexity:3.01,bggId:316554,spineColor:"#c4940a",boxSize:"lg",description:"Combine deck-building and worker placement in the universe of Frank Herbert's Dune."},
-  {id:"feast_for_odin",name:"A Feast for Odin",row:4,col:4,categories:["Strategy","Euro","Worker Placement"],players:"1-4",playTime:"30-120 min",complexity:3.86,bggId:177736,spineColor:"#3a3a5a",boxSize:"xl",description:"A saga in the form of a board game about the cultural achievements and explorations of the Norsemen."},
-  {id:"thunderbirds",name:"Thunderbirds",row:4,col:4,categories:["Co-op","Thematic","Family"],players:"1-4",playTime:"45-75 min",complexity:2.17,bggId:160610,spineColor:"#2050a0",boxSize:"md",description:"A cooperative game based on the classic TV series celebrating 50 years of Thunderbirds."},
+  {id:"turing_machine",name:"Turing Machine"
+   ,row:2,col:1,categories:["Puzzle", "Deduction"]
+   ,players:"1-4",playTime:"20 min"
+   ,complexity:2.55,bggId:356123
+   ,spineColor:"#e0d0a0",boxSize:"md"
+   ,designer:"Fabien Gridel, Yoann Levet"
+   ,year:2022
+   ,bggRating:7.6
+   ,mechanics:["Deduction", "Paper-and-Pencil", "Solo / Solitaire Game"]
+   ,description:"\"Codes are a puzzle. A game, just like any other game.\" - Alan Turing in The Imitation Game. Turing Machine is a fascinating and competitive deduction game. It offers a unique experience of questioning a proto-computer that works without electricity or any sort of technology, paving the way for a new generation of deduction games. The Goal? Find the secret code before the other players, by cleverly questioning the machine. With Turing Machine, you’ll use an analog computer with unique components"},
 
-  // R4C5 - Comics (filler)
+  {id:"great_western_trail",name:"Great Western Trail"
+   ,row:2,col:1,categories:["Strategy", "Euro", "Deck Building"]
+   ,players:"1-4",playTime:"75-150 min"
+   ,complexity:3.71,bggId:341169
+   ,spineColor:"#c47a30",boxSize:"lg"
+   ,designer:"Alexander Pfister"
+   ,year:2021
+   ,bggRating:8.3
+   ,mechanics:["Deck, Bag, and Pool Building", "Hand Management", "Ownership", "Set Collection", "Solo / Solitaire Game", "Tags"]
+   ,description:"America in the 19th century: You are a rancher and repeatedly herd your cattle from Texas to Kansas City, where you send them off by train. This earns you money and victory points. Needless to say, each time you arrive in Kansas City, you want to have your most valuable cattle in tow. However, the \"Great Western Trail\" not only requires that you keep your herd in good shape, but also that you wisely use the various buildings along the trail. Also, it might be a good idea to hire capable staff: c"},
 
-  // R4C6
-  {id:"blitzkrieg",name:"Blitzkrieg!",row:4,col:6,categories:["Strategy","Area Control"],players:"1-2",playTime:"20 min",complexity:1.91,bggId:258210,spineColor:"#5a5a5a",boxSize:"sm",description:"Relive WW2 in 20 minutes in this quick-playing tile-placement game."},
-  {id:"mdt_deadpool",name:"Marvel Dice Throne: Deadpool",row:4,col:6,categories:["Dice","Card Game","Thematic"],players:"2",playTime:"20-40 min",complexity:2.1,bggId:0,spineColor:"#cc2233",boxSize:"sm",description:"Deadpool hero pack for Marvel Dice Throne."},
-  {id:"mdt_cap_panther",name:"Marvel Dice Throne: Captain Marvel + Black Panther",row:4,col:6,categories:["Dice","Card Game","Thematic"],players:"2",playTime:"20-40 min",complexity:2.1,bggId:0,spineColor:"#2a2a6a",boxSize:"md",description:"Captain Marvel and Black Panther hero pack for Marvel Dice Throne."},
-  {id:"cthulhu_dmd",name:"Cthulhu: Death May Die",row:4,col:6,categories:["Co-op","Thematic","Dice"],players:"1-5",playTime:"90-120 min",complexity:2.44,bggId:253344,spineColor:"#1a3a1a",boxSize:"xl",description:"Fight eldritch horrors in this scenario-based cooperative game designed by Rob Daviau and Eric Lang."},
+  {id:"bomb_busters",name:"Bomb Busters"
+   ,row:2,col:1,categories:["Co-op", "Family", "Card Game"]
+   ,players:"2-6",playTime:"15-30 min"
+   ,complexity:1.2,bggId:0
+   ,spineColor:"#e05050",boxSize:"sm"
+   ,description:"A fast cooperative card game about defusing bombs."},
 
-  // ══════════════════════════════════════
-  // ROW 5
-  // ══════════════════════════════════════
+  {id:"magic_maze",name:"Magic Maze"
+   ,row:2,col:1,categories:["Co-op", "Family", "Puzzle"]
+   ,players:"1-8",playTime:"15 min"
+   ,complexity:1.75,bggId:209778
+   ,spineColor:"#e05030",boxSize:"md"
+   ,designer:"Kasper Lapp"
+   ,year:2017
+   ,bggRating:6.9
+   ,mechanics:["Communication Limits", "Cooperative Game", "Elapsed Real Time Ending", "Grid Movement", "Map Addition", "Modular Board"]
+   ,description:"Description from the publisher: After being stripped of all their possessions, a mage, a warrior, an elf, and a dwarf are forced to go rob the local Magic Maze shopping mall for all the equipment necessary for their next adventure. They agree to map out the labyrinth in its entirety first, then find each individual’s favorite store, and then locate the exit. In order to evade the surveillance of the guards who eyed their arrival suspiciously, all four will pull off their heists simultaneously, t"},
 
-  // R5C1
-  {id:"kill_hitler",name:"I Would Kill Hitler",row:5,col:1,categories:["Party","Card Game"],players:"3-8",playTime:"15-30 min",complexity:1.2,bggId:0,spineColor:"#8a7a50",boxSize:"md",description:"A party card game about absurd hypothetical dilemmas involving time travel."},
+  {id:"hansa_teutonica",name:"Hansa Teutonica"
+   ,row:2,col:1,categories:["Strategy", "Euro", "Area Control"]
+   ,players:"2-5",playTime:"45-90 min"
+   ,complexity:3.09,bggId:43015
+   ,spineColor:"#d0c090",boxSize:"md"
+   ,designer:"Andreas Steding"
+   ,year:2009
+   ,bggRating:7.7
+   ,mechanics:["Action Points", "Area Majority / Influence", "End Game Bonuses", "Network and Route Building", "Ownership", "Take That"]
+   ,description:"The players act as traders trying to get victory points for building a network of offices, controlling cities, collecting bonus markers, or when other traders use the cities they control. After controlling a line between two cities with your pawns, you can decide to build an office (and maybe also establish control and/or get a bonus marker) or to get a skill improvement from some of the cities. Players have to improve their traders' \"skills\" for the following effects: getting more VP from offic"},
 
-  // R5C2 - Books (filler)
+  {id:"hadrians_wall",name:"Hadrian's Wall"
+   ,row:2,col:2,categories:["Strategy", "Euro", "Engine Building"]
+   ,players:"1-6",playTime:"30-60 min"
+   ,complexity:3.17,bggId:304783
+   ,spineColor:"#8a7a5a",boxSize:"md"
+   ,designer:"Bobby Hill"
+   ,year:2021
+   ,bggRating:7.9
+   ,mechanics:["Hand Management", "Paper-and-Pencil", "Solo / Solitaire Game", "Tech Trees / Tech Tracks"]
+   ,description:"When visiting the North of Britannia in 122 AD, the Roman Emperor Hadrian Augustus witnessed the aftermath of war between his armies and the savage Picts. In a show of Roman might, he ordered a wall to be built that would separate the Pict tribes from the rest of England. Grand in its design, the wall stretched 80 Roman miles, from coast to coast. Hadrian's Wall stood in service to the Roman Empire for nearly 300 years before its eventual decline. Today, Hadrian's Wall is a UNESCO World Heritage"},
 
-  // R5C3 - merged with R4C3 (tall cubby)
+  {id:"search_planet_x",name:"The Search for Planet X"
+   ,row:2,col:2,categories:["Deduction", "Solo", "Puzzle"]
+   ,players:"1-4",playTime:"60 min"
+   ,complexity:2.44,bggId:279537
+   ,spineColor:"#0a1a3a",boxSize:"md"
+   ,designer:"Matthew O'Malley, Ben Rosset"
+   ,year:2020
+   ,bggRating:7.9
+   ,mechanics:["Action Points", "Deduction", "End Game Bonuses", "Paper-and-Pencil", "Rondel", "Solo / Solitaire Game"]
+   ,description:"At the edge of our solar system, a dark planet may lurk. In 2015, astronomers estimated a large distant planet could explain the unique orbits of dwarf planets and other objects. Since then, astronomers have been scanning the sky, hoping to find this planet. In The Search for Planet X, players take on the role of astronomers who use observations and logical deductions to search for this hypothetical planet. Each game, the companion app randomly selects an arrangement of objects and a location fo"},
 
-  // R5C4 - Books (filler)
+  {id:"marvel_dice_throne_box1",name:"Marvel Dice Throne"
+   ,row:2,col:2,categories:["Dice", "Card Game", "Thematic"]
+   ,players:"2-6",playTime:"20-40 min"
+   ,complexity:2.15,bggId:348406
+   ,spineColor:"#cc1122",boxSize:"lg"
+   ,designer:"Gavan Brown, Nate Chatellier, Manny Trembley"
+   ,year:2022
+   ,bggRating:8.0
+   ,mechanics:["Dice Rolling", "Take That", "Team-Based Game", "Variable Player Powers"]
+   ,description:"In Marvel Dice Throne , you become one of eight of Marvel's most famous heroes, including Black Panther, Captain Marvel, Black Widow, Scarlet Witch, Loki, Thor, Doctor Strange, and Miles Morales Spider-man! Every Marvel Dice Throne hero was painstakingly designed and balanced to provide the most thematic experience possible, allowing you to truly embody your favorite heroes like no other game. Featuring all-new mechanisms and asymmetrical designs, these are our most innovative and exciting heroe"},
 
-  // R5C5
-  {id:"kitchen_rush",name:"Kitchen Rush",row:5,col:5,categories:["Co-op","Family","Worker Placement"],players:"1-4",playTime:"20-60 min",complexity:2.01,bggId:223953,spineColor:"#d07030",boxSize:"md",description:"A real-time cooperative game where you run a restaurant using sand timers as workers."},
-  {id:"detective",name:"Detective: A Modern Crime Board Game",row:5,col:5,categories:["Co-op","Deduction","Thematic","Campaign"],players:"1-5",playTime:"120-180 min",complexity:3.25,bggId:223321,spineColor:"#1a1a3a",boxSize:"lg",description:"Solve a complex case using your wits, the game system, and real internet research."},
-  {id:"mdt_xmen",name:"Marvel Dice Throne: X-Men",row:5,col:5,categories:["Dice","Card Game","Thematic"],players:"2-6",playTime:"20-40 min",complexity:2.1,bggId:0,spineColor:"#c0a020",boxSize:"md",description:"X-Men hero pack for Marvel Dice Throne."},
-  {id:"kelp_expansion",name:"Kelp: Brilliant Behaviours",row:5,col:5,categories:["Strategy","Thematic"],players:"2",playTime:"30-45 min",complexity:2.4,bggId:0,spineColor:"#2a7a6a",boxSize:"sm",description:"Expansion for Kelp adding new behaviour cards and abilities."},
+  {id:"horizons_spirit_island",name:"Horizons of Spirit Island"
+   ,row:2,col:2,categories:["Co-op", "Strategy", "Thematic"]
+   ,players:"1-3",playTime:"90-120 min"
+   ,complexity:3.57,bggId:367498
+   ,spineColor:"#2a6050",boxSize:"md"
+   ,designer:"R. Eric Reuss"
+   ,year:2022
+   ,bggRating:8.1
+   ,mechanics:["Action Retrieval", "Area Majority / Influence", "Automatic Resource Growth", "Campaign / Battle Card Driven", "Cooperative Game", "Events"]
+   ,description:"Horizons of Spirit Island features the core mechanisms of Spirit Island, but features a new double-sided game board with a streamlined set-up, punchboard components, and five new Spirits designed to be ideal for those playing a Spirit Island game for the first time. These new Spirits are compatible with all existing Spirit Island components, but to play with expansions like Jagged Earth, you would need a copy of Spirit Island itself."},
 
-  // R5C6
-  {id:"dune_immortality",name:"Dune: Imperium - Immortality",row:5,col:6,categories:["Strategy","Deck Building","Worker Placement","Thematic"],players:"1-4",playTime:"60-120 min",complexity:3.2,bggId:382927,spineColor:"#b08a0a",boxSize:"md",description:"Expansion for Dune Imperium adding Tleilaxu and research mechanics."},
-  {id:"spirit_ff",name:"Spirit Island: Feather & Flame",row:5,col:6,categories:["Co-op","Strategy","Thematic"],players:"1-6",playTime:"90-120 min",complexity:4.1,bggId:0,spineColor:"#a05020",boxSize:"md",description:"Expansion for Spirit Island with new spirits and scenarios."},
-  {id:"spirit_bc",name:"Spirit Island: Branch & Claw",row:5,col:6,categories:["Co-op","Strategy","Thematic"],players:"1-4",playTime:"90-120 min",complexity:4.0,bggId:193065,spineColor:"#4a6a2a",boxSize:"md",description:"First expansion for Spirit Island adding events, new spirits, and tokens."},
-  {id:"coffee_roaster",name:"Coffee Roaster",row:5,col:6,categories:["Solo","Strategy"],players:"1",playTime:"10-30 min",complexity:2.18,bggId:196526,spineColor:"#5a3a1a",boxSize:"sm",description:"A solo bag-building game about roasting the perfect cup of coffee."},
-  {id:"l_project",name:"L Project",row:5,col:6,categories:["Strategy","Abstract"],players:"2",playTime:"15-30 min",complexity:1.5,bggId:0,spineColor:"#4a4a6a",boxSize:"sm",description:"A two-player abstract strategy game."},
-  {id:"targi",name:"Targi",row:5,col:6,categories:["Strategy","Euro","Worker Placement"],players:"2",playTime:"60 min",complexity:2.36,bggId:118048,spineColor:"#c4a060",boxSize:"sm",description:"A two-player-only Euro game of Tuareg traders in the Sahara desert."},
+  {id:"concordia_venus",name:"Concordia Venus"
+   ,row:2,col:2,categories:["Strategy", "Euro", "Engine Building"]
+   ,players:"2-6",playTime:"60-120 min"
+   ,complexity:3.01,bggId:256916
+   ,spineColor:"#d4a050",boxSize:"lg"
+   ,designer:"Mac Gerdts"
+   ,year:2018
+   ,bggRating:8.3
+   ,mechanics:["Action Retrieval", "Advantage Token", "Auction: Dutch", "Communication Limits", "Deck, Bag, and Pool Building", "Hand Management"]
+   ,description:"Concordia Venus is a standalone reimplementation of Concordia with some added features. Concordia Venus is a peaceful strategy game of economic development in Roman times for 2-6 players aged 13 and up. Instead of looking to the luck of dice or cards, players must rely on their strategic abilities. Be sure to watch your rivals to determine which goals they are pursuing and where you can outpace them! In the game, colonists are sent out from Rome to settle down in cities that produce bricks, food"},
 
-  // ══════════════════════════════════════
-  // ROW 6
-  // ══════════════════════════════════════
+  {id:"planet_unknown_super",name:"Planet Unknown: Supermoon"
+   ,row:2,col:3,categories:["Strategy", "Puzzle"]
+   ,players:"1-6",playTime:"60-80 min"
+   ,complexity:2.4,bggId:0
+   ,spineColor:"#2a2a5a",boxSize:"md"
+   ,description:"Expansion for Planet Unknown adding new planets and modules."},
 
-  // R6C1
-  {id:"carpe_diem",name:"Carpe Diem",row:6,col:1,categories:["Strategy","Euro"],players:"2-4",playTime:"45-75 min",complexity:2.71,bggId:245934,spineColor:"#7a5a30",boxSize:"md",description:"Build a Roman city district by selecting tiles and fulfilling scoring conditions."},
-  {id:"hallertau",name:"Hallertau",row:6,col:1,categories:["Strategy","Euro","Worker Placement"],players:"1-4",playTime:"50-140 min",complexity:3.46,bggId:300322,spineColor:"#5a8a3a",boxSize:"lg",description:"Develop your Bavarian village and manage your farmyard in this worker placement game."},
-  {id:"mu_xmen",name:"Marvel United: X-Men",row:6,col:1,categories:["Co-op","Thematic","Family"],players:"1-4",playTime:"40 min",complexity:1.67,bggId:340937,spineColor:"#2050a0",boxSize:"md",description:"Unite as Marvel's X-Men to defeat powerful villains in this cooperative card game."},
-  {id:"marvel_united",name:"Marvel United",row:6,col:1,categories:["Co-op","Thematic","Family"],players:"1-4",playTime:"40 min",complexity:1.53,bggId:298047,spineColor:"#cc2244",boxSize:"md",description:"A cooperative game where Marvel heroes combine their efforts to defeat iconic villains."},
+  {id:"trickerion",name:"Trickerion"
+   ,row:2,col:3,categories:["Strategy", "Euro", "Worker Placement", "Thematic"]
+   ,players:"2-4",playTime:"60-180 min"
+   ,complexity:4.26,bggId:163068
+   ,spineColor:"#3a1a4a",boxSize:"lg"
+   ,designer:"Richard Ámann, Viktor Péter"
+   ,year:2015
+   ,bggRating:8.0
+   ,mechanics:["Action Points", "Action Queue", "Catch the Leader", "Dice Rolling", "Simultaneous Action Selection", "Tile Placement"]
+   ,description:"Trickerion is a competitive Euro-style strategy game set in a fictional world inspired by the late 19th century urban life and culture, spiced with a pinch of supernatural. Players take on the roles of rival stage illusionists, each with their own strengths and characteristics. They are striving for fortune and fame in a competition hosted by a legendary magician, looking for a successor worthy of the mighty Trickerion Stone, which is fabled to grant supernatural power to its owner. Using worker"},
 
-  // R6C2
-  {id:"clank_catacombs",name:"Clank! Catacombs",row:6,col:2,categories:["Strategy","Deck Building","Thematic","Adventure"],players:"2-4",playTime:"45-90 min",complexity:2.51,bggId:365717,spineColor:"#3a3050",boxSize:"lg",description:"Explore procedurally generated dungeon tiles in this standalone Clank! adventure."},
-  {id:"witcher_skellige",name:"The Witcher: Skellige",row:6,col:2,categories:["Strategy","Thematic"],players:"2-4",playTime:"60-90 min",complexity:2.5,bggId:0,spineColor:"#3a5a7a",boxSize:"md",description:"A Witcher-themed board game set on the isles of Skellige."},
-  {id:"witcher_wild_hunt",name:"The Witcher: Old World Wild Hunt",row:6,col:2,categories:["Strategy","Thematic","Adventure"],players:"1-5",playTime:"90-150 min",complexity:3.07,bggId:331776,spineColor:"#2a3a2a",boxSize:"lg",description:"Become a witcher, slay monsters, and make morally ambiguous decisions in the world of The Witcher."},
-  {id:"planet_unknown",name:"Planet Unknown",row:6,col:2,categories:["Strategy","Puzzle"],players:"1-6",playTime:"60-80 min",complexity:2.38,bggId:258779,spineColor:"#1a3a5a",boxSize:"lg",description:"Simultaneously polyomino-place to terraform your unique planet."},
+  {id:"dead_cells",name:"Dead Cells"
+   ,row:2,col:3,categories:["Co-op", "Thematic", "Dice"]
+   ,players:"1-4",playTime:"45-75 min"
+   ,complexity:2.36,bggId:380135
+   ,spineColor:"#1a4a3a",boxSize:"lg"
+   ,designer:"Antoine Bauza, Corentin Lebrat, Ludovic Maublanc"
+   ,year:2024
+   ,bggRating:7.6
+   ,mechanics:["Action Queue", "Communication Limits", "Cooperative Game", "Deck, Bag, and Pool Building", "Delayed Purchase", "Legacy Game"]
+   ,description:"Dead Cells: The Rogue-Lite Board Game is a dungeon-crawler that offers a cooperative rogue-lite experience inspired by the Metroidvania genre, playable with 1-4 players, and with a gameplay of around 45 minutes. Explore the ever-changing island of Dead Cells in this ruthless dungeon crawler. Explore. Kill. Die. Mutate. Repeat. Choose one of the four Beheaded (Woah, hold on... Isn't it supposed to be only one of these guys? Is this one of those stupid time-loop plots?) As you resurrect with very "},
 
-  // R6C3
-  {id:"power_grid",name:"Power Grid",row:6,col:3,categories:["Strategy","Euro","Engine Building"],players:"2-6",playTime:"120 min",complexity:3.28,bggId:2651,spineColor:"#2a6a2a",boxSize:"md",description:"A classic game about supplying power to cities by purchasing plants and resources."},
-  {id:"mind_mgmt",name:"Mind MGMT",row:6,col:3,categories:["Strategy","Deduction","Thematic"],players:"1-5",playTime:"45-75 min",complexity:2.53,bggId:284653,spineColor:"#7050a0",boxSize:"md",description:"Based on the comic series, one player is a rogue agent while others try to track them down."},
-  {id:"alchemists",name:"Alchemists",row:6,col:3,categories:["Strategy","Euro","Deduction"],players:"2-4",playTime:"120 min",complexity:3.57,bggId:161970,spineColor:"#6a3a1a",boxSize:"lg",description:"Use an app-driven deduction system to publish alchemical theories and earn reputation."},
-  {id:"clans_of_caledonia",name:"Clans of Caledonia",row:6,col:3,categories:["Strategy","Euro","Engine Building"],players:"1-4",playTime:"30-120 min",complexity:3.33,bggId:216132,spineColor:"#4a7a3a",boxSize:"md",description:"Lead a Scottish clan to economic prosperity during the 19th century."},
-  {id:"twilight_struggle",name:"Twilight Struggle",row:6,col:3,categories:["Strategy","Area Control","Card Game"],players:"2",playTime:"120-180 min",complexity:3.58,bggId:12333,spineColor:"#3a2a1a",boxSize:"md",description:"The classic two-player Cold War game of geopolitical influence and brinkmanship."},
+  {id:"frosthaven",name:"Frosthaven"
+   ,row:3,col:1,categories:["Strategy", "Co-op", "Campaign", "Thematic"]
+   ,players:"1-4",playTime:"30-120 min"
+   ,complexity:4.41,bggId:295770
+   ,spineColor:"#4a7090",boxSize:"xl"
+   ,designer:"Isaac Childres"
+   ,year:2022
+   ,bggRating:8.7
+   ,mechanics:["Campaign / Battle Card Driven", "Communication Limits", "Cooperative Game", "Deck Construction", "Deck, Bag, and Pool Building", "Grid Movement"]
+   ,description:"Frosthaven is the story of a small outpost far to the north of the capital city of White Oak. It's an outpost barely surviving the harsh weather let alone invasions from forces both known and unknown. However, a group of mercenaries, at the end of their rope, will help bring this settlement back from the edge of destruction. Not only will they have to deal with the harsh elements, but with other, far more dangerous threats out in the unforgiving cold, as well. There are: Algox, the bigger, more "},
 
-  // R6C4
-  {id:"smartphone",name:"Smartphone Inc.",row:6,col:4,categories:["Strategy","Euro","Engine Building"],players:"1-5",playTime:"60-90 min",complexity:2.89,bggId:246684,spineColor:"#3090c0",boxSize:"md",description:"Build a smartphone manufacturing empire through innovative production planning."},
-  {id:"burano",name:"Burano",row:6,col:4,categories:["Strategy","Euro"],players:"2-4",playTime:"60-90 min",complexity:2.86,bggId:272498,spineColor:"#e0a050",boxSize:"md",description:"Build colorful buildings on the island of Burano in this pattern-building Euro game."},
-  {id:"azul",name:"Azul",row:6,col:4,categories:["Family","Abstract","Puzzle"],players:"2-4",playTime:"30-45 min",complexity:1.78,bggId:230802,spineColor:"#2070b0",boxSize:"md",description:"Draft beautiful tiles and create stunning mosaic patterns in this award-winning game."},
-  {id:"founders_of_gloomhaven",name:"Founders of Gloomhaven",row:6,col:4,categories:["Strategy","Euro"],players:"1-4",playTime:"90-120 min",complexity:4.06,bggId:214032,spineColor:"#4a5a3a",boxSize:"lg",description:"Build the city of Gloomhaven by managing resources and competing for prestige."},
+  {id:"gloomhaven",name:"Gloomhaven"
+   ,row:3,col:1,categories:["Strategy", "Co-op", "Campaign", "Thematic"]
+   ,players:"1-4",playTime:"60-120 min"
+   ,complexity:3.92,bggId:174430
+   ,spineColor:"#1a3050",boxSize:"xl"
+   ,designer:"Isaac Childres"
+   ,year:2017
+   ,bggRating:8.5
+   ,mechanics:["Action Queue", "Action Retrieval", "Campaign / Battle Card Driven", "Card Play Conflict Resolution", "Communication Limits", "Cooperative Game"]
+   ,description:"Gloomhaven is a game of Euro-inspired tactical combat in a persistent world of shifting motives. Players will take on the roles of wandering adventurers with their own special sets of skills and their own reasons for traveling to this dark corner of the world. Players must work together out of necessity to clear out menacing dungeons and forgotten ruins. In the process, they will enhance their abilities with experience and loot, discover new locations to explore and plunder, and expand an ever-b"},
 
-  // R6C5
-  {id:"on_mars",name:"On Mars",row:6,col:5,categories:["Strategy","Euro","Worker Placement"],players:"1-4",playTime:"90-150 min",complexity:4.67,bggId:184267,spineColor:"#b05020",boxSize:"xl",description:"Lacerda's complex Euro about colonizing Mars, managing resources between orbit and surface."},
-  {id:"lisboa",name:"Lisboa",row:6,col:5,categories:["Strategy","Euro"],players:"1-4",playTime:"60-120 min",complexity:4.41,bggId:161533,spineColor:"#c4a040",boxSize:"xl",description:"Rebuild Lisbon after the devastating 1755 earthquake in this deep Lacerda Euro."},
-  {id:"terra_mystica",name:"Terra Mystica: Big Box",row:6,col:5,categories:["Strategy","Euro","Area Control"],players:"2-5",playTime:"60-150 min",complexity:3.96,bggId:120677,spineColor:"#3a4a2a",boxSize:"xl",description:"Transform terrain and build your civilization in this asymmetric strategy classic."},
-  {id:"the_crew_deep_sea",name:"The Crew: Mission Deep Sea",row:6,col:5,categories:["Co-op","Card Game","Family"],players:"2-5",playTime:"20 min",complexity:2.07,bggId:324856,spineColor:"#1a4a7a",boxSize:"sm",description:"A cooperative trick-taking game with 32 underwater missions to complete."},
-  {id:"skoteines",name:"Skoteines Ypotheseis",row:6,col:5,categories:["Deduction","Party"],players:"2-6",playTime:"30-60 min",complexity:1.5,bggId:0,spineColor:"#2a2a3a",boxSize:"sm",description:"A Greek deduction/mystery game."},
+  {id:"bad_company",name:"Bad Company"
+   ,row:3,col:3,categories:["Strategy", "Engine Building", "Dice"]
+   ,players:"1-6",playTime:"30-60 min"
+   ,complexity:1.93,bggId:340677
+   ,spineColor:"#e05050",boxSize:"md"
+   ,designer:"Kenneth Minde, Kristian Amundsen Østby, Eilif Svensson"
+   ,year:2021
+   ,bggRating:7.2
+   ,mechanics:["Area Majority / Influence", "Contracts", "Dice Rolling", "Random Production", "Re-rolling and Locking", "Set Collection"]
+   ,description:"Build your own gang and customize it to suit your plans. Gather resources to complete heists and money to recruit new gang members. And make sure you escape the police! A unique and fun game from the award-winning designers of Automania and Trails of Tucana. Bad Company supports up to 6 players with very little downtime. It also includes a solo mode where you try to outsmart the police. Each player has a player board with 11 gang members. You may upgrade them by placing overlapping cards onto th"},
 
-  // R6C6
-  {id:"paleo",name:"Paleo",row:6,col:6,categories:["Co-op","Thematic","Card Game"],players:"1-4",playTime:"45-60 min",complexity:2.55,bggId:300531,spineColor:"#8a6a30",boxSize:"md",description:"Lead your Stone Age tribe through challenges in this cooperative adventure."},
-  {id:"trismegistus",name:"Trismegistus",row:6,col:6,categories:["Strategy","Euro","Dice"],players:"1-4",playTime:"60-90 min",complexity:3.68,bggId:281442,spineColor:"#5a3a6a",boxSize:"md",description:"Draft dice and transmute materials in this alchemical Euro game."},
-  {id:"marvel_champions",name:"Marvel Champions",row:6,col:6,categories:["Co-op","Card Game","Thematic","Deck Building"],players:"1-4",playTime:"45-90 min",complexity:2.88,bggId:285774,spineColor:"#1a3a8a",boxSize:"lg",description:"A cooperative Living Card Game where each player takes the role of a Marvel hero."},
-  {id:"aeons_end",name:"Aeon's End",row:6,col:6,categories:["Co-op","Deck Building","Thematic"],players:"1-4",playTime:"60 min",complexity:2.75,bggId:191189,spineColor:"#4a2060",boxSize:"lg",description:"A cooperative deck-building game where breach mages defend Gravehold from The Nameless."},
+  {id:"chronicles_of_crime",name:"Chronicles of Crime"
+   ,row:3,col:3,categories:["Co-op", "Deduction", "Thematic"]
+   ,players:"1-4",playTime:"60-90 min"
+   ,complexity:2.06,bggId:239188
+   ,spineColor:"#3a3a3a",boxSize:"md"
+   ,designer:"David Cicurel"
+   ,year:2018
+   ,bggRating:7.5
+   ,mechanics:["Cooperative Game", "Scenario / Mission / Campaign Game", "Solo / Solitaire Game", "Storytelling"]
+   ,description:"Chronicles of Crime is a cooperative game of crime investigation, mixing an app, a board game and a touch of Virtual Reality. With the same physical components (board, locations, characters and items), players will be able to play plenty of different scenarios and solve as many different crime stories. Players start the app, choose the scenario they want to play, and follow the story. The goal being to catch the killer of the current case in the shortest time possible. Using the Scan&Play techno"},
+
+  {id:"twilight_inscription",name:"Twilight Inscription"
+   ,row:3,col:3,categories:["Strategy", "Euro"]
+   ,players:"1-8",playTime:"90-120 min"
+   ,complexity:3.21,bggId:361545
+   ,spineColor:"#0a1a3a",boxSize:"md"
+   ,designer:"James Kniffen"
+   ,year:2022
+   ,bggRating:7.4
+   ,mechanics:["Dice Rolling", "Paper-and-Pencil", "Variable Player Powers"]
+   ,description:"The Lazax Empire has burned to ash, rejected by its subjects. The aftermath was tragedy and petty conflict in equal measure, a time of loss and exhaustion. In the ensuing Dark Years, the factions of the galaxy retreated and recovered their strength. Now, they look upon the stars and see an opportunity—a chance to reclaim what was lost. A chance to redefine galactic civilization. A chance to leave their mark upon the stars. Twilight Inscription, an epic roll-and-write game for one to eight player"},
+
+  {id:"mistborn",name:"Mistborn: House War"
+   ,row:3,col:3,categories:["Strategy", "Card Game", "Thematic"]
+   ,players:"3-5",playTime:"60-120 min"
+   ,complexity:2.76,bggId:182626
+   ,spineColor:"#3a3a4a",boxSize:"md"
+   ,designer:"Kevin Wilson"
+   ,year:2017
+   ,bggRating:6.8
+   ,mechanics:["Hand Management", "Take That", "Variable Player Powers"]
+   ,description:"Become the head of a Great House of Luthadel in this game of negotiation and betrayal set in the world of Brandon Sanderson's Mistborn novels. Contend with myriad problems plaguing the Final Empire — rampaging koloss, disease, social unrest, even the heroes of the novels — and with every step jockey for the Lord Ruler's favor. At the end of the story, will you rise to power and prestige — or fall in ruin and disgrace? Mistborn: House War is a resource-management game set during the events of the"},
+
+  {id:"empires_of_the_north",name:"Empires of the North"
+   ,row:3,col:3,categories:["Strategy", "Euro", "Engine Building", "Card Game"]
+   ,players:"1-4",playTime:"45-90 min"
+   ,complexity:2.81,bggId:270844
+   ,spineColor:"#3a5070",boxSize:"lg"
+   ,designer:"Joanna Kijanka, Ignacy Trzewiczek"
+   ,year:2019
+   ,bggRating:7.4
+   ,mechanics:["Hand Management", "Take That", "Variable Player Powers", "Worker Placement"]
+   ,description:"Imperial Settlers: Empires of the North is a new, standalone card game in the established Imperial Settlers universe, with players heading to the far north where three different factions live: Scotsmen, Inuits, and Vikings. Take on the role of leader, and make your faction into the best empire in the world! Choosing the faction is only the first step, though, as each faction can be played using one of the two separate and unique decks. Yes, in the base game, players will find six pre-constructed"},
+
+  {id:"lost_ruins_of_arnak",name:"Lost Ruins of Arnak"
+   ,row:3,col:4,categories:["Strategy", "Euro", "Deck Building", "Worker Placement"]
+   ,players:"1-4",playTime:"30-120 min"
+   ,complexity:2.93,bggId:312484
+   ,spineColor:"#5a7a3a",boxSize:"lg"
+   ,designer:"Elwen, Mín"
+   ,year:2020
+   ,bggRating:8.1
+   ,mechanics:["Area Movement", "Contracts", "Deck, Bag, and Pool Building", "Delayed Purchase", "End Game Bonuses", "Hand Management"]
+   ,description:"On an uninhabited island in uncharted seas, explorers have found traces of a great civilization. Now you will lead an expedition to explore the island, find lost artifacts, and face fearsome guardians, all in a quest to learn the island's secrets. Lost Ruins of Arnak combines deck-building and worker placement in a game of exploration, resource management, and discovery. In addition to traditional deck-builder effects, cards can also be used to place workers, and new worker actions become availa"},
+
+  {id:"ark_nova",name:"Ark Nova"
+   ,row:3,col:4,categories:["Strategy", "Euro", "Engine Building"]
+   ,players:"1-4",playTime:"90-150 min"
+   ,complexity:3.8,bggId:342942
+   ,spineColor:"#2a7a4a",boxSize:"lg"
+   ,designer:"Mathias Wigge"
+   ,year:2021
+   ,bggRating:8.5
+   ,mechanics:["Contracts", "End Game Bonuses", "Events", "Grid Coverage", "Hand Management", "Hexagon Grid"]
+   ,description:"In Ark Nova, you will plan and design a modern, scientifically managed zoo. With the ultimate goal of owning the most successful zoological establishment, you will build enclosures, accommodate animals, and support conservation projects all over the world. Specialists and unique buildings will help you in achieving this goal. Each player has a set of five action cards to manage their gameplay, and the power of an action is determined by the slot the card currently occupies. The cards in question"},
+
+  {id:"thunder_road",name:"Thunder Road: Vendetta"
+   ,row:3,col:4,categories:["Thematic", "Dice", "Family"]
+   ,players:"2-4",playTime:"45-75 min"
+   ,complexity:1.97,bggId:342070
+   ,spineColor:"#d04020",boxSize:"lg"
+   ,designer:"Dave Chalker, Brett Myers, Noah Cohen"
+   ,year:2023
+   ,bggRating:7.9
+   ,mechanics:["Dice Rolling", "Die Icon Resolution", "Grid Movement", "Hexagon Grid", "Player Elimination", "Roll / Spin and Move"]
+   ,description:"Thunder Road: Vendetta is a revved-up restoration of the classic 1986 game of mayhem on the asphalt. Grab your crew, roll your dice, race your cars, shoot your guns, and try not to get wrecked. This new version features exciting new additions, including random hazard tokens, such as wrecks, oil slicks, and more. Damage isn't merely one and done. Now, you'll draw damage tokens with exciting effects that can send your car careening across the board. You'll also have more choices on your turn, assi"},
+
+  {id:"abyss",name:"Abyss"
+   ,row:3,col:5,categories:["Strategy", "Card Game", "Thematic"]
+   ,players:"2-4",playTime:"30-60 min"
+   ,complexity:2.32,bggId:155987
+   ,spineColor:"#0a2a5a",boxSize:"md"
+   ,designer:"Bruno Cathala, Charles Chevallier"
+   ,year:2014
+   ,bggRating:7.3
+   ,mechanics:["Auction / Bidding", "Hand Management", "Memory", "Open Drafting", "Push Your Luck", "Set Collection"]
+   ,description:"The Abyss power is once again vacant, so the time has come to get your hands on the throne and its privileges. Use all of your cunning to win or buy votes in the Council. Recruit the most influential Lords and abuse their powers to take control of the most strategic territories. Finally, impose yourself as the only one able to rule the Abyssal people! Abyss is a game of development, combination and collection in which players try to take control of strategic locations in an underwater city. To a"},
+
+  {id:"mystic_vale",name:"Mystic Vale"
+   ,row:3,col:5,categories:["Card Game", "Strategy", "Engine Building"]
+   ,players:"2-4",playTime:"45-60 min"
+   ,complexity:2.26,bggId:194607
+   ,spineColor:"#2a5a2a",boxSize:"md"
+   ,designer:"John D. Clair"
+   ,year:2016
+   ,bggRating:7.2
+   ,mechanics:["Deck, Bag, and Pool Building", "End Game Bonuses", "Hand Management", "Layering", "Open Drafting", "Push Your Luck"]
+   ,description:"A curse has been placed on the Valley of Life. Hearing the spirits of nature cry out for aid, clans of druids have arrived, determined to use their blessings to heal the land and rescue the spirits. It will require courage and also caution, as the curse can overwhelm the careless who wield too much power. In Mystic Vale, 2 to 4 players take on the role of druidic clans trying to cleanse the curse upon the land. Each turn, you play cards into your field to gain powerful advancements and useful va"},
+
+  {id:"spirit_island_je",name:"Spirit Island: Jagged Earth"
+   ,row:3,col:5,categories:["Co-op", "Strategy", "Thematic"]
+   ,players:"1-6",playTime:"90-120 min"
+   ,complexity:4.52,bggId:262722
+   ,spineColor:"#5a3a1a",boxSize:"lg"
+   ,designer:"R. Eric Reuss"
+   ,year:2020
+   ,bggRating:9.3
+   ,mechanics:["Area Majority / Influence", "Cooperative Game", "Hand Management", "Modular Board", "Set Collection", "Simultaneous Action Selection"]
+   ,description:"The battle against the colonizing invaders rages on! Known Spirits adopt different Aspects to battle the Invaders, and new Spirits join the fray. Some transform the island, making it hazardous and deadly to all humanity, while others work with the Dahan to fight back in other ways. Hard choices confront the Spirits, and even Stone's Unyielding Defiance must weigh trade-offs. Jagged Earth is an expansion for the base game of Spirit Island. No other expansions are required to use it, though it is "},
+
+  {id:"spirit_island",name:"Spirit Island"
+   ,row:3,col:5,categories:["Co-op", "Strategy", "Thematic"]
+   ,players:"1-4",playTime:"90-120 min"
+   ,complexity:4.07,bggId:162886
+   ,spineColor:"#3a6040",boxSize:"xl"
+   ,designer:"R. Eric Reuss"
+   ,year:2017
+   ,bggRating:8.3
+   ,mechanics:["Action Retrieval", "Area Majority / Influence", "Automatic Resource Growth", "Campaign / Battle Card Driven", "Cooperative Game", "Deck, Bag, and Pool Building"]
+   ,description:"In the most distant reaches of the world, magic still exists, embodied by spirits of the land, of the sky, and of every natural thing. As the great powers of Europe stretch their colonial empires further and further, they will inevitably lay claim to a place where spirits still hold power - and when they do, the land itself will fight back alongside the islanders who live there. Spirit Island is a complex and thematic co-operative game about defending your island home from colonizing Invaders. P"},
+
+  {id:"hegemony",name:"Hegemony"
+   ,row:3,col:6,categories:["Strategy", "Euro", "Thematic"]
+   ,players:"2-4",playTime:"90-180 min"
+   ,complexity:4.26,bggId:321608
+   ,spineColor:"#8a2a2a",boxSize:"xl"
+   ,designer:"Vangelis Bagiartakis, Varnavas Timotheou"
+   ,year:2023
+   ,bggRating:8.4
+   ,mechanics:["Action / Event", "Hand Management", "Simulation", "Variable Player Powers", "Voting", "Worker Placement, Different Worker Types"]
+   ,description:"Extended edition includes Crisis & Control expansion. The Nation is in disarray and a war is waging between the classes. The working class faces a dismantled welfare system, the capitalists are losing their hard-earned profits, the middle class is gradually fading and the state is sinking into a deep deficit. Amidst all this chaos, the only person who can provide guidance is... you. Will you take the side of the working class and fight for social reforms? Or will you stand with the corporations "},
+
+  {id:"caverna_forgotten",name:"Caverna: The Forgotten Folk"
+   ,row:3,col:6,categories:["Strategy", "Euro", "Worker Placement"]
+   ,players:"1-7",playTime:"30-210 min"
+   ,complexity:3.79,bggId:245932
+   ,spineColor:"#6a5a3a",boxSize:"md"
+   ,designer:"Uwe Rosenberg, Alex Wilber"
+   ,year:2018
+   ,bggRating:8.2
+   ,mechanics:["Tile Placement", "Variable Player Powers", "Worker Placement"]
+   ,description:"Caverna: The Forgotten Folk — Caverna: Vergessene V&ouml;lker in German — originated as a fan project on BoardGameGeek, and Caverna publisher Lookout Games has decided to work with the designer to develop this material and release it as an official expansion. Forgotten Folk consists of eight different species or race packs such as elves, dark elves, and trolls, and now each player in Caverna can be one of these species instead of only the dwarves in the base game. Each species has special advant"},
+
+  {id:"caverna",name:"Caverna"
+   ,row:3,col:6,categories:["Strategy", "Euro", "Worker Placement"]
+   ,players:"1-7",playTime:"30-210 min"
+   ,complexity:3.78,bggId:102794
+   ,spineColor:"#5a4a30",boxSize:"xl"
+   ,designer:"Uwe Rosenberg"
+   ,year:2013
+   ,bggRating:7.9
+   ,mechanics:["Automatic Resource Growth", "Increase Value of Unchosen Resources", "Solo / Solitaire Game", "Tile Placement", "Turn Order: Claim Action", "Worker Placement"]
+   ,description:"Following along the same lines as its predecessor (Agricola), Caverna: The Cave Farmers is a worker-placement game at heart, with a focus on farming. In the game, you are the bearded leader of a small dwarf family that lives in a little cave in the mountains. You begin the game with a farmer and his spouse, and each member of the farming family represents an action that the player can take each turn. Together, you cultivate the forest in front of your cave and dig deeper into the mountain. You f"},
+
+  {id:"shipwrights",name:"Shipwrights of the North Sea"
+   ,row:3,col:6,categories:["Strategy", "Card Game", "Euro"]
+   ,players:"2-5",playTime:"60 min"
+   ,complexity:2.31,bggId:75547
+   ,spineColor:"#2a5a7a",boxSize:"md"
+   ,designer:"Shem Phillips"
+   ,year:2014
+   ,bggRating:6.3
+   ,mechanics:["Commodity Speculation", "Hand Management", "Open Drafting", "Trading"]
+   ,description:"Shipwrights of the North Sea is set in the early years of the Viking Age, circa 900 AD. As Viking shipwrights, players compete to build the greatest fleet on the North Sea. Players must collect oak, wool and iron, as well as getting other craftsmen on board to help. Gold is a precious commodity, and must be spent wisely. As you would expect, the township is filled with an array of characters, bad and worse. Better hope they're on your side! Aim of the GameThe aim of Shipwrights of the North Sea "},
+
+  {id:"seven_wonders_architects",name:"7 Wonders Architects"
+   ,row:4,col:2,categories:["Family", "Card Game", "Strategy"]
+   ,players:"2-7",playTime:"25 min"
+   ,complexity:1.37,bggId:346703
+   ,spineColor:"#c0943a",boxSize:"md"
+   ,designer:"Antoine Bauza"
+   ,year:2021
+   ,bggRating:7.0
+   ,mechanics:["Neighbor Scope", "Open Drafting", "Set Collection", "Variable Player Powers"]
+   ,description:"In 7 Wonders: Architects, 2-7 players race to become a leader of the ancient world by completing an architectural wonder that will last through the ages. Players receive an unconstructed wonder at the beginning of the game and must collect resources to build their society, develop military might to navigate conflicts, oversee resource management, research science improvements, and collect civil victory points as they race to leave their mark on world history."},
+
+  {id:"last_will",name:"Last Will"
+   ,row:4,col:2,categories:["Strategy", "Euro", "Worker Placement"]
+   ,players:"2-5",playTime:"45-75 min"
+   ,complexity:2.72,bggId:97842
+   ,spineColor:"#306a30",boxSize:"md"
+   ,designer:"Vladimír Suchý"
+   ,year:2011
+   ,bggRating:7.2
+   ,mechanics:["Action Points", "Hand Management", "Victory Points as a Resource", "Worker Placement"]
+   ,description:"In his last will, your rich uncle stated that all of his millions will go to the nephew who can enjoy money the most. How to find out which nephew should be rich? You will each be given a large amount of money and whoever can spend it first will be the rightful heir. Visit the most exclusive theatres or eat in the most expensive restaurants. Buy old properties for the price of new ones and sell them as ruins. Host a huge party in your mansion or on your private boat. Spend like your life would d"},
+
+  {id:"feast_for_odin_exp",name:"A Feast for Odin: The Norwegians"
+   ,row:4,col:2,categories:["Strategy", "Euro", "Worker Placement"]
+   ,players:"1-4",playTime:"30-120 min"
+   ,complexity:3.99,bggId:216788
+   ,spineColor:"#4a3a2a",boxSize:"md"
+   ,designer:"Gernot Köpke, Uwe Rosenberg"
+   ,year:2018
+   ,bggRating:8.9
+   ,mechanics:["Dice Rolling", "Income", "Pattern Building", "Solo / Solitaire Game", "Tile Placement", "Worker Placement"]
+   ,description:"The first large expansion for A Feast for Odin, The Norwegians, includes a viking-sized number of additions to the game, adding new strategies and puzzle-tiles. Renewed action board: The largest of the new additions, made of three double-sided pieces that can be flipped to show different actions based on the number of players, opening up new action paths and increasing the chances of players getting in each others' way. It contains new opportunities like butchering, elk-hunting, fishing, and thi"},
+
+  {id:"carnegie",name:"Carnegie"
+   ,row:4,col:2,categories:["Strategy", "Euro", "Worker Placement", "Engine Building"]
+   ,players:"1-4",playTime:"120-180 min"
+   ,complexity:3.82,bggId:310873
+   ,spineColor:"#2a4a2a",boxSize:"lg"
+   ,designer:"Xavier Georges"
+   ,year:2022
+   ,bggRating:8.0
+   ,mechanics:["Action Retrieval", "Area Movement", "Connections", "End Game Bonuses", "Follow", "Grid Movement"]
+   ,description:"Carnegie was inspired by the life of Andrew Carnegie who was born in Scotland in 1835. Andrew Carnegie and his parents emigrated to the United States in 1848. Although he started his career as a telegraphist, his role as one of the major players in the rise of the United States’ steel industry made him one of the richest men in the world and an icon of the American dream. Andrew Carnegie was also a benefactor and philanthropist; upon his death in 1919, more than $350 million of his wealth was be"},
+
+  {id:"adventure_tactics",name:"Adventure Tactics: Domianne's Tower"
+   ,row:4,col:3,categories:["Co-op", "Campaign", "Strategy", "Thematic"]
+   ,players:"1-5",playTime:"60-90 min"
+   ,complexity:2.54,bggId:268504
+   ,spineColor:"#d4b060",boxSize:"xl"
+   ,designer:"Nicholas Yu"
+   ,year:2021
+   ,bggRating:7.8
+   ,mechanics:["Campaign / Battle Card Driven", "Cooperative Game", "Dice Rolling", "Grid Movement", "Role Playing", "Scenario / Mission / Campaign Game"]
+   ,description:"SHARPEN YOUR SWORDS. READY YOUR SPELLS. GATHER YOUR ALLIES. The ruthless Queen Domianne rules the kingdom of Astelia with an iron fist, but an ancient prophecy has emerged which threatens her reign. The adventure starts in your humble village and eventually leads to the seat of Domianne's power, the peerless and ancient Tower of Greylock. Adventure Tactics: Domianne's Tower is an encounter-based, campaign-driven, cooperative tactical combat game. Begin your journey as one of 5 Basic Classes and "},
+
+  {id:"heat_heavy_rain",name:"Heat: Heavy Rain"
+   ,row:4,col:4,categories:["Racing", "Thematic", "Family"]
+   ,players:"1-6",playTime:"30-60 min"
+   ,complexity:2.1,bggId:0
+   ,spineColor:"#4a6a8a",boxSize:"md"
+   ,description:"Expansion for Heat: Pedal to the Metal adding rain and night driving conditions."},
+
+  {id:"dune_imperium",name:"Dune: Imperium"
+   ,row:4,col:4,categories:["Strategy", "Deck Building", "Worker Placement", "Thematic"]
+   ,players:"1-4",playTime:"60-120 min"
+   ,complexity:3.08,bggId:316554
+   ,spineColor:"#c4940a",boxSize:"lg"
+   ,designer:"Paul Dennen"
+   ,year:2020
+   ,bggRating:8.4
+   ,mechanics:["Card Play Conflict Resolution", "Deck, Bag, and Pool Building", "Delayed Purchase", "Force Commitment", "Increase Value of Unchosen Resources", "Multi-Use Cards"]
+   ,description:"Dune: Imperium is a game that uses deck building to add a hidden information angle to traditional worker placement. It finds inspiration in elements and characters from the Dune legacy, both the new film from Legendary Pictures and the seminal literary series from Frank Herbert, Brian Herbert, and Kevin J. Anderson. As a leader of one of the Great Houses of the Landsraad, raise your banner and marshal your forces and spies. War is coming, and at the center of the conflict is Arrakis – Dune, the "},
+
+  {id:"feast_for_odin",name:"A Feast for Odin"
+   ,row:4,col:4,categories:["Strategy", "Euro", "Worker Placement"]
+   ,players:"1-4",playTime:"30-120 min"
+   ,complexity:3.87,bggId:177736
+   ,spineColor:"#3a3a5a",boxSize:"xl"
+   ,designer:"Uwe Rosenberg"
+   ,year:2016
+   ,bggRating:8.2
+   ,mechanics:["Action Points", "Automatic Resource Growth", "Dice Rolling", "Enclosure", "Grid Coverage", "Hand Management"]
+   ,description:"A Feast for Odin is a saga in the form of a board game. You are reliving the cultural achievements, mercantile expeditions, and pillages of those tribes we know as Viking today — a term that was used quite differently towards the end of the first millennium. When the northerners went out for a raid, they used to say they headed out for a viking. Their Scandinavian ancestors, however, were much more than just pirates. They were explorers and founders of states. Leif Eriksson is said to be the fir"},
+
+  {id:"thunderbirds",name:"Thunderbirds"
+   ,row:4,col:4,categories:["Co-op", "Thematic", "Family"]
+   ,players:"1-4",playTime:"45-75 min"
+   ,complexity:2.48,bggId:160610
+   ,spineColor:"#2050a0",boxSize:"md"
+   ,designer:"Matt Leacock"
+   ,year:2015
+   ,bggRating:7.5
+   ,mechanics:["Action Points", "Area Movement", "Cooperative Game", "Dice Rolling", "Pick-up and Deliver", "Set Collection"]
+   ,description:"The co-operative game Thunderbirds, released in 2015 to celebrate the 50th anniversary of the cult hit TV show, features the iconic Thunderbirds machines and a high-octane world full of disasters and victims for players to rescue. Set in the year 2065, Thunderbirds follows the exploits of International Rescue, a secret organization committed to saving human life, secretly founded and funded by the millionaire Tracy family, with the motto: &lsquo;Never give in, at any cost!’ International Rescue "},
+
+  {id:"blitzkrieg",name:"Blitzkrieg!"
+   ,row:4,col:6,categories:["Strategy", "Area Control"]
+   ,players:"1-2",playTime:"20 min"
+   ,complexity:1.91,bggId:258210
+   ,spineColor:"#5a5a5a",boxSize:"sm"
+   ,designer:"Paolo Mori"
+   ,year:2019
+   ,bggRating:7.5
+   ,mechanics:["Area Majority / Influence", "Deck, Bag, and Pool Building", "Hand Management", "Kill Steal", "Race", "Solo / Solitaire Game"]
+   ,description:"Recreate World War Two in 20 minutes! The perfect wargame for non-wargamers, Blitzkrieg! allows two players to battle across the War’s most iconic theatres, winning key campaigns and building military might. Players draw army tokens from a bag to determine their starting forces and to replenish their losses. Rather than &lsquo;fighting’ battles with dice or cards, players allocate their military resources to each theatre’s campaigns, winning victory points, further resources, special weapons, an"},
+
+  {id:"mdt_deadpool",name:"Marvel Dice Throne: Deadpool"
+   ,row:4,col:6,categories:["Dice", "Card Game", "Thematic"]
+   ,players:"2",playTime:"20-40 min"
+   ,complexity:2.1,bggId:0
+   ,spineColor:"#cc2233",boxSize:"sm"
+   ,description:"Deadpool hero pack for Marvel Dice Throne."},
+
+  {id:"mdt_cap_panther",name:"Marvel Dice Throne: Captain Marvel + Black Panther"
+   ,row:4,col:6,categories:["Dice", "Card Game", "Thematic"]
+   ,players:"2",playTime:"20-40 min"
+   ,complexity:2.1,bggId:0
+   ,spineColor:"#2a2a6a",boxSize:"md"
+   ,description:"Captain Marvel and Black Panther hero pack for Marvel Dice Throne."},
+
+  {id:"cthulhu_dmd",name:"Cthulhu: Death May Die"
+   ,row:4,col:6,categories:["Co-op", "Thematic", "Dice"]
+   ,players:"1-5",playTime:"90-120 min"
+   ,complexity:2.5,bggId:253344
+   ,spineColor:"#1a3a1a",boxSize:"xl"
+   ,designer:"Rob Daviau, Eric M. Lang"
+   ,year:2019
+   ,bggRating:8.2
+   ,mechanics:["Action Points", "Area Movement", "Cooperative Game", "Dice Rolling", "Role Playing", "Scenario / Mission / Campaign Game"]
+   ,description:"In Cthulhu: Death May Die, inspired by the writings of H.P. Lovecraft, you and your fellow players represent investigators in the 1920s who instead of trying to stop the coming of Elder Gods, want to summon those otherworldly beings so that you can put a stop to them permanently. You start the game insane, and while your long-term goal is to shoot Cthulhu in the face, so to speak, at some point during the game you'll probably fail to mitigate your dice rolls properly and your insanity will cause"},
+
+  {id:"kill_hitler",name:"I Would Kill Hitler"
+   ,row:5,col:1,categories:["Party", "Card Game"]
+   ,players:"3-8",playTime:"15-30 min"
+   ,complexity:1.2,bggId:0
+   ,spineColor:"#8a7a50",boxSize:"md"
+   ,description:"A party card game about absurd hypothetical dilemmas involving time travel."},
+
+  {id:"kitchen_rush",name:"Kitchen Rush"
+   ,row:5,col:5,categories:["Co-op", "Family", "Worker Placement"]
+   ,players:"1-4",playTime:"20-60 min"
+   ,complexity:2.19,bggId:223953
+   ,spineColor:"#d07030",boxSize:"md"
+   ,designer:"Vangelis Bagiartakis, Dávid Turczi"
+   ,year:2017
+   ,bggRating:7.2
+   ,mechanics:["Action Timer", "Cooperative Game", "Real-Time", "Simulation", "Solo / Solitaire Game", "Worker Placement"]
+   ,description:"You've just inherited an old restaurant and you must turn it into a successful business! Hire personnel, order the right ingredients and be ready to serve the customers that enter your restaurant. The success will depend entirely on your efficiency in the kitchen! Kitchen Rush is an innovative real-time cooperative game that simulates the excitement of a high-pressure kitchen environment. It does so through worker placement, using hourglasses as your workers. These hourglasses are used to take o"},
+
+  {id:"detective",name:"Detective: A Modern Crime Board Game"
+   ,row:5,col:5,categories:["Co-op", "Deduction", "Thematic", "Campaign"]
+   ,players:"1-5",playTime:"120-180 min"
+   ,complexity:2.74,bggId:223321
+   ,spineColor:"#1a1a3a",boxSize:"lg"
+   ,designer:"Jakub Łapot, Przemysław Rymer, Ignacy Trzewiczek"
+   ,year:2018
+   ,bggRating:7.6
+   ,mechanics:["Cooperative Game", "Narrative Choice / Paragraph", "Scenario / Mission / Campaign Game", "Solo / Solitaire Game", "Storytelling", "Variable Player Powers"]
+   ,description:"In Detective: A Modern Crime Board Game you are going to solve FIVE different cases and find out what connects them, you are going to BREAK THE 4th WALL by using every resource you can, you are going to browse the game's DEDICATED DATABASE simulating your agency's resources, you will enter a city maze of old mysteries and fresh CRIME, and you will be able to COOPERATE with other agents or solve the mystery on your own. Take the job of a real detective in a modern setting! In Detective: A Modern "},
+
+  {id:"mdt_xmen",name:"Marvel Dice Throne: X-Men"
+   ,row:5,col:5,categories:["Dice", "Card Game", "Thematic"]
+   ,players:"2-6",playTime:"20-40 min"
+   ,complexity:2.1,bggId:0
+   ,spineColor:"#c0a020",boxSize:"md"
+   ,description:"X-Men hero pack for Marvel Dice Throne."},
+
+  {id:"kelp_expansion",name:"Kelp: Brilliant Behaviours"
+   ,row:5,col:5,categories:["Strategy", "Thematic"]
+   ,players:"2",playTime:"30-45 min"
+   ,complexity:2.4,bggId:0
+   ,spineColor:"#2a7a6a",boxSize:"sm"
+   ,description:"Expansion for Kelp adding new behaviour cards and abilities."},
+
+  {id:"dune_immortality",name:"Dune: Imperium - Immortality"
+   ,row:5,col:6,categories:["Strategy", "Deck Building", "Worker Placement", "Thematic"]
+   ,players:"1-4",playTime:"60-120 min"
+   ,complexity:3.33,bggId:367466
+   ,spineColor:"#b08a0a",boxSize:"md"
+   ,designer:"Paul Dennen"
+   ,year:2022
+   ,bggRating:8.5
+   ,mechanics:["Card Play Conflict Resolution", "Deck, Bag, and Pool Building", "Force Commitment", "Open Drafting", "Race", "Solo / Solitaire Game"]
+   ,description:"The Bene Tleilax advance their own agenda by trading in genetic innovations. Will you hire Face Dancer spies of unmatched skill? Regrow damaged tissue and organs? Or dare to employ people restored to life as gholas? Make shadowy deals with the Tleilaxu to harvest genetic specimens. Unlock the potential of scientific research. Graft cards together to empower your Agents. Explore a universe of possibilities with Dune: Imperium – Immortality. —description from the publisher"},
+
+  {id:"spirit_ff",name:"Spirit Island: Feather & Flame"
+   ,row:5,col:6,categories:["Co-op", "Strategy", "Thematic"]
+   ,players:"1-6",playTime:"90-120 min"
+   ,complexity:4.1,bggId:0
+   ,spineColor:"#a05020",boxSize:"md"
+   ,description:"Expansion for Spirit Island with new spirits and scenarios."},
+
+  {id:"spirit_bc",name:"Spirit Island: Branch & Claw"
+   ,row:5,col:6,categories:["Co-op", "Strategy", "Thematic"]
+   ,players:"1-4",playTime:"90-120 min"
+   ,complexity:4.24,bggId:193065
+   ,spineColor:"#4a6a2a",boxSize:"md"
+   ,designer:"R. Eric Reuss"
+   ,year:2017
+   ,bggRating:9.0
+   ,mechanics:["Cooperative Game", "Hand Management", "Modular Board", "Open Drafting", "Simultaneous Action Selection", "Variable Player Powers"]
+   ,description:"The Branch & Claw Expansion for Spirit Island features: Two new Spirits! (Sharp Fangs Behind the Leaves and Keeper of the Forbidden Wilds) A new Adversary! (France) A new step added to the Invader Phase of the game: Events! The Event Deck has events that happen each turn, adding further variation to the game play. New Tokens that can be added to the board! Wilds, Disease and Strife Tokens prevent the Invaders from Exploring, Building and Ravaging, respectively, and Beast tokens represent the wil"},
+
+  {id:"coffee_roaster",name:"Coffee Roaster"
+   ,row:5,col:6,categories:["Solo", "Strategy"]
+   ,players:"1",playTime:"10-30 min"
+   ,complexity:2.17,bggId:196526
+   ,spineColor:"#5a3a1a",boxSize:"sm"
+   ,designer:"Saashi"
+   ,year:2015
+   ,bggRating:7.3
+   ,mechanics:["Deck, Bag, and Pool Building", "Memory", "Once-Per-Game Abilities", "Push Your Luck", "Solo / Solitaire Game", "Variable Set-up"]
+   ,description:"Coffee Roaster is a solitaire pool-building game. You choose a variety of coffee beans you want to roast, and put a number of tokens specific to that variety into a bag. Each turn, you draw a number of bean tokens randomly from the bag to advance their roast level. When you are finished, you make a cup-testing to check the taste of your coffee and score points accordingly. Each variety has its own target roast level, but approaching the target is not enough for perfect roasting; you also have to"},
+
+  {id:"l_project",name:"L Project"
+   ,row:5,col:6,categories:["Strategy", "Abstract"]
+   ,players:"2",playTime:"15-30 min"
+   ,complexity:1.5,bggId:0
+   ,spineColor:"#4a4a6a",boxSize:"sm"
+   ,description:"A two-player abstract strategy game."},
+
+  {id:"targi",name:"Targi"
+   ,row:5,col:6,categories:["Strategy", "Euro", "Worker Placement"]
+   ,players:"2",playTime:"60 min"
+   ,complexity:2.34,bggId:118048
+   ,spineColor:"#c4a060",boxSize:"sm"
+   ,designer:"Andreas Steiger"
+   ,year:2012
+   ,bggRating:7.6
+   ,mechanics:["End Game Bonuses", "Modular Board", "Open Drafting", "Pattern Building", "Set Collection", "Square Grid"]
+   ,description:"Unlike in other cultures, the desert Tuareg men, known as Targi, cover their faces, whereas women of the tribe do not wear veils. They run the household and have the last word at home in the tents. Different families are divided into tribes, headed by the &lsquo;Imascheren’ (or nobles). As leader of a Tuareg tribe, players trade goods from near (such as dates and salt) and far (like pepper) in order to obtain gold and other benefits, and enlarge their family. In each round their new offerings ar"},
+
+  {id:"carpe_diem",name:"Carpe Diem"
+   ,row:6,col:1,categories:["Strategy", "Euro"]
+   ,players:"2-4",playTime:"45-75 min"
+   ,complexity:2.54,bggId:245934
+   ,spineColor:"#7a5a30",boxSize:"md"
+   ,designer:"Stefan Feld"
+   ,year:2018
+   ,bggRating:7.5
+   ,mechanics:["Area Movement", "Contracts", "End Game Bonuses", "Open Drafting", "Tile Placement", "Turn Order: Progressive"]
+   ,description:"The players slip into the role of rich patricians in ancient Rome. Everyone is trying to build a lucrative city district to score as many prestige points as possible. The novel way to get to the individual buildings of a district combined with a large variety of score cards make for an unusual game with a large number of strategies. From the successful designer, Stefan Feld."},
+
+  {id:"hallertau",name:"Hallertau"
+   ,row:6,col:1,categories:["Strategy", "Euro", "Worker Placement"]
+   ,players:"1-4",playTime:"50-140 min"
+   ,complexity:3.29,bggId:300322
+   ,spineColor:"#5a8a3a",boxSize:"lg"
+   ,designer:"Uwe Rosenberg"
+   ,year:2020
+   ,bggRating:7.8
+   ,mechanics:["Action Points", "Advantage Token", "Automatic Resource Growth", "Contracts", "End Game Bonuses", "Hand Management"]
+   ,description:"The Hallertau in Bavaria, Germany is the largest continuous hop-producing region in the world. It prides itself upon being the first in Middle Europe to cultivate hops. This game is set around 1850, when the Hallertau became what it is today. As chief of a small Bavarian village in the Hallertau, your objective is to increase its wealth and prestige in the eyes of the world. To achieve this, you will need to supply the local crafts folk with goods from agriculture and sheep breeding. Place your "},
+
+  {id:"mu_xmen",name:"Marvel United: X-Men"
+   ,row:6,col:1,categories:["Co-op", "Thematic", "Family"]
+   ,players:"1-4",playTime:"40 min"
+   ,complexity:1.99,bggId:336382
+   ,spineColor:"#2050a0",boxSize:"md"
+   ,designer:"Andrea Chiarvesio, Eric M. Lang, Francesco Rugerfred Sedda"
+   ,year:2021
+   ,bggRating:8.0
+   ,mechanics:["Cooperative Game", "Hand Management", "Modular Board", "Solo / Solitaire Game", "Team-Based Game", "Variable Player Powers"]
+   ,description:"In Marvel United: X-Men, you take the role of iconic Marvel Heroes cooperating to stop the master plan of a powerful Villain controlled by the game. Each Villain unveils their unique master plan, with cards that trigger different effects, and threats that pose challenges across the locations. Heroes must choose carefully the cards to play from their unique decks, that not only offer different actions and superpowers to use, but also combine with the actions of other Heroes to do the impossible. "},
+
+  {id:"marvel_united",name:"Marvel United"
+   ,row:6,col:1,categories:["Co-op", "Thematic", "Family"]
+   ,players:"1-4",playTime:"40 min"
+   ,complexity:1.84,bggId:298047
+   ,spineColor:"#cc2244",boxSize:"md"
+   ,designer:"Andrea Chiarvesio, Eric M. Lang"
+   ,year:2020
+   ,bggRating:7.5
+   ,mechanics:["Cooperative Game", "Hand Management", "Modular Board", "Solo / Solitaire Game", "Variable Player Powers"]
+   ,description:"In Marvel United, you take the role of iconic Marvel Heroes cooperating to stop the master plan of a powerful Villain controlled by the game. Each Villain unveils their unique master plan, with cards that trigger different effects, and threats that pose challenges across the locations. Heroes must choose carefully the cards to play from their unique decks, that not only offer different actions and superpowers to use, but also combine with the actions of other Heroes to do the impossible. Build y"},
+
+  {id:"clank_catacombs",name:"Clank! Catacombs"
+   ,row:6,col:2,categories:["Strategy", "Deck Building", "Thematic", "Adventure"]
+   ,players:"2-4",playTime:"45-90 min"
+   ,complexity:2.48,bggId:365717
+   ,spineColor:"#3a3050",boxSize:"lg"
+   ,designer:"Paul Dennen"
+   ,year:2022
+   ,bggRating:8.2
+   ,mechanics:["Deck, Bag, and Pool Building", "Delayed Purchase", "End Game Bonuses", "Map Addition", "Map Deformation", "Modular Board"]
+   ,description:"The catacombs of the skeletal dragon Umbrok Vessna are mysterious and dangerous. Portals transport you all around the dungeon depths. Wayshrines offer vast riches to intrepid explorers. Prisoners are counting on you to free them. Ghosts, once disturbed, may haunt you to death. Despite all that, it's time to leave the board behind with Clank! Catacombs, a standalone deck-building adventure. Each trip into the catacombs is unique since you lay tiles to create the dungeon. You can play using only t"},
+
+  {id:"witcher_skellige",name:"The Witcher: Skellige"
+   ,row:6,col:2,categories:["Strategy", "Thematic"]
+   ,players:"2-4",playTime:"60-90 min"
+   ,complexity:2.5,bggId:0
+   ,spineColor:"#3a5a7a",boxSize:"md"
+   ,description:"A Witcher-themed board game set on the isles of Skellige."},
+
+  {id:"witcher_wild_hunt",name:"The Witcher: Old World Wild Hunt"
+   ,row:6,col:2,categories:["Strategy", "Thematic", "Adventure"]
+   ,players:"1-5",playTime:"90-150 min"
+   ,complexity:2.88,bggId:331106
+   ,spineColor:"#2a3a2a",boxSize:"lg"
+   ,designer:"Łukasz Woźniak"
+   ,year:2023
+   ,bggRating:7.9
+   ,mechanics:["Card Play Conflict Resolution", "Deck, Bag, and Pool Building", "Dice Rolling", "Events", "Hand Management", "Increase Value of Unchosen Resources"]
+   ,description:"In The Witcher: Old World, you become a witcher — a professional monster slayer — and immerse yourself in the legendary universe of The Witcher franchise. Set years before the saga of Geralt of Rivia, The Witcher: Old World explores a time when monsters roamed the Continent in greater numbers, creating a constant peril that required the attention of expertly trained monster slayers, known as witchers. Five competing schools trained their adepts through brutal regimes, and once fully prepared, th"},
+
+  {id:"planet_unknown",name:"Planet Unknown"
+   ,row:6,col:2,categories:["Strategy", "Puzzle"]
+   ,players:"1-6",playTime:"60-80 min"
+   ,complexity:2.25,bggId:258779
+   ,spineColor:"#1a3a5a",boxSize:"lg"
+   ,designer:"Ryan Lambert, Adam Rehberg"
+   ,year:2022
+   ,bggRating:7.8
+   ,mechanics:["End Game Bonuses", "Events", "Grid Coverage", "Grid Movement", "Hidden Victory Points", "Map Addition"]
+   ,description:"Our planet has run out of resources, and we are forced to move. We have discovered a series of planets and sent our rovers to test their environment with the hope of colonization. Our rovers have confirmed 1-6 viable colonization options. Planet Unknown is a competitive game for 1-6 players in which players attempt to develop the best planet. Each round, each player places one polyomino-shaped, dual-resource tile on their planet. Each resource represents the infrastructure needed to support life"},
+
+  {id:"power_grid",name:"Power Grid"
+   ,row:6,col:3,categories:["Strategy", "Euro", "Engine Building"]
+   ,players:"2-6",playTime:"120 min"
+   ,complexity:3.25,bggId:2651
+   ,spineColor:"#2a6a2a",boxSize:"md"
+   ,designer:"Friedemann Friese"
+   ,year:2004
+   ,bggRating:7.8
+   ,mechanics:["Auction / Bidding", "Auction: Turn Order Until Pass", "Catch the Leader", "Income", "Market", "Network and Route Building"]
+   ,description:"Power Grid is the updated release of the Friedemann Friese crayon game Funkenschlag. It removes the crayon aspect from network building in the original edition, while retaining the fluctuating commodities market like Crude: The Oil Game and an auction round intensity reminiscent of The Princes of Florence. The objective of Power Grid is to supply the most cities with power when someone's network gains a predetermined size. In this new edition, players mark pre-existing routes between cities for "},
+
+  {id:"mind_mgmt",name:"Mind MGMT"
+   ,row:6,col:3,categories:["Strategy", "Deduction", "Thematic"]
+   ,players:"1-5",playTime:"45-75 min"
+   ,complexity:2.92,bggId:284653
+   ,spineColor:"#7050a0",boxSize:"md"
+   ,designer:"Jay Cormier, Sen-Foong Lim"
+   ,year:2021
+   ,bggRating:7.8
+   ,mechanics:["Cooperative Game", "Deduction", "Grid Movement", "Hidden Movement", "Paper-and-Pencil", "Point to Point Movement"]
+   ,description:"Working from the shadows, Mind MGMT once used its psychically-powered agents to put a stop to global crises. However, absolute power corrupts absolutely, and Mind MGMT is now rotting from the inside. To tighten its iron grip on the world stage, Mind MGMT deploys covert operatives around the world to recruit other psychically-attuned individuals to their side. How can this enigmatic organization, hell bent on global domination, be defeated? Thankfully, a few renegade agents have figured out that "},
+
+  {id:"alchemists",name:"Alchemists"
+   ,row:6,col:3,categories:["Strategy", "Euro", "Deduction"]
+   ,players:"2-4",playTime:"120 min"
+   ,complexity:3.92,bggId:161970
+   ,spineColor:"#6a3a1a",boxSize:"lg"
+   ,designer:"Matúš Kotry"
+   ,year:2014
+   ,bggRating:7.6
+   ,mechanics:["Action Drafting", "Constrained Bidding", "Deduction", "End Game Bonuses", "Events", "Hand Management"]
+   ,description:"In Alchemists, two to four budding alchemists compete to discover the secrets of their mystical art. Points can be earned in various ways, but most points are earned by publishing theories – correct theories, that is — and therein lies the problem. The game is played in six rounds. At the beginning of the round, players choose their play order. Those who choose to play later get more rewards. Players declare all their actions by placing cubes on the various action spaces, then each action space "},
+
+  {id:"clans_of_caledonia",name:"Clans of Caledonia"
+   ,row:6,col:3,categories:["Strategy", "Euro", "Engine Building"]
+   ,players:"1-4",playTime:"30-120 min"
+   ,complexity:3.47,bggId:216132
+   ,spineColor:"#4a7a3a",boxSize:"md"
+   ,designer:"Juma Al-JouJou"
+   ,year:2017
+   ,bggRating:7.9
+   ,mechanics:["Commodity Speculation", "Contracts", "Hexagon Grid", "Income", "Market", "Modular Board"]
+   ,description:"Clans of Caledonia is a mid-to-heavy economic game set in 19th-century Scotland. At this time, Scotland made the transition from an agricultural to an industrialized country that heavily relied on trade and export. In the following years, food production increased significantly to feed the population growth. Linen was increasingly substituted by the cheaper cotton and raising sheep was given high importance. More and more distilleries were founded and whisky became the premium alcoholic beverage"},
+
+  {id:"twilight_struggle",name:"Twilight Struggle"
+   ,row:6,col:3,categories:["Strategy", "Area Control", "Card Game"]
+   ,players:"2",playTime:"120-180 min"
+   ,complexity:3.61,bggId:12333
+   ,spineColor:"#3a2a1a",boxSize:"md"
+   ,designer:"Ananda Gupta, Jason Matthews"
+   ,year:2005
+   ,bggRating:8.2
+   ,mechanics:["Action / Event", "Advantage Token", "Area Majority / Influence", "Campaign / Battle Card Driven", "Dice Rolling", "Events"]
+   ,description:"Now the trumpet summons us again, not as a call to bear arms, though arms we need; not as a call to battle, though embattled we are – but a call to bear the burden of a long twilight struggle. – John F. Kennedy In 1945, unlikely allies toppled Hitler's war machine, while humanity's most devastating weapons forced the Japanese Empire to its knees in a storm of fire. Where once there stood many great powers, there then stood only two. The world had scant months to sigh its collective relief before"},
+
+  {id:"smartphone",name:"Smartphone Inc."
+   ,row:6,col:4,categories:["Strategy", "Euro", "Engine Building"]
+   ,players:"1-5",playTime:"60-90 min"
+   ,complexity:2.81,bggId:246684
+   ,spineColor:"#3090c0",boxSize:"md"
+   ,designer:"Ivan Lashin"
+   ,year:2018
+   ,bggRating:7.6
+   ,mechanics:["Action Queue", "Area Majority / Influence", "Layering", "Network and Route Building", "Simultaneous Action Selection", "Solo / Solitaire Game"]
+   ,description:"In Smartphone Inc., you become a CEO of one of the largest smartphone-producing companies in the time when smartphones were only beginning to conquer the world. Research technologies, develop your factory, build your worldwide office network, and outprice your competitors to become the most profitable and successful smartphone company in the world. Smartphone Inc. is an economic simulation Eurogame. Over five rounds, players program their decisions about price, production, research, and expansio"},
+
+  {id:"burano",name:"Burano"
+   ,row:6,col:4,categories:["Strategy", "Euro"]
+   ,players:"2-4",playTime:"60-90 min"
+   ,complexity:3.79,bggId:181260
+   ,spineColor:"#e0a050",boxSize:"md"
+   ,designer:"Yu-Chen Tseng, Eros Lin"
+   ,year:2015
+   ,bggRating:6.7
+   ,mechanics:["Action Points", "Area Majority / Influence", "Pick-up and Deliver", "Point to Point Movement", "Set Collection"]
+   ,description:"Burano, also known as the lace island, is an island in the northern Venetian lagoon. Burano is famous for its brightly colored houses, those square-shaped houses of a riot of colors along the water channels make it like a fairy tale land. Fishing has been the main activity in Burano since its foundation. A story goes that while fishermen went a long-term fishing outside the lagoon, their wife who stayed and missed their husband took out needles and made lace like they mended their husband's fish"},
+
+  {id:"azul",name:"Azul"
+   ,row:6,col:4,categories:["Family", "Abstract", "Puzzle"]
+   ,players:"2-4",playTime:"30-45 min"
+   ,complexity:1.77,bggId:230802
+   ,spineColor:"#2070b0",boxSize:"md"
+   ,designer:"Michael Kiesling"
+   ,year:2017
+   ,bggRating:7.7
+   ,mechanics:["Chaining", "End Game Bonuses", "Grid Coverage", "Open Drafting", "Pattern Building", "Set Collection"]
+   ,description:"Introduced by the Moors, azulejos (originally white and blue ceramic tiles) were fully embraced by the Portuguese when their king Manuel I, on a visit to the Alhambra palace in Southern Spain, was mesmerized by the stunning beauty of the Moorish decorative tiles. The king, awestruck by the interior beauty of the Alhambra, immediately ordered that his own palace in Portugal be decorated with similar wall tiles. As a tile-laying artist, you have been challenged to embellish the walls of the Royal "},
+
+  {id:"founders_of_gloomhaven",name:"Founders of Gloomhaven"
+   ,row:6,col:4,categories:["Strategy", "Euro"]
+   ,players:"1-4",playTime:"90-120 min"
+   ,complexity:4.12,bggId:214032
+   ,spineColor:"#4a5a3a",boxSize:"lg"
+   ,designer:"Isaac Childres"
+   ,year:2018
+   ,bggRating:6.6
+   ,mechanics:["Action Retrieval", "Auction / Bidding", "Deck, Bag, and Pool Building", "Follow", "Hand Management", "Network and Route Building"]
+   ,description:"Description from the publisher: Founders of Gloomhaven is a competitive tile-placement, action-selection, city-building game in which each player controls a fantastical race working to build the city of Gloomhaven and gain influence over its residents. This is a standalone game set in the same universe as Gloomhaven. The events, however, take place hundreds of years before Gloomhaven and depict the original construction of the city. In Founders of Gloomhaven, players use action cards to place re"},
+
+  {id:"on_mars",name:"On Mars"
+   ,row:6,col:5,categories:["Strategy", "Euro", "Worker Placement"]
+   ,players:"1-4",playTime:"90-150 min"
+   ,complexity:4.63,bggId:184267
+   ,spineColor:"#b05020",boxSize:"xl"
+   ,designer:"Vital Lacerda"
+   ,year:2020
+   ,bggRating:8.2
+   ,mechanics:["Contracts", "Delayed Purchase", "End Game Bonuses", "Hexagon Grid", "Income", "Movement Points"]
+   ,description:"Following the success of unmanned rover missions, the United Nations established the Department of Operations and Mars Exploration (D.O.M.E.). The first settlers arrived on Mars in the year 2037 and in the decades after establishment of Mars Base Camp, private exploration companies began work on the creation of a self-sustaining colony. As chief astronaut for one of these enterprises, you want to be a pioneer in the development of the biggest, most advanced colony on Mars by achieving both D.O.M"},
+
+  {id:"lisboa",name:"Lisboa"
+   ,row:6,col:5,categories:["Strategy", "Euro"]
+   ,players:"1-4",playTime:"60-120 min"
+   ,complexity:4.57,bggId:161533
+   ,spineColor:"#c4a040",boxSize:"xl"
+   ,designer:"Vital Lacerda"
+   ,year:2017
+   ,bggRating:8.2
+   ,mechanics:["Area Majority / Influence", "Hand Management", "Multi-Use Cards", "Open Drafting", "Set Collection", "Solo / Solitaire Game"]
+   ,description:"Lisboa is a game about the reconstruction of Lisboa after the great earthquake of 1755. On November 1, 1755, Lisbon suffered an earthquake of an estimated magnitude of 8.5–9.0, followed by a tsunami and three days of fires. The city was almost totally destroyed. The Marques of Pombal — Sebasti&atilde;o Jos&eacute; de Carvalho e Melo — was the then Minister of Foreign Affairs and the King put him in charge of the reconstruction of Lisbon. The Marques of Pombal gathered a team of engineers and arc"},
+
+  {id:"terra_mystica",name:"Terra Mystica: Big Box"
+   ,row:6,col:5,categories:["Strategy", "Euro", "Area Control"]
+   ,players:"2-5",playTime:"60-150 min"
+   ,complexity:3.97,bggId:120677
+   ,spineColor:"#3a4a2a",boxSize:"xl"
+   ,designer:"Jens Drögemüller, Helge Ostertag"
+   ,year:2012
+   ,bggRating:8.0
+   ,mechanics:["Chaining", "End Game Bonuses", "Hexagon Grid", "Income", "Increase Value of Unchosen Resources", "Network and Route Building"]
+   ,description:"In the land of Terra Mystica dwell 14 different peoples in seven landscapes, and each group is bound to its own home environment, so to develop and grow, they must terraform neighboring landscapes into their home environments in competition with the other groups. Terra Mystica is a full information game, without any luck, that rewards strategic planning. Each player governs one of the 14 groups. With subtlety and craft, the player must attempt to rule as great an area as possible and to develop "},
+
+  {id:"the_crew_deep_sea",name:"The Crew: Mission Deep Sea"
+   ,row:6,col:5,categories:["Co-op", "Card Game", "Family"]
+   ,players:"2-5",playTime:"20 min"
+   ,complexity:2.05,bggId:324856
+   ,spineColor:"#1a4a7a",boxSize:"sm"
+   ,designer:"Thomas Sing"
+   ,year:2021
+   ,bggRating:8.1
+   ,mechanics:["Communication Limits", "Cooperative Game", "Deduction", "Hand Management", "Scenario / Mission / Campaign Game", "Trick-taking"]
+   ,description:"The Crew: Mission Deep Sea plunges players into a cooperative card game unlike any other. As members of a deep-sea expedition, you and your fellow crew are on a quest to locate the lost continent of Mu—but your success depends on precision, teamwork, and a shared sense of timing. Each mission presents a new puzzle made up of unique tasks: perhaps one player must win a specific card, while another must avoid it entirely. The trick? You’ll have to complete these challenges through standard trick-t"},
+
+  {id:"skoteines",name:"Skoteines Ypotheseis"
+   ,row:6,col:5,categories:["Deduction", "Party"]
+   ,players:"2-6",playTime:"30-60 min"
+   ,complexity:1.5,bggId:0
+   ,spineColor:"#2a2a3a",boxSize:"sm"
+   ,description:"A Greek deduction/mystery game."},
+
+  {id:"paleo",name:"Paleo"
+   ,row:6,col:6,categories:["Co-op", "Thematic", "Card Game"]
+   ,players:"1-4",playTime:"45-60 min"
+   ,complexity:2.66,bggId:300531
+   ,spineColor:"#8a6a30",boxSize:"md"
+   ,designer:"Peter Rustemeyer"
+   ,year:2020
+   ,bggRating:7.7
+   ,mechanics:["Action / Event", "Cooperative Game", "Deck, Bag, and Pool Building", "Memory", "Scenario / Mission / Campaign Game", "Simultaneous Action Selection"]
+   ,description:"Paleo is a co-operative adventure game set in the stone age, a game in which players try to keep the human beings in their care alive while completing missions. Sometimes you need a fur, sometimes a tent, but these are all minor quests compared to your long-term goal: Painting a woolly mammoth on the wall so that humans thousands of years later will know that you once existed. (Okay, you just think the mammoth painting looks cool. Preserving a record of your past existence is gravy.) What might "},
+
+  {id:"trismegistus",name:"Trismegistus"
+   ,row:6,col:6,categories:["Strategy", "Euro", "Dice"]
+   ,players:"1-4",playTime:"60-90 min"
+   ,complexity:4.19,bggId:281442
+   ,spineColor:"#5a3a6a",boxSize:"md"
+   ,designer:"Federico Pierlorenzi, Daniele Tascini"
+   ,year:2019
+   ,bggRating:7.5
+   ,mechanics:["Action Points", "Contracts", "Dice Rolling", "End Game Bonuses", "Follow", "Open Drafting"]
+   ,description:"You are an adept of the mysterious art of alchemy, seeking a way to become the successor of the greatest alchemist ever living — Hermes Trismegistus. In order to do so you will be transmuting mere metals into pure gold, performing experiments, and inventing artifacts to finally achieve everlasting greatness. Trismegistus: The Ultimate Formula is played over three rounds during which you will draft exactly three dice. By expertly utilizing the potency of your drafted die, you will be able to tran"},
+
+  {id:"marvel_champions",name:"Marvel Champions"
+   ,row:6,col:6,categories:["Co-op", "Card Game", "Thematic", "Deck Building"]
+   ,players:"1-4",playTime:"45-90 min"
+   ,complexity:2.96,bggId:285774
+   ,spineColor:"#1a3a8a",boxSize:"lg"
+   ,designer:"Michael Boggs, Nate French, Caleb Grace"
+   ,year:2019
+   ,bggRating:8.1
+   ,mechanics:["Card Play Conflict Resolution", "Cooperative Game", "Deck Construction", "Events", "Hand Management", "Interrupts"]
+   ,description:"\"With great power, there must also come great responsibility.\" –Stan Lee, Amazing Fantasy #15 Iron Man and Black Panther team up to stop Rhino from rampaging through the streets of New York. Captain Marvel and Spider-Man battle Ultron as he threatens global annihilation. Do you have what it takes to join the ranks of these legendary heroes and become a champion? Jump into the Marvel Universe with Marvel Champions: The Card Game, a cooperative Living Card Game for one to four players! Marvel Cham"},
+
+  {id:"aeons_end",name:"Aeon's End"
+   ,row:6,col:6,categories:["Co-op", "Deck Building", "Thematic"]
+   ,players:"1-4",playTime:"60 min"
+   ,complexity:2.8,bggId:191189
+   ,spineColor:"#4a2060",boxSize:"lg"
+   ,designer:"Jenny Iglesias, Nick Little (I), Kevin Riley"
+   ,year:2016
+   ,bggRating:7.9
+   ,mechanics:["Chit-Pull System", "Cooperative Game", "Deck, Bag, and Pool Building", "Delayed Purchase", "Hand Management", "Open Drafting"]
+   ,description:"The survivors of a long-ago invasion have taken refuge in the forgotten underground city of Gravehold. There, the desperate remnants of society have learned that the energy of the very breaches the beings use to attack them can be repurposed through various gems, transforming the malign energies within into beneficial spells and weapons to aid their last line of defense: the breach mages. Aeon's End is a cooperative game that explores the deckbuilding genre with a number of innovative mechanisms"}
 ];
 
-// Cubby configuration - which cubbies are tall or filler
+
+// Cubby configuration
 const CUBBY_CONFIG = {
-  // tall merged cubbies (span 2 rows)
-  "1-5": {tall:true}, // R1C5 + R2C5 (Rove)
-  "3-1": {tall:true}, // R3C1 + R4C1 (Gloomhaven/Frosthaven)
-  "4-3": {tall:true}, // R4C3 + R5C3 (Adventure Tactics)
-  // skip these (bottom half of tall cubbies)
+  "1-5": {tall:true},
+  "3-1": {tall:true},
+  "4-3": {tall:true},
   "2-5": {skip:true},
   "4-1": {skip:true},
   "5-3": {skip:true},
-  // filler cubbies (comics/books)
   "2-4": {filler:"Comics"},
   "2-6": {filler:"Comics"},
   "3-2": {filler:"Comics"},
@@ -458,14 +1388,12 @@ function renderShelf() {
       const key = `${row}-${col}`;
       const cfg = CUBBY_CONFIG[key] || {};
 
-      // Skip bottom-half of tall cubbies
       if (cfg.skip) continue;
 
       const cubby = document.createElement('div');
       cubby.className = 'cubby';
       if (cfg.tall) cubby.classList.add('tall');
 
-      // Filler cubbies (comics/books)
       if (cfg.filler) {
         cubby.classList.add('filler-cubby');
         cubby.textContent = cfg.filler;
@@ -473,8 +1401,6 @@ function renderShelf() {
         continue;
       }
 
-      // Get games for this cubby
-      // For tall cubbies, also include games from the merged row
       let cubbyGames = GAMES.filter(g => g.row === row && g.col === col);
       if (cfg.tall) {
         const nextRowGames = GAMES.filter(g => g.row === row + 1 && g.col === col);
@@ -507,28 +1433,64 @@ function openModal(game) {
   const overlay = document.getElementById('modal-overlay');
   const content = document.getElementById('modal-content');
 
-  // Generate a gradient based on spine color
   const c = game.spineColor;
-  const bg = `linear-gradient(135deg, ${c}, ${adjustColor(c, -30)})`;
+  const fallbackBg = `linear-gradient(135deg, ${c}, ${adjustColor(c, -30)})`;
+
+  // Build cover image section
+  let coverHtml;
+  if (game.bggId > 0) {
+    coverHtml = `
+      <div class="modal-cover">
+        <img class="modal-cover-img"
+             src="images/${game.bggId}.jpg"
+             alt="${game.name}"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="modal-cover-fallback" style="display:none;background:${fallbackBg}">${game.name}</div>
+      </div>`;
+  } else {
+    coverHtml = `<div class="modal-cover"><div class="modal-cover-fallback" style="background:${fallbackBg}">${game.name}</div></div>`;
+  }
+
+  // Rating section
+  let ratingHtml = '';
+  if (game.bggRating) {
+    const pct = ((game.bggRating / 10) * 100).toFixed(0);
+    ratingHtml = `
+      <div class="modal-rating-row">
+        <span class="rating-badge">${game.bggRating}</span>
+        <div class="rating-bar-wrap"><div class="rating-bar" style="width:${pct}%"></div></div>
+        <span class="rating-label">BGG Rating</span>
+      </div>`;
+  }
+
+  // Mechanics
+  let mechanicsHtml = '';
+  if (game.mechanics && game.mechanics.length) {
+    mechanicsHtml = `<div class="modal-mechanics">${game.mechanics.map(m => `<span class="modal-mech">${m}</span>`).join('')}</div>`;
+  }
 
   content.innerHTML = `
-    <div class="modal-cover-placeholder" style="background:${bg}">
-      ${game.name}
-    </div>
+    ${coverHtml}
     <div class="modal-body">
-      <div class="modal-title">${game.name}</div>
+      <div class="modal-header">
+        <span class="modal-title">${game.name}</span>
+        ${game.year ? `<span class="modal-year">(${game.year})</span>` : ''}
+      </div>
+      ${game.designer ? `<div class="modal-designer">Designed by ${game.designer}</div>` : ''}
+      ${ratingHtml}
       <div class="modal-stats">
-        <span class="modal-stat"><span class="icon">👥</span> ${game.players} players</span>
-        <span class="modal-stat"><span class="icon">⏱️</span> ${game.playTime}</span>
-        ${game.complexity > 0 ? `<span class="modal-stat"><span class="icon">⚖️</span> ${game.complexity}/5 weight</span>` : ''}
+        <span class="modal-stat"><span class="icon">&#128101;</span> ${game.players} players</span>
+        <span class="modal-stat"><span class="icon">&#9201;</span> ${game.playTime}</span>
+        ${game.complexity > 0 ? `<span class="modal-stat"><span class="icon">&#9878;&#65039;</span> ${game.complexity}/5 weight</span>` : ''}
       </div>
       <div class="modal-categories">
         ${game.categories.map(c => `<span class="modal-cat">${c}</span>`).join('')}
       </div>
+      ${mechanicsHtml}
       <div class="modal-desc">${game.description}</div>
       ${game.bggId > 0
-        ? `<a class="modal-bgg-link" href="https://boardgamegeek.com/boardgame/${game.bggId}" target="_blank" rel="noopener">View on BoardGameGeek →</a>`
-        : `<a class="modal-bgg-link" href="https://boardgamegeek.com/geeksearch.php?action=search&objecttype=boardgame&q=${encodeURIComponent(game.name)}" target="_blank" rel="noopener">Search on BoardGameGeek →</a>`
+        ? `<a class="modal-bgg-link" href="https://boardgamegeek.com/boardgame/${game.bggId}" target="_blank" rel="noopener">View on BoardGameGeek &#8594;</a>`
+        : `<a class="modal-bgg-link" href="https://boardgamegeek.com/geeksearch.php?action=search&objecttype=boardgame&q=${encodeURIComponent(game.name)}" target="_blank" rel="noopener">Search on BoardGameGeek &#8594;</a>`
       }
     </div>
   `;
