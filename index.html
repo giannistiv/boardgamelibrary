@@ -537,6 +537,86 @@
   .community-rating-avg{font-weight:700;color:var(--accent)}
   .community-rating-count{font-size:0.68rem;opacity:0.4}
 
+  /* ── Favorite Star (modal) ── */
+  .modal-fav-btn{
+    position:absolute;top:12px;right:52px;background:rgba(0,0,0,0.5);border:none;
+    color:rgba(255,255,255,0.5);font-size:1.3rem;cursor:pointer;
+    z-index:2;line-height:1;width:32px;height:32px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;transition:all 0.2s;
+  }
+  .modal-fav-btn:hover{color:#e2b04a;background:rgba(0,0,0,0.7)}
+  .modal-fav-btn.favorited{color:#e2b04a}
+  .modal-fav-btn.full{opacity:0.3;cursor:not-allowed}
+  .modal-fav-btn.full:hover{color:rgba(255,255,255,0.5);background:rgba(0,0,0,0.5)}
+  .modal-fav-btn.favorited.full{opacity:1;cursor:pointer}
+  .modal-fav-btn.favorited.full:hover{color:#e2b04a;background:rgba(0,0,0,0.7)}
+
+  /* ── Top 4 Favorites ── */
+  .favorites-section{margin-bottom:1.8rem}
+  .favorites-grid{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:0.6rem;
+  }
+  .fav-card{
+    position:relative;border-radius:10px;overflow:hidden;cursor:pointer;
+    aspect-ratio:3/4;background:#2a2a2a;
+    box-shadow:0 4px 15px rgba(0,0,0,0.3);
+    transition:transform 0.2s,box-shadow 0.2s;
+  }
+  .fav-card:hover{transform:translateY(-3px);box-shadow:0 8px 25px rgba(0,0,0,0.5)}
+  .fav-card img{width:100%;height:100%;object-fit:cover}
+  .fav-card-name{
+    position:absolute;bottom:0;left:0;right:0;
+    padding:1.8rem 0.4rem 0.4rem;
+    background:linear-gradient(transparent,rgba(0,0,0,0.85));
+    font-size:0.65rem;font-weight:600;color:#fff;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .fav-card-empty{
+    display:flex;align-items:center;justify-content:center;
+    border:2px dashed rgba(255,255,255,0.1);
+    background:transparent;box-shadow:none;cursor:default;
+  }
+  .fav-card-empty:hover{transform:none;box-shadow:none}
+  .fav-card-empty span{font-size:1.5rem;opacity:0.15}
+  .fav-remove{
+    position:absolute;top:4px;right:4px;width:20px;height:20px;
+    border-radius:50%;background:rgba(0,0,0,0.6);border:none;
+    color:#fff;font-size:0.7rem;cursor:pointer;
+    display:none;align-items:center;justify-content:center;
+    line-height:1;z-index:2;
+  }
+  .fav-card:hover .fav-remove{display:flex}
+  .fav-remove:hover{background:rgba(239,68,68,0.8)}
+
+  /* ── Profile Visit ── */
+  .stats-players-section{margin-top:1.5rem}
+  .stats-player-row{
+    display:flex;align-items:center;gap:0.7rem;
+    padding:0.5rem 0.6rem;border-radius:8px;margin-bottom:0.3rem;
+    background:rgba(255,255,255,0.02);cursor:pointer;transition:background 0.15s;
+  }
+  .stats-player-row:hover{background:rgba(255,255,255,0.06)}
+  .stats-player-avatar{
+    width:36px;height:36px;border-radius:50%;
+    background:rgba(226,176,74,0.15);color:var(--accent);
+    display:flex;align-items:center;justify-content:center;
+    font-size:0.9rem;font-weight:700;flex-shrink:0;
+  }
+  .stats-player-info{flex:1;min-width:0}
+  .stats-player-info-name{font-size:0.82rem;font-weight:500}
+  .stats-player-info-detail{font-size:0.68rem;opacity:0.45}
+  .stats-player-wr{font-size:0.82rem;font-weight:700;min-width:3rem;text-align:right}
+
+  .stats-back-btn{
+    display:inline-flex;align-items:center;gap:0.3rem;
+    padding:0.4rem 0.8rem;border-radius:8px;
+    border:1px solid rgba(255,255,255,0.12);
+    background:rgba(255,255,255,0.06);color:var(--text);
+    font-family:inherit;font-size:0.75rem;cursor:pointer;
+    transition:all 0.15s;margin-bottom:1rem;
+  }
+  .stats-back-btn:hover{background:rgba(255,255,255,0.12)}
+
   /* ── Responsive ── */
   @media(max-width:900px){
     body{min-width:1200px}
@@ -556,6 +636,14 @@
     .modal{border-radius:0;max-width:none;max-height:none;width:100%;height:100%;box-shadow:none;display:flex;flex-direction:column;overflow:hidden}
     #modal-content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
     .modal-close{position:absolute;z-index:102;font-size:1.5rem;width:40px;height:40px;opacity:0.9;background:rgba(0,0,0,0.6)}
+    .modal-fav-btn{right:56px;font-size:1.5rem;width:40px;height:40px;opacity:0.9;background:rgba(0,0,0,0.6);z-index:102}
+    .fav-card-name{font-size:0.75rem;padding:2rem 0.5rem 0.5rem}
+    .fav-card-empty span{font-size:1.8rem}
+    .stats-back-btn{font-size:0.88rem;padding:0.5rem 1rem}
+    .stats-player-avatar{width:42px;height:42px;font-size:1rem}
+    .stats-player-info-name{font-size:1rem}
+    .stats-player-info-detail{font-size:0.82rem}
+    .stats-player-wr{font-size:1rem}
     .modal-cover{border-radius:0}
     .modal-cover-img{max-height:none}
     .modal-body{padding:1.2rem 1.4rem 2rem}
@@ -693,6 +781,7 @@
 
 <div class="modal-overlay" id="modal-overlay">
   <div class="modal" id="modal">
+    <button class="modal-fav-btn" id="modal-fav" title="Add to favorites">&#9733;</button>
     <button class="modal-close" id="modal-close">&times;</button>
     <div id="modal-content"></div>
   </div>
@@ -3890,6 +3979,8 @@ function openModal(game) {
 
   history.pushState({modal: true}, '');
   wireStarRating();
+  updateFavButton(game.bggId);
+  wireFavButton();
 }
 
 function adjustColor(hex, amount) {
@@ -4029,7 +4120,13 @@ document.getElementById('btn-mystats').addEventListener('click', switchToStats);
 // Change profile click handled via event delegation inside stats view
 
 // ── Stats Dashboard ──
-function showStatsView(playerName) {
+let _viewingProfile = null; // null = own profile, string = visiting someone
+
+function showStatsView(playerName, visiting) {
+  const loggedInPlayer = localStorage.getItem('bgl-player');
+  const isOwnProfile = !visiting || visiting === loggedInPlayer;
+  _viewingProfile = isOwnProfile ? null : playerName;
+
   document.getElementById('library-view').style.display = 'none';
   document.getElementById('stats-view').classList.add('open');
   document.getElementById('btn-library').classList.remove('active');
@@ -4125,12 +4222,58 @@ function showStatsView(playerName) {
     </div>`;
   };
 
+  // Build back button for visiting profiles
+  const backBtnHtml = !isOwnProfile && loggedInPlayer
+    ? `<button class="stats-back-btn" id="btn-back-profile">&#8592; Back to my stats</button>`
+    : '';
+
+  // Build favorites section
+  const favoritesHtml = buildFavoritesHtml(playerName, isOwnProfile);
+
+  // Build players section (people this player has played with)
+  const coPlayers = {};
+  for (const bggId in PLAY_HISTORY) {
+    for (const play of PLAY_HISTORY[bggId]) {
+      const hasTarget = play.sc.some(s => s.n === playerName);
+      if (!hasTarget) continue;
+      for (const s of play.sc) {
+        if (s.n === playerName || HIDDEN_PLAYERS.has(s.n)) continue;
+        if (!coPlayers[s.n]) coPlayers[s.n] = { plays: 0, wins: 0 };
+        coPlayers[s.n].plays++;
+        if (s.w) coPlayers[s.n].wins++;
+      }
+    }
+  }
+  const coPlayerList = Object.entries(coPlayers)
+    .filter(([, d]) => d.plays >= 2)
+    .map(([name, d]) => ({ name, plays: d.plays, wins: d.wins, wr: Math.round(d.wins / d.plays * 100) }))
+    .sort((a, b) => b.plays - a.plays)
+    .slice(0, 12);
+
+  const playersHtml = coPlayerList.length > 0 ? `<div class="stats-section stats-players-section">
+    <div class="stats-section-title">Frequent Opponents</div>
+    ${coPlayerList.map(p => {
+      const initial = p.name.charAt(0).toUpperCase();
+      return `<div class="stats-player-row" data-visit-player="${p.name.replace(/"/g, '&quot;')}">
+        <div class="stats-player-avatar">${initial}</div>
+        <div class="stats-player-info">
+          <div class="stats-player-info-name">${p.name}</div>
+          <div class="stats-player-info-detail">${p.plays} games together</div>
+        </div>
+        <div class="stats-player-wr" style="color:${wrColor(p.wr)}">${p.wr}%</div>
+      </div>`;
+    }).join('')}
+  </div>` : '';
+
   const container = document.getElementById('stats-view');
   container.innerHTML = `
+    ${backBtnHtml}
     <div class="stats-header">
       <div class="stats-player-name">${playerName}</div>
-      <div class="stats-player-sub">Player Statistics</div>
+      <div class="stats-player-sub">${isOwnProfile ? 'Your Profile' : 'Player Profile'}</div>
     </div>
+
+    ${favoritesHtml}
 
     <div class="stats-grid">
       <div class="stats-card">
@@ -4147,12 +4290,12 @@ function showStatsView(playerName) {
       </div>
       <div class="stats-card">
         <div class="stats-card-val">${uniqueGames}</div>
-        <div class="stats-card-label">Games Played</div>
+        <div class="stats-card-label">Unique Games</div>
       </div>
     </div>
 
     <div class="stats-section">
-      <div class="stats-section-title">Most Played Games</div>
+      <div class="stats-section-title">${isOwnProfile ? 'Most Played' : 'Most Played'}</div>
       ${topGames.map(gameRowHtml).join('')}
     </div>
 
@@ -4162,12 +4305,12 @@ function showStatsView(playerName) {
     </div>` : ''}
 
     <div class="stats-section">
-      <div class="stats-section-title">Recent Plays</div>
+      <div class="stats-section-title">Recent Activity</div>
       ${recentPlays.slice(0, 15).map(p => {
         const resultClass = p.won ? 'won' : (p.noWinner ? 'lost' : '');
         const resultText = p.won ? '&#9733; Won' : (p.noWinner ? '&#127866; Lost' : '');
         const boardHtml = p.board ? `<span class="stats-recent-result">&nbsp;&middot; &#9876; ${p.board}</span>` : '';
-        const playersHtml = p.allScores.map(s => {
+        const scoresHtml = p.allScores.map(s => {
           const isSelf = s.n === playerName;
           const cls = s.w ? ' winner' : '';
           const trophy = s.w ? '<span class="trophy">&#9733;</span>' : '';
@@ -4182,13 +4325,15 @@ function showStatsView(playerName) {
             <span class="stats-recent-game">${p.game.name}</span>
             <span class="stats-recent-date">${fmtDate(p.date)}</span>
           </div>
-          <div class="play-scores" style="margin-top:0.3rem">${playersHtml}</div>
+          <div class="play-scores" style="margin-top:0.3rem">${scoresHtml}</div>
           ${boardHtml}${noWinnerHtml}
         </div>`;
       }).join('')}
     </div>
 
-    ${recommendations.length > 0 ? `<div class="stats-section">
+    ${playersHtml}
+
+    ${isOwnProfile && recommendations.length > 0 ? `<div class="stats-section">
       <div class="stats-section-title">Recommended for You</div>
       <div class="stats-player-sub" style="margin:-0.3rem 0 0.6rem">Top-rated games from the shelf you haven't tried yet</div>
       ${recommendations.map(g => {
@@ -4210,7 +4355,7 @@ function showStatsView(playerName) {
       <div class="qr-label">Scan to open on your phone</div>
     </div>
 
-    <button class="change-profile-btn" id="btn-change-profile">Change Profile</button>
+    ${isOwnProfile ? '<button class="change-profile-btn" id="btn-change-profile">Change Profile</button>' : ''}
   `;
 
   // Make game rows clickable
@@ -4221,11 +4366,34 @@ function showStatsView(playerName) {
     });
   });
 
-  // Change profile button
-  document.getElementById('btn-change-profile').addEventListener('click', () => {
-    localStorage.removeItem('bgl-player');
-    openPicker();
+  // Wire favorites grid
+  wireFavoritesGrid(container, playerName);
+
+  // Wire player profile visits
+  container.querySelectorAll('[data-visit-player]').forEach(el => {
+    el.addEventListener('click', () => {
+      showStatsView(el.dataset.visitPlayer, 'visiting');
+      window.scrollTo(0, 0);
+    });
   });
+
+  // Back to own profile button
+  const backBtn = document.getElementById('btn-back-profile');
+  if (backBtn) {
+    backBtn.addEventListener('click', () => {
+      showStatsView(loggedInPlayer);
+      window.scrollTo(0, 0);
+    });
+  }
+
+  // Change profile button
+  const changeBtn = document.getElementById('btn-change-profile');
+  if (changeBtn) {
+    changeBtn.addEventListener('click', () => {
+      localStorage.removeItem('bgl-player');
+      openPicker();
+    });
+  }
 
   // Generate QR code via API
   const qrImg = document.getElementById('qr-img');
@@ -4389,6 +4557,142 @@ function wireStarRating() {
   }
 }
 
+// ── Favorites System ──
+let favoritesCache = {};
+let favoritesCacheReady = false;
+
+async function loadAllFavorites() {
+  if (!FIREBASE_DB) { favoritesCacheReady = true; return; }
+  try {
+    const res = await fetch(`${FIREBASE_DB}/favorites.json`);
+    const data = await res.json();
+    favoritesCache = data || {};
+    favoritesCacheReady = true;
+  } catch (e) {
+    console.warn('Failed to load favorites from Firebase:', e);
+    favoritesCacheReady = true;
+  }
+}
+
+function getPlayerFavorites(playerName) {
+  return favoritesCache[playerName] || [];
+}
+
+async function saveFavorites(playerName, bggIds) {
+  favoritesCache[playerName] = bggIds;
+  if (!FIREBASE_DB) return;
+  try {
+    await fetch(`${FIREBASE_DB}/favorites/${encodeURIComponent(playerName)}.json`, {
+      method: 'PUT',
+      body: JSON.stringify(bggIds)
+    });
+  } catch (e) {
+    console.warn('Failed to save favorites to Firebase:', e);
+  }
+}
+
+async function toggleFavorite(playerName, bggId) {
+  const favs = getPlayerFavorites(playerName).slice();
+  const idx = favs.indexOf(bggId);
+  if (idx >= 0) {
+    favs.splice(idx, 1);
+  } else {
+    if (favs.length >= 4) return false;
+    favs.push(bggId);
+  }
+  await saveFavorites(playerName, favs);
+  return true;
+}
+
+function isFavorited(playerName, bggId) {
+  return getPlayerFavorites(playerName).includes(bggId);
+}
+
+function updateFavButton(bggId) {
+  const btn = document.getElementById('modal-fav');
+  if (!btn) return;
+  const player = localStorage.getItem('bgl-player');
+  if (!player || bggId <= 0) {
+    btn.style.display = 'none';
+    return;
+  }
+  btn.style.display = 'flex';
+  const faved = isFavorited(player, bggId);
+  const favs = getPlayerFavorites(player);
+  const full = favs.length >= 4 && !faved;
+  btn.classList.toggle('favorited', faved);
+  btn.classList.toggle('full', full);
+  btn.title = faved ? 'Remove from favorites' : (full ? 'Favorites full (4/4)' : 'Add to favorites');
+  btn.dataset.bggId = bggId;
+}
+
+function wireFavButton() {
+  const btn = document.getElementById('modal-fav');
+  if (btn._wired) return;
+  btn._wired = true;
+  btn.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    const player = localStorage.getItem('bgl-player');
+    const bggId = Number(btn.dataset.bggId);
+    if (!player || !bggId) return;
+    if (btn.classList.contains('full') && !btn.classList.contains('favorited')) return;
+    await toggleFavorite(player, bggId);
+    updateFavButton(bggId);
+  });
+}
+
+function findGameByBggId(bggId) {
+  const num = Number(bggId);
+  return GAMES.find(g => g.bggId === num) || EXTRA_GAMES[bggId] || null;
+}
+
+function buildFavoritesHtml(playerName, isOwnProfile) {
+  const favs = getPlayerFavorites(playerName);
+  if (favs.length === 0 && !isOwnProfile) return '';
+
+  let cards = '';
+  for (let i = 0; i < 4; i++) {
+    if (i < favs.length) {
+      const game = findGameByBggId(favs[i]);
+      const name = game ? game.name : 'Game #' + favs[i];
+      const imgSrc = `images/${favs[i]}.jpg`;
+      const removeBtn = isOwnProfile ? `<button class="fav-remove" data-fav-idx="${i}" title="Remove">&times;</button>` : '';
+      cards += `<div class="fav-card" data-fav-bgg="${favs[i]}">
+        ${removeBtn}
+        <img src="${imgSrc}" alt="${name}" onerror="this.style.display='none'">
+        <div class="fav-card-name">${name}</div>
+      </div>`;
+    } else {
+      cards += `<div class="fav-card fav-card-empty"><span>&#9733;</span></div>`;
+    }
+  }
+
+  return `<div class="favorites-section">
+    <div class="stats-section-title">Favorite Games</div>
+    <div class="favorites-grid">${cards}</div>
+  </div>`;
+}
+
+function wireFavoritesGrid(container, playerName) {
+  container.querySelectorAll('.fav-card[data-fav-bgg]').forEach(el => {
+    el.addEventListener('click', (e) => {
+      if (e.target.closest('.fav-remove')) return;
+      const game = findGameByBggId(el.dataset.favBgg);
+      if (game) openModal(game);
+    });
+  });
+  container.querySelectorAll('.fav-remove').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const idx = Number(btn.dataset.favIdx);
+      const favs = getPlayerFavorites(playerName).slice();
+      favs.splice(idx, 1);
+      await saveFavorites(playerName, favs);
+      showStatsView(playerName);
+    });
+  });
+}
+
 // ── Init ──
 renderFilters();
 renderShelf();
@@ -4402,8 +4706,8 @@ if (_isTouchDevice()) {
 const _sp = localStorage.getItem('bgl-player');
 if (_sp && NAME_MAP[_sp]) localStorage.setItem('bgl-player', NAME_MAP[_sp]);
 
-// Load ratings from Firebase, then show the right view
-loadAllRatings().then(() => {
+// Load ratings and favorites from Firebase, then show the right view
+Promise.all([loadAllRatings(), loadAllFavorites()]).then(() => {
   const savedPlayer = localStorage.getItem('bgl-player');
   if (savedPlayer) {
     showStatsView(savedPlayer);
