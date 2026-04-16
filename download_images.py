@@ -1,32 +1,25 @@
 #!/usr/bin/env python3
 """
 Download board game box art images from BoardGameGeek.
-Run this script from the boardgamelibrary directory.
+Uses game page scraping instead of the API (which requires auth).
 
-Usage:
-  python3 download_images.py                          # anonymous (may 401)
-  python3 download_images.py --user BGG_USER --pass BGG_PASS  # with BGG login
+Usage: python3 download_images.py
 """
 
-import argparse
-import getpass
-import os
 import re
 import sys
 import time
-import xml.etree.ElementTree as ET
 from pathlib import Path
 
 try:
     import requests
 except ImportError:
-    print("Please install requests first:  pip install requests")
+    print("Install requests first:  pip install requests")
     sys.exit(1)
 
 IMAGES_DIR = Path(__file__).parent / "images"
 IMAGES_DIR.mkdir(exist_ok=True)
 
-# All BGG IDs that need images (311 total)
 NEED_IMAGES = [
     105551,118247,122522,124361,128882,129437,131287,132531,133473,136284,
     140603,141019,141572,142379,143741,14996,15062,15363,153912,15512,
@@ -60,64 +53,46 @@ NEED_IMAGES = [
     503,5,54043,55690,62219,63888,68448,70323,84876,9209,9674
 ]
 
-
-def bgg_login(session, username, password):
-    """Log into BGG and store session cookies."""
-    print(f"Logging into BGG as '{username}'...")
-    resp = session.post(
-        "https://boardgamegeek.com/login/api/v1",
-        json={"credentials": {"username": username, "password": password}},
-        headers={
-            "Content-Type": "application/json",
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-                          "AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36",
-        },
-        timeout=30,
-    )
-    if resp.status_code == 200 or resp.status_code == 202:
-        print("  Login successful!")
-        return True
-    else:
-        print(f"  Login failed: {resp.status_code} {resp.text[:200]}")
-        return False
+SESSION = requests.Session()
+SESSION.headers.update({
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                  "AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9",
+})
 
 
-def fetch_image_urls(session, bgg_ids):
-    """Fetch image URLs for a batch of BGG IDs using the XML API v2."""
-    ids_str = ",".join(str(i) for i in bgg_ids)
-    url = f"https://boardgamegeek.com/xmlapi2/thing?id={ids_str}"
-
-    for attempt in range(3):
-        try:
-            resp = session.get(url, timeout=30)
-            if resp.status_code == 202:
-                # BGG queued the request, wait and retry
-                print("  BGG queued request, waiting...")
-                time.sleep(5)
-                continue
-            resp.raise_for_status()
-            root = ET.fromstring(resp.content)
-            results = {}
-            for item in root.findall("item"):
-                item_id = int(item.get("id"))
-                img_el = item.find("image")
-                if img_el is not None and img_el.text:
-                    results[item_id] = img_el.text.strip()
-            return results
-        except Exception as e:
-            print(f"  Attempt {attempt+1} failed: {e}")
-            if attempt < 2:
-                wait = 2 ** (attempt + 1)
-                print(f"  Retrying in {wait}s...")
-                time.sleep(wait)
-    return {}
-
-
-def download_image(session, url, dest_path):
-    """Download an image from a URL to a local file."""
+def get_image_url_from_page(bgg_id):
+    """Scrape the BGG game page for the og:image meta tag."""
+    url = f"https://boardgamegeek.com/boardgame/{bgg_id}"
     try:
-        resp = session.get(url, timeout=30)
+        resp = SESSION.get(url, timeout=20, allow_redirects=True)
+        if resp.status_code != 200:
+            return None
+        # Look for og:image meta tag
+        m = re.search(r'<meta\s+property="og:image"\s+content="([^"]+)"', resp.text)
+        if m:
+            return m.group(1)
+        # Also try reverse order of attributes
+        m = re.search(r'<meta\s+content="([^"]+)"\s+property="og:image"', resp.text)
+        if m:
+            return m.group(1)
+        # Try finding any geekdo image URL
+        m = re.search(r'(https://cf\.geekdo-images\.com/[^"\'>\s]+)', resp.text)
+        if m:
+            return m.group(1)
+    except Exception as e:
+        print(f"  Page fetch failed: {e}")
+    return None
+
+
+def download_image(url, dest_path):
+    """Download an image from a CDN URL to a local file."""
+    try:
+        resp = SESSION.get(url, timeout=30)
         resp.raise_for_status()
+        if len(resp.content) < 1000:
+            return False  # Too small, probably an error page
         with open(dest_path, "wb") as f:
             f.write(resp.content)
         return True
@@ -127,72 +102,41 @@ def download_image(session, url, dest_path):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Download BGG box art images")
-    parser.add_argument("--user", "-u", help="BGG username")
-    parser.add_argument("--pass", "-p", dest="password", help="BGG password")
-    args = parser.parse_args()
-
-    # Set up session with browser-like headers
-    session = requests.Session()
-    session.headers.update({
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-                      "AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    })
-
-    # Log in if credentials provided
-    if args.user:
-        pwd = args.password or getpass.getpass("BGG password: ")
-        if not bgg_login(session, args.user, pwd):
-            print("Continuing without login (may get 401 errors)...")
-
-    # Filter out IDs that already have images
     existing = {int(f.stem) for f in IMAGES_DIR.glob("*.jpg")}
     todo = [i for i in NEED_IMAGES if i not in existing]
-    print(f"\nNeed to download {len(todo)} images ({len(existing)} already exist)")
+    print(f"Need to download {len(todo)} images ({len(existing)} already exist)")
 
     if not todo:
         print("All images already downloaded!")
         return
 
-    # Process in batches of 20
-    batch_size = 20
     downloaded = 0
     failed = []
 
-    for i in range(0, len(todo), batch_size):
-        batch = todo[i:i + batch_size]
-        batch_num = i // batch_size + 1
-        total_batches = (len(todo) + batch_size - 1) // batch_size
-        print(f"\nBatch {batch_num}/{total_batches}: fetching URLs for {len(batch)} games...")
+    for idx, bgg_id in enumerate(todo, 1):
+        dest = IMAGES_DIR / f"{bgg_id}.jpg"
+        print(f"[{idx}/{len(todo)}] {bgg_id}...", end=" ", flush=True)
 
-        url_map = fetch_image_urls(session, batch)
-        print(f"  Got {len(url_map)} image URLs")
-
-        for bgg_id in batch:
-            dest = IMAGES_DIR / f"{bgg_id}.jpg"
-            if bgg_id in url_map:
-                img_url = url_map[bgg_id]
-                print(f"  Downloading {bgg_id}...", end=" ", flush=True)
-                if download_image(session, img_url, dest):
-                    downloaded += 1
-                    print("OK")
-                else:
-                    failed.append(bgg_id)
-                    print("FAILED")
+        img_url = get_image_url_from_page(bgg_id)
+        if img_url:
+            if download_image(img_url, dest):
+                downloaded += 1
+                print("OK")
             else:
-                print(f"  {bgg_id}: no image URL found")
                 failed.append(bgg_id)
+                print("FAILED (download)")
+        else:
+            failed.append(bgg_id)
+            print("FAILED (no image URL)")
 
-        # Rate limit: wait between batches
-        if i + batch_size < len(todo):
-            time.sleep(3)
+        # Rate limit: 1 request per second to be polite
+        if idx < len(todo):
+            time.sleep(1)
 
     print(f"\n{'='*50}")
-    print(f"Downloaded: {downloaded}")
-    print(f"Failed: {len(failed)}")
+    print(f"Downloaded: {downloaded}/{len(todo)}")
     if failed:
-        print(f"Failed IDs: {failed}")
+        print(f"Failed ({len(failed)}): {failed}")
 
 if __name__ == "__main__":
     main()
