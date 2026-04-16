@@ -229,7 +229,7 @@
   .modal-overlay{
     display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);
     z-index:100;justify-content:center;align-items:center;padding:1rem;
-    backdrop-filter:blur(6px);
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
   }
   .modal-overlay.open{display:flex}
   .modal{
@@ -365,7 +365,7 @@
   .picker-overlay{
     display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);
     z-index:200;justify-content:center;align-items:center;padding:1rem;
-    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
   }
   .picker-overlay.open{display:flex}
   .picker-box{
@@ -3703,7 +3703,7 @@ document.getElementById('btn-other-side').addEventListener('click', () => {
   btn.innerHTML = _showingOtherSide ? '&#x21C4; Show Main Shelf' : '&#x21C4; Show Other Side';
   renderShelf();
   applyFilters();
-  window.scrollTo({top: 0});
+  window.scrollTo(0, 0);
 });
 
 // ── Modal ──
