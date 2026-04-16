@@ -3,10 +3,15 @@
 Download board game box art images from BoardGameGeek.
 Run this script from the boardgamelibrary directory.
 
-Usage: python3 download_images.py
+Usage:
+  python3 download_images.py                          # anonymous (may 401)
+  python3 download_images.py --user BGG_USER --pass BGG_PASS  # with BGG login
 """
 
+import argparse
+import getpass
 import os
+import re
 import sys
 import time
 import xml.etree.ElementTree as ET
@@ -14,10 +19,9 @@ from pathlib import Path
 
 try:
     import requests
-    USE_REQUESTS = True
 except ImportError:
-    import urllib.request
-    USE_REQUESTS = False
+    print("Please install requests first:  pip install requests")
+    sys.exit(1)
 
 IMAGES_DIR = Path(__file__).parent / "images"
 IMAGES_DIR.mkdir(exist_ok=True)
@@ -56,31 +60,43 @@ NEED_IMAGES = [
     503,5,54043,55690,62219,63888,68448,70323,84876,9209,9674
 ]
 
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-}
 
-def _get(url, timeout=30):
-    """Fetch a URL, returns bytes. Works with requests or urllib."""
-    if USE_REQUESTS:
-        resp = requests.get(url, headers=HEADERS, timeout=timeout)
-        resp.raise_for_status()
-        return resp.content
+def bgg_login(session, username, password):
+    """Log into BGG and store session cookies."""
+    print(f"Logging into BGG as '{username}'...")
+    resp = session.post(
+        "https://boardgamegeek.com/login/api/v1",
+        json={"credentials": {"username": username, "password": password}},
+        headers={
+            "Content-Type": "application/json",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                          "AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36",
+        },
+        timeout=30,
+    )
+    if resp.status_code == 200 or resp.status_code == 202:
+        print("  Login successful!")
+        return True
     else:
-        req = urllib.request.Request(url, headers=HEADERS)
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
-            return resp.read()
+        print(f"  Login failed: {resp.status_code} {resp.text[:200]}")
+        return False
 
-def fetch_image_urls(bgg_ids):
+
+def fetch_image_urls(session, bgg_ids):
     """Fetch image URLs for a batch of BGG IDs using the XML API v2."""
     ids_str = ",".join(str(i) for i in bgg_ids)
     url = f"https://boardgamegeek.com/xmlapi2/thing?id={ids_str}"
 
     for attempt in range(3):
         try:
-            xml_data = _get(url)
-            root = ET.fromstring(xml_data)
+            resp = session.get(url, timeout=30)
+            if resp.status_code == 202:
+                # BGG queued the request, wait and retry
+                print("  BGG queued request, waiting...")
+                time.sleep(5)
+                continue
+            resp.raise_for_status()
+            root = ET.fromstring(resp.content)
             results = {}
             for item in root.findall("item"):
                 item_id = int(item.get("id"))
@@ -96,24 +112,50 @@ def fetch_image_urls(bgg_ids):
                 time.sleep(wait)
     return {}
 
-def download_image(url, dest_path):
+
+def download_image(session, url, dest_path):
     """Download an image from a URL to a local file."""
     try:
-        data = _get(url)
+        resp = session.get(url, timeout=30)
+        resp.raise_for_status()
         with open(dest_path, "wb") as f:
-            f.write(data)
+            f.write(resp.content)
         return True
     except Exception as e:
         print(f"  Download failed: {e}")
         return False
 
+
 def main():
+    parser = argparse.ArgumentParser(description="Download BGG box art images")
+    parser.add_argument("--user", "-u", help="BGG username")
+    parser.add_argument("--pass", "-p", dest="password", help="BGG password")
+    args = parser.parse_args()
+
+    # Set up session with browser-like headers
+    session = requests.Session()
+    session.headers.update({
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                      "AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    })
+
+    # Log in if credentials provided
+    if args.user:
+        pwd = args.password or getpass.getpass("BGG password: ")
+        if not bgg_login(session, args.user, pwd):
+            print("Continuing without login (may get 401 errors)...")
+
     # Filter out IDs that already have images
     existing = {int(f.stem) for f in IMAGES_DIR.glob("*.jpg")}
     todo = [i for i in NEED_IMAGES if i not in existing]
-    print(f"Need to download {len(todo)} images ({len(existing)} already exist)")
+    print(f"\nNeed to download {len(todo)} images ({len(existing)} already exist)")
 
-    # Process in batches of 20 (BGG API limit)
+    if not todo:
+        print("All images already downloaded!")
+        return
+
+    # Process in batches of 20
     batch_size = 20
     downloaded = 0
     failed = []
@@ -124,15 +166,15 @@ def main():
         total_batches = (len(todo) + batch_size - 1) // batch_size
         print(f"\nBatch {batch_num}/{total_batches}: fetching URLs for {len(batch)} games...")
 
-        url_map = fetch_image_urls(batch)
+        url_map = fetch_image_urls(session, batch)
         print(f"  Got {len(url_map)} image URLs")
 
         for bgg_id in batch:
             dest = IMAGES_DIR / f"{bgg_id}.jpg"
             if bgg_id in url_map:
                 img_url = url_map[bgg_id]
-                print(f"  Downloading {bgg_id}...", end=" ")
-                if download_image(img_url, dest):
+                print(f"  Downloading {bgg_id}...", end=" ", flush=True)
+                if download_image(session, img_url, dest):
                     downloaded += 1
                     print("OK")
                 else:
