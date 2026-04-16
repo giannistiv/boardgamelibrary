@@ -3703,6 +3703,7 @@ document.getElementById('btn-other-side').addEventListener('click', () => {
   btn.innerHTML = _showingOtherSide ? '&#x21C4; Show Main Shelf' : '&#x21C4; Show Other Side';
   renderShelf();
   applyFilters();
+  window.scrollTo({top: 0});
 });
 
 // ── Modal ──
@@ -3882,6 +3883,8 @@ function openModal(game) {
     </div>
   `;
   overlay.classList.add('open');
+  content.scrollTop = 0;
+  document.querySelector('.modal').scrollTop = 0;
 
   // On mobile: reset zoom and shrink body so modal fits device screen
   if (_isTouchDevice()) {
