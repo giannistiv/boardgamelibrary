@@ -565,6 +565,24 @@
     .cubby.horizontal-layout .game-spine.box-md{height:24px}
     .cubby.horizontal-layout .game-spine.box-lg{height:35px}
     .cubby.horizontal-layout .game-spine.box-xl{height:48px}
+    /* Stats mobile: larger fonts, compact layout */
+    .stats-view{padding:0 0.8rem 2rem}
+    .stats-player-name{font-size:1.8rem}
+    .stats-player-sub{font-size:0.9rem}
+    .stats-card{padding:0.7rem 0.5rem}
+    .stats-card-val{font-size:1.8rem}
+    .stats-card-label{font-size:0.72rem}
+    .stats-section-title{font-size:1rem}
+    .stats-game-img{width:48px;height:48px}
+    .stats-game-name{font-size:1rem}
+    .stats-game-detail{font-size:0.82rem}
+    .stats-game-wr{font-size:1rem}
+    .stats-recent-game{font-size:1rem}
+    .stats-recent-date{font-size:0.82rem}
+    .stats-recent-result{font-size:0.85rem}
+    .play-scores{font-size:0.88rem}
+    .change-profile-btn{font-size:0.9rem;padding:0.6rem 1.4rem}
+    .qr-label{font-size:0.82rem}
   }
 </style>
 </head>
@@ -2444,11 +2462,24 @@ document.getElementById('picker-overlay').addEventListener('click', e => {
 });
 
 // ── View switching ──
+function _scrollToShelfCenter() {
+  requestAnimationFrame(() => {
+    const sx = (document.body.scrollWidth - window.innerWidth) / 2;
+    window.scrollTo(sx > 0 ? sx : 0, 0);
+  });
+}
+
 function switchToLibrary() {
   document.getElementById('library-view').style.display = '';
   document.getElementById('stats-view').classList.remove('open');
   document.getElementById('btn-library').classList.add('active');
   document.getElementById('btn-mystats').classList.remove('active');
+  if (isMobile()) {
+    document.body.style.minWidth = '';
+    const vp = document.querySelector('meta[name=viewport]');
+    if (vp) vp.content = 'width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=5.0, user-scalable=yes';
+    _scrollToShelfCenter();
+  }
 }
 
 function switchToStats() {
@@ -2458,6 +2489,12 @@ function switchToStats() {
   document.getElementById('stats-view').classList.add('open');
   document.getElementById('btn-library').classList.remove('active');
   document.getElementById('btn-mystats').classList.add('active');
+  if (isMobile()) {
+    document.body.style.minWidth = 'auto';
+    const vp = document.querySelector('meta[name=viewport]');
+    if (vp) vp.content = 'width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no';
+    window.scrollTo(0, 0);
+  }
   showStatsView(player);
 }
 
@@ -2471,6 +2508,12 @@ function showStatsView(playerName) {
   document.getElementById('stats-view').classList.add('open');
   document.getElementById('btn-library').classList.remove('active');
   document.getElementById('btn-mystats').classList.add('active');
+  if (isMobile()) {
+    document.body.style.minWidth = 'auto';
+    const vp = document.querySelector('meta[name=viewport]');
+    if (vp) vp.content = 'width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no';
+    window.scrollTo(0, 0);
+  }
 
   // Gather all play data for this player
   const gameStats = {};
