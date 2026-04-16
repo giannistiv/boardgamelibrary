@@ -1,20 +1,21 @@
 #!/usr/bin/env python3
 """
 Download board game box art images from BoardGameGeek.
-Uses game page scraping instead of the API (which requires auth).
 
-Usage: python3 download_images.py
+Usage:
+  pip install cloudscraper
+  python3 download_images.py
 """
 
-import re
 import sys
 import time
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 try:
-    import requests
+    import cloudscraper
 except ImportError:
-    print("Install requests first:  pip install requests")
+    print("Install cloudscraper first:  pip install cloudscraper")
     sys.exit(1)
 
 IMAGES_DIR = Path(__file__).parent / "images"
@@ -53,90 +54,131 @@ NEED_IMAGES = [
     503,5,54043,55690,62219,63888,68448,70323,84876,9209,9674
 ]
 
-SESSION = requests.Session()
-SESSION.headers.update({
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-                  "AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    "Accept-Language": "en-US,en;q=0.9",
-})
-
-
-def get_image_url_from_page(bgg_id):
-    """Scrape the BGG game page for the og:image meta tag."""
-    url = f"https://boardgamegeek.com/boardgame/{bgg_id}"
-    try:
-        resp = SESSION.get(url, timeout=20, allow_redirects=True)
-        if resp.status_code != 200:
-            return None
-        # Look for og:image meta tag
-        m = re.search(r'<meta\s+property="og:image"\s+content="([^"]+)"', resp.text)
-        if m:
-            return m.group(1)
-        # Also try reverse order of attributes
-        m = re.search(r'<meta\s+content="([^"]+)"\s+property="og:image"', resp.text)
-        if m:
-            return m.group(1)
-        # Try finding any geekdo image URL
-        m = re.search(r'(https://cf\.geekdo-images\.com/[^"\'>\s]+)', resp.text)
-        if m:
-            return m.group(1)
-    except Exception as e:
-        print(f"  Page fetch failed: {e}")
-    return None
-
-
-def download_image(url, dest_path):
-    """Download an image from a CDN URL to a local file."""
-    try:
-        resp = SESSION.get(url, timeout=30)
-        resp.raise_for_status()
-        if len(resp.content) < 1000:
-            return False  # Too small, probably an error page
-        with open(dest_path, "wb") as f:
-            f.write(resp.content)
-        return True
-    except Exception as e:
-        print(f"  Download failed: {e}")
-        return False
-
 
 def main():
+    scraper = cloudscraper.create_scraper(
+        browser={"browser": "chrome", "platform": "darwin", "mobile": False}
+    )
+
+    # Test connection first
+    print("Testing BGG API access...")
+    try:
+        resp = scraper.get("https://boardgamegeek.com/xmlapi2/thing?id=432", timeout=20)
+        print(f"  Status: {resp.status_code}")
+        if resp.status_code != 200:
+            print(f"  Response: {resp.text[:300]}")
+            print("\nIf this still fails, BGG may be fully blocking automated access.")
+            print("As a last resort, see the browser console method below.")
+            return
+        print("  Connection OK!")
+    except Exception as e:
+        print(f"  Failed: {e}")
+        return
+
     existing = {int(f.stem) for f in IMAGES_DIR.glob("*.jpg")}
     todo = [i for i in NEED_IMAGES if i not in existing]
-    print(f"Need to download {len(todo)} images ({len(existing)} already exist)")
+    print(f"\nNeed to download {len(todo)} images ({len(existing)} already exist)")
 
     if not todo:
         print("All images already downloaded!")
         return
 
+    # Process in batches of 20
+    batch_size = 20
     downloaded = 0
     failed = []
 
-    for idx, bgg_id in enumerate(todo, 1):
-        dest = IMAGES_DIR / f"{bgg_id}.jpg"
-        print(f"[{idx}/{len(todo)}] {bgg_id}...", end=" ", flush=True)
+    for i in range(0, len(todo), batch_size):
+        batch = todo[i:i + batch_size]
+        batch_num = i // batch_size + 1
+        total_batches = (len(todo) + batch_size - 1) // batch_size
+        print(f"\nBatch {batch_num}/{total_batches}: fetching URLs for {len(batch)} games...")
 
-        img_url = get_image_url_from_page(bgg_id)
-        if img_url:
-            if download_image(img_url, dest):
-                downloaded += 1
-                print("OK")
+        ids_str = ",".join(str(x) for x in batch)
+        url = f"https://boardgamegeek.com/xmlapi2/thing?id={ids_str}"
+
+        url_map = {}
+        for attempt in range(3):
+            try:
+                resp = scraper.get(url, timeout=30)
+                if resp.status_code == 202:
+                    print("  BGG queued request, waiting 5s...")
+                    time.sleep(5)
+                    continue
+                resp.raise_for_status()
+                root = ET.fromstring(resp.content)
+                for item in root.findall("item"):
+                    item_id = int(item.get("id"))
+                    img_el = item.find("image")
+                    if img_el is not None and img_el.text:
+                        url_map[item_id] = img_el.text.strip()
+                break
+            except Exception as e:
+                print(f"  Attempt {attempt+1} failed: {e}")
+                if attempt < 2:
+                    time.sleep(3)
+
+        print(f"  Got {len(url_map)} image URLs")
+
+        for bgg_id in batch:
+            dest = IMAGES_DIR / f"{bgg_id}.jpg"
+            if bgg_id in url_map:
+                print(f"  Downloading {bgg_id}...", end=" ", flush=True)
+                try:
+                    img_resp = scraper.get(url_map[bgg_id], timeout=30)
+                    img_resp.raise_for_status()
+                    if len(img_resp.content) > 1000:
+                        with open(dest, "wb") as f:
+                            f.write(img_resp.content)
+                        downloaded += 1
+                        print("OK")
+                    else:
+                        failed.append(bgg_id)
+                        print("FAILED (too small)")
+                except Exception as e:
+                    failed.append(bgg_id)
+                    print(f"FAILED ({e})")
             else:
                 failed.append(bgg_id)
-                print("FAILED (download)")
-        else:
-            failed.append(bgg_id)
-            print("FAILED (no image URL)")
 
-        # Rate limit: 1 request per second to be polite
-        if idx < len(todo):
-            time.sleep(1)
+        if i + batch_size < len(todo):
+            time.sleep(3)
 
     print(f"\n{'='*50}")
     print(f"Downloaded: {downloaded}/{len(todo)}")
     if failed:
         print(f"Failed ({len(failed)}): {failed}")
+
+
+# ─────────────────────────────────────────────────────────
+# FALLBACK: If the script above still fails, paste this
+# into your browser console on boardgamegeek.com:
+#
+# (async()=>{
+#   const ids = [PASTE_IDS_HERE];
+#   const results = {};
+#   for(let i=0; i<ids.length; i+=20){
+#     const batch = ids.slice(i,i+20).join(',');
+#     const r = await fetch(`/xmlapi2/thing?id=${batch}`);
+#     const txt = await r.text();
+#     const parser = new DOMParser();
+#     const doc = parser.parseFromString(txt,'text/xml');
+#     doc.querySelectorAll('item').forEach(item=>{
+#       const img = item.querySelector('image');
+#       if(img) results[item.getAttribute('id')] = img.textContent.trim();
+#     });
+#     console.log(`Fetched ${i+20}/${ids.length}`);
+#     await new Promise(r=>setTimeout(r,2000));
+#   }
+#   // Download as JSON file
+#   const blob = new Blob([JSON.stringify(results)],{type:'application/json'});
+#   const a = document.createElement('a');
+#   a.href = URL.createObjectURL(blob);
+#   a.download = 'bgg_image_urls.json';
+#   a.click();
+#   console.log('Done! Saved bgg_image_urls.json');
+# })();
+# ─────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
     main()
