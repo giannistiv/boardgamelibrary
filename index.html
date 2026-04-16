@@ -4086,6 +4086,10 @@ function closeModal() {
   if (overlay.classList.contains('open')) {
     overlay.classList.remove('open');
     _restoreAfterModal();
+    if (_modalOpenedFromStats) {
+      const player = _viewingProfile || localStorage.getItem('bgl-player');
+      if (player) showStatsView(player, _viewingProfile ? 'visiting' : undefined);
+    }
     if (history.state && history.state.modal) history.back();
   }
 }
@@ -4094,6 +4098,10 @@ window.addEventListener('popstate', e => {
   if (overlay.classList.contains('open')) {
     overlay.classList.remove('open');
     _restoreAfterModal();
+    if (_modalOpenedFromStats) {
+      const player = _viewingProfile || localStorage.getItem('bgl-player');
+      if (player) showStatsView(player, _viewingProfile ? 'visiting' : undefined);
+    }
   }
 });
 
