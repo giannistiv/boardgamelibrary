@@ -630,6 +630,8 @@
   }
   .pie-legend-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
   .pie-legend-pct{opacity:0.5;margin-left:auto;font-variant-numeric:tabular-nums}
+  .pie-legend-more{background:none;border:none;color:var(--accent);font-size:0.68rem;cursor:pointer;padding:0.25rem 0;opacity:0.7}
+  .pie-legend-more:hover{opacity:1}
 
   /* ── Insights search ── */
   .insights-search{
@@ -641,16 +643,6 @@
   }
   .insights-search::placeholder{color:rgba(240,230,211,0.35)}
   .insights-search:focus{border-color:var(--accent)}
-
-  .stats-back-btn{
-    display:inline-flex;align-items:center;gap:0.3rem;
-    padding:0.4rem 0.8rem;border-radius:8px;
-    border:1px solid rgba(255,255,255,0.12);
-    background:rgba(255,255,255,0.06);color:var(--text);
-    font-family:inherit;font-size:0.75rem;cursor:pointer;
-    transition:all 0.15s;margin-bottom:1rem;
-  }
-  .stats-back-btn:hover{background:rgba(255,255,255,0.12)}
 
   /* ── Responsive ── */
   @media(max-width:900px){
@@ -674,7 +666,6 @@
     .modal-fav-btn{right:56px;font-size:1.5rem;width:40px;height:40px;opacity:0.9;background:rgba(0,0,0,0.6);z-index:102}
     .fav-card-name{font-size:0.75rem;padding:2rem 0.5rem 0.5rem}
     .fav-card-empty span{font-size:1.8rem}
-    .stats-back-btn{font-size:0.88rem;padding:0.5rem 1rem}
     .stats-player-avatar{width:42px;height:42px;font-size:1rem}
     .stats-player-info-name{font-size:1rem}
     .stats-player-info-detail{font-size:0.82rem}
@@ -728,8 +719,8 @@
 
 <div class="player-bar" id="player-bar">
   <button class="player-bar-btn active" id="btn-library">Library</button>
-  <button class="player-bar-btn" id="btn-mystats">My Stats</button>
-  <button class="player-bar-btn" id="btn-insights">Insights</button>
+  <button class="player-bar-btn" id="btn-mystats">Profile</button>
+  <button class="player-bar-btn" id="btn-insights">Stats</button>
 </div>
 
 <div id="library-view">
@@ -4101,6 +4092,7 @@ const VP_LIBRARY = 'width=1200, initial-scale=1.3, user-scalable=yes';
 const VP_LOCKED  = 'width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no';
 const _isTouchDevice = () => 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 let _modalOpenedFromStats = false;
+let _modalOpenedFromInsights = false;
 
 function _setViewport(content) {
   const vp = document.querySelector('meta[name=viewport]');
@@ -4109,13 +4101,11 @@ function _setViewport(content) {
 
 function _restoreAfterModal() {
   if (!_isTouchDevice()) return;
-  if (_modalOpenedFromStats) {
-    // Return to stats: keep device-width viewport, locked zoom
+  if (_modalOpenedFromStats || _modalOpenedFromInsights) {
     document.body.style.minWidth = 'auto';
     _setViewport(VP_LOCKED);
     window.scrollTo(0, 0);
   } else {
-    // Return to library: wide viewport
     document.body.style.minWidth = '';
     _setViewport(VP_LIBRARY);
     requestAnimationFrame(() => window.scrollTo(0, 0));
@@ -4127,7 +4117,9 @@ function closeModal() {
   if (overlay.classList.contains('open')) {
     overlay.classList.remove('open');
     _restoreAfterModal();
-    if (_modalOpenedFromStats) {
+    if (_modalOpenedFromInsights) {
+      showInsightsView();
+    } else if (_modalOpenedFromStats) {
       const player = _viewingProfile || localStorage.getItem('bgl-player');
       if (player) showStatsView(player, _viewingProfile ? 'visiting' : undefined);
     }
@@ -4139,7 +4131,9 @@ window.addEventListener('popstate', e => {
   if (overlay.classList.contains('open')) {
     overlay.classList.remove('open');
     _restoreAfterModal();
-    if (_modalOpenedFromStats) {
+    if (_modalOpenedFromInsights) {
+      showInsightsView();
+    } else if (_modalOpenedFromStats) {
       const player = _viewingProfile || localStorage.getItem('bgl-player');
       if (player) showStatsView(player, _viewingProfile ? 'visiting' : undefined);
     }
@@ -4148,6 +4142,7 @@ window.addEventListener('popstate', e => {
 
 function openModal(game) {
   _modalOpenedFromStats = document.getElementById('stats-view').classList.contains('open');
+  _modalOpenedFromInsights = document.getElementById('insights-view').classList.contains('open');
   const overlay = document.getElementById('modal-overlay');
   const content = document.getElementById('modal-content');
 
@@ -4555,10 +4550,7 @@ function showStatsView(playerName, visiting) {
     </div>`;
   };
 
-  // Build back button for visiting profiles
-  const backBtnHtml = !isOwnProfile && loggedInPlayer
-    ? `<button class="stats-back-btn" id="btn-back-profile">&#8592; Back to my stats</button>`
-    : '';
+  const backBtnHtml = '';
 
   // Build favorites section
   const favoritesHtml = buildFavoritesHtml(playerName, isOwnProfile);
@@ -4679,15 +4671,6 @@ function showStatsView(playerName, visiting) {
 
   // Wire favorites grid
   wireFavoritesGrid(container, playerName);
-
-  // Back to own profile button
-  const backBtn = document.getElementById('btn-back-profile');
-  if (backBtn) {
-    backBtn.addEventListener('click', () => {
-      showStatsView(loggedInPlayer);
-      window.scrollTo(0, 0);
-    });
-  }
 
   // Change profile button
   const changeBtn = document.getElementById('btn-change-profile');
@@ -4863,7 +4846,7 @@ function wireStarRating() {
 // ── Pie Chart Builder ──
 const PIE_COLORS = ['#e2b04a','#4fc3f7','#22c55e','#f87171','#a78bfa','#f59e0b','#ec4899','#14b8a6','#8b5cf6','#6366f1'];
 
-function buildPieHtml(data, total, title) {
+function buildPieHtml(data, total, title, maxVisible) {
   if (!data || Object.keys(data).length === 0) return '';
   const sorted = Object.entries(data).sort((a, b) => b[1] - a[1]);
   let gradParts = [];
@@ -4877,21 +4860,26 @@ function buildPieHtml(data, total, title) {
     items.push({ label, count, pct: Math.round(pct), color });
   });
   const grad = `conic-gradient(${gradParts.join(',')})`;
-  const legendHtml = items.map(it =>
+  const limit = maxVisible && items.length > maxVisible ? maxVisible : items.length;
+  const visibleHtml = items.slice(0, limit).map(it =>
     `<div class="pie-legend-item"><span class="pie-legend-dot" style="background:${it.color}"></span>${it.label}<span class="pie-legend-pct">${it.pct}%</span></div>`
   ).join('');
+  const hiddenHtml = items.length > limit ? items.slice(limit).map(it =>
+    `<div class="pie-legend-item"><span class="pie-legend-dot" style="background:${it.color}"></span>${it.label}<span class="pie-legend-pct">${it.pct}%</span></div>`
+  ).join('') : '';
+  const showMoreBtn = hiddenHtml ? `<div class="pie-legend-hidden" style="display:none">${hiddenHtml}</div><button class="pie-legend-more" onclick="var h=this.previousElementSibling;h.style.display=h.style.display==='none'?'block':'none';this.textContent=h.style.display==='none'?'Show more':'Show less'">Show more</button>` : '';
   return `<div class="chart-block">
     <div class="chart-block-title">${title}</div>
     <div class="pie-wrap">
       <div class="pie" style="background:${grad}"><div class="pie-center">${total}</div></div>
-      <div class="pie-legend">${legendHtml}</div>
+      <div class="pie-legend">${visibleHtml}${showMoreBtn}</div>
     </div>
   </div>`;
 }
 
 function buildChartsHtml(days, locations, total) {
   const dayPie = buildPieHtml(days, total, 'Play Days');
-  const locPie = buildPieHtml(locations, total, 'Locations');
+  const locPie = buildPieHtml(locations, total, 'Locations', 5);
   if (!dayPie && !locPie) return '';
   return `<div class="stats-section"><div class="chart-row">${dayPie}${locPie}</div></div>`;
 }
@@ -4962,11 +4950,11 @@ function showInsightsView() {
     .sort((a, b) => b.plays - a.plays);
 
   // Charts
-  const chartsHtml = `<div class="stats-section"><div class="chart-row">${buildPieHtml(allDays, totalPlays, 'Play Days')}${buildPieHtml(allLocs, totalPlays, 'Locations')}</div></div>`;
+  const chartsHtml = `<div class="stats-section"><div class="chart-row">${buildPieHtml(allDays, totalPlays, 'Play Days')}${buildPieHtml(allLocs, totalPlays, 'Locations', 5)}</div></div>`;
 
   container.innerHTML = `
     <div class="stats-header">
-      <div class="stats-player-name">Insights</div>
+      <div class="stats-player-name">Stats</div>
       <div class="stats-player-sub">${totalPlays} plays across ${Object.keys(gamePlayCounts).length} games</div>
     </div>
 
@@ -4979,9 +4967,9 @@ function showInsightsView() {
 
     <div class="stats-section stats-players-section">
       <div class="stats-section-title">Players</div>
-      <input type="text" class="insights-search" id="insights-player-search" placeholder="Search players..." autocomplete="off">
+      <input type="text" class="insights-search" id="insights-player-search" placeholder="Search for more..." autocomplete="off">
       <div id="insights-player-list">
-        ${_renderInsightsPlayers(topPlayers, wrColor)}
+        ${_renderInsightsPlayers(topPlayers.slice(0, 10), wrColor)}
       </div>
     </div>
   `;
@@ -4998,7 +4986,7 @@ function showInsightsView() {
   const searchEl = document.getElementById('insights-player-search');
   searchEl.addEventListener('input', () => {
     const q = searchEl.value.toLowerCase();
-    const filtered = q ? topPlayers.filter(p => p.name.toLowerCase().includes(q)) : topPlayers;
+    const filtered = q ? topPlayers.filter(p => p.name.toLowerCase().includes(q)) : topPlayers.slice(0, 10);
     const listEl = document.getElementById('insights-player-list');
     listEl.innerHTML = _renderInsightsPlayers(filtered, wrColor);
     _wireInsightsPlayerClicks(listEl);
