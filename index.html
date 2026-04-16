@@ -2189,22 +2189,27 @@ function renderShelf() {
 }
 
 // ── Modal ──
-const isMobile = () => window.matchMedia('(max-width:900px)').matches;
-let _savedScrollX = 0;
+const VP_LIBRARY = 'width=1200, user-scalable=yes';
+const VP_LOCKED  = 'width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no';
+const _isTouchDevice = () => 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
-function _restoreMobileLayout() {
-  if (!isMobile()) return;
-  document.body.style.minWidth = '';
+function _setViewport(content) {
   const vp = document.querySelector('meta[name=viewport]');
-  if (vp) vp.content = 'width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=5.0, user-scalable=yes';
-  requestAnimationFrame(() => window.scrollTo(_savedScrollX, 0));
+  if (vp) vp.content = content;
+}
+
+function _restoreLibraryView() {
+  if (!_isTouchDevice()) return;
+  document.body.style.minWidth = '';
+  _setViewport(VP_LIBRARY);
+  requestAnimationFrame(() => window.scrollTo(0, 0));
 }
 
 function closeModal() {
   const overlay = document.getElementById('modal-overlay');
   if (overlay.classList.contains('open')) {
     overlay.classList.remove('open');
-    _restoreMobileLayout();
+    _restoreLibraryView();
     if (history.state && history.state.modal) history.back();
   }
 }
@@ -2212,7 +2217,7 @@ window.addEventListener('popstate', e => {
   const overlay = document.getElementById('modal-overlay');
   if (overlay.classList.contains('open')) {
     overlay.classList.remove('open');
-    _restoreMobileLayout();
+    _restoreLibraryView();
   }
 });
 
@@ -2352,11 +2357,9 @@ function openModal(game) {
   overlay.classList.add('open');
 
   // On mobile: reset zoom and shrink body so modal fits device screen
-  if (isMobile()) {
-    _savedScrollX = window.scrollX;
+  if (_isTouchDevice()) {
     document.body.style.minWidth = 'auto';
-    const vp = document.querySelector('meta[name=viewport]');
-    if (vp) vp.content = 'width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no';
+    _setViewport(VP_LOCKED);
     window.scrollTo(0, 0);
   }
 
@@ -2462,23 +2465,15 @@ document.getElementById('picker-overlay').addEventListener('click', e => {
 });
 
 // ── View switching ──
-function _scrollToShelfCenter() {
-  requestAnimationFrame(() => {
-    const sx = (document.body.scrollWidth - window.innerWidth) / 2;
-    window.scrollTo(sx > 0 ? sx : 0, 0);
-  });
-}
-
 function switchToLibrary() {
   document.getElementById('library-view').style.display = '';
   document.getElementById('stats-view').classList.remove('open');
   document.getElementById('btn-library').classList.add('active');
   document.getElementById('btn-mystats').classList.remove('active');
-  if (isMobile()) {
+  if (_isTouchDevice()) {
     document.body.style.minWidth = '';
-    const vp = document.querySelector('meta[name=viewport]');
-    if (vp) vp.content = 'width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=5.0, user-scalable=yes';
-    _scrollToShelfCenter();
+    _setViewport(VP_LIBRARY);
+    requestAnimationFrame(() => window.scrollTo(0, 0));
   }
 }
 
@@ -2489,10 +2484,9 @@ function switchToStats() {
   document.getElementById('stats-view').classList.add('open');
   document.getElementById('btn-library').classList.remove('active');
   document.getElementById('btn-mystats').classList.add('active');
-  if (isMobile()) {
+  if (_isTouchDevice()) {
     document.body.style.minWidth = 'auto';
-    const vp = document.querySelector('meta[name=viewport]');
-    if (vp) vp.content = 'width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no';
+    _setViewport(VP_LOCKED);
     window.scrollTo(0, 0);
   }
   showStatsView(player);
@@ -2508,10 +2502,9 @@ function showStatsView(playerName) {
   document.getElementById('stats-view').classList.add('open');
   document.getElementById('btn-library').classList.remove('active');
   document.getElementById('btn-mystats').classList.add('active');
-  if (isMobile()) {
+  if (_isTouchDevice()) {
     document.body.style.minWidth = 'auto';
-    const vp = document.querySelector('meta[name=viewport]');
-    if (vp) vp.content = 'width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no';
+    _setViewport(VP_LOCKED);
     window.scrollTo(0, 0);
   }
 
@@ -2867,12 +2860,9 @@ function wireStarRating() {
 renderFilters();
 renderShelf();
 
-// On mobile, scroll to center the shelf horizontally
-if (isMobile()) {
-  requestAnimationFrame(() => {
-    const scrollX = (document.body.scrollWidth - window.innerWidth) / 2;
-    if (scrollX > 0) window.scrollTo(scrollX, 0);
-  });
+// On touch devices, set library viewport so full shelf fits on screen
+if (_isTouchDevice()) {
+  _setViewport(VP_LIBRARY);
 }
 
 // Load ratings from Firebase, then show the right view
