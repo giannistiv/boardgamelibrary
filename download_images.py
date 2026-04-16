@@ -7,10 +7,17 @@ Usage: python3 download_images.py
 """
 
 import os
+import sys
 import time
-import urllib.request
 import xml.etree.ElementTree as ET
 from pathlib import Path
+
+try:
+    import requests
+    USE_REQUESTS = True
+except ImportError:
+    import urllib.request
+    USE_REQUESTS = False
 
 IMAGES_DIR = Path(__file__).parent / "images"
 IMAGES_DIR.mkdir(exist_ok=True)
@@ -49,17 +56,30 @@ NEED_IMAGES = [
     503,5,54043,55690,62219,63888,68448,70323,84876,9209,9674
 ]
 
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+}
+
+def _get(url, timeout=30):
+    """Fetch a URL, returns bytes. Works with requests or urllib."""
+    if USE_REQUESTS:
+        resp = requests.get(url, headers=HEADERS, timeout=timeout)
+        resp.raise_for_status()
+        return resp.content
+    else:
+        req = urllib.request.Request(url, headers=HEADERS)
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            return resp.read()
+
 def fetch_image_urls(bgg_ids):
     """Fetch image URLs for a batch of BGG IDs using the XML API v2."""
     ids_str = ",".join(str(i) for i in bgg_ids)
     url = f"https://boardgamegeek.com/xmlapi2/thing?id={ids_str}"
 
-    req = urllib.request.Request(url, headers={"User-Agent": "BoardGameLibrary/1.0"})
-
     for attempt in range(3):
         try:
-            with urllib.request.urlopen(req, timeout=30) as resp:
-                xml_data = resp.read()
+            xml_data = _get(url)
             root = ET.fromstring(xml_data)
             results = {}
             for item in root.findall("item"):
@@ -71,15 +91,15 @@ def fetch_image_urls(bgg_ids):
         except Exception as e:
             print(f"  Attempt {attempt+1} failed: {e}")
             if attempt < 2:
-                time.sleep(2 ** (attempt + 1))
+                wait = 2 ** (attempt + 1)
+                print(f"  Retrying in {wait}s...")
+                time.sleep(wait)
     return {}
 
 def download_image(url, dest_path):
     """Download an image from a URL to a local file."""
-    req = urllib.request.Request(url, headers={"User-Agent": "BoardGameLibrary/1.0"})
     try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            data = resp.read()
+        data = _get(url)
         with open(dest_path, "wb") as f:
             f.write(data)
         return True
