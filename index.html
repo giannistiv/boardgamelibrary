@@ -4834,16 +4834,35 @@ function wireStarRating() {
 let favoritesCache = {};
 let favoritesCacheReady = false;
 
+function _loadFavoritesFromLocal() {
+  try {
+    const raw = localStorage.getItem('bgl-favorites');
+    return raw ? JSON.parse(raw) : {};
+  } catch (e) { return {}; }
+}
+
+function _saveFavoritesToLocal() {
+  try { localStorage.setItem('bgl-favorites', JSON.stringify(favoritesCache)); } catch (e) {}
+}
+
 async function loadAllFavorites() {
-  if (!FIREBASE_DB) { favoritesCacheReady = true; return; }
+  const local = _loadFavoritesFromLocal();
+  favoritesCache = local;
+  favoritesCacheReady = true;
+  if (!FIREBASE_DB) return;
   try {
     const res = await fetch(`${FIREBASE_DB}/favorites.json`);
     const data = await res.json();
-    favoritesCache = data || {};
-    favoritesCacheReady = true;
+    if (data) {
+      for (const key in data) {
+        if (Array.isArray(data[key]) && data[key].length > 0) {
+          favoritesCache[key] = data[key];
+        }
+      }
+      _saveFavoritesToLocal();
+    }
   } catch (e) {
     console.warn('Failed to load favorites from Firebase:', e);
-    favoritesCacheReady = true;
   }
 }
 
@@ -4853,6 +4872,7 @@ function getPlayerFavorites(playerName) {
 
 async function saveFavorites(playerName, bggIds) {
   favoritesCache[playerName] = bggIds;
+  _saveFavoritesToLocal();
   if (!FIREBASE_DB) return;
   try {
     await fetch(`${FIREBASE_DB}/favorites/${encodeURIComponent(playerName)}.json`, {
