@@ -817,6 +817,15 @@ for (const bggId in PLAY_HISTORY) {
   }
 }
 
+// Games with play history that aren't on the shelf (for stats/modal)
+const EXTRA_GAMES = {
+  420087:{id:"flip7",name:"Flip 7",bggId:420087,year:2024,designer:"Eric Olsen",
+    description:"A press-your-luck card game where players flip cards one at a time, trying to collect up to seven without revealing a duplicate number. The deck uses a pyramid distribution plus special action cards — decide each turn whether to bank your points or risk busting.",
+    categories:["Card Game","Party Game"],players:"3-18",playTime:"20 min",
+    complexity:1.05,bggRating:7.1,spineColor:"#d94f30",boxSize:"sm",
+    mechanics:["Push Your Luck","Take That"]}
+};
+
 // =============================================
 // GAME DATA - Enriched with BoardGameGeek data
 // =============================================
@@ -2240,24 +2249,33 @@ function renderShelf() {
 const VP_LIBRARY = 'width=1200, user-scalable=yes';
 const VP_LOCKED  = 'width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no';
 const _isTouchDevice = () => 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+let _modalOpenedFromStats = false;
 
 function _setViewport(content) {
   const vp = document.querySelector('meta[name=viewport]');
   if (vp) vp.content = content;
 }
 
-function _restoreLibraryView() {
+function _restoreAfterModal() {
   if (!_isTouchDevice()) return;
-  document.body.style.minWidth = '';
-  _setViewport(VP_LIBRARY);
-  requestAnimationFrame(() => window.scrollTo(0, 0));
+  if (_modalOpenedFromStats) {
+    // Return to stats: keep device-width viewport, locked zoom
+    document.body.style.minWidth = 'auto';
+    _setViewport(VP_LOCKED);
+    window.scrollTo(0, 0);
+  } else {
+    // Return to library: wide viewport
+    document.body.style.minWidth = '';
+    _setViewport(VP_LIBRARY);
+    requestAnimationFrame(() => window.scrollTo(0, 0));
+  }
 }
 
 function closeModal() {
   const overlay = document.getElementById('modal-overlay');
   if (overlay.classList.contains('open')) {
     overlay.classList.remove('open');
-    _restoreLibraryView();
+    _restoreAfterModal();
     if (history.state && history.state.modal) history.back();
   }
 }
@@ -2265,11 +2283,12 @@ window.addEventListener('popstate', e => {
   const overlay = document.getElementById('modal-overlay');
   if (overlay.classList.contains('open')) {
     overlay.classList.remove('open');
-    _restoreLibraryView();
+    _restoreAfterModal();
   }
 });
 
 function openModal(game) {
+  _modalOpenedFromStats = document.getElementById('stats-view').classList.contains('open');
   const overlay = document.getElementById('modal-overlay');
   const content = document.getElementById('modal-content');
 
@@ -2569,6 +2588,7 @@ function showStatsView(playerName) {
 
   for (const bggId in PLAY_HISTORY) {
     const game = GAMES.find(g => g.bggId === Number(bggId))
+      || EXTRA_GAMES[bggId]
       || {id:'bgg_'+bggId, name:'Game #'+bggId, bggId:Number(bggId), spineColor:'#555', categories:[], players:'', playTime:'', complexity:0};
 
     for (const play of PLAY_HISTORY[bggId]) {
