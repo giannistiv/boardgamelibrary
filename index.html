@@ -3953,7 +3953,7 @@ function getAllPlayers() {
 
 function renderPickerList(filter) {
   const list = document.getElementById('picker-list');
-  const players = getAllPlayers().filter(p => p.plays >= 1);
+  const players = getAllPlayers().filter(p => p.plays >= 2);
   const q = (filter || '').toLowerCase();
   const filtered = q ? players.filter(p => p.name.toLowerCase().includes(q)) : players;
 
