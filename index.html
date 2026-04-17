@@ -4088,7 +4088,7 @@ document.getElementById('btn-other-side').addEventListener('click', () => {
 });
 
 // ── Modal ──
-const VP_LIBRARY = 'width=1200, initial-scale=1.3, user-scalable=yes';
+const VP_LIBRARY = 'width=1200, user-scalable=yes';
 const VP_LOCKED  = 'width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no';
 const _isTouchDevice = () => 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 let _modalOpenedFromStats = false;
@@ -4727,8 +4727,7 @@ function showStatsView(playerName, visiting) {
 
 // ── Rating System (Firebase Realtime Database) ──
 // PASTE YOUR FIREBASE REALTIME DATABASE URL BELOW:
-const FIREBASE_DB = 'https://boardgamelibrary0-default-rtdb.firebaseio.com';
-// Example: const FIREBASE_DB = 'https://boardgamelibrary-abc12-default-rtdb.firebaseio.com';
+const FIREBASE_DB = 'https://boardgamelibrary0-default-rtdb.europe-west1.firebasedatabase.app';
 
 // In-memory cache of all ratings: { bggId: { playerName: rating } }
 let ratingsCache = {};
@@ -5085,6 +5084,14 @@ async function loadAllFavorites() {
         }
       }
       _saveFavoritesToLocal();
+    } else {
+      const localKeys = Object.keys(local).filter(k => Array.isArray(local[k]) && local[k].length > 0);
+      if (localKeys.length > 0) {
+        await fetch(`${FIREBASE_DB}/favorites.json`, {
+          method: 'PUT',
+          body: JSON.stringify(local)
+        });
+      }
     }
   } catch (e) {
     console.warn('Failed to load favorites from Firebase:', e);
