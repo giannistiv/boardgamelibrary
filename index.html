@@ -3786,7 +3786,7 @@ const GAMES = [
   {id:"midnight_crown_os",name:"The Midnight Crown",bggId:370534,year:2023,designer:"(Unknown)",row:8,col:1,otherSide:true,categories:["Adventure","Fantasy"],players:"1-4",playTime:"60-120 min",complexity:2.5,bggRating:7.2,spineColor:"#1a0033",boxSize:"sm",mechanics:["Hand Management","Variable Player Powers"],description:"A fantasy adventure game centered on political intrigue and power struggles among noble houses vying for a mysterious throne through card play and area influence."},
   {id:"detective_bullets_os",name:"Detective: Bullets over Hollywood",bggId:265736,year:2019,designer:"Przemysław Rymer, Ignacy Trzewiczek",row:8,col:1,otherSide:true,categories:["Deduction","Co-op"],players:"1-5",playTime:"120-180 min",complexity:2.8,bggRating:7.7,spineColor:"#2e1b1b",boxSize:"sm",mechanics:["Cooperative Game","Deduction","Storytelling"],description:"A case expansion for Detective adding a Hollywood-themed murder investigation with the Antares online database integration."},
   {id:"detective_saints_os",name:"Detective: Saints & Sinners",bggId:281120,year:2019,designer:"Przemysław Rymer, Ignacy Trzewiczek",row:8,col:1,otherSide:true,categories:["Deduction","Co-op"],players:"1-5",playTime:"120-180 min",complexity:2.8,bggRating:7.8,spineColor:"#1a2a4a",boxSize:"sm",mechanics:["Cooperative Game","Deduction","Storytelling"],description:"Multi-case expansion for Detective delivering interconnected investigations in a city torn between sacred and criminal worlds."},
-  {id:"sherlock_tamesis_os",name:"Sherlock Holmes: Murders on the Tamesis",bggId:368190,year:2022,designer:"Raymond Edwards, Suzanne Goldberg, Gary Grady",row:8,col:1,otherSide:true,categories:["Deduction","Co-op"],players:"1-8",playTime:"60-120 min",complexity:2.3,bggRating:7.9,spineColor:"#2b4a6e",boxSize:"sm",mechanics:["Cooperative Game","Deduction","Storytelling"],description:"A standalone Sherlock Holmes Consulting Detective case book featuring investigations along the River Thames. Consult newspapers, maps, and directories to solve mysteries."},
+  {id:"sherlock_thames_os",name:"Sherlock Holmes Consulting Detective: The Thames Murders & Other Cases",bggId:2511,year:1982,designer:"Raymond Edwards, Suzanne Goldberg, Gary Grady",row:8,col:1,otherSide:true,categories:["Deduction","Co-op"],players:"1-8",playTime:"60-120 min",complexity:2.3,bggRating:7.8,spineColor:"#2b4a6e",boxSize:"sm",mechanics:["Cooperative Game","Deduction","Storytelling"],description:"The classic detective game where players follow leads across Victorian London using a map, directory, and newspapers. Work as a team to solve ten cases and compare your efficiency against Sherlock Holmes himself."},
   // ── Row 7, Col 5 ──
   {id:"gh_buttons_bugs_os",name:"Gloomhaven: Buttons & Bugs",bggId:372526,year:2023,designer:"Isaac Childres",row:8,col:2,otherSide:true,categories:["Adventure","Solo"],players:"1-1",playTime:"25-35 min",complexity:2.5,bggRating:7.6,spineColor:"#2c3e50",boxSize:"sm",mechanics:["Hand Management","Modular Board"],description:"A compact solo-only Gloomhaven experience in a tiny box. Players control a single character navigating hexagonal encounters using the familiar card-based combat system."},
   {id:"smartphone_update_os",name:"Smartphone Inc.: Update 1.1",bggId:306864,year:2020,designer:"Ivan Lashin",row:8,col:2,otherSide:true,categories:["Strategy","Euro"],players:"1-5",playTime:"60-90 min",complexity:3.0,bggRating:7.9,spineColor:"#2c3e50",boxSize:"sm",mechanics:["Simultaneous Action Selection","Worker Placement"],description:"Comprehensive expansion for Smartphone Inc. adding asymmetric company powers, new product tiles, and additional market mechanisms."},
@@ -3820,7 +3820,7 @@ const CATEGORIES = [
   "Card Game","Deduction","Area Control","Dice",
   "Solo","Puzzle","Party","Abstract","Adventure","Racing"
 ];
-const EXPANSION_IDS = new Set(["mu_asgard", "mu_panther", "mu_spider", "mu_deadpool", "mu_xmen_gold", "mu_gotg", "mu_xmen_blue", "rove_xulc", "crimson_scales", "caverna_forgotten", "spirit_island_je", "spirit_ff", "spirit_bc", "feast_for_odin_exp", "heat_heavy_rain", "dune_immortality", "witcher_skellige", "witcher_wild_hunt", "kelp_expansion", "planet_unknown_super", "mdt_deadpool", "witcher_monster_trail_os", "witcher_mages_os", "witcher_legend_hunt_os", "etherfields_harpy_os", "earthborne_legacy_os", "gh_forgotten_circles_os", "on_mars_alien_os", "alchemists_golem_os", "hegemony_crisis_os", "crimson_scales_os", "dune_rise_ix_os", "kingdom_legacy_os", "auztralia_taz_os", "thunder_road_cc_os", "gh_buttons_bugs_os", "smartphone_update_os", "paleo_new_beg_os", "final_girl_ht_os", "azul_crystal_os", "magic_maze_ms_os", "paint_roses_esc_os", "abyss_leviathan_os", "underwater_data_os", "detective_bullets_os", "detective_saints_os", "sherlock_tamesis_os", "cthulhu_dmd_s2", "targi_exp_os"]);
+const EXPANSION_IDS = new Set(["mu_asgard", "mu_panther", "mu_spider", "mu_deadpool", "mu_xmen_gold", "mu_gotg", "mu_xmen_blue", "rove_xulc", "crimson_scales", "caverna_forgotten", "spirit_island_je", "spirit_ff", "spirit_bc", "feast_for_odin_exp", "heat_heavy_rain", "dune_immortality", "witcher_skellige", "witcher_wild_hunt", "kelp_expansion", "planet_unknown_super", "mdt_deadpool", "witcher_monster_trail_os", "witcher_mages_os", "witcher_legend_hunt_os", "etherfields_harpy_os", "earthborne_legacy_os", "gh_forgotten_circles_os", "on_mars_alien_os", "alchemists_golem_os", "hegemony_crisis_os", "crimson_scales_os", "dune_rise_ix_os", "kingdom_legacy_os", "auztralia_taz_os", "thunder_road_cc_os", "gh_buttons_bugs_os", "smartphone_update_os", "paleo_new_beg_os", "final_girl_ht_os", "azul_crystal_os", "magic_maze_ms_os", "paint_roses_esc_os", "abyss_leviathan_os", "underwater_data_os", "detective_bullets_os", "detective_saints_os", "sherlock_thames_os", "cthulhu_dmd_s2", "targi_exp_os"]);
 
 
 // ── Filter helpers ──
@@ -4084,7 +4084,7 @@ document.getElementById('btn-other-side').addEventListener('click', () => {
   btn.innerHTML = _showingOtherSide ? '&#x21C4; Show Main Shelf' : '&#x21C4; Show Other Side';
   renderShelf();
   applyFilters();
-  window.scrollTo(0, 0);
+  _scrollToShelfCenter();
 });
 
 // ── Modal ──
@@ -4099,6 +4099,11 @@ function _setViewport(content) {
   if (vp) vp.content = content;
 }
 
+function _scrollToShelfCenter() {
+  const scrollX = Math.max(0, (document.documentElement.scrollWidth - window.innerWidth) / 2);
+  window.scrollTo(scrollX, 0);
+}
+
 function _restoreAfterModal() {
   if (!_isTouchDevice()) return;
   if (_modalOpenedFromStats || _modalOpenedFromInsights) {
@@ -4108,7 +4113,7 @@ function _restoreAfterModal() {
   } else {
     document.body.style.minWidth = '';
     _setViewport(VP_LIBRARY);
-    requestAnimationFrame(() => window.scrollTo(0, 0));
+    requestAnimationFrame(_scrollToShelfCenter);
   }
 }
 
@@ -4377,6 +4382,7 @@ function selectPlayer(name) {
 }
 
 function openPicker() {
+  if (_isTouchDevice()) _setViewport(VP_LOCKED);
   document.getElementById('picker-search').value = '';
   renderPickerList('');
   document.getElementById('picker-overlay').classList.add('open');
@@ -4393,7 +4399,13 @@ document.getElementById('picker-skip').addEventListener('click', () => {
 });
 
 document.getElementById('picker-overlay').addEventListener('click', e => {
-  if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+  if (e.target === e.currentTarget) {
+    e.currentTarget.classList.remove('open');
+    if (_isTouchDevice()) {
+      document.body.style.minWidth = '';
+      _setViewport(VP_LIBRARY);
+    }
+  }
 });
 
 // ── View switching ──
@@ -4413,7 +4425,7 @@ function switchToLibrary() {
   if (_isTouchDevice()) {
     document.body.style.minWidth = '';
     _setViewport(VP_LIBRARY);
-    requestAnimationFrame(() => window.scrollTo(0, 0));
+    requestAnimationFrame(_scrollToShelfCenter);
   }
 }
 
@@ -4671,6 +4683,30 @@ function showStatsView(playerName, visiting) {
 
   // Wire favorites grid
   wireFavoritesGrid(container, playerName);
+
+  // Refresh favorites from Firebase for cross-device sync
+  if (FIREBASE_DB) {
+    fetch(`${FIREBASE_DB}/favorites/${encodeURIComponent(playerName)}.json`)
+      .then(r => r.json())
+      .then(data => {
+        if (!data) data = [];
+        if (!Array.isArray(data)) return;
+        const current = getPlayerFavorites(playerName);
+        if (JSON.stringify(current) === JSON.stringify(data)) return;
+        favoritesCache[playerName] = data;
+        _saveFavoritesToLocal();
+        const section = container.querySelector('.favorites-section');
+        const newHtml = buildFavoritesHtml(playerName, isOwnProfile);
+        if (section) {
+          section.outerHTML = newHtml;
+        } else if (newHtml) {
+          const header = container.querySelector('.stats-header');
+          if (header) header.insertAdjacentHTML('afterend', newHtml);
+        }
+        wireFavoritesGrid(container, playerName);
+      })
+      .catch(() => {});
+  }
 
   // Change profile button
   const changeBtn = document.getElementById('btn-change-profile');
@@ -5182,6 +5218,7 @@ renderShelf();
 // On touch devices, set library viewport so full shelf fits on screen
 if (_isTouchDevice()) {
   _setViewport(VP_LIBRARY);
+  requestAnimationFrame(_scrollToShelfCenter);
 }
 
 // Migrate old Latin player name in localStorage
