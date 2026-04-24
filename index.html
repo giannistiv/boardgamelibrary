@@ -4123,6 +4123,7 @@ const VP_LOCKED  = 'width=device-width, initial-scale=1.0, minimum-scale=1.0, ma
 const _isTouchDevice = () => 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 let _modalOpenedFromStats = false;
 let _modalOpenedFromInsights = false;
+let _modalOpenedFromGames = false;
 
 function _setViewport(content) {
   const vp = document.querySelector('meta[name=viewport]');
@@ -4136,7 +4137,7 @@ function _scrollToShelfCenter() {
 
 function _restoreAfterModal() {
   if (!_isTouchDevice()) return;
-  if (_modalOpenedFromStats || _modalOpenedFromInsights) {
+  if (_modalOpenedFromStats || _modalOpenedFromInsights || _modalOpenedFromGames) {
     document.body.style.minWidth = 'auto';
     _setViewport(VP_LOCKED);
     window.scrollTo(0, 0);
@@ -4158,6 +4159,8 @@ function closeModal() {
     } else if (_modalOpenedFromStats) {
       const player = _viewingProfile || localStorage.getItem('bgl-player');
       if (player) showStatsView(player, _viewingProfile ? 'visiting' : undefined);
+    } else if (_modalOpenedFromGames) {
+      showGamesView();
     }
     if (history.state && history.state.modal) history.back();
   }
@@ -4173,6 +4176,8 @@ window.addEventListener('popstate', e => {
     } else if (_modalOpenedFromStats) {
       const player = _viewingProfile || localStorage.getItem('bgl-player');
       if (player) showStatsView(player, _viewingProfile ? 'visiting' : undefined);
+    } else if (_modalOpenedFromGames) {
+      showGamesView();
     }
   }
 });
@@ -4180,10 +4185,11 @@ window.addEventListener('popstate', e => {
 function openModal(game) {
   _modalOpenedFromStats = document.getElementById('stats-view').classList.contains('open');
   _modalOpenedFromInsights = document.getElementById('insights-view').classList.contains('open');
+  _modalOpenedFromGames = document.getElementById('games-view').classList.contains('open');
   const overlay = document.getElementById('modal-overlay');
   const content = document.getElementById('modal-content');
 
-  const c = game.spineColor;
+  const c = game.spineColor || '#555';
   const fallbackBg = `linear-gradient(135deg, ${c}, ${adjustColor(c, -30)})`;
 
   // Build cover image section
