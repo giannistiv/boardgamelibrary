@@ -4307,13 +4307,13 @@ function openModal(game) {
         ${game.year ? `<span class="modal-year">(${game.year})</span>` : ''}
       </div>
       ${game.designer ? `<div class="modal-designer">Designed by ${game.designer}</div>` : ''}
-      ${ratingHtml}
-      ${game.bggId > 0 ? buildStarRatingHtml(game.bggId) : ''}
       <div class="modal-stats">
         <span class="modal-stat"><span class="icon">&#128101;</span> ${game.players} players</span>
         <span class="modal-stat"><span class="icon">&#9201;</span> ${game.playTime}</span>
         ${game.complexity > 0 ? `<span class="modal-stat"><span class="icon">&#9878;&#65039;</span> ${game.complexity}/5 weight</span>` : ''}
       </div>
+      ${ratingHtml}
+      ${game.bggId > 0 ? `<div style="margin-top:1rem">${buildStarRatingHtml(game.bggId)}</div>` : ''}
       <div class="modal-categories">
         ${game.categories.map(c => `<span class="modal-cat">${c}</span>`).join('')}
       </div>
