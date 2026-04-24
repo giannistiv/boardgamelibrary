@@ -232,6 +232,8 @@
     -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
   }
   .modal-overlay.open{display:flex}
+  body.modal-open{overflow:hidden;touch-action:none;overscroll-behavior:contain}
+  body.modal-open #modal-overlay{overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y}
   .modal{
     background:var(--modal-bg);border-radius:16px;max-width:520px;width:100%;
     max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.5);
@@ -4149,6 +4151,7 @@ function closeModal() {
   const overlay = document.getElementById('modal-overlay');
   if (overlay.classList.contains('open')) {
     overlay.classList.remove('open');
+    document.body.classList.remove('modal-open');
     _restoreAfterModal();
     if (_modalOpenedFromInsights) {
       showInsightsView();
@@ -4163,6 +4166,7 @@ window.addEventListener('popstate', e => {
   const overlay = document.getElementById('modal-overlay');
   if (overlay.classList.contains('open')) {
     overlay.classList.remove('open');
+    document.body.classList.remove('modal-open');
     _restoreAfterModal();
     if (_modalOpenedFromInsights) {
       showInsightsView();
@@ -4309,6 +4313,7 @@ function openModal(game) {
     </div>
   `;
   overlay.classList.add('open');
+  document.body.classList.add('modal-open');
   content.scrollTop = 0;
   document.querySelector('.modal').scrollTop = 0;
 
