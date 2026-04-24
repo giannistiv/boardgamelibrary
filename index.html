@@ -3,6 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=5.0, user-scalable=yes">
+<script>
+  // Touch devices open on the Library (zoomed-out shelf view). Set the
+  // viewport synchronously before CSS renders so the mobile-library h1 size
+  // (which is tuned for a 1200-css-pixel viewport) doesn't flash huge under
+  // device-width for a split second. Keep in sync with VP_LIBRARY below.
+  (function(){
+    if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+      var vp = document.querySelector('meta[name=viewport]');
+      if (vp) vp.setAttribute('content', 'width=1200, user-scalable=yes');
+      document.documentElement.classList.add('pre-mobile-library');
+    }
+  })();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 <title>Board Game Library</title>
@@ -847,6 +860,14 @@
 </style>
 </head>
 <body>
+<script>
+  // Match the early viewport toggle in <head>: add mobile-library to body
+  // immediately so the h1 and shelf render at the correct size on the very
+  // first paint (otherwise h1 flashes huge under device-width).
+  if (document.documentElement.classList.contains('pre-mobile-library')) {
+    document.body.classList.add('mobile-library');
+  }
+</script>
 
 <h1>Board Game Library</h1>
 
@@ -4699,8 +4720,15 @@ function showStatsView(playerName, visiting) {
   recentPlays.sort((a, b) => b.date.localeCompare(a.date));
 
   const totalPlays = recentPlays.length;
-  const totalWins = recentPlays.filter(p => p.won).length;
-  const winRate = totalPlays > 0 ? Math.round(totalWins / totalPlays * 100) : 0;
+  // Competitive = play with a single winner; coop = 2+ winners; no-winner plays are excluded from both.
+  const competitivePlays = recentPlays.filter(p => {
+    const winnerCount = p.allScores.filter(s => s.w).length;
+    return winnerCount === 1;
+  });
+  const competitiveWins = competitivePlays.filter(p => p.won).length;
+  const coopPlays = recentPlays.filter(p => p.allScores.filter(s => s.w).length >= 2);
+  const coopWins = coopPlays.filter(p => p.won).length;
+  const winRate = competitivePlays.length > 0 ? Math.round(competitiveWins / competitivePlays.length * 100) : 0;
   const uniqueGames = Object.keys(gameStats).length;
 
   const fmtDate = (d) => {
@@ -4780,12 +4808,16 @@ function showStatsView(playerName, visiting) {
         <div class="stats-card-label">Total Plays</div>
       </div>
       <div class="stats-card">
-        <div class="stats-card-val">${totalWins}</div>
+        <div class="stats-card-val">${competitiveWins}</div>
         <div class="stats-card-label">Wins</div>
       </div>
       <div class="stats-card">
         <div class="stats-card-val" style="color:${wrColor(winRate)}">${winRate}%</div>
         <div class="stats-card-label">Win Rate</div>
+      </div>
+      <div class="stats-card">
+        <div class="stats-card-val">${coopWins}<span style="font-size:0.55em;opacity:0.55">/${coopPlays.length}</span></div>
+        <div class="stats-card-label">Coop Wins</div>
       </div>
       <div class="stats-card">
         <div class="stats-card-val">${uniqueGames}</div>
@@ -5491,8 +5523,9 @@ function _leaderboardRanksForPlay(sc) {
   if (!Array.isArray(sc) || sc.length < 2) return null;
   const winners = sc.filter(s => s && s.w === true);
   const losers  = sc.filter(s => s && s.w !== true);
+  if (winners.length >= 2) return null;    // cooperative play (2+ winners) → skip
   if (winners.length === 0) return null;   // no declared winner → skip
-  if (losers.length === 0)  return null;   // cooperative "all win" → no Elo info
+  if (losers.length === 0)  return null;   // shouldn't hit (1 winner + 0 losers = solo, nothing to pair)
 
   const parsed = sc.map(s => {
     if (s.s == null || s.s === '') return null;
