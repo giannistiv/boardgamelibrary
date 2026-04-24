@@ -4475,6 +4475,10 @@ function showStatsView(playerName, visiting) {
     window.scrollTo(0, 0);
   }
 
+  // Show importer only for Στιβ
+  const importSection = document.getElementById('importSection');
+  if (importSection) importSection.style.display = (playerName === 'Στιβ') ? '' : 'none';
+
   // Gather all play data for this player
   const gameStats = {};
   const recentPlays = [];
@@ -4670,7 +4674,7 @@ function showStatsView(playerName, visiting) {
     </div>
 
     <!-- ── JSON Import ── -->
-  <div class="import-section">
+  <div class="import-section" id="importSection" style="display:none">
     <div class="import-section-title">📥 Import BGStats Play File</div>
     <div class="import-drop-zone" id="importDropZone">
       <input type="file" id="importFileInput" accept=".json">
