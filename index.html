@@ -4313,7 +4313,6 @@ function openModal(game) {
         ${game.complexity > 0 ? `<span class="modal-stat"><span class="icon">&#9878;&#65039;</span> ${game.complexity}/5 weight</span>` : ''}
       </div>
       ${ratingHtml}
-      ${game.bggId > 0 ? `<div style="margin-top:1rem">${buildStarRatingHtml(game.bggId)}</div>` : ''}
       <div class="modal-categories">
         ${game.categories.map(c => `<span class="modal-cat">${c}</span>`).join('')}
       </div>
@@ -4323,6 +4322,7 @@ function openModal(game) {
         ? `<a class="modal-bgg-link" href="https://boardgamegeek.com/boardgame/${game.bggId}" target="_blank" rel="noopener">View on BoardGameGeek &#8594;</a>`
         : `<a class="modal-bgg-link" href="https://boardgamegeek.com/geeksearch.php?action=search&objecttype=boardgame&q=${encodeURIComponent(game.name)}" target="_blank" rel="noopener">Search on BoardGameGeek &#8594;</a>`
       }
+      ${game.bggId > 0 ? buildStarRatingHtml(game.bggId) : ''}
       ${playHistoryHtml}
     </div>
   `;
@@ -4353,13 +4353,12 @@ function adjustColor(hex, amount) {
 }
 
 function ratingColor(rating) {
-  if (rating >= 8.5) return '#22c55e';  // Emerald green - outstanding
-  if (rating >= 8.0) return '#4ade80';  // Green - excellent
-  if (rating >= 7.5) return '#a3e635';  // Lime - very good
-  if (rating >= 7.0) return '#e2b04a';  // Amber/gold - good
-  if (rating >= 6.5) return '#f59e0b';  // Orange - decent
-  if (rating >= 6.0) return '#f97316';  // Deep orange - fair
-  return '#ef4444';                      // Red - below average
+  // Smooth gradient: 0 → red, 5 → yellow, 10 → green (HSL hue 0→120)
+  const r = Math.max(0, Math.min(10, Number(rating) || 0));
+  const hue = r * 12;
+  const sat = 72;
+  const light = 48 + (r - 5) * 0.8; // subtle lightness bump at the top end
+  return `hsl(${hue.toFixed(1)}, ${sat}%, ${light.toFixed(1)}%)`;
 }
 
 // Close modal
