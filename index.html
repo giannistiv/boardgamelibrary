@@ -630,6 +630,64 @@
   .stats-player-info-detail{font-size:0.68rem;opacity:0.45}
   .stats-player-wr{font-size:0.82rem;font-weight:700;min-width:3rem;text-align:right}
 
+  /* ── Leaderboard ── */
+  .lb-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:0.8rem;flex-wrap:wrap;gap:0.5rem}
+  .lb-title{font-size:1.3rem;font-weight:700;color:var(--accent)}
+  .lb-sub{font-size:0.72rem;opacity:0.55}
+  .lb-podium{display:flex;gap:0.8rem;justify-content:center;align-items:end;margin:1rem 0 1.6rem;flex-wrap:wrap}
+  .lb-podium-card{
+    flex:1;min-width:110px;max-width:180px;
+    background:rgba(255,255,255,0.04);border-radius:12px;
+    padding:0.9rem 0.7rem;text-align:center;cursor:pointer;
+    transition:background 0.15s,transform 0.15s;position:relative;
+  }
+  .lb-podium-card:hover{background:rgba(255,255,255,0.08);transform:translateY(-2px)}
+  .lb-podium-card.rank-1{border:2px solid #e2b04a;background:rgba(226,176,74,0.08)}
+  .lb-podium-card.rank-2{border:1px solid #c0c0c0}
+  .lb-podium-card.rank-3{border:1px solid #cd7f32}
+  .lb-podium-medal{font-size:1.1rem;margin-bottom:0.2rem}
+  .lb-podium-avatar{
+    width:52px;height:52px;border-radius:50%;margin:0 auto 0.5rem;
+    background:rgba(226,176,74,0.18);color:var(--accent);
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.3rem;font-weight:700;
+  }
+  .lb-podium-name{
+    font-size:0.9rem;font-weight:600;margin-bottom:0.25rem;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .lb-podium-elo{font-size:1.35rem;font-weight:800;font-variant-numeric:tabular-nums}
+  .lb-podium-meta{font-size:0.62rem;opacity:0.55;margin-top:0.2rem}
+  .lb-list{margin-top:0.5rem}
+  .lb-row{
+    display:flex;align-items:center;gap:0.7rem;
+    padding:0.55rem 0.7rem;border-radius:8px;margin-bottom:0.3rem;
+    background:rgba(255,255,255,0.02);cursor:pointer;transition:background 0.15s;
+  }
+  .lb-row:hover{background:rgba(255,255,255,0.06)}
+  .lb-rank{font-size:0.85rem;font-weight:700;min-width:1.8rem;text-align:center;opacity:0.7;font-variant-numeric:tabular-nums}
+  .lb-avatar{
+    width:32px;height:32px;border-radius:50%;
+    background:rgba(226,176,74,0.15);color:var(--accent);
+    display:flex;align-items:center;justify-content:center;
+    font-size:0.85rem;font-weight:700;flex-shrink:0;
+  }
+  .lb-name{flex:1;font-size:0.85rem;font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .lb-prov-badge{
+    display:inline-block;font-size:0.55rem;font-weight:700;
+    background:rgba(226,176,74,0.18);color:var(--accent);
+    padding:1px 5px;border-radius:4px;margin-left:0.4rem;letter-spacing:0.05em;
+    vertical-align:middle;
+  }
+  .lb-elo{font-size:0.95rem;font-weight:800;min-width:3.5rem;text-align:right;font-variant-numeric:tabular-nums}
+  .lb-delta{font-size:0.7rem;min-width:3rem;text-align:right;font-variant-numeric:tabular-nums;opacity:0.85}
+  .lb-delta.pos{color:#22c55e}
+  .lb-delta.neg{color:#ef4444}
+  .lb-plays{font-size:0.65rem;opacity:0.5;min-width:3rem;text-align:right}
+  .lb-empty{padding:1.5rem;text-align:center;opacity:0.6;font-size:0.88rem}
+  .lb-explain{margin-top:1.6rem;padding:0.8rem 1rem;background:rgba(255,255,255,0.03);border-radius:8px;font-size:0.72rem;opacity:0.75;line-height:1.55}
+  .lb-explain b{color:var(--accent)}
+
   /* ── Pie Charts ── */
   .chart-row{
     display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;
@@ -760,17 +818,29 @@
   body.mobile-library .filter-slider{ width:240px; }
   body.mobile-library .filter-check{ font-size:1.7rem; }
   body.mobile-library .filter-check input[type="checkbox"]{ width:26px; height:26px; }
+  body.mobile-library .lb-row{ padding:0.85rem 1rem; gap:1rem; }
+  body.mobile-library .lb-rank{ font-size:1.05rem; min-width:2.4rem; }
+  body.mobile-library .lb-avatar{ width:42px; height:42px; font-size:1rem; }
+  body.mobile-library .lb-name{ font-size:1.05rem; }
+  body.mobile-library .lb-elo{ font-size:1.2rem; min-width:4.2rem; }
+  body.mobile-library .lb-delta{ font-size:0.82rem; min-width:3.4rem; }
+  body.mobile-library .lb-plays{ font-size:0.78rem; }
+  body.mobile-library .lb-title{ font-size:1.6rem; }
+  body.mobile-library .lb-sub{ font-size:0.88rem; }
+  body.mobile-library .lb-podium-name{ font-size:1.05rem; }
+  body.mobile-library .lb-podium-elo{ font-size:1.55rem; }
+  body.mobile-library .lb-explain{ font-size:0.88rem; }
 </style>
 </head>
 <body>
 
 <h1>Board Game Library</h1>
-<p class="subtitle">Click a game to see details &middot; Use filters to find what to play</p>
 
 <div class="player-bar" id="player-bar">
   <button class="player-bar-btn active" id="btn-library">Library</button>
   <button class="player-bar-btn" id="btn-games">Games</button>
   <button class="player-bar-btn" id="btn-mystats">Profile</button>
+  <button class="player-bar-btn" id="btn-leaderboard">Leaderboard</button>
   <button class="player-bar-btn" id="btn-insights">Stats</button>
 </div>
 
@@ -849,6 +919,7 @@
 <div class="stats-view" id="stats-view"></div>
 <div class="stats-view" id="insights-view"></div>
 <div class="stats-view" id="games-view"></div>
+<div class="stats-view" id="leaderboard-view"></div>
 
 <!-- Player Picker Overlay -->
 <div class="picker-overlay" id="picker-overlay">
@@ -4125,6 +4196,7 @@ const _isTouchDevice = () => 'ontouchstart' in window || navigator.maxTouchPoint
 let _modalOpenedFromStats = false;
 let _modalOpenedFromInsights = false;
 let _modalOpenedFromGames = false;
+let _modalOpenedFromLeaderboard = false;
 
 function _setViewport(content) {
   const vp = document.querySelector('meta[name=viewport]');
@@ -4138,7 +4210,7 @@ function _scrollToShelfCenter() {
 
 function _restoreAfterModal() {
   if (!_isTouchDevice()) return;
-  if (_modalOpenedFromStats || _modalOpenedFromInsights || _modalOpenedFromGames) {
+  if (_modalOpenedFromStats || _modalOpenedFromInsights || _modalOpenedFromGames || _modalOpenedFromLeaderboard) {
     document.body.style.minWidth = 'auto';
     _setViewport(VP_LOCKED);
     window.scrollTo(0, 0);
@@ -4162,6 +4234,8 @@ function closeModal() {
       if (player) showStatsView(player, _viewingProfile ? 'visiting' : undefined);
     } else if (_modalOpenedFromGames) {
       showGamesView();
+    } else if (_modalOpenedFromLeaderboard) {
+      showLeaderboardView();
     }
     if (history.state && history.state.modal) history.back();
   }
@@ -4179,6 +4253,8 @@ window.addEventListener('popstate', e => {
       if (player) showStatsView(player, _viewingProfile ? 'visiting' : undefined);
     } else if (_modalOpenedFromGames) {
       showGamesView();
+    } else if (_modalOpenedFromLeaderboard) {
+      showLeaderboardView();
     }
   }
 });
@@ -4187,6 +4263,7 @@ function openModal(game) {
   _modalOpenedFromStats = document.getElementById('stats-view').classList.contains('open');
   _modalOpenedFromInsights = document.getElementById('insights-view').classList.contains('open');
   _modalOpenedFromGames = document.getElementById('games-view').classList.contains('open');
+  _modalOpenedFromLeaderboard = document.getElementById('leaderboard-view').classList.contains('open');
   const overlay = document.getElementById('modal-overlay');
   const content = document.getElementById('modal-content');
 
@@ -4472,10 +4549,12 @@ function _deactivateAllTabs() {
   document.getElementById('stats-view').classList.remove('open');
   document.getElementById('insights-view').classList.remove('open');
   document.getElementById('games-view').classList.remove('open');
+  document.getElementById('leaderboard-view').classList.remove('open');
   document.getElementById('btn-library').classList.remove('active');
   document.getElementById('btn-mystats').classList.remove('active');
   document.getElementById('btn-insights').classList.remove('active');
   document.getElementById('btn-games').classList.remove('active');
+  document.getElementById('btn-leaderboard').classList.remove('active');
 }
 
 function switchToLibrary() {
@@ -4531,8 +4610,22 @@ function switchToGames() {
   showGamesView();
 }
 
+function switchToLeaderboard() {
+  _deactivateAllTabs();
+  document.getElementById('leaderboard-view').classList.add('open');
+  document.getElementById('btn-leaderboard').classList.add('active');
+  if (_isTouchDevice()) {
+    document.body.style.minWidth = 'auto';
+    document.body.classList.remove('mobile-library');
+    _setViewport(VP_LOCKED);
+    window.scrollTo(0, 0);
+  }
+  showLeaderboardView();
+}
+
 document.getElementById('btn-library').addEventListener('click', switchToLibrary);
 document.getElementById('btn-games').addEventListener('click', switchToGames);
+document.getElementById('btn-leaderboard').addEventListener('click', switchToLeaderboard);
 document.getElementById('btn-mystats').addEventListener('click', switchToStats);
 document.getElementById('btn-insights').addEventListener('click', switchToInsights);
 
@@ -5379,6 +5472,236 @@ function showGamesView() {
   window.scrollTo(0, 0);
 }
 
+// ── Leaderboard (Elo) ──
+function _leaderboardRanksForPlay(sc) {
+  if (!Array.isArray(sc) || sc.length < 2) return null;
+  const winners = sc.filter(s => s && s.w === true);
+  const losers  = sc.filter(s => s && s.w !== true);
+  if (winners.length === 0) return null;   // no declared winner → skip
+  if (losers.length === 0)  return null;   // cooperative "all win" → no Elo info
+
+  const parsed = sc.map(s => {
+    if (s.s == null || s.s === '') return null;
+    const t = String(s.s).trim();
+    if (!t) return null;
+    if (/^-?\d+(\.\d+)?$/.test(t)) return Number(t);
+    // scores like "16+3+16" → sum
+    if (/^[\d.+\-\s]+$/.test(t)) {
+      try {
+        const v = t.split('+').reduce((a, b) => a + Number(b.trim() || 0), 0);
+        return isFinite(v) ? v : null;
+      } catch (_) { return null; }
+    }
+    return null;
+  });
+
+  if (parsed.every(v => v !== null)) {
+    const wScores = sc.map((s, i) => s.w ? parsed[i] : null).filter(v => v !== null);
+    const lScores = sc.map((s, i) => !s.w ? parsed[i] : null).filter(v => v !== null);
+    const minW = Math.min(...wScores), maxW = Math.max(...wScores);
+    const minL = Math.min(...lScores), maxL = Math.max(...lScores);
+
+    let dir = null;
+    if (minW > maxL) dir = 'desc';
+    else if (maxW < minL) dir = 'asc';
+
+    if (dir) {
+      const indexed = sc.map((s, i) => ({ s, n: parsed[i] }));
+      indexed.sort((a, b) => dir === 'desc' ? b.n - a.n : a.n - b.n);
+      const out = [];
+      let prev = null, rank = 0;
+      indexed.forEach((item, i) => {
+        if (prev === null || item.n !== prev) { rank = i + 1; prev = item.n; }
+        out.push({ player: item.s.n, rank });
+      });
+      return out;
+    }
+  }
+
+  // Fallback: winners all at rank 1, losers all at rank 2
+  return sc.map(s => ({ player: s.n, rank: s.w ? 1 : 2 }));
+}
+
+function _computeEloLeaderboard() {
+  const flat = [];
+  for (const bggId in PLAY_HISTORY) {
+    for (const p of PLAY_HISTORY[bggId]) {
+      if (!p || !p.date || !Array.isArray(p.sc)) continue;
+      flat.push({ bggId: Number(bggId), date: p.date, sc: p.sc });
+    }
+  }
+  flat.sort((a, b) => a.date.localeCompare(b.date));
+
+  const ratings = {};
+  const plays = {};
+  const lastPlayDate = {};
+  const lastDelta = {};
+  const firstPlayDate = {};
+
+  for (const play of flat) {
+    const ranks = _leaderboardRanksForPlay(play.sc);
+    if (!ranks) continue;
+
+    // Normalize names via NAME_MAP, dedupe duplicate names (keep best rank)
+    const byName = {};
+    for (const r of ranks) {
+      const mapped = NAME_MAP[r.player] || r.player;
+      if (!mapped) continue;
+      if (byName[mapped] == null || r.rank < byName[mapped]) byName[mapped] = r.rank;
+    }
+    const participants = Object.keys(byName).map(n => ({ player: n, rank: byName[n] }));
+    const N = participants.length;
+    if (N < 2) continue;
+
+    const game = findGameByBggId(play.bggId);
+    const cx = (game && typeof game.complexity === 'number' && game.complexity > 0) ? game.complexity : 2.5;
+    const w = cx / 5;
+    const lossMult = Math.min(1, Math.max(0.7, 3 / N));
+
+    for (const m of participants) {
+      if (ratings[m.player] == null) ratings[m.player] = 1000;
+      if (plays[m.player] == null) plays[m.player] = 0;
+    }
+
+    const pre = {}, preCount = {};
+    for (const m of participants) {
+      pre[m.player] = ratings[m.player];
+      preCount[m.player] = plays[m.player];
+    }
+
+    const deltas = {};
+    for (const m of participants) deltas[m.player] = 0;
+
+    for (let i = 0; i < N; i++) {
+      for (let j = i + 1; j < N; j++) {
+        const a = participants[i], b = participants[j];
+        if (a.rank === b.rank) continue;
+        const winner = a.rank < b.rank ? a : b;
+        const loser  = a.rank < b.rank ? b : a;
+        const Rw = pre[winner.player], Rl = pre[loser.player];
+        const Ew = 1 / (1 + Math.pow(10, (Rl - Rw) / 400));
+        const El = 1 - Ew;
+        const Kw = preCount[winner.player] < 10 ? 48 : 32;
+        const Kl = preCount[loser.player]  < 10 ? 48 : 32;
+        deltas[winner.player] += Kw * w * (1 - Ew);
+        deltas[loser.player]  -= Kl * w * El * lossMult;
+      }
+    }
+
+    for (const m of participants) {
+      ratings[m.player] += deltas[m.player];
+      plays[m.player]++;
+      lastPlayDate[m.player] = play.date;
+      if (!firstPlayDate[m.player]) firstPlayDate[m.player] = play.date;
+      lastDelta[m.player] = deltas[m.player];
+    }
+  }
+
+  return { ratings, plays, lastPlayDate, lastDelta, firstPlayDate };
+}
+
+function _eloToColorScore(elo) {
+  // Map Elo to a 0–10 rating scale used by ratingColor().
+  // 850 → 0 (red), 1000 → 5 (yellow), 1150+ → 10 (green).
+  return Math.max(0, Math.min(10, (elo - 850) / 30));
+}
+
+function showLeaderboardView() {
+  const container = document.getElementById('leaderboard-view');
+  const data = _computeEloLeaderboard();
+
+  const now = new Date();
+  const cutoffMs = now.getTime() - 365 * 86400 * 1000;
+  const cutoff = new Date(cutoffMs).toISOString().slice(0, 10);
+
+  const rows = Object.keys(data.ratings)
+    .filter(p => data.lastPlayDate[p] && data.lastPlayDate[p] >= cutoff)
+    .filter(p => data.plays[p] >= 1)
+    .map(p => ({
+      name: p,
+      elo: Math.round(data.ratings[p]),
+      plays: data.plays[p],
+      lastPlayed: data.lastPlayDate[p],
+      lastDelta: data.lastDelta[p] || 0,
+      provisional: data.plays[p] < 10,
+    }))
+    .sort((a, b) => b.elo - a.elo);
+
+  if (rows.length === 0) {
+    container.innerHTML = `
+      <div class="lb-header">
+        <div>
+          <div class="lb-title">Leaderboard</div>
+          <div class="lb-sub">Elo ratings · active players (past year)</div>
+        </div>
+      </div>
+      <div class="lb-empty">No active players to rank yet.</div>`;
+    window.scrollTo(0, 0);
+    return;
+  }
+
+  const podium = rows.slice(0, Math.min(3, rows.length));
+  const rest = rows.slice(podium.length);
+  const medals = ['🥇', '🥈', '🥉'];
+  const podiumOrder = podium.length === 3 ? [1, 0, 2] : podium.map((_, i) => i);
+
+  const podiumHtml = podiumOrder.map(idx => {
+    const p = podium[idx];
+    if (!p) return '';
+    const color = ratingColor(_eloToColorScore(p.elo));
+    const initial = p.name.charAt(0).toUpperCase();
+    const prov = p.provisional ? '<span class="lb-prov-badge">PROV</span>' : '';
+    return `<div class="lb-podium-card rank-${idx + 1}" data-visit-player="${p.name.replace(/"/g, '&quot;')}">
+      <div class="lb-podium-medal">${medals[idx]}</div>
+      <div class="lb-podium-avatar">${initial}</div>
+      <div class="lb-podium-name">${p.name}${prov}</div>
+      <div class="lb-podium-elo" style="color:${color}">${p.elo}</div>
+      <div class="lb-podium-meta">${p.plays} play${p.plays !== 1 ? 's' : ''} · last ${_fmtDateShort(p.lastPlayed)}</div>
+    </div>`;
+  }).join('');
+
+  const listHtml = rest.map((p, i) => {
+    const rank = podium.length + i + 1;
+    const color = ratingColor(_eloToColorScore(p.elo));
+    const initial = p.name.charAt(0).toUpperCase();
+    const deltaCls = p.lastDelta > 0 ? 'pos' : (p.lastDelta < 0 ? 'neg' : '');
+    const deltaSign = p.lastDelta > 0 ? '+' : '';
+    const deltaTxt = `${deltaSign}${p.lastDelta.toFixed(1)}`;
+    const prov = p.provisional ? '<span class="lb-prov-badge">PROV</span>' : '';
+    return `<div class="lb-row" data-visit-player="${p.name.replace(/"/g, '&quot;')}">
+      <div class="lb-rank">${rank}</div>
+      <div class="lb-avatar">${initial}</div>
+      <div class="lb-name">${p.name}${prov}</div>
+      <div class="lb-delta ${deltaCls}">${deltaTxt}</div>
+      <div class="lb-plays">${p.plays}p</div>
+      <div class="lb-elo" style="color:${color}">${p.elo}</div>
+    </div>`;
+  }).join('');
+
+  container.innerHTML = `
+    <div class="lb-header">
+      <div>
+        <div class="lb-title">Leaderboard</div>
+        <div class="lb-sub">Elo ratings · active players (past year)</div>
+      </div>
+      <div class="lb-sub">${rows.length} player${rows.length !== 1 ? 's' : ''}</div>
+    </div>
+    ${podium.length > 0 ? `<div class="lb-podium">${podiumHtml}</div>` : ''}
+    <div class="lb-list">${listHtml}</div>
+    <div class="lb-explain">
+      <b>How it works:</b> Everyone starts at 1000. Each play replays in date order — winners gain, losers drop, with bigger swings when the underdog wins. Complexity scales points (a win on weight 5 = full value, lighter games = less). Losses scale down with player count, and finishing last costs more than finishing mid-pack. <b>PROV</b> means fewer than 10 plays (points move faster). Players inactive for more than a year are hidden.
+    </div>`;
+
+  container.querySelectorAll('[data-visit-player]').forEach(el => {
+    el.addEventListener('click', () => {
+      showStatsView(el.dataset.visitPlayer, 'visiting');
+      window.scrollTo(0, 0);
+    });
+  });
+
+  window.scrollTo(0, 0);
+}
+
 function _renderInsightsPlayers(players, wrColor) {
   return players.map(p => {
     const initial = p.name.charAt(0).toUpperCase();
@@ -5779,6 +6102,11 @@ window.initImporter = function(){
       newPlayers  ? `+${newPlayers} new player${newPlayers!==1?'s':''}` : '',
       skipped     ? `${skipped} duplicate${skipped!==1?'s':''} skipped` : '',
     ]);
+
+    const lbView = document.getElementById('leaderboard-view');
+    if (lbView && lbView.classList.contains('open')) {
+      try { showLeaderboardView(); } catch (_) {}
+    }
 
     fileInput.value = '';
   }
