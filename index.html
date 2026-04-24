@@ -4213,6 +4213,20 @@ function openModal(game) {
         <span class="rating-label">BGG Rating</span>
       </div>`;
   }
+  // Community rating bar (only if at least one person has rated)
+  if (game.bggId > 0) {
+    const community = getCommunityRating(game.bggId);
+    if (community) {
+      const cPct = ((community.avg / 10) * 100).toFixed(0);
+      const cColor = ratingColor(community.avg);
+      ratingHtml += `
+      <div class="modal-rating-row">
+        <span class="rating-badge" style="color:${cColor}">${community.avg}</span>
+        <div class="rating-bar-wrap"><div class="rating-bar" style="width:${cPct}%;background:${cColor}"></div></div>
+        <span class="rating-label">User Rating <span style="opacity:0.5">(${community.count})</span></span>
+      </div>`;
+    }
+  }
 
   // Mechanics
   let mechanicsHtml = '';
@@ -4294,6 +4308,7 @@ function openModal(game) {
       </div>
       ${game.designer ? `<div class="modal-designer">Designed by ${game.designer}</div>` : ''}
       ${ratingHtml}
+      ${game.bggId > 0 ? buildStarRatingHtml(game.bggId) : ''}
       <div class="modal-stats">
         <span class="modal-stat"><span class="icon">&#128101;</span> ${game.players} players</span>
         <span class="modal-stat"><span class="icon">&#9201;</span> ${game.playTime}</span>
@@ -4308,7 +4323,6 @@ function openModal(game) {
         ? `<a class="modal-bgg-link" href="https://boardgamegeek.com/boardgame/${game.bggId}" target="_blank" rel="noopener">View on BoardGameGeek &#8594;</a>`
         : `<a class="modal-bgg-link" href="https://boardgamegeek.com/geeksearch.php?action=search&objecttype=boardgame&q=${encodeURIComponent(game.name)}" target="_blank" rel="noopener">Search on BoardGameGeek &#8594;</a>`
       }
-      ${game.bggId > 0 ? buildStarRatingHtml(game.bggId) : ''}
       ${playHistoryHtml}
     </div>
   `;
@@ -4929,7 +4943,6 @@ function getCommunityRating(bggId) {
 function buildStarRatingHtml(bggId) {
   const player = localStorage.getItem('bgl-player');
   const current = player ? getPlayerRating(player, bggId) : 0;
-  const community = getCommunityRating(bggId);
 
   let html = '<div class="star-rating-section">';
 
@@ -4944,23 +4957,6 @@ function buildStarRatingHtml(bggId) {
     html += `</div>`;
     if (current) html += `<span class="star-rating-val">${current}/10</span>`;
     if (current) html += `<button class="star-rating-clear" data-bgg="${bggId}">clear</button>`;
-    html += `</div>`;
-  }
-
-  // Community rating
-  if (community) {
-    const fullStars = Math.floor(community.avg);
-    const hasHalf = (community.avg - fullStars) >= 0.4;
-    html += `<div class="community-rating-row">`;
-    html += `<div class="community-stars">`;
-    for (let i = 1; i <= 10; i++) {
-      if (i <= fullStars) html += '<span class="star filled">&#9733;</span>';
-      else if (i === fullStars + 1 && hasHalf) html += '<span class="star half">&#9733;</span>';
-      else html += '<span class="star">&#9733;</span>';
-    }
-    html += `</div>`;
-    html += `<span class="community-rating-text"><span class="community-rating-avg">${community.avg}</span>/10</span>`;
-    html += `<span class="community-rating-count">(${community.count} rating${community.count !== 1 ? 's' : ''})</span>`;
     html += `</div>`;
   }
 
