@@ -766,6 +766,7 @@
 
 <div class="player-bar" id="player-bar">
   <button class="player-bar-btn active" id="btn-library">Library</button>
+  <button class="player-bar-btn" id="btn-games">Games</button>
   <button class="player-bar-btn" id="btn-mystats">Profile</button>
   <button class="player-bar-btn" id="btn-insights">Stats</button>
 </div>
@@ -844,6 +845,7 @@
 
 <div class="stats-view" id="stats-view"></div>
 <div class="stats-view" id="insights-view"></div>
+<div class="stats-view" id="games-view"></div>
 
 <!-- Player Picker Overlay -->
 <div class="picker-overlay" id="picker-overlay">
@@ -4439,9 +4441,11 @@ function _deactivateAllTabs() {
   document.getElementById('library-view').style.display = 'none';
   document.getElementById('stats-view').classList.remove('open');
   document.getElementById('insights-view').classList.remove('open');
+  document.getElementById('games-view').classList.remove('open');
   document.getElementById('btn-library').classList.remove('active');
   document.getElementById('btn-mystats').classList.remove('active');
   document.getElementById('btn-insights').classList.remove('active');
+  document.getElementById('btn-games').classList.remove('active');
 }
 
 function switchToLibrary() {
@@ -4484,7 +4488,21 @@ function switchToInsights() {
   showInsightsView();
 }
 
+function switchToGames() {
+  _deactivateAllTabs();
+  document.getElementById('games-view').classList.add('open');
+  document.getElementById('btn-games').classList.add('active');
+  if (_isTouchDevice()) {
+    document.body.style.minWidth = 'auto';
+    document.body.classList.remove('mobile-library');
+    _setViewport(VP_LOCKED);
+    window.scrollTo(0, 0);
+  }
+  showGamesView();
+}
+
 document.getElementById('btn-library').addEventListener('click', switchToLibrary);
+document.getElementById('btn-games').addEventListener('click', switchToGames);
 document.getElementById('btn-mystats').addEventListener('click', switchToStats);
 document.getElementById('btn-insights').addEventListener('click', switchToInsights);
 
@@ -4648,33 +4666,6 @@ function showStatsView(playerName, visiting) {
       ${bestWR.map(gameRowHtml).join('')}
     </div>` : ''}
 
-    <div class="stats-section">
-      <div class="stats-section-title">Recent Activity</div>
-      ${recentPlays.slice(0, 15).map(p => {
-        const resultClass = p.won ? 'won' : (p.noWinner ? 'lost' : '');
-        const resultText = p.won ? '&#9733; Won' : (p.noWinner ? '&#127866; Lost' : '');
-        const boardHtml = p.board ? `<span class="stats-recent-result">&nbsp;&middot; &#9876; ${p.board}</span>` : '';
-        const scoresHtml = p.allScores.map(s => {
-          const isSelf = s.n === playerName;
-          const cls = s.w ? ' winner' : '';
-          const trophy = s.w ? '<span class="trophy">&#9733;</span>' : '';
-          const score = s.s ? ` (${s.s})` : '';
-          const roleHtml = s.r ? `<span class="play-role">${s.r}</span>` : '';
-          const style = isSelf ? 'font-weight:600' : '';
-          return `<span class="play-score${cls}" style="${style}"><span class="play-player"><span class="play-player-name">${trophy}${s.n}${score}</span>${roleHtml}</span></span>`;
-        }).join('');
-        const noWinnerHtml = p.noWinner ? '<div class="play-no-winner">&#127866; The game won</div>' : '';
-        return `<div class="stats-recent-play">
-          <div class="stats-recent-top">
-            <span class="stats-recent-game">${p.game.name}</span>
-            <span class="stats-recent-date">${fmtDate(p.date)}</span>
-          </div>
-          <div class="play-scores" style="margin-top:0.3rem">${scoresHtml}</div>
-          ${boardHtml}${noWinnerHtml}
-        </div>`;
-      }).join('')}
-    </div>
-
     ${chartsHtml}
 
     ${isOwnProfile && recommendations.length > 0 ? `<div class="stats-section">
@@ -4779,7 +4770,8 @@ function showStatsView(playerName, visiting) {
 // PASTE YOUR FIREBASE REALTIME DATABASE URL BELOW:
 const FIREBASE_DB = 'https://boardgamelibrary0-default-rtdb.europe-west1.firebasedatabase.app';
 
-// In-memory cache of all ratings: { bggId: { playerName: rating } }
+// In-memory cache of all ratings: { bggId: { playerName: {value, updatedAt} } }
+// Legacy shape was { bggId: { playerName: number } } — migrated on load.
 let ratingsCache = {};
 let ratingsCacheReady = false;
 
@@ -4789,6 +4781,23 @@ async function loadAllRatings() {
     const res = await fetch(`${FIREBASE_DB}/ratings.json`);
     const data = await res.json();
     ratingsCache = data || {};
+    const migrations = [];
+    for (const bggId in ratingsCache) {
+      for (const player in ratingsCache[bggId]) {
+        const v = ratingsCache[bggId][player];
+        if (typeof v === 'number') {
+          const obj = { value: v, updatedAt: 0 };
+          ratingsCache[bggId][player] = obj;
+          migrations.push(
+            fetch(`${FIREBASE_DB}/ratings/${bggId}/${encodeURIComponent(player)}.json`, {
+              method: 'PUT',
+              body: JSON.stringify(obj)
+            }).catch(() => {})
+          );
+        }
+      }
+    }
+    if (migrations.length) await Promise.all(migrations);
     ratingsCacheReady = true;
   } catch (e) {
     console.warn('Failed to load ratings from Firebase:', e);
@@ -4797,16 +4806,14 @@ async function loadAllRatings() {
 }
 
 async function saveRating(playerName, bggId, rating) {
-  // Update cache immediately
   if (!ratingsCache[bggId]) ratingsCache[bggId] = {};
   if (rating === 0) {
     delete ratingsCache[bggId][playerName];
     if (Object.keys(ratingsCache[bggId]).length === 0) delete ratingsCache[bggId];
   } else {
-    ratingsCache[bggId][playerName] = rating;
+    ratingsCache[bggId][playerName] = { value: rating, updatedAt: Date.now() };
   }
 
-  // Persist to Firebase
   if (!FIREBASE_DB) return;
   try {
     if (rating === 0) {
@@ -4814,7 +4821,7 @@ async function saveRating(playerName, bggId, rating) {
     } else {
       await fetch(`${FIREBASE_DB}/ratings/${bggId}/${encodeURIComponent(playerName)}.json`, {
         method: 'PUT',
-        body: JSON.stringify(rating)
+        body: JSON.stringify(ratingsCache[bggId][playerName])
       });
     }
   } catch (e) {
@@ -4822,14 +4829,93 @@ async function saveRating(playerName, bggId, rating) {
   }
 }
 
+function _ratingValue(r){ return typeof r === 'number' ? r : (r && r.value) || 0; }
+
+// ── Imported plays persistence ──
+// Stored in Firebase at /importedPlays/{uuid} = {bggId, date, sc, d?, b?}
+// Merged into the in-memory PLAY_HISTORY on startup so new browsers see them.
+let importedPlaysCache = {}; // uuid -> play entry (includes bggId)
+
+function _mergePlayIntoHistory(uuid, p) {
+  if (!p || !p.bggId || !p.date || !Array.isArray(p.sc)) return;
+  const bggId = p.bggId;
+  if (!PLAY_HISTORY[bggId]) PLAY_HISTORY[bggId] = [];
+  const entry = { date: p.date, sc: p.sc };
+  if (p.d) entry.d = p.d;
+  if (p.b) entry.b = p.b;
+  const idx = PLAY_HISTORY[bggId].findIndex(e =>
+    e.date === p.date && e.sc.length === p.sc.length &&
+    e.sc.every((pp,i) => pp.n === p.sc[i]?.n)
+  );
+  if (idx !== -1) {
+    PLAY_HISTORY[bggId][idx] = entry;
+  } else {
+    PLAY_HISTORY[bggId].push(entry);
+    PLAY_HISTORY[bggId].sort((a,b) => b.date.localeCompare(a.date));
+  }
+}
+
+async function loadImportedPlays() {
+  if (!FIREBASE_DB) return;
+  try {
+    const res = await fetch(`${FIREBASE_DB}/importedPlays.json`);
+    const data = await res.json();
+    importedPlaysCache = data || {};
+    for (const uuid in importedPlaysCache) {
+      _mergePlayIntoHistory(uuid, importedPlaysCache[uuid]);
+    }
+  } catch (e) {
+    console.warn('Failed to load imported plays from Firebase:', e);
+  }
+}
+
+async function persistImportedPlay(uuid, p) {
+  importedPlaysCache[uuid] = p;
+  if (!FIREBASE_DB) return;
+  try {
+    await fetch(`${FIREBASE_DB}/importedPlays/${encodeURIComponent(uuid)}.json`, {
+      method: 'PUT',
+      body: JSON.stringify(p)
+    });
+  } catch (e) {
+    console.warn('Failed to save imported play to Firebase:', e);
+  }
+}
+
+async function loadImportedGames() {
+  if (!FIREBASE_DB) return;
+  try {
+    const res = await fetch(`${FIREBASE_DB}/importedGames.json`);
+    const data = await res.json();
+    if (!data) return;
+    for (const bggId in data) {
+      if (!EXTRA_GAMES[bggId]) EXTRA_GAMES[bggId] = data[bggId];
+    }
+  } catch (e) {
+    console.warn('Failed to load imported games from Firebase:', e);
+  }
+}
+
+async function persistImportedGame(entry) {
+  if (!FIREBASE_DB || !entry || !entry.bggId) return;
+  try {
+    await fetch(`${FIREBASE_DB}/importedGames/${entry.bggId}.json`, {
+      method: 'PUT',
+      body: JSON.stringify(entry)
+    });
+  } catch (e) {
+    console.warn('Failed to save imported game to Firebase:', e);
+  }
+}
+
 function getPlayerRating(playerName, bggId) {
-  return (ratingsCache[bggId] && ratingsCache[bggId][playerName]) || 0;
+  return _ratingValue(ratingsCache[bggId] && ratingsCache[bggId][playerName]);
 }
 
 function getCommunityRating(bggId) {
   const gameRatings = ratingsCache[bggId];
   if (!gameRatings) return null;
-  const values = Object.values(gameRatings).filter(v => typeof v === 'number' && v > 0);
+  const values = Object.values(gameRatings).map(_ratingValue).filter(v => v > 0);
   if (values.length === 0) return null;
   const avg = values.reduce((a, b) => a + b, 0) / values.length;
   return { avg: Math.round(avg * 10) / 10, count: values.length };
@@ -5081,6 +5167,189 @@ function showInsightsView() {
   window.scrollTo(0, 0);
 }
 
+// ── Games Tab ──
+function _fmtDateShort(d) {
+  const [y, m, day] = d.split('-');
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${months[parseInt(m)-1]} ${parseInt(day)}, ${y}`;
+}
+
+function _timeAgo(ts) {
+  if (!ts) return '';
+  const s = Math.floor((Date.now() - ts) / 1000);
+  if (s < 60) return 'just now';
+  if (s < 3600) return Math.floor(s/60) + 'm ago';
+  if (s < 86400) return Math.floor(s/3600) + 'h ago';
+  const d = Math.floor(s/86400);
+  if (d < 30) return d + 'd ago';
+  if (d < 365) return Math.floor(d/30) + 'mo ago';
+  return Math.floor(d/365) + 'y ago';
+}
+
+function _allGames() {
+  const seen = new Set();
+  const all = [];
+  (GAMES || []).forEach(g => { if (g.bggId && !seen.has(g.bggId)) { seen.add(g.bggId); all.push(g); } });
+  Object.values(EXTRA_GAMES || {}).forEach(g => { if (g.bggId && !seen.has(g.bggId)) { seen.add(g.bggId); all.push(g); } });
+  return all;
+}
+
+function showGamesView() {
+  const container = document.getElementById('games-view');
+
+  // Global recent plays across all players
+  const allPlays = [];
+  for (const bggId in PLAY_HISTORY) {
+    const game = findGameByBggId(bggId) || { name: 'Game #' + bggId, bggId: Number(bggId) };
+    for (const play of PLAY_HISTORY[bggId]) {
+      allPlays.push({ game, date: play.date, sc: play.sc, b: play.b || '' });
+    }
+  }
+  allPlays.sort((a, b) => b.date.localeCompare(a.date));
+
+  // Most played recently (last 90 days)
+  const cutoff = (() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 90);
+    return d.toISOString().slice(0, 10);
+  })();
+  const playCounts = {};
+  for (const p of allPlays) {
+    if (p.date < cutoff) continue;
+    const id = p.game.bggId;
+    if (!playCounts[id]) playCounts[id] = { game: p.game, count: 0, lastPlayed: '' };
+    playCounts[id].count++;
+    if (p.date > playCounts[id].lastPlayed) playCounts[id].lastPlayed = p.date;
+  }
+  const mostPlayed = Object.values(playCounts).sort((a,b) => b.count - a.count || b.lastPlayed.localeCompare(a.lastPlayed)).slice(0, 10);
+
+  // Newest ratings
+  const newestRatings = [];
+  for (const bggId in ratingsCache) {
+    for (const player in ratingsCache[bggId]) {
+      const r = ratingsCache[bggId][player];
+      const value = typeof r === 'number' ? r : (r && r.value) || 0;
+      const updatedAt = (r && typeof r === 'object' && r.updatedAt) || 0;
+      if (!value) continue;
+      newestRatings.push({ bggId: Number(bggId), player, value, updatedAt });
+    }
+  }
+  newestRatings.sort((a, b) => b.updatedAt - a.updatedAt);
+  const newestTop = newestRatings.filter(r => r.updatedAt > 0).slice(0, 10);
+
+  const playRowHtml = (p) => {
+    const scoresHtml = p.sc.map(s => {
+      const cls = s.w ? ' winner' : '';
+      const trophy = s.w ? '<span class="trophy">&#9733;</span>' : '';
+      const score = s.s ? ` (${s.s})` : '';
+      const roleHtml = s.r ? `<span class="play-role">${s.r}</span>` : '';
+      return `<span class="play-score${cls}"><span class="play-player"><span class="play-player-name">${trophy}${s.n}${score}</span>${roleHtml}</span></span>`;
+    }).join('');
+    const boardHtml = p.b ? `<span class="stats-recent-result">&nbsp;&middot; &#9876; ${p.b}</span>` : '';
+    return `<div class="stats-recent-play" data-bgg-id="${p.game.bggId}">
+      <div class="stats-recent-top">
+        <span class="stats-recent-game">${p.game.name}</span>
+        <span class="stats-recent-date">${_fmtDateShort(p.date)}</span>
+      </div>
+      <div class="play-scores" style="margin-top:0.3rem">${scoresHtml}</div>
+      ${boardHtml}
+    </div>`;
+  };
+
+  const gameRowHtml = (entry) => {
+    const imgSrc = entry.game.bggId > 0 ? `images/${entry.game.bggId}.jpg` : '';
+    return `<div class="stats-game-row" data-bgg-id="${entry.game.bggId}">
+      ${imgSrc ? `<img class="stats-game-img" src="${imgSrc}" alt="" onerror="__imgFallback(this, ${entry.game.bggId})">` : ''}
+      <div class="stats-game-info">
+        <div class="stats-game-name">${entry.game.name}</div>
+        <div class="stats-game-detail">${entry.count} play${entry.count!==1?'s':''} &middot; Last: ${_fmtDateShort(entry.lastPlayed)}</div>
+      </div>
+    </div>`;
+  };
+
+  const ratingRowHtml = (r) => {
+    const game = findGameByBggId(r.bggId) || { name: 'Game #' + r.bggId, bggId: r.bggId };
+    const imgSrc = r.bggId > 0 ? `images/${r.bggId}.jpg` : '';
+    return `<div class="stats-game-row" data-bgg-id="${r.bggId}">
+      ${imgSrc ? `<img class="stats-game-img" src="${imgSrc}" alt="" onerror="__imgFallback(this, ${r.bggId})">` : ''}
+      <div class="stats-game-info">
+        <div class="stats-game-name">${game.name}</div>
+        <div class="stats-game-detail">${r.player} &middot; ${_timeAgo(r.updatedAt)}</div>
+      </div>
+      <div class="stats-game-wr" style="color:#e2b04a">&#9733; ${r.value}</div>
+    </div>`;
+  };
+
+  container.innerHTML = `
+    <div class="stats-header">
+      <div class="stats-player-name">Games</div>
+      <div class="stats-player-sub">Search, rate, and explore plays</div>
+    </div>
+
+    <div class="stats-section">
+      <input type="text" class="insights-search" id="games-search" placeholder="Search all games..." autocomplete="off">
+      <div id="games-search-results"></div>
+    </div>
+
+    ${mostPlayed.length > 0 ? `<div class="stats-section">
+      <div class="stats-section-title">Most Played Recently</div>
+      <div class="stats-player-sub" style="margin:-0.3rem 0 0.6rem">Last 90 days</div>
+      ${mostPlayed.map(gameRowHtml).join('')}
+    </div>` : ''}
+
+    ${newestTop.length > 0 ? `<div class="stats-section">
+      <div class="stats-section-title">Newest Ratings</div>
+      ${newestTop.map(ratingRowHtml).join('')}
+    </div>` : ''}
+
+    <div class="stats-section">
+      <div class="stats-section-title">Recent Plays</div>
+      ${allPlays.slice(0, 20).map(playRowHtml).join('')}
+    </div>
+  `;
+
+  // Search
+  const searchEl = document.getElementById('games-search');
+  const resultsEl = document.getElementById('games-search-results');
+  const allGames = _allGames();
+  const renderSearch = (q) => {
+    if (!q) { resultsEl.innerHTML = ''; return; }
+    const ql = q.toLowerCase();
+    const matches = allGames
+      .filter(g => (g.name || '').toLowerCase().includes(ql))
+      .sort((a,b) => a.name.localeCompare(b.name))
+      .slice(0, 20);
+    if (!matches.length) { resultsEl.innerHTML = '<div class="stats-player-sub" style="padding:0.6rem">No matches</div>'; return; }
+    resultsEl.innerHTML = matches.map(g => {
+      const imgSrc = g.bggId > 0 ? `images/${g.bggId}.jpg` : '';
+      return `<div class="stats-game-row" data-bgg-id="${g.bggId}">
+        ${imgSrc ? `<img class="stats-game-img" src="${imgSrc}" alt="" onerror="__imgFallback(this, ${g.bggId})">` : ''}
+        <div class="stats-game-info">
+          <div class="stats-game-name">${g.name}</div>
+          <div class="stats-game-detail">${g.year || ''}${g.players ? ' &middot; ' + g.players + ' players' : ''}</div>
+        </div>
+      </div>`;
+    }).join('');
+    resultsEl.querySelectorAll('[data-bgg-id]').forEach(el => {
+      el.addEventListener('click', () => {
+        const game = findGameByBggId(el.dataset.bggId);
+        if (game) openModal(game);
+      });
+    });
+  };
+  searchEl.addEventListener('input', () => renderSearch(searchEl.value.trim()));
+
+  // Wire game rows
+  container.querySelectorAll('.stats-section [data-bgg-id]').forEach(el => {
+    el.addEventListener('click', () => {
+      const game = findGameByBggId(el.dataset.bggId);
+      if (game) openModal(game);
+    });
+  });
+
+  window.scrollTo(0, 0);
+}
+
 function _renderInsightsPlayers(players, wrColor) {
   return players.map(p => {
     const initial = p.name.charAt(0).toUpperCase();
@@ -5295,7 +5564,7 @@ const _sp = localStorage.getItem('bgl-player');
 if (_sp && NAME_MAP[_sp]) localStorage.setItem('bgl-player', NAME_MAP[_sp]);
 
 // Load ratings and favorites from Firebase, then show the right view
-Promise.all([loadAllRatings(), loadAllFavorites()]).then(() => {
+Promise.all([loadAllRatings(), loadAllFavorites(), loadImportedGames(), loadImportedPlays()]).then(() => {
   const savedPlayer = localStorage.getItem('bgl-player');
   if (savedPlayer) {
     showStatsView(savedPlayer);
@@ -5399,6 +5668,7 @@ window.initImporter = function(){
     let newGames = 0;
     const imagesToDownload = [];
     const descFetches = [];
+    const gamePersists = [];
 
     data.games.forEach(g => {
       if(existingBggIds.has(g.bggId)) return;
@@ -5436,11 +5706,12 @@ window.initImporter = function(){
       }
 
       EXTRA_GAMES[entry.bggId] = entry;
+      gamePersists.push(persistImportedGame(entry));
     });
 
     // ── 3. Merge plays → PLAY_HISTORY ──
-    if(!window._importedPlayUuids) window._importedPlayUuids = new Map(); // uuid → {bggId, index}
     let newPlays = 0, updatedPlays = 0, skipped = 0;
+    const playPersists = [];
 
     data.plays.forEach(play => {
       const game = importedGamesById[play.gameRefId];
@@ -5461,47 +5732,23 @@ window.initImporter = function(){
         };
       });
 
-      const entry = { date: dateStr, sc };
-      if(play.durationMin) entry.d = play.durationMin;
-      if(play.board) entry.b = play.board;
+      const persistedEntry = { bggId, date: dateStr, sc };
+      if(play.durationMin) persistedEntry.d = play.durationMin;
+      if(play.board) persistedEntry.b = play.board;
 
-      if(!PLAY_HISTORY[bggId]) PLAY_HISTORY[bggId] = [];
-
-      // Check if this uuid was already imported → UPDATE
-      if(window._importedPlayUuids.has(play.uuid)){
-        const {bggId: oldBggId, index} = window._importedPlayUuids.get(play.uuid);
-        if(PLAY_HISTORY[oldBggId] && PLAY_HISTORY[oldBggId][index]){
-          PLAY_HISTORY[oldBggId][index] = entry;
-          updatedPlays++;
-        }
-        return;
-      }
-
-      // Check if a matching entry already exists in the hardcoded PLAY_HISTORY by date+players
-      const existingIdx = PLAY_HISTORY[bggId].findIndex(
-        e => e.date === dateStr && e.sc.length === sc.length &&
-            e.sc.every((p,i) => p.n === sc[i]?.n)
-      );
-
-      if(existingIdx !== -1){
-        // Overwrite the existing hardcoded entry
-        PLAY_HISTORY[bggId][existingIdx] = entry;
-        window._importedPlayUuids.set(play.uuid, {bggId, index: existingIdx});
-        updatedPlays++;
-      } else {
-        // Brand new play
-        PLAY_HISTORY[bggId].push(entry);
-        PLAY_HISTORY[bggId].sort((a,b) => b.date.localeCompare(a.date));
-        const newIdx = PLAY_HISTORY[bggId].findIndex(e => e.date === dateStr && e.sc.length === sc.length && e.sc.every((p,i) => p.n === sc[i]?.n));
-        window._importedPlayUuids.set(play.uuid, {bggId, index: newIdx});
-        newPlays++;
-      }
+      const alreadyImported = !!importedPlaysCache[play.uuid];
+      _mergePlayIntoHistory(play.uuid, persistedEntry);
+      playPersists.push(persistImportedPlay(play.uuid, persistedEntry));
+      if(alreadyImported) updatedPlays++; else newPlays++;
     });
+
     await Promise.all(descFetches);
+    await Promise.all(gamePersists);
+    await Promise.all(playPersists);
 
     // Re-render if stats view is open
-    if(typeof renderStatsView === 'function' && window.currentStatsPlayer){
-      renderStatsView(window.currentStatsPlayer);
+    if(typeof showStatsView === 'function' && window.currentStatsPlayer){
+      showStatsView(window.currentStatsPlayer);
     }
 
     if(newPlays === 0 && newGames === 0 && newPlayers === 0){
