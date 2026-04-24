@@ -4161,7 +4161,7 @@ function openModal(game) {
         <img class="modal-cover-img"
              src="images/${game.bggId}.jpg"
              alt="${game.name}"
-             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+             onerror="__imgFallback(this, ${game.bggId})">
         <div class="modal-cover-fallback" style="display:none;background:${fallbackBg}">${game.name}</div>
       </div>`;
   } else {
@@ -4552,7 +4552,7 @@ function showStatsView(playerName, visiting) {
     const wr = gs.plays > 0 ? Math.round(gs.wins / gs.plays * 100) : 0;
     const imgSrc = gs.game.bggId > 0 ? `images/${gs.game.bggId}.jpg` : '';
     return `<div class="stats-game-row" data-bgg-id="${gs.game.bggId}">
-      ${imgSrc ? `<img class="stats-game-img" src="${imgSrc}" alt="" onerror="this.style.display='none'">` : ''}
+      ${imgSrc ? `<img class="stats-game-img" src="${imgSrc}" alt="" onerror="__imgFallback(this, ${gs.game.bggId})">` : ''}
       <div class="stats-game-info">
         <div class="stats-game-name">${gs.game.name}</div>
         <div class="stats-game-detail">${gs.plays} play${gs.plays !== 1 ? 's' : ''} &middot; ${gs.wins} win${gs.wins !== 1 ? 's' : ''} &middot; Last: ${fmtDate(gs.lastPlayed)}</div>
@@ -4653,7 +4653,7 @@ function showStatsView(playerName, visiting) {
       ${recommendations.map(g => {
         const imgSrc = g.bggId > 0 ? `images/${g.bggId}.jpg` : '';
         return `<div class="stats-rec-row" data-bgg-id="${g.bggId}">
-          ${imgSrc ? `<img class="stats-game-img" src="${imgSrc}" alt="" onerror="this.style.display='none'">` : ''}
+          ${imgSrc ? `<img class="stats-game-img" src="${imgSrc}" alt="" onerror="__imgFallback(this, ${g.bggId})">` : ''}
           <div class="stats-game-info">
             <div class="stats-game-name">${g.name}</div>
             <div class="stats-game-detail">${g.players} players &middot; ${g.playTime} &middot; ${g.complexity}/5 weight</div>
@@ -4990,7 +4990,7 @@ function showInsightsView() {
   const topGamesHtml = topGames.map(gs => {
     const imgSrc = gs.game.bggId > 0 ? `images/${gs.game.bggId}.jpg` : '';
     return `<div class="stats-game-row" data-bgg-id="${gs.game.bggId}">
-      ${imgSrc ? `<img class="stats-game-img" src="${imgSrc}" alt="" onerror="this.style.display='none'">` : ''}
+      ${imgSrc ? `<img class="stats-game-img" src="${imgSrc}" alt="" onerror="__imgFallback(this, ${gs.game.bggId})">` : ''}
       <div class="stats-game-info">
         <div class="stats-game-name">${gs.game.name}</div>
         <div class="stats-game-detail">${gs.count} play${gs.count !== 1 ? 's' : ''}</div>
@@ -5186,6 +5186,17 @@ function wireFavButton() {
   });
 }
 
+// When a local images/<bggId>.jpg is missing, fall back to the remote
+// urlImage stored on the game (set by the importer for BGStats games).
+window.__imgFallback = function(img, bggId){
+  if(img.dataset.fb){ img.style.display='none'; if(img.nextElementSibling && img.nextElementSibling.classList.contains('modal-cover-fallback')){ img.nextElementSibling.style.display='flex'; } return; }
+  img.dataset.fb = '1';
+  const game = findGameByBggId(bggId);
+  const url = game && game.urlImage;
+  if(url){ img.src = url; }
+  else{ img.style.display='none'; if(img.nextElementSibling && img.nextElementSibling.classList.contains('modal-cover-fallback')){ img.nextElementSibling.style.display='flex'; } }
+};
+
 function findGameByBggId(bggId) {
   const num = Number(bggId);
   return GAMES.find(g => g.bggId === num) || EXTRA_GAMES[bggId] || null;
@@ -5204,7 +5215,7 @@ function buildFavoritesHtml(playerName, isOwnProfile) {
       const removeBtn = isOwnProfile ? `<button class="fav-remove" data-fav-idx="${i}" title="Remove">&times;</button>` : '';
       cards += `<div class="fav-card" data-fav-bgg="${favs[i]}">
         ${removeBtn}
-        <img src="${imgSrc}" alt="${name}" onerror="this.style.display='none'">
+        <img src="${imgSrc}" alt="${name}" onerror="__imgFallback(this, ${favs[i]})">
         <div class="fav-card-name">${name}</div>
       </div>`;
     } else {
