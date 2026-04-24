@@ -4720,7 +4720,6 @@ function showStatsView(playerName, visiting) {
     <div class="import-result" id="importResult">
       <div class="import-result-title" id="importResultTitle"></div>
       <div class="import-result-lines" id="importResultLines"></div>
-      <div class="import-img-downloads" id="importImgDownloads"></div>
     </div>
   </div>` : ''}
 
@@ -4858,11 +4857,29 @@ function _mergePlayIntoHistory(uuid, p) {
   if (!p || !p.bggId || !p.date || !Array.isArray(p.sc)) return;
   const bggId = p.bggId;
   if (!PLAY_HISTORY[bggId]) PLAY_HISTORY[bggId] = [];
-  const entry = { date: p.date, sc: p.sc };
+  const entry = { date: p.date, sc: p.sc, _uuid: uuid };
   if (p.d) entry.d = p.d;
   if (p.b) entry.b = p.b;
+
+  // 1. Prefer matching the existing entry by uuid across all bggIds
+  for (const existingBggId in PLAY_HISTORY) {
+    const arr = PLAY_HISTORY[existingBggId];
+    const uuidIdx = arr.findIndex(e => e._uuid === uuid);
+    if (uuidIdx !== -1) {
+      if (existingBggId == bggId) {
+        arr[uuidIdx] = entry;
+      } else {
+        arr.splice(uuidIdx, 1);
+        PLAY_HISTORY[bggId].push(entry);
+        PLAY_HISTORY[bggId].sort((a,b) => b.date.localeCompare(a.date));
+      }
+      return;
+    }
+  }
+
+  // 2. Fall back to date+players dedup against hardcoded entries
   const idx = PLAY_HISTORY[bggId].findIndex(e =>
-    e.date === p.date && e.sc.length === p.sc.length &&
+    !e._uuid && e.date === p.date && e.sc.length === p.sc.length &&
     e.sc.every((pp,i) => pp.n === p.sc[i]?.n)
   );
   if (idx !== -1) {
@@ -5584,24 +5601,12 @@ window.initImporter = function(){
   const imgDls    = document.getElementById('importImgDownloads');
   if(!dropZone || !fileInput) return;
 
-  function showResult(type, title, lines, imgLinks){
+  function showResult(type, title, lines){
     result.className = 'import-result ' + type;
     result.style.display = 'block';
     resTitle.textContent = title;
     resLines.innerHTML = lines.filter(Boolean).join('<br>');
-    imgDls.innerHTML = '';
-    if(imgLinks && imgLinks.length){
-      const note = document.createElement('div');
-      note.style.cssText = 'font-size:0.7rem;opacity:0.5;margin-bottom:0.3rem;margin-top:0.4rem';
-      note.textContent = '⬇️ Save these images to your /images/ folder and commit:';
-      imgDls.appendChild(note);
-      imgLinks.forEach(({bggId, url, name})=>{
-        const row = document.createElement('div');
-        row.className = 'import-img-dl';
-        row.innerHTML = `<span>${name} (${bggId}.jpg)</span><a href="${url}" download="${bggId}.jpg" target="_blank">Download</a>`;
-        imgDls.appendChild(row);
-      });
-    }
+    if(imgDls) imgDls.innerHTML = '';
   }
 
   async function fetchDescription(bggId){
@@ -5649,13 +5654,18 @@ window.initImporter = function(){
     data.players.forEach(p => importedPlayersById[p.id] = p);
 
     // ── 1. Merge players ──
-    // Build existing uuid set from PLAY_HISTORY player names (we don't have a uuid store,
-    // so we track by uuid in a window-level registry)
-    if(!window._importedPlayerUuids) window._importedPlayerUuids = new Set();
+    // A player is "new" only if their mapped name doesn't already appear in PLAY_HISTORY
+    const existingPlayerNames = new Set();
+    for (const id in PLAY_HISTORY) {
+      for (const play of PLAY_HISTORY[id]) {
+        for (const s of play.sc) existingPlayerNames.add(s.n);
+      }
+    }
     let newPlayers = 0;
     data.players.forEach(p => {
-      if(window._importedPlayerUuids.has(p.uuid)) return;
-      window._importedPlayerUuids.add(p.uuid);
+      const mapped = NAME_MAP[p.name] || p.name;
+      if(existingPlayerNames.has(mapped)) return;
+      existingPlayerNames.add(mapped);
       newPlayers++;
     });
 
@@ -5666,7 +5676,6 @@ window.initImporter = function(){
     );
 
     let newGames = 0;
-    const imagesToDownload = [];
     const descFetches = [];
     const gamePersists = [];
 
@@ -5699,11 +5708,6 @@ window.initImporter = function(){
       descFetches.push(
         fetchDescription(g.bggId).then(desc => { entry.description = desc; })
       );
-
-      // Queue image download link
-      if(entry.urlImage){
-        imagesToDownload.push({ bggId: g.bggId, url: entry.urlImage, name: entry.name });
-      }
 
       EXTRA_GAMES[entry.bggId] = entry;
       gamePersists.push(persistImportedGame(entry));
@@ -5762,7 +5766,7 @@ window.initImporter = function(){
       newGames    ? `+${newGames} new game${newGames!==1?'s':''}` : '',
       newPlayers  ? `+${newPlayers} new player${newPlayers!==1?'s':''}` : '',
       skipped     ? `${skipped} duplicate${skipped!==1?'s':''} skipped` : '',
-    ], imagesToDownload);
+    ]);
 
     fileInput.value = '';
   }
