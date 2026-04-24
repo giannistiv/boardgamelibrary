@@ -4475,10 +4475,6 @@ function showStatsView(playerName, visiting) {
     window.scrollTo(0, 0);
   }
 
-  // Show importer only for Στιβ
-  const importSection = document.getElementById('importSection');
-  if (importSection) importSection.style.display = (playerName === 'Στιβ') ? '' : 'none';
-
   // Gather all play data for this player
   const gameStats = {};
   const recentPlays = [];
@@ -4673,8 +4669,8 @@ function showStatsView(playerName, visiting) {
       <div class="qr-label">Scan to open on your phone</div>
     </div>
 
-    <!-- ── JSON Import ── -->
-  <div class="import-section" id="importSection" style="display:none">
+    <!-- ── JSON Import (Στιβ only) ── -->
+  ${playerName === 'Στιβ' ? `<div class="import-section" id="importSection">
     <div class="import-section-title">📥 Import BGStats Play File</div>
     <div class="import-drop-zone" id="importDropZone">
       <input type="file" id="importFileInput" accept=".json">
@@ -4687,10 +4683,15 @@ function showStatsView(playerName, visiting) {
       <div class="import-result-lines" id="importResultLines"></div>
       <div class="import-img-downloads" id="importImgDownloads"></div>
     </div>
-  </div>
+  </div>` : ''}
 
     ${isOwnProfile ? '<button class="change-profile-btn" id="btn-change-profile">Change Profile</button>' : ''}
   `;
+
+  // Wire up importer for Στιβ
+  if (playerName === 'Στιβ' && typeof window.initImporter === 'function') {
+    window.initImporter();
+  }
 
   // Make game rows clickable
   container.querySelectorAll('[data-bgg-id]').forEach(el => {
@@ -5263,13 +5264,14 @@ Promise.all([loadAllRatings(), loadAllFavorites()]).then(() => {
 
 // ── JSON Import ──
 // ── BGStats Play File Importer ──
-(function(){
+window.initImporter = function(){
   const dropZone  = document.getElementById('importDropZone');
   const fileInput = document.getElementById('importFileInput');
   const result    = document.getElementById('importResult');
   const resTitle  = document.getElementById('importResultTitle');
   const resLines  = document.getElementById('importResultLines');
   const imgDls    = document.getElementById('importImgDownloads');
+  if(!dropZone || !fileInput) return;
 
   function showResult(type, title, lines, imgLinks){
     result.className = 'import-result ' + type;
@@ -5484,7 +5486,7 @@ Promise.all([loadAllRatings(), loadAllFavorites()]).then(() => {
     dropZone.classList.remove('drag-over');
     processImport(e.dataTransfer.files[0]);
   });
-})();
+};
 
 </script>
 </body>
