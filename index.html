@@ -5343,10 +5343,9 @@ Promise.all([loadAllRatings(), loadAllFavorites()]).then(() => {
     });
 
     // ── 2. Merge games → EXTRA_GAMES + PLAY_HISTORY images ──
-    if(!window.EXTRA_GAMES) window.EXTRA_GAMES = [];
     const existingBggIds = new Set(
       (window.GAMES || []).map(g => g.bggId).concat(
-       (window.EXTRA_GAMES || []).map(g => g.bggId))
+       Object.values(EXTRA_GAMES).map(g => g.bggId))
     );
 
     let newGames = 0;
@@ -5388,7 +5387,7 @@ Promise.all([loadAllRatings(), loadAllFavorites()]).then(() => {
         imagesToDownload.push({ bggId: g.bggId, url: entry.urlImage, name: entry.name });
       }
 
-      window.EXTRA_GAMES.push(entry);
+      EXTRA_GAMES[entry.bggId] = entry;
     });
 
     // ── 3. Merge plays → PLAY_HISTORY ──
@@ -5445,7 +5444,7 @@ Promise.all([loadAllRatings(), loadAllFavorites()]).then(() => {
         // Brand new play
         PLAY_HISTORY[bggId].push(entry);
         PLAY_HISTORY[bggId].sort((a,b) => b.date.localeCompare(a.date));
-        const newIdx = PLAY_HISTORY[bggId].findIndex(e => e.date === dateStr && e.sc.length === sc.length);
+        const newIdx = PLAY_HISTORY[bggId].findIndex(e => e.date === dateStr && e.sc.length === sc.length && e.sc.every((p,i) => p.n === sc[i]?.n));
         window._importedPlayUuids.set(play.uuid, {bggId, index: newIdx});
         newPlays++;
       }
