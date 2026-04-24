@@ -515,6 +515,10 @@
   .import-result.info{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:rgba(240,230,211,0.7)}
   .import-result-title{font-weight:700;margin-bottom:0.3rem}
   .import-result-lines{opacity:0.8;line-height:1.7}
+  .import-img-downloads{margin-top:0.6rem;display:flex;flex-direction:column;gap:0.3rem}
+  .import-img-dl{font-size:0.7rem;opacity:0.7;display:flex;align-items:center;justify-content:space-between;gap:0.5rem}
+  .import-img-dl a{color:var(--accent);text-decoration:none;font-weight:600;white-space:nowrap}
+  .import-img-dl a:hover{text-decoration:underline}
 
   /* ── Star Rating ── */
   .star-rating-section{
@@ -4667,16 +4671,17 @@ function showStatsView(playerName, visiting) {
 
     <!-- ── JSON Import ── -->
   <div class="import-section">
-    <div class="import-section-title">📥 Import BGStats Export</div>
+    <div class="import-section-title">📥 Import BGStats Play File</div>
     <div class="import-drop-zone" id="importDropZone">
       <input type="file" id="importFileInput" accept=".json">
       <div class="import-drop-icon">📂</div>
-      <div class="import-drop-label">Drop your BGStatsExport.json here</div>
+      <div class="import-drop-label">Drop your BGStats Play export here</div>
       <div class="import-drop-sub">or click to browse — new plays, players & games will be merged</div>
     </div>
     <div class="import-result" id="importResult">
       <div class="import-result-title" id="importResultTitle"></div>
       <div class="import-result-lines" id="importResultLines"></div>
+      <div class="import-img-downloads" id="importImgDownloads"></div>
     </div>
   </div>
 
@@ -5253,75 +5258,229 @@ Promise.all([loadAllRatings(), loadAllFavorites()]).then(() => {
 });
 
 // ── JSON Import ──
+// ── BGStats Play File Importer ──
 (function(){
-  const dropZone = document.getElementById('importDropZone');
+  const dropZone  = document.getElementById('importDropZone');
   const fileInput = document.getElementById('importFileInput');
-  const result   = document.getElementById('importResult');
-  const resTitle = document.getElementById('importResultTitle');
-  const resLines = document.getElementById('importResultLines');
+  const result    = document.getElementById('importResult');
+  const resTitle  = document.getElementById('importResultTitle');
+  const resLines  = document.getElementById('importResultLines');
+  const imgDls    = document.getElementById('importImgDownloads');
 
-  function showResult(type, title, lines){
+  function showResult(type, title, lines, imgLinks){
     result.className = 'import-result ' + type;
     result.style.display = 'block';
     resTitle.textContent = title;
-    resLines.innerHTML = lines.join('<br>');
+    resLines.innerHTML = lines.filter(Boolean).join('<br>');
+    imgDls.innerHTML = '';
+    if(imgLinks && imgLinks.length){
+      const note = document.createElement('div');
+      note.style.cssText = 'font-size:0.7rem;opacity:0.5;margin-bottom:0.3rem;margin-top:0.4rem';
+      note.textContent = '⬇️ Save these images to your /images/ folder and commit:';
+      imgDls.appendChild(note);
+      imgLinks.forEach(({bggId, url, name})=>{
+        const row = document.createElement('div');
+        row.className = 'import-img-dl';
+        row.innerHTML = `<span>${name} (${bggId}.jpg)</span><a href="${url}" download="${bggId}.jpg" target="_blank">Download</a>`;
+        imgDls.appendChild(row);
+      });
+    }
   }
 
-  function processImport(file){
+  async function fetchDescription(bggId){
+    try{
+      const res = await fetch(`https://boardgamegeek.com/xmlapi2/thing?id=${bggId}`);
+      const txt = await res.text();
+      const parser = new DOMParser();
+      const xml = parser.parseFromString(txt, 'text/xml');
+      const desc = xml.querySelector('description');
+      if(!desc) return '';
+      // decode HTML entities
+      const ta = document.createElement('textarea');
+      ta.innerHTML = desc.textContent;
+      return ta.value.replace(/&#10;/g,'').trim().slice(0,600) + '…';
+    } catch(e){ return ''; }
+  }
+
+  async function processImport(file){
     if(!file || !file.name.endsWith('.json')){
       showResult('error','Invalid file',['Please select a .json file exported from BGStats.']);
       return;
     }
-    const reader = new FileReader();
-    reader.onload = function(e){
-      let data;
-      try { data = JSON.parse(e.target.result); }
-      catch(_){ showResult('error','Parse error',['The file is not valid JSON.']); return; }
 
-      let newPlays=0, newPlayers=0, newGames=0, skipped=0;
+    showResult('info','Reading file…',['Please wait…']);
 
-      if(Array.isArray(data.players)){
-        const existingUuids = new Set((window.bgsPlayers||[]).map(p=>p.uuid));
-        data.players.forEach(p=>{
-          if(!existingUuids.has(p.uuid)){ (window.bgsPlayers=window.bgsPlayers||[]).push(p); newPlayers++; }
-        });
-      }
-      if(Array.isArray(data.games)){
-        const existingIds = new Set((window.bgsGames||[]).map(g=>g.id));
-        data.games.forEach(g=>{
-          if(!existingIds.has(g.id)){ (window.bgsGames=window.bgsGames||[]).push(g); newGames++; }
-        });
-      }
-      if(Array.isArray(data.plays)){
-        const existingUuids = new Set((window.bgsPlays||[]).map(p=>p.uuid));
-        data.plays.forEach(p=>{
-          if(!existingUuids.has(p.uuid)){ (window.bgsPlays=window.bgsPlays||[]).push(p); newPlays++; }
-          else { skipped++; }
-        });
+    let data;
+    try{
+      const text = await file.text();
+      data = JSON.parse(text);
+    } catch(_){
+      showResult('error','Parse error',['The file is not valid JSON.']);
+      return;
+    }
+
+    // Validate it's a BGStats play file
+    if(!data.plays || !data.games || !data.players){
+      showResult('error','Wrong format',['This doesn\'t look like a BGStats Play export. Make sure you export using Share → Play File from BGStats.']);
+      return;
+    }
+
+    // Build lookup maps from the imported file
+    const importedGamesById  = {};  // id → game object
+    const importedPlayersById = {}; // id → player object
+    data.games.forEach(g   => importedGamesById[g.id]   = g);
+    data.players.forEach(p => importedPlayersById[p.id] = p);
+
+    // ── 1. Merge players ──
+    // Build existing uuid set from PLAY_HISTORY player names (we don't have a uuid store,
+    // so we track by uuid in a window-level registry)
+    if(!window._importedPlayerUuids) window._importedPlayerUuids = new Set();
+    let newPlayers = 0;
+    data.players.forEach(p => {
+      if(window._importedPlayerUuids.has(p.uuid)) return;
+      window._importedPlayerUuids.add(p.uuid);
+      newPlayers++;
+    });
+
+    // ── 2. Merge games → EXTRA_GAMES + PLAY_HISTORY images ──
+    if(!window.EXTRA_GAMES) window.EXTRA_GAMES = [];
+    const existingBggIds = new Set(
+      (window.GAMES || []).map(g => g.bggId).concat(
+       (window.EXTRA_GAMES || []).map(g => g.bggId))
+    );
+
+    let newGames = 0;
+    const imagesToDownload = [];
+    const descFetches = [];
+
+    data.games.forEach(g => {
+      if(existingBggIds.has(g.bggId)) return;
+      existingBggIds.add(g.bggId);
+      newGames++;
+
+      const entry = {
+        id: 'imported_' + g.bggId,
+        name: g.bggName || g.name,
+        bggId: g.bggId,
+        year: g.bggYear || null,
+        designer: g.designers || '',
+        players: (g.minPlayerCount && g.maxPlayerCount)
+          ? (g.minPlayerCount === g.maxPlayerCount ? String(g.minPlayerCount) : `${g.minPlayerCount}-${g.maxPlayerCount}`)
+          : '',
+        playTime: (g.minPlayTime && g.maxPlayTime)
+          ? (g.minPlayTime === g.maxPlayTime ? `${g.minPlayTime} min` : `${g.minPlayTime}-${g.maxPlayTime} min`)
+          : '',
+        categories: [],
+        mechanics: [],
+        description: '',
+        bggRating: g.rating ? (g.rating / 10).toFixed(1) : null,
+        urlImage: g.urlImage || g.urlThumb || null,
+        imported: true,
+      };
+
+      // Queue description fetch
+      descFetches.push(
+        fetchDescription(g.bggId).then(desc => { entry.description = desc; })
+      );
+
+      // Queue image download link
+      if(entry.urlImage){
+        imagesToDownload.push({ bggId: g.bggId, url: entry.urlImage, name: entry.name });
       }
 
-      if(newPlays===0 && newPlayers===0 && newGames===0){
-        showResult('info','Nothing new',['All entries already exist.'+(skipped?` ${skipped} duplicate play(s) skipped.`:'')]);
+      window.EXTRA_GAMES.push(entry);
+    });
+
+    // ── 3. Merge plays → PLAY_HISTORY ──
+    if(!window._importedPlayUuids) window._importedPlayUuids = new Map(); // uuid → {bggId, index}
+    let newPlays = 0, updatedPlays = 0, skipped = 0;
+
+    data.plays.forEach(play => {
+      const game = importedGamesById[play.gameRefId];
+      if(!game || !game.bggId) return;
+      const bggId = game.bggId;
+
+      const dateStr = (play.playDate || play.entryDate || '').slice(0,10);
+
+      const sc = (play.playerScores || []).map(ps => {
+        const player = importedPlayersById[ps.playerRefId];
+        let rawName = player ? player.name : ('Player ' + ps.playerRefId);
+        const mappedName = NAME_MAP[rawName] || rawName;
+        return {
+          n: mappedName,
+          s: ps.score !== null && ps.score !== undefined ? String(ps.score) : '',
+          w: !!ps.winner,
+          ...(ps.role ? {r: ps.role} : {}),
+        };
+      });
+
+      const entry = { date: dateStr, sc };
+      if(play.durationMin) entry.d = play.durationMin;
+      if(play.board) entry.b = play.board;
+
+      if(!PLAY_HISTORY[bggId]) PLAY_HISTORY[bggId] = [];
+
+      // Check if this uuid was already imported → UPDATE
+      if(window._importedPlayUuids.has(play.uuid)){
+        const {bggId: oldBggId, index} = window._importedPlayUuids.get(play.uuid);
+        if(PLAY_HISTORY[oldBggId] && PLAY_HISTORY[oldBggId][index]){
+          PLAY_HISTORY[oldBggId][index] = entry;
+          updatedPlays++;
+        }
         return;
       }
-      if(typeof renderStatsView==='function' && window.currentStatsPlayer){
-        renderStatsView(window.currentStatsPlayer);
+
+      // Check if a matching entry already exists in the hardcoded PLAY_HISTORY by date+players
+      const existingIdx = PLAY_HISTORY[bggId].findIndex(
+        e => e.date === dateStr && e.sc.length === sc.length &&
+            e.sc.every((p,i) => p.n === sc[i]?.n)
+      );
+
+      if(existingIdx !== -1){
+        // Overwrite the existing hardcoded entry
+        PLAY_HISTORY[bggId][existingIdx] = entry;
+        window._importedPlayUuids.set(play.uuid, {bggId, index: existingIdx});
+        updatedPlays++;
+      } else {
+        // Brand new play
+        PLAY_HISTORY[bggId].push(entry);
+        PLAY_HISTORY[bggId].sort((a,b) => b.date.localeCompare(a.date));
+        const newIdx = PLAY_HISTORY[bggId].findIndex(e => e.date === dateStr && e.sc.length === sc.length);
+        window._importedPlayUuids.set(play.uuid, {bggId, index: newIdx});
+        newPlays++;
       }
-      showResult('success','Import successful ✓',[
-        newPlays   ? `+${newPlays} new play${newPlays!==1?'s':''}` :'',
-        newPlayers ? `+${newPlayers} new player${newPlayers!==1?'s':''}` :'',
-        newGames   ? `+${newGames} new game${newGames!==1?'s':''}` :'',
-        skipped    ? `${skipped} duplicate${skipped!==1?'s':''} skipped` :'',
-      ].filter(Boolean));
-      fileInput.value='';
-    };
-    reader.readAsText(file);
+    });
+    await Promise.all(descFetches);
+
+    // Re-render if stats view is open
+    if(typeof renderStatsView === 'function' && window.currentStatsPlayer){
+      renderStatsView(window.currentStatsPlayer);
+    }
+
+    if(newPlays === 0 && newGames === 0 && newPlayers === 0){
+      showResult('info','Nothing new',['All entries in this file already exist.', skipped ? `${skipped} duplicate(s) skipped.` : '']);
+      return;
+    }
+
+    showResult('success','Import successful ✓',[
+      newPlays    ? `+${newPlays} new play${newPlays!==1?'s':''}` : '',
+      updatedPlays ? `✏️ ${updatedPlays} play${updatedPlays!==1?'s':''} updated` : '',
+      newGames    ? `+${newGames} new game${newGames!==1?'s':''}` : '',
+      newPlayers  ? `+${newPlayers} new player${newPlayers!==1?'s':''}` : '',
+      skipped     ? `${skipped} duplicate${skipped!==1?'s':''} skipped` : '',
+    ], imagesToDownload);
+
+    fileInput.value = '';
   }
 
-  fileInput.addEventListener('change', e=>processImport(e.target.files[0]));
-  dropZone.addEventListener('dragover', e=>{e.preventDefault();dropZone.classList.add('drag-over');});
-  dropZone.addEventListener('dragleave', ()=>dropZone.classList.remove('drag-over'));
-  dropZone.addEventListener('drop', e=>{e.preventDefault();dropZone.classList.remove('drag-over');processImport(e.dataTransfer.files[0]);});
+  fileInput.addEventListener('change', e => processImport(e.target.files[0]));
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    processImport(e.dataTransfer.files[0]);
+  });
 })();
 
 </script>
