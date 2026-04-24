@@ -4191,6 +4191,11 @@ function openModal(game) {
 
   const c = game.spineColor || '#555';
   const fallbackBg = `linear-gradient(135deg, ${c}, ${adjustColor(c, -30)})`;
+  if (!Array.isArray(game.categories)) game.categories = [];
+  if (!Array.isArray(game.mechanics)) game.mechanics = [];
+  if (game.description == null) game.description = '';
+  if (game.players == null) game.players = '';
+  if (game.playTime == null) game.playTime = '';
 
   // Build cover image section
   let coverHtml;
