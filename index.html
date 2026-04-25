@@ -5501,11 +5501,19 @@ function _mergePlayIntoHistory(uuid, p) {
     }
   }
 
-  // 2. Fall back to date+players dedup against hardcoded entries
-  const idx = PLAY_HISTORY[bggId].findIndex(e =>
-    !e._uuid && e.date === p.date && e.sc.length === p.sc.length &&
-    e.sc.every((pp,i) => pp.n === p.sc[i]?.n)
-  );
+  // 2. Fall back to date+players dedup against hardcoded entries.
+  // Match if same date + same player count + at least N-1 of N players overlap
+  // (set-based, order-independent). This lets a re-import correct a single
+  // mistyped player name on a hardcoded play instead of creating a duplicate.
+  const newNames = new Set(p.sc.map(s => s.n));
+  const idx = PLAY_HISTORY[bggId].findIndex(e => {
+    if (e._uuid) return false;
+    if (e.date !== p.date) return false;
+    if (e.sc.length !== p.sc.length) return false;
+    let overlap = 0;
+    for (const s of e.sc) if (newNames.has(s.n)) overlap++;
+    return overlap >= Math.max(1, e.sc.length - 1);
+  });
   if (idx !== -1) {
     PLAY_HISTORY[bggId][idx] = entry;
   } else {
@@ -6501,23 +6509,35 @@ function _saveBggImageCache(cache){
 const _bggImageInflight = {}; // bggId -> Promise (dedupe concurrent fetches)
 async function _fetchBggImageUrl(bggId){
   const cache = _loadBggImageCache();
-  if (cache[bggId] !== undefined) return cache[bggId]; // cached (may be empty string for "tried, none")
+  if (cache[bggId]) return cache[bggId]; // only cache non-empty hits — retry empty/failures next visit
   if (_bggImageInflight[bggId]) return _bggImageInflight[bggId];
   _bggImageInflight[bggId] = (async () => {
-    let url = '';
-    try {
-      const res = await fetch(`https://boardgamegeek.com/xmlapi2/thing?id=${bggId}`);
-      const txt = await res.text();
-      const xml = new DOMParser().parseFromString(txt, 'text/xml');
-      const img = xml.querySelector('image');
-      const thumb = xml.querySelector('thumbnail');
-      url = (img && img.textContent.trim()) || (thumb && thumb.textContent.trim()) || '';
-    } catch (e) { url = ''; }
-    const c = _loadBggImageCache();
-    c[bggId] = url;
-    _saveBggImageCache(c);
+    // BGG sometimes returns HTTP 202 with empty body on first hit; retry once.
+    async function attempt() {
+      try {
+        const res = await fetch(`https://boardgamegeek.com/xmlapi2/thing?id=${bggId}`);
+        if (res.status === 202) return null; // queued, retry
+        const txt = await res.text();
+        if (!txt) return null;
+        const xml = new DOMParser().parseFromString(txt, 'text/xml');
+        const img = xml.querySelector('image');
+        const thumb = xml.querySelector('thumbnail');
+        const url = (img && img.textContent.trim()) || (thumb && thumb.textContent.trim()) || '';
+        return url || null;
+      } catch (e) { return null; }
+    }
+    let url = await attempt();
+    if (url == null) {
+      await new Promise(r => setTimeout(r, 1500));
+      url = await attempt();
+    }
+    if (url) {
+      const c = _loadBggImageCache();
+      c[bggId] = url;
+      _saveBggImageCache(c);
+    }
     delete _bggImageInflight[bggId];
-    return url;
+    return url || '';
   })();
   return _bggImageInflight[bggId];
 }
