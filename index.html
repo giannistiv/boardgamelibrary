@@ -645,6 +645,22 @@
 
   /* ── Leaderboard ── */
   .lb-header{text-align:center;margin-bottom:1rem}
+  .lb-tabs{
+    display:flex;gap:0.4rem;justify-content:center;
+    margin:0 auto 1.4rem;max-width:560px;
+    background:rgba(255,255,255,0.04);padding:0.3rem;border-radius:10px;
+  }
+  .lb-tab{
+    flex:1;background:transparent;border:none;
+    padding:0.55rem 0.9rem;border-radius:8px;
+    color:var(--text);font-family:inherit;font-size:0.82rem;font-weight:600;
+    cursor:pointer;opacity:0.65;transition:background 0.15s,opacity 0.15s,color 0.15s;
+  }
+  .lb-tab:hover{opacity:0.95}
+  .lb-tab.active{
+    background:rgba(226,176,74,0.18);color:var(--accent);opacity:1;
+    box-shadow:0 1px 6px rgba(0,0,0,0.25);
+  }
   .lb-title{font-size:1.5rem;font-weight:700;color:var(--accent);letter-spacing:0.03em}
   .lb-count{font-size:0.72rem;opacity:0.5;margin-top:0.2rem}
   .lb-podium{
@@ -4838,7 +4854,7 @@ function showStatsView(playerName, visiting) {
   };
 
   const backBtnHtml = (!isOwnProfile && _statsViewSource)
-    ? `<button class="profile-back-btn" onclick="_goBackFromProfile()">← Back to ${_statsViewSource === 'leaderboard' ? 'Leaderboard' : 'Insights'}</button>`
+    ? `<button class="profile-back-btn" onclick="_goBackFromProfile()">← Back to ${_statsViewSource === 'leaderboard' ? 'Leaderboard' : 'Stats'}</button>`
     : '';
 
   // Build favorites section
@@ -5638,11 +5654,12 @@ function _leaderboardRanksForPlay(sc) {
   return sc.map(s => ({ player: s.n, rank: s.w ? 1 : 2 }));
 }
 
-function _computeEloLeaderboard() {
+function _computeEloLeaderboard(mode) {
   const flat = [];
   for (const bggId in PLAY_HISTORY) {
     for (const p of PLAY_HISTORY[bggId]) {
       if (!p || !p.date || !Array.isArray(p.sc)) continue;
+      if (mode === 'south' && p.l !== 'South Board') continue;
       flat.push({ bggId: Number(bggId), date: p.date, sc: p.sc });
     }
   }
@@ -5722,9 +5739,13 @@ function _eloToColorScore(elo) {
   return Math.max(0, Math.min(10, (elo - 850) / 30));
 }
 
+let _leaderboardMode = 'main'; // 'main' | 'south'
+
 function showLeaderboardView() {
   const container = document.getElementById('leaderboard-view');
-  const data = _computeEloLeaderboard();
+  const mode = _leaderboardMode;
+  const data = _computeEloLeaderboard(mode);
+  const isSouth = mode === 'south';
 
   const now = new Date();
   const cutoffMs = now.getTime() - 365 * 86400 * 1000;
@@ -5743,12 +5764,33 @@ function showLeaderboardView() {
     }))
     .sort((a, b) => b.elo - a.elo);
 
+  const tabsHtml = `
+    <div class="lb-tabs">
+      <button class="lb-tab ${!isSouth ? 'active' : ''}" data-lb-mode="main">Main</button>
+      <button class="lb-tab ${isSouth ? 'active' : ''}" data-lb-mode="south">South Board</button>
+    </div>`;
+  const titleTxt = isSouth ? 'South Board League' : 'Leaderboard';
+
+  const wireTabs = () => {
+    container.querySelectorAll('[data-lb-mode]').forEach(el => {
+      el.addEventListener('click', () => {
+        const m = el.dataset.lbMode;
+        if (m !== _leaderboardMode) {
+          _leaderboardMode = m;
+          showLeaderboardView();
+        }
+      });
+    });
+  };
+
   if (rows.length === 0) {
     container.innerHTML = `
       <div class="lb-header">
-        <div class="lb-title">Leaderboard</div>
+        <div class="lb-title">${titleTxt}</div>
       </div>
+      ${tabsHtml}
       <div class="lb-empty">No active players to rank yet.</div>`;
+    wireTabs();
     window.scrollTo(0, 0);
     return;
   }
@@ -5796,14 +5838,17 @@ function showLeaderboardView() {
 
   container.innerHTML = `
     <div class="lb-header">
-      <div class="lb-title">Leaderboard</div>
+      <div class="lb-title">${titleTxt}</div>
       <div class="lb-count">${rows.length} player${rows.length !== 1 ? 's' : ''}</div>
     </div>
+    ${tabsHtml}
     ${podium.length > 0 ? `<div class="lb-podium">${podiumHtml}</div>` : ''}
     <div class="lb-list">${listHtml}</div>
     <div class="lb-explain">
-      <b>How it works:</b> Everyone starts at 1000. Each play replays in date order — winners gain, losers drop, with bigger swings when the underdog wins. Complexity scales points (a win on weight 5 = full value, lighter games = less). Losses scale down with player count, and finishing last costs more than finishing mid-pack. <b>PROV</b> means fewer than 10 plays (points move faster). Players inactive for more than a year are hidden.
+      ${isSouth ? '<b>South Board League:</b> A separate Elo using only plays where the location is "South Board". Independent of the main leaderboard.<br><br>' : ''}<b>How it works:</b> Everyone starts at 1000. Each play replays in date order — winners gain, losers drop, with bigger swings when the underdog wins. Complexity scales points (a win on weight 5 = full value, lighter games = less). Losses scale down with player count, and finishing last costs more than finishing mid-pack. <b>PROV</b> means fewer than 10 plays (points move faster). Players inactive for more than a year are hidden.
     </div>`;
+
+  wireTabs();
 
   container.querySelectorAll('[data-visit-player]').forEach(el => {
     el.addEventListener('click', () => {
