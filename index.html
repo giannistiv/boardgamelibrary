@@ -5485,7 +5485,18 @@ function _mergePlayIntoHistory(uuid, p) {
   if (p.b) entry.b = p.b;
   if (p.l) entry.l = p.l;
 
+  const newNames = new Set(p.sc.map(s => s.n));
+  const isHardcodedDup = (e) => {
+    if (e._uuid) return false;
+    if (e.date !== p.date) return false;
+    if (e.sc.length !== p.sc.length) return false;
+    let overlap = 0;
+    for (const s of e.sc) if (newNames.has(s.n)) overlap++;
+    return overlap >= Math.max(1, e.sc.length - 1);
+  };
+
   // 1. Prefer matching the existing entry by uuid across all bggIds
+  let placed = false;
   for (const existingBggId in PLAY_HISTORY) {
     const arr = PLAY_HISTORY[existingBggId];
     const uuidIdx = arr.findIndex(e => e._uuid === uuid);
@@ -5497,29 +5508,31 @@ function _mergePlayIntoHistory(uuid, p) {
         PLAY_HISTORY[bggId].push(entry);
         PLAY_HISTORY[bggId].sort((a,b) => b.date.localeCompare(a.date));
       }
-      return;
+      placed = true;
+      break;
     }
   }
 
-  // 2. Fall back to date+players dedup against hardcoded entries.
-  // Match if same date + same player count + at least N-1 of N players overlap
-  // (set-based, order-independent). This lets a re-import correct a single
-  // mistyped player name on a hardcoded play instead of creating a duplicate.
-  const newNames = new Set(p.sc.map(s => s.n));
-  const idx = PLAY_HISTORY[bggId].findIndex(e => {
-    if (e._uuid) return false;
-    if (e.date !== p.date) return false;
-    if (e.sc.length !== p.sc.length) return false;
-    let overlap = 0;
-    for (const s of e.sc) if (newNames.has(s.n)) overlap++;
-    return overlap >= Math.max(1, e.sc.length - 1);
-  });
-  if (idx !== -1) {
-    PLAY_HISTORY[bggId][idx] = entry;
-  } else {
-    PLAY_HISTORY[bggId].push(entry);
-    PLAY_HISTORY[bggId].sort((a,b) => b.date.localeCompare(a.date));
+  // 2. Fall back to hardcoded dedup: same date + same player count + ≥ N-1
+  // players overlap (set-based, order-independent) → replace.
+  if (!placed) {
+    const idx = PLAY_HISTORY[bggId].findIndex(isHardcodedDup);
+    if (idx !== -1) {
+      PLAY_HISTORY[bggId][idx] = entry;
+    } else {
+      PLAY_HISTORY[bggId].push(entry);
+      PLAY_HISTORY[bggId].sort((a,b) => b.date.localeCompare(a.date));
+    }
+    return;
   }
+
+  // 3. After uuid match placed the entry, also clean up any leftover
+  // hardcoded duplicates of the same play (e.g. old PLAY_HISTORY entry
+  // that was imported separately before — now that it has a uuid, its
+  // hardcoded twin should go away).
+  PLAY_HISTORY[bggId] = PLAY_HISTORY[bggId].filter(e =>
+    e._uuid === uuid || !isHardcodedDup(e)
+  );
 }
 
 async function loadImportedPlays() {
