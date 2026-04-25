@@ -4727,12 +4727,26 @@ function showStatsView(playerName, visiting) {
 
   const totalPlays = recentPlays.length;
   const totalWins = recentPlays.filter(p => p.won).length;
-  // Coop = play where every participant is marked winner. Anything else (1 winner,
-  // 2-of-3 winners as a team, etc.) counts as competitive.
-  const coopPlays = recentPlays.filter(p => p.allScores.length > 0 && p.allScores.every(s => s.w));
+  // Coop play = 2+ participants where every winner flag is the same (everyone won
+  // together OR everyone lost together). A coop *win* is the all-won subset.
+  // Plays with mixed flags (some won, some lost) are competitive (incl. team games).
+  const coopPlays = recentPlays.filter(p => {
+    if (!p.allScores || p.allScores.length < 2) return false;
+    const first = !!p.allScores[0].w;
+    return p.allScores.every(s => !!s.w === first);
+  });
   const coopWins = coopPlays.filter(p => p.won).length;
   const winRate = totalPlays > 0 ? Math.round(totalWins / totalPlays * 100) : 0;
   const uniqueGames = Object.keys(gameStats).length;
+  const uniquePlayers = (() => {
+    const set = new Set();
+    for (const p of recentPlays) {
+      for (const s of p.allScores) {
+        if (s && s.n && s.n !== playerName) set.add(s.n);
+      }
+    }
+    return set.size;
+  })();
 
   const fmtDate = (d) => {
     const [y, m, day] = d.split('-');
@@ -4825,6 +4839,10 @@ function showStatsView(playerName, visiting) {
       <div class="stats-card">
         <div class="stats-card-val">${uniqueGames}</div>
         <div class="stats-card-label">Unique Games</div>
+      </div>
+      <div class="stats-card">
+        <div class="stats-card-val">${uniquePlayers}</div>
+        <div class="stats-card-label">Different Players</div>
       </div>
     </div>
 
