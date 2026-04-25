@@ -5976,12 +5976,24 @@ function showGamesView() {
 }
 
 // ── Leaderboard (Elo) ──
-function _leaderboardRanksForPlay(sc) {
-  if (!Array.isArray(sc) || sc.length < 2) return null;
+const AUZTRALIA_BGG_IDS = new Set([231581, 320110]); // base + Tasmania
+const GAME_PLAYER_NAME = '__GAME__';
+
+function _leaderboardRanksForPlay(sc, bggId) {
+  if (!Array.isArray(sc) || sc.length < 1) return null;
+  const isAuztralia = bggId && AUZTRALIA_BGG_IDS.has(Number(bggId));
   const winners = sc.filter(s => s && s.w === true);
-  const losers  = sc.filter(s => s && s.w !== true);
-  if (winners.length === 0) return null;                   // no declared winner → skip
-  if (winners.length === sc.length) return null;           // everyone wins → cooperative → skip
+  if (winners.length === 0) {
+    // AuZtralia: if no human won, the Game wins for Elo purposes
+    if (isAuztralia && sc.length >= 1) {
+      const ranks = sc.map(s => ({ player: s.n, rank: 2 }));
+      ranks.push({ player: GAME_PLAYER_NAME, rank: 1 });
+      return ranks;
+    }
+    return null;
+  }
+  if (sc.length < 2) return null;
+  if (winners.length === sc.length && !isAuztralia) return null; // everyone wins → coop (skip unless AuZtralia)
   // winners.length < sc.length: some won, some lost (including 2+ winners = tie/team)
 
   const parsed = sc.map(s => {
@@ -6045,7 +6057,7 @@ function _computeEloLeaderboard(mode) {
   const streaks = {}; // current consecutive-win streak per player
 
   for (const play of flat) {
-    const ranks = _leaderboardRanksForPlay(play.sc);
+    const ranks = _leaderboardRanksForPlay(play.sc, play.bggId);
     if (!ranks) continue;
 
     // Normalize names via NAME_MAP, dedupe duplicate names (keep best rank)
@@ -6095,6 +6107,10 @@ function _computeEloLeaderboard(mode) {
     }
 
     for (const m of participants) {
+      if (m.player === GAME_PLAYER_NAME) {
+        ratings[m.player] = 1000; // pin synthetic Game opponent at base
+        continue;
+      }
       ratings[m.player] += deltas[m.player];
       plays[m.player]++;
       lastPlayDate[m.player] = play.date;
@@ -6108,6 +6124,7 @@ function _computeEloLeaderboard(mode) {
     }
   }
 
+  delete ratings[GAME_PLAYER_NAME];
   return { ratings, plays, lastPlayDate, lastDelta, firstPlayDate, streaks };
 }
 
@@ -6120,10 +6137,11 @@ function _computeRivalryOfMonth(mode) {
     for (const play of PLAY_HISTORY[bggId]) {
       if (!play || !play.date || play.date < cutoff || !Array.isArray(play.sc)) continue;
       if (mode === 'south' && play.l !== 'South Board') continue;
-      const ranks = _leaderboardRanksForPlay(play.sc);
+      const ranks = _leaderboardRanksForPlay(play.sc, bggId);
       if (!ranks) continue;
       const byName = {};
       for (const r of ranks) {
+        if (r.player === GAME_PLAYER_NAME) continue;
         const m = NAME_MAP[r.player] || r.player;
         if (!m) continue;
         if (byName[m] == null || r.rank < byName[m]) byName[m] = r.rank;
