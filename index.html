@@ -749,13 +749,14 @@
   .lb-podium-name{
     font-size:0.88rem;font-weight:600;margin-bottom:0.3rem;
     line-height:1.2;word-break:break-word;overflow-wrap:anywhere;hyphens:auto;
+    min-height:2.4em;
   }
   .lb-podium-card.rank-1 .lb-podium-name{font-size:1rem}
   @media(max-width:600px){
     .lb-podium{gap:0.4rem;max-width:100%}
     .lb-podium-card{padding:0.7rem 0.35rem 0.85rem}
     .lb-podium-card.rank-1{padding:1rem 0.4rem 1.8rem}
-    .lb-podium-name{font-size:0.72rem}
+    .lb-podium-name{font-size:0.72rem;min-height:2.4em}
     .lb-podium-card.rank-1 .lb-podium-name{font-size:0.82rem}
     .lb-podium-elo{font-size:1rem}
     .lb-podium-card.rank-1 .lb-podium-elo{font-size:1.3rem}
@@ -5482,6 +5483,7 @@ function _mergePlayIntoHistory(uuid, p) {
   const entry = { date: p.date, sc: p.sc, _uuid: uuid };
   if (p.d) entry.d = p.d;
   if (p.b) entry.b = p.b;
+  if (p.l) entry.l = p.l;
 
   // 1. Prefer matching the existing entry by uuid across all bggIds
   for (const existingBggId in PLAY_HISTORY) {
@@ -6696,8 +6698,12 @@ window.initImporter = function(){
     // Build lookup maps from the imported file
     const importedGamesById  = {};  // id → game object
     const importedPlayersById = {}; // id → player object
+    const importedLocationsById = {}; // id → location object
     data.games.forEach(g   => importedGamesById[g.id]   = g);
     data.players.forEach(p => importedPlayersById[p.id] = p);
+    if (Array.isArray(data.locations)) {
+      data.locations.forEach(l => importedLocationsById[l.id] = l);
+    }
 
     // ── 1. Merge players ──
     // A player is "new" only if their mapped name doesn't already appear in PLAY_HISTORY
@@ -6785,6 +6791,9 @@ window.initImporter = function(){
       const persistedEntry = { bggId, date: dateStr, sc };
       if(play.durationMin) persistedEntry.d = play.durationMin;
       if(play.board) persistedEntry.b = play.board;
+      const locObj = play.locationRefId ? importedLocationsById[play.locationRefId] : null;
+      const locName = locObj && locObj.name ? locObj.name : '';
+      if (locName) persistedEntry.l = LOCATION_MAP[locName] || locName;
 
       const alreadyImported = !!importedPlaysCache[play.uuid];
       _mergePlayIntoHistory(play.uuid, persistedEntry);
