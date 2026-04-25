@@ -1546,12 +1546,17 @@ const NAME_MAP = {
   'Χρηστος Καραφουλιδης':'Χρηστος Ρετσος',
   'Leonidas Marias':'Λεωνιδας'
 };
-// Apply name conversions to PLAY_HISTORY
+const LOCATION_MAP = {
+  'South Board': 'Board South',
+};
+
+// Apply name + location conversions to PLAY_HISTORY
 for (const bggId in PLAY_HISTORY) {
   for (const play of PLAY_HISTORY[bggId]) {
     for (const s of play.sc) {
       if (NAME_MAP[s.n]) s.n = NAME_MAP[s.n];
     }
+    if (play.l && LOCATION_MAP[play.l]) play.l = LOCATION_MAP[play.l];
   }
 }
 
@@ -5473,6 +5478,7 @@ function _mergePlayIntoHistory(uuid, p) {
   for (const s of p.sc) {
     if (s && s.n && NAME_MAP[s.n]) s.n = NAME_MAP[s.n];
   }
+  if (p.l && LOCATION_MAP[p.l]) p.l = LOCATION_MAP[p.l];
   const entry = { date: p.date, sc: p.sc, _uuid: uuid };
   if (p.d) entry.d = p.d;
   if (p.b) entry.b = p.b;
@@ -6057,7 +6063,7 @@ function _computeEloLeaderboard(mode) {
     for (const p of PLAY_HISTORY[bggId]) {
       if (!p || !p.date || !Array.isArray(p.sc)) continue;
       if (p.date < yearStart) continue;
-      if (mode === 'south' && p.l !== 'South Board') continue;
+      if (mode === 'south' && p.l !== 'Board South') continue;
       flat.push({ bggId: Number(bggId), date: p.date, sc: p.sc });
     }
   }
@@ -6150,7 +6156,7 @@ function _computeRivalryOfYear(mode, forPlayer) {
   for (const bggId in PLAY_HISTORY) {
     for (const play of PLAY_HISTORY[bggId]) {
       if (!play || !play.date || play.date < cutoff || !Array.isArray(play.sc)) continue;
-      if (mode === 'south' && play.l !== 'South Board') continue;
+      if (mode === 'south' && play.l !== 'Board South') continue;
       const ranks = _leaderboardRanksForPlay(play.sc, bggId);
       if (!ranks) continue;
       const byName = {};
@@ -6228,9 +6234,9 @@ function showLeaderboardView() {
   const tabsHtml = `
     <div class="lb-tabs">
       <button class="lb-tab ${!isSouth ? 'active' : ''}" data-lb-mode="main">Main</button>
-      <button class="lb-tab ${isSouth ? 'active' : ''}" data-lb-mode="south">South Board</button>
+      <button class="lb-tab ${isSouth ? 'active' : ''}" data-lb-mode="south">Board South</button>
     </div>`;
-  const titleTxt = isSouth ? `South Board ${currentYear}` : `Leaderboard ${currentYear}`;
+  const titleTxt = isSouth ? `Board South ${currentYear}` : `Leaderboard ${currentYear}`;
 
   const rawPlayer = localStorage.getItem('bgl-player');
   const focusPlayer = rawPlayer ? (NAME_MAP[rawPlayer] || rawPlayer) : null;
@@ -6328,7 +6334,7 @@ function showLeaderboardView() {
     ${podium.length > 0 ? `<div class="lb-podium">${podiumHtml}</div>` : ''}
     <div class="lb-list">${listHtml}</div>
     <div class="lb-explain">
-      ${isSouth ? '<b>South Board League:</b> A separate Elo using only plays where the location is "South Board". Independent of the main leaderboard.<br><br>' : ''}<b>How it works:</b> Everyone starts at 1000 on Jan 1. Each play of ${currentYear} replays in date order — winners gain, losers drop, with bigger swings when the underdog wins. Complexity scales points (a win on weight 5 = full value, lighter games = less). Losses scale down with player count, and finishing last costs more than finishing mid-pack. <b>PROV</b> means fewer than 10 plays this year (points move faster). The leaderboard resets every January 1st.
+      ${isSouth ? '<b>Board South League:</b> A separate Elo using only plays where the location is "Board South". Independent of the main leaderboard.<br><br>' : ''}<b>How it works:</b> Everyone starts at 1000 on Jan 1. Each play of ${currentYear} replays in date order — winners gain, losers drop, with bigger swings when the underdog wins. Complexity scales points (a win on weight 5 = full value, lighter games = less). Losses scale down with player count, and finishing last costs more than finishing mid-pack. <b>PROV</b> means fewer than 10 plays this year (points move faster). The leaderboard resets every January 1st.
     </div>`;
 
   wireTabs();
