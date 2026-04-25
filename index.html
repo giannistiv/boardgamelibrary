@@ -622,6 +622,59 @@
     line-height:1;z-index:2;
   }
   .fav-card:hover .fav-remove{display:flex}
+
+  /* ── Favorite Picker ── */
+  .fav-picker-overlay{
+    position:fixed;inset:0;z-index:9999;
+    background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);
+    display:flex;align-items:center;justify-content:center;
+    padding:1rem;
+  }
+  .fav-picker-panel{
+    background:var(--modal-bg, #1a1a1a);color:var(--text);
+    border:1px solid rgba(226,176,74,0.25);border-radius:14px;
+    width:min(560px, 100%);max-height:85vh;
+    display:flex;flex-direction:column;overflow:hidden;
+    box-shadow:0 20px 60px rgba(0,0,0,0.6);
+  }
+  .fav-picker-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0.9rem 1.1rem;border-bottom:1px solid rgba(255,255,255,0.08);
+  }
+  .fav-picker-title{font-size:1.05rem;font-weight:700;color:var(--accent)}
+  .fav-picker-close{
+    background:none;border:none;color:var(--text);
+    font-size:1.6rem;line-height:1;cursor:pointer;opacity:0.65;
+    padding:0 0.3rem;
+  }
+  .fav-picker-close:hover{opacity:1}
+  .fav-picker-search{
+    margin:0.8rem 1.1rem 0.4rem;padding:0.6rem 0.9rem;
+    border:1px solid rgba(255,255,255,0.15);border-radius:10px;
+    background:rgba(255,255,255,0.07);color:var(--text);
+    font-family:inherit;font-size:0.9rem;outline:none;
+  }
+  .fav-picker-search:focus{border-color:var(--accent)}
+  .fav-picker-list{flex:1;overflow-y:auto;padding:0.4rem 0.6rem 0.8rem}
+  .fav-picker-row{
+    display:flex;align-items:center;gap:0.7rem;
+    padding:0.45rem 0.6rem;border-radius:8px;cursor:pointer;
+    transition:background 0.12s;
+  }
+  .fav-picker-row:hover{background:rgba(255,255,255,0.07)}
+  .fav-picker-row.already{opacity:0.5}
+  .fav-picker-img{
+    width:42px;height:42px;border-radius:6px;object-fit:cover;flex-shrink:0;
+    background:rgba(255,255,255,0.04);
+  }
+  .fav-picker-name{flex:1;font-size:0.88rem;font-weight:500}
+  .fav-picker-tag{
+    font-size:0.65rem;color:var(--accent);opacity:0.8;
+    margin-left:0.4rem;font-weight:600;
+  }
+  .fav-picker-empty{padding:1.5rem;text-align:center;opacity:0.55;font-size:0.85rem}
+  .fav-card-empty{cursor:pointer}
+  .fav-card-empty:hover span{opacity:0.4}
   .fav-remove:hover{background:rgba(239,68,68,0.8)}
 
   /* ── Profile Visit ── */
@@ -4977,7 +5030,7 @@ function showStatsView(playerName, visiting) {
   });
 
   // Wire favorites grid
-  wireFavoritesGrid(container, playerName);
+  wireFavoritesGrid(container, playerName, isOwnProfile);
 
   // Refresh favorites from Firebase for cross-device sync
   if (FIREBASE_DB) {
@@ -4998,7 +5051,7 @@ function showStatsView(playerName, visiting) {
           const header = container.querySelector('.stats-header');
           if (header) header.insertAdjacentHTML('afterend', newHtml);
         }
-        wireFavoritesGrid(container, playerName);
+        wireFavoritesGrid(container, playerName, isOwnProfile);
       })
       .catch(() => {});
   }
@@ -6039,7 +6092,7 @@ function buildFavoritesHtml(playerName, isOwnProfile) {
   </div>`;
 }
 
-function wireFavoritesGrid(container, playerName) {
+function wireFavoritesGrid(container, playerName, isOwnProfile) {
   container.querySelectorAll('.fav-card[data-fav-bgg]').forEach(el => {
     el.addEventListener('click', (e) => {
       if (e.target.closest('.fav-remove')) return;
@@ -6057,6 +6110,70 @@ function wireFavoritesGrid(container, playerName) {
       showStatsView(playerName);
     });
   });
+  if (isOwnProfile) {
+    container.querySelectorAll('.fav-card-empty').forEach(el => {
+      el.addEventListener('click', () => openFavPicker(playerName));
+    });
+  }
+}
+
+function openFavPicker(playerName) {
+  const existing = document.getElementById('fav-picker-overlay');
+  if (existing) existing.remove();
+
+  const currentFavs = getPlayerFavorites(playerName);
+  const allGames = GAMES.slice().sort((a, b) => a.name.localeCompare(b.name));
+
+  const overlay = document.createElement('div');
+  overlay.id = 'fav-picker-overlay';
+  overlay.className = 'fav-picker-overlay';
+  overlay.innerHTML = `
+    <div class="fav-picker-panel">
+      <div class="fav-picker-head">
+        <div class="fav-picker-title">Add a Favorite</div>
+        <button class="fav-picker-close" aria-label="Close">&times;</button>
+      </div>
+      <input type="text" class="fav-picker-search" id="fav-picker-search" placeholder="Search games..." autocomplete="off">
+      <div class="fav-picker-list" id="fav-picker-list"></div>
+    </div>`;
+  document.body.appendChild(overlay);
+
+  const listEl = overlay.querySelector('#fav-picker-list');
+  const searchEl = overlay.querySelector('#fav-picker-search');
+
+  const render = (q) => {
+    const term = (q || '').trim().toLowerCase();
+    const matches = allGames
+      .filter(g => !term || g.name.toLowerCase().includes(term))
+      .slice(0, 200);
+    listEl.innerHTML = matches.map(g => {
+      const already = currentFavs.includes(g.bggId);
+      const imgSrc = `images/${g.bggId}.jpg`;
+      return `<div class="fav-picker-row${already ? ' already' : ''}" data-bgg="${g.bggId}">
+        <img class="fav-picker-img" src="${imgSrc}" alt="" onerror="__imgFallback(this, ${g.bggId})">
+        <div class="fav-picker-name">${g.name}${already ? ' <span class="fav-picker-tag">already a favorite</span>' : ''}</div>
+      </div>`;
+    }).join('') || '<div class="fav-picker-empty">No games match.</div>';
+    listEl.querySelectorAll('.fav-picker-row').forEach(row => {
+      row.addEventListener('click', async () => {
+        if (row.classList.contains('already')) { close(); return; }
+        const bggId = Number(row.dataset.bgg);
+        const favs = getPlayerFavorites(playerName).slice();
+        if (favs.length >= 4) return;
+        favs.push(bggId);
+        await saveFavorites(playerName, favs);
+        close();
+        showStatsView(playerName, _viewingProfile ? 'visiting' : undefined);
+      });
+    });
+  };
+
+  const close = () => overlay.remove();
+  overlay.querySelector('.fav-picker-close').addEventListener('click', close);
+  overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+  searchEl.addEventListener('input', () => render(searchEl.value));
+  render('');
+  setTimeout(() => searchEl.focus(), 50);
 }
 
 // ── Init ──
