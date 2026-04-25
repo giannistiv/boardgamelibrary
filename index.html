@@ -823,28 +823,34 @@
         read at the same visual size as Profile/Stats.
         Viewport on library is width=1200 → ~0.325x on a phone, so
         sizes are ~3x their baseline to match the locked-viewport look. */
-  body.mobile-library h1{ font-size:5.2rem; margin:2.6rem 0 0.7rem; }
-  body.mobile-library .subtitle{ font-size:2.5rem; margin-bottom:2.6rem; }
-  body.mobile-library .player-bar{ gap:1.4rem; margin-bottom:1.8rem; }
-  body.mobile-library .player-bar-btn{ font-size:2rem; padding:0.9rem 2rem; border-radius:16px; }
-  body.mobile-library .search-wrap{ max-width:1000px; padding:0 2rem; margin-bottom:2.2rem; }
-  body.mobile-library .search-input{
-    font-size:2.2rem; padding:1.1rem 1.8rem 1.1rem 4.4rem; border-radius:22px;
+  /* Library mobile styles only kick in once the viewport has actually been
+     widened to the 1200-css-pixel library viewport. On the very first paint
+     after a refresh, the meta tag may still be device-width, so guarding
+     these scaled-up sizes with min-width:1000 prevents the huge-h1 flash. */
+  @media(min-width:1000px){
+    body.mobile-library h1{ font-size:5.2rem; margin:2.6rem 0 0.7rem; }
+    body.mobile-library .subtitle{ font-size:2.5rem; margin-bottom:2.6rem; }
+    body.mobile-library .player-bar{ gap:1.4rem; margin-bottom:1.8rem; }
+    body.mobile-library .player-bar-btn{ font-size:2rem; padding:0.9rem 2rem; border-radius:16px; }
+    body.mobile-library .search-wrap{ max-width:1000px; padding:0 2rem; margin-bottom:2.2rem; }
+    body.mobile-library .search-input{
+      font-size:2.2rem; padding:1.1rem 1.8rem 1.1rem 4.4rem; border-radius:22px;
+    }
+    body.mobile-library .search-icon{ font-size:2.2rem; left:3.2rem; }
+    body.mobile-library .filters{ gap:1.8rem 2.2rem; padding:0 2rem 3.2rem; max-width:1100px; }
+    body.mobile-library .filter-label{ font-size:1.6rem; padding-left:4px; letter-spacing:0.1em; }
+    body.mobile-library .filter-select,
+    body.mobile-library .filter-multi-btn{
+      font-size:1.9rem; padding:0.9rem 3.2rem 0.9rem 1.3rem; border-radius:16px; min-width:200px;
+    }
+    body.mobile-library .filter-select{
+      background-size:20px 12px; background-position:right 1.1rem center;
+    }
+    body.mobile-library .filter-arrow{ font-size:1.4rem; right:1.1rem; }
+    body.mobile-library .filter-slider{ width:240px; }
+    body.mobile-library .filter-check{ font-size:1.7rem; }
+    body.mobile-library .filter-check input[type="checkbox"]{ width:26px; height:26px; }
   }
-  body.mobile-library .search-icon{ font-size:2.2rem; left:3.2rem; }
-  body.mobile-library .filters{ gap:1.8rem 2.2rem; padding:0 2rem 3.2rem; max-width:1100px; }
-  body.mobile-library .filter-label{ font-size:1.6rem; padding-left:4px; letter-spacing:0.1em; }
-  body.mobile-library .filter-select,
-  body.mobile-library .filter-multi-btn{
-    font-size:1.9rem; padding:0.9rem 3.2rem 0.9rem 1.3rem; border-radius:16px; min-width:200px;
-  }
-  body.mobile-library .filter-select{
-    background-size:20px 12px; background-position:right 1.1rem center;
-  }
-  body.mobile-library .filter-arrow{ font-size:1.4rem; right:1.1rem; }
-  body.mobile-library .filter-slider{ width:240px; }
-  body.mobile-library .filter-check{ font-size:1.7rem; }
-  body.mobile-library .filter-check input[type="checkbox"]{ width:26px; height:26px; }
   body.mobile-library .lb-row{ padding:0.85rem 1rem; gap:1rem; }
   body.mobile-library .lb-rank{ font-size:1.05rem; min-width:2.4rem; }
   body.mobile-library .lb-avatar{ width:42px; height:42px; font-size:1rem; }
@@ -4720,15 +4726,12 @@ function showStatsView(playerName, visiting) {
   recentPlays.sort((a, b) => b.date.localeCompare(a.date));
 
   const totalPlays = recentPlays.length;
-  // Competitive = play with a single winner; coop = 2+ winners; no-winner plays are excluded from both.
-  const competitivePlays = recentPlays.filter(p => {
-    const winnerCount = p.allScores.filter(s => s.w).length;
-    return winnerCount === 1;
-  });
-  const competitiveWins = competitivePlays.filter(p => p.won).length;
-  const coopPlays = recentPlays.filter(p => p.allScores.filter(s => s.w).length >= 2);
+  const totalWins = recentPlays.filter(p => p.won).length;
+  // Coop = play where every participant is marked winner. Anything else (1 winner,
+  // 2-of-3 winners as a team, etc.) counts as competitive.
+  const coopPlays = recentPlays.filter(p => p.allScores.length > 0 && p.allScores.every(s => s.w));
   const coopWins = coopPlays.filter(p => p.won).length;
-  const winRate = competitivePlays.length > 0 ? Math.round(competitiveWins / competitivePlays.length * 100) : 0;
+  const winRate = totalPlays > 0 ? Math.round(totalWins / totalPlays * 100) : 0;
   const uniqueGames = Object.keys(gameStats).length;
 
   const fmtDate = (d) => {
@@ -4808,8 +4811,8 @@ function showStatsView(playerName, visiting) {
         <div class="stats-card-label">Total Plays</div>
       </div>
       <div class="stats-card">
-        <div class="stats-card-val">${competitiveWins}</div>
-        <div class="stats-card-label">Wins</div>
+        <div class="stats-card-val">${totalWins}</div>
+        <div class="stats-card-label">Total Wins</div>
       </div>
       <div class="stats-card">
         <div class="stats-card-val" style="color:${wrColor(winRate)}">${winRate}%</div>
@@ -5523,9 +5526,9 @@ function _leaderboardRanksForPlay(sc) {
   if (!Array.isArray(sc) || sc.length < 2) return null;
   const winners = sc.filter(s => s && s.w === true);
   const losers  = sc.filter(s => s && s.w !== true);
-  if (winners.length >= 2) return null;    // cooperative play (2+ winners) → skip
-  if (winners.length === 0) return null;   // no declared winner → skip
-  if (losers.length === 0)  return null;   // shouldn't hit (1 winner + 0 losers = solo, nothing to pair)
+  if (winners.length === 0) return null;                   // no declared winner → skip
+  if (winners.length === sc.length) return null;           // everyone wins → cooperative → skip
+  // winners.length < sc.length: some won, some lost (including 2+ winners = tie/team)
 
   const parsed = sc.map(s => {
     if (s.s == null || s.s === '') return null;
