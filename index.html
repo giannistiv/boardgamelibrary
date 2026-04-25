@@ -6487,14 +6487,80 @@ function wireFavButton() {
 }
 
 // When a local images/<bggId>.jpg is missing, fall back to the remote
-// urlImage stored on the game (set by the importer for BGStats games).
+// urlImage stored on the game (set by the importer for BGStats games),
+// then to BGG's XML API as a last resort. BGG lookups are cached in
+// localStorage so we only hit their API once per game per browser.
+const BGG_IMG_CACHE_KEY = 'bgl-bgg-image-cache';
+function _loadBggImageCache(){
+  try { return JSON.parse(localStorage.getItem(BGG_IMG_CACHE_KEY) || '{}'); }
+  catch(e) { return {}; }
+}
+function _saveBggImageCache(cache){
+  try { localStorage.setItem(BGG_IMG_CACHE_KEY, JSON.stringify(cache)); } catch(e){}
+}
+const _bggImageInflight = {}; // bggId -> Promise (dedupe concurrent fetches)
+async function _fetchBggImageUrl(bggId){
+  const cache = _loadBggImageCache();
+  if (cache[bggId] !== undefined) return cache[bggId]; // cached (may be empty string for "tried, none")
+  if (_bggImageInflight[bggId]) return _bggImageInflight[bggId];
+  _bggImageInflight[bggId] = (async () => {
+    let url = '';
+    try {
+      const res = await fetch(`https://boardgamegeek.com/xmlapi2/thing?id=${bggId}`);
+      const txt = await res.text();
+      const xml = new DOMParser().parseFromString(txt, 'text/xml');
+      const img = xml.querySelector('image');
+      const thumb = xml.querySelector('thumbnail');
+      url = (img && img.textContent.trim()) || (thumb && thumb.textContent.trim()) || '';
+    } catch (e) { url = ''; }
+    const c = _loadBggImageCache();
+    c[bggId] = url;
+    _saveBggImageCache(c);
+    delete _bggImageInflight[bggId];
+    return url;
+  })();
+  return _bggImageInflight[bggId];
+}
+function _hideImgWithFallback(img){
+  img.style.display = 'none';
+  if (img.nextElementSibling && img.nextElementSibling.classList.contains('modal-cover-fallback')) {
+    img.nextElementSibling.style.display = 'flex';
+  }
+}
 window.__imgFallback = function(img, bggId){
-  if(img.dataset.fb){ img.style.display='none'; if(img.nextElementSibling && img.nextElementSibling.classList.contains('modal-cover-fallback')){ img.nextElementSibling.style.display='flex'; } return; }
-  img.dataset.fb = '1';
-  const game = findGameByBggId(bggId);
-  const url = game && game.urlImage;
-  if(url){ img.src = url; }
-  else{ img.style.display='none'; if(img.nextElementSibling && img.nextElementSibling.classList.contains('modal-cover-fallback')){ img.nextElementSibling.style.display='flex'; } }
+  // Stage 0 → 1: local image failed. Try urlImage on the game.
+  if (!img.dataset.fb) {
+    img.dataset.fb = '1';
+    const game = findGameByBggId(bggId);
+    if (game && game.urlImage) { img.src = game.urlImage; return; }
+    // No urlImage — go straight to BGG.
+    img.dataset.fb = '2';
+    _fetchBggImageUrl(bggId).then(url => {
+      if (url) {
+        if (game) game.urlImage = url; // cache on the game object too
+        img.src = url;
+      } else {
+        _hideImgWithFallback(img);
+      }
+    });
+    return;
+  }
+  // Stage 1 → 2: stored urlImage failed. Try BGG.
+  if (img.dataset.fb === '1') {
+    img.dataset.fb = '2';
+    const game = findGameByBggId(bggId);
+    _fetchBggImageUrl(bggId).then(url => {
+      if (url) {
+        if (game) game.urlImage = url;
+        img.src = url;
+      } else {
+        _hideImgWithFallback(img);
+      }
+    });
+    return;
+  }
+  // Stage 2: BGG image also failed to load — give up.
+  _hideImgWithFallback(img);
 };
 
 function findGameByBggId(bggId) {
