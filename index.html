@@ -734,8 +734,8 @@
   }
   .lb-podium-card.rank-2{border:1px solid #c0c0c0;padding-bottom:1.5rem}
   .lb-podium-card.rank-3{border:1px solid #cd7f32;padding-bottom:1rem}
-  .lb-podium-medal{font-size:1.3rem;margin-bottom:0.25rem}
-  .lb-podium-card.rank-1 .lb-podium-medal{font-size:1.7rem}
+  .lb-podium-medal{font-size:2rem;margin-bottom:0.3rem;line-height:1}
+  .lb-podium-card.rank-1 .lb-podium-medal{font-size:2.6rem}
   .lb-podium-avatar{
     width:46px;height:46px;border-radius:50%;margin:0 auto 0.5rem;
     background:rgba(226,176,74,0.18);color:var(--accent);
@@ -761,8 +761,8 @@
     .lb-podium-card.rank-1 .lb-podium-elo{font-size:1.3rem}
     .lb-podium-avatar{width:38px;height:38px;font-size:1rem}
     .lb-podium-card.rank-1 .lb-podium-avatar{width:48px;height:48px;font-size:1.2rem}
-    .lb-podium-medal{font-size:1.05rem}
-    .lb-podium-card.rank-1 .lb-podium-medal{font-size:1.4rem}
+    .lb-podium-medal{font-size:1.5rem}
+    .lb-podium-card.rank-1 .lb-podium-medal{font-size:2rem}
     .lb-podium-meta{font-size:0.55rem}
   }
   .profile-back-btn{
@@ -775,6 +775,21 @@
     transition:background 0.15s;
   }
   .profile-back-btn:hover{background:rgba(226,176,74,0.22)}
+
+  /* ── Head-to-Head ── */
+  .h2h-section{
+    background:rgba(255,255,255,0.03);
+    border:1px solid rgba(226,176,74,0.18);
+    border-radius:12px;padding:1rem 1.1rem;margin-bottom:1.5rem;
+  }
+  .h2h-grid{
+    display:grid;grid-template-columns:1fr auto 1fr;
+    gap:0.6rem;align-items:center;margin-bottom:0.7rem;
+  }
+  .h2h-card{text-align:center;padding:0.5rem 0.4rem;border-radius:8px;background:rgba(255,255,255,0.03)}
+  .h2h-val{font-size:1.6rem;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
+  .h2h-label{font-size:0.7rem;opacity:0.65;margin-top:0.15rem;font-weight:600}
+  .h2h-meta{font-size:0.72rem;opacity:0.65;text-align:center;line-height:1.5}
   .lb-podium-elo{font-size:1.2rem;font-weight:800;font-variant-numeric:tabular-nums}
   .lb-podium-card.rank-1 .lb-podium-elo{font-size:1.55rem}
   .lb-podium-meta{font-size:0.62rem;opacity:0.55;margin-top:0.25rem}
@@ -799,6 +814,34 @@
     padding:1px 5px;border-radius:4px;margin-left:0.4rem;letter-spacing:0.05em;
     vertical-align:middle;
   }
+  .lb-streak{
+    display:inline-block;font-size:0.7rem;font-weight:700;
+    background:rgba(239,68,68,0.16);color:#fca5a5;
+    padding:1px 6px;border-radius:6px;margin-left:0.4rem;
+    vertical-align:middle;letter-spacing:0.02em;
+  }
+  .lb-rivalry{
+    margin:0 auto 1.4rem;max-width:560px;
+    padding:0.85rem 1rem;border-radius:12px;
+    background:linear-gradient(135deg, rgba(239,68,68,0.10), rgba(226,176,74,0.08));
+    border:1px solid rgba(239,68,68,0.25);text-align:center;
+  }
+  .lb-rivalry-head{
+    font-size:0.7rem;font-weight:700;letter-spacing:0.06em;
+    color:#fca5a5;margin-bottom:0.45rem;text-transform:uppercase;
+  }
+  .lb-rivalry-body{
+    display:flex;align-items:center;justify-content:center;gap:0.7rem;
+    font-size:1rem;font-weight:600;flex-wrap:wrap;
+  }
+  .lb-rivalry-name{color:var(--accent);cursor:pointer;text-decoration:underline;text-decoration-color:rgba(226,176,74,0.3);text-underline-offset:3px}
+  .lb-rivalry-name:hover{text-decoration-color:var(--accent)}
+  .lb-rivalry-score{
+    font-variant-numeric:tabular-nums;
+    background:rgba(0,0,0,0.25);padding:2px 10px;border-radius:6px;
+    font-weight:800;
+  }
+  .lb-rivalry-meta{font-size:0.7rem;opacity:0.6;margin-top:0.4rem}
   .lb-elo{font-size:0.95rem;font-weight:800;min-width:3.5rem;text-align:right;font-variant-numeric:tabular-nums}
   .lb-delta{font-size:0.7rem;min-width:3rem;text-align:right;font-variant-numeric:tabular-nums;opacity:0.85}
   .lb-delta.pos{color:#22c55e}
@@ -4912,6 +4955,74 @@ function showStatsView(playerName, visiting) {
     ? `<button class="profile-back-btn" onclick="_goBackFromProfile()">← Back to ${_statsViewSource === 'leaderboard' ? 'Leaderboard' : 'Stats'}</button>`
     : '';
 
+  // Head-to-head when viewing someone else's profile
+  let h2hHtml = '';
+  if (!isOwnProfile && loggedInPlayer && loggedInPlayer !== playerName) {
+    const h2hPlays = [];
+    for (const bggId in PLAY_HISTORY) {
+      for (const play of PLAY_HISTORY[bggId]) {
+        if (!play || !Array.isArray(play.sc)) continue;
+        const me = play.sc.find(s => s.n === loggedInPlayer);
+        const them = play.sc.find(s => s.n === playerName);
+        if (!me || !them) continue;
+        h2hPlays.push({ date: play.date, sc: play.sc });
+      }
+    }
+    h2hPlays.sort((a, b) => a.date.localeCompare(b.date));
+
+    let myWins = 0, theirWins = 0, ties = 0;
+    let curMyStreak = 0, longestMyStreak = 0;
+    let curTheirStreak = 0, longestTheirStreak = 0;
+    let lastResult = '', lastDate = '';
+    for (const p of h2hPlays) {
+      const me = p.sc.find(s => s.n === loggedInPlayer);
+      const them = p.sc.find(s => s.n === playerName);
+      const allSame = p.sc.every(s => !!s.w === !!p.sc[0].w);
+      if (allSame) continue; // coop / all-lost
+      const meW = !!me.w, themW = !!them.w;
+      if (meW && !themW) {
+        myWins++;
+        curMyStreak++;
+        curTheirStreak = 0;
+        longestMyStreak = Math.max(longestMyStreak, curMyStreak);
+        lastResult = 'You won';
+      } else if (themW && !meW) {
+        theirWins++;
+        curTheirStreak++;
+        curMyStreak = 0;
+        longestTheirStreak = Math.max(longestTheirStreak, curTheirStreak);
+        lastResult = `${playerName} won`;
+      } else if (meW && themW) {
+        ties++;
+        curMyStreak = 0;
+        curTheirStreak = 0;
+        lastResult = 'Tied';
+      } else {
+        curMyStreak = 0;
+        curTheirStreak = 0;
+        lastResult = 'Both lost';
+      }
+      lastDate = p.date;
+    }
+
+    const decisive = myWins + theirWins + ties;
+    if (decisive > 0) {
+      const shortName = playerName.split(' ')[0];
+      const streakLine = (longestMyStreak >= 2 || longestTheirStreak >= 2)
+        ? ` · best streaks: you ${longestMyStreak} · ${shortName} ${longestTheirStreak}`
+        : '';
+      h2hHtml = `<div class="stats-section h2h-section">
+        <div class="stats-section-title">You vs ${playerName}</div>
+        <div class="h2h-grid">
+          <div class="h2h-card"><div class="h2h-val" style="color:#22c55e">${myWins}</div><div class="h2h-label">You</div></div>
+          <div class="h2h-card"><div class="h2h-val">${ties}</div><div class="h2h-label">Tied</div></div>
+          <div class="h2h-card"><div class="h2h-val" style="color:#f87171">${theirWins}</div><div class="h2h-label">${shortName}</div></div>
+        </div>
+        <div class="h2h-meta">${decisive} head-to-head play${decisive !== 1 ? 's' : ''}${streakLine}${lastDate ? ` · last: ${lastResult} on ${fmtDate(lastDate)}` : ''}</div>
+      </div>`;
+    }
+  }
+
   // Build favorites section
   const favoritesHtml = buildFavoritesHtml(playerName, isOwnProfile);
 
@@ -4937,6 +5048,8 @@ function showStatsView(playerName, visiting) {
     </div>
 
     ${favoritesHtml}
+
+    ${h2hHtml}
 
     <div class="stats-grid">
       <div class="stats-card">
@@ -5728,6 +5841,7 @@ function _computeEloLeaderboard(mode) {
   const lastPlayDate = {};
   const lastDelta = {};
   const firstPlayDate = {};
+  const streaks = {}; // current consecutive-win streak per player
 
   for (const play of flat) {
     const ranks = _leaderboardRanksForPlay(play.sc);
@@ -5785,10 +5899,65 @@ function _computeEloLeaderboard(mode) {
       lastPlayDate[m.player] = play.date;
       if (!firstPlayDate[m.player]) firstPlayDate[m.player] = play.date;
       lastDelta[m.player] = deltas[m.player];
+      if (m.rank === 1) {
+        streaks[m.player] = (streaks[m.player] || 0) + 1;
+      } else {
+        streaks[m.player] = 0;
+      }
     }
   }
 
-  return { ratings, plays, lastPlayDate, lastDelta, firstPlayDate };
+  return { ratings, plays, lastPlayDate, lastDelta, firstPlayDate, streaks };
+}
+
+function _computeRivalryOfMonth(mode) {
+  const now = new Date();
+  const cutoff = new Date(now.getTime() - 30 * 86400 * 1000).toISOString().slice(0, 10);
+
+  const pairs = {};
+  for (const bggId in PLAY_HISTORY) {
+    for (const play of PLAY_HISTORY[bggId]) {
+      if (!play || !play.date || play.date < cutoff || !Array.isArray(play.sc)) continue;
+      if (mode === 'south' && play.l !== 'South Board') continue;
+      const ranks = _leaderboardRanksForPlay(play.sc);
+      if (!ranks) continue;
+      const byName = {};
+      for (const r of ranks) {
+        const m = NAME_MAP[r.player] || r.player;
+        if (!m) continue;
+        if (byName[m] == null || r.rank < byName[m]) byName[m] = r.rank;
+      }
+      const list = Object.entries(byName);
+      if (list.length < 2) continue;
+      for (let i = 0; i < list.length; i++) {
+        for (let j = i + 1; j < list.length; j++) {
+          const [n1, r1] = list[i];
+          const [n2, r2] = list[j];
+          const [a, b] = n1 < n2 ? [n1, n2] : [n2, n1];
+          const aRank = a === n1 ? r1 : r2;
+          const bRank = a === n1 ? r2 : r1;
+          const key = a + '||' + b;
+          if (!pairs[key]) pairs[key] = { a, b, total: 0, aWins: 0, bWins: 0, lastDate: '' };
+          pairs[key].total++;
+          if (aRank < bRank) pairs[key].aWins++;
+          else if (bRank < aRank) pairs[key].bWins++;
+          if (play.date > pairs[key].lastDate) pairs[key].lastDate = play.date;
+        }
+      }
+    }
+  }
+
+  let best = null;
+  for (const k in pairs) {
+    const p = pairs[k];
+    if (p.total < 2) continue;
+    const closeness = Math.abs(p.aWins - p.bWins);
+    if (!best) { best = p; continue; }
+    const bestCloseness = Math.abs(best.aWins - best.bWins);
+    if (p.total > best.total) best = p;
+    else if (p.total === best.total && closeness < bestCloseness) best = p;
+  }
+  return best;
 }
 
 function _eloToColorScore(elo) {
@@ -5819,6 +5988,7 @@ function showLeaderboardView() {
       lastPlayed: data.lastPlayDate[p],
       lastDelta: data.lastDelta[p] || 0,
       provisional: data.plays[p] < 10,
+      streak: data.streaks[p] || 0,
     }))
     .sort((a, b) => b.elo - a.elo);
 
@@ -5828,6 +5998,18 @@ function showLeaderboardView() {
       <button class="lb-tab ${isSouth ? 'active' : ''}" data-lb-mode="south">South Board</button>
     </div>`;
   const titleTxt = isSouth ? 'South Board League' : 'Leaderboard';
+
+  const rivalry = _computeRivalryOfMonth(mode);
+  const rivalryHtml = rivalry ? `
+    <div class="lb-rivalry">
+      <div class="lb-rivalry-head">🔥 Rivalry of the Month</div>
+      <div class="lb-rivalry-body">
+        <span class="lb-rivalry-name" data-visit-player="${rivalry.a.replace(/"/g, '&quot;')}">${rivalry.a}</span>
+        <span class="lb-rivalry-score">${rivalry.aWins}–${rivalry.bWins}</span>
+        <span class="lb-rivalry-name" data-visit-player="${rivalry.b.replace(/"/g, '&quot;')}">${rivalry.b}</span>
+      </div>
+      <div class="lb-rivalry-meta">${rivalry.total} play${rivalry.total !== 1 ? 's' : ''} in last 30 days · last ${_fmtDateShort(rivalry.lastDate)}</div>
+    </div>` : '';
 
   const wireTabs = () => {
     container.querySelectorAll('[data-lb-mode]').forEach(el => {
@@ -5867,10 +6049,11 @@ function showLeaderboardView() {
     const color = ratingColor(_eloToColorScore(p.elo));
     const initial = p.name.charAt(0).toUpperCase();
     const prov = p.provisional ? '<span class="lb-prov-badge">PROV</span>' : '';
+    const streakHtml = p.streak >= 2 ? `<span class="lb-streak" title="${p.streak}-win streak">🔥 ${p.streak}</span>` : '';
     return `<div class="lb-podium-card rank-${idx + 1}" data-visit-player="${p.name.replace(/"/g, '&quot;')}">
       <div class="lb-podium-medal">${medals[idx]}</div>
       <div class="lb-podium-avatar">${initial}</div>
-      <div class="lb-podium-name">${p.name}${prov}</div>
+      <div class="lb-podium-name">${p.name}${prov}${streakHtml}</div>
       <div class="lb-podium-elo" style="color:${color}">${p.elo}</div>
       <div class="lb-podium-meta">${p.plays} play${p.plays !== 1 ? 's' : ''} · last ${_fmtDateShort(p.lastPlayed)}</div>
     </div>`;
@@ -5884,10 +6067,11 @@ function showLeaderboardView() {
     const deltaSign = p.lastDelta > 0 ? '+' : '';
     const deltaTxt = `${deltaSign}${p.lastDelta.toFixed(1)}`;
     const prov = p.provisional ? '<span class="lb-prov-badge">PROV</span>' : '';
+    const streakHtml = p.streak >= 2 ? `<span class="lb-streak" title="${p.streak}-win streak">🔥 ${p.streak}</span>` : '';
     return `<div class="lb-row" data-visit-player="${p.name.replace(/"/g, '&quot;')}">
       <div class="lb-rank">${rank}</div>
       <div class="lb-avatar">${initial}</div>
-      <div class="lb-name">${p.name}${prov}</div>
+      <div class="lb-name">${p.name}${prov}${streakHtml}</div>
       <div class="lb-delta ${deltaCls}">${deltaTxt}</div>
       <div class="lb-plays">${p.plays}p</div>
       <div class="lb-elo" style="color:${color}">${p.elo}</div>
@@ -5900,6 +6084,7 @@ function showLeaderboardView() {
       <div class="lb-count">${rows.length} player${rows.length !== 1 ? 's' : ''}</div>
     </div>
     ${tabsHtml}
+    ${rivalryHtml}
     ${podium.length > 0 ? `<div class="lb-podium">${podiumHtml}</div>` : ''}
     <div class="lb-list">${listHtml}</div>
     <div class="lb-explain">
