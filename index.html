@@ -1461,6 +1461,7 @@ const NAME_MAP = {
   'Vlasis - Argo':'Βλασης - Argo','Xristina Marias':'Χριστινα Πελεκανου',
   'Xristos Antoni':'Χρηστος Σταυρακακης','Xristos Apostolou':'Χρηστος Αποστολου',
   'Xristos Madrileñas':'Χρηστος Ρετσος','Anastasiia Deel':'Anastasia Deel',
+  'Χρηστος Καραφουλιδης':'Χρηστος Ρετσος',
   'Leonidas Marias':'Λεωνιδας'
 };
 // Apply name conversions to PLAY_HISTORY
@@ -5147,6 +5148,9 @@ function _mergePlayIntoHistory(uuid, p) {
   if (!p || !p.bggId || !p.date || !Array.isArray(p.sc)) return;
   const bggId = p.bggId;
   if (!PLAY_HISTORY[bggId]) PLAY_HISTORY[bggId] = [];
+  for (const s of p.sc) {
+    if (s && s.n && NAME_MAP[s.n]) s.n = NAME_MAP[s.n];
+  }
   const entry = { date: p.date, sc: p.sc, _uuid: uuid };
   if (p.d) entry.d = p.d;
   if (p.b) entry.b = p.b;
