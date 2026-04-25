@@ -6508,52 +6508,11 @@ function wireFavButton() {
 }
 
 // When a local images/<bggId>.jpg is missing, fall back to the remote
-// urlImage stored on the game (set by the importer for BGStats games),
-// then to BGG's XML API as a last resort. BGG lookups are cached in
-// localStorage so we only hit their API once per game per browser.
-const BGG_IMG_CACHE_KEY = 'bgl-bgg-image-cache';
-function _loadBggImageCache(){
-  try { return JSON.parse(localStorage.getItem(BGG_IMG_CACHE_KEY) || '{}'); }
-  catch(e) { return {}; }
-}
-function _saveBggImageCache(cache){
-  try { localStorage.setItem(BGG_IMG_CACHE_KEY, JSON.stringify(cache)); } catch(e){}
-}
-const _bggImageInflight = {}; // bggId -> Promise (dedupe concurrent fetches)
-async function _fetchBggImageUrl(bggId){
-  const cache = _loadBggImageCache();
-  if (cache[bggId]) return cache[bggId]; // only cache non-empty hits — retry empty/failures next visit
-  if (_bggImageInflight[bggId]) return _bggImageInflight[bggId];
-  _bggImageInflight[bggId] = (async () => {
-    // BGG sometimes returns HTTP 202 with empty body on first hit; retry once.
-    async function attempt() {
-      try {
-        const res = await fetch(`https://boardgamegeek.com/xmlapi2/thing?id=${bggId}`);
-        if (res.status === 202) return null; // queued, retry
-        const txt = await res.text();
-        if (!txt) return null;
-        const xml = new DOMParser().parseFromString(txt, 'text/xml');
-        const img = xml.querySelector('image');
-        const thumb = xml.querySelector('thumbnail');
-        const url = (img && img.textContent.trim()) || (thumb && thumb.textContent.trim()) || '';
-        return url || null;
-      } catch (e) { return null; }
-    }
-    let url = await attempt();
-    if (url == null) {
-      await new Promise(r => setTimeout(r, 1500));
-      url = await attempt();
-    }
-    if (url) {
-      const c = _loadBggImageCache();
-      c[bggId] = url;
-      _saveBggImageCache(c);
-    }
-    delete _bggImageInflight[bggId];
-    return url || '';
-  })();
-  return _bggImageInflight[bggId];
-}
+// urlImage stored on the game. urlImage is populated from BGStats imports
+// (the .bgsplay file carries CDN URLs for every game) and persisted to
+// Firebase under /gameImages/{bggId} so the cover sticks across reloads
+// for hardcoded games too. BGG's xmlapi2 is no longer usable from the
+// browser (Bearer auth required), so there is no online lookup fallback.
 function _hideImgWithFallback(img){
   img.style.display = 'none';
   if (img.nextElementSibling && img.nextElementSibling.classList.contains('modal-cover-fallback')) {
@@ -6561,40 +6520,47 @@ function _hideImgWithFallback(img){
   }
 }
 window.__imgFallback = function(img, bggId){
-  // Stage 0 → 1: local image failed. Try urlImage on the game.
   if (!img.dataset.fb) {
     img.dataset.fb = '1';
     const game = findGameByBggId(bggId);
     if (game && game.urlImage) { img.src = game.urlImage; return; }
-    // No urlImage — go straight to BGG.
-    img.dataset.fb = '2';
-    _fetchBggImageUrl(bggId).then(url => {
-      if (url) {
-        if (game) game.urlImage = url; // cache on the game object too
-        img.src = url;
-      } else {
-        _hideImgWithFallback(img);
-      }
-    });
+    _hideImgWithFallback(img);
     return;
   }
-  // Stage 1 → 2: stored urlImage failed. Try BGG.
-  if (img.dataset.fb === '1') {
-    img.dataset.fb = '2';
-    const game = findGameByBggId(bggId);
-    _fetchBggImageUrl(bggId).then(url => {
-      if (url) {
-        if (game) game.urlImage = url;
-        img.src = url;
-      } else {
-        _hideImgWithFallback(img);
-      }
-    });
-    return;
-  }
-  // Stage 2: BGG image also failed to load — give up.
+  // Stored urlImage also failed — give up.
   _hideImgWithFallback(img);
 };
+
+// ── Game image overrides (Firebase-backed) ──
+// Lets us capture urlImage from BGStats imports for hardcoded games whose
+// GAMES entry doesn't have one baked in.
+async function loadGameImages() {
+  if (!FIREBASE_DB) return;
+  try {
+    const res = await fetch(`${FIREBASE_DB}/gameImages.json`);
+    const data = await res.json();
+    if (!data) return;
+    for (const bggId in data) {
+      const url = data[bggId] && data[bggId].url;
+      if (!url) continue;
+      const g = findGameByBggId(bggId);
+      if (g && !g.urlImage) g.urlImage = url;
+    }
+  } catch (e) {
+    console.warn('Failed to load game images from Firebase:', e);
+  }
+}
+async function persistGameImage(bggId, url) {
+  if (!FIREBASE_DB || !url) return;
+  try {
+    await fetch(`${FIREBASE_DB}/gameImages/${encodeURIComponent(bggId)}.json`, {
+      method: 'PUT',
+      body: JSON.stringify({ url })
+    });
+  } catch (e) {
+    console.warn('Failed to save game image to Firebase:', e);
+  }
+}
 
 function findGameByBggId(bggId) {
   const num = Number(bggId);
@@ -6728,7 +6694,7 @@ const _sp = localStorage.getItem('bgl-player');
 if (_sp && NAME_MAP[_sp]) localStorage.setItem('bgl-player', NAME_MAP[_sp]);
 
 // Load ratings and favorites from Firebase, then show the right view
-Promise.all([loadAllRatings(), loadAllFavorites(), loadImportedGames(), loadImportedPlays()]).then(() => {
+Promise.all([loadAllRatings(), loadAllFavorites(), loadImportedGames(), loadImportedPlays(), loadGameImages()]).then(() => {
   const savedPlayer = localStorage.getItem('bgl-player');
   if (savedPlayer) {
     showStatsView(savedPlayer);
@@ -6831,6 +6797,16 @@ window.initImporter = function(){
     const gamePersists = [];
 
     data.games.forEach(g => {
+      // Capture urlImage for ALL games (even already-known ones) so hardcoded
+      // games can pick up covers from BGStats imports.
+      const incomingUrl = g.urlImage || g.urlThumb || null;
+      if (incomingUrl) {
+        const existingGame = findGameByBggId(g.bggId);
+        if (existingGame && !existingGame.urlImage) {
+          existingGame.urlImage = incomingUrl;
+          gamePersists.push(persistGameImage(g.bggId, incomingUrl));
+        }
+      }
       if(existingBggIds.has(g.bggId)) return;
       existingBggIds.add(g.bggId);
       newGames++;
@@ -6862,6 +6838,7 @@ window.initImporter = function(){
 
       EXTRA_GAMES[entry.bggId] = entry;
       gamePersists.push(persistImportedGame(entry));
+      if (entry.urlImage) gamePersists.push(persistGameImage(entry.bggId, entry.urlImage));
     });
 
     // ── 3. Merge plays → PLAY_HISTORY ──
