@@ -679,9 +679,33 @@
   }
   .lb-podium-name{
     font-size:0.88rem;font-weight:600;margin-bottom:0.3rem;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    line-height:1.2;word-break:break-word;overflow-wrap:anywhere;hyphens:auto;
   }
   .lb-podium-card.rank-1 .lb-podium-name{font-size:1rem}
+  @media(max-width:600px){
+    .lb-podium{gap:0.4rem;max-width:100%}
+    .lb-podium-card{padding:0.7rem 0.35rem 0.85rem}
+    .lb-podium-card.rank-1{padding:1rem 0.4rem 1.8rem}
+    .lb-podium-name{font-size:0.72rem}
+    .lb-podium-card.rank-1 .lb-podium-name{font-size:0.82rem}
+    .lb-podium-elo{font-size:1rem}
+    .lb-podium-card.rank-1 .lb-podium-elo{font-size:1.3rem}
+    .lb-podium-avatar{width:38px;height:38px;font-size:1rem}
+    .lb-podium-card.rank-1 .lb-podium-avatar{width:48px;height:48px;font-size:1.2rem}
+    .lb-podium-medal{font-size:1.05rem}
+    .lb-podium-card.rank-1 .lb-podium-medal{font-size:1.4rem}
+    .lb-podium-meta{font-size:0.55rem}
+  }
+  .profile-back-btn{
+    display:inline-flex;align-items:center;gap:0.4rem;
+    background:rgba(226,176,74,0.12);color:var(--accent);
+    border:1px solid rgba(226,176,74,0.35);
+    padding:0.55rem 1rem;border-radius:8px;
+    font-family:inherit;font-size:0.85rem;font-weight:600;
+    cursor:pointer;margin-bottom:1rem;
+    transition:background 0.15s;
+  }
+  .profile-back-btn:hover{background:rgba(226,176,74,0.22)}
   .lb-podium-elo{font-size:1.2rem;font-weight:800;font-variant-numeric:tabular-nums}
   .lb-podium-card.rank-1 .lb-podium-elo{font-size:1.55rem}
   .lb-podium-meta{font-size:0.62rem;opacity:0.55;margin-top:0.25rem}
@@ -4672,11 +4696,33 @@ document.getElementById('btn-insights').addEventListener('click', switchToInsigh
 
 // ── Stats Dashboard ──
 let _viewingProfile = null; // null = own profile, string = visiting someone
+let _statsViewSource = null; // 'leaderboard' | 'insights' | null — where the visit was triggered from
+
+function _goBackFromProfile() {
+  const src = _statsViewSource;
+  _statsViewSource = null;
+  _viewingProfile = null;
+  if (src === 'leaderboard') switchToLeaderboard();
+  else if (src === 'insights') switchToInsights();
+  else switchToLibrary();
+}
+window._goBackFromProfile = _goBackFromProfile;
 
 function showStatsView(playerName, visiting) {
   const loggedInPlayer = localStorage.getItem('bgl-player');
   const isOwnProfile = !visiting || visiting === loggedInPlayer;
   _viewingProfile = isOwnProfile ? null : playerName;
+
+  if (visiting && !isOwnProfile) {
+    if (!_statsViewSource) {
+      const lbOpen = document.getElementById('leaderboard-view').classList.contains('open');
+      const insOpen = document.getElementById('insights-view').classList.contains('open');
+      if (lbOpen) _statsViewSource = 'leaderboard';
+      else if (insOpen) _statsViewSource = 'insights';
+    }
+  } else {
+    _statsViewSource = null;
+  }
 
   _deactivateAllTabs();
   document.getElementById('stats-view').classList.add('open');
@@ -4791,7 +4837,9 @@ function showStatsView(playerName, visiting) {
     </div>`;
   };
 
-  const backBtnHtml = '';
+  const backBtnHtml = (!isOwnProfile && _statsViewSource)
+    ? `<button class="profile-back-btn" onclick="_goBackFromProfile()">← Back to ${_statsViewSource === 'leaderboard' ? 'Leaderboard' : 'Insights'}</button>`
+    : '';
 
   // Build favorites section
   const favoritesHtml = buildFavoritesHtml(playerName, isOwnProfile);
