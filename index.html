@@ -790,6 +790,40 @@
   .h2h-val{font-size:1.6rem;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
   .h2h-label{font-size:0.7rem;opacity:0.65;margin-top:0.15rem;font-weight:600}
   .h2h-meta{font-size:0.72rem;opacity:0.65;text-align:center;line-height:1.5}
+
+  /* ── Achievements ── */
+  .ach-grid{
+    display:grid;grid-template-columns:repeat(auto-fill, minmax(110px, 1fr));
+    gap:0.7rem;margin-top:0.4rem;
+  }
+  .ach-card{
+    background:rgba(255,255,255,0.04);border-radius:10px;
+    padding:0.85rem 0.5rem 0.6rem;text-align:center;
+    border:1px solid rgba(226,176,74,0.18);
+    transition:transform 0.15s, background 0.15s;
+    display:flex;flex-direction:column;align-items:center;
+  }
+  .ach-card:hover{transform:translateY(-2px);background:rgba(255,255,255,0.07)}
+  .ach-card.locked{opacity:0.32;border-color:rgba(255,255,255,0.06);background:rgba(255,255,255,0.02)}
+  .ach-card.locked:hover{transform:none}
+  .ach-icon{
+    width:54px;height:54px;margin:0 auto 0.5rem;
+    background-color:var(--accent);
+    -webkit-mask-size:contain;mask-size:contain;
+    -webkit-mask-position:center;mask-position:center;
+    -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+    filter:drop-shadow(0 1px 4px rgba(226,176,74,0.25));
+  }
+  .ach-card.locked .ach-icon{background-color:rgba(240,230,211,0.45);filter:none}
+  .ach-name{font-size:0.78rem;font-weight:600;color:var(--text);line-height:1.2;min-height:2.4em;display:flex;align-items:center;justify-content:center;text-align:center}
+  .ach-date{font-size:0.6rem;opacity:0.55;margin-top:0.25rem;font-variant-numeric:tabular-nums;letter-spacing:0.02em}
+  .ach-recent .ach-card{
+    border-color:rgba(226,176,74,0.45);
+    background:linear-gradient(135deg, rgba(226,176,74,0.10), rgba(255,255,255,0.04));
+    box-shadow:0 0 14px rgba(226,176,74,0.12);
+  }
+  .ach-credit{font-size:0.6rem;opacity:0.4;margin-top:0.7rem;text-align:center}
+  .ach-credit a{color:inherit}
   .lb-podium-elo{font-size:1.2rem;font-weight:800;font-variant-numeric:tabular-nums}
   .lb-podium-card.rank-1 .lb-podium-elo{font-size:1.55rem}
   .lb-podium-meta{font-size:0.62rem;opacity:0.55;margin-top:0.25rem}
@@ -4808,6 +4842,166 @@ document.getElementById('btn-leaderboard').addEventListener('click', switchToLea
 document.getElementById('btn-mystats').addEventListener('click', switchToStats);
 document.getElementById('btn-insights').addEventListener('click', switchToInsights);
 
+// ── Achievements ──
+const ACHIEVEMENTS = [
+  { id:'first-win',       name:'First Blood',     desc:'Win your first game' },
+  { id:'centurion',       name:'Centurion',       desc:'Play 100 games' },
+  { id:'half-grand',      name:'Half-Grand',      desc:'Play 500 games' },
+  { id:'graduated',       name:'Veteran',         desc:'Reach 10 plays (graduate from PROV)' },
+  { id:'diversifier',     name:'Diversifier',     desc:'Play 25 different games' },
+  { id:'social-butterfly',name:'Social Butterfly',desc:'Play with 25 different opponents' },
+  { id:'globetrotter',    name:'Globetrotter',    desc:'Play in 5 different locations' },
+  { id:'explorer',        name:'Explorer',        desc:'Play games from 8 different categories' },
+  { id:'marathon',        name:'Marathon',        desc:'Play 5 games in a single day' },
+  { id:'hot-streak',      name:'Hot Streak',      desc:'Win 3 in a row' },
+  { id:'on-fire',         name:'On Fire',         desc:'Win 5 in a row' },
+  { id:'inferno',         name:'Inferno',         desc:'Win 10 in a row' },
+  { id:'comeback-kid',    name:'Comeback Kid',    desc:'Win after a 5-loss streak' },
+  { id:'heavy-hitter',    name:'Heavy Hitter',    desc:'Win a game with weight 4+' },
+  { id:'brain-burner',    name:'Brain Burner',    desc:'Win a game with weight 4.5+' },
+  { id:'speed-demon',     name:'Speed Demon',     desc:'Win 10 light games (weight ≤1.5)' },
+  { id:'heavy-lifter',    name:'Heavy Lifter',    desc:'Win 10 heavy games (weight ≥3)' },
+  { id:'perfectionist',   name:'Perfectionist',   desc:'100% win rate across 5+ plays of one game' },
+  { id:'coop-captain',    name:'Coop Captain',    desc:'Earn 10 cooperative wins' },
+  { id:'solo-adventurer', name:'Solo Adventurer', desc:'Play 10 solo games' },
+];
+
+function _achievementIcon(id) { return `images/achievements/${id}.svg`; }
+
+function computeAchievements(playerName) {
+  const plays = [];
+  for (const bggId in PLAY_HISTORY) {
+    for (const p of PLAY_HISTORY[bggId]) {
+      if (!p || !p.date || !Array.isArray(p.sc)) continue;
+      const me = p.sc.find(s => s.n === playerName);
+      if (!me) continue;
+      plays.push({ date: p.date, bggId: Number(bggId), sc: p.sc, me, location: p.l });
+    }
+  }
+  plays.sort((a, b) => a.date.localeCompare(b.date));
+
+  const earned = {};
+  const mark = (id, date) => { if (!earned[id]) earned[id] = date; };
+
+  let totalPlays = 0, totalWins = 0;
+  let coopWins = 0, soloPlays = 0;
+  let lightWins = 0, heavyWins = 0;
+  let curStreak = 0, curLossStreak = 0;
+  const gamesPlayed = new Set();
+  const opponents = new Set();
+  const locations = new Set();
+  const categories = new Set();
+  const perGameWR = {}; // bggId -> {plays, wins}
+  const playsByDate = {}; // date -> count
+
+  for (const p of plays) {
+    totalPlays++;
+    gamesPlayed.add(p.bggId);
+    if (p.location) locations.add(p.location);
+    playsByDate[p.date] = (playsByDate[p.date] || 0) + 1;
+
+    for (const s of p.sc) {
+      if (s && s.n && s.n !== playerName) opponents.add(s.n);
+    }
+
+    const game = findGameByBggId(p.bggId);
+    if (game && Array.isArray(game.categories)) {
+      for (const c of game.categories) categories.add(c);
+    }
+
+    const meWon = !!p.me.w;
+    const isSolo = p.sc.length === 1;
+    const allSame = p.sc.every(s => !!s.w === !!p.sc[0].w);
+    const isCoop = !isSolo && allSame;
+
+    if (meWon) totalWins++;
+    if (isSolo) soloPlays++;
+    if (isCoop && meWon) coopWins++;
+
+    if (!perGameWR[p.bggId]) perGameWR[p.bggId] = { plays: 0, wins: 0 };
+    perGameWR[p.bggId].plays++;
+    if (meWon) perGameWR[p.bggId].wins++;
+
+    // Competitive plays drive streaks
+    if (!isCoop && !isSolo) {
+      if (meWon) {
+        if (curLossStreak >= 5) mark('comeback-kid', p.date);
+        curStreak++;
+        curLossStreak = 0;
+        if (curStreak >= 3)  mark('hot-streak', p.date);
+        if (curStreak >= 5)  mark('on-fire',    p.date);
+        if (curStreak >= 10) mark('inferno',    p.date);
+      } else {
+        curStreak = 0;
+        curLossStreak++;
+      }
+    }
+
+    if (meWon && game && typeof game.complexity === 'number') {
+      if (game.complexity >= 4)   mark('heavy-hitter', p.date);
+      if (game.complexity >= 4.5) mark('brain-burner', p.date);
+      if (game.complexity >= 3)              heavyWins++;
+      if (game.complexity > 0 && game.complexity <= 1.5) lightWins++;
+    }
+
+    if (totalWins === 1)             mark('first-win',        p.date);
+    if (totalPlays === 10)           mark('graduated',        p.date);
+    if (totalPlays === 100)          mark('centurion',        p.date);
+    if (totalPlays === 500)          mark('half-grand',       p.date);
+    if (gamesPlayed.size === 25)     mark('diversifier',      p.date);
+    if (opponents.size === 25)       mark('social-butterfly', p.date);
+    if (locations.size === 5)        mark('globetrotter',     p.date);
+    if (categories.size === 8)       mark('explorer',         p.date);
+    if (playsByDate[p.date] === 5)   mark('marathon',         p.date);
+    if (lightWins === 10)            mark('speed-demon',      p.date);
+    if (heavyWins === 10)            mark('heavy-lifter',     p.date);
+    if (coopWins === 10)             mark('coop-captain',     p.date);
+    if (soloPlays === 10)            mark('solo-adventurer',  p.date);
+
+    if (!earned['perfectionist']) {
+      for (const bggId in perGameWR) {
+        const r = perGameWR[bggId];
+        if (r.plays >= 5 && r.plays === r.wins) { mark('perfectionist', p.date); break; }
+      }
+    }
+  }
+  return earned;
+}
+
+function buildAchievementsHtml(playerName) {
+  const earned = computeAchievements(playerName);
+  const today = new Date().toISOString().slice(0, 10);
+  const sevenAgo = new Date(Date.now() - 7 * 86400 * 1000).toISOString().slice(0, 10);
+
+  const all = ACHIEVEMENTS.map(a => ({ ...a, earnedDate: earned[a.id] || null }));
+  const recent = all.filter(a => a.earnedDate && a.earnedDate >= sevenAgo)
+                    .sort((a, b) => b.earnedDate.localeCompare(a.earnedDate));
+  const earnedCount = all.filter(a => a.earnedDate).length;
+
+  const card = (a) => {
+    const e = a.earnedDate;
+    const dateLine = e ? _fmtDateShort(e) : 'Locked';
+    return `<div class="ach-card${e ? '' : ' locked'}" title="${a.desc}${e ? ' · earned ' + e : ''}">
+      <div class="ach-icon" style="-webkit-mask-image:url(${_achievementIcon(a.id)});mask-image:url(${_achievementIcon(a.id)})"></div>
+      <div class="ach-name">${a.name}</div>
+      <div class="ach-date">${dateLine}</div>
+    </div>`;
+  };
+
+  const recentHtml = recent.length > 0 ? `<div class="stats-section ach-recent">
+    <div class="stats-section-title">🎉 Recently Earned</div>
+    <div class="ach-grid">${recent.map(card).join('')}</div>
+  </div>` : '';
+
+  const allHtml = `<div class="stats-section">
+    <div class="stats-section-title">Achievements (${earnedCount}/${ACHIEVEMENTS.length})</div>
+    <div class="ach-grid">${all.map(card).join('')}</div>
+    <div class="ach-credit">Icons by <a href="https://game-icons.net" target="_blank" rel="noopener">game-icons.net</a> (CC BY 3.0)</div>
+  </div>`;
+
+  return { recentHtml, allHtml };
+}
+
 // ── Stats Dashboard ──
 let _viewingProfile = null; // null = own profile, string = visiting someone
 let _statsViewSource = null; // 'leaderboard' | 'insights' | null — where the visit was triggered from
@@ -5026,6 +5220,9 @@ function showStatsView(playerName, visiting) {
   // Build favorites section
   const favoritesHtml = buildFavoritesHtml(playerName, isOwnProfile);
 
+  // Build achievements (recent at top, full list at bottom)
+  const { recentHtml: achRecentHtml, allHtml: achAllHtml } = buildAchievementsHtml(playerName);
+
   // Build day/location charts for this player
   const playerDays = {};
   const playerLocs = {};
@@ -5046,6 +5243,8 @@ function showStatsView(playerName, visiting) {
       <div class="stats-player-name">${playerName}</div>
       <div class="stats-player-sub">${isOwnProfile ? 'Your Profile' : 'Player Profile'}</div>
     </div>
+
+    ${achRecentHtml}
 
     ${favoritesHtml}
 
@@ -5105,6 +5304,8 @@ function showStatsView(playerName, visiting) {
         </div>`;
       }).join('')}
     </div>` : ''}
+
+    ${achAllHtml}
 
     <div class="qr-section">
       <div class="stats-section-title" style="border:none;text-align:center">Share This Library</div>
