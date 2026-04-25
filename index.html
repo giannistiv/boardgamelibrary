@@ -6086,7 +6086,10 @@ function _computeEloLeaderboard(mode) {
     for (const p of PLAY_HISTORY[bggId]) {
       if (!p || !p.date || !Array.isArray(p.sc)) continue;
       if (p.date < yearStart) continue;
-      if (mode === 'south' && p.l !== 'Board South') continue;
+      // South tab: include Board South AND legacy/untagged plays (no `l`),
+      // since hardcoded plays predate location tracking and are de facto BS.
+      // Plays explicitly tagged elsewhere (Home, Tabletop Sim, etc.) are excluded.
+      if (mode === 'south' && p.l && p.l !== 'Board South') continue;
       flat.push({ bggId: Number(bggId), date: p.date, sc: p.sc });
     }
   }
@@ -6179,7 +6182,8 @@ function _computeRivalryOfYear(mode, forPlayer) {
   for (const bggId in PLAY_HISTORY) {
     for (const play of PLAY_HISTORY[bggId]) {
       if (!play || !play.date || play.date < cutoff || !Array.isArray(play.sc)) continue;
-      if (mode === 'south' && play.l !== 'Board South') continue;
+      // South tab: include Board South AND legacy/untagged plays (no `l`).
+      if (mode === 'south' && play.l && play.l !== 'Board South') continue;
       const ranks = _leaderboardRanksForPlay(play.sc, bggId);
       if (!ranks) continue;
       const byName = {};
