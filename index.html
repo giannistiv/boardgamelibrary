@@ -6046,11 +6046,17 @@ function _leaderboardRanksForPlay(sc, bggId) {
   return sc.map(s => ({ player: s.n, rank: s.w ? 1 : 2 }));
 }
 
+function _yearStartCutoff() {
+  return new Date().getFullYear() + '-01-01';
+}
+
 function _computeEloLeaderboard(mode) {
+  const yearStart = _yearStartCutoff();
   const flat = [];
   for (const bggId in PLAY_HISTORY) {
     for (const p of PLAY_HISTORY[bggId]) {
       if (!p || !p.date || !Array.isArray(p.sc)) continue;
+      if (p.date < yearStart) continue;
       if (mode === 'south' && p.l !== 'South Board') continue;
       flat.push({ bggId: Number(bggId), date: p.date, sc: p.sc });
     }
@@ -6136,9 +6142,9 @@ function _computeEloLeaderboard(mode) {
   return { ratings, plays, lastPlayDate, lastDelta, firstPlayDate, streaks };
 }
 
-function _computeRivalryOfMonth(mode) {
-  const now = new Date();
-  const cutoff = new Date(now.getTime() - 30 * 86400 * 1000).toISOString().slice(0, 10);
+function _computeRivalryOfYear(mode, forPlayer) {
+  const cutoff = _yearStartCutoff();
+  const focus = forPlayer ? (NAME_MAP[forPlayer] || forPlayer) : null;
 
   const pairs = {};
   for (const bggId in PLAY_HISTORY) {
@@ -6156,10 +6162,14 @@ function _computeRivalryOfMonth(mode) {
       }
       const list = Object.entries(byName);
       if (list.length < 2) continue;
+      // If we have a focus player, skip plays they weren't in
+      if (focus && byName[focus] == null) continue;
       for (let i = 0; i < list.length; i++) {
         for (let j = i + 1; j < list.length; j++) {
           const [n1, r1] = list[i];
           const [n2, r2] = list[j];
+          // If focusing on a player, only consider pairs that include them
+          if (focus && n1 !== focus && n2 !== focus) continue;
           const [a, b] = n1 < n2 ? [n1, n2] : [n2, n1];
           const aRank = a === n1 ? r1 : r2;
           const bRank = a === n1 ? r2 : r1;
@@ -6200,13 +6210,9 @@ function showLeaderboardView() {
   const mode = _leaderboardMode;
   const data = _computeEloLeaderboard(mode);
   const isSouth = mode === 'south';
-
-  const now = new Date();
-  const cutoffMs = now.getTime() - 365 * 86400 * 1000;
-  const cutoff = new Date(cutoffMs).toISOString().slice(0, 10);
+  const currentYear = new Date().getFullYear();
 
   const rows = Object.keys(data.ratings)
-    .filter(p => data.lastPlayDate[p] && data.lastPlayDate[p] >= cutoff)
     .filter(p => data.plays[p] >= 1)
     .map(p => ({
       name: p,
@@ -6224,18 +6230,21 @@ function showLeaderboardView() {
       <button class="lb-tab ${!isSouth ? 'active' : ''}" data-lb-mode="main">Main</button>
       <button class="lb-tab ${isSouth ? 'active' : ''}" data-lb-mode="south">South Board</button>
     </div>`;
-  const titleTxt = isSouth ? 'South Board League' : 'Leaderboard';
+  const titleTxt = isSouth ? `South Board ${currentYear}` : `Leaderboard ${currentYear}`;
 
-  const rivalry = _computeRivalryOfMonth(mode);
+  const rawPlayer = localStorage.getItem('bgl-player');
+  const focusPlayer = rawPlayer ? (NAME_MAP[rawPlayer] || rawPlayer) : null;
+  const rivalry = _computeRivalryOfYear(mode, focusPlayer);
+  const rivalryHead = focusPlayer ? '🔥 Your Top Rival' : '🔥 Top Rivalry';
   const rivalryHtml = rivalry ? `
     <div class="lb-rivalry">
-      <div class="lb-rivalry-head">🔥 Rivalry of the Month</div>
+      <div class="lb-rivalry-head">${rivalryHead}</div>
       <div class="lb-rivalry-body">
         <span class="lb-rivalry-name" data-visit-player="${rivalry.a.replace(/"/g, '&quot;')}">${rivalry.a}</span>
         <span class="lb-rivalry-score">${rivalry.aWins}–${rivalry.bWins}</span>
         <span class="lb-rivalry-name" data-visit-player="${rivalry.b.replace(/"/g, '&quot;')}">${rivalry.b}</span>
       </div>
-      <div class="lb-rivalry-meta">${rivalry.total} play${rivalry.total !== 1 ? 's' : ''} in last 30 days · last ${_fmtDateShort(rivalry.lastDate)}</div>
+      <div class="lb-rivalry-meta">${rivalry.total} play${rivalry.total !== 1 ? 's' : ''} in ${currentYear} · last ${_fmtDateShort(rivalry.lastDate)}</div>
     </div>` : '';
 
   const wireTabs = () => {
@@ -6319,7 +6328,7 @@ function showLeaderboardView() {
     ${podium.length > 0 ? `<div class="lb-podium">${podiumHtml}</div>` : ''}
     <div class="lb-list">${listHtml}</div>
     <div class="lb-explain">
-      ${isSouth ? '<b>South Board League:</b> A separate Elo using only plays where the location is "South Board". Independent of the main leaderboard.<br><br>' : ''}<b>How it works:</b> Everyone starts at 1000. Each play replays in date order — winners gain, losers drop, with bigger swings when the underdog wins. Complexity scales points (a win on weight 5 = full value, lighter games = less). Losses scale down with player count, and finishing last costs more than finishing mid-pack. <b>PROV</b> means fewer than 10 plays (points move faster). Players inactive for more than a year are hidden.
+      ${isSouth ? '<b>South Board League:</b> A separate Elo using only plays where the location is "South Board". Independent of the main leaderboard.<br><br>' : ''}<b>How it works:</b> Everyone starts at 1000 on Jan 1. Each play of ${currentYear} replays in date order — winners gain, losers drop, with bigger swings when the underdog wins. Complexity scales points (a win on weight 5 = full value, lighter games = less). Losses scale down with player count, and finishing last costs more than finishing mid-pack. <b>PROV</b> means fewer than 10 plays this year (points move faster). The leaderboard resets every January 1st.
     </div>`;
 
   wireTabs();
