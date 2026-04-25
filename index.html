@@ -6079,6 +6079,21 @@ function _yearStartCutoff() {
   return new Date().getFullYear() + '-01-01';
 }
 
+// A play is Board South if it's explicitly tagged that way (from a BGStats
+// import) OR if any participant's name carries the " - BS" suffix the user
+// uses to disambiguate the Board South friend group on hardcoded plays.
+function _isBoardSouthPlay(p) {
+  if (!p) return false;
+  if (p.l === 'Board South') return true;
+  if (p.l) return false; // explicitly tagged elsewhere (Home, Tabletop Sim, …)
+  if (Array.isArray(p.sc)) {
+    for (const s of p.sc) {
+      if (s && typeof s.n === 'string' && s.n.includes(' - BS')) return true;
+    }
+  }
+  return false;
+}
+
 function _computeEloLeaderboard(mode) {
   const yearStart = _yearStartCutoff();
   const flat = [];
@@ -6086,10 +6101,7 @@ function _computeEloLeaderboard(mode) {
     for (const p of PLAY_HISTORY[bggId]) {
       if (!p || !p.date || !Array.isArray(p.sc)) continue;
       if (p.date < yearStart) continue;
-      // South tab: include Board South AND legacy/untagged plays (no `l`),
-      // since hardcoded plays predate location tracking and are de facto BS.
-      // Plays explicitly tagged elsewhere (Home, Tabletop Sim, etc.) are excluded.
-      if (mode === 'south' && p.l && p.l !== 'Board South') continue;
+      if (mode === 'south' && !_isBoardSouthPlay(p)) continue;
       flat.push({ bggId: Number(bggId), date: p.date, sc: p.sc });
     }
   }
@@ -6182,8 +6194,7 @@ function _computeRivalryOfYear(mode, forPlayer) {
   for (const bggId in PLAY_HISTORY) {
     for (const play of PLAY_HISTORY[bggId]) {
       if (!play || !play.date || play.date < cutoff || !Array.isArray(play.sc)) continue;
-      // South tab: include Board South AND legacy/untagged plays (no `l`).
-      if (mode === 'south' && play.l && play.l !== 'Board South') continue;
+      if (mode === 'south' && !_isBoardSouthPlay(play)) continue;
       const ranks = _leaderboardRanksForPlay(play.sc, bggId);
       if (!ranks) continue;
       const byName = {};
