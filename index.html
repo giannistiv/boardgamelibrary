@@ -6079,16 +6079,25 @@ function _yearStartCutoff() {
   return new Date().getFullYear() + '-01-01';
 }
 
+// Known Board South regulars whose mere presence in a play is enough to
+// classify it as a Board South play (in addition to the " - BS" suffix
+// convention). Names here should match post-NAME_MAP canonical names.
+const BOARD_SOUTH_REGULARS = new Set(['LGeorge']);
+
 // A play is Board South if it's explicitly tagged that way (from a BGStats
-// import) OR if any participant's name carries the " - BS" suffix the user
-// uses to disambiguate the Board South friend group on hardcoded plays.
+// import) OR if any participant carries the " - BS" suffix the user uses
+// to disambiguate the Board South group on hardcoded plays OR if any
+// participant is a known Board South regular.
 function _isBoardSouthPlay(p) {
   if (!p) return false;
   if (p.l === 'Board South') return true;
   if (p.l) return false; // explicitly tagged elsewhere (Home, Tabletop Sim, …)
   if (Array.isArray(p.sc)) {
     for (const s of p.sc) {
-      if (s && typeof s.n === 'string' && s.n.includes(' - BS')) return true;
+      if (!s || typeof s.n !== 'string') continue;
+      if (s.n.includes(' - BS')) return true;
+      const canonical = (typeof NAME_MAP !== 'undefined' && NAME_MAP[s.n]) || s.n;
+      if (BOARD_SOUTH_REGULARS.has(canonical)) return true;
     }
   }
   return false;
