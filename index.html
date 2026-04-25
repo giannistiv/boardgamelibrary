@@ -6121,8 +6121,8 @@ function _computeEloLeaderboard(mode) {
         const Rw = pre[winner.player], Rl = pre[loser.player];
         const Ew = 1 / (1 + Math.pow(10, (Rl - Rw) / 400));
         const El = 1 - Ew;
-        const Kw = preCount[winner.player] < 10 ? 48 : 32;
-        const Kl = preCount[loser.player]  < 10 ? 48 : 32;
+        const Kw = preCount[winner.player] < 5 ? 48 : 32;
+        const Kl = preCount[loser.player]  < 5 ? 48 : 32;
         deltas[winner.player] += Kw * w * (1 - Ew);
         deltas[loser.player]  -= Kl * w * El * lossMult;
       }
@@ -6228,7 +6228,7 @@ function showLeaderboardView() {
       plays: data.plays[p],
       lastPlayed: data.lastPlayDate[p],
       lastDelta: data.lastDelta[p] || 0,
-      provisional: data.plays[p] < 10,
+      provisional: data.plays[p] < 5,
       streak: data.streaks[p] || 0,
     }))
     .sort((a, b) => b.elo - a.elo);
@@ -6336,7 +6336,7 @@ function showLeaderboardView() {
     ${podium.length > 0 ? `<div class="lb-podium">${podiumHtml}</div>` : ''}
     <div class="lb-list">${listHtml}</div>
     <div class="lb-explain">
-      ${isSouth ? '<b>Board South League:</b> A separate Elo using only plays where the location is "Board South". Independent of the main leaderboard.<br><br>' : ''}<b>How it works:</b> Everyone starts at 1000 on Jan 1. Each play of ${currentYear} replays in date order — winners gain, losers drop, with bigger swings when the underdog wins. Complexity scales points (a win on weight 5 = full value, lighter games = less). Losses scale down with player count, and finishing last costs more than finishing mid-pack. <b>PROV</b> means fewer than 10 plays this year (points move faster). The leaderboard resets every January 1st.
+      ${isSouth ? '<b>Board South League:</b> A separate Elo using only plays where the location is "Board South". Independent of the main leaderboard.<br><br>' : ''}<b>How it works:</b> Everyone starts at 1000 on Jan 1. Each play of ${currentYear} replays in date order — winners gain, losers drop, with bigger swings when the underdog wins. Complexity scales points (a win on weight 5 = full value, lighter games = less). Losses scale down with player count, and finishing last costs more than finishing mid-pack. <b>PROV</b> means fewer than 5 plays this year (points move faster). The leaderboard resets every January 1st.
     </div>`;
 
   wireTabs();
