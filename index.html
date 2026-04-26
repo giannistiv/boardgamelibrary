@@ -994,6 +994,20 @@
   .bsv-modal-close{
     background:transparent;border:none;color:var(--text);font-size:1.4rem;cursor:pointer;padding:0 0.4rem;line-height:1;
   }
+  .bsv-modal-filters{
+    display:flex;gap:0.5rem;flex-wrap:wrap;align-items:flex-end;
+    padding:0.4rem 0;border-bottom:1px solid rgba(255,255,255,0.07);margin-bottom:0.4rem;
+  }
+  .bsv-filter{display:flex;flex-direction:column;gap:0.2rem;flex:1;min-width:6rem}
+  .bsv-filter span{font-size:0.65rem;text-transform:uppercase;letter-spacing:0.06em;opacity:0.55;font-weight:600}
+  .bsv-filter select{
+    background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);
+    color:var(--text);border-radius:6px;padding:0.35rem 0.5rem;font-size:0.82rem;font-family:inherit;
+  }
+  .bsv-filter select:focus{outline:none;border-color:var(--accent)}
+  .bsv-modal-count{
+    font-size:0.7rem;opacity:0.55;text-align:right;margin-bottom:0.2rem;
+  }
   .bsv-modal-results{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:0.35rem;padding-right:0.2rem}
   .bsv-modal-row{
     display:grid;grid-template-columns:2.2rem 1fr auto;gap:0.55rem;align-items:center;
@@ -6798,9 +6812,23 @@ function _openBoardSouthAddModal(skipFlagSet) {
 
   const myListSet = new Set((boardSouthVotes[voter] || []).map(Number));
 
-  // Library = GAMES (the user's owned shelf), per requirement.
-  const libraryGames = (typeof GAMES !== 'undefined' ? GAMES : []).slice()
+  // Library = GAMES (the user's owned shelf), but skip expansions and
+  // campaign/legacy games — those aren't typically picked for "what to
+  // play next" group sessions.
+  const libraryGames = (typeof GAMES !== 'undefined' ? GAMES : [])
+    .filter(g => !isExpansion(g) && !isCampaign(g))
+    .slice()
     .sort((a, b) => a.name.localeCompare(b.name));
+
+  // Parse a game's player range into a [min, max] tuple for filtering.
+  const parsePlayers = (g) => {
+    if (!g || !g.players) return [null, null];
+    const m = String(g.players).match(/^(\d+)(?:\s*-\s*(\d+))?/);
+    if (!m) return [null, null];
+    const min = Number(m[1]);
+    const max = m[2] ? Number(m[2]) : min;
+    return [min, max];
+  };
 
   overlay.innerHTML = `
     <div class="bsv-modal" role="dialog" aria-modal="true">
@@ -6809,6 +6837,37 @@ function _openBoardSouthAddModal(skipFlagSet) {
         <button class="bsv-modal-close" id="bsv-modal-close" aria-label="Close">×</button>
       </div>
       <input type="text" class="bsv-search-bar" id="bsv-modal-search" placeholder="Search your library…" autocomplete="off">
+      <div class="bsv-modal-filters">
+        <label class="bsv-filter">
+          <span>Players</span>
+          <select id="bsv-f-players">
+            <option value="">Any</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6+</option>
+          </select>
+        </label>
+        <label class="bsv-filter">
+          <span>Weight</span>
+          <select id="bsv-f-weight">
+            <option value="">Any</option>
+            <option value="light">Light (≤ 2)</option>
+            <option value="medium">Medium (2–3)</option>
+            <option value="heavy">Heavy (3+)</option>
+          </select>
+        </label>
+        <label class="bsv-filter">
+          <span>Sort</span>
+          <select id="bsv-f-sort">
+            <option value="name">Name</option>
+            <option value="rating">BGG rating</option>
+            <option value="weight">Weight</option>
+          </select>
+        </label>
+      </div>
+      <div class="bsv-modal-count" id="bsv-modal-count"></div>
       <div class="bsv-modal-results" id="bsv-modal-results"></div>
     </div>`;
 
@@ -6823,24 +6882,68 @@ function _openBoardSouthAddModal(skipFlagSet) {
 
   const resultsEl = overlay.querySelector('#bsv-modal-results');
   const searchEl = overlay.querySelector('#bsv-modal-search');
+  const playersEl = overlay.querySelector('#bsv-f-players');
+  const weightEl = overlay.querySelector('#bsv-f-weight');
+  const sortEl = overlay.querySelector('#bsv-f-sort');
+  const countEl = overlay.querySelector('#bsv-modal-count');
 
   const renderResults = () => {
     const q = (searchEl.value || '').trim().toLowerCase();
-    const matches = q
-      ? libraryGames.filter(g => g.name && g.name.toLowerCase().includes(q)).slice(0, 80)
-      : libraryGames.slice(0, 30); // show top 30 alphabetical when empty
+    const wantPlayers = playersEl.value ? Number(playersEl.value) : null;
+    const wantWeight = weightEl.value;
+    const sortBy = sortEl.value || 'name';
+
+    let matches = libraryGames.filter(g => {
+      if (q && !(g.name || '').toLowerCase().includes(q)) return false;
+      if (wantPlayers != null) {
+        const [mn, mx] = parsePlayers(g);
+        if (mn == null) return false;
+        if (wantPlayers === 6) {
+          // "6+" → any game whose max ≥ 6
+          if (mx < 6) return false;
+        } else if (!(mn <= wantPlayers && mx >= wantPlayers)) {
+          return false;
+        }
+      }
+      if (wantWeight) {
+        const cx = Number(g.complexity);
+        if (!Number.isFinite(cx)) return false;
+        if (wantWeight === 'light' && cx > 2) return false;
+        if (wantWeight === 'medium' && (cx < 2 || cx > 3)) return false;
+        if (wantWeight === 'heavy' && cx < 3) return false;
+      }
+      return true;
+    });
+
+    if (sortBy === 'rating') {
+      matches.sort((a, b) => (Number(b.bggRating) || 0) - (Number(a.bggRating) || 0)
+        || (a.name || '').localeCompare(b.name || ''));
+    } else if (sortBy === 'weight') {
+      matches.sort((a, b) => (Number(a.complexity) || 0) - (Number(b.complexity) || 0)
+        || (a.name || '').localeCompare(b.name || ''));
+    } else {
+      matches.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    }
+
+    countEl.textContent = `${matches.length} game${matches.length !== 1 ? 's' : ''}`;
+
     if (matches.length === 0) {
-      resultsEl.innerHTML = `<div class="bsv-empty">No games match "${_escapeHtml(q)}".</div>`;
+      resultsEl.innerHTML = `<div class="bsv-empty">${q ? `No games match "${_escapeHtml(q)}".` : 'No games match these filters.'}</div>`;
       return;
     }
     resultsEl.innerHTML = matches.map(g => {
       const cover = _bsvCoverHtml(g, 'modal');
       const already = myListSet.has(Number(g.bggId));
+      const meta = [
+        g.players ? _escapeHtml(g.players) + 'p' : '',
+        g.complexity ? `wt ${Number(g.complexity).toFixed(1)}` : '',
+        g.bggRating ? `★ ${Number(g.bggRating).toFixed(1)}` : '',
+      ].filter(Boolean).join(' · ');
       return `<div class="bsv-modal-row" data-bgg-id="${g.bggId}">
         ${cover}
         <div>
           <div class="bsv-modal-name">${_escapeHtml(g.name)}</div>
-          <div class="bsv-modal-meta">${g.year || ''}${g.players ? ' · ' + _escapeHtml(g.players) + 'p' : ''}</div>
+          <div class="bsv-modal-meta">${meta}</div>
         </div>
         ${already ? '<div class="bsv-modal-already">In list</div>' : '<div style="color:var(--accent);font-size:1.2rem;font-weight:700">+</div>'}
       </div>`;
@@ -6867,6 +6970,9 @@ function _openBoardSouthAddModal(skipFlagSet) {
   };
 
   searchEl.addEventListener('input', renderResults);
+  playersEl.addEventListener('change', renderResults);
+  weightEl.addEventListener('change', renderResults);
+  sortEl.addEventListener('change', renderResults);
   // Focus the search box and render initial results
   setTimeout(() => searchEl.focus(), 30);
   renderResults();
