@@ -928,15 +928,23 @@
     grid-template-columns:1.6rem 2.4rem 1fr auto;
     align-items:center;gap:0.6rem;padding:0.45rem 0.7rem;border-radius:8px;
     background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);
-    transition:transform .15s,box-shadow .15s,opacity .15s;
+    cursor:grab;user-select:none;-webkit-user-select:none;
+    touch-action:none; /* let pointer-drag work on touch instead of scrolling */
+    transition:box-shadow .15s,opacity .15s;
   }
-  .bsv-myitem.dragging{opacity:0.4;transform:scale(0.98)}
-  .bsv-myitem.drag-over{box-shadow:inset 0 2px 0 0 var(--accent)}
+  .bsv-myitem:active{cursor:grabbing}
+  .bsv-myitem.dragging{
+    opacity:0.85;cursor:grabbing;
+    box-shadow:0 8px 24px rgba(0,0,0,0.5);border-color:var(--accent);
+    z-index:10;position:relative;
+  }
+  .bsv-myitem .bsv-mybtn{cursor:pointer;touch-action:auto}
   .bsv-myrank{font-weight:700;font-size:0.82rem;text-align:center;color:var(--accent)}
   .bsv-mythumb{
-    width:2.4rem;height:2.4rem;border-radius:6px;background-size:cover;background-position:center;
-    background-color:rgba(255,255,255,0.08);flex-shrink:0;
+    width:2.4rem;height:2.4rem;border-radius:6px;
+    background-color:rgba(255,255,255,0.08);flex-shrink:0;overflow:hidden;
   }
+  .bsv-mythumb img{width:100%;height:100%;object-fit:cover;display:block}
   .bsv-myname{font-size:0.88rem;font-weight:600;line-height:1.25;overflow:hidden;text-overflow:ellipsis}
   .bsv-myactions{display:flex;gap:0.25rem;flex-shrink:0}
   .bsv-mybtn{
@@ -964,9 +972,10 @@
   }
   .bsv-aggrank{font-weight:700;font-size:0.85rem;color:var(--accent);text-align:center}
   .bsv-aggthumb{
-    width:2.6rem;height:2.6rem;border-radius:6px;background-size:cover;background-position:center;
-    background-color:rgba(255,255,255,0.08);flex-shrink:0;
+    width:2.6rem;height:2.6rem;border-radius:6px;
+    background-color:rgba(255,255,255,0.08);flex-shrink:0;overflow:hidden;
   }
+  .bsv-aggthumb img{width:100%;height:100%;object-fit:cover;display:block}
   .bsv-aggname{font-size:0.9rem;font-weight:600;line-height:1.2}
   .bsv-aggvoters{font-size:0.7rem;opacity:0.65;margin-top:0.2rem}
   .bsv-aggvoters .you{color:var(--accent);font-weight:600}
@@ -1015,10 +1024,11 @@
     border:1px solid transparent;transition:background .15s,border-color .15s;
   }
   .bsv-modal-row:hover{background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.1)}
-  .bsv-modal-thumb{
-    width:2.2rem;height:2.2rem;border-radius:5px;background-size:cover;background-position:center;
-    background-color:rgba(255,255,255,0.08);
+  .bsv-modalthumb{
+    width:2.2rem;height:2.2rem;border-radius:5px;
+    background-color:rgba(255,255,255,0.08);overflow:hidden;
   }
+  .bsv-modalthumb img{width:100%;height:100%;object-fit:cover;display:block}
   .bsv-modal-name{font-size:0.85rem;font-weight:600}
   .bsv-modal-meta{font-size:0.7rem;opacity:0.55}
   .bsv-modal-already{
@@ -6559,15 +6569,27 @@ let _bsvSearchQuery = ''; // current aggregate-list filter
 let _bsvSearchModalOpen = false;
 
 function _bsvCoverHtml(game, size) {
-  // size is the CSS size class suffix (myitem / aggrow / modal)
+  // size is the CSS size class suffix (my / agg / modal)
   const cls = `bsv-${size}thumb`;
   if (!game) return `<div class="${cls}"></div>`;
-  const src = game.bggId > 0 ? `images/${game.bggId}.jpg` : '';
-  // Use background-image inline; fall back to remote urlImage if loaded.
-  const url = src || (game.urlImage || '');
-  if (!url) return `<div class="${cls}"></div>`;
-  return `<div class="${cls}" style="background-image:url('${url.replace(/'/g, "\\'")}')" data-bgg-id="${game.bggId}"></div>`;
+  const local = game.bggId > 0 ? `images/${game.bggId}.jpg` : '';
+  const fallback = (game.urlImage || '').replace(/'/g, "\\'");
+  if (!local && !fallback) return `<div class="${cls}"></div>`;
+  // <img> with onerror does local → urlImage → hide. Wrapping div carries
+  // the rounded background placeholder so layout stays stable on failure.
+  const initialSrc = local || fallback;
+  return `<div class="${cls}"><img src="${initialSrc}" alt="" loading="lazy"
+    onerror="window.__bsvImgFallback(this, '${fallback}')"></div>`;
 }
+
+window.__bsvImgFallback = function(img, fallback) {
+  if (!img.dataset.bsvFb && fallback) {
+    img.dataset.bsvFb = '1';
+    img.src = fallback;
+    return;
+  }
+  img.style.display = 'none';
+};
 
 function _renderBoardSouthVoteView(container) {
   const currentYear = new Date().getFullYear();
@@ -6728,39 +6750,12 @@ function _renderBoardSouthVoteView(container) {
           persistBoardSouthVote(voter, list);
         });
       });
-
-      // HTML5 drag-and-drop for desktop reordering
-      item.addEventListener('dragstart', (ev) => {
-        item.classList.add('dragging');
-        ev.dataTransfer.effectAllowed = 'move';
-        ev.dataTransfer.setData('text/plain', String(idx));
-      });
-      item.addEventListener('dragend', () => {
-        item.classList.remove('dragging');
-        container.querySelectorAll('.bsv-myitem.drag-over').forEach(el => el.classList.remove('drag-over'));
-      });
-      item.addEventListener('dragover', (ev) => {
-        ev.preventDefault();
-        ev.dataTransfer.dropEffect = 'move';
-        item.classList.add('drag-over');
-      });
-      item.addEventListener('dragleave', () => {
-        item.classList.remove('drag-over');
-      });
-      item.addEventListener('drop', async (ev) => {
-        ev.preventDefault();
-        item.classList.remove('drag-over');
-        const fromIdx = Number(ev.dataTransfer.getData('text/plain'));
-        const toIdx = idx;
-        if (!Number.isFinite(fromIdx) || fromIdx === toIdx) return;
-        const list = (boardSouthVotes[voter] || []).slice();
-        const [moved] = list.splice(fromIdx, 1);
-        list.splice(toIdx, 0, moved);
-        boardSouthVotes[voter] = list;
-        showLeaderboardView();
-        persistBoardSouthVote(voter, list);
-      });
     });
+
+    // Unified pointer-based drag-and-drop reordering (works for mouse + touch).
+    // Live-swaps DOM rows during the drag so the user sees the new ordering
+    // immediately; persists once on pointerup so we don't churn Firebase.
+    _wireBoardSouthDrag(container, voter);
 
     const openBtn = container.querySelector('#bsv-open-search');
     if (openBtn) openBtn.addEventListener('click', _openBoardSouthAddModal);
@@ -6797,6 +6792,121 @@ function _renderBoardSouthVoteView(container) {
   if (_bsvSearchModalOpen) _openBoardSouthAddModal(true);
 
   window.scrollTo(0, 0);
+}
+
+// Unified pointer-based drag for the priority list. Works on mouse + touch.
+// Live-reorders DOM rows as the user drags, and persists once on release.
+function _wireBoardSouthDrag(container, voter) {
+  let drag = null;
+
+  const items = () => Array.from(container.querySelectorAll('.bsv-myitem'));
+
+  const onDown = (ev) => {
+    // Ignore right-click; ignore drags initiated on action buttons.
+    if (ev.pointerType === 'mouse' && ev.button !== 0) return;
+    if (ev.target.closest('.bsv-mybtn')) return;
+    const item = ev.currentTarget;
+    if (!item) return;
+    ev.preventDefault();
+
+    drag = {
+      item,
+      startY: ev.clientY,
+      lastY: ev.clientY,
+      pointerId: ev.pointerId,
+      moved: false,
+    };
+    item.classList.add('dragging');
+    try { item.setPointerCapture(ev.pointerId); } catch (_) {}
+  };
+
+  const onMove = (ev) => {
+    if (!drag) return;
+    if (ev.pointerId !== drag.pointerId) return;
+    ev.preventDefault();
+
+    const dy = ev.clientY - drag.lastY;
+    if (Math.abs(ev.clientY - drag.startY) > 3) drag.moved = true;
+
+    // Visually offset the dragged item so the user sees it follow the pointer.
+    const currentTransform = drag.item.style.transform || '';
+    const m = currentTransform.match(/translateY\(([-\d.]+)px\)/);
+    const prev = m ? Number(m[1]) : 0;
+    drag.item.style.transform = `translateY(${prev + dy}px)`;
+    drag.lastY = ev.clientY;
+
+    // Find the sibling currently under the pointer (excluding the dragged
+    // item and ignoring its visual translation).
+    const all = items();
+    for (const other of all) {
+      if (other === drag.item) continue;
+      // Use the un-transformed bounding rect of `other` since it's static.
+      const r = other.getBoundingClientRect();
+      const mid = (r.top + r.bottom) / 2;
+      if (ev.clientY < r.top || ev.clientY > r.bottom) continue;
+      // Reorder DOM: insert dragged before/after `other` based on direction
+      const fromBefore = drag.item.compareDocumentPosition(other) & Node.DOCUMENT_POSITION_FOLLOWING;
+      // fromBefore is non-zero when `other` follows the dragged item in DOM
+      if (fromBefore) {
+        if (ev.clientY > mid) other.after(drag.item);
+        else continue;
+      } else {
+        if (ev.clientY < mid) other.before(drag.item);
+        else continue;
+      }
+      // Clear the visual offset since the row's natural position has moved.
+      drag.item.style.transform = '';
+      drag.startY = ev.clientY;
+      drag.lastY = ev.clientY;
+      // Update the rank label for every item to reflect the new order.
+      _refreshBsvRanks(container);
+      break;
+    }
+  };
+
+  const onUp = (ev) => {
+    if (!drag) return;
+    if (ev.pointerId !== drag.pointerId) return;
+    drag.item.classList.remove('dragging');
+    drag.item.style.transform = '';
+    try { drag.item.releasePointerCapture(ev.pointerId); } catch (_) {}
+
+    // Compute the final order from the DOM and persist if changed.
+    const newOrder = items().map(el => Number(el.dataset.bggId)).filter(Number.isFinite);
+    drag = null;
+
+    const before = (boardSouthVotes[voter] || []).map(Number);
+    const same = before.length === newOrder.length && before.every((v, i) => v === newOrder[i]);
+    if (!same) {
+      boardSouthVotes[voter] = newOrder;
+      persistBoardSouthVote(voter, newOrder);
+      // Re-render so the aggregate ranking + voter labels update.
+      showLeaderboardView();
+    }
+  };
+
+  items().forEach(item => {
+    item.addEventListener('pointerdown', onDown);
+    item.addEventListener('pointermove', onMove);
+    item.addEventListener('pointerup', onUp);
+    item.addEventListener('pointercancel', onUp);
+  });
+}
+
+// Update the visible "1, 2, 3…" rank labels and the up/down disabled
+// states after a live drag-reorder, without a full re-render.
+function _refreshBsvRanks(container) {
+  const items = container.querySelectorAll('.bsv-myitem');
+  const last = items.length - 1;
+  items.forEach((item, i) => {
+    item.dataset.bsvIdx = String(i);
+    const rankEl = item.querySelector('.bsv-myrank');
+    if (rankEl) rankEl.textContent = String(i + 1);
+    const upBtn = item.querySelector('[data-bsv-act="up"]');
+    const downBtn = item.querySelector('[data-bsv-act="down"]');
+    if (upBtn) upBtn.disabled = i === 0;
+    if (downBtn) downBtn.disabled = i === last;
+  });
 }
 
 function _openBoardSouthAddModal(skipFlagSet) {
