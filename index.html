@@ -6799,7 +6799,8 @@ function _openBoardSouthAddModal(skipFlagSet) {
   const myListSet = new Set((boardSouthVotes[voter] || []).map(Number));
 
   // Library = GAMES (the user's owned shelf), per requirement.
-  const libraryGames = (window.GAMES || []).slice().sort((a, b) => a.name.localeCompare(b.name));
+  const libraryGames = (typeof GAMES !== 'undefined' ? GAMES : []).slice()
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   overlay.innerHTML = `
     <div class="bsv-modal" role="dialog" aria-modal="true">
