@@ -891,6 +891,126 @@
   .lb-explain{margin-top:1.6rem;padding:0.8rem 1rem;background:rgba(255,255,255,0.03);border-radius:8px;font-size:0.72rem;opacity:0.75;line-height:1.55}
   .lb-explain b{color:var(--accent)}
 
+  /* ── Board South sub-tabs (Leaderboard / Vote) ── */
+  .bs-subtabs{display:flex;gap:0.4rem;margin:0.6rem 0 1rem 0;justify-content:center}
+  .bs-subtab{
+    flex:0 1 auto;padding:0.4rem 0.9rem;border-radius:999px;border:1px solid rgba(255,255,255,0.12);
+    background:transparent;color:var(--text);font-size:0.78rem;font-weight:600;cursor:pointer;
+    transition:background .2s,border-color .2s;
+  }
+  .bs-subtab.active{background:var(--accent);color:#0b0b0d;border-color:var(--accent)}
+  .bs-subtab:hover:not(.active){background:rgba(255,255,255,0.06)}
+
+  /* ── Voting view ── */
+  .bsv-section-title{
+    font-size:0.78rem;text-transform:uppercase;letter-spacing:0.08em;font-weight:700;
+    color:var(--accent);margin:1.2rem 0 0.6rem 0;padding-bottom:0.3rem;
+    border-bottom:1px solid rgba(255,255,255,0.08);
+  }
+  .bsv-empty{padding:0.9rem 1rem;text-align:center;opacity:0.55;font-size:0.85rem;font-style:italic}
+  .bsv-permission{
+    background:rgba(255,182,77,0.08);border:1px solid rgba(255,182,77,0.25);
+    border-radius:8px;padding:0.7rem 0.9rem;margin:0.6rem 0;font-size:0.78rem;line-height:1.45;
+  }
+  .bsv-permission b{color:#ffb64d}
+
+  .bsv-search-bar{
+    width:100%;padding:0.6rem 0.9rem;border-radius:8px;border:1px solid rgba(255,255,255,0.12);
+    background:rgba(255,255,255,0.04);color:var(--text);font-size:0.9rem;font-family:inherit;
+    margin-bottom:0.7rem;box-sizing:border-box;
+  }
+  .bsv-search-bar:focus{outline:none;border-color:var(--accent)}
+
+  /* My priority list */
+  .bsv-mylist{display:flex;flex-direction:column;gap:0.45rem;margin-bottom:0.5rem}
+  .bsv-myitem{
+    display:grid;
+    grid-template-columns:1.6rem 2.4rem 1fr auto;
+    align-items:center;gap:0.6rem;padding:0.45rem 0.7rem;border-radius:8px;
+    background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);
+    transition:transform .15s,box-shadow .15s,opacity .15s;
+  }
+  .bsv-myitem.dragging{opacity:0.4;transform:scale(0.98)}
+  .bsv-myitem.drag-over{box-shadow:inset 0 2px 0 0 var(--accent)}
+  .bsv-myrank{font-weight:700;font-size:0.82rem;text-align:center;color:var(--accent)}
+  .bsv-mythumb{
+    width:2.4rem;height:2.4rem;border-radius:6px;background-size:cover;background-position:center;
+    background-color:rgba(255,255,255,0.08);flex-shrink:0;
+  }
+  .bsv-myname{font-size:0.88rem;font-weight:600;line-height:1.25;overflow:hidden;text-overflow:ellipsis}
+  .bsv-myactions{display:flex;gap:0.25rem;flex-shrink:0}
+  .bsv-mybtn{
+    width:1.7rem;height:1.7rem;border-radius:6px;border:1px solid rgba(255,255,255,0.12);
+    background:transparent;color:var(--text);cursor:pointer;font-size:0.85rem;line-height:1;
+    display:flex;align-items:center;justify-content:center;padding:0;
+  }
+  .bsv-mybtn:hover{background:rgba(255,255,255,0.08)}
+  .bsv-mybtn:disabled{opacity:0.3;cursor:not-allowed}
+  .bsv-mybtn.danger:hover{background:rgba(239,68,68,0.18);border-color:rgba(239,68,68,0.4);color:#ef4444}
+
+  .bsv-add-btn{
+    width:100%;padding:0.55rem 0.9rem;margin-top:0.5rem;border-radius:8px;border:1px dashed rgba(255,255,255,0.2);
+    background:transparent;color:var(--accent);font-weight:600;cursor:pointer;font-size:0.85rem;
+  }
+  .bsv-add-btn:hover{background:rgba(255,255,255,0.04);border-color:var(--accent)}
+
+  /* Aggregate ranking */
+  .bsv-agg-list{display:flex;flex-direction:column;gap:0.45rem}
+  .bsv-aggrow{
+    display:grid;
+    grid-template-columns:1.8rem 2.6rem 1fr auto;
+    align-items:center;gap:0.6rem;padding:0.5rem 0.7rem;border-radius:8px;
+    background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.06);
+  }
+  .bsv-aggrank{font-weight:700;font-size:0.85rem;color:var(--accent);text-align:center}
+  .bsv-aggthumb{
+    width:2.6rem;height:2.6rem;border-radius:6px;background-size:cover;background-position:center;
+    background-color:rgba(255,255,255,0.08);flex-shrink:0;
+  }
+  .bsv-aggname{font-size:0.9rem;font-weight:600;line-height:1.2}
+  .bsv-aggvoters{font-size:0.7rem;opacity:0.65;margin-top:0.2rem}
+  .bsv-aggvoters .you{color:var(--accent);font-weight:600}
+  .bsv-aggvotes{
+    background:rgba(255,255,255,0.06);border-radius:999px;padding:0.2rem 0.6rem;
+    font-size:0.78rem;font-weight:700;text-align:center;min-width:2.2rem;
+  }
+  .bsv-aggvotes.hot{background:var(--accent);color:#0b0b0d}
+
+  /* Search-add modal (overlay over leaderboard) */
+  .bsv-modal-overlay{
+    position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9000;
+    display:flex;align-items:flex-start;justify-content:center;padding:3rem 1rem 1rem;
+    overflow-y:auto;
+  }
+  .bsv-modal{
+    background:#16161a;border:1px solid rgba(255,255,255,0.1);border-radius:12px;
+    width:100%;max-width:480px;padding:1rem 1rem 0.8rem;display:flex;flex-direction:column;gap:0.6rem;
+    max-height:85vh;
+  }
+  .bsv-modal-head{
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .bsv-modal-title{font-size:1rem;font-weight:700}
+  .bsv-modal-close{
+    background:transparent;border:none;color:var(--text);font-size:1.4rem;cursor:pointer;padding:0 0.4rem;line-height:1;
+  }
+  .bsv-modal-results{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:0.35rem;padding-right:0.2rem}
+  .bsv-modal-row{
+    display:grid;grid-template-columns:2.2rem 1fr auto;gap:0.55rem;align-items:center;
+    padding:0.4rem 0.55rem;border-radius:6px;background:rgba(255,255,255,0.025);cursor:pointer;
+    border:1px solid transparent;transition:background .15s,border-color .15s;
+  }
+  .bsv-modal-row:hover{background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.1)}
+  .bsv-modal-thumb{
+    width:2.2rem;height:2.2rem;border-radius:5px;background-size:cover;background-position:center;
+    background-color:rgba(255,255,255,0.08);
+  }
+  .bsv-modal-name{font-size:0.85rem;font-weight:600}
+  .bsv-modal-meta{font-size:0.7rem;opacity:0.55}
+  .bsv-modal-already{
+    font-size:0.68rem;color:var(--accent);font-weight:700;text-transform:uppercase;letter-spacing:0.05em;
+  }
+
   /* ── Pie Charts ── */
   .chart-row{
     display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;
@@ -6082,7 +6202,7 @@ function _yearStartCutoff() {
 // Known Board South regulars whose mere presence in a play is enough to
 // classify it as a Board South play (in addition to the " - BS" suffix
 // convention). Names here should match post-NAME_MAP canonical names.
-const BOARD_SOUTH_REGULARS = new Set(['LGeorge']);
+const BOARD_SOUTH_REGULARS = new Set(['LGeorge', 'Θανος']);
 
 // A play is Board South if it's explicitly tagged that way (from a BGStats
 // import) OR if any participant carries the " - BS" suffix the user uses
@@ -6257,12 +6377,20 @@ function _eloToColorScore(elo) {
 }
 
 let _leaderboardMode = 'main'; // 'main' | 'south'
+let _bsSubTab = 'leaderboard'; // 'leaderboard' | 'vote' (only meaningful when mode==='south')
 
 function showLeaderboardView() {
   const container = document.getElementById('leaderboard-view');
   const mode = _leaderboardMode;
-  const data = _computeEloLeaderboard(mode);
   const isSouth = mode === 'south';
+
+  // When the user is viewing the Board South tab, route to the right sub-view.
+  if (isSouth && _bsSubTab === 'vote') {
+    _renderBoardSouthVoteView(container);
+    return;
+  }
+
+  const data = _computeEloLeaderboard(mode);
   const currentYear = new Date().getFullYear();
 
   const rows = Object.keys(data.ratings)
@@ -6282,7 +6410,12 @@ function showLeaderboardView() {
     <div class="lb-tabs">
       <button class="lb-tab ${!isSouth ? 'active' : ''}" data-lb-mode="main">Main</button>
       <button class="lb-tab ${isSouth ? 'active' : ''}" data-lb-mode="south">Board South</button>
-    </div>`;
+    </div>
+    ${isSouth ? `
+    <div class="bs-subtabs">
+      <button class="bs-subtab active" data-bs-sub="leaderboard">🏆 Leaderboard</button>
+      <button class="bs-subtab" data-bs-sub="vote">🗳️ Vote</button>
+    </div>` : ''}`;
   const titleTxt = isSouth ? `Board South ${currentYear}` : `Leaderboard ${currentYear}`;
 
   const rawPlayer = localStorage.getItem('bgl-player');
@@ -6306,6 +6439,17 @@ function showLeaderboardView() {
         const m = el.dataset.lbMode;
         if (m !== _leaderboardMode) {
           _leaderboardMode = m;
+          // When entering Board South, default to leaderboard sub-tab.
+          if (m === 'south') _bsSubTab = 'leaderboard';
+          showLeaderboardView();
+        }
+      });
+    });
+    container.querySelectorAll('[data-bs-sub]').forEach(el => {
+      el.addEventListener('click', () => {
+        const s = el.dataset.bsSub;
+        if (s !== _bsSubTab) {
+          _bsSubTab = s;
           showLeaderboardView();
         }
       });
@@ -6394,6 +6538,347 @@ function showLeaderboardView() {
   });
 
   window.scrollTo(0, 0);
+}
+
+// ── Board South: "What to play next?" voting view ──
+let _bsvSearchQuery = ''; // current aggregate-list filter
+let _bsvSearchModalOpen = false;
+
+function _bsvCoverHtml(game, size) {
+  // size is the CSS size class suffix (myitem / aggrow / modal)
+  const cls = `bsv-${size}thumb`;
+  if (!game) return `<div class="${cls}"></div>`;
+  const src = game.bggId > 0 ? `images/${game.bggId}.jpg` : '';
+  // Use background-image inline; fall back to remote urlImage if loaded.
+  const url = src || (game.urlImage || '');
+  if (!url) return `<div class="${cls}"></div>`;
+  return `<div class="${cls}" style="background-image:url('${url.replace(/'/g, "\\'")}')" data-bgg-id="${game.bggId}"></div>`;
+}
+
+function _renderBoardSouthVoteView(container) {
+  const currentYear = new Date().getFullYear();
+  const voter = _activeBoardSouthVoter();
+  const myList = voter ? (boardSouthVotes[voter] || []) : [];
+
+  const tabsHtml = `
+    <div class="lb-tabs">
+      <button class="lb-tab" data-lb-mode="main">Main</button>
+      <button class="lb-tab active" data-lb-mode="south">Board South</button>
+    </div>
+    <div class="bs-subtabs">
+      <button class="bs-subtab" data-bs-sub="leaderboard">🏆 Leaderboard</button>
+      <button class="bs-subtab active" data-bs-sub="vote">🗳️ Vote</button>
+    </div>`;
+
+  // Permission notice for non-voters
+  const permissionHtml = voter ? '' : `
+    <div class="bsv-permission">
+      Only Board South regulars can vote. ${localStorage.getItem('bgl-player')
+        ? `Logged in as <b>${localStorage.getItem('bgl-player')}</b> — view-only access.`
+        : 'Pick your name from the player list to participate.'}
+    </div>`;
+
+  // ── My priority list ──
+  let myListHtml = '';
+  if (voter) {
+    if (myList.length === 0) {
+      myListHtml = `<div class="bsv-empty">You haven't voted yet. Tap below to add games you want to play next.</div>`;
+    } else {
+      myListHtml = '<div class="bsv-mylist">' + myList.map((bggId, idx) => {
+        const game = findGameByBggId(bggId);
+        const name = game ? game.name : `Game #${bggId}`;
+        const cover = _bsvCoverHtml(game, 'my');
+        const upDisabled = idx === 0 ? 'disabled' : '';
+        const downDisabled = idx === myList.length - 1 ? 'disabled' : '';
+        return `<div class="bsv-myitem" draggable="true" data-bsv-idx="${idx}" data-bgg-id="${bggId}">
+          <div class="bsv-myrank">${idx + 1}</div>
+          ${cover}
+          <div class="bsv-myname">${_escapeHtml(name)}</div>
+          <div class="bsv-myactions">
+            <button class="bsv-mybtn" data-bsv-act="up" ${upDisabled} title="Move up">▲</button>
+            <button class="bsv-mybtn" data-bsv-act="down" ${downDisabled} title="Move down">▼</button>
+            <button class="bsv-mybtn danger" data-bsv-act="remove" title="Remove">✕</button>
+          </div>
+        </div>`;
+      }).join('') + '</div>';
+    }
+    myListHtml += `<button class="bsv-add-btn" id="bsv-open-search">+ Add a game from the library</button>`;
+  }
+
+  // ── Aggregate ranking ──
+  const ranking = _computeBoardSouthVoteRanking();
+  const q = (_bsvSearchQuery || '').trim().toLowerCase();
+  const filtered = q
+    ? ranking.filter(r => {
+        const g = findGameByBggId(r.bggId);
+        return g && g.name && g.name.toLowerCase().includes(q);
+      })
+    : ranking;
+
+  let aggHtml;
+  if (ranking.length === 0) {
+    aggHtml = `<div class="bsv-empty">No votes yet. Be the first to suggest what to play next!</div>`;
+  } else if (filtered.length === 0) {
+    aggHtml = `<div class="bsv-empty">No voted games match "${_escapeHtml(q)}".</div>`;
+  } else {
+    const maxVotes = ranking[0].votes;
+    aggHtml = '<div class="bsv-agg-list">' + filtered.map((r, i) => {
+      const game = findGameByBggId(r.bggId);
+      const name = game ? game.name : `Game #${r.bggId}`;
+      const cover = _bsvCoverHtml(game, 'agg');
+      const isHot = r.votes === maxVotes;
+      const voterStr = r.voters
+        .sort((a, b) => a.position - b.position)
+        .map(v => {
+          const isYou = voter && v.name === voter;
+          const cls = isYou ? 'you' : '';
+          return `<span class="${cls}">${_escapeHtml(v.name)}#${v.position}</span>`;
+        })
+        .join(', ');
+      return `<div class="bsv-aggrow" data-bgg-id="${r.bggId}">
+        <div class="bsv-aggrank">#${i + 1}</div>
+        ${cover}
+        <div>
+          <div class="bsv-aggname">${_escapeHtml(name)}</div>
+          <div class="bsv-aggvoters">${voterStr}</div>
+        </div>
+        <div class="bsv-aggvotes ${isHot ? 'hot' : ''}">${r.votes}</div>
+      </div>`;
+    }).join('') + '</div>';
+  }
+
+  container.innerHTML = `
+    <div class="lb-header">
+      <div class="lb-title">What to Play Next?</div>
+      <div class="lb-count">${ranking.length} game${ranking.length !== 1 ? 's' : ''} voted</div>
+    </div>
+    ${tabsHtml}
+    ${permissionHtml}
+    ${voter ? `
+      <div class="bsv-section-title">Your Priority List ${myList.length ? `· ${myList.length}` : ''}</div>
+      ${myListHtml}
+    ` : ''}
+    <div class="bsv-section-title">Group Ranking ${currentYear}</div>
+    <input type="text" class="bsv-search-bar" id="bsv-search-agg"
+           placeholder="Search voted games…" value="${_escapeHtml(_bsvSearchQuery)}">
+    ${aggHtml}
+    <div class="lb-explain">
+      <b>How voting works:</b> Each Board South regular adds the games they want to play next, ordered by personal priority (top = most wanted). Games are ranked first by total vote count, then by combined priority — a game placed #1 by everyone outranks a game placed #5 by everyone, even with the same vote count. Reorder your list with ▲/▼ or drag to break ties in your favour. Votes are saved live and shared across devices.
+    </div>`;
+
+  // Wire top-level tabs
+  container.querySelectorAll('[data-lb-mode]').forEach(el => {
+    el.addEventListener('click', () => {
+      const m = el.dataset.lbMode;
+      if (m !== _leaderboardMode) {
+        _leaderboardMode = m;
+        if (m === 'south') _bsSubTab = 'leaderboard';
+        showLeaderboardView();
+      }
+    });
+  });
+  container.querySelectorAll('[data-bs-sub]').forEach(el => {
+    el.addEventListener('click', () => {
+      const s = el.dataset.bsSub;
+      if (s !== _bsSubTab) {
+        _bsSubTab = s;
+        showLeaderboardView();
+      }
+    });
+  });
+
+  // Voting actions on my list
+  if (voter) {
+    container.querySelectorAll('.bsv-myitem').forEach(item => {
+      const idx = Number(item.dataset.bsvIdx);
+      item.querySelectorAll('[data-bsv-act]').forEach(btn => {
+        btn.addEventListener('click', async (ev) => {
+          ev.stopPropagation();
+          const act = btn.dataset.bsvAct;
+          const list = (boardSouthVotes[voter] || []).slice();
+          if (act === 'remove') {
+            list.splice(idx, 1);
+          } else if (act === 'up' && idx > 0) {
+            const tmp = list[idx];
+            list[idx] = list[idx - 1];
+            list[idx - 1] = tmp;
+          } else if (act === 'down' && idx < list.length - 1) {
+            const tmp = list[idx];
+            list[idx] = list[idx + 1];
+            list[idx + 1] = tmp;
+          } else {
+            return;
+          }
+          boardSouthVotes[voter] = list;
+          showLeaderboardView();
+          persistBoardSouthVote(voter, list);
+        });
+      });
+
+      // HTML5 drag-and-drop for desktop reordering
+      item.addEventListener('dragstart', (ev) => {
+        item.classList.add('dragging');
+        ev.dataTransfer.effectAllowed = 'move';
+        ev.dataTransfer.setData('text/plain', String(idx));
+      });
+      item.addEventListener('dragend', () => {
+        item.classList.remove('dragging');
+        container.querySelectorAll('.bsv-myitem.drag-over').forEach(el => el.classList.remove('drag-over'));
+      });
+      item.addEventListener('dragover', (ev) => {
+        ev.preventDefault();
+        ev.dataTransfer.dropEffect = 'move';
+        item.classList.add('drag-over');
+      });
+      item.addEventListener('dragleave', () => {
+        item.classList.remove('drag-over');
+      });
+      item.addEventListener('drop', async (ev) => {
+        ev.preventDefault();
+        item.classList.remove('drag-over');
+        const fromIdx = Number(ev.dataTransfer.getData('text/plain'));
+        const toIdx = idx;
+        if (!Number.isFinite(fromIdx) || fromIdx === toIdx) return;
+        const list = (boardSouthVotes[voter] || []).slice();
+        const [moved] = list.splice(fromIdx, 1);
+        list.splice(toIdx, 0, moved);
+        boardSouthVotes[voter] = list;
+        showLeaderboardView();
+        persistBoardSouthVote(voter, list);
+      });
+    });
+
+    const openBtn = container.querySelector('#bsv-open-search');
+    if (openBtn) openBtn.addEventListener('click', _openBoardSouthAddModal);
+  }
+
+  // Aggregate search
+  const searchInput = container.querySelector('#bsv-search-agg');
+  if (searchInput) {
+    searchInput.addEventListener('input', (ev) => {
+      _bsvSearchQuery = ev.target.value;
+      // Re-render only the aggregate region for snappier typing
+      showLeaderboardView();
+      // Restore focus + cursor
+      const fresh = document.getElementById('bsv-search-agg');
+      if (fresh) {
+        fresh.focus();
+        const len = fresh.value.length;
+        fresh.setSelectionRange(len, len);
+      }
+    });
+  }
+
+  // Click an aggregate row → open the game's modal
+  container.querySelectorAll('.bsv-aggrow').forEach(el => {
+    el.addEventListener('click', () => {
+      const bggId = Number(el.dataset.bggId);
+      const game = findGameByBggId(bggId);
+      if (game && typeof openModal === 'function') {
+        try { openModal(game); } catch (_) {}
+      }
+    });
+  });
+
+  if (_bsvSearchModalOpen) _openBoardSouthAddModal(true);
+
+  window.scrollTo(0, 0);
+}
+
+function _openBoardSouthAddModal(skipFlagSet) {
+  const voter = _activeBoardSouthVoter();
+  if (!voter) return;
+  if (!skipFlagSet) _bsvSearchModalOpen = true;
+
+  // Avoid stacking duplicates
+  document.querySelectorAll('.bsv-modal-overlay').forEach(el => el.remove());
+
+  const overlay = document.createElement('div');
+  overlay.className = 'bsv-modal-overlay';
+
+  const myListSet = new Set((boardSouthVotes[voter] || []).map(Number));
+
+  // Library = GAMES (the user's owned shelf), per requirement.
+  const libraryGames = (window.GAMES || []).slice().sort((a, b) => a.name.localeCompare(b.name));
+
+  overlay.innerHTML = `
+    <div class="bsv-modal" role="dialog" aria-modal="true">
+      <div class="bsv-modal-head">
+        <div class="bsv-modal-title">Add a game to your list</div>
+        <button class="bsv-modal-close" id="bsv-modal-close" aria-label="Close">×</button>
+      </div>
+      <input type="text" class="bsv-search-bar" id="bsv-modal-search" placeholder="Search your library…" autocomplete="off">
+      <div class="bsv-modal-results" id="bsv-modal-results"></div>
+    </div>`;
+
+  document.body.appendChild(overlay);
+
+  const close = () => {
+    _bsvSearchModalOpen = false;
+    overlay.remove();
+  };
+  overlay.addEventListener('click', (ev) => { if (ev.target === overlay) close(); });
+  overlay.querySelector('#bsv-modal-close').addEventListener('click', close);
+
+  const resultsEl = overlay.querySelector('#bsv-modal-results');
+  const searchEl = overlay.querySelector('#bsv-modal-search');
+
+  const renderResults = () => {
+    const q = (searchEl.value || '').trim().toLowerCase();
+    const matches = q
+      ? libraryGames.filter(g => g.name && g.name.toLowerCase().includes(q)).slice(0, 80)
+      : libraryGames.slice(0, 30); // show top 30 alphabetical when empty
+    if (matches.length === 0) {
+      resultsEl.innerHTML = `<div class="bsv-empty">No games match "${_escapeHtml(q)}".</div>`;
+      return;
+    }
+    resultsEl.innerHTML = matches.map(g => {
+      const cover = _bsvCoverHtml(g, 'modal');
+      const already = myListSet.has(Number(g.bggId));
+      return `<div class="bsv-modal-row" data-bgg-id="${g.bggId}">
+        ${cover}
+        <div>
+          <div class="bsv-modal-name">${_escapeHtml(g.name)}</div>
+          <div class="bsv-modal-meta">${g.year || ''}${g.players ? ' · ' + _escapeHtml(g.players) + 'p' : ''}</div>
+        </div>
+        ${already ? '<div class="bsv-modal-already">In list</div>' : '<div style="color:var(--accent);font-size:1.2rem;font-weight:700">+</div>'}
+      </div>`;
+    }).join('');
+
+    resultsEl.querySelectorAll('[data-bgg-id]').forEach(row => {
+      row.addEventListener('click', async () => {
+        const bggId = Number(row.dataset.bggId);
+        if (!Number.isFinite(bggId)) return;
+        const list = (boardSouthVotes[voter] || []).slice();
+        if (list.includes(bggId)) {
+          // Already there — close modal anyway
+          close();
+          showLeaderboardView();
+          return;
+        }
+        list.push(bggId);
+        boardSouthVotes[voter] = list;
+        close();
+        showLeaderboardView();
+        persistBoardSouthVote(voter, list);
+      });
+    });
+  };
+
+  searchEl.addEventListener('input', renderResults);
+  // Focus the search box and render initial results
+  setTimeout(() => searchEl.focus(), 30);
+  renderResults();
+}
+
+function _escapeHtml(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 function _renderInsightsPlayers(players, wrColor) {
@@ -6591,6 +7076,108 @@ function findGameByBggId(bggId) {
   return GAMES.find(g => g.bggId === num) || EXTRA_GAMES[bggId] || null;
 }
 
+// ── Board South "what to play next" voting (Firebase-backed) ──
+// Each BS regular submits an ordered list of bggIds (highest priority first).
+// Stored at /boardSouthVotes/{encodedName} = [bggId, bggId, …].
+let boardSouthVotes = {}; // canonical voter name → ordered bggId[]
+
+function _bsVoteEncodeName(name) {
+  // Firebase keys can't contain . $ # [ ] / — replace each with _
+  return encodeURIComponent(name).replace(/\./g, '%2E');
+}
+
+async function loadBoardSouthVotes() {
+  if (!FIREBASE_DB) return;
+  try {
+    const res = await fetch(`${FIREBASE_DB}/boardSouthVotes.json`);
+    const data = await res.json();
+    boardSouthVotes = {};
+    if (!data) return;
+    for (const encName in data) {
+      const decoded = decodeURIComponent(encName);
+      const list = data[encName];
+      if (Array.isArray(list)) {
+        boardSouthVotes[decoded] = list.map(Number).filter(n => Number.isFinite(n));
+      } else if (list && typeof list === 'object') {
+        // Firebase serialised an array as an object {0: id, 1: id, …}
+        const ordered = Object.keys(list).sort((a, b) => Number(a) - Number(b)).map(k => Number(list[k]));
+        boardSouthVotes[decoded] = ordered.filter(n => Number.isFinite(n));
+      }
+    }
+  } catch (e) {
+    console.warn('Failed to load Board South votes from Firebase:', e);
+  }
+}
+
+async function persistBoardSouthVote(voterName, bggIds) {
+  if (!voterName) return;
+  const clean = (bggIds || []).map(Number).filter(n => Number.isFinite(n));
+  boardSouthVotes[voterName] = clean;
+  if (!FIREBASE_DB) return;
+  try {
+    await fetch(`${FIREBASE_DB}/boardSouthVotes/${_bsVoteEncodeName(voterName)}.json`, {
+      method: 'PUT',
+      body: JSON.stringify(clean),
+    });
+  } catch (e) {
+    console.warn('Failed to save Board South vote to Firebase:', e);
+  }
+}
+
+// Returns the canonical name of the currently-logged-in Board South voter,
+// or null if the active player isn't allowed to vote.
+function _activeBoardSouthVoter() {
+  const raw = localStorage.getItem('bgl-player');
+  if (!raw) return null;
+  const name = NAME_MAP[raw] || raw;
+  if (BOARD_SOUTH_REGULARS.has(name)) return name;
+  if (typeof name === 'string' && name.includes(' - BS')) return name;
+  return null;
+}
+
+// Returns the set of all canonical voter names ever seen — both the
+// BOARD_SOUTH_REGULARS allowlist and anyone tagged " - BS" from PLAY_HISTORY.
+function _allBoardSouthVoterNames() {
+  const set = new Set(BOARD_SOUTH_REGULARS);
+  for (const bggId in PLAY_HISTORY) {
+    for (const play of PLAY_HISTORY[bggId]) {
+      if (!play || !Array.isArray(play.sc)) continue;
+      for (const s of play.sc) {
+        if (s && typeof s.n === 'string' && s.n.includes(' - BS')) {
+          set.add(NAME_MAP[s.n] || s.n);
+        }
+      }
+    }
+  }
+  return set;
+}
+
+// Build the aggregate ranking of voted-on games.
+// Each voter contributes 1 vote per listed game. Among games with the same
+// vote count, sort by the sum of inverse rank (1/position) so games people
+// place near the top of their list win ties.
+function _computeBoardSouthVoteRanking() {
+  const tally = {}; // bggId → { votes, score, voters: [{name, position}] }
+  for (const voter in boardSouthVotes) {
+    const list = boardSouthVotes[voter];
+    if (!Array.isArray(list)) continue;
+    list.forEach((bggId, idx) => {
+      if (!Number.isFinite(bggId)) return;
+      if (!tally[bggId]) tally[bggId] = { bggId, votes: 0, score: 0, voters: [] };
+      tally[bggId].votes++;
+      tally[bggId].score += 1 / (idx + 1);
+      tally[bggId].voters.push({ name: voter, position: idx + 1 });
+    });
+  }
+  return Object.values(tally).sort((a, b) => {
+    if (b.votes !== a.votes) return b.votes - a.votes;
+    if (b.score !== a.score) return b.score - a.score;
+    const ga = findGameByBggId(a.bggId);
+    const gb = findGameByBggId(b.bggId);
+    return (ga ? ga.name : '').localeCompare(gb ? gb.name : '');
+  });
+}
+
 function buildFavoritesHtml(playerName, isOwnProfile) {
   const favs = getPlayerFavorites(playerName);
   if (favs.length === 0 && !isOwnProfile) return '';
@@ -6718,7 +7305,7 @@ const _sp = localStorage.getItem('bgl-player');
 if (_sp && NAME_MAP[_sp]) localStorage.setItem('bgl-player', NAME_MAP[_sp]);
 
 // Load ratings and favorites from Firebase, then show the right view
-Promise.all([loadAllRatings(), loadAllFavorites(), loadImportedGames(), loadImportedPlays(), loadGameImages()]).then(() => {
+Promise.all([loadAllRatings(), loadAllFavorites(), loadImportedGames(), loadImportedPlays(), loadGameImages(), loadBoardSouthVotes()]).then(() => {
   const savedPlayer = localStorage.getItem('bgl-player');
   if (savedPlayer) {
     showStatsView(savedPlayer);
