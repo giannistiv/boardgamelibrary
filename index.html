@@ -1203,6 +1203,7 @@
   <button class="player-bar-btn" id="btn-mystats">Profile</button>
   <button class="player-bar-btn" id="btn-leaderboard">Leaderboard</button>
   <button class="player-bar-btn" id="btn-insights">Stats</button>
+  <button class="player-bar-btn" id="btn-boardsouth" style="display:none">Board South</button>
 </div>
 
 <div id="library-view">
@@ -1281,6 +1282,7 @@
 <div class="stats-view" id="insights-view"></div>
 <div class="stats-view" id="games-view"></div>
 <div class="stats-view" id="leaderboard-view"></div>
+<div class="stats-view" id="boardsouth-view"></div>
 
 <!-- Player Picker Overlay -->
 <div class="picker-overlay" id="picker-overlay">
@@ -4565,6 +4567,7 @@ let _modalOpenedFromStats = false;
 let _modalOpenedFromInsights = false;
 let _modalOpenedFromGames = false;
 let _modalOpenedFromLeaderboard = false;
+let _modalOpenedFromBoardSouth = false;
 
 function _setViewport(content) {
   const vp = document.querySelector('meta[name=viewport]');
@@ -4578,7 +4581,7 @@ function _scrollToShelfCenter() {
 
 function _restoreAfterModal() {
   if (!_isTouchDevice()) return;
-  if (_modalOpenedFromStats || _modalOpenedFromInsights || _modalOpenedFromGames || _modalOpenedFromLeaderboard) {
+  if (_modalOpenedFromStats || _modalOpenedFromInsights || _modalOpenedFromGames || _modalOpenedFromLeaderboard || _modalOpenedFromBoardSouth) {
     document.body.style.minWidth = 'auto';
     _setViewport(VP_LOCKED);
     window.scrollTo(0, 0);
@@ -4604,6 +4607,8 @@ function closeModal() {
       showGamesView();
     } else if (_modalOpenedFromLeaderboard) {
       showLeaderboardView();
+    } else if (_modalOpenedFromBoardSouth) {
+      showBoardSouthView();
     }
     if (history.state && history.state.modal) history.back();
   }
@@ -4623,6 +4628,8 @@ window.addEventListener('popstate', e => {
       showGamesView();
     } else if (_modalOpenedFromLeaderboard) {
       showLeaderboardView();
+    } else if (_modalOpenedFromBoardSouth) {
+      showBoardSouthView();
     }
   }
 });
@@ -4632,6 +4639,7 @@ function openModal(game) {
   _modalOpenedFromInsights = document.getElementById('insights-view').classList.contains('open');
   _modalOpenedFromGames = document.getElementById('games-view').classList.contains('open');
   _modalOpenedFromLeaderboard = document.getElementById('leaderboard-view').classList.contains('open');
+  _modalOpenedFromBoardSouth = document.getElementById('boardsouth-view').classList.contains('open');
   const overlay = document.getElementById('modal-overlay');
   const content = document.getElementById('modal-content');
 
@@ -4881,6 +4889,7 @@ function renderPickerList(filter) {
 function selectPlayer(name) {
   localStorage.setItem('bgl-player', name);
   document.getElementById('picker-overlay').classList.remove('open');
+  if (typeof _updateBoardSouthBtnVisibility === 'function') _updateBoardSouthBtnVisibility();
   showStatsView(name);
 }
 
@@ -4918,11 +4927,13 @@ function _deactivateAllTabs() {
   document.getElementById('insights-view').classList.remove('open');
   document.getElementById('games-view').classList.remove('open');
   document.getElementById('leaderboard-view').classList.remove('open');
+  document.getElementById('boardsouth-view').classList.remove('open');
   document.getElementById('btn-library').classList.remove('active');
   document.getElementById('btn-mystats').classList.remove('active');
   document.getElementById('btn-insights').classList.remove('active');
   document.getElementById('btn-games').classList.remove('active');
   document.getElementById('btn-leaderboard').classList.remove('active');
+  document.getElementById('btn-boardsouth').classList.remove('active');
 }
 
 function switchToLibrary() {
@@ -4991,11 +5002,32 @@ function switchToLeaderboard() {
   showLeaderboardView();
 }
 
+function switchToBoardSouth() {
+  _deactivateAllTabs();
+  document.getElementById('boardsouth-view').classList.add('open');
+  document.getElementById('btn-boardsouth').classList.add('active');
+  if (_isTouchDevice()) {
+    document.body.style.minWidth = 'auto';
+    document.body.classList.remove('mobile-library');
+    _setViewport(VP_LOCKED);
+    window.scrollTo(0, 0);
+  }
+  showBoardSouthView();
+}
+
+function _updateBoardSouthBtnVisibility() {
+  const btn = document.getElementById('btn-boardsouth');
+  if (!btn) return;
+  const active = (typeof _activeBoardSouthVoter === 'function') ? _activeBoardSouthVoter() : null;
+  btn.style.display = active ? '' : 'none';
+}
+
 document.getElementById('btn-library').addEventListener('click', switchToLibrary);
 document.getElementById('btn-games').addEventListener('click', switchToGames);
 document.getElementById('btn-leaderboard').addEventListener('click', switchToLeaderboard);
 document.getElementById('btn-mystats').addEventListener('click', switchToStats);
 document.getElementById('btn-insights').addEventListener('click', switchToInsights);
+document.getElementById('btn-boardsouth').addEventListener('click', switchToBoardSouth);
 
 // ── Achievements ──
 const ACHIEVEMENTS = [
@@ -5534,6 +5566,7 @@ function showStatsView(playerName, visiting) {
   if (changeBtn) {
     changeBtn.addEventListener('click', () => {
       localStorage.removeItem('bgl-player');
+      if (typeof _updateBoardSouthBtnVisibility === 'function') _updateBoardSouthBtnVisibility();
       openPicker();
     });
   }
@@ -6400,20 +6433,11 @@ function _eloToColorScore(elo) {
   return Math.max(0, Math.min(10, (elo - 850) / 30));
 }
 
-let _leaderboardMode = 'main'; // 'main' | 'south'
-let _bsSubTab = 'leaderboard'; // 'leaderboard' | 'vote' (only meaningful when mode==='south')
+let _leaderboardMode = 'main'; // 'main' | 'south' — kept for legacy callers; UI now splits across tabs
+let _bsSubTab = 'leaderboard'; // 'leaderboard' | 'vote' — used by the dedicated Board South tab
 
-function showLeaderboardView() {
-  const container = document.getElementById('leaderboard-view');
-  const mode = _leaderboardMode;
+function _renderEloLeaderboardInto(container, mode) {
   const isSouth = mode === 'south';
-
-  // When the user is viewing the Board South tab, route to the right sub-view.
-  if (isSouth && _bsSubTab === 'vote') {
-    _renderBoardSouthVoteView(container);
-    return;
-  }
-
   const data = _computeEloLeaderboard(mode);
   const currentYear = new Date().getFullYear();
 
@@ -6430,16 +6454,6 @@ function showLeaderboardView() {
     }))
     .sort((a, b) => b.elo - a.elo);
 
-  const tabsHtml = `
-    <div class="lb-tabs">
-      <button class="lb-tab ${!isSouth ? 'active' : ''}" data-lb-mode="main">Main</button>
-      <button class="lb-tab ${isSouth ? 'active' : ''}" data-lb-mode="south">Board South</button>
-    </div>
-    ${isSouth ? `
-    <div class="bs-subtabs">
-      <button class="bs-subtab active" data-bs-sub="leaderboard">🏆 Leaderboard</button>
-      <button class="bs-subtab" data-bs-sub="vote">🗳️ Vote</button>
-    </div>` : ''}`;
   const titleTxt = isSouth ? `Board South ${currentYear}` : `Leaderboard ${currentYear}`;
 
   const rawPlayer = localStorage.getItem('bgl-player');
@@ -6457,45 +6471,18 @@ function showLeaderboardView() {
       <div class="lb-rivalry-meta">${rivalry.total} play${rivalry.total !== 1 ? 's' : ''} in ${currentYear} · last ${_fmtDateShort(rivalry.lastDate)}</div>
     </div>` : '';
 
-  const wireTabs = () => {
-    container.querySelectorAll('[data-lb-mode]').forEach(el => {
-      el.addEventListener('click', () => {
-        const m = el.dataset.lbMode;
-        if (m !== _leaderboardMode) {
-          _leaderboardMode = m;
-          // When entering Board South, default to leaderboard sub-tab.
-          if (m === 'south') _bsSubTab = 'leaderboard';
-          showLeaderboardView();
-        }
-      });
-    });
-    container.querySelectorAll('[data-bs-sub]').forEach(el => {
-      el.addEventListener('click', () => {
-        const s = el.dataset.bsSub;
-        if (s !== _bsSubTab) {
-          _bsSubTab = s;
-          showLeaderboardView();
-        }
-      });
-    });
-  };
-
   if (rows.length === 0) {
     container.innerHTML = `
       <div class="lb-header">
         <div class="lb-title">${titleTxt}</div>
       </div>
-      ${tabsHtml}
       <div class="lb-empty">No active players to rank yet.</div>`;
-    wireTabs();
-    window.scrollTo(0, 0);
     return;
   }
 
   const podium = rows.slice(0, Math.min(3, rows.length));
   const rest = rows.slice(podium.length);
   const medals = ['🥇', '🥈', '🥉'];
-  // Place 2nd on left, 1st in middle (tallest), 3rd on right
   const slotOrder = podium.length === 3 ? [1, 0, 2]
                    : podium.length === 2 ? [1, 0]
                    : [0];
@@ -6544,7 +6531,6 @@ function showLeaderboardView() {
       <div class="lb-title">${titleTxt}</div>
       <div class="lb-count">${rows.length} player${rows.length !== 1 ? 's' : ''}</div>
     </div>
-    ${tabsHtml}
     ${rivalryHtml}
     ${podium.length > 0 ? `<div class="lb-podium">${podiumHtml}</div>` : ''}
     <div class="lb-list">${listHtml}</div>
@@ -6552,15 +6538,55 @@ function showLeaderboardView() {
       ${isSouth ? '<b>Board South League:</b> A separate Elo using only plays where the location is "Board South". Independent of the main leaderboard.<br><br>' : ''}<b>How it works:</b> Everyone starts at 1000 on Jan 1. Each play of ${currentYear} replays in date order — winners gain, losers drop, with bigger swings when the underdog wins. Complexity scales points (a win on weight 5 = full value, lighter games = less). Losses scale down with player count, and finishing last costs more than finishing mid-pack. <b>PROV</b> means fewer than 5 plays this year (points move faster). The leaderboard resets every January 1st.
     </div>`;
 
-  wireTabs();
-
   container.querySelectorAll('[data-visit-player]').forEach(el => {
     el.addEventListener('click', () => {
       showStatsView(el.dataset.visitPlayer, 'visiting');
       window.scrollTo(0, 0);
     });
   });
+}
 
+function showLeaderboardView() {
+  // Top-level Leaderboard tab now shows only the Main Elo league.
+  // Board South lives in its own tab (for BS regulars).
+  const container = document.getElementById('leaderboard-view');
+  _renderEloLeaderboardInto(container, 'main');
+  window.scrollTo(0, 0);
+}
+
+function showBoardSouthView() {
+  const container = document.getElementById('boardsouth-view');
+  if (_bsSubTab === 'vote') {
+    _renderBoardSouthVoteView(container);
+    return;
+  }
+  // Render BS leaderboard wrapped in the BS sub-tab nav so the user can flip
+  // between Leaderboard and Vote inside the Board South tab.
+  const subTabsHtml = `
+    <div class="bs-subtabs">
+      <button class="bs-subtab active" data-bs-sub="leaderboard">🏆 Leaderboard</button>
+      <button class="bs-subtab" data-bs-sub="vote">🗳️ Vote</button>
+    </div>`;
+  // Render leaderboard content into a temporary host, then prepend sub-tabs.
+  const host = document.createElement('div');
+  _renderEloLeaderboardInto(host, 'south');
+  container.innerHTML = subTabsHtml + host.innerHTML;
+  // Re-wire the visit-player handlers since we copied innerHTML.
+  container.querySelectorAll('[data-visit-player]').forEach(el => {
+    el.addEventListener('click', () => {
+      showStatsView(el.dataset.visitPlayer, 'visiting');
+      window.scrollTo(0, 0);
+    });
+  });
+  container.querySelectorAll('[data-bs-sub]').forEach(el => {
+    el.addEventListener('click', () => {
+      const s = el.dataset.bsSub;
+      if (s !== _bsSubTab) {
+        _bsSubTab = s;
+        showBoardSouthView();
+      }
+    });
+  });
   window.scrollTo(0, 0);
 }
 
@@ -6597,10 +6623,6 @@ function _renderBoardSouthVoteView(container) {
   const myList = voter ? (boardSouthVotes[voter] || []) : [];
 
   const tabsHtml = `
-    <div class="lb-tabs">
-      <button class="lb-tab" data-lb-mode="main">Main</button>
-      <button class="lb-tab active" data-lb-mode="south">Board South</button>
-    </div>
     <div class="bs-subtabs">
       <button class="bs-subtab" data-bs-sub="leaderboard">🏆 Leaderboard</button>
       <button class="bs-subtab active" data-bs-sub="vote">🗳️ Vote</button>
@@ -6702,23 +6724,13 @@ function _renderBoardSouthVoteView(container) {
       <b>How voting works:</b> Each Board South regular adds the games they want to play next, ordered by personal priority (top = most wanted). Games are ranked first by total vote count, then by combined priority — a game placed #1 by everyone outranks a game placed #5 by everyone, even with the same vote count. Reorder your list with ▲/▼ or drag to break ties in your favour. Votes are saved live and shared across devices.
     </div>`;
 
-  // Wire top-level tabs
-  container.querySelectorAll('[data-lb-mode]').forEach(el => {
-    el.addEventListener('click', () => {
-      const m = el.dataset.lbMode;
-      if (m !== _leaderboardMode) {
-        _leaderboardMode = m;
-        if (m === 'south') _bsSubTab = 'leaderboard';
-        showLeaderboardView();
-      }
-    });
-  });
+  // Wire BS sub-tabs
   container.querySelectorAll('[data-bs-sub]').forEach(el => {
     el.addEventListener('click', () => {
       const s = el.dataset.bsSub;
       if (s !== _bsSubTab) {
         _bsSubTab = s;
-        showLeaderboardView();
+        showBoardSouthView();
       }
     });
   });
@@ -6746,7 +6758,7 @@ function _renderBoardSouthVoteView(container) {
             return;
           }
           boardSouthVotes[voter] = list;
-          showLeaderboardView();
+          showBoardSouthView();
           persistBoardSouthVote(voter, list);
         });
       });
@@ -6767,7 +6779,7 @@ function _renderBoardSouthVoteView(container) {
     searchInput.addEventListener('input', (ev) => {
       _bsvSearchQuery = ev.target.value;
       // Re-render only the aggregate region for snappier typing
-      showLeaderboardView();
+      showBoardSouthView();
       // Restore focus + cursor
       const fresh = document.getElementById('bsv-search-agg');
       if (fresh) {
@@ -6881,7 +6893,7 @@ function _wireBoardSouthDrag(container, voter) {
       boardSouthVotes[voter] = newOrder;
       persistBoardSouthVote(voter, newOrder);
       // Re-render so the aggregate ranking + voter labels update.
-      showLeaderboardView();
+      showBoardSouthView();
     }
   };
 
@@ -7067,13 +7079,13 @@ function _openBoardSouthAddModal(skipFlagSet) {
         if (list.includes(bggId)) {
           // Already there — close modal anyway
           close();
-          showLeaderboardView();
+          showBoardSouthView();
           return;
         }
         list.push(bggId);
         boardSouthVotes[voter] = list;
         close();
-        showLeaderboardView();
+        showBoardSouthView();
         persistBoardSouthVote(voter, list);
       });
     });
@@ -7523,6 +7535,7 @@ if (_sp && NAME_MAP[_sp]) localStorage.setItem('bgl-player', NAME_MAP[_sp]);
 
 // Load ratings and favorites from Firebase, then show the right view
 Promise.all([loadAllRatings(), loadAllFavorites(), loadImportedGames(), loadImportedPlays(), loadGameImages(), loadBoardSouthVotes()]).then(() => {
+  if (typeof _updateBoardSouthBtnVisibility === 'function') _updateBoardSouthBtnVisibility();
   const savedPlayer = localStorage.getItem('bgl-player');
   if (savedPlayer) {
     showStatsView(savedPlayer);
@@ -7730,6 +7743,13 @@ window.initImporter = function(){
     const lbView = document.getElementById('leaderboard-view');
     if (lbView && lbView.classList.contains('open')) {
       try { showLeaderboardView(); } catch (_) {}
+    }
+    const bsView = document.getElementById('boardsouth-view');
+    if (bsView && bsView.classList.contains('open')) {
+      try { showBoardSouthView(); } catch (_) {}
+    }
+    if (typeof _updateBoardSouthBtnVisibility === 'function') {
+      try { _updateBoardSouthBtnVisibility(); } catch (_) {}
     }
 
     fileInput.value = '';
