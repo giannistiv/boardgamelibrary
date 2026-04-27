@@ -1012,8 +1012,23 @@
   .bsv-filter select{
     background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);
     color:var(--text);border-radius:6px;padding:0.35rem 0.5rem;font-size:0.82rem;font-family:inherit;
+    /* Tell the OS/browser the control is dark-themed so the native dropdown
+       popup uses dark colors instead of the default white background. */
+    color-scheme:dark;
+    -webkit-appearance:none;-moz-appearance:none;appearance:none;
+    background-image:linear-gradient(45deg,transparent 50%,rgba(255,255,255,0.5) 50%),
+                     linear-gradient(135deg,rgba(255,255,255,0.5) 50%,transparent 50%);
+    background-position:calc(100% - 14px) 50%,calc(100% - 9px) 50%;
+    background-size:5px 5px,5px 5px;background-repeat:no-repeat;
+    padding-right:1.4rem;
   }
-  .bsv-filter select:focus{outline:none;border-color:var(--accent)}
+  .bsv-filter select:focus{outline:none;border-color:var(--accent);background-color:rgba(255,255,255,0.08)}
+  .bsv-filter select:hover{background-color:rgba(255,255,255,0.08)}
+  /* Style the option list itself for browsers that honour these (most desktop
+     browsers do; mobile WebKit defers to color-scheme above). */
+  .bsv-filter select option{
+    background:#1f1f23;color:var(--text);
+  }
   .bsv-modal-count{
     font-size:0.7rem;opacity:0.55;text-align:right;margin-bottom:0.2rem;
   }
