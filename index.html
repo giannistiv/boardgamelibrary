@@ -6400,6 +6400,8 @@ function _computeRivalryOfYear(mode, forPlayer) {
           const [n2, r2] = list[j];
           // If focusing on a player, only consider pairs that include them
           if (focus && n1 !== focus && n2 !== focus) continue;
+          // In Board South mode, both members of the pair must be BS members.
+          if (mode === 'south' && (!_isBoardSouthMember(n1) || !_isBoardSouthMember(n2))) continue;
           const [a, b] = n1 < n2 ? [n1, n2] : [n2, n1];
           const aRank = a === n1 ? r1 : r2;
           const bRank = a === n1 ? r2 : r1;
@@ -6436,6 +6438,16 @@ function _eloToColorScore(elo) {
 let _leaderboardMode = 'main'; // 'main' | 'south' — kept for legacy callers; UI now splits across tabs
 let _bsSubTab = 'leaderboard'; // 'leaderboard' | 'vote' — used by the dedicated Board South tab
 
+// A canonical name belongs on the Board South leaderboard only if it's a
+// known BS regular OR carries the " - BS" disambiguation suffix. Random
+// people who happened to show up to a BS night don't get ranked here.
+function _isBoardSouthMember(canonicalName) {
+  if (!canonicalName) return false;
+  if (BOARD_SOUTH_REGULARS.has(canonicalName)) return true;
+  if (typeof canonicalName === 'string' && canonicalName.includes(' - BS')) return true;
+  return false;
+}
+
 function _renderEloLeaderboardInto(container, mode) {
   const isSouth = mode === 'south';
   const data = _computeEloLeaderboard(mode);
@@ -6443,6 +6455,7 @@ function _renderEloLeaderboardInto(container, mode) {
 
   const rows = Object.keys(data.ratings)
     .filter(p => data.plays[p] >= 1)
+    .filter(p => !isSouth || _isBoardSouthMember(p))
     .map(p => ({
       name: p,
       elo: Math.round(data.ratings[p]),
