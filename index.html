@@ -5063,30 +5063,78 @@ const ACHIEVEMENTS = [
   { id:'brain-burner',    name:'Brain Burner',    desc:'Win a game with weight 4.5+' },
   { id:'speed-demon',     name:'Speed Demon',     desc:'Win 10 light games (weight ≤1.5)' },
   { id:'heavy-lifter',    name:'Heavy Lifter',    desc:'Win 10 heavy games (weight ≥3)' },
-  { id:'perfectionist',   name:'Perfectionist',   desc:'100% win rate across 5+ plays of one game' },
   { id:'coop-captain',    name:'Coop Captain',    desc:'Earn 10 cooperative wins' },
-  { id:'solo-adventurer', name:'Solo Adventurer', desc:'Play 10 solo games' },
+  // ── Newer achievements ──
+  { id:'beat-stiv',       name:'Stiv Slayer',     desc:'Win a game against Στιβ' },
+  { id:'medalist',        name:'Medalist',        desc:'Finish top 3 on the main leaderboard' },
+  { id:'ten-by-ten',      name:'Decuple',         desc:'Play 10 different games at least 10 times each' },
+  { id:'campaigner',      name:'Campaigner',      desc:'Start a campaign or legacy game' },
+  { id:'tastemaker',      name:'Tastemaker',      desc:'Pick a top 4 of favourite games' },
+  { id:'critic',          name:'Critic',          desc:'Rate at least one game' },
+  { id:'all-week-player', name:'All-Week Player', desc:'Have a play on every day of the week' },
+  { id:'devoted',         name:'Devoted',         desc:'Play a single game more than 30 times' },
+  { id:'streak-breaker',  name:'Streak Breaker',  desc:"End someone else's 3+ win streak" },
+  { id:'coop-veteran',    name:'Coop Veteran',    desc:'Earn 50 cooperative wins' },
+  { id:'tragic-hero',     name:'Tragic Hero',     desc:'Lose a cooperative game' },
+  { id:'true-believer',   name:'True Believer',   desc:'Play 5 different Marvel games' },
+  { id:'eurogamer',       name:'Eurogamer',       desc:'Play 5 different Euro-style games' },
+  { id:'tactician',       name:'Tactician',       desc:'Play 5 different war games' },
+  { id:'uwe-disciple',    name:'Uwe Disciple',    desc:'Play 5 different Uwe Rosenberg games' },
 ];
 
-function _achievementIcon(id) { return `images/achievements/${id}.svg`; }
+// Achievements with custom SVG icons. Anything else falls back to default.svg
+// (a simple star shape) so new entries render cleanly until we ship art.
+const _ACH_ICON_IDS = new Set([
+  'first-win','centurion','half-grand','graduated','diversifier','social-butterfly',
+  'globetrotter','explorer','marathon','hot-streak','on-fire','inferno','comeback-kid',
+  'heavy-hitter','brain-burner','speed-demon','heavy-lifter','coop-captain',
+  // Pre-existing extras still on disk:
+  'giant-slayer','south-champ','top-dog','underdog',
+]);
+function _achievementIcon(id) {
+  return _ACH_ICON_IDS.has(id) ? `images/achievements/${id}.svg` : `images/achievements/default.svg`;
+}
+
+// Heuristics for thematic-family achievements.
+function _isMarvelGame(g) {
+  return g && typeof g.name === 'string' && /\bmarvel\b/i.test(g.name);
+}
+function _isEuroGame(g) {
+  return g && Array.isArray(g.categories) && g.categories.includes('Euro');
+}
+function _isWarGame(g) {
+  if (!g) return false;
+  if (typeof g.name === 'string' && /\b(war|wars|battle|combat|skirmish)\b/i.test(g.name)) return true;
+  // Known wargames in the library that don't match the regex above.
+  const knownWargameIds = new Set([12333 /* Twilight Struggle */]);
+  return knownWargameIds.has(Number(g.bggId));
+}
+function _isUweGame(g) {
+  return g && typeof g.designer === 'string' && /Uwe Rosenberg/i.test(g.designer);
+}
 
 function computeAchievements(playerName) {
-  const plays = [];
+  // ── Build per-player play list and a global timeline (for cross-player
+  //    streak detection used by 'streak-breaker'). ──
+  const plays = []; // plays where playerName participated
+  const allPlays = []; // every play, every player — for global streak tracking
   for (const bggId in PLAY_HISTORY) {
     for (const p of PLAY_HISTORY[bggId]) {
       if (!p || !p.date || !Array.isArray(p.sc)) continue;
       const me = p.sc.find(s => s.n === playerName);
-      if (!me) continue;
-      plays.push({ date: p.date, bggId: Number(bggId), sc: p.sc, me, location: p.l });
+      const entry = { date: p.date, bggId: Number(bggId), sc: p.sc, location: p.l };
+      allPlays.push(entry);
+      if (me) plays.push({ ...entry, me });
     }
   }
   plays.sort((a, b) => a.date.localeCompare(b.date));
+  allPlays.sort((a, b) => a.date.localeCompare(b.date));
 
   const earned = {};
   const mark = (id, date) => { if (!earned[id]) earned[id] = date; };
 
   let totalPlays = 0, totalWins = 0;
-  let coopWins = 0, soloPlays = 0;
+  let coopWins = 0;
   let lightWins = 0, heavyWins = 0;
   let curStreak = 0, curLossStreak = 0;
   const gamesPlayed = new Set();
@@ -5095,12 +5143,54 @@ function computeAchievements(playerName) {
   const categories = new Set();
   const perGameWR = {}; // bggId -> {plays, wins}
   const playsByDate = {}; // date -> count
+  const tenPlayGames = new Set(); // bggIds the player has played at least 10 times
+  const daysOfWeek = new Set();   // 0..6 weekdays the player has played on
+  const marvelSet = new Set(), euroSet = new Set(), warSet = new Set(), uweSet = new Set();
 
+  // ── Pass 1: walk the GLOBAL timeline tracking each player's competitive
+  //    win-streak. When the active player wins a play in which an opponent's
+  //    incoming streak is ≥ 3, mark 'streak-breaker'. We update streaks AFTER
+  //    the check so the play that breaks the streak still sees the old value.
+  const globalStreaks = {};
+  for (const p of allPlays) {
+    const isSolo = p.sc.length === 1;
+    const allSame = p.sc.every(s => !!s.w === !!p.sc[0].w);
+    const isCoop = !isSolo && allSame;
+    if (!isSolo && !isCoop) {
+      const me = p.sc.find(s => s.n === playerName);
+      if (me && me.w) {
+        for (const s of p.sc) {
+          if (!s || s.n === playerName) continue;
+          if ((globalStreaks[s.n] || 0) >= 3) {
+            mark('streak-breaker', p.date);
+            break;
+          }
+        }
+      }
+      // Update streaks for everyone in this play.
+      for (const s of p.sc) {
+        if (!s || !s.n) continue;
+        if (s.w) globalStreaks[s.n] = (globalStreaks[s.n] || 0) + 1;
+        else globalStreaks[s.n] = 0;
+      }
+    }
+  }
+
+  // ── Pass 2: walk the player's plays for per-player counters/conditions. ──
   for (const p of plays) {
     totalPlays++;
     gamesPlayed.add(p.bggId);
     if (p.location) locations.add(p.location);
     playsByDate[p.date] = (playsByDate[p.date] || 0) + 1;
+
+    // Day-of-week tracking for 'all-week-player'.
+    // YYYY-MM-DD parsed as UTC to avoid local-timezone drift.
+    const [yy, mm, dd] = p.date.split('-').map(Number);
+    if (yy && mm && dd) {
+      const dow = new Date(Date.UTC(yy, mm - 1, dd)).getUTCDay();
+      daysOfWeek.add(dow);
+      if (daysOfWeek.size === 7) mark('all-week-player', p.date);
+    }
 
     for (const s of p.sc) {
       if (s && s.n && s.n !== playerName) opponents.add(s.n);
@@ -5111,20 +5201,37 @@ function computeAchievements(playerName) {
       for (const c of game.categories) categories.add(c);
     }
 
+    // Thematic-family sets — counted per unique game played.
+    if (game) {
+      if (_isMarvelGame(game)) { marvelSet.add(p.bggId); if (marvelSet.size === 5) mark('true-believer', p.date); }
+      if (_isEuroGame(game))   { euroSet.add(p.bggId);   if (euroSet.size === 5)   mark('eurogamer',     p.date); }
+      if (_isWarGame(game))    { warSet.add(p.bggId);    if (warSet.size === 5)    mark('tactician',     p.date); }
+      if (_isUweGame(game))    { uweSet.add(p.bggId);    if (uweSet.size === 5)    mark('uwe-disciple',  p.date); }
+      if (isCampaign(game))    mark('campaigner', p.date);
+    }
+
     const meWon = !!p.me.w;
     const isSolo = p.sc.length === 1;
     const allSame = p.sc.every(s => !!s.w === !!p.sc[0].w);
     const isCoop = !isSolo && allSame;
 
     if (meWon) totalWins++;
-    if (isSolo) soloPlays++;
     if (isCoop && meWon) coopWins++;
+    if (isCoop && !meWon) mark('tragic-hero', p.date);
 
     if (!perGameWR[p.bggId]) perGameWR[p.bggId] = { plays: 0, wins: 0 };
     perGameWR[p.bggId].plays++;
     if (meWon) perGameWR[p.bggId].wins++;
 
-    // Competitive plays drive streaks
+    // Devoted: any single game played > 30 times.
+    if (perGameWR[p.bggId].plays === 31) mark('devoted', p.date);
+    // Decuple: 10 different games each with ≥ 10 plays.
+    if (perGameWR[p.bggId].plays === 10) {
+      tenPlayGames.add(p.bggId);
+      if (tenPlayGames.size === 10) mark('ten-by-ten', p.date);
+    }
+
+    // Competitive plays drive streaks + the Stiv Slayer marker.
     if (!isCoop && !isSolo) {
       if (meWon) {
         if (curLossStreak >= 5) mark('comeback-kid', p.date);
@@ -5133,6 +5240,12 @@ function computeAchievements(playerName) {
         if (curStreak >= 3)  mark('hot-streak', p.date);
         if (curStreak >= 5)  mark('on-fire',    p.date);
         if (curStreak >= 10) mark('inferno',    p.date);
+        // Beat Στιβ: any competitive win where Στιβ was a participant who lost.
+        if (playerName !== 'Στιβ') {
+          for (const s of p.sc) {
+            if (s && s.n === 'Στιβ' && !s.w) { mark('beat-stiv', p.date); break; }
+          }
+        }
       } else {
         curStreak = 0;
         curLossStreak++;
@@ -5158,15 +5271,50 @@ function computeAchievements(playerName) {
     if (lightWins === 10)            mark('speed-demon',      p.date);
     if (heavyWins === 10)            mark('heavy-lifter',     p.date);
     if (coopWins === 10)             mark('coop-captain',     p.date);
-    if (soloPlays === 10)            mark('solo-adventurer',  p.date);
+    if (coopWins === 50)             mark('coop-veteran',     p.date);
+  }
 
-    if (!earned['perfectionist']) {
-      for (const bggId in perGameWR) {
-        const r = perGameWR[bggId];
-        if (r.plays >= 5 && r.plays === r.wins) { mark('perfectionist', p.date); break; }
+  // ── Static post-checks: data outside PLAY_HISTORY ──
+  const today = new Date().toISOString().slice(0, 10);
+  const lastDate = plays.length > 0 ? plays[plays.length - 1].date : today;
+
+  // Tastemaker: the player has at least 4 favourites pinned.
+  try {
+    const favs = (typeof getPlayerFavorites === 'function')
+      ? getPlayerFavorites(playerName)
+      : [];
+    if (Array.isArray(favs) && favs.length >= 4) mark('tastemaker', lastDate);
+  } catch (_) {}
+
+  // Critic: the player has rated at least one game.
+  try {
+    if (typeof ratingsCache !== 'undefined' && ratingsCache) {
+      for (const bggId in ratingsCache) {
+        const v = ratingsCache[bggId] && ratingsCache[bggId][playerName];
+        if (v == null) continue;
+        const value = (typeof v === 'object') ? v.value : v;
+        if (typeof value === 'number' && value > 0) {
+          mark('critic', lastDate);
+          break;
+        }
       }
     }
-  }
+  } catch (_) {}
+
+  // Medalist: currently top 3 on the main Elo leaderboard for this year.
+  try {
+    if (typeof _computeEloLeaderboard === 'function') {
+      const data = _computeEloLeaderboard('main');
+      const rows = Object.keys(data.ratings || {})
+        .filter(p => (data.plays[p] || 0) >= 1)
+        .map(p => ({ name: p, elo: data.ratings[p], lastDate: data.lastPlayDate[p] || today }))
+        .sort((a, b) => b.elo - a.elo)
+        .slice(0, 3);
+      const me = rows.find(r => r.name === playerName);
+      if (me) mark('medalist', me.lastDate);
+    }
+  } catch (_) {}
+
   return earned;
 }
 
