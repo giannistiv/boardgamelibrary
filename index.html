@@ -5313,8 +5313,29 @@ function showStatsView(playerName, visiting) {
     return `${months[parseInt(m)-1]} ${parseInt(day)}, ${y}`;
   };
 
-  // Top games by plays
+  // Top games by plays (still computed for win-rate filtering & charts).
   const topGames = Object.values(gameStats).sort((a, b) => b.plays - a.plays).slice(0, 10);
+
+  // Latest individual plays (recentPlays is already sorted newest-first above).
+  const latestPlays = recentPlays.slice(0, 10);
+  const latestPlayRowHtml = (p) => {
+    const imgSrc = p.game.bggId > 0 ? `images/${p.game.bggId}.jpg` : '';
+    const result = p.noWinner
+      ? '<span class="stats-game-wr" style="color:#94a3b8">—</span>'
+      : (p.won
+          ? '<span class="stats-game-wr" style="color:#22c55e">WIN</span>'
+          : '<span class="stats-game-wr" style="color:#f87171">LOSS</span>');
+    const scoreTxt = p.score ? ` &middot; ${p.score} pts` : '';
+    const roleTxt = p.role ? ` &middot; ${p.role}` : '';
+    return `<div class="stats-game-row" data-bgg-id="${p.game.bggId}">
+      ${imgSrc ? `<img class="stats-game-img" src="${imgSrc}" alt="" onerror="__imgFallback(this, ${p.game.bggId})">` : ''}
+      <div class="stats-game-info">
+        <div class="stats-game-name">${p.game.name}</div>
+        <div class="stats-game-detail">${fmtDate(p.date)}${scoreTxt}${roleTxt} &middot; ${p.players} player${p.players !== 1 ? 's' : ''}</div>
+      </div>
+      ${result}
+    </div>`;
+  };
 
   // Best win rates (min 3 plays)
   const bestWR = Object.values(gameStats)
@@ -5483,8 +5504,10 @@ function showStatsView(playerName, visiting) {
     </div>
 
     <div class="stats-section">
-      <div class="stats-section-title">${isOwnProfile ? 'Most Played' : 'Most Played'}</div>
-      ${topGames.map(gameRowHtml).join('')}
+      <div class="stats-section-title">Latest Plays</div>
+      ${latestPlays.length > 0
+        ? latestPlays.map(latestPlayRowHtml).join('')
+        : '<div class="stats-game-detail" style="opacity:0.55;padding:0.4rem 0">No plays recorded yet.</div>'}
     </div>
 
     ${bestWR.length > 0 ? `<div class="stats-section">
