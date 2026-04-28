@@ -424,7 +424,8 @@
   /* ── Player Header Bar ── */
   .player-bar{
     display:flex;align-items:center;justify-content:center;
-    gap:0.6rem;margin-bottom:0.6rem;
+    gap:0.4rem;margin-bottom:0.6rem;
+    flex-wrap:wrap;max-width:100%;padding:0 0.4rem;
   }
   .player-bar-btn{
     padding:0.35rem 0.8rem;border-radius:8px;
@@ -432,6 +433,7 @@
     background:rgba(226,176,74,0.12);color:var(--accent);
     font-family:inherit;font-size:0.78rem;cursor:pointer;
     transition:all 0.15s;font-weight:500;
+    white-space:nowrap;
   }
   .player-bar-btn:hover{background:rgba(226,176,74,0.22)}
   .player-bar-btn.active{background:var(--accent);color:#1a1a2e;border-color:var(--accent)}
@@ -819,7 +821,8 @@
   .ach-name{font-size:0.78rem;font-weight:600;color:var(--text);line-height:1.2;min-height:2.4em;display:flex;align-items:center;justify-content:center;text-align:center}
   .ach-card.locked .ach-name{opacity:0.6}
   .ach-date{font-size:0.6rem;opacity:0.55;margin-top:0.25rem;font-variant-numeric:tabular-nums;letter-spacing:0.02em}
-  .ach-desc{font-size:0.63rem;line-height:1.35;margin-top:0.3rem;opacity:0.55;text-align:center;color:var(--text)}
+  .ach-desc{font-size:0.63rem;line-height:1.35;margin-top:0.3rem;opacity:0.7;text-align:center;color:var(--text)}
+  .ach-card.locked .ach-desc{opacity:0.5}
   .ach-recent .ach-card{
     border-color:rgba(226,176,74,0.45);
     background:linear-gradient(135deg, rgba(226,176,74,0.10), rgba(255,255,255,0.04));
@@ -1165,8 +1168,9 @@
   @media(min-width:1000px){
     body.mobile-library h1{ font-size:5.2rem; margin:2.6rem 0 0.7rem; }
     body.mobile-library .subtitle{ font-size:2.5rem; margin-bottom:2.6rem; }
-    body.mobile-library .player-bar{ gap:1.4rem; margin-bottom:1.8rem; }
-    body.mobile-library .player-bar-btn{ font-size:2rem; padding:0.9rem 2rem; border-radius:16px; }
+    body.mobile-library .player-bar{ gap:0.8rem; margin-bottom:1.8rem; padding:0 1rem;
+                                    flex-wrap:wrap;max-width:100%; }
+    body.mobile-library .player-bar-btn{ font-size:1.5rem; padding:0.7rem 1.2rem; border-radius:14px; }
     body.mobile-library .search-wrap{ max-width:1000px; padding:0 2rem; margin-bottom:2.2rem; }
     body.mobile-library .search-input{
       font-size:2.2rem; padding:1.1rem 1.8rem 1.1rem 4.4rem; border-radius:22px;
@@ -1217,6 +1221,7 @@
   <button class="player-bar-btn" id="btn-games">Games</button>
   <button class="player-bar-btn" id="btn-mystats">Profile</button>
   <button class="player-bar-btn" id="btn-leaderboard">Leaderboard</button>
+  <button class="player-bar-btn" id="btn-achievements">Achievements</button>
   <button class="player-bar-btn" id="btn-insights">Stats</button>
   <button class="player-bar-btn" id="btn-boardsouth" style="display:none">Board South</button>
 </div>
@@ -1297,6 +1302,7 @@
 <div class="stats-view" id="insights-view"></div>
 <div class="stats-view" id="games-view"></div>
 <div class="stats-view" id="leaderboard-view"></div>
+<div class="stats-view" id="achievements-view"></div>
 <div class="stats-view" id="boardsouth-view"></div>
 
 <!-- Player Picker Overlay -->
@@ -4942,12 +4948,14 @@ function _deactivateAllTabs() {
   document.getElementById('insights-view').classList.remove('open');
   document.getElementById('games-view').classList.remove('open');
   document.getElementById('leaderboard-view').classList.remove('open');
+  document.getElementById('achievements-view').classList.remove('open');
   document.getElementById('boardsouth-view').classList.remove('open');
   document.getElementById('btn-library').classList.remove('active');
   document.getElementById('btn-mystats').classList.remove('active');
   document.getElementById('btn-insights').classList.remove('active');
   document.getElementById('btn-games').classList.remove('active');
   document.getElementById('btn-leaderboard').classList.remove('active');
+  document.getElementById('btn-achievements').classList.remove('active');
   document.getElementById('btn-boardsouth').classList.remove('active');
 }
 
@@ -5017,6 +5025,21 @@ function switchToLeaderboard() {
   showLeaderboardView();
 }
 
+function switchToAchievements() {
+  const player = localStorage.getItem('bgl-player');
+  if (!player) { openPicker(); return; }
+  _deactivateAllTabs();
+  document.getElementById('achievements-view').classList.add('open');
+  document.getElementById('btn-achievements').classList.add('active');
+  if (_isTouchDevice()) {
+    document.body.style.minWidth = 'auto';
+    document.body.classList.remove('mobile-library');
+    _setViewport(VP_LOCKED);
+    window.scrollTo(0, 0);
+  }
+  showAchievementsView(player);
+}
+
 function switchToBoardSouth() {
   _deactivateAllTabs();
   document.getElementById('boardsouth-view').classList.add('open');
@@ -5042,6 +5065,7 @@ document.getElementById('btn-games').addEventListener('click', switchToGames);
 document.getElementById('btn-leaderboard').addEventListener('click', switchToLeaderboard);
 document.getElementById('btn-mystats').addEventListener('click', switchToStats);
 document.getElementById('btn-insights').addEventListener('click', switchToInsights);
+document.getElementById('btn-achievements').addEventListener('click', switchToAchievements);
 document.getElementById('btn-boardsouth').addEventListener('click', switchToBoardSouth);
 
 // ── Achievements ──
@@ -5078,18 +5102,35 @@ const ACHIEVEMENTS = [
   { id:'tragic-hero',     name:'Tragic Hero',     desc:'Lose a cooperative game' },
   { id:'true-believer',   name:'True Believer',   desc:'Play 5 different Marvel games' },
   { id:'eurogamer',       name:'Eurogamer',       desc:'Play 5 different Euro-style games' },
-  { id:'tactician',       name:'Tactician',       desc:'Play 5 different war games' },
+  { id:'tactician',       name:'Tactician',       desc:'Play 5 different war or area-control games' },
   { id:'uwe-disciple',    name:'Uwe Disciple',    desc:'Play 5 different Uwe Rosenberg games' },
+  // ── Latest additions ──
+  { id:'year-of-champ',   name:'Year of the Champ',desc:'Finish a past year as #1 on the main leaderboard' },
+  { id:'wooden-spoon',    name:'Wooden Spoon',    desc:'Finish last in 5 different games' },
+  { id:'tiebreaker',      name:'Photo Finish',    desc:'Win a competitive game on a tiebreaker' },
+  { id:'speed-run',       name:'Speed Run',       desc:'Play 10 games in a single calendar week' },
+  { id:'big-group',       name:'Big Group',       desc:'Play with 6 or more players at one table' },
+  { id:'decade-hopper',   name:'Decade Hopper',   desc:'Play games from 5 different release decades' },
+  { id:'best-friend',     name:'Best Friend',     desc:'Reach 50 plays with the same opponent' },
+  { id:'gateway-drug',    name:'Gateway Drug',    desc:"Win the first time someone else plays a new game" },
+  { id:'renaissance',     name:'Renaissance Player',desc:'Play games from 5 different decades in a single year' },
 ];
 
 // Achievements with custom SVG icons. Anything else falls back to default.svg
 // (a simple star shape) so new entries render cleanly until we ship art.
 const _ACH_ICON_IDS = new Set([
+  // Original art set
   'first-win','centurion','half-grand','graduated','diversifier','social-butterfly',
   'globetrotter','explorer','marathon','hot-streak','on-fire','inferno','comeback-kid',
   'heavy-hitter','brain-burner','speed-demon','heavy-lifter','coop-captain',
   // Pre-existing extras still on disk:
   'giant-slayer','south-champ','top-dog','underdog',
+  // Latest custom icons (newer + freshest additions):
+  'beat-stiv','medalist','ten-by-ten','campaigner','tastemaker','critic',
+  'all-week-player','devoted','streak-breaker','coop-veteran','tragic-hero',
+  'true-believer','eurogamer','tactician','uwe-disciple',
+  'year-of-champ','wooden-spoon','tiebreaker','speed-run','big-group',
+  'decade-hopper','best-friend','gateway-drug','renaissance',
 ]);
 function _achievementIcon(id) {
   return _ACH_ICON_IDS.has(id) ? `images/achievements/${id}.svg` : `images/achievements/default.svg`;
@@ -5104,6 +5145,7 @@ function _isEuroGame(g) {
 }
 function _isWarGame(g) {
   if (!g) return false;
+  if (Array.isArray(g.categories) && g.categories.includes('Area Control')) return true;
   if (typeof g.name === 'string' && /\b(war|wars|battle|combat|skirmish)\b/i.test(g.name)) return true;
   // Known wargames in the library that don't match the regex above.
   const knownWargameIds = new Set([12333 /* Twilight Struggle */]);
@@ -5146,6 +5188,34 @@ function computeAchievements(playerName) {
   const tenPlayGames = new Set(); // bggIds the player has played at least 10 times
   const daysOfWeek = new Set();   // 0..6 weekdays the player has played on
   const marvelSet = new Set(), euroSet = new Set(), warSet = new Set(), uweSet = new Set();
+  const lastPlaceGames = new Set();  // bggIds where the player finished last
+  const playsByIsoWeek = {};         // 'YYYY-Www' → count
+  const decadeSet = new Set();       // distinct release decades played
+  const decadeByYear = {};           // calendar year → Set of decades played that year
+  const opponentPlayCounts = {};     // opponent name → count of plays together
+
+  // Pre-compute first-play date per (bggId, name) for 'gateway-drug'.
+  const firstPlayOfGameByName = {}; // bggId → { name → 'YYYY-MM-DD' }
+  for (const p of allPlays) {
+    if (!firstPlayOfGameByName[p.bggId]) firstPlayOfGameByName[p.bggId] = {};
+    for (const s of p.sc) {
+      if (!s || !s.n) continue;
+      const cur = firstPlayOfGameByName[p.bggId][s.n];
+      if (!cur || p.date < cur) firstPlayOfGameByName[p.bggId][s.n] = p.date;
+    }
+  }
+
+  // ISO week key helper: returns 'YYYY-Www' for a YYYY-MM-DD date string.
+  const isoWeekKey = (dateStr) => {
+    const [yy, mm, dd] = dateStr.split('-').map(Number);
+    if (!yy) return null;
+    const d = new Date(Date.UTC(yy, mm - 1, dd));
+    const day = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - day);
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    const week = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
+    return `${d.getUTCFullYear()}-W${String(week).padStart(2, '0')}`;
+  };
 
   // ── Pass 1: walk the GLOBAL timeline tracking each player's competitive
   //    win-streak. When the active player wins a play in which an opponent's
@@ -5272,6 +5342,86 @@ function computeAchievements(playerName) {
     if (heavyWins === 10)            mark('heavy-lifter',     p.date);
     if (coopWins === 10)             mark('coop-captain',     p.date);
     if (coopWins === 50)             mark('coop-veteran',     p.date);
+
+    // ── Big Group: 6 or more distinct players at the same table. ──
+    {
+      const distinctPlayers = new Set(p.sc.map(s => s && s.n).filter(Boolean));
+      if (distinctPlayers.size >= 6) mark('big-group', p.date);
+    }
+
+    // ── Speed Run: 10 plays in one ISO week. ──
+    {
+      const wk = isoWeekKey(p.date);
+      if (wk) {
+        playsByIsoWeek[wk] = (playsByIsoWeek[wk] || 0) + 1;
+        if (playsByIsoWeek[wk] === 10) mark('speed-run', p.date);
+      }
+    }
+
+    // ── Decade tracking: lifetime + per-year. ──
+    if (game && typeof game.year === 'number' && game.year > 0) {
+      const decade = Math.floor(game.year / 10) * 10;
+      decadeSet.add(decade);
+      if (decadeSet.size === 5) mark('decade-hopper', p.date);
+      const py = (yy != null) ? yy : Number(p.date.slice(0, 4));
+      if (!decadeByYear[py]) decadeByYear[py] = new Set();
+      decadeByYear[py].add(decade);
+      if (decadeByYear[py].size === 5) mark('renaissance', p.date);
+    }
+
+    // ── Best Friend: 50 plays with the same opponent. ──
+    {
+      const seenInThisPlay = new Set();
+      for (const s of p.sc) {
+        if (!s || !s.n || s.n === playerName) continue;
+        if (seenInThisPlay.has(s.n)) continue;
+        seenInThisPlay.add(s.n);
+        opponentPlayCounts[s.n] = (opponentPlayCounts[s.n] || 0) + 1;
+        if (opponentPlayCounts[s.n] === 50) mark('best-friend', p.date);
+      }
+    }
+
+    // ── Wooden Spoon: finish last in 5 different competitive games. ──
+    if (!isCoop && !isSolo) {
+      const ranks = _leaderboardRanksForPlay(p.sc, p.bggId);
+      if (ranks) {
+        const myRank = ranks.find(r => r.player === playerName);
+        if (myRank) {
+          const maxRank = Math.max(...ranks.map(r => r.rank));
+          if (myRank.rank === maxRank && maxRank > 1) {
+            lastPlaceGames.add(p.bggId);
+            if (lastPlaceGames.size === 5) mark('wooden-spoon', p.date);
+          }
+        }
+      }
+    }
+
+    // ── Photo Finish: win on a tiebreaker (tied top score, marked winner). ──
+    if (!isCoop && !isSolo && meWon && !earned['tiebreaker']) {
+      const parsed = p.sc.map(s => {
+        if (!s || s.s == null || s.s === '') return null;
+        const t = String(s.s).trim();
+        if (!t) return null;
+        if (/^-?\d+(\.\d+)?$/.test(t)) return Number(t);
+        return null;
+      });
+      if (parsed.every(v => v !== null)) {
+        const myIdx = p.sc.findIndex(s => s.n === playerName);
+        const myScore = parsed[myIdx];
+        // True tiebreaker = at least one other player also has my score AND is NOT a winner.
+        const tiedNonWinner = p.sc.some((s, i) => i !== myIdx && parsed[i] === myScore && !s.w);
+        if (tiedNonWinner) mark('tiebreaker', p.date);
+      }
+    }
+
+    // ── Gateway Drug: win the first time an opponent ever played this game. ──
+    if (meWon && !isSolo && !earned['gateway-drug']) {
+      const fp = firstPlayOfGameByName[p.bggId] || {};
+      for (const s of p.sc) {
+        if (!s || !s.n || s.n === playerName) continue;
+        if (fp[s.n] === p.date) { mark('gateway-drug', p.date); break; }
+      }
+    }
   }
 
   // ── Static post-checks: data outside PLAY_HISTORY ──
@@ -5315,6 +5465,29 @@ function computeAchievements(playerName) {
     }
   } catch (_) {}
 
+  // Year of the Champ: finished a past (already-closed) calendar year as #1
+  // on the main Elo leaderboard. Skips the current in-progress year.
+  try {
+    const currentYear = new Date().getFullYear();
+    const yearsSeen = new Set();
+    for (const p of allPlays) {
+      const y = Number(p.date.slice(0, 4));
+      if (y && y < currentYear) yearsSeen.add(y);
+    }
+    let earliestWinYear = null;
+    for (const y of yearsSeen) {
+      const data = _computeMainEloForYear(y);
+      const rows = Object.keys(data.ratings || {})
+        .filter(p => (data.plays[p] || 0) >= 1)
+        .map(p => ({ name: p, elo: data.ratings[p] }))
+        .sort((a, b) => b.elo - a.elo);
+      if (rows.length > 0 && rows[0].name === playerName) {
+        if (earliestWinYear === null || y < earliestWinYear) earliestWinYear = y;
+      }
+    }
+    if (earliestWinYear !== null) mark('year-of-champ', `${earliestWinYear}-12-31`);
+  } catch (_) {}
+
   return earned;
 }
 
@@ -5331,13 +5504,14 @@ function buildAchievementsHtml(playerName) {
   const card = (a) => {
     const e = a.earnedDate;
     const tip = e ? `${a.desc} · earned ${e}` : a.desc;
-    const bottom = e
-      ? `<div class="ach-date">Earned ${_fmtDateShort(e)}</div>`
-      : `<div class="ach-desc">${a.desc}</div>`;
+    // Always show the description, regardless of earned/locked state.
+    // Earned date is appended underneath when present.
+    const dateLine = e ? `<div class="ach-date">Earned ${_fmtDateShort(e)}</div>` : '';
     return `<div class="ach-card${e ? '' : ' locked'}" title="${tip}">
       <div class="ach-icon" style="-webkit-mask-image:url(${_achievementIcon(a.id)});mask-image:url(${_achievementIcon(a.id)})"></div>
       <div class="ach-name">${a.name}</div>
-      ${bottom}
+      <div class="ach-desc">${a.desc}</div>
+      ${dateLine}
     </div>`;
   };
 
@@ -5353,6 +5527,19 @@ function buildAchievementsHtml(playerName) {
   </div>`;
 
   return { recentHtml, allHtml };
+}
+
+function showAchievementsView(playerName) {
+  const container = document.getElementById('achievements-view');
+  if (!container) return;
+  const { recentHtml, allHtml } = buildAchievementsHtml(playerName);
+  container.innerHTML = `
+    <div class="lb-header">
+      <div class="lb-title">${playerName}'s Achievements</div>
+    </div>
+    ${recentHtml}
+    ${allHtml}`;
+  window.scrollTo(0, 0);
 }
 
 // ── Stats Dashboard ──
@@ -5594,8 +5781,8 @@ function showStatsView(playerName, visiting) {
   // Build favorites section
   const favoritesHtml = buildFavoritesHtml(playerName, isOwnProfile);
 
-  // Build achievements (recent at top, full list at bottom)
-  const { recentHtml: achRecentHtml, allHtml: achAllHtml } = buildAchievementsHtml(playerName);
+  // Achievements moved to their own dedicated tab (#achievements-view).
+  // Profile no longer renders the grid.
 
   // Build day/location charts for this player
   const playerDays = {};
@@ -5617,8 +5804,6 @@ function showStatsView(playerName, visiting) {
       <div class="stats-player-name">${playerName}</div>
       <div class="stats-player-sub">${isOwnProfile ? 'Your Profile' : 'Player Profile'}</div>
     </div>
-
-    ${achRecentHtml}
 
     ${favoritesHtml}
 
@@ -5680,8 +5865,6 @@ function showStatsView(playerName, visiting) {
         </div>`;
       }).join('')}
     </div>` : ''}
-
-    ${achAllHtml}
 
     <div class="qr-section">
       <div class="stats-section-title" style="border:none;text-align:center">Share This Library</div>
@@ -6440,6 +6623,71 @@ function _leaderboardRanksForPlay(sc, bggId) {
 
 function _yearStartCutoff() {
   return new Date().getFullYear() + '-01-01';
+}
+
+// Compute the main Elo leaderboard for a closed past year [YYYY-01-01, YYYY-12-31].
+// Returns { ratings, plays, lastPlayDate } similar to _computeEloLeaderboard.
+// Used by the 'year-of-champ' achievement.
+function _computeMainEloForYear(year) {
+  const start = `${year}-01-01`;
+  const end = `${year}-12-31`;
+  const flat = [];
+  for (const bggId in PLAY_HISTORY) {
+    for (const p of PLAY_HISTORY[bggId]) {
+      if (!p || !p.date || !Array.isArray(p.sc)) continue;
+      if (p.date < start || p.date > end) continue;
+      flat.push({ bggId: Number(bggId), date: p.date, sc: p.sc });
+    }
+  }
+  flat.sort((a, b) => a.date.localeCompare(b.date));
+
+  const ratings = {}, plays = {}, lastPlayDate = {};
+  for (const play of flat) {
+    const ranks = _leaderboardRanksForPlay(play.sc, play.bggId);
+    if (!ranks) continue;
+    const byName = {};
+    for (const r of ranks) {
+      const mapped = NAME_MAP[r.player] || r.player;
+      if (!mapped) continue;
+      if (byName[mapped] == null || r.rank < byName[mapped]) byName[mapped] = r.rank;
+    }
+    const participants = Object.keys(byName).map(n => ({ player: n, rank: byName[n] }));
+    if (participants.length < 2) continue;
+    const game = findGameByBggId(play.bggId);
+    const cx = (game && typeof game.complexity === 'number' && game.complexity > 0) ? game.complexity : 2.5;
+    const w = cx / 5;
+    const lossMult = Math.min(1, Math.max(0.7, 3 / participants.length));
+    for (const m of participants) {
+      if (ratings[m.player] == null) ratings[m.player] = 1000;
+      if (plays[m.player] == null) plays[m.player] = 0;
+    }
+    const pre = {}, preCount = {};
+    for (const m of participants) { pre[m.player] = ratings[m.player]; preCount[m.player] = plays[m.player]; }
+    const deltas = {};
+    for (const m of participants) deltas[m.player] = 0;
+    for (let i = 0; i < participants.length; i++) {
+      for (let j = i + 1; j < participants.length; j++) {
+        const a = participants[i], b = participants[j];
+        if (a.rank === b.rank) continue;
+        const winner = a.rank < b.rank ? a : b;
+        const loser  = a.rank < b.rank ? b : a;
+        const Rw = pre[winner.player], Rl = pre[loser.player];
+        const Ew = 1 / (1 + Math.pow(10, (Rl - Rw) / 400));
+        const Kw = preCount[winner.player] < 5 ? 48 : 32;
+        const Kl = preCount[loser.player]  < 5 ? 48 : 32;
+        deltas[winner.player] += Kw * w * (1 - Ew);
+        deltas[loser.player]  -= Kl * w * (1 - Ew) * lossMult;
+      }
+    }
+    for (const m of participants) {
+      if (m.player === GAME_PLAYER_NAME) { ratings[m.player] = 1000; continue; }
+      ratings[m.player] += deltas[m.player];
+      plays[m.player]++;
+      lastPlayDate[m.player] = play.date;
+    }
+  }
+  delete ratings[GAME_PLAYER_NAME];
+  return { ratings, plays, lastPlayDate };
 }
 
 // Known Board South regulars whose mere presence in a play is enough to
