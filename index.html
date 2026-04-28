@@ -4347,7 +4347,10 @@ function isExpansion(game) {
   return EXPANSION_IDS.has(game.id);
 }
 function isCampaign(game) {
-  return game.categories.includes('Campaign') || (game.mechanics && game.mechanics.includes('Legacy Game'));
+  if (!game) return false;
+  const hasCampaignCat = Array.isArray(game.categories) && game.categories.includes('Campaign');
+  const hasLegacyMech  = Array.isArray(game.mechanics) && game.mechanics.includes('Legacy Game');
+  return hasCampaignCat || hasLegacyMech;
 }
 
 // ── Render filters ──
