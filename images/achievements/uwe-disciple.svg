@@ -1,1 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M256 40v100m0 0c-30-30-60-30-80-20l60 60c20-10 20-30 20-40zm0 0c30-30 60-30 80-20l-60 60c-20-10-20-30-20-40zm-100 60c-30 0-50 20-50 50l80 30c-10-30-10-60-30-80zm200 0c30 0 50 20 50 50l-80 30c10-30 10-60 30-80zm-200 100c-30 10-40 40-30 70l90-10c-20-20-40-50-60-60zm200 0c30 10 40 40 30 70l-90-10c20-20 40-50 60-60zm-100 70-80 200h160zm-80 200h160l20 40H156z" stroke="currentColor" stroke-width="20" fill="none" stroke-linejoin="round" stroke-linecap="round"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Hair tuft on top of head -->
+  <path fill="currentColor" d="M170 96q86-58 172 0-26 26-86 26t-86-26z"/>
+  <!-- Left round lens (ring via even-odd fill rule) -->
+  <path fill="currentColor" fill-rule="evenodd" d="M120 232a70 70 0 1 1 140 0 70 70 0 0 1-140 0zm22 0a48 48 0 1 0 96 0 48 48 0 0 0-96 0z"/>
+  <!-- Right round lens (ring via even-odd fill rule) -->
+  <path fill="currentColor" fill-rule="evenodd" d="M252 232a70 70 0 1 1 140 0 70 70 0 0 1-140 0zm22 0a48 48 0 1 0 96 0 48 48 0 0 0-96 0z"/>
+  <!-- Bridge connecting the two lenses -->
+  <path fill="currentColor" d="M256 224h12v18h-12z"/>
+  <!-- Left temple (earpiece) -->
+  <path fill="currentColor" d="M60 220l60 4v18l-60 4z"/>
+  <!-- Right temple (earpiece) -->
+  <path fill="currentColor" d="M392 224l60-4v26l-60-4z"/>
+  <!-- Bushy mustache below the glasses -->
+  <path fill="currentColor" d="M180 320q38 22 76 22t76-22q-12 38-76 38t-76-38z"/>
+  <!-- Neck/shoulders silhouette -->
+  <path fill="currentColor" d="M168 400q88-26 176 0v60H168z"/>
+</svg>
