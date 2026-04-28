@@ -5598,11 +5598,22 @@ function showStatsView(playerName, visiting) {
       if (!playerEntry) continue;
 
       if (!gameStats[bggId]) {
-        gameStats[bggId] = { game, plays: 0, wins: 0, lastPlayed: '' };
+        gameStats[bggId] = { game, plays: 0, wins: 0, pvpPlays: 0, pvpWins: 0, lastPlayed: '' };
       }
       gameStats[bggId].plays++;
       if (playerEntry.w) gameStats[bggId].wins++;
       if (play.date > gameStats[bggId].lastPlayed) gameStats[bggId].lastPlayed = play.date;
+
+      // Classify play: PvP = competitive multi-player game (>=2 players, mixed
+      // win flags). Excludes solo games and coop (everyone won/lost together).
+      const isSoloPlay = play.sc.length === 1;
+      const allSameFlag = play.sc.every(s => !!s.w === !!play.sc[0].w);
+      const isCoopPlay  = !isSoloPlay && allSameFlag;
+      const isPvP       = !isSoloPlay && !isCoopPlay;
+      if (isPvP) {
+        gameStats[bggId].pvpPlays++;
+        if (playerEntry.w) gameStats[bggId].pvpWins++;
+      }
 
       const hasWinner = play.sc.some(s => s.w);
       recentPlays.push({
@@ -5658,11 +5669,11 @@ function showStatsView(playerName, visiting) {
   const latestPlays = recentPlays.slice(0, 10);
   const latestPlayRowHtml = (p) => {
     const imgSrc = p.game.bggId > 0 ? `images/${p.game.bggId}.jpg` : '';
-    const result = p.noWinner
-      ? '<span class="stats-game-wr" style="color:#94a3b8">—</span>'
-      : (p.won
-          ? '<span class="stats-game-wr" style="color:#22c55e">WIN</span>'
-          : '<span class="stats-game-wr" style="color:#f87171">LOSS</span>');
+    // "No human winner" almost always means coop/solo loss (the game won),
+    // so render LOSS instead of a dash.
+    const result = p.won
+      ? '<span class="stats-game-wr" style="color:#22c55e">WIN</span>'
+      : '<span class="stats-game-wr" style="color:#f87171">LOSS</span>';
     const scoreTxt = p.score ? ` &middot; ${p.score} pts` : '';
     const roleTxt = p.role ? ` &middot; ${p.role}` : '';
     return `<div class="stats-game-row" data-bgg-id="${p.game.bggId}">
@@ -5675,10 +5686,17 @@ function showStatsView(playerName, visiting) {
     </div>`;
   };
 
-  // Best win rates (min 3 plays)
+  // Best PvP win rates (min 3 competitive plays). Coop and solo games are
+  // excluded since they don't produce a meaningful per-player win rate.
   const bestWR = Object.values(gameStats)
-    .filter(g => g.plays >= 3)
-    .map(g => ({ ...g, wr: Math.round(g.wins / g.plays * 100) }))
+    .filter(g => g.pvpPlays >= 3)
+    .map(g => ({
+      ...g,
+      // Display the PvP plays/wins under the row so the percentage matches.
+      plays: g.pvpPlays,
+      wins:  g.pvpWins,
+      wr: Math.round(g.pvpWins / g.pvpPlays * 100),
+    }))
     .sort((a, b) => b.wr - a.wr || b.plays - a.plays)
     .slice(0, 8);
 
@@ -5847,7 +5865,7 @@ function showStatsView(playerName, visiting) {
     </div>
 
     ${bestWR.length > 0 ? `<div class="stats-section">
-      <div class="stats-section-title">Best Win Rates (3+ plays)</div>
+      <div class="stats-section-title">Best Win Rate in PvP (3+ plays)</div>
       ${bestWR.map(gameRowHtml).join('')}
     </div>` : ''}
 
