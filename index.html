@@ -1092,7 +1092,11 @@
 
   /* ── Responsive ── */
   @media(max-width:900px){
-    body{min-width:1200px}
+    /* Only force the 1200-px layout when we're actually viewing the
+       library shelf. Stats / Achievements / Board South / Insights all
+       use a normal width=device-width viewport and would otherwise
+       overflow horizontally on phones. */
+    body.mobile-library{min-width:1200px}
     .stats-grid{grid-template-columns:repeat(2,1fr)}
     h1{font-size:1.5rem}
     .filters{gap:0.5rem 0.6rem}
@@ -5580,6 +5584,11 @@ function showStatsView(playerName, visiting) {
   document.getElementById('btn-mystats').classList.add('active');
   if (_isTouchDevice()) {
     document.body.style.minWidth = 'auto';
+    // The early-paint script adds mobile-library to <body> for the first
+    // render. When this view is reached directly (e.g. saved-player boot
+    // path) we need to drop it so the locked viewport doesn't inherit
+    // library-only sizing or the 1200-wide min-width rule.
+    document.body.classList.remove('mobile-library');
     _setViewport(VP_LOCKED);
     window.scrollTo(0, 0);
   }
