@@ -6255,9 +6255,15 @@ function wireStarRating() {
 // ── Pie Chart Builder ──
 const PIE_COLORS = ['#e2b04a','#4fc3f7','#22c55e','#f87171','#a78bfa','#f59e0b','#ec4899','#14b8a6','#8b5cf6','#6366f1'];
 
-function buildPieHtml(data, total, title, maxVisible) {
+function buildPieHtml(data, _passedTotal, title, maxVisible) {
   if (!data || Object.keys(data).length === 0) return '';
   const sorted = Object.entries(data).sort((a, b) => b[1] - a[1]);
+  // Use the SUM of the slice values, not the caller-supplied total. Locations
+  // are optional on plays, so a "player total" coming in here would leave the
+  // pie short of 360° and the percentages summing to <100%. Each chart should
+  // describe what's *in* it, full circle.
+  const total = sorted.reduce((sum, [, count]) => sum + count, 0);
+  if (total <= 0) return '';
   let gradParts = [];
   let angle = 0;
   const items = [];
