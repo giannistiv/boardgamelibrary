@@ -890,6 +890,13 @@
   .lb-delta{font-size:0.68rem;text-align:right;font-variant-numeric:tabular-nums;opacity:0.85;line-height:1}
   .lb-delta.pos{color:#22c55e}
   .lb-delta.neg{color:#ef4444}
+  .lb-podium-delta{
+    font-size:0.7rem;font-weight:700;font-variant-numeric:tabular-nums;
+    line-height:1;margin-top:0.2rem;opacity:0.9;color:#94a3b8;
+  }
+  .lb-podium-delta.pos{color:#22c55e}
+  .lb-podium-delta.neg{color:#ef4444}
+  .lb-podium-card.rank-1 .lb-podium-delta{font-size:0.85rem}
   .lb-empty{padding:1.5rem;text-align:center;opacity:0.6;font-size:0.88rem}
   .lb-explain{margin-top:1.6rem;padding:0.8rem 1rem;background:rgba(255,255,255,0.03);border-radius:8px;font-size:0.72rem;opacity:0.75;line-height:1.55}
   .lb-explain b{color:var(--accent)}
@@ -6980,11 +6987,17 @@ function _renderEloLeaderboardInto(container, mode) {
     const initial = p.name.charAt(0).toUpperCase();
     const prov = p.provisional ? '<span class="lb-prov-badge">PROV</span>' : '';
     const streakHtml = p.streak >= 2 ? `<span class="lb-streak" title="${p.streak}-win streak">🔥 ${p.streak}</span>` : '';
+    // Show the most recent point delta on the podium too — same convention as
+    // the list rows below (green for gain, red for loss, dim for zero).
+    const deltaCls = p.lastDelta > 0 ? 'pos' : (p.lastDelta < 0 ? 'neg' : '');
+    const deltaSign = p.lastDelta > 0 ? '+' : '';
+    const deltaTxt = `${deltaSign}${p.lastDelta.toFixed(1)}`;
     return `<div class="lb-podium-card rank-${idx + 1}" data-visit-player="${p.name.replace(/"/g, '&quot;')}">
       <div class="lb-podium-medal">${medals[idx]}</div>
       <div class="lb-podium-avatar">${initial}</div>
       <div class="lb-podium-name">${p.name}${prov}${streakHtml}</div>
       <div class="lb-podium-elo" style="color:${color}">${p.elo}</div>
+      <div class="lb-podium-delta ${deltaCls}">${deltaTxt}</div>
       <div class="lb-podium-meta">${p.plays} play${p.plays !== 1 ? 's' : ''} · last ${_fmtDateShort(p.lastPlayed)}</div>
     </div>`;
   }).join('');
