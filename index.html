@@ -5903,11 +5903,11 @@ function showStatsView(playerName, visiting) {
       }).join('')}
     </div>` : ''}
 
-    <div class="qr-section">
+    ${playerName === 'Στιβ' ? `<div class="qr-section">
       <div class="stats-section-title" style="border:none;text-align:center">Share This Library</div>
       <div class="qr-canvas"><img id="qr-img" width="150" height="150" alt="QR Code" style="border-radius:8px"></div>
       <div class="qr-label">Scan to open on your phone</div>
-    </div>
+    </div>` : ''}
 
     <!-- ── JSON Import (Στιβ only) ── -->
   ${playerName === 'Στιβ' ? `<div class="import-section" id="importSection">
