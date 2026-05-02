@@ -6944,10 +6944,10 @@ function _computeMainEloForYear(year) {
     for (const p of PLAY_HISTORY[bggId]) {
       if (!p || !p.date || !Array.isArray(p.sc)) continue;
       if (p.date < start || p.date > end) continue;
-      flat.push({ bggId: Number(bggId), date: p.date, sc: p.sc });
+      flat.push({ bggId: Number(bggId), date: p.date, t: p.t || p.date, sc: p.sc });
     }
   }
-  flat.sort((a, b) => a.date.localeCompare(b.date));
+  flat.sort((a, b) => a.t.localeCompare(b.t));
 
   const ratings = {}, plays = {}, lastPlayDate = {};
   for (const play of flat) {
@@ -7013,8 +7013,12 @@ function _computePerPlayElo() {
       flat.push({ bggId: Number(bggId), idx, p });
     });
   }
+  // Same sort order as _computeEloLeaderboard: full timestamp when available,
+  // then bggId / array index as a stable tie-break.
   flat.sort((a, b) => {
-    if (a.p.date !== b.p.date) return a.p.date.localeCompare(b.p.date);
+    const at = a.p.t || a.p.date;
+    const bt = b.p.t || b.p.date;
+    if (at !== bt) return at.localeCompare(bt);
     if (a.bggId !== b.bggId) return a.bggId - b.bggId;
     return a.idx - b.idx;
   });
@@ -7105,10 +7109,12 @@ function _computeEloLeaderboard(mode) {
       if (!p || !p.date || !Array.isArray(p.sc)) continue;
       if (p.date < yearStart) continue;
       if (mode === 'south' && !_isBoardSouthPlay(p)) continue;
-      flat.push({ bggId: Number(bggId), date: p.date, sc: p.sc });
+      flat.push({ bggId: Number(bggId), date: p.date, t: p.t || p.date, sc: p.sc });
     }
   }
-  flat.sort((a, b) => a.date.localeCompare(b.date));
+  // Sort by full timestamp (when present from BGStats import) so plays on
+  // the same calendar day keep their actual chronological order.
+  flat.sort((a, b) => a.t.localeCompare(b.t));
 
   const ratings = {};
   const plays = {};
@@ -8527,7 +8533,11 @@ window.initImporter = function(){
       if(!game || !game.bggId) return;
       const bggId = game.bggId;
 
-      const dateStr = (play.playDate || play.entryDate || '').slice(0,10);
+      const fullStamp = play.playDate || play.entryDate || '';
+      const dateStr = fullStamp.slice(0,10);
+      // Preserve the full timestamp so plays on the same calendar day keep
+      // their actual order through the leaderboard / per-play Elo replay.
+      const tStamp = (fullStamp.length > 10 && fullStamp !== dateStr) ? fullStamp : null;
 
       const sc = (play.playerScores || []).map(ps => {
         const player = importedPlayersById[ps.playerRefId];
@@ -8542,6 +8552,7 @@ window.initImporter = function(){
       });
 
       const persistedEntry = { bggId, date: dateStr, sc };
+      if(tStamp) persistedEntry.t = tStamp;
       if(play.durationMin) persistedEntry.d = play.durationMin;
       if(play.board) persistedEntry.b = play.board;
       const locObj = play.locationRefId ? importedLocationsById[play.locationRefId] : null;
