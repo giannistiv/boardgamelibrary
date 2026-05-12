@@ -991,6 +991,19 @@
   .bs-subtab.active{background:var(--accent);color:#0b0b0d;border-color:var(--accent)}
   .bs-subtab:hover:not(.active){background:rgba(255,255,255,0.06)}
 
+  /* Library-source toggle inside the BS vote view */
+  .bsv-lib-tabs{
+    display:flex;gap:0.4rem;margin:0 0 1rem;justify-content:center;flex-wrap:wrap;
+  }
+  .bsv-lib-tab{
+    padding:0.32rem 0.85rem;border-radius:8px;border:1px solid rgba(226,176,74,0.35);
+    background:rgba(226,176,74,0.08);color:var(--accent);font-size:0.74rem;font-weight:600;
+    cursor:pointer;font-family:inherit;letter-spacing:0.02em;
+    transition:background .15s,border-color .15s,color .15s;
+  }
+  .bsv-lib-tab:hover{background:rgba(226,176,74,0.18)}
+  .bsv-lib-tab.active{background:var(--accent);color:#1a1a2e;border-color:var(--accent)}
+
   /* ── Voting view ── */
   .bsv-section-title{
     font-size:0.78rem;text-transform:uppercase;letter-spacing:0.08em;font-weight:700;
@@ -3160,6 +3173,652 @@ const EXTRA_GAMES = {
     mechanics:["Trivia","Team Play"]}
 };
 
+const GIANNIS_GAMES = {
+  208766:{name:"13 Clues",bggId:208766,year:2016,complexity:1.97,players:"2-6",playTime:"30 min",bggRating:6.5},
+  1899:{name:"13 Dead End Drive",bggId:1899,year:1993,complexity:1.39,players:"2-4",playTime:"45 min",bggRating:6.1},
+  206150:{name:"1754: Conquest – The French and Indian War",bggId:206150,year:2017,complexity:2.33,players:"2-4",playTime:"120 min",bggRating:7.7},
+  158837:{name:"27th Passenger: A Hunt on Rails",bggId:158837,year:2014,complexity:2.0,players:"3-6",playTime:"45 min",bggRating:6.7},
+  197754:{name:"27th Passenger: A Hunt on Rails – Chatty Bunch Promo Pack",bggId:197754,year:2016,players:"3-6",playTime:"45 min",bggRating:8.0},
+  166990:{name:"27th Passenger: A Hunt on Rails – Spiel 2014 Promo Pack",bggId:166990,year:2014,complexity:1.67,players:"3-6",playTime:"45 min",bggRating:7.2},
+  197753:{name:"27th Passenger: A Hunt on Rails – True Colors Promo Pack",bggId:197753,year:2016,players:"3-6",playTime:"45 min",bggRating:7.9},
+  410103:{name:"7 Empires",bggId:410103,year:2024,complexity:2.96,players:"2-6",playTime:"150 min",bggRating:7.5},
+  204516:{name:"878 Vikings: Invasions of England",bggId:204516,year:2017,complexity:2.63,players:"2-4",playTime:"120 min",bggRating:7.5},
+  233859:{name:"878 Vikings: Invasions of England – Viking Age Expansion",bggId:233859,year:2017,complexity:3.11,players:"2-4",playTime:"120 min",bggRating:7.3},
+  177736:{name:"A Feast for Odin",bggId:177736,year:2016,complexity:3.87,players:"1-4",playTime:"120 min",bggRating:8.2},
+  338376:{name:"A Gest of Robin Hood",bggId:338376,year:2024,complexity:3.05,players:"2",playTime:"90 min",bggRating:7.7},
+  239472:{name:"Abomination: The Heir of Frankenstein",bggId:239472,year:2019,complexity:3.24,players:"2-4",playTime:"180 min",bggRating:7.4},
+  1315:{name:"Africa",bggId:1315,year:2001,complexity:1.77,players:"2-5",playTime:"60 min",bggRating:6.0},
+  200511:{name:"After the Empire",bggId:200511,year:2021,complexity:3.11,players:"2-4",playTime:"120 min",bggRating:7.4},
+  203740:{name:"Age of Thieves",bggId:203740,year:2016,complexity:2.62,players:"2-4",playTime:"120 min",bggRating:6.7},
+  227798:{name:"Age of Thieves: Masters of Disguise",bggId:227798,year:2017,players:"2-4",playTime:"90 min",bggRating:7.6},
+  1387:{name:"Alaska",bggId:1387,year:1979,complexity:1.45,players:"2-4",playTime:"60 min",bggRating:5.9},
+  161970:{name:"Alchemists",bggId:161970,year:2014,complexity:3.92,players:"2-4",playTime:"120 min",bggRating:7.6},
+  204650:{name:"Alchemists: The King's Golem",bggId:204650,year:2016,complexity:4.55,players:"2-4",playTime:"120 min",bggRating:8.4},
+  45358:{name:"Alhambra: Big Box",bggId:45358,year:2009,complexity:2.34,players:"2-6",playTime:"60 min",bggRating:7.5},
+  354568:{name:"Amun-Re: 20th Anniversary Edition",bggId:354568,year:2023,complexity:2.93,players:"2-5",playTime:"90 min",bggRating:7.5},
+  185343:{name:"Anachrony",bggId:185343,year:2017,complexity:4.0,players:"1-4",playTime:"120 min",bggRating:8.0},
+  297528:{name:"Anachrony: Classic Expansion Pack",bggId:297528,year:2020,complexity:4.25,players:"1-4",playTime:"120 min",bggRating:8.4},
+  218791:{name:"Anachrony: Exosuit Commander Pack",bggId:218791,year:2017,complexity:3.67,players:"1-4",playTime:"120 min",bggRating:8.5},
+  272077:{name:"Anachrony: Fractures of Time",bggId:272077,year:2020,complexity:4.53,players:"1-4",playTime:"150 min",bggRating:8.8},
+  286574:{name:"Anachrony: Future Imperfect",bggId:286574,year:2020,complexity:4.07,players:"2-4",playTime:"150 min",bggRating:8.6},
+  429653:{name:"Andromeda's Edge: Deluxe Edition",bggId:429653,year:2024,complexity:3.75,players:"1-5",playTime:"160 min",bggRating:8.8},
+  285967:{name:"Ankh: Gods of Egypt",bggId:285967,year:2021,complexity:3.13,players:"2-5",playTime:"90 min",bggRating:7.7},
+  308321:{name:"Ankh: Gods of Egypt – Guardians Set",bggId:308321,year:2021,complexity:3.0,players:"2-5",playTime:"90 min",bggRating:7.9},
+  307807:{name:"Ankh: Gods of Egypt – Pantheon",bggId:307807,year:2021,complexity:3.0,players:"2-5",playTime:"90 min",bggRating:8.2},
+  308505:{name:"Ankh: Gods of Egypt – Pharaoh",bggId:308505,year:2021,complexity:3.64,players:"2-5",playTime:"90 min",bggRating:8.1},
+  308966:{name:"Ankh: Gods of Egypt – Tomb of Wonders",bggId:308966,year:2021,complexity:2.67,players:"2-5",playTime:"180 min",bggRating:8.4},
+  150783:{name:"Antidote",bggId:150783,year:2013,complexity:1.67,players:"2-7",playTime:"30 min",bggRating:6.3},
+  218495:{name:"Antidote: Lab Alliance",bggId:218495,year:2018,complexity:2.0,players:"3-9",playTime:"40 min",bggRating:6.5},
+  236457:{name:"Architects of the West Kingdom",bggId:236457,year:2018,complexity:2.76,players:"1-5",playTime:"80 min",bggRating:7.7},
+  248492:{name:"Architects of the West Kingdom: Extra Apprentices",bggId:248492,year:2018,complexity:2.5,players:"1-5",playTime:"80 min",bggRating:7.7},
+  248491:{name:"Architects of the West Kingdom: Extra Buildings",bggId:248491,year:2018,complexity:2.46,players:"1-5",playTime:"80 min",bggRating:7.7},
+  248493:{name:"Architects of the West Kingdom: Extra Player Boards",bggId:248493,year:2018,complexity:2.47,players:"1-5",playTime:"80 min",bggRating:7.9},
+  274783:{name:"Architects of the West Kingdom: Paladins Apprentices",bggId:274783,year:2019,complexity:2.5,players:"1-5",playTime:"80 min",bggRating:7.7},
+  342942:{name:"Ark Nova",bggId:342942,year:2021,complexity:3.8,players:"1-4",playTime:"150 min",bggRating:8.5},
+  368966:{name:"Ark Nova: Marine Worlds",bggId:368966,year:2023,complexity:3.85,players:"1-4",playTime:"150 min",bggRating:8.9},
+  65200:{name:"Asteroyds",bggId:65200,year:2010,complexity:2.15,players:"2-6",playTime:"30 min",bggRating:6.3},
+  6752:{name:"Attack!",bggId:6752,year:2003,complexity:2.55,players:"2-6",playTime:"180 min",bggRating:5.8},
+  252555:{name:"Bad Maps",bggId:252555,year:2019,complexity:2.25,players:"3-5",playTime:"60 min",bggRating:5.1},
+  3955:{name:"BANG!",bggId:3955,year:2002,complexity:1.63,players:"4-7",playTime:"40 min",bggRating:6.5},
+  147918:{name:"BANG! Dodge City with High Noon expansion",bggId:147918,year:2008,complexity:1.8,players:"3-8",playTime:"45 min",bggRating:7.0},
+  161953:{name:"BANG! High Noon/A Fistful of Cards",bggId:161953,year:2014,complexity:1.5,players:"4-7",playTime:"40 min",bggRating:7.0},
+  130046:{name:"BANG! The Valley of Shadows",bggId:130046,year:2011,complexity:1.92,players:"4-7",playTime:"40 min",bggRating:7.3},
+  219832:{name:"Barbarians: The Invasion",bggId:219832,year:2018,complexity:3.2,players:"1-4",playTime:"90 min",bggRating:7.4},
+  251247:{name:"Barrage",bggId:251247,year:2019,complexity:4.11,players:"1-4",playTime:"180 min",bggRating:8.1},
+  30328:{name:"Battleground: Crossbows & Catapults",bggId:30328,year:2007,complexity:1.33,players:"2",playTime:"60 min",bggRating:6.6},
+  10547:{name:"Betrayal at House on the Hill",bggId:10547,year:2004,complexity:2.4,players:"3-6",playTime:"60 min",bggRating:7.0},
+  198452:{name:"Betrayal at House on the Hill: Widow's Walk",bggId:198452,year:2016,complexity:2.76,players:"3-6",playTime:"60 min",bggRating:7.4},
+  34219:{name:"Biblios",bggId:34219,year:2007,complexity:1.69,players:"2-4",playTime:"30 min",bggRating:7.2},
+  157403:{name:"Black Fleet",bggId:157403,year:2014,complexity:1.94,players:"3-4",playTime:"60 min",bggRating:7.0},
+  268797:{name:"Black Rose Wars: Inferno",bggId:268797,year:2021,complexity:3.0,players:"1-6",playTime:"90 min",bggRating:8.1},
+  438707:{name:"Black Rose Wars: Magister Box",bggId:438707,year:2024,players:"2-4",bggRating:8.8},
+  342444:{name:"Black Rose Wars: Rebirth",bggId:342444,year:2023,complexity:3.74,players:"1-4",playTime:"240 min",bggRating:8.4},
+  412687:{name:"Black Rose Wars: Rebirth – Apocalypse",bggId:412687,year:2024,players:"1-4",playTime:"90 min",bggRating:8.7},
+  414161:{name:"Black Rose Wars: Rebirth – Deadly Masks",bggId:414161,year:2024,complexity:4.0,players:"1-6",bggRating:8.5},
+  414160:{name:"Black Rose Wars: Rebirth – Dreadforge",bggId:414160,year:2024,complexity:3.5,players:"1-4",bggRating:8.5},
+  413564:{name:"Black Rose Wars: Rebirth – Jukas",bggId:413564,year:2024,players:"2-4",bggRating:8.2},
+  412735:{name:"Black Rose Wars: Rebirth – Rotas Box",bggId:412735,year:2023,complexity:4.0,players:"1-4",playTime:"120 min",bggRating:8.9},
+  312230:{name:"Black Rose Wars: Sator Box",bggId:312230,year:2020,complexity:3.33,players:"1-6",playTime:"180 min",bggRating:8.8},
+  36739:{name:"Black Sheep",bggId:36739,year:2008,complexity:1.43,players:"2-4",playTime:"30 min",bggRating:5.9},
+  253861:{name:"Black Skull Island",bggId:253861,year:2018,complexity:1.29,players:"2-9",playTime:"25 min",bggRating:5.6},
+  25685:{name:"Blackbeard: The Golden Age of Piracy",bggId:25685,year:2008,complexity:3.31,players:"1-5",playTime:"120 min",bggRating:6.1},
+  14258:{name:"Blood Feud in New York",bggId:14258,year:2004,complexity:2.69,players:"2-6",playTime:"180 min",bggRating:6.1},
+  170216:{name:"Blood Rage",bggId:170216,year:2015,complexity:2.88,players:"2-4",playTime:"90 min",bggRating:7.9},
+  174506:{name:"Blood Rage: 5th Player Expansion",bggId:174506,year:2015,complexity:2.72,players:"5",playTime:"90 min",bggRating:8.1},
+  174801:{name:"Blood Rage: Gods of Ásgard",bggId:174801,year:2015,complexity:2.57,players:"2-4",playTime:"90 min",bggRating:7.6},
+  175100:{name:"Blood Rage: Mystics of Midgard",bggId:175100,year:2015,complexity:2.74,players:"2-4",playTime:"90 min",bggRating:7.9},
+  343905:{name:"Boonlake",bggId:343905,year:2021,complexity:3.8,players:"1-4",playTime:"160 min",bggRating:7.6},
+  12477:{name:"Bootleggers",bggId:12477,year:2004,complexity:2.62,players:"3-6",playTime:"90 min",bggRating:6.7},
+  224517:{name:"Brass: Birmingham",bggId:224517,year:2018,complexity:3.86,players:"2-4",playTime:"120 min",bggRating:8.6},
+  249277:{name:"Brazil: Imperial",bggId:249277,year:2021,complexity:3.01,players:"1-4",playTime:"100 min",bggRating:7.5},
+  337765:{name:"Brian Boru: High King of Ireland",bggId:337765,year:2021,complexity:2.56,players:"3-5",playTime:"90 min",bggRating:7.5},
+  308989:{name:"Bristol 1350",bggId:308989,year:2021,complexity:1.62,players:"1-9",playTime:"40 min",bggRating:6.9},
+  280106:{name:"Britannia: Classic and New Duel Edition",bggId:280106,year:2020,complexity:3.44,players:"2-4",playTime:"240 min",bggRating:7.5},
+  172308:{name:"Broom Service",bggId:172308,year:2015,complexity:2.39,players:"2-5",playTime:"75 min",bggRating:7.2},
+  202021:{name:"Broom Service: The 1st Expansion",bggId:202021,year:2016,complexity:2.0,players:"2-5",playTime:"75 min",bggRating:7.2},
+  341496:{name:"Caesar's Empire",bggId:341496,year:2022,complexity:1.56,players:"2-5",playTime:"60 min",bggRating:7.2},
+  1324:{name:"Café International: Das Kartenspiel",bggId:1324,year:2001,complexity:1.32,players:"2-5",playTime:"45 min",bggRating:5.7},
+  260605:{name:"Camel Up (Second Edition)",bggId:260605,year:2018,complexity:1.51,players:"3-8",playTime:"45 min",bggRating:7.5},
+  290236:{name:"Canvas",bggId:290236,year:2021,complexity:1.73,players:"1-5",playTime:"30 min",bggRating:7.2},
+  335172:{name:"Canvas: Reflections",bggId:335172,year:2022,complexity:2.04,players:"1-5",playTime:"30 min",bggRating:7.7},
+  337330:{name:"Canvas: Reflections – Deluxe Edition",bggId:337330,year:2022,complexity:1.8,players:"1-5",playTime:"30 min",bggRating:7.9},
+  269789:{name:"Caravan",bggId:269789,year:2019,complexity:1.77,players:"2-4",playTime:"45 min",bggRating:6.6},
+  822:{name:"Carcassonne",bggId:822,year:2000,complexity:1.89,players:"2-5",playTime:"45 min",bggRating:7.4},
+  310873:{name:"Carnegie",bggId:310873,year:2022,complexity:3.82,players:"1-4",playTime:"120 min",bggRating:8.0},
+  263918:{name:"Cartographers",bggId:263918,year:2019,complexity:1.89,players:"1-100",playTime:"45 min",bggRating:7.6},
+  401216:{name:"Cascadero",bggId:401216,year:2024,complexity:2.57,players:"2-4",playTime:"60 min",bggRating:7.3},
+  357841:{name:"Castles by the Sea",bggId:357841,year:2023,complexity:2.15,players:"1-4",playTime:"60 min",bggRating:6.9},
+  13:{name:"Catan",bggId:13,year:1995,complexity:2.28,players:"3-4",playTime:"120 min",bggRating:7.1},
+  244144:{name:"Catan Histories: Rise of the Inkas",bggId:244144,year:2018,complexity:2.67,players:"3-4",playTime:"90 min",bggRating:7.2},
+  2807:{name:"Catan: 5-6 Player Expansion",bggId:2807,year:1996,complexity:2.31,players:"5-6",playTime:"120 min",bggRating:7.0},
+  926:{name:"Catan: Cities & Knights",bggId:926,year:1998,complexity:2.9,players:"3-4",playTime:"150 min",bggRating:7.5},
+  4101:{name:"Catan: Cities & Knights – 5-6 Player Extension",bggId:4101,year:2000,complexity:2.74,players:"5-6",playTime:"120 min",bggRating:7.1},
+  282853:{name:"Catan: Starfarers",bggId:282853,year:2019,complexity:2.59,players:"3-4",playTime:"120 min",bggRating:7.5},
+  27760:{name:"Catan: Traders & Barbarians",bggId:27760,year:2007,complexity:2.57,players:"2-4",playTime:"60 min",bggRating:7.0},
+  310789:{name:"Catapult Feud",bggId:310789,year:2021,complexity:1.07,players:"2",playTime:"30 min",bggRating:7.0},
+  330302:{name:"Catapult Feud: Artificer's Tower!",bggId:330302,year:2021,complexity:1.0,players:"2",playTime:"30 min",bggRating:7.1},
+  339469:{name:"Catapult Feud: Dice Ammo Expansion",bggId:339469,year:2021,complexity:1.0,players:"2",playTime:"30 min",bggRating:7.5},
+  371905:{name:"Catapult Feud: Holiday Ammo",bggId:371905,year:2022,players:"2",playTime:"30 min",bggRating:7.6},
+  353681:{name:"Catapult Feud: Hydra! Expansion",bggId:353681,year:2022,players:"2",playTime:"45 min",bggRating:6.3},
+  371907:{name:"Catapult Feud: Secret Santa",bggId:371907,year:2022,players:"2",playTime:"30 min",bggRating:7.6},
+  330301:{name:"Catapult Feud: Siege! Expansion",bggId:330301,year:2021,complexity:1.0,players:"2-4",playTime:"30 min",bggRating:7.1},
+  339468:{name:"Catapult Feud: The Royal Feast Expansion",bggId:339468,year:2021,players:"2-4",playTime:"30 min",bggRating:7.7},
+  330312:{name:"Catapult Feud: Vikings! Expansion",bggId:330312,year:2021,complexity:1.0,players:"2",playTime:"30 min",bggRating:7.3},
+  330303:{name:"Catapult Feud: Volcano! Expansion",bggId:330303,year:2021,complexity:1.0,players:"2",playTime:"30 min",bggRating:6.8},
+  360951:{name:"Catherine: The Cities of the Tsarina",bggId:360951,year:2022,complexity:2.26,players:"2-4",playTime:"45 min",bggRating:6.6},
+  4491:{name:"Cave Troll",bggId:4491,year:2002,complexity:1.98,players:"2-4",playTime:"60 min",bggRating:6.4},
+  357912:{name:"Chachapoya (Second Edition)",bggId:357912,year:2022,complexity:1.5,players:"2-5",playTime:"45 min",bggRating:7.4},
+  172287:{name:"Champions of Midgard",bggId:172287,year:2015,complexity:2.62,players:"2-4",playTime:"90 min",bggRating:7.7},
+  30379:{name:"Change Horses",bggId:30379,year:2008,complexity:1.62,players:"2-5",playTime:"30 min",bggRating:5.4},
+  239189:{name:"Chronicle X",bggId:239189,year:2021,complexity:2.5,players:"1-7",playTime:"180 min",bggRating:6.1},
+  478:{name:"Citadels",bggId:478,year:2000,complexity:2.05,players:"2-8",playTime:"60 min",bggRating:7.1},
+  205398:{name:"Citadels",bggId:205398,year:2016,complexity:2.05,players:"2-8",playTime:"60 min",bggRating:7.2},
+  220095:{name:"City of Spies: Double Agent",bggId:220095,year:2017,complexity:2.67,players:"2-5",playTime:"60 min",bggRating:7.5},
+  169318:{name:"City of Spies: Estoril 1942",bggId:169318,year:2015,complexity:2.49,players:"2-4",playTime:"60 min",bggRating:7.0},
+  400602:{name:"Civolution",bggId:400602,year:2024,complexity:4.25,players:"1-4",playTime:"180 min",bggRating:8.2},
+  140279:{name:"Clacks: A Discworld Board Game",bggId:140279,year:2015,complexity:2.6,players:"1-4",playTime:"45 min",bggRating:6.2},
+  257276:{name:"Clank! Expeditions: Gold and Silk",bggId:257276,year:2018,complexity:2.2,players:"2-4",playTime:"60 min",bggRating:8.0},
+  282426:{name:"Clank! Expeditions: Temple of the Ape Lords",bggId:282426,year:2019,complexity:2.0,players:"2-4",playTime:"60 min",bggRating:8.0},
+  233371:{name:"Clank! In! Space!: A Deck-Building Adventure",bggId:233371,year:2017,complexity:2.58,players:"2-4",playTime:"90 min",bggRating:7.8},
+  275532:{name:"Clank! Legacy: Acquisitions Incorporated – Upper Management Pack",bggId:275532,year:2019,complexity:1.2,players:"2-4",playTime:"60 min",bggRating:7.7},
+  201808:{name:"Clank!: A Deck-Building Adventure",bggId:201808,year:2016,complexity:2.23,players:"2-4",playTime:"60 min",bggRating:7.8},
+  365717:{name:"Clank!: Catacombs",bggId:365717,year:2022,complexity:2.48,players:"2-4",playTime:"90 min",bggRating:8.2},
+  218103:{name:"Clank!: Sunken Treasures",bggId:218103,year:2017,complexity:2.22,players:"2-4",playTime:"60 min",bggRating:8.0},
+  245377:{name:"Clank!: The Mummy's Curse",bggId:245377,year:2018,complexity:2.26,players:"2-4",playTime:"60 min",bggRating:7.9},
+  299659:{name:"Clash of Cultures: Monumental Edition",bggId:299659,year:2021,complexity:3.74,players:"2-4",playTime:"240 min",bggRating:8.3},
+  265784:{name:"Cleopatra and the Society of Architects: Deluxe Edition",bggId:265784,year:2020,complexity:2.21,players:"2-4",playTime:"60 min",bggRating:7.3},
+  31506:{name:"Cliffhanger",bggId:31506,year:2007,complexity:1.21,players:"3-6",playTime:"15 min",bggRating:6.2},
+  262211:{name:"Cloudspire",bggId:262211,year:2019,complexity:4.4,players:"1-4",playTime:"180 min",bggRating:8.2},
+  178900:{name:"Codenames",bggId:178900,year:2015,complexity:1.26,players:"2-8",playTime:"15 min",bggRating:7.5},
+  220774:{name:"Codenames: Marvel",bggId:220774,year:2017,complexity:1.21,players:"2-8",playTime:"15 min",bggRating:6.1},
+  341504:{name:"Colt Express: Big Box",bggId:341504,year:2022,complexity:2.18,players:"2-9",playTime:"40 min",bggRating:7.8},
+  124361:{name:"Concordia",bggId:124361,year:2013,complexity:2.99,players:"2-5",playTime:"100 min",bggRating:8.1},
+  17710:{name:"Conquest of the Empire",bggId:17710,year:2005,complexity:3.07,players:"2-6",playTime:"240 min",bggRating:6.7},
+  31483:{name:"Constantinopolis",bggId:31483,year:2010,complexity:3.13,players:"2-5",playTime:"90 min",bggRating:6.9},
+  840:{name:"Corsairs",bggId:840,year:2000,complexity:1.67,players:"2-4",playTime:"60 min",bggRating:6.1},
+  173101:{name:"Council of 4",bggId:173101,year:2015,complexity:2.69,players:"2-4",playTime:"75 min",bggRating:7.1},
+  181372:{name:"Coup: Rebellion G54 – Anarchy",bggId:181372,year:2015,complexity:1.75,players:"3-6",playTime:"15 min",bggRating:7.3},
+  13284:{name:"Cowpoker",bggId:13284,year:2006,complexity:1.52,players:"2-4",playTime:"30 min",bggRating:5.5},
+  266937:{name:"Cradle of Civilization",bggId:266937,year:2021,complexity:2.67,players:"1-6",playTime:"240 min",bggRating:7.0},
+  147:{name:"Crude: The Oil Game",bggId:147,year:1974,complexity:2.73,players:"2-4",playTime:"90 min",bggRating:6.7},
+  192457:{name:"Cry Havoc",bggId:192457,year:2016,complexity:3.3,players:"2-4",playTime:"120 min",bggRating:7.1},
+  404509:{name:"Cthulhu: Dark Providence",bggId:404509,year:2025,complexity:3.27,players:"1-5",playTime:"120 min",bggRating:7.5},
+  253344:{name:"Cthulhu: Death May Die",bggId:253344,year:2019,complexity:2.5,players:"1-5",playTime:"120 min",bggRating:8.2},
+  30380:{name:"Cuba",bggId:30380,year:2007,complexity:3.26,players:"2-5",playTime:"120 min",bggRating:7.1},
+  40794:{name:"Cuba: El Presidente",bggId:40794,year:2009,complexity:3.13,players:"2-5",playTime:"120 min",bggRating:7.6},
+  1867:{name:"Curse of the Idol",bggId:1867,year:1990,complexity:1.19,players:"2-4",playTime:"60 min",bggRating:5.4},
+  380619:{name:"Cyclades: Legendary Edition",bggId:380619,year:2024,complexity:2.84,players:"2-6",playTime:"90 min",bggRating:8.1},
+  295535:{name:"Dark Ages: Heritage of Charlemagne",bggId:295535,year:2021,complexity:3.52,players:"1-4",playTime:"180 min",bggRating:7.8},
+  304985:{name:"Dark Ages: Holy Roman Empire",bggId:304985,year:2021,complexity:3.48,players:"1-4",playTime:"180 min",bggRating:7.8},
+  418826:{name:"Dark Blood",bggId:418826,year:2025,complexity:3.33,players:"1-4",playTime:"120 min",bggRating:7.8},
+  353677:{name:"Darkest Doom",bggId:353677,year:2025,complexity:3.27,players:"1-4",playTime:"150 min",bggRating:7.6},
+  264321:{name:"Dead Man's Cabal",bggId:264321,year:2019,complexity:2.67,players:"2-4",playTime:"60 min",bggRating:6.7},
+  286070:{name:"Dead Man's Cabal: Undeading Pack",bggId:286070,year:2019,players:"2-4",playTime:"90 min",bggRating:6.2},
+  149155:{name:"Dead Man's Draw",bggId:149155,year:2014,complexity:1.32,players:"2-4",playTime:"15 min",bggRating:6.9},
+  141423:{name:"Dead Men Tell No Tales",bggId:141423,year:2015,complexity:2.56,players:"2-5",playTime:"75 min",bggRating:7.1},
+  244532:{name:"Dead Men Tell No Tales: The Kraken Expansion",bggId:244532,year:2018,complexity:2.9,players:"1-5",playTime:"120 min",bggRating:8.0},
+  276182:{name:"Dead Reckoning",bggId:276182,year:2022,complexity:3.44,players:"1-4",playTime:"150 min",bggRating:8.1},
+  340404:{name:"Dead Reckoning: Deep Legends",bggId:340404,year:2022,complexity:3.5,players:"1-4",playTime:"150 min",bggRating:8.4},
+  340406:{name:"Dead Reckoning: Salt & Thunder",bggId:340406,year:2022,complexity:4.0,players:"1-4",playTime:"150 min",bggRating:8.5},
+  39798:{name:"Deadlands: The Battle for Slaughter Gulch",bggId:39798,year:2009,complexity:2.92,players:"2-6",playTime:"60 min",bggRating:5.8},
+  156129:{name:"Deception: Murder in Hong Kong",bggId:156129,year:2014,complexity:1.59,players:"4-12",playTime:"20 min",bggRating:7.4},
+  295571:{name:"Deckscape Crew vs Crew: The Pirates' Island",bggId:295571,year:2021,complexity:1.5,players:"2-6",playTime:"90 min",bggRating:6.1},
+  225694:{name:"Decrypto",bggId:225694,year:2018,complexity:1.83,players:"3-8",playTime:"45 min",bggRating:7.8},
+  17226:{name:"Descent: Journeys in the Dark",bggId:17226,year:2005,complexity:3.35,players:"2-5",playTime:"240 min",bggRating:7.3},
+  118410:{name:"Dirty Pig",bggId:118410,year:2012,complexity:1.05,players:"2-4",playTime:"10 min",bggRating:6.1},
+  358027:{name:"Disney Big Thunder Mountain Railroad",bggId:358027,year:2022,complexity:1.83,players:"2-4",playTime:"45 min",bggRating:6.5},
+  309129:{name:"Disney: The Haunted Mansion – Call of the Spirits Game",bggId:309129,year:2020,complexity:1.87,players:"2-6",playTime:"30 min",bggRating:6.9},
+  39856:{name:"Dixit",bggId:39856,year:2008,complexity:1.19,players:"3-6",playTime:"30 min",bggRating:7.2},
+  256237:{name:"Dixit: Anniversary",bggId:256237,year:2018,complexity:1.2,players:"3-6",playTime:"60 min",bggRating:7.9},
+  234553:{name:"Dixit: Harmonies",bggId:234553,year:2017,complexity:1.21,players:"3-6",playTime:"60 min",bggRating:7.8},
+  205761:{name:"Dixit: Revelations",bggId:205761,year:2016,complexity:1.18,players:"3-6",playTime:"30 min",bggRating:7.9},
+  262941:{name:"Dominant Species: Marine",bggId:262941,year:2021,complexity:3.69,players:"2-4",playTime:"150 min",bggRating:7.9},
+  232219:{name:"Dragon Castle",bggId:232219,year:2017,complexity:1.99,players:"1-4",playTime:"45 min",bggRating:7.1},
+  23107:{name:"Drakon (Third Edition)",bggId:23107,year:2006,complexity:1.81,players:"2-6",playTime:"60 min",bggRating:6.5},
+  397598:{name:"Dune: Imperium – Uprising",bggId:397598,year:2023,complexity:3.52,players:"1-6",playTime:"120 min",bggRating:8.7},
+  472:{name:"DungeonQuest",bggId:472,year:1985,complexity:1.92,players:"1-4",playTime:"60 min",bggRating:6.8},
+  157958:{name:"DungeonQuest: Revised Edition",bggId:157958,year:2014,complexity:2.0,players:"1-4",playTime:"60 min",bggRating:7.2},
+  246900:{name:"Eclipse: Second Dawn for the Galaxy",bggId:246900,year:2020,complexity:3.67,players:"2-6",playTime:"200 min",bggRating:8.4},
+  375216:{name:"Eclipse: Second Dawn for the Galaxy – Gamemat",bggId:375216,year:2020,complexity:1.0,players:"2-9",playTime:"240 min",bggRating:8.9},
+  368378:{name:"Eclipse: Second Dawn for the Galaxy – Outcasts",bggId:368378,year:2024,complexity:3.5,bggRating:8.6},
+  305955:{name:"Eclipse: Second Dawn for the Galaxy – Rift Cannon",bggId:305955,year:2020,complexity:2.75,players:"2-6",bggRating:7.9},
+  308388:{name:"Egizia: Shifting Sands – Kickstarter Edition",bggId:308388,year:2019,complexity:3.25,players:"2-4",playTime:"90 min",bggRating:7.7},
+  171908:{name:"El Grande Big Box",bggId:171908,year:2015,complexity:2.8,players:"2-5",playTime:"90 min",bggRating:8.2},
+  280475:{name:"Element: Silver",bggId:280475,year:2019,complexity:2.14,players:"2-4",playTime:"60 min",bggRating:7.5},
+  173442:{name:"Empires: Age of Discovery",bggId:173442,year:2015,complexity:3.31,players:"2-6",playTime:"150 min",bggRating:7.8},
+  206931:{name:"Encore!",bggId:206931,year:2016,complexity:1.16,players:"1-6",playTime:"20 min",bggRating:6.9},
+  305096:{name:"Endless Winter: Paleoamericans",bggId:305096,year:2022,complexity:3.33,players:"1-4",playTime:"120 min",bggRating:7.6},
+  187777:{name:"Endure the Stars",bggId:187777,year:2017,complexity:2.25,players:"1-6",playTime:"180 min",bggRating:6.5},
+  24037:{name:"Escape from Atlantis",bggId:24037,year:1986,complexity:1.55,players:"2-4",playTime:"60 min",bggRating:6.6},
+  113294:{name:"Escape: The Curse of the Temple",bggId:113294,year:2012,complexity:1.48,players:"1-5",playTime:"10 min",bggRating:7.0},
+  199792:{name:"Everdell",bggId:199792,year:2018,complexity:2.83,players:"1-4",playTime:"80 min",bggRating:8.0},
+  318983:{name:"Faiyum",bggId:318983,year:2020,complexity:3.07,players:"1-5",playTime:"140 min",bggRating:7.5},
+  187121:{name:"Far East War 1592",bggId:187121,year:2016,complexity:2.5,players:"2-4",playTime:"120 min",bggRating:6.9},
+  198609:{name:"Fate of the Elder Gods",bggId:198609,year:2017,complexity:2.83,players:"1-4",playTime:"90 min",bggRating:7.2},
+  7805:{name:"Fearsome Floors",bggId:7805,year:2003,complexity:1.81,players:"2-7",playTime:"60 min",bggRating:6.7},
+  278304:{name:"Fief: France",bggId:278304,year:2021,complexity:3.92,players:"3-6",playTime:"180 min",bggRating:7.6},
+  233020:{name:"Fireball Island: The Curse of Vul-Kar",bggId:233020,year:2018,complexity:1.46,players:"2-4",playTime:"60 min",bggRating:6.7},
+  249326:{name:"Fireball Island: The Curse of Vul-Kar – Crouching Tiger, Hidden Bees!",bggId:249326,year:2018,complexity:1.29,players:"2-4",playTime:"60 min",bggRating:7.2},
+  274536:{name:"Fireball Island: The Curse of Vul-Kar – Spider Springs",bggId:274536,year:2019,complexity:1.33,players:"2-4",playTime:"60 min",bggRating:7.3},
+  249325:{name:"Fireball Island: The Curse of Vul-Kar – The Last Adventurer",bggId:249325,year:2018,complexity:1.22,players:"2-5",playTime:"60 min",bggRating:7.1},
+  250648:{name:"Fireball Island: The Curse of Vul-Kar – Treasure Trove",bggId:250648,year:2018,complexity:1.4,players:"2-4",playTime:"45 min",bggRating:7.2},
+  249792:{name:"Fireball Island: The Curse of Vul-Kar – Wreck of the Crimson Cutlass",bggId:249792,year:2018,complexity:1.57,players:"2-4",playTime:"60 min",bggRating:6.9},
+  176677:{name:"Five Tribes: The Artisans of Naqala",bggId:176677,year:2015,complexity:2.8,players:"2-4",playTime:"80 min",bggRating:8.1},
+  157354:{name:"Five Tribes: The Djinns of Naqala",bggId:157354,year:2014,complexity:2.84,players:"2-4",playTime:"80 min",bggRating:7.8},
+  226828:{name:"Five Tribes: Whims of the Sultan",bggId:226828,year:2017,complexity:2.88,players:"2-5",playTime:"90 min",bggRating:8.0},
+  424765:{name:"Food for Thought",bggId:424765,year:2025,complexity:2.67,players:"1-4",playTime:"90 min",bggRating:7.4},
+  318709:{name:"For Sale Autorama",bggId:318709,year:2021,complexity:1.79,players:"3-6",playTime:"45 min",bggRating:7.2},
+  3945:{name:"Forbidden Bridge",bggId:3945,year:1992,complexity:1.35,players:"2-4",playTime:"10 min",bggRating:6.3},
+  175155:{name:"Forbidden Stars",bggId:175155,year:2015,complexity:3.84,players:"2-4",playTime:"180 min",bggRating:8.0},
+  37904:{name:"Formula D",bggId:37904,year:2008,complexity:1.96,players:"2-10",playTime:"60 min",bggRating:7.0},
+  115293:{name:"Fortress America",bggId:115293,year:2012,complexity:2.71,players:"2-4",playTime:"150 min",bggRating:6.8},
+  95103:{name:"Fortune and Glory: The Cliffhanger Game",bggId:95103,year:2011,complexity:2.87,players:"1-8",playTime:"240 min",bggRating:7.1},
+  446703:{name:"Fortunes of Scoundrel Bay",bggId:446703,year:2025,complexity:3.25,players:"1-4",playTime:"120 min",bggRating:7.4},
+  284189:{name:"Foundations of Rome",bggId:284189,year:2022,complexity:2.02,players:"1-5",playTime:"90 min",bggRating:8.0},
+  422433:{name:"Foundations of Rome (Emperor Edition)",bggId:422433,year:2022,complexity:2.0,players:"2-5",playTime:"60 min",bggRating:8.5},
+  357512:{name:"Foundations of Rome: 5th Player Expansion",bggId:357512,year:2022,complexity:2.0,players:"5",playTime:"90 min",bggRating:8.4},
+  357304:{name:"Foundations of Rome: Monuments Expansion",bggId:357304,year:2022,complexity:2.0,players:"1-5",playTime:"90 min",bggRating:8.5},
+  140603:{name:"Francis Drake",bggId:140603,year:2013,complexity:2.91,players:"3-5",playTime:"120 min",bggRating:7.4},
+  170813:{name:"Francis Drake: The Expansions",bggId:170813,year:2015,complexity:2.5,players:"2-6",playTime:"90 min",bggRating:7.4},
+  12891:{name:"Friedrich: Anniversary Edition",bggId:12891,year:2004,complexity:3.13,players:"3-4",playTime:"210 min",bggRating:7.5},
+  217362:{name:"Frogriders",bggId:217362,year:2017,complexity:1.27,players:"2-4",playTime:"30 min",bggRating:6.5},
+  181279:{name:"Fury of Dracula (Third/Fourth Edition)",bggId:181279,year:2015,complexity:3.28,players:"2-5",playTime:"180 min",bggRating:7.4},
+  220308:{name:"Gaia Project",bggId:220308,year:2017,complexity:4.4,players:"1-4",playTime:"150 min",bggRating:8.4},
+  312789:{name:"Gardens of Babylon: Deluxe Edition",bggId:312789,year:2019,players:"1-4",playTime:"60 min",bggRating:7.1},
+  140613:{name:"Gear & Piston",bggId:140613,year:2013,complexity:2.12,players:"2-6",playTime:"60 min",bggRating:5.7},
+  142365:{name:"Gear & Piston: Engineer Assistants",bggId:142365,year:2013,complexity:2.5,players:"2-6",playTime:"60 min",bggRating:6.3},
+  146312:{name:"Ghost Fightin' Treasure Hunters",bggId:146312,year:2013,complexity:1.63,players:"2-4",playTime:"30 min",bggRating:7.1},
+  229676:{name:"Ghost Fightin' Treasure Hunters: Expansion Pack",bggId:229676,year:2017,complexity:1.5,players:"2-4",playTime:"30 min",bggRating:7.5},
+  3846:{name:"Ghostly Galleon",bggId:3846,year:1991,complexity:1.6,players:"2-4",playTime:"45 min",bggRating:5.5},
+  364048:{name:"Go Ahead Punk!",bggId:364048,year:2024,complexity:2.25,players:"1-4",playTime:"90 min",bggRating:8.1},
+  57163:{name:"Gonzaga",bggId:57163,year:2009,complexity:2.47,players:"2-4",playTime:"60 min",bggRating:6.6},
+  153064:{name:"Good Cop Bad Cop",bggId:153064,year:2014,complexity:1.26,players:"4-8",playTime:"20 min",bggRating:6.5},
+  168037:{name:"Good Cop Bad Cop: Bombers and Traitors",bggId:168037,year:2015,complexity:1.67,players:"3-8",playTime:"20 min",bggRating:6.5},
+  182874:{name:"Grand Austria Hotel",bggId:182874,year:2015,complexity:3.2,players:"2-4",playTime:"120 min",bggRating:8.0},
+  320780:{name:"Grand Austria Hotel: Let's Waltz!",bggId:320780,year:2021,complexity:3.28,players:"1-4",playTime:"120 min",bggRating:8.4},
+  380607:{name:"Great Western Trail: New Zealand",bggId:380607,year:2023,complexity:4.0,players:"1-4",playTime:"150 min",bggRating:8.5},
+  286749:{name:"Hansa Teutonica: Big Box",bggId:286749,year:2020,complexity:2.97,players:"3-5",playTime:"90 min",bggRating:8.4},
+  360899:{name:"Harrow County: The Game of Gothic Conflict",bggId:360899,year:2024,complexity:3.71,players:"1-3",playTime:"90 min",bggRating:7.8},
+  366013:{name:"Heat: Pedal to the Metal",bggId:366013,year:2022,complexity:2.2,players:"1-6",playTime:"60 min",bggRating:8.0},
+  227789:{name:"Heaven & Ale",bggId:227789,year:2017,complexity:3.17,players:"2-4",playTime:"90 min",bggRating:7.5},
+  3439:{name:"HeroClix",bggId:3439,year:2002,complexity:2.82,players:"2",playTime:"60 min",bggRating:6.5},
+  699:{name:"HeroQuest",bggId:699,year:1989,complexity:2.13,players:"2-5",playTime:"90 min",bggRating:7.2},
+  367490:{name:"Hickory Dickory",bggId:367490,year:2023,complexity:2.66,players:"1-4",playTime:"120 min",bggRating:7.0},
+  282524:{name:"Horrified",bggId:282524,year:2019,complexity:2.02,players:"1-5",playTime:"60 min",bggRating:7.6},
+  58110:{name:"Horse Fever",bggId:58110,year:2009,complexity:2.37,players:"2-6",playTime:"90 min",bggRating:6.9},
+  1502:{name:"Hotel",bggId:1502,year:1974,complexity:1.39,players:"2-4",playTime:"60 min",bggRating:5.6},
+  371688:{name:"HUANG",bggId:371688,year:2024,complexity:3.02,players:"2-4",playTime:"90 min",bggRating:8.0},
+  420898:{name:"HUANG: The Dragon Dynasty",bggId:420898,year:2024,complexity:3.0,players:"2-5",bggRating:7.9},
+  115:{name:"I'm the Boss!",bggId:115,year:1994,complexity:1.97,players:"3-6",playTime:"60 min",bggRating:6.8},
+  31133:{name:"Ice Flow",bggId:31133,year:2008,complexity:2.15,players:"2-4",playTime:"75 min",bggRating:6.4},
+  221:{name:"Ikusa",bggId:221,year:1986,complexity:2.95,players:"2-5",playTime:"360 min",bggRating:7.0},
+  54138:{name:"Imperial 2030",bggId:54138,year:2009,complexity:3.5,players:"2-6",playTime:"180 min",bggRating:7.6},
+  206480:{name:"Imperial Struggle",bggId:206480,year:2020,complexity:4.07,players:"2",playTime:"240 min",bggRating:8.2},
+  393165:{name:"Inferno",bggId:393165,year:2024,complexity:3.62,players:"1-4",playTime:"120 min",bggRating:7.9},
+  304285:{name:"Infinity Gauntlet: A Love Letter Game",bggId:304285,year:2020,complexity:1.25,players:"2-6",playTime:"15 min",bggRating:6.9},
+  181797:{name:"Inhabit the Earth",bggId:181797,year:2015,complexity:3.18,players:"2-4",playTime:"90 min",bggRating:6.9},
+  155821:{name:"Inis",bggId:155821,year:2016,complexity:2.94,players:"2-4",playTime:"90 min",bggRating:7.8},
+  255588:{name:"Inis: Seasons of Inis",bggId:255588,year:2019,complexity:3.02,players:"2-5",playTime:"90 min",bggRating:8.2},
+  378387:{name:"Inventors of the South Tigris",bggId:378387,year:2024,complexity:4.46,players:"1-4",playTime:"120 min",bggRating:7.9},
+  235627:{name:"Iquazú",bggId:235627,year:2017,complexity:1.82,players:"2-4",playTime:"50 min",bggRating:6.9},
+  68182:{name:"Isla Dorada",bggId:68182,year:2010,complexity:2.16,players:"3-6",playTime:"90 min",bggRating:6.7},
+  176494:{name:"Isle of Skye: From Chieftain to King",bggId:176494,year:2015,complexity:2.26,players:"2-5",playTime:"50 min",bggRating:7.4},
+  251219:{name:"Istanbul: Big Box",bggId:251219,year:2018,complexity:2.5,players:"2-5",playTime:"90 min",bggRating:8.0},
+  28023:{name:"Jamaica",bggId:28023,year:2007,complexity:1.66,players:"2-6",playTime:"60 min",bggRating:7.1},
+  211712:{name:"Jamaica (fan expansion for Ticket to Ride)",bggId:211712,year:2016,players:"2-4",playTime:"60 min",bggRating:1.0},
+  64:{name:"Joan of Arc",bggId:64,year:1998,complexity:2.54,players:"3-6",playTime:"150 min",bggRating:6.3},
+  8098:{name:"Jungle Speed",bggId:8098,year:1997,complexity:1.13,players:"2-10",playTime:"10 min",bggRating:6.4},
+  137900:{name:"Jupiter Rescue",bggId:137900,year:2013,complexity:1.88,players:"2-7",playTime:"60 min",bggRating:6.6},
+  313475:{name:"Kemet: Blood and Sand – Book of the Dead",bggId:313475,year:2021,complexity:3.0,players:"2-5",playTime:"120 min",bggRating:7.5},
+  336849:{name:"Kemet: Blood and Sand – Kickstarter Edition",bggId:336849,year:2021,complexity:3.0,players:"2-5",playTime:"120 min",bggRating:8.1},
+  419158:{name:"Kemet: Rise of the Gods",bggId:419158,year:2025,complexity:3.0,players:"1-6",playTime:"150 min",bggRating:8.1},
+  1933:{name:"Key to the Kingdom",bggId:1933,year:1990,complexity:1.59,players:"2-6",playTime:"45 min",bggRating:5.6},
+  147930:{name:"King & Assassins",bggId:147930,year:2013,complexity:1.85,players:"2",playTime:"30 min",bggRating:6.8},
+  70323:{name:"King of Tokyo",bggId:70323,year:2011,complexity:1.48,players:"2-6",playTime:"30 min",bggRating:7.1},
+  127067:{name:"King of Tokyo: Power Up!",bggId:127067,year:2012,complexity:1.71,players:"2-6",playTime:"30 min",bggRating:7.6},
+  199966:{name:"Kingsburg (Second Edition)",bggId:199966,year:2017,complexity:2.44,players:"2-5",playTime:"120 min",bggRating:7.4},
+  391124:{name:"Kraftwagen: Age of Engineering",bggId:391124,year:2024,complexity:2.9,players:"2-4",playTime:"90 min",bggRating:7.4},
+  1219:{name:"Labyrinth",bggId:1219,year:1986,complexity:1.34,players:"2-4",playTime:"20 min",bggRating:6.4},
+  96913:{name:"Lancaster",bggId:96913,year:2011,complexity:2.99,players:"2-5",playTime:"60 min",bggRating:7.4},
+  30932:{name:"Lascaux",bggId:30932,year:2007,complexity:1.57,players:"3-5",playTime:"25 min",bggRating:6.3},
+  192927:{name:"Last Friday",bggId:192927,year:2016,complexity:2.26,players:"2-6",playTime:"120 min",bggRating:6.4},
+  315727:{name:"Last Light",bggId:315727,year:2023,complexity:2.78,players:"2-4",playTime:"75 min",bggRating:7.3},
+  381132:{name:"Last Light: Infinity",bggId:381132,year:2023,complexity:3.0,players:"2-8",playTime:"90 min",bggRating:7.6},
+  29368:{name:"Last Night on Earth: The Zombie Game",bggId:29368,year:2007,complexity:2.3,players:"2-6",playTime:"90 min",bggRating:6.9},
+  97842:{name:"Last Will",bggId:97842,year:2011,complexity:2.72,players:"2-5",playTime:"75 min",bggRating:7.2},
+  143063:{name:"Last Will: Getting Sacked",bggId:143063,year:2013,complexity:2.67,players:"2-5",playTime:"75 min",bggRating:7.5},
+  6554:{name:"Lawless",bggId:6554,year:2003,complexity:1.82,players:"2-6",playTime:"45 min",bggRating:6.0},
+  3794:{name:"Legend of Zagor",bggId:3794,year:1993,complexity:1.7,players:"1-4",playTime:"60 min",bggRating:6.2},
+  59959:{name:"Letters from Whitechapel",bggId:59959,year:2011,complexity:2.64,players:"2-6",playTime:"90 min",bggRating:7.3},
+  161533:{name:"Lisboa",bggId:161533,year:2017,complexity:4.57,players:"1-4",playTime:"120 min",bggRating:8.2},
+  770:{name:"Loot",bggId:770,year:1992,complexity:1.38,players:"2-8",playTime:"20 min",bggRating:6.3},
+  3201:{name:"Lord of the Rings: The Confrontation",bggId:3201,year:2002,complexity:2.15,players:"2",playTime:"30 min",bggRating:7.2},
+  338476:{name:"Lorenzo il Magnifico: Big Box",bggId:338476,year:2021,complexity:3.38,players:"2-5",playTime:"120 min",bggRating:8.4},
+  312484:{name:"Lost Ruins of Arnak",bggId:312484,year:2020,complexity:2.93,players:"1-4",playTime:"120 min",bggRating:8.1},
+  341254:{name:"Lost Ruins of Arnak: Expedition Leaders",bggId:341254,year:2021,complexity:3.1,players:"1-4",playTime:"120 min",bggRating:8.7},
+  129622:{name:"Love Letter",bggId:129622,year:2012,complexity:1.18,players:"2-4",playTime:"20 min",bggRating:7.2},
+  196326:{name:"Love Letter: Premium Edition",bggId:196326,year:2016,complexity:1.29,players:"2-8",playTime:"30 min",bggRating:7.4},
+  198740:{name:"Lovecraft Letter",bggId:198740,year:2017,complexity:1.44,players:"2-6",playTime:"15 min",bggRating:7.2},
+  66:{name:"Löwenherz",bggId:66,year:1997,complexity:2.78,players:"2-4",playTime:"90 min",bggRating:7.1},
+  258242:{name:"Magnate: The First City",bggId:258242,year:2021,complexity:3.13,players:"1-5",playTime:"120 min",bggRating:7.5},
+  9440:{name:"Maharaja: The Game of Palace Building in India",bggId:9440,year:2004,complexity:3.17,players:"2-5",playTime:"90 min",bggRating:7.1},
+  199:{name:"Manhattan",bggId:199,year:1994,complexity:1.92,players:"2-4",playTime:"45 min",bggRating:6.7},
+  14808:{name:"Marvel Heroes",bggId:14808,year:2006,complexity:3.08,players:"2-4",playTime:"120 min",bggRating:6.4},
+  351817:{name:"Marvel Zombies: A Zombicide Game",bggId:351817,year:2023,complexity:2.39,players:"1-6",playTime:"60 min",bggRating:7.9},
+  356524:{name:"Marvel Zombies: A Zombicide Game – Clash of the Sinister Six",bggId:356524,year:2023,complexity:3.0,players:"1-6",playTime:"60 min",bggRating:8.5},
+  355481:{name:"Marvel Zombies: A Zombicide Game – Fantastic 4: Under Siege",bggId:355481,year:2023,complexity:3.0,players:"1-6",playTime:"60 min",bggRating:8.5},
+  355817:{name:"Marvel Zombies: A Zombicide Game – Guardians of the Galaxy Set",bggId:355817,year:2023,complexity:3.0,players:"1-6",playTime:"60 min",bggRating:8.4},
+  355200:{name:"Marvel Zombies: X-Men Resistance",bggId:355200,year:2023,complexity:2.53,players:"1-6",playTime:"60 min",bggRating:8.5},
+  139030:{name:"Mascarade",bggId:139030,year:2013,complexity:1.53,players:"2-13",playTime:"30 min",bggRating:6.5},
+  241106:{name:"Masque of the Red Death",bggId:241106,year:2018,complexity:2.44,players:"4-7",playTime:"90 min",bggRating:6.5},
+  65673:{name:"Masques",bggId:65673,year:2010,complexity:2.01,players:"2-4",playTime:"45 min",bggRating:6.5},
+  280453:{name:"Masters of Renaissance: Lorenzo il Magnifico – The Card Game",bggId:280453,year:2019,complexity:2.13,players:"1-4",playTime:"45 min",bggRating:7.1},
+  317526:{name:"Masters of The Universe: Fields of Eternia The Board Game",bggId:317526,year:2022,complexity:3.1,players:"1-6",playTime:"180 min",bggRating:7.0},
+  209010:{name:"Mechs vs. Minions",bggId:209010,year:2016,complexity:2.45,players:"2-4",playTime:"120 min",bggRating:7.9},
+  31069:{name:"Medievalia",bggId:31069,year:2007,complexity:2.16,players:"2-4",playTime:"50 min",bggRating:5.6},
+  42839:{name:"Medievalia Action!",bggId:42839,year:2009,complexity:3.0,players:"2-4",playTime:"50 min",bggRating:6.5},
+  266304:{name:"MegaCity: Oceania",bggId:266304,year:2019,complexity:1.85,players:"2-4",playTime:"60 min",bggRating:6.7},
+  10630:{name:"Memoir '44",bggId:10630,year:2004,complexity:2.27,players:"2-4",playTime:"45 min",bggRating:7.5},
+  125755:{name:"Memoir '44: Equipment Pack",bggId:125755,year:2012,complexity:2.5,players:"2-8",playTime:"120 min",bggRating:7.8},
+  37911:{name:"Memoir '44: Operation Overlord",bggId:37911,year:2008,complexity:2.49,players:"2-8",playTime:"90 min",bggRating:7.8},
+  244794:{name:"Mercado",bggId:244794,year:2018,complexity:1.8,players:"2-4",playTime:"30 min",bggRating:6.5},
+  25292:{name:"Merchants & Marauders",bggId:25292,year:2010,complexity:3.26,players:"2-4",playTime:"180 min",bggRating:7.4},
+  161167:{name:"Merchants & Marauders: Seas of Glory",bggId:161167,year:2015,complexity:3.43,players:"2-4",playTime:"180 min",bggRating:8.3},
+  277700:{name:"Merchants Cove",bggId:277700,year:2021,complexity:2.74,players:"1-4",playTime:"90 min",bggRating:7.4},
+  364640:{name:"Merchants Cove: Master Craft",bggId:364640,year:2025,complexity:3.33,players:"1-5",playTime:"90 min",bggRating:8.1},
+  286985:{name:"Merchants Cove: The Innkeeper",bggId:286985,year:2021,complexity:2.83,players:"1-5",playTime:"90 min",bggRating:7.7},
+  286986:{name:"Merchants Cove: The Oracle",bggId:286986,year:2021,complexity:2.33,players:"1-5",playTime:"90 min",bggRating:7.9},
+  230933:{name:"Merlin",bggId:230933,year:2017,complexity:3.1,players:"2-4",playTime:"75 min",bggRating:7.1},
+  238799:{name:"Messina 1347",bggId:238799,year:2021,complexity:3.61,players:"1-4",playTime:"140 min",bggRating:7.5},
+  357010:{name:"Mind MGMT: Secret Missions",bggId:357010,year:2021,players:"1-5",bggRating:7.9},
+  284653:{name:"Mind MGMT: The Psychic Espionage “Game.”",bggId:284653,year:2021,complexity:2.91,players:"1-5",playTime:"60 min",bggRating:7.8},
+  284653:{name:"Mind MGMT: The Psychic Espionage “Game.”",bggId:284653,year:2021,complexity:2.91,players:"1-5",playTime:"60 min",bggRating:7.8},
+  260927:{name:"Mississippi Queen",bggId:260927,year:2019,complexity:1.88,players:"2-6",playTime:"45 min",bggRating:6.7},
+  358124:{name:"Mists over Carcassonne",bggId:358124,year:2022,complexity:2.16,players:"1-5",playTime:"35 min",bggRating:7.3},
+  201048:{name:"Monkey Butt",bggId:201048,year:2016,complexity:1.5,players:"2-8",playTime:"30 min",bggRating:6.3},
+  17835:{name:"Monsters Menace America",bggId:17835,year:2005,complexity:1.84,players:"2-4",playTime:"90 min",bggRating:6.0},
+  441663:{name:"Monsters Menace the World",bggId:441663,year:2025,players:"2-4",playTime:"90 min",bggRating:6.6},
+  329551:{name:"Mosaic: A Story of Civilization",bggId:329551,year:2022,complexity:3.05,players:"2-6",playTime:"120 min",bggRating:7.5},
+  21763:{name:"Mr. Jack",bggId:21763,year:2006,complexity:2.17,players:"2",playTime:"30 min",bggRating:7.0},
+  55427:{name:"Mr. Jack in New York",bggId:55427,year:2009,complexity:2.52,players:"2",playTime:"30 min",bggRating:7.2},
+  30362:{name:"Mr. Jack: Extension",bggId:30362,year:2007,complexity:2.28,players:"2",playTime:"30 min",bggRating:7.2},
+  260303:{name:"Mr. Jack: Extension",bggId:260303,year:2018,complexity:2.0,players:"2",playTime:"30 min",bggRating:7.5},
+  189848:{name:"Munchkin Marvel",bggId:189848,year:2016,complexity:2.04,players:"3-6",playTime:"120 min",bggRating:6.8},
+  109969:{name:"Mutant Meeples",bggId:109969,year:2012,complexity:2.44,players:"2-7",playTime:"45 min",bggRating:6.6},
+  181304:{name:"Mysterium",bggId:181304,year:2015,complexity:1.89,players:"2-7",playTime:"42 min",bggRating:7.2},
+  192661:{name:"Mysterium: Hidden Signs",bggId:192661,year:2016,complexity:1.73,players:"2-7",playTime:"42 min",bggRating:7.7},
+  216465:{name:"Mysterium: Secrets & Lies",bggId:216465,year:2017,complexity:1.71,players:"2-7",playTime:"42 min",bggRating:7.8},
+  65907:{name:"Mystery Express",bggId:65907,year:2010,complexity:2.66,players:"3-5",playTime:"90 min",bggRating:6.5},
+  915:{name:"Mystery of the Abbey",bggId:915,year:1995,complexity:2.2,players:"3-6",playTime:"90 min",bggRating:6.5},
+  153912:{name:"Mystery of the Abbey with The Pilgrims' Chronicles",bggId:153912,year:2007,complexity:2.24,players:"3-6",playTime:"90 min",bggRating:6.9},
+  198455:{name:"Mystic ScROLLS",bggId:198455,year:2017,complexity:1.62,players:"2-4",playTime:"15 min",bggRating:6.5},
+  186751:{name:"Mythic Battles: Pantheon",bggId:186751,year:2017,complexity:3.06,players:"2-4",playTime:"90 min",bggRating:8.3},
+  220000:{name:"Mythic Battles: Pantheon – Pandora's Box",bggId:220000,year:2017,complexity:3.0,players:"1-4",playTime:"90 min",bggRating:8.7},
+  244191:{name:"Naga Raja",bggId:244191,year:2019,complexity:2.02,players:"2",playTime:"30 min",bggRating:7.1},
+  249746:{name:"Nanty Narking",bggId:249746,year:2019,complexity:2.32,players:"2-4",playTime:"60 min",bggRating:7.5},
+  253106:{name:"Narcos: The Board Game",bggId:253106,year:2018,complexity:2.93,players:"2-5",playTime:"100 min",bggRating:7.0},
+  381248:{name:"Nemesis: Retaliation",bggId:381248,year:2025,complexity:3.76,players:"1-5",playTime:"180 min",bggRating:8.7},
+  15363:{name:"Nexus Ops",bggId:15363,year:2005,complexity:2.23,players:"2-4",playTime:"90 min",bggRating:7.2},
+  306321:{name:"Night of the Ninja",bggId:306321,year:2021,complexity:1.84,players:"4-11",playTime:"30 min",bggRating:7.2},
+  357659:{name:"Nightmare Cathedral",bggId:357659,year:2023,complexity:3.49,players:"1-4",playTime:"60 min",bggRating:7.5},
+  101013:{name:"Ninja: Legend of the Scorpion Clan",bggId:101013,year:2011,complexity:2.65,players:"2-4",playTime:"45 min",bggRating:6.5},
+  434367:{name:"Nippon: Zaibatsu",bggId:434367,year:2026,complexity:3.59,players:"1-4",playTime:"120 min",bggRating:8.6},
+  213984:{name:"Notre Dame: 10th Anniversary",bggId:213984,year:2017,complexity:2.52,players:"2-5",playTime:"75 min",bggRating:7.5},
+  324538:{name:"Nova Aetas Renaissance: Hyperion",bggId:324538,year:2023,players:"1-6",playTime:"90 min",bggRating:8.4},
+  324537:{name:"Nova Aetas Renaissance: The Mediceo",bggId:324537,year:2023,players:"1-6",playTime:"90 min",bggRating:8.1},
+  396790:{name:"Nucleum",bggId:396790,year:2023,complexity:4.19,players:"1-4",playTime:"150 min",bggRating:8.1},
+  65515:{name:"Nuns on the Run",bggId:65515,year:2010,complexity:2.07,players:"2-8",playTime:"60 min",bggRating:6.5},
+  343362:{name:"Oak",bggId:343362,year:2022,complexity:3.13,players:"1-4",playTime:"90 min",bggRating:7.1},
+  172158:{name:"Oath of the Brotherhood",bggId:172158,year:2015,complexity:2.1,players:"2-5",playTime:"60 min",bggRating:6.3},
+  232414:{name:"Oceans",bggId:232414,year:2020,complexity:2.85,players:"2-4",playTime:"90 min",bggRating:7.4},
+  271762:{name:"Oh My Gold!",bggId:271762,year:2019,complexity:1.0,players:"2-4",playTime:"10 min",bggRating:5.9},
+  406933:{name:"Omertà: The Five Families",bggId:406933,year:2025,complexity:3.75,players:"2-5",playTime:"180 min",bggRating:8.1},
+  184267:{name:"On Mars",bggId:184267,year:2020,complexity:4.63,players:"1-4",playTime:"150 min",bggRating:8.2},
+  296981:{name:"On Mars: Upgrade Pack",bggId:296981,year:2020,complexity:4.0,players:"1-4",playTime:"150 min",bggRating:8.1},
+  176361:{name:"One Night Revolution",bggId:176361,year:2015,complexity:1.87,players:"3-10",playTime:"15 min",bggRating:6.1},
+  164928:{name:"Orléans",bggId:164928,year:2014,complexity:3.01,players:"2-5",playTime:"90 min",bggRating:8.0},
+  191051:{name:"Outlive",bggId:191051,year:2017,complexity:3.04,players:"2-4",playTime:"110 min",bggRating:7.3},
+  321596:{name:"P'achakuna",bggId:321596,year:2021,complexity:1.81,players:"2",playTime:"60 min",bggRating:6.8},
+  129050:{name:"P.I.",bggId:129050,year:2012,complexity:2.23,players:"2-5",playTime:"60 min",bggRating:6.7},
+  297674:{name:"Pacific Rails Inc.",bggId:297674,year:2020,complexity:3.42,players:"2-4",playTime:"90 min",bggRating:6.7},
+  266810:{name:"Paladins of the West Kingdom",bggId:266810,year:2019,complexity:3.71,players:"1-4",playTime:"120 min",bggRating:8.0},
+  274782:{name:"Paladins of the West Kingdom: 2019 Promos",bggId:274782,year:2019,complexity:3.0,players:"1-4",playTime:"120 min",bggRating:8.0},
+  32412:{name:"Palastgeflüster",bggId:32412,year:2007,complexity:1.64,players:"3-5",playTime:"45 min",bggRating:6.8},
+  104581:{name:"Panic on Wall Street!",bggId:104581,year:2011,complexity:1.68,players:"3-11",playTime:"45 min",bggRating:7.0},
+  280136:{name:"Paranormal Detectives",bggId:280136,year:2019,complexity:1.67,players:"2-6",playTime:"50 min",bggRating:6.9},
+  308119:{name:"Pax Renaissance: 2nd Edition",bggId:308119,year:2021,complexity:4.65,players:"1-4",playTime:"120 min",bggRating:8.4},
+  90040:{name:"Pergamon",bggId:90040,year:2011,complexity:2.24,players:"2-4",playTime:"45 min",bggRating:6.9},
+  21954:{name:"Perikles",bggId:21954,year:2006,complexity:3.28,players:"3-5",playTime:"120 min",bggRating:6.9},
+  165095:{name:"Pirate Loot: Base Set",bggId:165095,year:2015,complexity:2.0,players:"2-4",playTime:"60 min",bggRating:6.1},
+  2987:{name:"Pirate's Cove",bggId:2987,year:2002,complexity:2.01,players:"3-5",playTime:"90 min",bggRating:6.6},
+  117663:{name:"Piraten Kapern",bggId:117663,year:2012,complexity:1.1,players:"2-5",playTime:"30 min",bggRating:6.4},
+  258779:{name:"Planet Unknown",bggId:258779,year:2022,complexity:2.25,players:"1-6",playTime:"80 min",bggRating:7.8},
+  393509:{name:"Planet Unknown: Supermoon",bggId:393509,year:2025,complexity:2.5,players:"1-6",playTime:"80 min",bggRating:7.6},
+  201920:{name:"Pocket Madness",bggId:201920,year:2016,complexity:1.29,players:"2-4",playTime:"30 min",bggRating:6.0},
+  331265:{name:"Port Royal: Big Box",bggId:331265,year:2022,complexity:1.75,players:"1-5",playTime:"50 min",bggRating:7.5},
+  105624:{name:"Poseidon's Kingdom",bggId:105624,year:2011,complexity:2.39,players:"2-4",playTime:"60 min",bggRating:6.8},
+  180974:{name:"Potion Explosion",bggId:180974,year:2015,complexity:1.78,players:"2-4",playTime:"45 min",bggRating:7.1},
+  257729:{name:"Potion Explosion: The 6th Student",bggId:257729,year:2019,complexity:2.14,players:"2-6",playTime:"45 min",bggRating:7.5},
+  203542:{name:"Potion Explosion: The Fifth Ingredient",bggId:203542,year:2017,complexity:1.95,players:"2-4",playTime:"60 min",bggRating:7.5},
+  487:{name:"Power",bggId:487,year:1981,complexity:2.59,players:"2-4",playTime:"30 min",bggRating:6.1},
+  2651:{name:"Power Grid",bggId:2651,year:2004,complexity:3.25,players:"2-6",playTime:"120 min",bggRating:7.8},
+  25031:{name:"Power Grid: Benelux/Central Europe",bggId:25031,year:2006,complexity:3.14,players:"2-6",playTime:"120 min",bggRating:8.0},
+  285448:{name:"Power Grid: Middle East/South Africa",bggId:285448,year:2019,complexity:3.0,players:"2-6",playTime:"120 min",bggRating:8.0},
+  78727:{name:"Power Grid: Russia & Japan",bggId:78727,year:2010,complexity:3.08,players:"2-6",playTime:"120 min",bggRating:7.9},
+  344429:{name:"Power Grid: The New Power Plants – Set 2",bggId:344429,year:2021,complexity:3.0,players:"2-6",playTime:"120 min",bggRating:7.8},
+  181971:{name:"Power Grid: The Stock Companies",bggId:181971,year:2015,complexity:3.52,players:"2-6",playTime:"120 min",bggRating:6.7},
+  12451:{name:"Pro Action Football",bggId:12451,year:1994,complexity:1.12,players:"2",playTime:"90 min",bggRating:6.4},
+  108687:{name:"Puerto Rico",bggId:108687,year:2011,complexity:3.22,players:"2-5",playTime:"150 min",bggRating:8.3},
+  331979:{name:"Quartermaster General WW2: 2nd Edition",bggId:331979,year:2020,complexity:2.62,players:"2-6",playTime:"120 min",bggRating:7.7},
+  208773:{name:"Quartermaster General: 1914",bggId:208773,year:2016,complexity:2.68,players:"2-5",playTime:"120 min",bggRating:7.5},
+  6068:{name:"Queen's Necklace",bggId:6068,year:2003,complexity:1.91,players:"2-4",playTime:"45 min",bggRating:6.4},
+  20445:{name:"Quest for the DragonLords (Second Edition)",bggId:20445,year:2006,complexity:3.11,players:"2-4",playTime:"120 min",bggRating:6.2},
+  3190:{name:"Quixo",bggId:3190,year:1995,complexity:1.62,players:"2-4",playTime:"15 min",bggRating:6.3},
+  125752:{name:"Race! Formula 90",bggId:125752,year:2013,complexity:3.56,players:"2-6",playTime:"270 min",bggRating:7.9},
+  301880:{name:"Raiders of Scythia",bggId:301880,year:2020,complexity:2.77,players:"1-4",playTime:"80 min",bggRating:7.7},
+  249301:{name:"Raiders of the North Sea: Solo Variant",bggId:249301,year:2018,complexity:2.44,players:"1",playTime:"50 min",bggRating:8.1},
+  245654:{name:"Railroad Ink: Deep Blue Edition",bggId:245654,year:2018,complexity:1.47,players:"1-6",playTime:"30 min",bggRating:7.1},
+  320736:{name:"Railroad Ink: Sky Expansion Pack",bggId:320736,year:2021,complexity:2.0,players:"1-4",playTime:"30 min",bggRating:7.5},
+  207691:{name:"Railroad Revolution",bggId:207691,year:2016,complexity:3.24,players:"2-4",playTime:"90 min",bggRating:7.3},
+  214988:{name:"Railways of Nippon",bggId:214988,year:2018,complexity:2.21,players:"2-4",playTime:"120 min",bggRating:7.6},
+  17133:{name:"Railways of the World",bggId:17133,year:2005,complexity:3.02,players:"2-6",playTime:"120 min",bggRating:7.7},
+  202732:{name:"Raise Your Goblets",bggId:202732,year:2016,complexity:1.39,players:"2-12",playTime:"45 min",bggRating:6.1},
+  312959:{name:"Rallyman: DIRT",bggId:312959,year:2022,complexity:2.32,players:"1-6",playTime:"60 min",bggRating:7.5},
+  432591:{name:"Rallyman: DIRT – Monte-Carlo",bggId:432591,year:2025,complexity:3.0,players:"1-6",playTime:"60 min",bggRating:8.4},
+  143690:{name:"Rattus: Arabian Traders",bggId:143690,year:2013,complexity:2.33,players:"2-6",playTime:"45 min",bggRating:6.9},
+  360212:{name:"Rattus: Big Box",bggId:360212,year:2023,complexity:2.14,players:"2-6",playTime:"60 min",bggRating:7.2},
+  143689:{name:"Rattus: Mercatus",bggId:143689,year:2013,complexity:2.25,players:"2-4",playTime:"45 min",bggRating:7.0},
+  351040:{name:"Ready Set Bet",bggId:351040,year:2022,complexity:1.33,players:"2-9",playTime:"60 min",bggRating:7.5},
+  277:{name:"Res Publica",bggId:277,year:1991,complexity:1.71,players:"3-5",playTime:"60 min",bggRating:5.9},
+  256680:{name:"Return to Dark Tower",bggId:256680,year:2022,complexity:2.65,players:"1-4",playTime:"120 min",bggRating:8.2},
+  118695:{name:"Riff Raff",bggId:118695,year:2012,complexity:1.19,players:"2-4",playTime:"30 min",bggRating:6.9},
+  30658:{name:"Rise of Empires",bggId:30658,year:2009,complexity:3.54,players:"2-5",playTime:"150 min",bggRating:7.0},
+  205896:{name:"Rising Sun",bggId:205896,year:2018,complexity:3.3,players:"3-5",playTime:"120 min",bggRating:7.8},
+  224654:{name:"Rising Sun: Daimyo Box",bggId:224654,year:2018,complexity:3.36,players:"3-6",playTime:"120 min",bggRating:8.5},
+  223782:{name:"Rising Sun: Dynasty Invasion",bggId:223782,year:2018,complexity:3.12,players:"3-6",playTime:"120 min",bggRating:8.2},
+  224479:{name:"Rising Sun: Kami Unbound",bggId:224479,year:2018,complexity:3.47,players:"3-5",playTime:"120 min",bggRating:8.0},
+  224653:{name:"Rising Sun: Monster Pack",bggId:224653,year:2018,complexity:3.0,players:"3-5",playTime:"120 min",bggRating:8.1},
+  10383:{name:"Risk: Godstorm",bggId:10383,year:2004,complexity:2.69,players:"2-5",playTime:"120 min",bggRating:6.3},
+  66056:{name:"Rivals for Catan",bggId:66056,year:2010,complexity:2.33,players:"2",playTime:"60 min",bggRating:6.9},
+  93401:{name:"Rivals for Catan: Age of Darkness",bggId:93401,year:2011,complexity:2.27,players:"2",playTime:"75 min",bggRating:7.5},
+  127437:{name:"Rivals for Catan: Age of Enlightenment",bggId:127437,year:2012,complexity:2.26,players:"2",playTime:"75 min",bggRating:7.7},
+  168788:{name:"Rum & Bones",bggId:168788,year:2015,complexity:2.34,players:"2-6",playTime:"60 min",bggRating:6.9},
+  198584:{name:"Rum & Bones: Blutrausch Legion",bggId:198584,year:2017,players:"2-6",playTime:"60 min",bggRating:7.9},
+  181631:{name:"Rum & Bones: La Brise Sanguine",bggId:181631,year:2015,complexity:2.0,players:"2-6",bggRating:7.5},
+  196202:{name:"Rum & Bones: Second Tide",bggId:196202,year:2017,complexity:2.83,players:"2-6",playTime:"60 min",bggRating:7.6},
+  230221:{name:"Rum & Bones: Second Tide – Captains Promos Set",bggId:230221,year:2017,players:"2-6",playTime:"75 min",bggRating:7.8},
+  198890:{name:"Rum & Bones: Second Tide – Cutthroats Hero Pack",bggId:198890,year:2017,players:"2-6",bggRating:7.8},
+  217667:{name:"Rum & Bones: Second Tide – Deep Lords Heroes Set #1",bggId:217667,year:2017,players:"2-6",playTime:"75 min",bggRating:7.8},
+  198326:{name:"Rum & Bones: Second Tide – Fairy Tale Hero Pack",bggId:198326,year:2017,players:"2-6",bggRating:7.8},
+  198405:{name:"Rum & Bones: Second Tide – Iron Inquisition Heroes Set #1",bggId:198405,year:2017,players:"2-6",bggRating:8.0},
+  202680:{name:"Rum & Bones: Second Tide – KS exclusives",bggId:202680,year:2017,players:"2-6",playTime:"75 min",bggRating:7.9},
+  198923:{name:"Rum & Bones: Second Tide – League of Extraordinary Pirates Hero Pack",bggId:198923,year:2017,players:"2-6",bggRating:7.6},
+  217669:{name:"Rum & Bones: Second Tide – Marea de la Muerte Heroes Set #1",bggId:217669,year:2017,players:"2-6",playTime:"75 min",bggRating:7.7},
+  230218:{name:"Rum & Bones: Second Tide – Mercenaries Promos Set #3",bggId:230218,year:2017,players:"2-6",playTime:"75 min",bggRating:7.8},
+  230219:{name:"Rum & Bones: Second Tide – Mercenaries Promos Set #4",bggId:230219,year:2017,players:"2-6",playTime:"75 min",bggRating:7.9},
+  217670:{name:"Rum & Bones: Second Tide – Sea Monsters",bggId:217670,year:2017,complexity:3.0,players:"2-6",playTime:"75 min",bggRating:7.9},
+  202681:{name:"Rum & Bones: Second Tide – Season One Upgrade Kit",bggId:202681,year:2017,players:"2-6",playTime:"75 min",bggRating:8.4},
+  21523:{name:"Runebound: Second Edition",bggId:21523,year:2005,complexity:2.68,players:"2-6",playTime:"240 min",bggRating:6.9},
+  59294:{name:"Runewars",bggId:59294,year:2010,complexity:3.79,players:"2-4",playTime:"240 min",bggRating:7.6},
+  288316:{name:"Rurik: Dawn of Kiev – Kickstarter Edition",bggId:288316,year:2019,complexity:2.8,players:"1-4",playTime:"120 min",bggRating:7.9},
+  312983:{name:"Rurik: Stone & Blade",bggId:312983,year:2021,complexity:3.14,players:"1-4",playTime:"140 min",bggRating:8.1},
+  91072:{name:"Saboteur 2 (expansion-only editions)",bggId:91072,year:2011,complexity:1.54,players:"2-12",playTime:"45 min",bggRating:6.9},
+  168215:{name:"Saboteur: The Duel",bggId:168215,year:2014,complexity:1.29,players:"1-2",playTime:"30 min",bggRating:6.0},
+  245214:{name:"Saboteur: The Lost Mines",bggId:245214,year:2018,complexity:2.0,players:"3-9",playTime:"45 min",bggRating:6.3},
+  128667:{name:"Samurai Sword",bggId:128667,year:2012,complexity:1.76,players:"3-7",playTime:"40 min",bggRating:6.7},
+  104347:{name:"Santiago de Cuba",bggId:104347,year:2011,complexity:2.15,players:"2-4",playTime:"75 min",bggRating:6.9},
+  194655:{name:"Santorini",bggId:194655,year:2016,complexity:1.72,players:"2-4",playTime:"20 min",bggRating:7.3},
+  324090:{name:"Scarface 1920",bggId:324090,year:2023,complexity:3.83,players:"1-4",playTime:"150 min",bggRating:7.9},
+  388682:{name:"Scarface 1920: Bloody Business",bggId:388682,year:2025,complexity:3.5,players:"1-4",playTime:"180 min",bggRating:8.6},
+  367041:{name:"Scholars of the South Tigris",bggId:367041,year:2023,complexity:4.13,players:"1-4",playTime:"90 min",bggRating:8.0},
+  169786:{name:"Scythe",bggId:169786,year:2016,complexity:3.45,players:"1-5",playTime:"115 min",bggRating:8.1},
+  199727:{name:"Scythe: Invaders from Afar",bggId:199727,year:2016,complexity:3.44,players:"1-7",playTime:"140 min",bggRating:8.3},
+  279304:{name:"Scythe: Modular Board",bggId:279304,year:2019,complexity:3.3,players:"1-5",playTime:"115 min",bggRating:8.2},
+  242277:{name:"Scythe: The Rise of Fenris",bggId:242277,year:2018,complexity:3.42,players:"1-5",playTime:"150 min",bggRating:8.7},
+  223555:{name:"Scythe: The Wind Gambit",bggId:223555,year:2017,complexity:3.41,players:"1-7",playTime:"140 min",bggRating:7.8},
+  189052:{name:"Sea of Clouds",bggId:189052,year:2016,complexity:1.72,players:"2-4",playTime:"45 min",bggRating:6.6},
+  343525:{name:"Seas of Havoc",bggId:343525,year:2023,complexity:2.53,players:"1-5",playTime:"75 min",bggRating:7.3},
+  200847:{name:"Secrets",bggId:200847,year:2017,complexity:1.5,players:"4-8",playTime:"35 min",bggRating:6.4},
+  418059:{name:"SETI: Search for Extraterrestrial Intelligence",bggId:418059,year:2024,complexity:3.83,players:"1-4",playTime:"160 min",bggRating:8.4},
+  102898:{name:"Sewer Pirats",bggId:102898,year:2012,complexity:2.11,players:"2-5",playTime:"60 min",bggRating:6.6},
+  24068:{name:"Shadow Hunters",bggId:24068,year:2005,complexity:1.82,players:"4-8",playTime:"60 min",bggRating:6.8},
+  15062:{name:"Shadows over Camelot",bggId:15062,year:2005,complexity:2.57,players:"3-7",playTime:"90 min",bggRating:7.1},
+  35704:{name:"Shadows over Camelot: Merlin's Company",bggId:35704,year:2008,complexity:2.54,players:"3-8",playTime:"90 min",bggRating:7.4},
+  129904:{name:"Shadows over Camelot: The Card Game",bggId:129904,year:2012,complexity:1.94,players:"1-7",playTime:"20 min",bggRating:5.7},
+  121615:{name:"Shadows Over the Empire",bggId:121615,year:2013,complexity:2.85,players:"2-4",playTime:"120 min",bggRating:5.9},
+  298638:{name:"Sheriff of Nottingham: 2nd Edition",bggId:298638,year:2020,complexity:1.71,players:"3-6",playTime:"60 min",bggRating:7.2},
+  226065:{name:"Sheriff of Nottingham: Merry Men",bggId:226065,year:2017,complexity:2.0,players:"3-6",playTime:"60 min",bggRating:7.5},
+  393179:{name:"Shipyard (Second Edition)",bggId:393179,year:2023,complexity:3.28,players:"1-4",playTime:"120 min",bggRating:7.4},
+  239175:{name:"Shiver Me Timbers",bggId:239175,year:2021,complexity:3.29,players:"2-4",playTime:"150 min",bggRating:7.9},
+  176103:{name:"Shogun Big Box",bggId:176103,year:2015,complexity:3.31,players:"3-5",playTime:"150 min",bggRating:8.0},
+  125534:{name:"Skeleton Island",bggId:125534,year:2012,complexity:1.0,players:"2-4",playTime:"15 min",bggRating:5.9},
+  150145:{name:"Skull King",bggId:150145,year:2013,complexity:1.73,players:"2-8",playTime:"30 min",bggRating:7.5},
+  298231:{name:"Skyrise",bggId:298231,year:2024,complexity:2.24,players:"2-4",playTime:"90 min",bggRating:7.7},
+  317191:{name:"Skytear (Kickstarter edition)",bggId:317191,year:2020,players:"2-8",playTime:"45 min",bggRating:7.3},
+  594:{name:"Sleuth",bggId:594,year:1971,complexity:2.47,players:"3-7",playTime:"45 min",bggRating:6.9},
+  284616:{name:"Small Samurai Empires",bggId:284616,year:2020,complexity:2.75,players:"2-4",playTime:"90 min",bggRating:7.5},
+  40692:{name:"Small World",bggId:40692,year:2009,complexity:2.35,players:"2-5",playTime:"80 min",bggRating:7.2},
+  97786:{name:"Small World Underground",bggId:97786,year:2011,complexity:2.59,players:"2-5",playTime:"90 min",bggRating:7.2},
+  1568:{name:"Space Crusade",bggId:1568,year:1990,complexity:2.3,players:"2-4",playTime:"120 min",bggRating:7.1},
+  128671:{name:"Spartacus: A Game of Blood and Treachery",bggId:128671,year:2012,complexity:2.73,players:"3-4",playTime:"180 min",bggRating:7.5},
+  256606:{name:"Spirits of the Wild",bggId:256606,year:2018,complexity:1.44,players:"2",playTime:"30 min",bggRating:7.3},
+  166384:{name:"Spyfall",bggId:166384,year:2014,complexity:1.23,players:"3-8",playTime:"15 min",bggRating:6.7},
+  187645:{name:"Star Wars: Rebellion",bggId:187645,year:2016,complexity:3.75,players:"2-4",playTime:"240 min",bggRating:8.4},
+  226840:{name:"Star Wars: Rebellion – Rise of the Empire",bggId:226840,year:2017,complexity:3.69,players:"2-4",playTime:"240 min",bggRating:8.9},
+  22827:{name:"StarCraft: The Board Game",bggId:22827,year:2007,complexity:3.86,players:"2-6",playTime:"240 min",bggRating:7.4},
+  363369:{name:"Starship Captains",bggId:363369,year:2022,complexity:2.36,players:"1-4",playTime:"100 min",bggRating:7.1},
+  260009:{name:"Steam Pirates",bggId:260009,year:2018,complexity:2.5,players:"2-4",playTime:"90 min",bggRating:6.1},
+  331992:{name:"Steampunk Rally Fusion: Atomic Edition",bggId:331992,year:2021,complexity:2.86,players:"2-8",playTime:"60 min",bggRating:7.7},
+  302413:{name:"Steamwatchers",bggId:302413,year:2021,complexity:3.17,players:"2-5",playTime:"90 min",bggRating:7.3},
+  215312:{name:"Stop Thief!",bggId:215312,year:2017,complexity:1.48,players:"1-5",playTime:"60 min",bggRating:6.9},
+  207809:{name:"Sultans of Wind",bggId:207809,year:2016,complexity:1.5,players:"2-4",playTime:"40 min",bggRating:6.3},
+  18745:{name:"Sun Tzu",bggId:18745,year:2005,complexity:2.09,players:"2",playTime:"30 min",bggRating:7.0},
+  194517:{name:"Super Fantasy Brawl",bggId:194517,year:2022,complexity:2.28,players:"2-4",playTime:"40 min",bggRating:7.5},
+  427084:{name:"Superstore 3000",bggId:427084,year:2024,complexity:1.95,players:"2-4",playTime:"45 min",bggRating:6.4},
+  2653:{name:"Survive: Escape from Atlantis!",bggId:2653,year:1982,complexity:1.69,players:"2-4",playTime:"60 min",bggRating:7.3},
+  96323:{name:"Survive: Escape from Atlantis! – 5-6 Player Mini Expansion",bggId:96323,year:2011,complexity:1.56,players:"2-6",playTime:"45 min",bggRating:7.4},
+  85990:{name:"Survive: Escape from Atlantis! – The Giant Squid Mini Expansion",bggId:85990,year:2011,complexity:1.48,players:"2-4",playTime:"60 min",bggRating:7.1},
+  349369:{name:"Tabriz",bggId:349369,year:2025,complexity:2.02,players:"1-5",playTime:"60 min",bggRating:7.2},
+  475:{name:"Taj Mahal",bggId:475,year:2000,complexity:2.85,players:"2-5",playTime:"90 min",bggRating:7.3},
+  223481:{name:"Take the Gold",bggId:223481,year:2017,complexity:1.0,players:"2-6",playTime:"15 min",bggRating:6.5},
+  34119:{name:"Tales of the Arabian Nights",bggId:34119,year:2009,complexity:2.15,players:"2-6",playTime:"120 min",bggRating:7.2},
+  422406:{name:"Talisman: Alliances – Fate Beckons",bggId:422406,year:2024,complexity:2.5,players:"2-6",bggRating:7.3},
+  415550:{name:"Talisman: The Magical Quest Game – 5th Edition",bggId:415550,year:2024,complexity:2.11,players:"2-6",bggRating:7.3},
+  306481:{name:"Tawantinsuyu: The Inca Empire",bggId:306481,year:2020,complexity:4.09,players:"1-4",playTime:"120 min",bggRating:7.4},
+  9464:{name:"Teenage Mutant Ninja Turtles: Pizza Power Game",bggId:9464,year:1987,complexity:1.3,players:"2-4",playTime:"20 min",bggRating:4.8},
+  229853:{name:"Teotihuacan: City of Gods",bggId:229853,year:2018,complexity:3.78,players:"1-4",playTime:"120 min",bggRating:7.8},
+  167791:{name:"Terraforming Mars",bggId:167791,year:2016,complexity:3.27,players:"1-5",playTime:"120 min",bggRating:8.3},
+  311247:{name:"Terraforming Mars: Big Box",bggId:311247,year:2021,complexity:2.06,players:"1-5",playTime:"120 min",bggRating:8.3},
+  255681:{name:"Terraforming Mars: Colonies",bggId:255681,year:2018,complexity:3.01,players:"1-5",playTime:"120 min",bggRating:8.1},
+  401114:{name:"Terraforming Mars: Milestones & Awards",bggId:401114,year:2024,complexity:3.0,players:"2-5",bggRating:8.4},
+  247030:{name:"Terraforming Mars: Prelude",bggId:247030,year:2018,complexity:2.56,players:"1-5",playTime:"120 min",bggRating:8.8},
+  387809:{name:"Terraforming Mars: Prelude 2",bggId:387809,year:2024,complexity:2.38,players:"1-5",playTime:"120 min",bggRating:8.4},
+  273473:{name:"Terraforming Mars: Turmoil",bggId:273473,year:2019,complexity:3.68,players:"1-5",playTime:"150 min",bggRating:7.5},
+  371433:{name:"Terrorscape",bggId:371433,year:2023,complexity:2.27,players:"2-4",playTime:"45 min",bggRating:8.1},
+  385270:{name:"Terrorscape: Amorphous Peril",bggId:385270,year:2023,complexity:2.0,players:"2-4",bggRating:8.6},
+  385269:{name:"Terrorscape: Feral Instincts",bggId:385269,year:2023,complexity:2.5,players:"2-4",bggRating:8.6},
+  385271:{name:"Terrorscape: Lethal Immortals",bggId:385271,year:2023,complexity:2.0,players:"2-4",bggRating:8.4},
+  423733:{name:"Terrorscape: Putrefied Enmity",bggId:423733,year:2025,players:"2-4",bggRating:8.6},
+  98315:{name:"The Adventurers: The Pyramid of Horus",bggId:98315,year:2011,complexity:1.75,players:"2-6",playTime:"45 min",bggRating:6.8},
+  43868:{name:"The Adventurers: The Temple of Chac",bggId:43868,year:2009,complexity:1.66,players:"2-6",playTime:"45 min",bggRating:6.6},
+  271320:{name:"The Castles of Burgundy",bggId:271320,year:2019,complexity:2.91,players:"1-4",playTime:"120 min",bggRating:8.5},
+  129351:{name:"The Cave",bggId:129351,year:2012,complexity:2.52,players:"2-5",playTime:"60 min",bggRating:6.5},
+  170437:{name:"The Curse of the Black Dice",bggId:170437,year:2015,complexity:1.74,players:"2-4",playTime:"40 min",bggRating:6.1},
+  184648:{name:"The Exiled: Siege",bggId:184648,year:2016,complexity:2.8,players:"1-5",playTime:"120 min",bggRating:6.5},
+  238164:{name:"The Faceless",bggId:238164,year:2018,complexity:2.29,players:"2-4",playTime:"45 min",bggRating:6.6},
+  2921:{name:"The Game of Life",bggId:2921,year:1960,complexity:1.17,players:"2-6",playTime:"60 min",bggRating:4.4},
+  195539:{name:"The Godfather: Corleone's Empire",bggId:195539,year:2017,complexity:2.64,players:"2-5",playTime:"90 min",bggRating:7.5},
+  292375:{name:"The Great Wall",bggId:292375,year:2021,complexity:3.91,players:"1-4",playTime:"180 min",bggRating:7.8},
+  254513:{name:"The Grimm Masquerade",bggId:254513,year:2019,complexity:1.69,players:"2-5",playTime:"40 min",bggRating:6.9},
+  339906:{name:"The Hunger",bggId:339906,year:2021,complexity:2.33,players:"2-6",playTime:"60 min",bggRating:7.0},
+  358559:{name:"The Hunger: High Stakes",bggId:358559,year:2022,complexity:2.6,players:"2-6",playTime:"60 min",bggRating:7.7},
+  368260:{name:"The Hunger: Severin Promo Card",bggId:368260,year:2022,players:"2-6",playTime:"60 min",bggRating:6.9},
+  319966:{name:"The King Is Dead: Second Edition",bggId:319966,year:2020,complexity:2.17,players:"2-4",playTime:"45 min",bggRating:7.6},
+  275557:{name:"The Last Bottle of Rum",bggId:275557,year:2021,complexity:1.92,players:"2-5",playTime:"60 min",bggRating:7.2},
+  41916:{name:"The Magic Labyrinth",bggId:41916,year:2009,complexity:1.21,players:"2-4",playTime:"30 min",bggRating:6.8},
+  1950:{name:"The Mysteries of Peking",bggId:1950,year:1987,complexity:1.31,players:"2-6",playTime:"30 min",bggRating:5.8},
+  555:{name:"The Princes of Florence",bggId:555,year:2000,complexity:3.24,players:"1-5",playTime:"100 min",bggRating:7.5},
+  36811:{name:"The Princes of Machu Picchu",bggId:36811,year:2008,complexity:3.1,players:"2-5",playTime:"90 min",bggRating:6.9},
+  181796:{name:"The Prodigals Club",bggId:181796,year:2015,complexity:3.26,players:"2-5",playTime:"100 min",bggRating:7.3},
+  349955:{name:"The Quacks of Quedlinburg: MegaBox",bggId:349955,year:2021,complexity:2.05,players:"2-5",playTime:"60 min",bggRating:8.2},
+  217372:{name:"The Quest for El Dorado",bggId:217372,year:2017,complexity:1.94,players:"2-4",playTime:"60 min",bggRating:7.7},
+  128882:{name:"The Resistance: Avalon",bggId:128882,year:2012,complexity:1.74,players:"5-10",playTime:"30 min",bggRating:7.5},
+  358557:{name:"The Search for Lost Species",bggId:358557,year:2023,complexity:2.95,players:"1-4",playTime:"75 min",bggRating:7.7},
+  279537:{name:"The Search for Planet X",bggId:279537,year:2020,complexity:2.43,players:"1-4",playTime:"75 min",bggRating:7.9},
+  257987:{name:"The Towers of Arkhanos",bggId:257987,year:2019,complexity:1.38,players:"2-4",playTime:"30 min",bggRating:6.7},
+  279125:{name:"The Towers of Arkhanos: Silver Lotus Order Expansion",bggId:279125,year:2019,players:"2-5",playTime:"50 min",bggRating:7.4},
+  282775:{name:"The Warp",bggId:282775,year:2023,complexity:3.52,players:"1-4",playTime:"180 min",bggRating:7.8},
+  354912:{name:"The Warp: 5/6 Player Expansion",bggId:354912,year:2023,players:"5-6",playTime:"180 min",bggRating:8.1},
+  503:{name:"Through the Desert",bggId:503,year:1998,complexity:2.16,players:"2-5",playTime:"45 min",bggRating:7.2},
+  21790:{name:"Thurn and Taxis",bggId:21790,year:2006,complexity:2.26,players:"2-4",playTime:"60 min",bggRating:7.1},
+  329841:{name:"Ticket to Ride: Europe – 15th Anniversary",bggId:329841,year:2021,complexity:1.87,players:"2-5",playTime:"60 min",bggRating:8.2},
+  202670:{name:"Ticket to Ride: Rails & Sails",bggId:202670,year:2016,complexity:2.48,players:"2-5",playTime:"120 min",bggRating:7.4},
+  34127:{name:"Ticket to Ride: The Card Game",bggId:34127,year:2008,complexity:1.88,players:"2-4",playTime:"30 min",bggRating:6.1},
+  42:{name:"Tigris & Euphrates",bggId:42,year:1997,complexity:3.48,players:"2-4",playTime:"120 min",bggRating:7.7},
+  54:{name:"Tikal",bggId:54,year:1999,complexity:2.78,players:"2-4",playTime:"90 min",bggRating:7.3},
+  42215:{name:"Tobago",bggId:42215,year:2009,complexity:2.13,players:"2-4",playTime:"60 min",bggRating:7.1},
+  319398:{name:"Tobago: Volcano",bggId:319398,year:2020,complexity:2.0,players:"2-4",playTime:"45 min",bggRating:7.5},
+  273993:{name:"Tonari",bggId:273993,year:2019,complexity:1.11,players:"2-4",playTime:"45 min",bggRating:6.4},
+  218530:{name:"Tortuga 1667",bggId:218530,year:2017,complexity:2.05,players:"2-9",playTime:"40 min",bggRating:6.9},
+  242639:{name:"Treasure Island",bggId:242639,year:2018,complexity:2.2,players:"2-5",playTime:"45 min",bggRating:7.2},
+  297566:{name:"Treasure Island: Captain Silver – Revenge Island",bggId:297566,year:2020,complexity:2.0,players:"2-5",playTime:"45 min",bggRating:7.7},
+  172659:{name:"Trickerion: Dahlgaard's Gifts",bggId:172659,year:2015,complexity:4.05,players:"2-4",playTime:"120 min",bggRating:8.2},
+  163068:{name:"Trickerion: Legends of Illusion",bggId:163068,year:2015,complexity:4.26,players:"2-4",playTime:"180 min",bggRating:8.0},
+  281442:{name:"Trismegistus: The Ultimate Formula",bggId:281442,year:2019,complexity:4.19,players:"1-4",playTime:"120 min",bggRating:7.5},
+  72478:{name:"Trollhalla",bggId:72478,year:2011,complexity:2.02,players:"2-4",playTime:"60 min",bggRating:6.6},
+  124172:{name:"Tsuro of the Seas",bggId:124172,year:2012,complexity:1.41,players:"2-8",playTime:"40 min",bggRating:6.5},
+  356123:{name:"Turing Machine",bggId:356123,year:2022,complexity:2.54,players:"1-4",playTime:"20 min",bggRating:7.6},
+  233078:{name:"Twilight Imperium: Fourth Edition",bggId:233078,year:2017,complexity:4.35,players:"3-6",playTime:"480 min",bggRating:8.6},
+  126163:{name:"Tzolk'in: The Mayan Calendar",bggId:126163,year:2012,complexity:3.66,players:"2-4",playTime:"90 min",bggRating:7.8},
+  249410:{name:"U.S. Telegraph",bggId:249410,year:2018,complexity:1.73,players:"2-4",playTime:"60 min",bggRating:6.9},
+  46396:{name:"Ubongo 3D",bggId:46396,year:2009,complexity:1.91,players:"2-4",playTime:"30 min",bggRating:7.1},
+  340466:{name:"Unfathomable",bggId:340466,year:2021,complexity:3.12,players:"3-6",playTime:"240 min",bggRating:7.5},
+  252399:{name:"Vast: The Mysterious Manor",bggId:252399,year:2019,complexity:3.75,players:"1-5",playTime:"120 min",bggRating:7.4},
+  1001:{name:"Vendetta",bggId:1001,year:1988,complexity:1.28,players:"2-4",playTime:"30 min",bggRating:5.1},
+  205477:{name:"Vengeance",bggId:205477,year:2018,complexity:2.86,players:"1-4",playTime:"120 min",bggRating:7.1},
+  238229:{name:"Vengeance: Rosari Clan Expansion",bggId:238229,year:2017,complexity:3.5,players:"1-5",playTime:"120 min",bggRating:7.4},
+  104006:{name:"Village",bggId:104006,year:2011,complexity:3.06,players:"2-4",playTime:"90 min",bggRating:7.5},
+  280143:{name:"Volcanic Isle",bggId:280143,year:2019,complexity:1.67,players:"2-4",playTime:"60 min",bggRating:6.2},
+  19:{name:"Wacky Wacky West",bggId:19,year:1991,complexity:1.82,players:"2-4",playTime:"45 min",bggRating:6.3},
+  2718:{name:"War! Age of Imperialism",bggId:2718,year:2001,complexity:2.78,players:"2-6",playTime:"180 min",bggRating:5.6},
+  22038:{name:"Warrior Knights",bggId:22038,year:2006,complexity:3.51,players:"2-6",playTime:"240 min",bggRating:6.9},
+  396618:{name:"Waterfall Park",bggId:396618,year:2023,complexity:1.95,players:"3-5",playTime:"45 min",bggRating:7.0},
+  262543:{name:"Wavelength",bggId:262543,year:2019,complexity:1.11,players:"2-12",playTime:"45 min",bggRating:7.2},
+  232405:{name:"Western Legends",bggId:232405,year:2018,complexity:2.85,players:"2-6",playTime:"90 min",bggRating:7.6},
+  267545:{name:"Western Legends: Ante Up",bggId:267545,year:2019,complexity:3.29,players:"2-6",playTime:"90 min",bggRating:8.1},
+  295026:{name:"Western Legends: Blood Money",bggId:295026,year:2021,complexity:3.17,players:"2-6",playTime:"90 min",bggRating:8.2},
+  244936:{name:"Western Legends: Fistful of Extras",bggId:244936,year:2018,complexity:2.75,players:"2-6",playTime:"90 min",bggRating:7.9},
+  272253:{name:"Western Legends: Man in Black Promo Card",bggId:272253,year:2019,complexity:3.0,players:"2-6",playTime:"90 min",bggRating:7.7},
+  270728:{name:"Western Legends: Wild Bunch of Extras",bggId:270728,year:2019,complexity:3.0,players:"2-6",playTime:"90 min",bggRating:8.1},
+  198454:{name:"When I Dream",bggId:198454,year:2016,complexity:1.19,players:"4-10",playTime:"40 min",bggRating:6.9},
+  335427:{name:"Wild: Serengeti",bggId:335427,year:2022,complexity:2.59,players:"1-4",playTime:"120 min",bggRating:7.0},
+  370878:{name:"Wild: Serengeti – Animal Specialist Mini-Expansion",bggId:370878,year:2022,complexity:2.4,players:"1-4",playTime:"120 min",bggRating:7.6},
+  244654:{name:"Wildlands",bggId:244654,year:2018,complexity:2.25,players:"2-4",playTime:"60 min",bggRating:7.3},
+  1382:{name:"Winner's Circle",bggId:1382,year:2001,complexity:1.6,players:"2-6",playTime:"60 min",bggRating:7.0},
+  318560:{name:"Witchstone",bggId:318560,year:2021,complexity:2.77,players:"2-4",playTime:"90 min",bggRating:7.5},
+  353890:{name:"Witchstone: Full Moon",bggId:353890,year:2023,complexity:3.0,players:"2-4",playTime:"90 min",bggRating:7.0},
+  355093:{name:"Woodcraft",bggId:355093,year:2022,complexity:3.82,players:"1-4",playTime:"120 min",bggRating:7.6},
+  365258:{name:"World Wonders",bggId:365258,year:2023,complexity:2.26,players:"1-5",playTime:"70 min",bggRating:7.6},
+  406746:{name:"World Wonders: Mundo Wonders Pack",bggId:406746,year:2024,complexity:2.3,players:"1-5",playTime:"70 min",bggRating:8.0},
+  199329:{name:"Xia: Embers of a Forsaken Star",bggId:199329,year:2017,complexity:3.47,players:"1-5",playTime:"180 min",bggRating:8.7},
+  82222:{name:"Xia: Legends of a Drift System",bggId:82222,year:2014,complexity:3.2,players:"3-5",playTime:"180 min",bggRating:7.9},
+  281466:{name:"Yedo: Deluxe Master Set",bggId:281466,year:2020,complexity:3.21,players:"1-5",playTime:"90 min",bggRating:7.9},
+  196340:{name:"Yokohama",bggId:196340,year:2016,complexity:3.27,players:"2-4",playTime:"90 min",bggRating:7.8},
+  22345:{name:"Yspahan",bggId:22345,year:2006,complexity:2.37,players:"2-4",playTime:"60 min",bggRating:7.0},
+  337568:{name:"Zombicide (2nd Edition): Daily Zombie Spawn Set",bggId:337568,year:2021,players:"1-6",playTime:"60 min",bggRating:8.4},
+  294327:{name:"Zombicide (2nd Edition): Danny Trejo – Badass Survivor and Zombie Set",bggId:294327,year:2021,complexity:2.0,players:"1-6",playTime:"60 min",bggRating:8.2},
+  336729:{name:"Zombicide (2nd Edition): Gabriel",bggId:336729,year:2021,complexity:3.0,players:"1-6",playTime:"60 min",bggRating:7.8},
+  336634:{name:"Zombicide (2nd Edition): Presidential Box",bggId:336634,year:2021,complexity:2.5,players:"1-6",playTime:"60 min",bggRating:7.9},
+  336637:{name:"Zombicide (2nd Edition): Reboot Box",bggId:336637,year:2021,complexity:3.0,players:"1-6",playTime:"60 min",bggRating:8.4},
+  379907:{name:"Zombicide (2nd Edition): Rio Z Janeiro",bggId:379907,year:2023,complexity:2.0,players:"1-6",playTime:"120 min",bggRating:8.6},
+  299071:{name:"Zombicide (2nd Edition): Urban Legends Abominations",bggId:299071,year:2022,complexity:2.0,players:"1-6",playTime:"60 min",bggRating:8.3},
+  292122:{name:"Zombicide (2nd Edition): Washington Z.C.",bggId:292122,year:2021,complexity:2.75,players:"1-6",playTime:"60 min",bggRating:8.1},
+  286751:{name:"Zombicide: 2nd Edition",bggId:286751,year:2021,complexity:2.38,players:"1-6",playTime:"60 min",bggRating:7.9},
+  293546:{name:"Zombicide: 2nd Edition – Fort Hendrix",bggId:293546,year:2021,complexity:3.0,players:"1-6",playTime:"60 min",bggRating:8.3},
+  180483:{name:"Zombicide: Black Plague – Zombie Bosses Abomination Pack",bggId:180483,year:2015,complexity:2.14,players:"1-6",playTime:"60 min",bggRating:8.1},
+  209671:{name:"Zona: The Secret of Chernobyl",bggId:209671,year:2019,complexity:2.71,players:"1-4",playTime:"180 min",bggRating:7.3},
+  94639:{name:"Μονοκράτορας",bggId:94639,year:1992,complexity:2.0,players:"2-4",playTime:"30 min",bggRating:6.3},
+};
 
 // =============================================
 // GAME DATA - Enriched with BoardGameGeek data
@@ -7462,13 +8121,23 @@ window.__bsvImgFallback = function(img, fallback) {
 function _renderBoardSouthVoteView(container) {
   const currentYear = new Date().getFullYear();
   const voter = _activeBoardSouthVoter();
-  const myList = voter ? (boardSouthVotes[voter] || []) : [];
+  const lib = _bsvLibrary;
+  const myList = voter ? (_bsvGetVotes(lib)[voter] || []) : [];
+
+  const libTabsHtml = `
+    <div class="bsv-lib-tabs">
+      ${BSV_LIBRARIES.map(L => `
+        <button class="bsv-lib-tab${L === lib ? ' active' : ''}" data-bsv-lib="${L}">
+          ${BSV_LIB_LABEL[L]}
+        </button>`).join('')}
+    </div>`;
 
   const tabsHtml = `
     <div class="bs-subtabs">
       <button class="bs-subtab" data-bs-sub="leaderboard">🏆 Leaderboard</button>
       <button class="bs-subtab active" data-bs-sub="vote">🗳️ Vote</button>
-    </div>`;
+    </div>
+    ${libTabsHtml}`;
 
   // Permission notice for non-voters
   const permissionHtml = voter ? '' : `
@@ -7485,7 +8154,7 @@ function _renderBoardSouthVoteView(container) {
       myListHtml = `<div class="bsv-empty">You haven't voted yet. Tap below to add games you want to play next.</div>`;
     } else {
       myListHtml = '<div class="bsv-mylist">' + myList.map((bggId, idx) => {
-        const game = findGameByBggId(bggId);
+        const game = _bsvFindGame(lib, bggId);
         const name = game ? game.name : `Game #${bggId}`;
         const cover = _bsvCoverHtml(game, 'my');
         const upDisabled = idx === 0 ? 'disabled' : '';
@@ -7506,11 +8175,11 @@ function _renderBoardSouthVoteView(container) {
   }
 
   // ── Aggregate ranking ──
-  const ranking = _computeBoardSouthVoteRanking();
+  const ranking = _computeBoardSouthVoteRanking(lib);
   const q = (_bsvSearchQuery || '').trim().toLowerCase();
   const filtered = q
     ? ranking.filter(r => {
-        const g = findGameByBggId(r.bggId);
+        const g = _bsvFindGame(lib, r.bggId);
         return g && g.name && g.name.toLowerCase().includes(q);
       })
     : ranking;
@@ -7523,7 +8192,7 @@ function _renderBoardSouthVoteView(container) {
   } else {
     const maxVotes = ranking[0].votes;
     aggHtml = '<div class="bsv-agg-list">' + filtered.map((r, i) => {
-      const game = findGameByBggId(r.bggId);
+      const game = _bsvFindGame(lib, r.bggId);
       const name = game ? game.name : `Game #${r.bggId}`;
       const cover = _bsvCoverHtml(game, 'agg');
       const isHot = r.votes === maxVotes;
@@ -7577,6 +8246,18 @@ function _renderBoardSouthVoteView(container) {
     });
   });
 
+  // Wire library tabs (Στιβ ↔ Γιαννης)
+  container.querySelectorAll('[data-bsv-lib]').forEach(el => {
+    el.addEventListener('click', () => {
+      const L = el.dataset.bsvLib;
+      if (L && L !== _bsvLibrary && BSV_LIBRARIES.includes(L)) {
+        _bsvLibrary = L;
+        _bsvSearchQuery = '';
+        showBoardSouthView();
+      }
+    });
+  });
+
   // Voting actions on my list
   if (voter) {
     container.querySelectorAll('.bsv-myitem').forEach(item => {
@@ -7585,7 +8266,7 @@ function _renderBoardSouthVoteView(container) {
         btn.addEventListener('click', async (ev) => {
           ev.stopPropagation();
           const act = btn.dataset.bsvAct;
-          const list = (boardSouthVotes[voter] || []).slice();
+          const list = (_bsvGetVotes(lib)[voter] || []).slice();
           if (act === 'remove') {
             list.splice(idx, 1);
           } else if (act === 'up' && idx > 0) {
@@ -7599,9 +8280,9 @@ function _renderBoardSouthVoteView(container) {
           } else {
             return;
           }
-          boardSouthVotes[voter] = list;
+          _bsvGetVotes(lib)[voter] = list;
           showBoardSouthView();
-          persistBoardSouthVote(voter, list);
+          persistBoardSouthVote(voter, list, lib);
         });
       });
     });
@@ -7609,7 +8290,7 @@ function _renderBoardSouthVoteView(container) {
     // Unified pointer-based drag-and-drop reordering (works for mouse + touch).
     // Live-swaps DOM rows during the drag so the user sees the new ordering
     // immediately; persists once on pointerup so we don't churn Firebase.
-    _wireBoardSouthDrag(container, voter);
+    _wireBoardSouthDrag(container, voter, lib);
 
     const openBtn = container.querySelector('#bsv-open-search');
     if (openBtn) openBtn.addEventListener('click', _openBoardSouthAddModal);
@@ -7632,7 +8313,9 @@ function _renderBoardSouthVoteView(container) {
     });
   }
 
-  // Click an aggregate row → open the game's modal
+  // Click an aggregate row → open the game's modal (only when the underlying
+  // game exists in the global library — Γιαννης-only games don't have a
+  // detail modal yet so they're silently no-ops).
   container.querySelectorAll('.bsv-aggrow').forEach(el => {
     el.addEventListener('click', () => {
       const bggId = Number(el.dataset.bggId);
@@ -7650,7 +8333,8 @@ function _renderBoardSouthVoteView(container) {
 
 // Unified pointer-based drag for the priority list. Works on mouse + touch.
 // Live-reorders DOM rows as the user drags, and persists once on release.
-function _wireBoardSouthDrag(container, voter) {
+function _wireBoardSouthDrag(container, voter, library) {
+  const lib = library || _bsvLibrary;
   let drag = null;
 
   const items = () => Array.from(container.querySelectorAll('.bsv-myitem'));
@@ -7729,11 +8413,11 @@ function _wireBoardSouthDrag(container, voter) {
     const newOrder = items().map(el => Number(el.dataset.bggId)).filter(Number.isFinite);
     drag = null;
 
-    const before = (boardSouthVotes[voter] || []).map(Number);
+    const before = (_bsvGetVotes(lib)[voter] || []).map(Number);
     const same = before.length === newOrder.length && before.every((v, i) => v === newOrder[i]);
     if (!same) {
-      boardSouthVotes[voter] = newOrder;
-      persistBoardSouthVote(voter, newOrder);
+      _bsvGetVotes(lib)[voter] = newOrder;
+      persistBoardSouthVote(voter, newOrder, lib);
       // Re-render so the aggregate ranking + voter labels update.
       showBoardSouthView();
     }
@@ -7767,6 +8451,7 @@ function _openBoardSouthAddModal(skipFlagSet) {
   const voter = _activeBoardSouthVoter();
   if (!voter) return;
   if (!skipFlagSet) _bsvSearchModalOpen = true;
+  const lib = _bsvLibrary;
 
   // Avoid stacking duplicates
   document.querySelectorAll('.bsv-modal-overlay').forEach(el => el.remove());
@@ -7774,15 +8459,18 @@ function _openBoardSouthAddModal(skipFlagSet) {
   const overlay = document.createElement('div');
   overlay.className = 'bsv-modal-overlay';
 
-  const myListSet = new Set((boardSouthVotes[voter] || []).map(Number));
+  const myListSet = new Set((_bsvGetVotes(lib)[voter] || []).map(Number));
 
-  // Library = GAMES (the user's owned shelf), but skip expansions and
-  // campaign/legacy games — those aren't typically picked for "what to
-  // play next" group sessions.
-  const libraryGames = (typeof GAMES !== 'undefined' ? GAMES : [])
-    .filter(g => !isExpansion(g) && !isCampaign(g))
+  // Library catalogue depends on which collection we're voting on.
+  // Skip expansions and campaign/legacy games when those flags are known
+  // (the Γιαννης catalogue doesn't carry expansion data, so isExpansion is
+  // guarded).
+  const _safeIsExpansion = (g) => { try { return isExpansion(g); } catch (_) { return false; } };
+  const _safeIsCampaign  = (g) => { try { return isCampaign(g);  } catch (_) { return false; } };
+  const libraryGames = _bsvLibraryCatalogue(lib)
+    .filter(g => !_safeIsExpansion(g) && !_safeIsCampaign(g))
     .slice()
-    .sort((a, b) => a.name.localeCompare(b.name));
+    .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
   // Parse a game's player range into a [min, max] tuple for filtering.
   const parsePlayers = (g) => {
@@ -7797,10 +8485,10 @@ function _openBoardSouthAddModal(skipFlagSet) {
   overlay.innerHTML = `
     <div class="bsv-modal" role="dialog" aria-modal="true">
       <div class="bsv-modal-head">
-        <div class="bsv-modal-title">Add a game to your list</div>
+        <div class="bsv-modal-title">Add a game · ${BSV_LIB_LABEL[lib]}</div>
         <button class="bsv-modal-close" id="bsv-modal-close" aria-label="Close">×</button>
       </div>
-      <input type="text" class="bsv-search-bar" id="bsv-modal-search" placeholder="Search your library…" autocomplete="off">
+      <input type="text" class="bsv-search-bar" id="bsv-modal-search" placeholder="Search ${BSV_LIB_LABEL[lib]}…" autocomplete="off">
       <div class="bsv-modal-filters">
         <label class="bsv-filter">
           <span>Players</span>
@@ -7917,7 +8605,7 @@ function _openBoardSouthAddModal(skipFlagSet) {
       row.addEventListener('click', async () => {
         const bggId = Number(row.dataset.bggId);
         if (!Number.isFinite(bggId)) return;
-        const list = (boardSouthVotes[voter] || []).slice();
+        const list = (_bsvGetVotes(lib)[voter] || []).slice();
         if (list.includes(bggId)) {
           // Already there — close modal anyway
           close();
@@ -7925,10 +8613,10 @@ function _openBoardSouthAddModal(skipFlagSet) {
           return;
         }
         list.push(bggId);
-        boardSouthVotes[voter] = list;
+        _bsvGetVotes(lib)[voter] = list;
         close();
         showBoardSouthView();
-        persistBoardSouthVote(voter, list);
+        persistBoardSouthVote(voter, list, lib);
       });
     });
   };
@@ -8148,51 +8836,88 @@ function findGameByBggId(bggId) {
 }
 
 // ── Board South "what to play next" voting (Firebase-backed) ──
-// Each BS regular submits an ordered list of bggIds (highest priority first).
-// Stored at /boardSouthVotes/{encodedName} = [bggId, bggId, …].
-let boardSouthVotes = {}; // canonical voter name → ordered bggId[]
+// Each BS regular submits an ordered list of bggIds (highest priority first)
+// per *library*. Two libraries are voted on independently:
+//   - 'stiv'    → games from Στιβ's collection (GAMES + EXTRA_GAMES).
+//                 Persisted at /boardSouthVotes/{encName} (legacy path).
+//   - 'giannis' → games from Γιαννης Φωτοπουλος's collection (GIANNIS_GAMES).
+//                 Persisted at /boardSouthVotesGiannis/{encName}.
+const BSV_LIBRARIES = ['stiv', 'giannis'];
+const BSV_LIB_LABEL = { stiv: "Στιβ's library", giannis: "Γιαννης's library" };
+const BSV_LIB_PATH  = { stiv: 'boardSouthVotes', giannis: 'boardSouthVotesGiannis' };
+
+let boardSouthVotes = { stiv: {}, giannis: {} };
+let _bsvLibrary = 'stiv'; // currently-selected library in the vote view
 
 function _bsVoteEncodeName(name) {
   // Firebase keys can't contain . $ # [ ] / — replace each with _
   return encodeURIComponent(name).replace(/\./g, '%2E');
 }
 
-async function loadBoardSouthVotes() {
-  if (!FIREBASE_DB) return;
-  try {
-    const res = await fetch(`${FIREBASE_DB}/boardSouthVotes.json`);
-    const data = await res.json();
-    boardSouthVotes = {};
-    if (!data) return;
-    for (const encName in data) {
-      const decoded = decodeURIComponent(encName);
-      const list = data[encName];
-      if (Array.isArray(list)) {
-        boardSouthVotes[decoded] = list.map(Number).filter(n => Number.isFinite(n));
-      } else if (list && typeof list === 'object') {
-        // Firebase serialised an array as an object {0: id, 1: id, …}
-        const ordered = Object.keys(list).sort((a, b) => Number(a) - Number(b)).map(k => Number(list[k]));
-        boardSouthVotes[decoded] = ordered.filter(n => Number.isFinite(n));
-      }
-    }
-  } catch (e) {
-    console.warn('Failed to load Board South votes from Firebase:', e);
-  }
+function _bsvGetVotes(library) {
+  if (!boardSouthVotes[library]) boardSouthVotes[library] = {};
+  return boardSouthVotes[library];
 }
 
-async function persistBoardSouthVote(voterName, bggIds) {
+async function loadBoardSouthVotes() {
+  boardSouthVotes = { stiv: {}, giannis: {} };
+  if (!FIREBASE_DB) return;
+  await Promise.all(BSV_LIBRARIES.map(async (lib) => {
+    try {
+      const res = await fetch(`${FIREBASE_DB}/${BSV_LIB_PATH[lib]}.json`);
+      const data = await res.json();
+      if (!data) return;
+      for (const encName in data) {
+        const decoded = decodeURIComponent(encName);
+        const list = data[encName];
+        if (Array.isArray(list)) {
+          boardSouthVotes[lib][decoded] = list.map(Number).filter(n => Number.isFinite(n));
+        } else if (list && typeof list === 'object') {
+          const ordered = Object.keys(list).sort((a, b) => Number(a) - Number(b)).map(k => Number(list[k]));
+          boardSouthVotes[lib][decoded] = ordered.filter(n => Number.isFinite(n));
+        }
+      }
+    } catch (e) {
+      console.warn(`Failed to load Board South votes (${lib}) from Firebase:`, e);
+    }
+  }));
+}
+
+async function persistBoardSouthVote(voterName, bggIds, library) {
   if (!voterName) return;
+  const lib = library || _bsvLibrary;
   const clean = (bggIds || []).map(Number).filter(n => Number.isFinite(n));
-  boardSouthVotes[voterName] = clean;
+  _bsvGetVotes(lib)[voterName] = clean;
   if (!FIREBASE_DB) return;
   try {
-    await fetch(`${FIREBASE_DB}/boardSouthVotes/${_bsVoteEncodeName(voterName)}.json`, {
+    await fetch(`${FIREBASE_DB}/${BSV_LIB_PATH[lib]}/${_bsVoteEncodeName(voterName)}.json`, {
       method: 'PUT',
       body: JSON.stringify(clean),
     });
   } catch (e) {
-    console.warn('Failed to save Board South vote to Firebase:', e);
+    console.warn(`Failed to save Board South vote (${lib}) to Firebase:`, e);
   }
+}
+
+// Find a game by bggId in the selected library. Falls back through:
+//   1. The library's own catalogue (GIANNIS_GAMES for 'giannis', GAMES/EXTRA_GAMES for 'stiv')
+//   2. findGameByBggId(bggId) so we still pick up urlImage from any BGStats import
+function _bsvFindGame(library, bggId) {
+  const id = Number(bggId);
+  if (library === 'giannis') {
+    const base = (typeof GIANNIS_GAMES !== 'undefined') ? GIANNIS_GAMES[id] : null;
+    const imported = (typeof EXTRA_GAMES !== 'undefined') ? EXTRA_GAMES[id] : null;
+    if (base && imported) return { ...base, urlImage: imported.urlImage || base.urlImage };
+    return base || imported || findGameByBggId(id);
+  }
+  return findGameByBggId(id);
+}
+
+function _bsvLibraryCatalogue(library) {
+  if (library === 'giannis') {
+    return (typeof GIANNIS_GAMES !== 'undefined') ? Object.values(GIANNIS_GAMES) : [];
+  }
+  return (typeof GAMES !== 'undefined') ? GAMES : [];
 }
 
 // Returns the canonical name of the currently-logged-in Board South voter,
@@ -8227,10 +8952,12 @@ function _allBoardSouthVoterNames() {
 // Each voter contributes 1 vote per listed game. Among games with the same
 // vote count, sort by the sum of inverse rank (1/position) so games people
 // place near the top of their list win ties.
-function _computeBoardSouthVoteRanking() {
+function _computeBoardSouthVoteRanking(library) {
+  const lib = library || _bsvLibrary;
+  const votes = _bsvGetVotes(lib);
   const tally = {}; // bggId → { votes, score, voters: [{name, position}] }
-  for (const voter in boardSouthVotes) {
-    const list = boardSouthVotes[voter];
+  for (const voter in votes) {
+    const list = votes[voter];
     if (!Array.isArray(list)) continue;
     list.forEach((bggId, idx) => {
       if (!Number.isFinite(bggId)) return;
@@ -8243,8 +8970,8 @@ function _computeBoardSouthVoteRanking() {
   return Object.values(tally).sort((a, b) => {
     if (b.votes !== a.votes) return b.votes - a.votes;
     if (b.score !== a.score) return b.score - a.score;
-    const ga = findGameByBggId(a.bggId);
-    const gb = findGameByBggId(b.bggId);
+    const ga = _bsvFindGame(lib, a.bggId);
+    const gb = _bsvFindGame(lib, b.bggId);
     return (ga ? ga.name : '').localeCompare(gb ? gb.name : '');
   });
 }
