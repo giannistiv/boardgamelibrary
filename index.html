@@ -589,7 +589,13 @@
     position:absolute;top:12px;right:52px;background:rgba(0,0,0,0.5);border:none;
     color:rgba(255,255,255,0.5);font-size:1.3rem;cursor:pointer;
     z-index:2;line-height:1;width:32px;height:32px;border-radius:50%;
-    display:flex;align-items:center;justify-content:center;transition:color 0.15s, background 0.15s;
+    display:flex;align-items:center;justify-content:center;
+    /* No colour transition — the tap should look instant. background fade is fine. */
+    transition:background 0.15s;
+    /* Skip the 300ms iOS double-tap delay so the toggle fires the moment
+       the user lifts their finger. */
+    touch-action:manipulation;
+    -webkit-tap-highlight-color:transparent;
   }
   /* Hover state must NOT be the same colour as the favorited state — on
      touch devices the :hover sticks after a tap, so an unfavorited star
