@@ -589,14 +589,19 @@
     position:absolute;top:12px;right:52px;background:rgba(0,0,0,0.5);border:none;
     color:rgba(255,255,255,0.5);font-size:1.3rem;cursor:pointer;
     z-index:2;line-height:1;width:32px;height:32px;border-radius:50%;
-    display:flex;align-items:center;justify-content:center;transition:all 0.2s;
+    display:flex;align-items:center;justify-content:center;transition:color 0.15s, background 0.15s;
   }
-  .modal-fav-btn:hover{color:#e2b04a;background:rgba(0,0,0,0.7)}
+  /* Hover state must NOT be the same colour as the favorited state — on
+     touch devices the :hover sticks after a tap, so an unfavorited star
+     would still appear yellow until the next touch. Use white for the
+     not-yet-favorited hover so the toggle is visible immediately. */
+  .modal-fav-btn:hover{color:#fff;background:rgba(0,0,0,0.7)}
   .modal-fav-btn.favorited{color:#e2b04a}
+  .modal-fav-btn.favorited:hover{color:#f5c963;background:rgba(0,0,0,0.7)}
   .modal-fav-btn.full{opacity:0.3;cursor:not-allowed}
   .modal-fav-btn.full:hover{color:rgba(255,255,255,0.5);background:rgba(0,0,0,0.5)}
   .modal-fav-btn.favorited.full{opacity:1;cursor:pointer}
-  .modal-fav-btn.favorited.full:hover{color:#e2b04a;background:rgba(0,0,0,0.7)}
+  .modal-fav-btn.favorited.full:hover{color:#f5c963;background:rgba(0,0,0,0.7)}
 
   /* ── Top 4 Favorites ── */
   .favorites-section{margin-bottom:1.8rem}
@@ -8196,6 +8201,9 @@ function wireFavButton() {
     else return;
     favoritesCache[player] = next;
     updateFavButton(bggId);
+    // Drop focus / sticky :hover on touch so the colour swap is visible
+    // even on iOS where the hover state lingers until the next touch.
+    try { btn.blur(); } catch (_) {}
 
     try {
       await saveFavorites(player, next);
