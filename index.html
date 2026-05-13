@@ -3826,6 +3826,26 @@ const GIANNIS_GAMES = {
   94639:{name:"Μονοκράτορας",bggId:94639,year:1992,complexity:2.0,players:"2-4",playTime:"30 min",bggRating:6.3},
 };
 
+const LGEORGE_GAMES = {
+  210625:{name:"Agricola: Expansion for 5 and 6 Players",bggId:210625,year:2016,complexity:3.5,players:"1-6",playTime:"120 min",bggRating:7.8},
+  380681:{name:"Apex Legends: The Board Game",bggId:380681,year:2025,complexity:3.33,players:"2-6",playTime:"90 min",bggRating:7.9},
+  359871:{name:"Arcs",bggId:359871,year:2024,complexity:3.44,players:"2-4",playTime:"120 min",bggRating:8.0},
+  378574:{name:"Ascension Tactics: Inferno",bggId:378574,year:2025,complexity:2.25,players:"1-4",playTime:"90 min",bggRating:8.1},
+  176544:{name:"Automania",bggId:176544,year:2016,complexity:2.76,players:"2-4",playTime:"90 min",bggRating:7.3},
+  172308:{name:"Broom Service",bggId:172308,year:2015,complexity:2.39,players:"2-5",playTime:"75 min",bggRating:7.2},
+  397598:{name:"Dune: Imperium – Uprising",bggId:397598,year:2023,complexity:3.52,players:"1-6",playTime:"120 min",bggRating:8.7},
+  246900:{name:"Eclipse: Second Dawn for the Galaxy",bggId:246900,year:2020,complexity:3.67,players:"2-6",playTime:"200 min",bggRating:8.4},
+  218509:{name:"Empires of the Void II",bggId:218509,year:2018,complexity:3.47,players:"2-5",playTime:"180 min",bggRating:7.4},
+  245271:{name:"Forbidden Sky",bggId:245271,year:2018,complexity:2.52,players:"2-5",playTime:"60 min",bggRating:6.4},
+  250458:{name:"Gùgōng",bggId:250458,year:2018,complexity:3.08,players:"1-5",playTime:"90 min",bggRating:7.4},
+  271088:{name:"Ishtar: Gardens of Babylon",bggId:271088,year:2019,complexity:2.28,players:"2-4",playTime:"45 min",bggRating:7.0},
+  411894:{name:"Kinfire Council",bggId:411894,year:2025,complexity:3.25,players:"2-6",playTime:"120 min",bggRating:7.8},
+  363622:{name:"The Castles of Burgundy: Special Edition",bggId:363622,year:2023,complexity:2.85,players:"1-4",playTime:"120 min",bggRating:9.1},
+  325293:{name:"The Pursuit of Happiness: Big Box",bggId:325293,year:2023,complexity:2.9,players:"1-5",playTime:"120 min",bggRating:7.8},
+  42:{name:"Tigris & Euphrates",bggId:42,year:2015,complexity:3.48,players:"2-4",playTime:"120 min",bggRating:7.7},
+  227935:{name:"Wonderland's War",bggId:227935,year:2022,complexity:3.04,players:"2-5",playTime:"125 min",bggRating:8.0},
+};
+
 // =============================================
 // GAME DATA - Enriched with BoardGameGeek data
 // =============================================
@@ -8859,11 +8879,19 @@ function findGameByBggId(bggId) {
 //                 Persisted at /boardSouthVotes/{encName} (legacy path).
 //   - 'giannis' → games from Γιαννης Φωτοπουλος's collection (GIANNIS_GAMES).
 //                 Persisted at /boardSouthVotesGiannis/{encName}.
-const BSV_LIBRARIES = ['stiv', 'giannis'];
-const BSV_LIB_LABEL = { stiv: "Στιβ's library", giannis: "Φωτοπουλος library" };
-const BSV_LIB_PATH  = { stiv: 'boardSouthVotes', giannis: 'boardSouthVotesGiannis' };
+const BSV_LIBRARIES = ['stiv', 'giannis', 'lgeorge'];
+const BSV_LIB_LABEL = {
+  stiv:    "Στιβ's library",
+  giannis: "Φωτοπουλος library",
+  lgeorge: "LGeorge library",
+};
+const BSV_LIB_PATH = {
+  stiv:    'boardSouthVotes',
+  giannis: 'boardSouthVotesGiannis',
+  lgeorge: 'boardSouthVotesLGeorge',
+};
 
-let boardSouthVotes = { stiv: {}, giannis: {} };
+let boardSouthVotes = { stiv: {}, giannis: {}, lgeorge: {} };
 let _bsvLibrary = 'stiv'; // currently-selected library in the vote view
 
 function _bsVoteEncodeName(name) {
@@ -8921,19 +8949,23 @@ async function persistBoardSouthVote(voterName, bggIds, library) {
 //   2. findGameByBggId(bggId) so we still pick up urlImage from any BGStats import
 function _bsvFindGame(library, bggId) {
   const id = Number(bggId);
-  if (library === 'giannis') {
-    const base = (typeof GIANNIS_GAMES !== 'undefined') ? GIANNIS_GAMES[id] : null;
+  // Pick the per-library catalogue (Γιαννης or LGeorge), then overlay any
+  // imported metadata (urlImage etc.) from EXTRA_GAMES so newly imported
+  // BGStats covers show up automatically.
+  let base = null;
+  if (library === 'giannis')      base = (typeof GIANNIS_GAMES !== 'undefined') ? GIANNIS_GAMES[id] : null;
+  else if (library === 'lgeorge') base = (typeof LGEORGE_GAMES !== 'undefined') ? LGEORGE_GAMES[id] : null;
+  if (base) {
     const imported = (typeof EXTRA_GAMES !== 'undefined') ? EXTRA_GAMES[id] : null;
-    if (base && imported) return { ...base, urlImage: imported.urlImage || base.urlImage };
-    return base || imported || findGameByBggId(id);
+    if (imported) return { ...base, urlImage: imported.urlImage || base.urlImage };
+    return base;
   }
   return findGameByBggId(id);
 }
 
 function _bsvLibraryCatalogue(library) {
-  if (library === 'giannis') {
-    return (typeof GIANNIS_GAMES !== 'undefined') ? Object.values(GIANNIS_GAMES) : [];
-  }
+  if (library === 'giannis') return (typeof GIANNIS_GAMES !== 'undefined') ? Object.values(GIANNIS_GAMES) : [];
+  if (library === 'lgeorge') return (typeof LGEORGE_GAMES !== 'undefined') ? Object.values(LGEORGE_GAMES) : [];
   return (typeof GAMES !== 'undefined') ? GAMES : [];
 }
 
