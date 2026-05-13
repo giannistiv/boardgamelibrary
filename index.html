@@ -29,8 +29,16 @@
   /* Lock the document to its viewport width *unless* we're showing the
      library shelf (which intentionally extends to 1200px on mobile so the
      shelf can be panned). Stats / Profile / Achievements / Board South /
-     Insights / Leaderboard never want a horizontal scrollbar. */
-  html, body:not(.mobile-library){ overflow-x:hidden; max-width:100%; }
+     Insights / Leaderboard never want a horizontal scrollbar.
+     - html is always locked: even when body is wider (mobile-library), the
+       browser handles the visual-viewport pan independently of CSS overflow.
+     - body locked unless mobile-library, so the library shelf can still
+       extend to 1200px.
+     - overscroll-behavior-x:contain stops iOS from rubber-banding when a
+       diagonal swipe has a horizontal component. */
+  html{ overflow-x:hidden; overscroll-behavior-x:contain; }
+  body{ max-width:100%; overscroll-behavior-x:contain; }
+  body:not(.mobile-library){ overflow-x:hidden; width:100%; }
   body{
     font-family:'Roboto','Segoe UI',system-ui,-apple-system,sans-serif;
     background:var(--bg);color:var(--text);
