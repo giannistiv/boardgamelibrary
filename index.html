@@ -445,7 +445,11 @@
 
   /* ── Stats Dashboard ── */
   .stats-view{
-    display:none;max-width:700px;width:100%;margin:0 auto;padding:0 1rem 2rem;
+    display:none;max-width:700px;width:100%;margin:0 auto;
+    /* Generous bottom padding so the final row isn't clipped by mobile
+       browser chrome (URL bar / home indicator). env(safe-area-inset-bottom)
+       adds extra space on notched iPhones. */
+    padding:0 1rem calc(5rem + env(safe-area-inset-bottom, 0px));
   }
   .stats-view.open{display:block}
   .stats-header{
@@ -1248,7 +1252,7 @@
     .cubby.horizontal-layout .game-spine.box-lg{height:35px}
     .cubby.horizontal-layout .game-spine.box-xl{height:48px}
     /* Stats mobile: larger fonts, compact layout */
-    .stats-view{padding:0 0.8rem 2rem}
+    .stats-view{padding:0 0.8rem calc(5rem + env(safe-area-inset-bottom, 0px))}
     .stats-player-name{font-size:1.8rem}
     .stats-player-sub{font-size:0.9rem}
     .stats-card{padding:0.7rem 0.5rem}
