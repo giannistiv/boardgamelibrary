@@ -1092,7 +1092,7 @@
   .bsv-modal-overlay{
     position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9000;
     display:flex;align-items:flex-start;justify-content:center;padding:3rem 1rem 1rem;
-    overflow-y:auto;
+    overflow-y:auto;overscroll-behavior:contain;
   }
   .bsv-modal{
     background:#16161a;border:1px solid rgba(255,255,255,0.1);border-radius:12px;
@@ -8524,10 +8524,15 @@ function _openBoardSouthAddModal(skipFlagSet) {
     </div>`;
 
   document.body.appendChild(overlay);
+  // Lock background scroll while the modal is open so swiping on iOS
+  // doesn't accidentally move the BS view underneath.
+  const _prevBodyOverflow = document.body.style.overflow;
+  document.body.style.overflow = 'hidden';
 
   const close = () => {
     _bsvSearchModalOpen = false;
     overlay.remove();
+    document.body.style.overflow = _prevBodyOverflow;
   };
   overlay.addEventListener('click', (ev) => { if (ev.target === overlay) close(); });
   overlay.querySelector('#bsv-modal-close').addEventListener('click', close);
@@ -8843,7 +8848,7 @@ function findGameByBggId(bggId) {
 //   - 'giannis' → games from Γιαννης Φωτοπουλος's collection (GIANNIS_GAMES).
 //                 Persisted at /boardSouthVotesGiannis/{encName}.
 const BSV_LIBRARIES = ['stiv', 'giannis'];
-const BSV_LIB_LABEL = { stiv: "Στιβ's library", giannis: "Γιαννης's library" };
+const BSV_LIB_LABEL = { stiv: "Στιβ's library", giannis: "Φωτοπουλος library" };
 const BSV_LIB_PATH  = { stiv: 'boardSouthVotes', giannis: 'boardSouthVotesGiannis' };
 
 let boardSouthVotes = { stiv: {}, giannis: {} };
