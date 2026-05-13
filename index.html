@@ -657,13 +657,19 @@
   .fav-picker-overlay{
     position:fixed;inset:0;z-index:9999;
     background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);
-    display:flex;align-items:center;justify-content:center;
-    padding:1rem;
+    /* Anchor to the top so the panel (and therefore the search bar) doesn't
+       jump down when the result list shrinks. */
+    display:flex;align-items:flex-start;justify-content:center;
+    padding:max(2.5rem, 6vh) 1rem 1rem;
   }
   .fav-picker-panel{
     background:var(--modal-bg, #1a1a1a);color:var(--text);
     border:1px solid rgba(226,176,74,0.25);border-radius:14px;
-    width:min(560px, 100%);max-height:85vh;
+    width:min(560px, 100%);
+    /* Lock the panel to a single height so the search bar always sits where
+       the user first opened the modal, regardless of how many results
+       remain after typing. The list scrolls inside. */
+    height:min(85vh, 720px);max-height:85vh;
     display:flex;flex-direction:column;overflow:hidden;
     box-shadow:0 20px 60px rgba(0,0,0,0.6);
   }
