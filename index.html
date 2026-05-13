@@ -26,6 +26,11 @@
     --wood:#c9a66b;--wood-dark:#a07840;--wood-light:#dfc89a;--wood-shadow:#7a5a30;
     --bg:#363636;--text:#f0e6d3;--accent:#e2b04a;--modal-bg:#3a3a3a;
   }
+  /* Lock the document to its viewport width *unless* we're showing the
+     library shelf (which intentionally extends to 1200px on mobile so the
+     shelf can be panned). Stats / Profile / Achievements / Board South /
+     Insights / Leaderboard never want a horizontal scrollbar. */
+  html, body:not(.mobile-library){ overflow-x:hidden; max-width:100%; }
   body{
     font-family:'Roboto','Segoe UI',system-ui,-apple-system,sans-serif;
     background:var(--bg);color:var(--text);
@@ -1048,7 +1053,7 @@
     background-color:rgba(255,255,255,0.08);flex-shrink:0;overflow:hidden;
   }
   .bsv-mythumb img{width:100%;height:100%;object-fit:cover;display:block}
-  .bsv-myname{font-size:0.88rem;font-weight:600;line-height:1.25;overflow:hidden;text-overflow:ellipsis}
+  .bsv-myname{font-size:0.88rem;font-weight:600;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
   .bsv-myactions{display:flex;gap:0.25rem;flex-shrink:0}
   .bsv-mybtn{
     width:1.7rem;height:1.7rem;border-radius:6px;border:1px solid rgba(255,255,255,0.12);
@@ -1079,8 +1084,9 @@
     background-color:rgba(255,255,255,0.08);flex-shrink:0;overflow:hidden;
   }
   .bsv-aggthumb img{width:100%;height:100%;object-fit:cover;display:block}
-  .bsv-aggname{font-size:0.9rem;font-weight:600;line-height:1.2}
-  .bsv-aggvoters{font-size:0.7rem;opacity:0.65;margin-top:0.2rem}
+  .bsv-aggrow > div{min-width:0}
+  .bsv-aggname{font-size:0.9rem;font-weight:600;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .bsv-aggvoters{font-size:0.7rem;opacity:0.65;margin-top:0.2rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .bsv-aggvoters .you{color:var(--accent);font-weight:600}
   .bsv-aggvotes{
     background:rgba(255,255,255,0.06);border-radius:999px;padding:0.2rem 0.6rem;
@@ -8095,16 +8101,16 @@ function showBoardSouthView() {
 let _bsvSearchQuery = ''; // current aggregate-list filter
 let _bsvSearchModalOpen = false;
 
+const _BSV_PLACEHOLDER = 'images/game-placeholder.svg';
+
 function _bsvCoverHtml(game, size) {
   // size is the CSS size class suffix (my / agg / modal)
   const cls = `bsv-${size}thumb`;
-  if (!game) return `<div class="${cls}"></div>`;
-  const local = game.bggId > 0 ? `images/${game.bggId}.jpg` : '';
-  const fallback = (game.urlImage || '').replace(/'/g, "\\'");
-  if (!local && !fallback) return `<div class="${cls}"></div>`;
-  // <img> with onerror does local → urlImage → hide. Wrapping div carries
-  // the rounded background placeholder so layout stays stable on failure.
-  const initialSrc = local || fallback;
+  const local = (game && game.bggId > 0) ? `images/${game.bggId}.jpg` : '';
+  const fallback = (game && game.urlImage || '').replace(/'/g, "\\'");
+  // Resolution chain: local → urlImage → generic placeholder. Always render
+  // an <img> so the visual is consistent (no empty divs in the list).
+  const initialSrc = local || fallback || _BSV_PLACEHOLDER;
   return `<div class="${cls}"><img src="${initialSrc}" alt="" loading="lazy"
     onerror="window.__bsvImgFallback(this, '${fallback}')"></div>`;
 }
@@ -8115,6 +8121,12 @@ window.__bsvImgFallback = function(img, fallback) {
     img.src = fallback;
     return;
   }
+  // Final fallback: a generic dice placeholder so the row never goes blank.
+  if (img.src.indexOf('game-placeholder.svg') === -1) {
+    img.src = 'images/game-placeholder.svg';
+    return;
+  }
+  // If even the placeholder failed for some reason, hide the image cleanly.
   img.style.display = 'none';
 };
 
