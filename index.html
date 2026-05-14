@@ -577,6 +577,8 @@
   /* ── JSON Import Section ── */
   .import-section{margin-top:2rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.06)}
   .import-section-title{font-size:0.75rem;font-weight:600;color:var(--accent);margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.08em}
+  .import-last-play{font-size:0.8rem;opacity:0.7;margin-bottom:0.8rem}
+  .import-last-play b{color:var(--accent);font-weight:600}
   .import-drop-zone{border:2px dashed rgba(255,255,255,0.12);border-radius:12px;padding:1.2rem 1rem;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;background:rgba(255,255,255,0.02)}
   .import-drop-zone:hover,.import-drop-zone.drag-over{border-color:var(--accent);background:rgba(226,176,74,0.06)}
   .import-drop-zone input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
@@ -6315,19 +6317,34 @@ function showStatsView(playerName, visiting) {
     </div>` : ''}
 
     <!-- ── JSON Import (Στιβ only) ── -->
-  ${playerName === 'Στιβ' ? `<div class="import-section" id="importSection">
-    <div class="import-section-title">📥 Import BGStats Play File</div>
-    <div class="import-drop-zone" id="importDropZone">
-      <input type="file" id="importFileInput" accept=".json,.bgsplay">
-      <div class="import-drop-icon">📂</div>
-      <div class="import-drop-label">Drop your BGStats Play export here</div>
-      <div class="import-drop-sub">or click to browse — new plays, players & games will be merged</div>
-    </div>
-    <div class="import-result" id="importResult">
-      <div class="import-result-title" id="importResultTitle"></div>
-      <div class="import-result-lines" id="importResultLines"></div>
-    </div>
-  </div>` : ''}
+  ${playerName === 'Στιβ' ? (() => {
+    // Find the most recent play date across PLAY_HISTORY so the user can
+    // tell from which day onwards they still need to upload.
+    let latest = '';
+    for (const bggId in PLAY_HISTORY) {
+      for (const p of PLAY_HISTORY[bggId]) {
+        if (p && p.date && p.date > latest) latest = p.date;
+      }
+    }
+    const latestLabel = latest ? fmtDate(latest) : null;
+    const sinceLine = latestLabel
+      ? `<div class="import-last-play">Latest uploaded play: <b>${latestLabel}</b></div>`
+      : '';
+    return `<div class="import-section" id="importSection">
+      <div class="import-section-title">📥 Import BGStats Play File</div>
+      ${sinceLine}
+      <div class="import-drop-zone" id="importDropZone">
+        <input type="file" id="importFileInput" accept=".json,.bgsplay">
+        <div class="import-drop-icon">📂</div>
+        <div class="import-drop-label">Drop your BGStats Play export here</div>
+        <div class="import-drop-sub">or click to browse — new plays, players & games will be merged</div>
+      </div>
+      <div class="import-result" id="importResult">
+        <div class="import-result-title" id="importResultTitle"></div>
+        <div class="import-result-lines" id="importResultLines"></div>
+      </div>
+    </div>`;
+  })() : ''}
 
     ${isOwnProfile ? '<button class="change-profile-btn" id="btn-change-profile">Change Profile</button>' : ''}
   `;
