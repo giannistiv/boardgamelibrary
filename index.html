@@ -1135,7 +1135,7 @@
   .bsv-mybtn.danger:hover{background:rgba(239,68,68,0.18);border-color:rgba(239,68,68,0.4);color:#ef4444}
 
   .bsv-add-btn{
-    width:100%;padding:0.55rem 0.9rem;margin-top:0.5rem;border-radius:8px;border:1px dashed rgba(255,255,255,0.2);
+    width:100%;padding:0.55rem 0.9rem;margin:0 0 0.6rem;border-radius:8px;border:1px dashed rgba(255,255,255,0.2);
     background:transparent;color:var(--accent);font-weight:600;cursor:pointer;font-size:0.85rem;
   }
   .bsv-add-btn:hover{background:rgba(255,255,255,0.04);border-color:var(--accent)}
@@ -8275,10 +8275,13 @@ function _renderBoardSouthVoteView(container) {
   // ── My priority list ──
   let myListHtml = '';
   if (voter) {
+    // Add-game button sits at the top so it's always reachable without
+    // scrolling past the existing list.
+    myListHtml = `<button class="bsv-add-btn" id="bsv-open-search">+ Vote a game from the library</button>`;
     if (myList.length === 0) {
-      myListHtml = `<div class="bsv-empty">You haven't voted yet. Tap below to add games you want to play next.</div>`;
+      myListHtml += `<div class="bsv-empty">You haven't voted yet. Tap above to add games you want to play next.</div>`;
     } else {
-      myListHtml = '<div class="bsv-mylist">' + myList.map((bggId, idx) => {
+      myListHtml += '<div class="bsv-mylist">' + myList.map((bggId, idx) => {
         const game = _bsvFindGame(lib, bggId);
         const name = game ? game.name : `Game #${bggId}`;
         const cover = _bsvCoverHtml(game, 'my');
@@ -8296,7 +8299,6 @@ function _renderBoardSouthVoteView(container) {
         </div>`;
       }).join('') + '</div>';
     }
-    myListHtml += `<button class="bsv-add-btn" id="bsv-open-search">+ Add a game from the library</button>`;
   }
 
   // ── Aggregate ranking ──
