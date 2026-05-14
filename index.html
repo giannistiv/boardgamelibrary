@@ -26,19 +26,18 @@
     --wood:#c9a66b;--wood-dark:#a07840;--wood-light:#dfc89a;--wood-shadow:#7a5a30;
     --bg:#363636;--text:#f0e6d3;--accent:#e2b04a;--modal-bg:#3a3a3a;
   }
-  /* Lock the document to its viewport width *unless* we're showing the
-     library shelf (which intentionally extends to 1200px on mobile so the
-     shelf can be panned). Stats / Profile / Achievements / Board South /
-     Insights / Leaderboard never want a horizontal scrollbar.
-     - html is always locked: even when body is wider (mobile-library), the
-       browser handles the visual-viewport pan independently of CSS overflow.
-     - body locked unless mobile-library, so the library shelf can still
-       extend to 1200px.
-     - overscroll-behavior-x:contain stops iOS from rubber-banding when a
-       diagonal swipe has a horizontal component. */
+  /* Horizontal-scroll lock — implemented on <html> ONLY. Setting overflow-x
+     on <body> implicitly flips its overflow-y to auto, which on desktop
+     browsers gives the body its own internal vertical scrollbar that eats
+     into the layout width and pushes centered content off-axis. With the
+     clip on <html>, body keeps its default overflow-y:visible (the
+     document scrolls vertically as one piece, no rogue scrollbar) while
+     any horizontal overflow from descendants is still clipped at the
+     document boundary.
+     overscroll-behavior-x:contain stops iOS from rubber-banding when a
+     diagonal swipe has a horizontal component. */
   html{ overflow-x:hidden; overscroll-behavior-x:contain; }
   body{ max-width:100%; overscroll-behavior-x:contain; }
-  body:not(.mobile-library){ overflow-x:hidden; width:100%; }
   body{
     font-family:'Roboto','Segoe UI',system-ui,-apple-system,sans-serif;
     background:var(--bg);color:var(--text);
