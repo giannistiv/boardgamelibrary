@@ -14,6 +14,14 @@
       if (vp) vp.setAttribute('content', 'width=1200, user-scalable=yes');
       document.documentElement.classList.add('pre-mobile-library');
     }
+    // If there's already a saved player, the post-Firebase boot code will
+    // jump to the Profile view. Tag <html> so CSS can hide the library
+    // shell on the very first paint and avoid a library→profile flicker.
+    try {
+      if (localStorage.getItem('bgl-player')) {
+        document.documentElement.classList.add('boot-to-profile');
+      }
+    } catch (_) {}
   })();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -51,6 +59,14 @@
          `hidden` doesn't disturb centering on body. */
   html{ overflow-x:hidden; overflow-x:clip; overscroll-behavior-x:contain; }
   body{ overflow-x:hidden; overflow-x:clip; max-width:100%; width:100%; overscroll-behavior-x:contain; }
+
+  /* Boot-to-profile: when a player is saved, hide the library shell on
+     the very first paint and reveal the empty stats-view container so
+     the user lands on their profile without a library flash. The
+     Promise.all() below populates the stats-view innerHTML once
+     Firebase data is in. */
+  html.boot-to-profile #library-view{ display:none !important; }
+  html.boot-to-profile #stats-view{ display:block; }
   body{
     font-family:'Roboto','Segoe UI',system-ui,-apple-system,sans-serif;
     background:var(--bg);color:var(--text);
@@ -1360,8 +1376,30 @@
   // Match the early viewport toggle in <head>: add mobile-library to body
   // immediately so the h1 and shelf render at the correct size on the very
   // first paint (otherwise h1 flashes huge under device-width).
-  if (document.documentElement.classList.contains('pre-mobile-library')) {
+  // BUT if we're booting straight into the profile, skip that — the library
+  // shell is hidden, and mobile-library would force a 1200-px body width
+  // that horizontally overflows on a 375-px phone in profile view.
+  if (
+    document.documentElement.classList.contains('pre-mobile-library') &&
+    !document.documentElement.classList.contains('boot-to-profile')
+  ) {
     document.body.classList.add('mobile-library');
+  }
+  // Pre-flip the active tab indicator + viewport so the player-bar reflects
+  // the destination view on first paint instead of flashing "Library".
+  if (document.documentElement.classList.contains('boot-to-profile')) {
+    var libBtn = document.getElementById('btn-library');
+    var profBtn = document.getElementById('btn-mystats');
+    if (libBtn) libBtn.classList.remove('active');
+    if (profBtn) profBtn.classList.add('active');
+    var statsView = document.getElementById('stats-view');
+    if (statsView) statsView.classList.add('open');
+    // Touch devices: lock the viewport so we don't flash a 1200-px layout
+    // before the JS-side switchTo runs.
+    if (document.documentElement.classList.contains('pre-mobile-library')) {
+      var vp2 = document.querySelector('meta[name=viewport]');
+      if (vp2) vp2.setAttribute('content', 'width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no');
+    }
   }
 </script>
 
@@ -8641,10 +8679,10 @@ Promise.all([loadAllRatings(), loadAllFavorites(), loadImportedGames(), loadImpo
   if (typeof _updateBoardSouthBtnVisibility === 'function') _updateBoardSouthBtnVisibility();
   const savedPlayer = localStorage.getItem('bgl-player');
   if (savedPlayer) {
-    // Stay on the library shelf — the player's profile is one tap away
-    // via the Profile button and the previous behaviour of auto-jumping
-    // to Stats caused a visible flicker (library → profile) on load.
-    if (typeof switchToLibrary === 'function') switchToLibrary();
+    // The boot-to-profile CSS hook already hid the library shell on first
+    // paint; drop the class now so subsequent navigation works normally.
+    document.documentElement.classList.remove('boot-to-profile');
+    showStatsView(savedPlayer);
   } else {
     openPicker();
   }
