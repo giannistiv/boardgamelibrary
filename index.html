@@ -8641,7 +8641,10 @@ Promise.all([loadAllRatings(), loadAllFavorites(), loadImportedGames(), loadImpo
   if (typeof _updateBoardSouthBtnVisibility === 'function') _updateBoardSouthBtnVisibility();
   const savedPlayer = localStorage.getItem('bgl-player');
   if (savedPlayer) {
-    showStatsView(savedPlayer);
+    // Stay on the library shelf — the player's profile is one tap away
+    // via the Profile button and the previous behaviour of auto-jumping
+    // to Stats caused a visible flicker (library → profile) on load.
+    if (typeof switchToLibrary === 'function') switchToLibrary();
   } else {
     openPicker();
   }
