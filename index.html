@@ -44,8 +44,13 @@
      swipes. Body keeps width:100% and max-width:100% so the flex
      container that centers its children always uses the true viewport
      width (no rogue scrollbar gutter). */
-  html{ overflow-x:clip; overscroll-behavior-x:contain; }
-  body{ overflow-x:clip; max-width:100%; width:100%; overscroll-behavior-x:contain; }
+  /* Two declarations on purpose:
+       - `overflow-x: hidden` is the fallback that every browser understands.
+       - `overflow-x: clip` overrides on modern browsers (Chrome 90+,
+         Firefox 81+, Safari 16+) so the no-scroll-container side-effect of
+         `hidden` doesn't disturb centering on body. */
+  html{ overflow-x:hidden; overflow-x:clip; overscroll-behavior-x:contain; }
+  body{ overflow-x:hidden; overflow-x:clip; max-width:100%; width:100%; overscroll-behavior-x:contain; }
   body{
     font-family:'Roboto','Segoe UI',system-ui,-apple-system,sans-serif;
     background:var(--bg);color:var(--text);
@@ -8615,6 +8620,17 @@ if (_isTouchDevice()) {
 // Migrate old Latin player name in localStorage
 const _sp = localStorage.getItem('bgl-player');
 if (_sp && NAME_MAP[_sp]) localStorage.setItem('bgl-player', NAME_MAP[_sp]);
+
+// Hard guard: if anything bypasses the CSS lock (legacy browser, rogue
+// element with `position: fixed` + negative offset, etc.), snap the page
+// back to scrollX = 0. The check is gated to skip the library shelf,
+// which is the one place horizontal scroll is intentional (and lives in
+// a different scroll container anyway via the mobile-library body class).
+window.addEventListener('scroll', () => {
+  if (window.scrollX !== 0 && !document.body.classList.contains('mobile-library')) {
+    window.scrollTo(0, window.scrollY);
+  }
+}, { passive: true });
 
 // Load ratings and favorites from Firebase, then show the right view
 Promise.all([loadAllRatings(), loadAllFavorites(), loadImportedGames(), loadImportedPlays(), loadGameImages(), loadBoardSouthVotes()]).then(() => {
