@@ -1163,6 +1163,17 @@
     font-size:0.78rem;font-weight:700;text-align:center;min-width:2.2rem;
   }
   .bsv-aggvotes.hot{background:var(--accent);color:#0b0b0d}
+  /* Library-owner remove button on each aggregate row. */
+  .bsv-aggrow{position:relative}
+  .bsv-aggremove{
+    background:transparent;border:1px solid rgba(239,68,68,0.35);color:#ef4444;
+    width:1.5rem;height:1.5rem;border-radius:6px;cursor:pointer;
+    font-size:0.8rem;line-height:1;padding:0;margin-left:0.4rem;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    transition:background 0.15s,border-color 0.15s;
+    touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+  }
+  .bsv-aggremove:hover{background:rgba(239,68,68,0.18);border-color:#ef4444}
 
   /* Search-add modal (overlay over leaderboard) */
   .bsv-modal-overlay{
@@ -8298,6 +8309,11 @@ function _renderBoardSouthVoteView(container) {
       })
     : ranking;
 
+  // The owner of the currently-selected library may prune entries from the
+  // group ranking (e.g. games they no longer own / are unavailable). This
+  // strips the bggId from every voter's list for the active library.
+  const isLibOwner = voter && voter === BSV_LIB_OWNER[lib];
+
   let aggHtml;
   if (ranking.length === 0) {
     aggHtml = `<div class="bsv-empty">No votes yet. Be the first to suggest what to play next!</div>`;
@@ -8318,6 +8334,9 @@ function _renderBoardSouthVoteView(container) {
           return `<span class="${cls}">${_escapeHtml(v.name)}#${v.position}</span>`;
         })
         .join(', ');
+      const removeBtnHtml = isLibOwner
+        ? `<button class="bsv-aggremove" data-bsv-remove="${r.bggId}" title="Remove from group ranking — you no longer have this game" aria-label="Remove game">✕</button>`
+        : '';
       return `<div class="bsv-aggrow" data-bgg-id="${r.bggId}">
         <div class="bsv-aggrank">#${i + 1}</div>
         ${cover}
@@ -8326,6 +8345,7 @@ function _renderBoardSouthVoteView(container) {
           <div class="bsv-aggvoters">${voterStr}</div>
         </div>
         <div class="bsv-aggvotes ${isHot ? 'hot' : ''}">${r.votes}</div>
+        ${removeBtnHtml}
       </div>`;
     }).join('') + '</div>';
   }
@@ -8427,11 +8447,42 @@ function _renderBoardSouthVoteView(container) {
     });
   }
 
+  // Library-owner can prune a game from the group ranking (removes that
+  // bggId from every voter's list for the active library, both in memory
+  // and in Firebase). Stops propagation so the row-level click below
+  // doesn't also open the game's modal.
+  if (isLibOwner) {
+    container.querySelectorAll('[data-bsv-remove]').forEach(btn => {
+      btn.addEventListener('click', async (ev) => {
+        ev.stopPropagation();
+        const bggId = Number(btn.dataset.bsvRemove);
+        if (!Number.isFinite(bggId)) return;
+        const game = _bsvFindGame(lib, bggId);
+        const gameName = game ? game.name : `game #${bggId}`;
+        const ok = window.confirm(`Remove "${gameName}" from the ${BSV_LIB_LABEL[lib]} group ranking?\n\nThis clears the game from every voter's list for this library.`);
+        if (!ok) return;
+        const votesNow = _bsvGetVotes(lib);
+        const updates = [];
+        for (const v in votesNow) {
+          const cur = votesNow[v] || [];
+          if (!cur.includes(bggId)) continue;
+          const next = cur.filter(id => id !== bggId);
+          votesNow[v] = next;
+          updates.push(persistBoardSouthVote(v, next, lib));
+        }
+        showBoardSouthView();
+        await Promise.all(updates);
+      });
+    });
+  }
+
   // Click an aggregate row → open the game's modal (only when the underlying
   // game exists in the global library — Γιαννης-only games don't have a
   // detail modal yet so they're silently no-ops).
   container.querySelectorAll('.bsv-aggrow').forEach(el => {
-    el.addEventListener('click', () => {
+    el.addEventListener('click', (ev) => {
+      // Skip if the click originated from the remove button.
+      if (ev.target.closest('[data-bsv-remove]')) return;
       const bggId = Number(el.dataset.bggId);
       const game = findGameByBggId(bggId);
       if (game && typeof openModal === 'function') {
@@ -9007,6 +9058,13 @@ const BSV_LIB_PATH = {
   stiv:    'boardSouthVotes',
   giannis: 'boardSouthVotesGiannis',
   lgeorge: 'boardSouthVotesLGeorge',
+};
+// Each library has a single canonical owner — that player can prune games
+// from the group ranking that they no longer own / aren't available.
+const BSV_LIB_OWNER = {
+  stiv:    'Στιβ',
+  giannis: 'Γιαννης Φωτοπουλος',
+  lgeorge: 'LGeorge',
 };
 
 let boardSouthVotes = { stiv: {}, giannis: {}, lgeorge: {} };
