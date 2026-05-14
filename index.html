@@ -8393,13 +8393,21 @@ function _bsvGetVotes(library) {
 }
 
 async function loadBoardSouthVotes() {
-  boardSouthVotes = { stiv: {}, giannis: {} };
+  // Init a namespace for every registered library — adding a new library
+  // to BSV_LIBRARIES (e.g. 'lgeorge') used to require a parallel hand-edit
+  // here; without it, boardSouthVotes[lib] was undefined and the load
+  // silently failed with a TypeError caught by the try/catch below, leading
+  // to votes appearing "lost" on every page reload.
+  boardSouthVotes = {};
+  for (const lib of BSV_LIBRARIES) boardSouthVotes[lib] = {};
   if (!FIREBASE_DB) return;
   await Promise.all(BSV_LIBRARIES.map(async (lib) => {
     try {
       const res = await fetch(`${FIREBASE_DB}/${BSV_LIB_PATH[lib]}.json`);
       const data = await res.json();
       if (!data) return;
+      // Defensive: make sure the bucket still exists before writing into it.
+      if (!boardSouthVotes[lib]) boardSouthVotes[lib] = {};
       for (const encName in data) {
         const decoded = decodeURIComponent(encName);
         const list = data[encName];
