@@ -8622,15 +8622,19 @@ const _sp = localStorage.getItem('bgl-player');
 if (_sp && NAME_MAP[_sp]) localStorage.setItem('bgl-player', NAME_MAP[_sp]);
 
 // Hard guard: if anything bypasses the CSS lock (legacy browser, rogue
-// element with `position: fixed` + negative offset, etc.), snap the page
-// back to scrollX = 0. The check is gated to skip the library shelf,
-// which is the one place horizontal scroll is intentional (and lives in
-// a different scroll container anyway via the mobile-library body class).
-window.addEventListener('scroll', () => {
-  if (window.scrollX !== 0 && !document.body.classList.contains('mobile-library')) {
-    window.scrollTo(0, window.scrollY);
-  }
-}, { passive: true });
+// element extending past viewport, browser quirk, etc.), snap the page
+// back to scrollX = 0 immediately. The library shelf doesn't use
+// document-level horizontal scroll at all — it pans the visual viewport
+// on touch and scrolls inside .shelf-wrapper on desktop — so this is
+// safe to apply unconditionally.
+(function _lockHorizontalScroll() {
+  const snap = () => {
+    if (window.scrollX !== 0) window.scrollTo(0, window.scrollY);
+  };
+  window.addEventListener('scroll', snap, { passive: true });
+  // Also snap on resize, since resizing can momentarily shift scroll position.
+  window.addEventListener('resize', snap, { passive: true });
+})();
 
 // Load ratings and favorites from Firebase, then show the right view
 Promise.all([loadAllRatings(), loadAllFavorites(), loadImportedGames(), loadImportedPlays(), loadGameImages(), loadBoardSouthVotes()]).then(() => {
