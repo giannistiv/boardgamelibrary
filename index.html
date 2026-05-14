@@ -9269,17 +9269,30 @@ function openFavPicker(playerName) {
 
   const currentFavs = getPlayerFavorites(playerName);
 
-  // Build a comprehensive game list: Στιβ's own shelf + every imported game
-  // (EXTRA_GAMES) + any bggId that has play history but isn't catalogued
-  // anywhere else. Deduped by bggId so picks aren't restricted to my shelf.
+  // Build a comprehensive game list across EVERY known catalogue so favorites
+  // aren't restricted to my own shelf. Sources, in priority order (later
+  // entries overwrite earlier ones, picking up newer urlImage/name data):
+  //   1. GAMES (Στιβ's hardcoded shelf)
+  //   2. EXTRA_GAMES (BGStats-imported games)
+  //   3. GIANNIS_GAMES (Φωτοπουλος's catalogue)
+  //   4. LGEORGE_GAMES (LGeorge's catalogue)
+  //   5. Any bggId that has play history but no metadata anywhere.
+  // bggId === 0 is allowed through (the "Η γεωγραφία ειναι πολυ κουλ" game).
   const byId = new Map();
   const add = (g) => {
-    if (!g || !g.bggId) return;
-    if (byId.has(g.bggId)) return;
-    byId.set(g.bggId, { bggId: g.bggId, name: g.name || `Game #${g.bggId}`, urlImage: g.urlImage || '' });
+    if (!g || g.bggId == null) return;
+    const existing = byId.get(g.bggId);
+    const merged = {
+      bggId: g.bggId,
+      name: g.name || (existing && existing.name) || `Game #${g.bggId}`,
+      urlImage: g.urlImage || (existing && existing.urlImage) || '',
+    };
+    byId.set(g.bggId, merged);
   };
   if (typeof GAMES !== 'undefined') GAMES.forEach(add);
   if (typeof EXTRA_GAMES !== 'undefined') Object.values(EXTRA_GAMES).forEach(add);
+  if (typeof GIANNIS_GAMES !== 'undefined') Object.values(GIANNIS_GAMES).forEach(add);
+  if (typeof LGEORGE_GAMES !== 'undefined') Object.values(LGEORGE_GAMES).forEach(add);
   for (const bggIdStr in PLAY_HISTORY) {
     const id = Number(bggIdStr);
     if (!byId.has(id)) byId.set(id, { bggId: id, name: `Game #${id}`, urlImage: '' });
