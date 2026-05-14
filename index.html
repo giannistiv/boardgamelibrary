@@ -504,6 +504,14 @@
   }
   .stats-player-name{font-size:1.6rem;font-weight:700;color:var(--accent)}
   .stats-player-sub{font-size:0.8rem;opacity:0.4;margin-top:0.2rem}
+  .stats-bgg-btn{
+    display:inline-block;margin-top:0.6rem;padding:0.4rem 0.9rem;
+    border-radius:999px;border:1px solid rgba(226,176,74,0.4);
+    background:rgba(226,176,74,0.10);color:var(--accent);
+    font-size:0.78rem;font-weight:600;text-decoration:none;
+    transition:background 0.15s,border-color 0.15s;
+  }
+  .stats-bgg-btn:hover{background:rgba(226,176,74,0.2);border-color:var(--accent)}
   .stats-grid{
     display:grid;grid-template-columns:repeat(4,1fr);gap:0.6rem;margin-bottom:1.5rem;
   }
@@ -1898,6 +1906,28 @@ const PLAY_HISTORY = {
 
 
 
+
+// Canonical-name → BGG username map. Profiles for these players render a
+// "View collection on BGG" button that links to
+//   https://boardgamegeek.com/collection/user/{USERNAME}?own=1&subtype=boardgame&gallery=large&ff=1
+const BGG_USERS = {
+  'Στιβ':                  'johnstiv',
+  'Γιαννης Φωτοπουλος':    'JohnnyDgame',
+  'LGeorge':               'kukugames',
+  'Βασιλης - Argo':        'airmil',
+  'Γιαννης Αγγουριδακης':  'petinis',
+  'Δημητρης':              'Rhogarj',
+  'Δημητρης Σελιτσιανος':  'aristomenes',
+  'Πανος':                 'panowar',
+  'Γιωργος Γεωργιαδης':    'GiorGeo',
+  'Κωστας Ρεταλης':        'Fabregus',
+  'Οδυσσεας Ηλιοπουλος':   'BlizzBoy',
+  'Σωτηρης - Argo':        'S0tiris',
+};
+function _bggCollectionUrl(playerName) {
+  const u = BGG_USERS[playerName];
+  return u ? `https://boardgamegeek.com/collection/user/${u}?own=1&subtype=boardgame&gallery=large&ff=1` : null;
+}
 
 // Auto-convert old Latin player names to Greek when new data is uploaded
 const NAME_MAP = {
@@ -6859,6 +6889,11 @@ function showStatsView(playerName, visiting) {
     <div class="stats-header">
       <div class="stats-player-name">${playerName}</div>
       <div class="stats-player-sub">${isOwnProfile ? 'Your Profile' : 'Player Profile'}</div>
+      ${_bggCollectionUrl(playerName)
+        ? `<a class="stats-bgg-btn" href="${_bggCollectionUrl(playerName)}" target="_blank" rel="noopener">
+             View collection on BGG ↗
+           </a>`
+        : ''}
     </div>
 
     ${favoritesHtml}
