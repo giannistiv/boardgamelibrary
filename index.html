@@ -9301,7 +9301,16 @@ async function persistGameImage(bggId, url) {
 
 function findGameByBggId(bggId) {
   const num = Number(bggId);
-  return GAMES.find(g => g.bggId === num) || EXTRA_GAMES[bggId] || null;
+  // Resolution order: the hand-curated shelf and BGStats imports first
+  // (richest metadata), then the per-person CSV catalogues so favorites /
+  // votes / modals can resolve any owned game even if it's only known from
+  // a collection import. Returns the first catalogue that has it.
+  return GAMES.find(g => g.bggId === num)
+    || EXTRA_GAMES[bggId]
+    || (typeof GIANNIS_GAMES !== 'undefined' && GIANNIS_GAMES[num])
+    || (typeof LGEORGE_GAMES !== 'undefined' && LGEORGE_GAMES[num])
+    || (typeof DIMITRIS_GAMES !== 'undefined' && DIMITRIS_GAMES[num])
+    || null;
 }
 
 // ── Board South "what to play next" voting (Firebase-backed) ──
