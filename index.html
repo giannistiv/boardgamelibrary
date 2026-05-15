@@ -6818,7 +6818,11 @@ function showIlioupoliView() {
 
   container.querySelectorAll('[data-ilio-bgg]').forEach(el => {
     el.addEventListener('click', () => {
-      const g = DIMITRIS_GAMES[Number(el.dataset.ilioBgg)];
+      const id = Number(el.dataset.ilioBgg);
+      // Prefer findGameByBggId so a game that also lives in the curated
+      // GAMES shelf opens with its full description / categories, rather
+      // than the metadata-thin CSV entry.
+      const g = findGameByBggId(id) || DIMITRIS_GAMES[id];
       if (g && typeof openModal === 'function') {
         try { openModal(g); } catch (_) {}
       }
@@ -7744,8 +7748,21 @@ function _timeAgo(ts) {
 function _allGames() {
   const seen = new Set();
   const all = [];
-  (GAMES || []).forEach(g => { if (g.bggId && !seen.has(g.bggId)) { seen.add(g.bggId); all.push(g); } });
-  Object.values(EXTRA_GAMES || {}).forEach(g => { if (g.bggId && !seen.has(g.bggId)) { seen.add(g.bggId); all.push(g); } });
+  // Merge every catalogue so the Games tab covers everyone's collection.
+  // First-seen wins, and the source order is richest-metadata-first
+  // (curated shelf → BGStats imports → the three per-person CSV libraries).
+  const sources = [
+    GAMES,
+    Object.values(EXTRA_GAMES || {}),
+    typeof GIANNIS_GAMES !== 'undefined' ? Object.values(GIANNIS_GAMES) : [],
+    typeof LGEORGE_GAMES !== 'undefined' ? Object.values(LGEORGE_GAMES) : [],
+    typeof DIMITRIS_GAMES !== 'undefined' ? Object.values(DIMITRIS_GAMES) : [],
+  ];
+  for (const src of sources) {
+    (src || []).forEach(g => {
+      if (g && g.bggId != null && !seen.has(g.bggId)) { seen.add(g.bggId); all.push(g); }
+    });
+  }
   return all;
 }
 
