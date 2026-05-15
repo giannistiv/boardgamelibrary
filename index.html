@@ -8390,14 +8390,38 @@ function _computeRivalryOfYear(mode, forPlayer) {
   }
 
   let best = null;
-  for (const k in pairs) {
-    const p = pairs[k];
-    if (p.total < 2) continue;
-    const closeness = Math.abs(p.aWins - p.bWins);
-    if (!best) { best = p; continue; }
-    const bestCloseness = Math.abs(best.aWins - best.bWins);
-    if (p.total > best.total) best = p;
-    else if (p.total === best.total && closeness < bestCloseness) best = p;
+  if (mode === 'south') {
+    // Board South rivalry — unchanged: most-played pair, then closest by
+    // absolute win-difference.
+    for (const k in pairs) {
+      const p = pairs[k];
+      if (p.total < 2) continue;
+      const closeness = Math.abs(p.aWins - p.bWins);
+      if (!best) { best = p; continue; }
+      const bestCloseness = Math.abs(best.aWins - best.bWins);
+      if (p.total > best.total) best = p;
+      else if (p.total === best.total && closeness < bestCloseness) best = p;
+    }
+  } else {
+    // Main rivalry — only pairs played within the last 2 months count, and
+    // we pick the *proportionally* closest head-to-head record: |aWins-bWins|
+    // divided by total games. So 90–100 (ratio 0.05) beats 4–12 (ratio 0.50).
+    // Total games is only a tie-breaker when two pairs are equally close.
+    const twoMonthsAgo = (() => {
+      const d = new Date();
+      d.setMonth(d.getMonth() - 2);
+      return d.toISOString().slice(0, 10);
+    })();
+    const ratio = (p) => Math.abs(p.aWins - p.bWins) / p.total;
+    for (const k in pairs) {
+      const p = pairs[k];
+      if (p.total < 2) continue;
+      if (p.lastDate < twoMonthsAgo) continue; // recency gate
+      if (!best) { best = p; continue; }
+      const r = ratio(p), rBest = ratio(best);
+      if (r < rBest) best = p;
+      else if (r === rBest && p.total > best.total) best = p;
+    }
   }
   return best;
 }
