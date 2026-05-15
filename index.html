@@ -229,6 +229,7 @@
   /* Fixed height (not just min-height) so a very long game name's vertical
      spine text can't blow the cubby up — it clips with an ellipsis instead. */
   .ilio-shelf .cubby{height:150px;min-height:150px;padding:4px 3px 3px}
+  .ilio-f-count{font-size:0.72rem;opacity:0.6;text-align:right;margin-top:0.3rem}
 
   /* ── Game spines ── */
   .game-spine{
@@ -6814,6 +6815,40 @@ function showIlioupoliView() {
       <div class="lb-title">Ilioupoli Bros</div>
       <div class="lb-count">Δημητρης's library · ${games.length} game${games.length !== 1 ? 's' : ''}</div>
     </div>
+    <input type="text" class="bsv-search-bar" id="ilio-search" placeholder="Search games…" autocomplete="off">
+    <div class="bsv-modal-filters">
+      <label class="bsv-filter">
+        <span>Players</span>
+        <select id="ilio-f-players">
+          <option value="">Any</option>
+          <option value="1">1</option><option value="2">2</option>
+          <option value="3">3</option><option value="4">4</option>
+          <option value="5">5</option><option value="6">6</option>
+          <option value="8">8+</option>
+        </select>
+      </label>
+      <label class="bsv-filter">
+        <span>Difficulty</span>
+        <select id="ilio-f-diff">
+          <option value="">All</option>
+          <option value="easy">Easy</option>
+          <option value="medium">Medium</option>
+          <option value="hard">Hard</option>
+          <option value="expert">Expert</option>
+        </select>
+      </label>
+      <label class="bsv-filter">
+        <span>Max Time</span>
+        <select id="ilio-f-time">
+          <option value="">Any</option>
+          <option value="30">≤ 30 min</option>
+          <option value="60">≤ 60 min</option>
+          <option value="90">≤ 90 min</option>
+          <option value="120">≤ 120 min</option>
+        </select>
+      </label>
+    </div>
+    <div class="ilio-f-count" id="ilio-f-count"></div>
     <div class="ilio-shelf">${cubbiesHtml}</div>`;
 
   container.querySelectorAll('[data-ilio-bgg]').forEach(el => {
@@ -6828,7 +6863,66 @@ function showIlioupoliView() {
       }
     });
   });
+
+  // Wire search + filters — fade non-matching spines, same as the Library.
+  const searchEl = container.querySelector('#ilio-search');
+  if (searchEl) searchEl.addEventListener('input', _applyIlioFilters);
+  ['ilio-f-players', 'ilio-f-diff', 'ilio-f-time'].forEach(id => {
+    const el = container.querySelector('#' + id);
+    if (el) el.addEventListener('change', _applyIlioFilters);
+  });
+
   window.scrollTo(0, 0);
+}
+
+// Fade out shelf spines in the Ilioupoli view that don't match the
+// search box / filter selects. Mirrors the main Library's applyFilters().
+function _applyIlioFilters() {
+  const view = document.getElementById('ilioupoli-view');
+  if (!view) return;
+  const q  = (document.getElementById('ilio-search')?.value || '').trim().toLowerCase();
+  const fp = document.getElementById('ilio-f-players')?.value || '';
+  const fd = document.getElementById('ilio-f-diff')?.value || '';
+  const ft = document.getElementById('ilio-f-time')?.value || '';
+  const anyActive = !!(q || fp || fd || ft);
+
+  let matchCount = 0;
+  view.querySelectorAll('.game-spine[data-ilio-bgg]').forEach(el => {
+    if (!anyActive) { el.classList.remove('faded'); matchCount++; return; }
+    const g = DIMITRIS_GAMES[Number(el.dataset.ilioBgg)];
+    let pass = !!g;
+
+    if (pass && q && !(g.name || '').toLowerCase().includes(q)) pass = false;
+
+    if (pass && fp) {
+      const want = Number(fp);
+      const supported = g.players ? parsePlayers(g.players) : [];
+      if (want === 8) {
+        if (!(supported.length && Math.max(...supported) >= 8)) pass = false;
+      } else if (!supported.includes(want)) {
+        pass = false;
+      }
+    }
+
+    if (pass && fd) {
+      if (!g.complexity || difficultyBucket(g.complexity) !== fd) pass = false;
+    }
+
+    if (pass && ft) {
+      const t = g.playTime ? parseMinTime(g.playTime) : 0;
+      if (!t || t > Number(ft)) pass = false;
+    }
+
+    el.classList.toggle('faded', !pass);
+    if (pass) matchCount++;
+  });
+
+  const countEl = document.getElementById('ilio-f-count');
+  if (countEl) {
+    countEl.textContent = anyActive
+      ? `${matchCount} game${matchCount !== 1 ? 's' : ''}`
+      : '';
+  }
 }
 
 // ── Stats Dashboard ──
