@@ -9257,30 +9257,46 @@ function _computeBoardSouthVoteRanking(library) {
       tally[bggId].voters.push({ name: voter, position: idx + 1 });
     });
   }
-  // Sort priority (each step is a tie-breaker for the previous):
-  //   1. total vote count
-  //   2. games the library owner voted for come first
-  //   3. highest average rating from this app's users
-  //   4. highest BGG rating
-  //   5. combined priority score (#2 picks outrank #3 picks)
-  //   6. name, purely for a stable final order
+  // Sorting, with two distinct tie-break paths once vote counts are equal:
+  //
+  //   A. Same voter set — the two games were picked by the *same* person(s).
+  //      The higher personal priority wins outright (a #1 pick beats a #2
+  //      pick). No rating rules involved — within one person's list, what
+  //      they ranked higher is simply what they want more.
+  //
+  //   B. Different voter set — the games come from different people. Here
+  //      the descriptive tie-break rules apply, in order:
+  //        1. games the library owner voted for come first
+  //        2. highest average rating from this app's users
+  //        3. highest BGG rating
+  //        4. combined priority score, as a last resort
+  //
+  //   Name is the final stable order in both paths.
+  const voterKey = (r) => r.voters.map(v => v.name).sort().join('|');
   return Object.values(tally).sort((a, b) => {
     if (b.votes !== a.votes) return b.votes - a.votes;
 
-    const aOwner = owner && a.voters.some(v => v.name === owner) ? 1 : 0;
-    const bOwner = owner && b.voters.some(v => v.name === owner) ? 1 : 0;
-    if (bOwner !== aOwner) return bOwner - aOwner;
-
-    const aApp = _avgAppRating(a.bggId), bApp = _avgAppRating(b.bggId);
-    if (bApp !== aApp) return bApp - aApp;
-
     const ga = _bsvFindGame(lib, a.bggId);
     const gb = _bsvFindGame(lib, b.bggId);
-    const aBgg = Number(ga && ga.bggRating) || 0;
-    const bBgg = Number(gb && gb.bggRating) || 0;
-    if (bBgg !== aBgg) return bBgg - aBgg;
 
-    if (b.score !== a.score) return b.score - a.score;
+    if (voterKey(a) === voterKey(b)) {
+      // Path A — same person(s): personal priority decides.
+      if (b.score !== a.score) return b.score - a.score;
+    } else {
+      // Path B — different people: owner → app rating → BGG → priority.
+      const aOwner = owner && a.voters.some(v => v.name === owner) ? 1 : 0;
+      const bOwner = owner && b.voters.some(v => v.name === owner) ? 1 : 0;
+      if (bOwner !== aOwner) return bOwner - aOwner;
+
+      const aApp = _avgAppRating(a.bggId), bApp = _avgAppRating(b.bggId);
+      if (bApp !== aApp) return bApp - aApp;
+
+      const aBgg = Number(ga && ga.bggRating) || 0;
+      const bBgg = Number(gb && gb.bggRating) || 0;
+      if (bBgg !== aBgg) return bBgg - aBgg;
+
+      if (b.score !== a.score) return b.score - a.score;
+    }
 
     return (ga ? ga.name : '').localeCompare(gb ? gb.name : '');
   });
