@@ -217,6 +217,19 @@
     opacity:0.2;font-size:0.65rem;font-style:italic;letter-spacing:0.05em;
   }
 
+  /* ── Ilioupoli Bros mini-shelf — same look as the main shelf, smaller.
+        4 columns inside the locked ~700-px view make it naturally compact. */
+  .ilio-shelf{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:0;
+    background:var(--wood);
+    border:5px solid var(--wood-dark);border-radius:4px;
+    box-shadow:0 6px 30px rgba(0,0,0,0.5),inset 0 0 16px rgba(0,0,0,0.15);
+    margin:0.7rem auto 0;width:100%;
+  }
+  /* Fixed height (not just min-height) so a very long game name's vertical
+     spine text can't blow the cubby up — it clips with an ellipsis instead. */
+  .ilio-shelf .cubby{height:150px;min-height:150px;padding:4px 3px 3px}
+
   /* ── Game spines ── */
   .game-spine{
     flex-shrink:0;flex-grow:1;
@@ -1443,6 +1456,7 @@
 
 <div class="player-bar" id="player-bar">
   <button class="player-bar-btn active" id="btn-library">Library</button>
+  <button class="player-bar-btn" id="btn-ilioupoli" style="display:none">Ilioupoli Bros</button>
   <button class="player-bar-btn" id="btn-games">Games</button>
   <button class="player-bar-btn" id="btn-mystats">Profile</button>
   <button class="player-bar-btn" id="btn-leaderboard">Leaderboard</button>
@@ -1529,6 +1543,7 @@
 <div class="stats-view" id="leaderboard-view"></div>
 <div class="stats-view" id="achievements-view"></div>
 <div class="stats-view" id="boardsouth-view"></div>
+<div class="stats-view" id="ilioupoli-view"></div>
 
 <!-- Latest Plays full-log modal -->
 <div class="lpm-overlay" id="lpm-overlay" role="dialog" aria-modal="true" aria-hidden="true">
@@ -3958,6 +3973,141 @@ const LGEORGE_GAMES = {
   227935:{name:"Wonderland's War",bggId:227935,year:2022,complexity:3.04,players:"2-5",playTime:"125 min",bggRating:8.0},
 };
 
+const DIMITRIS_GAMES = {
+  373167:{name:"20 Strong",bggId:373167,spineColor:"#7a3b2e",boxSize:"md",year:2023,complexity:2.36,players:"1",playTime:"40 min",bggRating:7.4},
+  173346:{name:"7 Wonders Duel",bggId:173346,spineColor:"#5a2e7a",boxSize:"md",year:2015,complexity:2.23,players:"2",playTime:"30 min",bggRating:8.1},
+  172818:{name:"Above and Below",bggId:172818,spineColor:"#2e3a6e",boxSize:"md",year:2015,complexity:2.52,players:"2-4",playTime:"90 min",bggRating:7.3},
+  6707:{name:"Age of Mythology: The Boardgame",bggId:6707,spineColor:"#7a2e52",boxSize:"lg",year:2003,complexity:2.93,players:"2-4",playTime:"120 min",bggRating:6.1},
+  6249:{name:"Alhambra",bggId:6249,spineColor:"#7a2e52",boxSize:"md",year:2003,complexity:2.1,players:"2-6",playTime:"60 min",bggRating:7.0},
+  205637:{name:"Arkham Horror: The Card Game",bggId:205637,spineColor:"#3b7a4f",boxSize:"lg",year:2016,complexity:3.57,players:"1-2",playTime:"120 min",bggRating:8.1},
+  359609:{name:"Arkham Horror: The Card Game (Revised Core Set)",bggId:359609,spineColor:"#3a6e3a",boxSize:"xl",year:2021,complexity:3.74,players:"1-4",playTime:"180 min",bggRating:8.6},
+  340036:{name:"Arkham Horror: The Card Game – Edge of the Earth: Investigator Expansion",bggId:340036,spineColor:"#7a6b2e",boxSize:"xl",year:2021,complexity:3.77,players:"1-4",playTime:"180 min",bggRating:8.7},
+  382510:{name:"Arkham Horror: The Card Game – The Circle Undone: Campaign Expansion",bggId:382510,spineColor:"#6e4a2e",boxSize:"xl",year:2023,complexity:3.83,players:"1-4",playTime:"180 min",bggRating:8.4},
+  382509:{name:"Arkham Horror: The Card Game – The Circle Undone: Investigator Expansion",bggId:382509,spineColor:"#3a6e3a",boxSize:"xl",year:2023,complexity:3.75,players:"1-4",playTime:"180 min",bggRating:8.8},
+  347148:{name:"Arkham Horror: The Card Game – The Dunwich Legacy: Investigator Expansion",bggId:347148,spineColor:"#2e7a73",boxSize:"xl",year:2022,complexity:3.67,players:"1-4",playTime:"120 min",bggRating:8.7},
+  377055:{name:"Arkham Horror: The Card Game – The Forgotten Age: Campaign Expansion",bggId:377055,spineColor:"#7a2e52",boxSize:"xl",year:2023,complexity:3.91,players:"1-4",playTime:"180 min",bggRating:8.6},
+  377056:{name:"Arkham Horror: The Card Game – The Forgotten Age: Investigator Expansion",bggId:377056,spineColor:"#6e4a2e",boxSize:"xl",year:2023,complexity:3.88,players:"1-4",playTime:"180 min",bggRating:8.7},
+  358212:{name:"Arkham Horror: The Card Game – The Path to Carcosa: Campaign Expansion",bggId:358212,spineColor:"#3b7a4f",boxSize:"xl",year:2022,complexity:3.69,players:"1-4",playTime:"180 min",bggRating:8.9},
+  225563:{name:"Arkham Horror: The Card Game – The Path to Carcosa: Expansion",bggId:225563,spineColor:"#6e4a2e",boxSize:"lg",year:2017,complexity:3.52,players:"1-2",playTime:"120 min",bggRating:8.7},
+  358213:{name:"Arkham Horror: The Card Game – The Path to Carcosa: Investigator Expansion",bggId:358213,spineColor:"#444b6e",boxSize:"xl",year:2022,complexity:3.83,players:"1-4",bggRating:8.8},
+  12005:{name:"Around the World in 80 Days",bggId:12005,spineColor:"#2e3a6e",boxSize:"md",year:2004,complexity:1.81,players:"2-6",playTime:"70 min",bggRating:6.5},
+  25417:{name:"BattleLore",bggId:25417,spineColor:"#6e2e2e",boxSize:"lg",year:2006,complexity:2.77,players:"2",playTime:"60 min",bggRating:7.3},
+  21882:{name:"Blue Moon City",bggId:21882,spineColor:"#5a2e7a",boxSize:"md",year:2006,complexity:2.29,players:"2-4",playTime:"50 min",bggRating:7.0},
+  132:{name:"Caesar & Cleopatra",bggId:132,spineColor:"#7a2e52",boxSize:"md",year:1997,complexity:1.91,players:"2",playTime:"60 min",bggRating:6.4},
+  283155:{name:"Calico",bggId:283155,spineColor:"#2e3a6e",boxSize:"md",year:2020,complexity:2.19,players:"1-4",playTime:"45 min",bggRating:7.5},
+  345972:{name:"Cat in the Box: Deluxe Edition",bggId:345972,spineColor:"#2e7a73",boxSize:"md",year:2022,complexity:2.04,players:"2-5",playTime:"40 min",bggRating:7.4},
+  13:{name:"Catan",bggId:13,spineColor:"#5a2e7a",boxSize:"md",year:1995,complexity:2.28,players:"3-4",playTime:"120 min",bggRating:7.1},
+  2807:{name:"Catan: 5-6 Player Expansion",bggId:2807,spineColor:"#2e5a7a",boxSize:"md",year:1996,complexity:2.31,players:"5-6",playTime:"120 min",bggRating:7.0},
+  926:{name:"Catan: Cities & Knights",bggId:926,spineColor:"#6e4a2e",boxSize:"lg",year:1998,complexity:2.9,players:"3-4",playTime:"150 min",bggRating:7.5},
+  325:{name:"Catan: Seafarers",bggId:325,spineColor:"#7a2e52",boxSize:"md",year:1997,complexity:2.37,players:"3-4",playTime:"90 min",bggRating:7.2},
+  201808:{name:"Clank!: A Deck-Building Adventure",bggId:201808,spineColor:"#7a6b2e",boxSize:"md",year:2016,complexity:2.23,players:"2-4",playTime:"60 min",bggRating:7.8},
+  178900:{name:"Codenames",bggId:178900,spineColor:"#7a2e52",boxSize:"sm",year:2015,complexity:1.26,players:"2-8",playTime:"15 min",bggRating:7.5},
+  237031:{name:"D100 Dungeon",bggId:237031,spineColor:"#2e7a73",boxSize:"lg",year:2018,complexity:2.79,players:"1",playTime:"90 min",bggRating:7.7},
+  313306:{name:"Dawn on Titan",bggId:313306,spineColor:"#6e2e2e",boxSize:"md",year:2022,complexity:2.2,players:"1-4",playTime:"30 min",bggRating:6.7},
+  17226:{name:"Descent: Journeys in the Dark",bggId:17226,spineColor:"#2e3a6e",boxSize:"lg",year:2005,complexity:3.35,players:"2-5",playTime:"240 min",bggRating:7.3},
+  285192:{name:"Destinies",bggId:285192,spineColor:"#7a2e52",boxSize:"md",year:2021,complexity:1.92,players:"1-3",playTime:"150 min",bggRating:7.6},
+  316554:{name:"Dune: Imperium",bggId:316554,spineColor:"#5a2e7a",boxSize:"lg",year:2020,complexity:3.08,players:"1-4",playTime:"120 min",bggRating:8.4},
+  210232:{name:"Dungeon Degenerates: Hand of Doom",bggId:210232,spineColor:"#7a3b2e",boxSize:"xl",year:2017,complexity:3.66,players:"1-4",playTime:"360 min",bggRating:8.1},
+  261393:{name:"Dungeon Universalis",bggId:261393,spineColor:"#2e3a6e",boxSize:"xl",year:2019,complexity:4.35,players:"1-6",playTime:"180 min",bggRating:8.7},
+  6366:{name:"Dungeons & Dragons: The Fantasy Adventure Board Game",bggId:6366,spineColor:"#2e7a73",boxSize:"md",year:2003,complexity:2.18,players:"2-5",playTime:"60 min",bggRating:6.6},
+  112686:{name:"Epic Spell Wars of the Battle Wizards: Duel at Mt. Skullzfyre",bggId:112686,spineColor:"#5a2e7a",boxSize:"sm",year:2012,complexity:1.57,players:"2-6",playTime:"30 min",bggRating:6.4},
+  175914:{name:"Food Chain Magnate",bggId:175914,spineColor:"#6e4a2e",boxSize:"xl",year:2015,complexity:4.19,players:"2-5",playTime:"240 min",bggRating:8.0},
+  65244:{name:"Forbidden Island",bggId:65244,spineColor:"#6e2e2e",boxSize:"md",year:2010,complexity:1.74,players:"2-4",playTime:"30 min",bggRating:6.8},
+  393672:{name:"Gloomhaven: Buttons & Bugs",bggId:393672,spineColor:"#5a2e7a",boxSize:"lg",year:2024,complexity:3.32,players:"1",playTime:"20 min",bggRating:7.5},
+  638:{name:"Hera and Zeus",bggId:638,spineColor:"#6e4a2e",boxSize:"md",year:2000,complexity:2.05,players:"2",playTime:"30 min",bggRating:6.5},
+  355326:{name:"Heroes of Might and Magic III: The Board Game",bggId:355326,spineColor:"#444b6e",boxSize:"lg",year:2024,complexity:3.49,players:"1-3",playTime:"120 min",bggRating:7.8},
+  448703:{name:"Heroes of the Shire: Fire & Ice",bggId:448703,spineColor:"#3b7a4f",boxSize:"md",year:2024,players:"1-6",playTime:"180 min"},
+  214484:{name:"HEXplore It: The Valley of the Dead King",bggId:214484,spineColor:"#7a2e52",boxSize:"lg",year:2017,complexity:3.22,players:"1-6",playTime:"180 min",bggRating:7.7},
+  401658:{name:"Hoplomachus: Pandora's Might",bggId:401658,spineColor:"#7a2e52",boxSize:"md",year:2025,players:"1-4",bggRating:8.4},
+  338434:{name:"Hoplomachus: Remastered",bggId:338434,spineColor:"#5a2e7a",boxSize:"lg",year:2023,complexity:2.72,players:"1-4",playTime:"60 min",bggRating:8.0},
+  401657:{name:"Hoplomachus: Remastered – Pandora's Wake",bggId:401657,spineColor:"#3b7a4f",boxSize:"md",year:2025,players:"1-4",playTime:"60 min",bggRating:8.3},
+  313889:{name:"Hoplomachus: Victorum",bggId:313889,spineColor:"#2e5a7a",boxSize:"lg",year:2023,complexity:3.54,players:"1",playTime:"90 min",bggRating:8.3},
+  401655:{name:"Hoplomachus: Victorum – Pandora's Ruin",bggId:401655,spineColor:"#7a2e52",boxSize:"md",year:2025,players:"1",playTime:"90 min",bggRating:8.6},
+  216070:{name:"Hunt for the Ring",bggId:216070,spineColor:"#6e4a2e",boxSize:"lg",year:2017,complexity:3.18,players:"2-5",playTime:"180 min",bggRating:7.1},
+  318184:{name:"Imperium: Classics",bggId:318184,spineColor:"#3a6e3a",boxSize:"xl",year:2021,complexity:3.62,players:"1-4",playTime:"160 min",bggRating:7.7},
+  34010:{name:"Journey to the Center of the Earth",bggId:34010,spineColor:"#7a3b2e",boxSize:"md",year:2008,complexity:2.03,players:"2-4",playTime:"60 min",bggRating:6.3},
+  34585:{name:"Keltis",bggId:34585,spineColor:"#2e5a7a",boxSize:"md",year:2008,complexity:1.64,players:"2-4",playTime:"30 min",bggRating:6.4},
+  406174:{name:"Kinfire Delve: Callous' Lab",bggId:406174,spineColor:"#6e4a2e",boxSize:"md",year:2024,complexity:2.17,players:"1-2",playTime:"60 min",bggRating:8.0},
+  404538:{name:"Kinfire Delve: Scorn's Stockade",bggId:404538,spineColor:"#3a6e3a",boxSize:"md",year:2024,complexity:2.09,players:"1-2",playTime:"60 min",bggRating:8.0},
+  391795:{name:"Kinfire Delve: Vainglory's Grotto",bggId:391795,spineColor:"#3a6e3a",boxSize:"md",year:2023,complexity:2.14,players:"1-2",playTime:"60 min",bggRating:7.9},
+  415776:{name:"Kingdom Legacy: Feudal Kingdom",bggId:415776,spineColor:"#2e3a6e",boxSize:"md",year:2024,complexity:2.26,players:"1",playTime:"480 min",bggRating:8.1},
+  272533:{name:"Kingdom Rush: Rift in Time",bggId:272533,spineColor:"#5a2e7a",boxSize:"lg",year:2020,complexity:2.98,players:"1-4",playTime:"90 min",bggRating:7.3},
+  287667:{name:"Kingdom Rush: Rift in Time – Spider Goddess Expansion",bggId:287667,spineColor:"#2e3a6e",boxSize:"lg",year:2020,complexity:3.0,players:"1-4",playTime:"90 min",bggRating:7.5},
+  394193:{name:"Kosmogonia 2086: Kronos Epilogue – The Card Game!",bggId:394193,spineColor:"#2e7a73",boxSize:"md",year:2023,complexity:2.0,players:"1-4",playTime:"45 min",bggRating:7.8},
+  358737:{name:"Leviathan Wilds",bggId:358737,spineColor:"#7a3b2e",boxSize:"md",year:2024,complexity:2.47,players:"1-4",playTime:"90 min",bggRating:7.9},
+  96848:{name:"Mage Knight Board Game",bggId:96848,spineColor:"#6e2e2e",boxSize:"xl",year:2011,complexity:4.38,players:"1-4",playTime:"240 min",bggRating:8.1},
+  209778:{name:"Magic Maze",bggId:209778,spineColor:"#2e5a7a",boxSize:"md",year:2017,complexity:1.75,players:"1-8",playTime:"15 min",bggRating:6.9},
+  8147:{name:"Maka Bana",bggId:8147,spineColor:"#2e3a6e",boxSize:"md",year:2003,complexity:2.01,players:"3-6",playTime:"60 min",bggRating:6.7},
+  311715:{name:"Mini Rogue",bggId:311715,spineColor:"#7a6b2e",boxSize:"md",year:2021,complexity:2.02,players:"1-2",playTime:"45 min",bggRating:7.3},
+  363396:{name:"Mini Rogue: Coaster Expansion",bggId:363396,spineColor:"#2e3a6e",boxSize:"md",year:2021,bggRating:7.3},
+  420358:{name:"Mini Rogue: Forgotten Guardians",bggId:420358,spineColor:"#444b6e",boxSize:"md",year:2026,players:"1-4",playTime:"60 min",bggRating:8.3},
+  424603:{name:"Mini Rogue: Literature-Inspired Lore Cards",bggId:424603,spineColor:"#3b7a4f",boxSize:"md",year:2026,bggRating:8.2},
+  418367:{name:"Mini Rogue: Mountain of Torments",bggId:418367,spineColor:"#3b7a4f",boxSize:"md",year:2026,players:"1-3",playTime:"60 min",bggRating:8.2},
+  417020:{name:"Mini Rogue: The Council",bggId:417020,spineColor:"#7a6b2e",boxSize:"md",year:2026,complexity:2.0,players:"1-3",playTime:"60 min",bggRating:8.0},
+  424602:{name:"Mini Rogue: Treasure Map",bggId:424602,spineColor:"#7a2e52",boxSize:"md",year:2026,bggRating:8.1},
+  1927:{name:"Munchkin",bggId:1927,spineColor:"#2e3a6e",boxSize:"md",year:2001,complexity:1.82,players:"3-6",playTime:"120 min",bggRating:5.9},
+  3943:{name:"Munchkin 2: Unnatural Axe",bggId:3943,spineColor:"#5a2e7a",boxSize:"md",year:2002,complexity:1.8,players:"3-6",playTime:"90 min",bggRating:6.4},
+  6606:{name:"Munchkin 3: Clerical Errors",bggId:6606,spineColor:"#7a6b2e",boxSize:"md",year:2003,complexity:1.86,players:"3-6",playTime:"90 min",bggRating:6.5},
+  308762:{name:"Mystic Vale: Essential Edition",bggId:308762,spineColor:"#3a6e3a",boxSize:"md",year:2020,complexity:2.38,players:"2-4",playTime:"60 min",bggRating:7.8},
+  251661:{name:"Oathsworn: Into the Deepwood",bggId:251661,spineColor:"#3a6e3a",boxSize:"xl",year:2022,complexity:3.69,players:"1-4",playTime:"90 min",bggRating:8.8},
+  295146:{name:"One Deck Dungeon: Abyssal Depths",bggId:295146,spineColor:"#2e7a73",boxSize:"md",year:2021,complexity:2.43,players:"1-2",playTime:"45 min",bggRating:7.1},
+  224821:{name:"One Deck Dungeon: Forest of Shadows",bggId:224821,spineColor:"#3b7a4f",boxSize:"md",year:2017,complexity:2.33,players:"1-2",playTime:"45 min",bggRating:7.1},
+  30549:{name:"Pandemic",bggId:30549,spineColor:"#444b6e",boxSize:"md",year:2008,complexity:2.39,players:"2-4",playTime:"45 min",bggRating:7.5},
+  338468:{name:"Paperback Adventures",bggId:338468,spineColor:"#3a6e3a",boxSize:"lg",year:2022,complexity:2.79,players:"1-2",playTime:"150 min",bggRating:7.6},
+  263938:{name:"Paupers' Ladder",bggId:263938,spineColor:"#6e2e2e",boxSize:"md",year:2019,complexity:2.2,players:"1-4",playTime:"90 min",bggRating:7.8},
+  3267:{name:"Pizarro & Co.",bggId:3267,spineColor:"#3a6e3a",boxSize:"md",year:2002,complexity:2.44,players:"3-6",playTime:"45 min",bggRating:6.5},
+  156009:{name:"Port Royal",bggId:156009,spineColor:"#2e7a73",boxSize:"md",year:2014,complexity:1.63,players:"2-5",playTime:"50 min",bggRating:7.1},
+  28143:{name:"Race for the Galaxy",bggId:28143,spineColor:"#7a6b2e",boxSize:"lg",year:2007,complexity:2.99,players:"2-4",playTime:"60 min",bggRating:7.7},
+  251678:{name:"Railroad Ink: Blazing Red Edition",bggId:251678,spineColor:"#3b7a4f",boxSize:"sm",year:2018,complexity:1.47,players:"1-6",playTime:"30 min",bggRating:7.1},
+  417426:{name:"Rogue Dungeon: 2nd Edition",bggId:417426,spineColor:"#3a6e3a",boxSize:"md",year:2024,complexity:2.12,players:"1-3",playTime:"60 min",bggRating:8.1},
+  127024:{name:"Room 25",bggId:127024,spineColor:"#2e7a73",boxSize:"md",year:2013,complexity:1.93,players:"1-6",playTime:"30 min",bggRating:6.7},
+  369751:{name:"Sagrada Artisans",bggId:369751,spineColor:"#2e7a73",boxSize:"md",year:2023,complexity:2.4,players:"2-4",playTime:"60 min",bggRating:7.7},
+  228855:{name:"Set a Watch",bggId:228855,spineColor:"#7a6b2e",boxSize:"md",year:2019,complexity:2.42,players:"1-4",playTime:"80 min",bggRating:7.2},
+  246297:{name:"Shadows: Amsterdam",bggId:246297,spineColor:"#3a6e3a",boxSize:"sm",year:2018,complexity:1.29,players:"2-8",playTime:"20 min",bggRating:6.6},
+  204305:{name:"Sherlock Holmes Consulting Detective: Jack the Ripper & West End Adventures",bggId:204305,spineColor:"#6e2e2e",boxSize:"md",year:2016,complexity:2.21,players:"1-8",playTime:"90 min",bggRating:7.5},
+  303553:{name:"Skulls of Sedlec",bggId:303553,spineColor:"#2e5a7a",boxSize:"sm",year:2020,complexity:1.25,players:"2-3",playTime:"20 min",bggRating:7.4},
+  373106:{name:"Sky Team",bggId:373106,spineColor:"#3a6e3a",boxSize:"md",year:2023,complexity:2.04,players:"2",playTime:"20 min",bggRating:8.1},
+  344789:{name:"Skytear Horde",bggId:344789,spineColor:"#7a6b2e",boxSize:"lg",year:2023,complexity:2.69,players:"1-3",playTime:"30 min",bggRating:7.4},
+  385325:{name:"Skytear Horde: Monoliths",bggId:385325,spineColor:"#3a6e3a",boxSize:"lg",year:2024,complexity:2.91,players:"1-3",playTime:"40 min",bggRating:8.1},
+  40692:{name:"Small World",bggId:40692,spineColor:"#2e7a73",boxSize:"md",year:2009,complexity:2.35,players:"2-5",playTime:"80 min",bggRating:7.2},
+  122522:{name:"Smash Up",bggId:122522,spineColor:"#7a6b2e",boxSize:"md",year:2012,complexity:2.06,players:"2-4",playTime:"45 min",bggRating:6.7},
+  372559:{name:"Spots",bggId:372559,spineColor:"#7a6b2e",boxSize:"sm",year:2022,complexity:1.27,players:"1-4",playTime:"30 min",bggRating:7.1},
+  372559:{name:"Spots",bggId:372559,spineColor:"#7a6b2e",boxSize:"sm",year:2022,complexity:1.27,players:"1-4",playTime:"30 min",bggRating:7.1},
+  34635:{name:"Stone Age",bggId:34635,spineColor:"#3b7a4f",boxSize:"md",year:2008,complexity:2.46,players:"2-4",playTime:"90 min",bggRating:7.5},
+  133473:{name:"Sushi Go!",bggId:133473,spineColor:"#444b6e",boxSize:"sm",year:2013,complexity:1.16,players:"2-5",playTime:"15 min",bggRating:7.0},
+  120677:{name:"Terra Mystica",bggId:120677,spineColor:"#7a2e52",boxSize:"xl",year:2012,complexity:3.97,players:"2-5",playTime:"150 min",bggRating:8.0},
+  358741:{name:"Terraforming Mars: Ares Expedition – Discovery · Foundations · Crisis",bggId:358741,spineColor:"#7a2e52",boxSize:"lg",year:2023,complexity:2.83,players:"1-6",playTime:"60 min",bggRating:8.0},
+  244522:{name:"That's Pretty Clever!",bggId:244522,spineColor:"#6e2e2e",boxSize:"md",year:2018,complexity:1.85,players:"1-4",playTime:"30 min",bggRating:7.6},
+  286063:{name:"The 7th Citadel",bggId:286063,spineColor:"#5a2e7a",boxSize:"lg",year:2024,complexity:2.95,players:"1-4",playTime:"1000 min",bggRating:8.3},
+  84876:{name:"The Castles of Burgundy",bggId:84876,spineColor:"#6e4a2e",boxSize:"lg",year:2011,complexity:2.97,players:"2-4",playTime:"90 min",bggRating:8.2},
+  284083:{name:"The Crew: The Quest for Planet Nine",bggId:284083,spineColor:"#3b7a4f",boxSize:"md",year:2019,complexity:1.97,players:"2-5",playTime:"20 min",bggRating:7.8},
+  281259:{name:"The Isle of Cats",bggId:281259,spineColor:"#444b6e",boxSize:"md",year:2019,complexity:2.36,players:"1-4",playTime:"90 min",bggRating:7.6},
+  421006:{name:"The Lord of the Rings: Duel for Middle-earth",bggId:421006,spineColor:"#7a2e52",boxSize:"md",year:2024,complexity:2.07,players:"2",playTime:"30 min",bggRating:8.4},
+  349955:{name:"The Quacks of Quedlinburg: MegaBox",bggId:349955,spineColor:"#6e2e2e",boxSize:"md",year:2021,complexity:2.05,players:"2-5",playTime:"60 min",bggRating:8.2},
+  1144:{name:"The Warlock of Firetop Mountain",bggId:1144,spineColor:"#7a2e52",boxSize:"md",year:1986,complexity:1.88,players:"2-6",playTime:"120 min",bggRating:6.0},
+  503:{name:"Through the Desert",bggId:503,spineColor:"#2e3a6e",boxSize:"md",year:1998,complexity:2.16,players:"2-5",playTime:"45 min",bggRating:7.2},
+  390092:{name:"Ticket to Ride Legacy: Legends of the West",bggId:390092,spineColor:"#6e4a2e",boxSize:"md",year:2023,complexity:2.57,players:"2-5",playTime:"90 min",bggRating:8.6},
+  14996:{name:"Ticket to Ride: Europe",bggId:14996,spineColor:"#7a6b2e",boxSize:"md",year:2005,complexity:1.92,players:"2-5",playTime:"60 min",bggRating:7.5},
+  347900:{name:"Tin Helm",bggId:347900,spineColor:"#2e5a7a",boxSize:"sm",year:2021,complexity:1.39,players:"1",playTime:"30 min",bggRating:7.5},
+  412068:{name:"Tin Realm",bggId:412068,spineColor:"#6e2e2e",boxSize:"md",year:2024,complexity:1.67,players:"1",playTime:"30 min",bggRating:8.1},
+  238656:{name:"Tiny Epic Defenders (Second Edition)",bggId:238656,spineColor:"#7a2e52",boxSize:"md",year:2018,complexity:2.05,players:"1-4",playTime:"60 min",bggRating:6.9},
+  331787:{name:"Tiny Epic Dungeons",bggId:331787,spineColor:"#3a6e3a",boxSize:"lg",year:2021,complexity:3.11,players:"1-4",playTime:"60 min",bggRating:7.4},
+  201921:{name:"Tiny Epic Quest",bggId:201921,spineColor:"#7a6b2e",boxSize:"lg",year:2017,complexity:2.69,players:"1-4",playTime:"60 min",bggRating:6.9},
+  192135:{name:"Too Many Bones",bggId:192135,spineColor:"#2e5a7a",boxSize:"xl",year:2017,complexity:3.87,players:"1-4",playTime:"120 min",bggRating:8.3},
+  242639:{name:"Treasure Island",bggId:242639,spineColor:"#6e4a2e",boxSize:"md",year:2018,complexity:2.2,players:"2-5",playTime:"45 min",bggRating:7.2},
+  361545:{name:"Twilight Inscription",bggId:361545,spineColor:"#3a6e3a",boxSize:"lg",year:2022,complexity:3.22,players:"1-8",playTime:"120 min",bggRating:7.4},
+  3230:{name:"Tyros",bggId:3230,spineColor:"#2e3a6e",boxSize:"md",year:2002,complexity:2.46,players:"3-4",playTime:"90 min",bggRating:6.4},
+  75223:{name:"Utopia Engine",bggId:75223,spineColor:"#7a3b2e",boxSize:"md",year:2010,complexity:2.03,players:"1",playTime:"60 min",bggRating:6.9},
+  420033:{name:"Vantage",bggId:420033,spineColor:"#5a2e7a",boxSize:"md",year:2025,complexity:2.34,players:"1-6",playTime:"180 min",bggRating:8.2},
+  350736:{name:"Voyages",bggId:350736,spineColor:"#7a6b2e",boxSize:"md",year:2021,complexity:1.78,players:"1-100",playTime:"30 min",bggRating:7.4},
+  7479:{name:"WarCraft: The Board Game",bggId:7479,spineColor:"#5a2e7a",boxSize:"lg",year:2003,complexity:2.76,players:"2-4",playTime:"120 min",bggRating:6.1},
+  296237:{name:"Warp's Edge",bggId:296237,spineColor:"#7a2e52",boxSize:"md",year:2020,complexity:2.39,players:"1",playTime:"45 min",bggRating:7.6},
+  357008:{name:"Warp's Edge: Anomaly",bggId:357008,spineColor:"#6e2e2e",boxSize:"md",year:2022,complexity:2.56,players:"1",playTime:"45 min",bggRating:7.8},
+  262543:{name:"Wavelength",bggId:262543,spineColor:"#3b7a4f",boxSize:"sm",year:2019,complexity:1.11,players:"2-12",playTime:"45 min",bggRating:7.2},
+  195043:{name:"Welcome Back to the Dungeon",bggId:195043,spineColor:"#6e2e2e",boxSize:"sm",year:2016,complexity:1.31,players:"2-4",playTime:"30 min",bggRating:6.7},
+  150312:{name:"Welcome to the Dungeon",bggId:150312,spineColor:"#444b6e",boxSize:"sm",year:2013,complexity:1.24,players:"2-4",playTime:"30 min",bggRating:6.5},
+};
+
 // =============================================
 // GAME DATA - Enriched with BoardGameGeek data
 // =============================================
@@ -5492,6 +5642,7 @@ let _modalOpenedFromInsights = false;
 let _modalOpenedFromGames = false;
 let _modalOpenedFromLeaderboard = false;
 let _modalOpenedFromBoardSouth = false;
+let _modalOpenedFromIlioupoli = false;
 
 function _setViewport(content) {
   const vp = document.querySelector('meta[name=viewport]');
@@ -5505,7 +5656,7 @@ function _scrollToShelfCenter() {
 
 function _restoreAfterModal() {
   if (!_isTouchDevice()) return;
-  if (_modalOpenedFromStats || _modalOpenedFromInsights || _modalOpenedFromGames || _modalOpenedFromLeaderboard || _modalOpenedFromBoardSouth) {
+  if (_modalOpenedFromStats || _modalOpenedFromInsights || _modalOpenedFromGames || _modalOpenedFromLeaderboard || _modalOpenedFromBoardSouth || _modalOpenedFromIlioupoli) {
     document.body.style.minWidth = 'auto';
     _setViewport(VP_LOCKED);
     window.scrollTo(0, 0);
@@ -5533,6 +5684,8 @@ function closeModal() {
       showLeaderboardView();
     } else if (_modalOpenedFromBoardSouth) {
       showBoardSouthView();
+    } else if (_modalOpenedFromIlioupoli) {
+      showIlioupoliView();
     }
     if (history.state && history.state.modal) history.back();
   }
@@ -5554,6 +5707,8 @@ window.addEventListener('popstate', e => {
       showLeaderboardView();
     } else if (_modalOpenedFromBoardSouth) {
       showBoardSouthView();
+    } else if (_modalOpenedFromIlioupoli) {
+      showIlioupoliView();
     }
   }
 });
@@ -5564,6 +5719,7 @@ function openModal(game) {
   _modalOpenedFromGames = document.getElementById('games-view').classList.contains('open');
   _modalOpenedFromLeaderboard = document.getElementById('leaderboard-view').classList.contains('open');
   _modalOpenedFromBoardSouth = document.getElementById('boardsouth-view').classList.contains('open');
+  _modalOpenedFromIlioupoli = document.getElementById('ilioupoli-view').classList.contains('open');
   const overlay = document.getElementById('modal-overlay');
   const content = document.getElementById('modal-content');
 
@@ -5853,6 +6009,7 @@ function _deactivateAllTabs() {
   document.getElementById('leaderboard-view').classList.remove('open');
   document.getElementById('achievements-view').classList.remove('open');
   document.getElementById('boardsouth-view').classList.remove('open');
+  document.getElementById('ilioupoli-view').classList.remove('open');
   document.getElementById('btn-library').classList.remove('active');
   document.getElementById('btn-mystats').classList.remove('active');
   document.getElementById('btn-insights').classList.remove('active');
@@ -5860,6 +6017,7 @@ function _deactivateAllTabs() {
   document.getElementById('btn-leaderboard').classList.remove('active');
   document.getElementById('btn-achievements').classList.remove('active');
   document.getElementById('btn-boardsouth').classList.remove('active');
+  document.getElementById('btn-ilioupoli').classList.remove('active');
 }
 
 function switchToLibrary() {
@@ -5956,11 +6114,32 @@ function switchToBoardSouth() {
   showBoardSouthView();
 }
 
+function switchToIlioupoli() {
+  _deactivateAllTabs();
+  document.getElementById('ilioupoli-view').classList.add('open');
+  document.getElementById('btn-ilioupoli').classList.add('active');
+  if (_isTouchDevice()) {
+    document.body.style.minWidth = 'auto';
+    document.body.classList.remove('mobile-library');
+    _setViewport(VP_LOCKED);
+    window.scrollTo(0, 0);
+  }
+  showIlioupoliView();
+}
+
 function _updateBoardSouthBtnVisibility() {
   const btn = document.getElementById('btn-boardsouth');
-  if (!btn) return;
-  const active = (typeof _activeBoardSouthVoter === 'function') ? _activeBoardSouthVoter() : null;
-  btn.style.display = active ? '' : 'none';
+  if (btn) {
+    const active = (typeof _activeBoardSouthVoter === 'function') ? _activeBoardSouthVoter() : null;
+    btn.style.display = active ? '' : 'none';
+  }
+  // The "Ilioupoli Bros" tab is private to Στιβ and Δημητρης.
+  const ilioBtn = document.getElementById('btn-ilioupoli');
+  if (ilioBtn) {
+    const raw = localStorage.getItem('bgl-player');
+    const name = raw ? (NAME_MAP[raw] || raw) : null;
+    ilioBtn.style.display = (name && ILIOUPOLI_MEMBERS.has(name)) ? '' : 'none';
+  }
 }
 
 document.getElementById('btn-library').addEventListener('click', switchToLibrary);
@@ -5970,6 +6149,7 @@ document.getElementById('btn-mystats').addEventListener('click', switchToStats);
 document.getElementById('btn-insights').addEventListener('click', switchToInsights);
 document.getElementById('btn-achievements').addEventListener('click', switchToAchievements);
 document.getElementById('btn-boardsouth').addEventListener('click', switchToBoardSouth);
+document.getElementById('btn-ilioupoli').addEventListener('click', switchToIlioupoli);
 
 // ── Achievements ──
 const ACHIEVEMENTS = [
@@ -6602,6 +6782,48 @@ function showAchievementsView(playerName) {
     </div>
     ${recentHtml}
     ${allHtml}`;
+  window.scrollTo(0, 0);
+}
+
+// ── Ilioupoli Bros — Δημητρης's private library shelf ──
+// Tab visible only to these two players.
+const ILIOUPOLI_MEMBERS = new Set(['Στιβ', 'Δημητρης']);
+
+function showIlioupoliView() {
+  const container = document.getElementById('ilioupoli-view');
+  if (!container) return;
+  const games = (typeof DIMITRIS_GAMES !== 'undefined') ? Object.values(DIMITRIS_GAMES) : [];
+  games.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+  // Distribute games into cubbies, ~5 spines each, to mimic the main shelf.
+  const PER_CUBBY = 5;
+  let cubbiesHtml = '';
+  for (let i = 0; i < games.length; i += PER_CUBBY) {
+    const chunk = games.slice(i, i + PER_CUBBY);
+    const horiz = chunk.length <= 2 ? ' horizontal-layout' : '';
+    const spines = chunk.map(g =>
+      `<div class="game-spine box-${g.boxSize || 'md'}" style="background:${g.spineColor || '#555'}"
+            data-ilio-bgg="${g.bggId}" title="${_escapeHtml(g.name)}">
+        <span class="spine-text">${_escapeHtml(g.name)}</span>
+      </div>`).join('');
+    cubbiesHtml += `<div class="cubby${horiz}">${spines}</div>`;
+  }
+
+  container.innerHTML = `
+    <div class="lb-header">
+      <div class="lb-title">Ilioupoli Bros</div>
+      <div class="lb-count">Δημητρης's library · ${games.length} game${games.length !== 1 ? 's' : ''}</div>
+    </div>
+    <div class="ilio-shelf">${cubbiesHtml}</div>`;
+
+  container.querySelectorAll('[data-ilio-bgg]').forEach(el => {
+    el.addEventListener('click', () => {
+      const g = DIMITRIS_GAMES[Number(el.dataset.ilioBgg)];
+      if (g && typeof openModal === 'function') {
+        try { openModal(g); } catch (_) {}
+      }
+    });
+  });
   window.scrollTo(0, 0);
 }
 
