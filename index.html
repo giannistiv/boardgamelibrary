@@ -1110,14 +1110,9 @@
   /* My priority list */
   .bsv-mylist{display:flex;flex-direction:column;gap:0.45rem;margin-bottom:0.5rem}
   .bsv-myitem{
-    position:relative;
     display:grid;
     grid-template-columns:1.6rem 2.4rem 1fr auto;
-    align-items:center;gap:0.6rem;
-    /* min-height + right padding give the corner ✕ its own space so the
-       ▲▼ move buttons (pinned to the bottom) never sit next to it */
-    min-height:4.6rem;
-    padding:0.5rem 1.9rem 0.5rem 0.7rem;border-radius:8px;
+    align-items:center;gap:0.6rem;padding:0.45rem 0.7rem;border-radius:8px;
     background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);
     cursor:grab;user-select:none;-webkit-user-select:none;
     touch-action:none; /* let pointer-drag work on touch instead of scrolling */
@@ -1127,29 +1122,17 @@
   .bsv-myitem.dragging{
     opacity:0.85;cursor:grabbing;
     box-shadow:0 8px 24px rgba(0,0,0,0.5);border-color:var(--accent);
-    z-index:10;
+    z-index:10;position:relative;
   }
   .bsv-myitem .bsv-mybtn{cursor:pointer;touch-action:auto}
-  .bsv-myrank{font-weight:700;font-size:1rem;text-align:center;color:var(--accent)}
-  /* Remove-from-your-list ✕ — pinned to the item's top-right corner, well
-     away from the ▲▼ move buttons so it isn't tapped by accident. */
-  .bsv-myremove{
-    position:absolute;top:4px;right:5px;
-    width:1.35rem;height:1.35rem;border-radius:6px;padding:0;
-    border:1px solid rgba(239,68,68,0.3);background:rgba(239,68,68,0.06);
-    color:#ef4444;font-size:0.66rem;line-height:1;cursor:pointer;
-    display:flex;align-items:center;justify-content:center;
-    touch-action:auto;-webkit-tap-highlight-color:transparent;
-  }
-  .bsv-myremove:hover{background:rgba(239,68,68,0.2);border-color:#ef4444}
+  .bsv-myrank{font-weight:700;font-size:0.82rem;text-align:center;color:var(--accent)}
   .bsv-mythumb{
     width:2.4rem;height:2.4rem;border-radius:6px;
     background-color:rgba(255,255,255,0.08);flex-shrink:0;overflow:hidden;
   }
   .bsv-mythumb img{width:100%;height:100%;object-fit:cover;display:block}
   .bsv-myname{font-size:0.88rem;font-weight:600;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
-  /* ▲▼ pinned to the bottom of the row, clear of the top-corner ✕ */
-  .bsv-myactions{display:flex;gap:0.25rem;flex-shrink:0;align-self:end}
+  .bsv-myactions{display:flex;gap:0.25rem;flex-shrink:0}
   .bsv-mybtn{
     width:1.7rem;height:1.7rem;border-radius:6px;border:1px solid rgba(255,255,255,0.12);
     background:transparent;color:var(--text);cursor:pointer;font-size:0.85rem;line-height:1;
@@ -1188,17 +1171,21 @@
     font-size:0.78rem;font-weight:700;text-align:center;min-width:2.2rem;
   }
   .bsv-aggvotes.hot{background:var(--accent);color:#0b0b0d}
-  /* Library-owner remove button on each aggregate row. */
+  /* Library-owner remove button — pinned to the row's top-right corner,
+     well clear of the vote-count badge so it isn't tapped by accident.
+     Only owner rows carry .has-remove, which reserves the corner space. */
   .bsv-aggrow{position:relative}
+  .bsv-aggrow.has-remove{padding-top:1.5rem}
   .bsv-aggremove{
-    background:transparent;border:1px solid rgba(239,68,68,0.35);color:#ef4444;
-    width:1.5rem;height:1.5rem;border-radius:6px;cursor:pointer;
-    font-size:0.8rem;line-height:1;padding:0;margin-left:0.4rem;
-    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    position:absolute;top:5px;right:6px;
+    background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.3);color:#ef4444;
+    width:1.35rem;height:1.35rem;border-radius:6px;cursor:pointer;
+    font-size:0.66rem;line-height:1;padding:0;
+    display:flex;align-items:center;justify-content:center;
     transition:background 0.15s,border-color 0.15s;
     touch-action:manipulation;-webkit-tap-highlight-color:transparent;
   }
-  .bsv-aggremove:hover{background:rgba(239,68,68,0.18);border-color:#ef4444}
+  .bsv-aggremove:hover{background:rgba(239,68,68,0.2);border-color:#ef4444}
 
   /* Search-add modal (overlay over leaderboard) */
   .bsv-modal-overlay{
@@ -8346,8 +8333,8 @@ function _renderBoardSouthVoteView(container) {
           <div class="bsv-myactions">
             <button class="bsv-mybtn" data-bsv-act="up" ${upDisabled} title="Move up">▲</button>
             <button class="bsv-mybtn" data-bsv-act="down" ${downDisabled} title="Move down">▼</button>
+            <button class="bsv-mybtn danger" data-bsv-act="remove" title="Remove">✕</button>
           </div>
-          <button class="bsv-myremove" data-bsv-act="remove" title="Remove from your list" aria-label="Remove">✕</button>
         </div>`;
       }).join('') + '</div>';
     }
@@ -8391,7 +8378,7 @@ function _renderBoardSouthVoteView(container) {
       const removeBtnHtml = isLibOwner
         ? `<button class="bsv-aggremove" data-bsv-remove="${r.bggId}" title="Remove from group ranking — you no longer have this game" aria-label="Remove game">✕</button>`
         : '';
-      return `<div class="bsv-aggrow" data-bgg-id="${r.bggId}">
+      return `<div class="bsv-aggrow${isLibOwner ? ' has-remove' : ''}" data-bgg-id="${r.bggId}">
         <div class="bsv-aggrank">#${i + 1}</div>
         ${cover}
         <div>
@@ -8559,10 +8546,9 @@ function _wireBoardSouthDrag(container, voter, library) {
   const items = () => Array.from(container.querySelectorAll('.bsv-myitem'));
 
   const onDown = (ev) => {
-    // Ignore right-click; ignore drags initiated on action buttons
-    // (▲▼ move buttons and the corner ✕ remove button).
+    // Ignore right-click; ignore drags initiated on action buttons.
     if (ev.pointerType === 'mouse' && ev.button !== 0) return;
-    if (ev.target.closest('.bsv-mybtn') || ev.target.closest('.bsv-myremove')) return;
+    if (ev.target.closest('.bsv-mybtn')) return;
     const item = ev.currentTarget;
     if (!item) return;
     ev.preventDefault();
