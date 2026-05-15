@@ -230,6 +230,9 @@
      spine text can't blow the cubby up — it clips with an ellipsis instead. */
   .ilio-shelf .cubby{height:150px;min-height:150px;padding:4px 3px 3px}
   .ilio-f-count{font-size:0.72rem;opacity:0.6;text-align:right;margin-top:0.3rem}
+  /* The Ilioupoli view gets extra width over the standard 700-px stats-view
+     so Δημητρης's shelf reads a little bigger. */
+  #ilioupoli-view{max-width:900px}
 
   /* ── Game spines ── */
   .game-spine{
@@ -6787,14 +6790,43 @@ function showAchievementsView(playerName) {
 }
 
 // ── Ilioupoli Bros — Δημητρης's private library shelf ──
-// Tab visible only to these two players.
-const ILIOUPOLI_MEMBERS = new Set(['Στιβ', 'Δημητρης']);
+// Tab visible only to these players.
+const ILIOUPOLI_MEMBERS = new Set(['Στιβ', 'Δημητρης', 'Μαντσος']);
+let _ilioSubTab = 'library'; // 'library' | 'oathsworn'
 
 function showIlioupoliView() {
   const container = document.getElementById('ilioupoli-view');
   if (!container) return;
   const games = (typeof DIMITRIS_GAMES !== 'undefined') ? Object.values(DIMITRIS_GAMES) : [];
   games.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+  const subTabsHtml = `
+    <div class="bs-subtabs">
+      <button class="bs-subtab${_ilioSubTab === 'library' ? ' active' : ''}" data-ilio-sub="library">📚 Dimitris Library</button>
+      <button class="bs-subtab${_ilioSubTab === 'oathsworn' ? ' active' : ''}" data-ilio-sub="oathsworn">⚔️ Oathsworn</button>
+    </div>`;
+
+  const wireSubTabs = () => {
+    container.querySelectorAll('[data-ilio-sub]').forEach(el => {
+      el.addEventListener('click', () => {
+        const s = el.dataset.ilioSub;
+        if (s !== _ilioSubTab) { _ilioSubTab = s; showIlioupoliView(); }
+      });
+    });
+  };
+
+  // ── Oathsworn sub-tab — placeholder for now ──
+  if (_ilioSubTab === 'oathsworn') {
+    container.innerHTML = `
+      <div class="lb-header">
+        <div class="lb-title">Ilioupoli Bros</div>
+      </div>
+      ${subTabsHtml}
+      <div class="bsv-empty">⚔️ Oathsworn — coming soon.</div>`;
+    wireSubTabs();
+    window.scrollTo(0, 0);
+    return;
+  }
 
   // Distribute games into cubbies, ~5 spines each, to mimic the main shelf.
   const PER_CUBBY = 5;
@@ -6815,6 +6847,7 @@ function showIlioupoliView() {
       <div class="lb-title">Ilioupoli Bros</div>
       <div class="lb-count">Δημητρης's library · ${games.length} game${games.length !== 1 ? 's' : ''}</div>
     </div>
+    ${subTabsHtml}
     <input type="text" class="bsv-search-bar" id="ilio-search" placeholder="Search games…" autocomplete="off">
     <div class="bsv-modal-filters">
       <label class="bsv-filter">
@@ -6850,6 +6883,8 @@ function showIlioupoliView() {
     </div>
     <div class="ilio-f-count" id="ilio-f-count"></div>
     <div class="ilio-shelf">${cubbiesHtml}</div>`;
+
+  wireSubTabs();
 
   container.querySelectorAll('[data-ilio-bgg]').forEach(el => {
     el.addEventListener('click', () => {
