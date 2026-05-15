@@ -9222,8 +9222,22 @@ function _allBoardSouthVoterNames() {
 // Each voter contributes 1 vote per listed game. Among games with the same
 // vote count, sort by the sum of inverse rank (1/position) so games people
 // place near the top of their list win ties.
+// Average rating given by *app users* to a game (0 when nobody rated it).
+// Distinct from the static BGG rating carried on the game object.
+function _avgAppRating(bggId) {
+  const r = (typeof ratingsCache !== 'undefined') ? ratingsCache[bggId] : null;
+  if (!r) return 0;
+  let sum = 0, n = 0;
+  for (const p in r) {
+    const val = _ratingValue(r[p]);
+    if (typeof val === 'number' && val > 0) { sum += val; n++; }
+  }
+  return n ? sum / n : 0;
+}
+
 function _computeBoardSouthVoteRanking(library) {
   const lib = library || _bsvLibrary;
+  const owner = BSV_LIB_OWNER[lib];
   const votes = _bsvGetVotes(lib);
   const tally = {}; // bggId → { votes, score, voters: [{name, position}] }
   for (const voter in votes) {
@@ -9233,15 +9247,37 @@ function _computeBoardSouthVoteRanking(library) {
       if (!Number.isFinite(bggId)) return;
       if (!tally[bggId]) tally[bggId] = { bggId, votes: 0, score: 0, voters: [] };
       tally[bggId].votes++;
+      // score = Σ(1/position): a #2 placement weighs more than a #3, so it
+      // breaks ties in favour of games people ranked higher in their lists.
       tally[bggId].score += 1 / (idx + 1);
       tally[bggId].voters.push({ name: voter, position: idx + 1 });
     });
   }
+  // Sort priority (each step is a tie-breaker for the previous):
+  //   1. total vote count
+  //   2. games the library owner voted for come first
+  //   3. highest average rating from this app's users
+  //   4. highest BGG rating
+  //   5. combined priority score (#2 picks outrank #3 picks)
+  //   6. name, purely for a stable final order
   return Object.values(tally).sort((a, b) => {
     if (b.votes !== a.votes) return b.votes - a.votes;
-    if (b.score !== a.score) return b.score - a.score;
+
+    const aOwner = owner && a.voters.some(v => v.name === owner) ? 1 : 0;
+    const bOwner = owner && b.voters.some(v => v.name === owner) ? 1 : 0;
+    if (bOwner !== aOwner) return bOwner - aOwner;
+
+    const aApp = _avgAppRating(a.bggId), bApp = _avgAppRating(b.bggId);
+    if (bApp !== aApp) return bApp - aApp;
+
     const ga = _bsvFindGame(lib, a.bggId);
     const gb = _bsvFindGame(lib, b.bggId);
+    const aBgg = Number(ga && ga.bggRating) || 0;
+    const bBgg = Number(gb && gb.bggRating) || 0;
+    if (bBgg !== aBgg) return bBgg - aBgg;
+
+    if (b.score !== a.score) return b.score - a.score;
+
     return (ga ? ga.name : '').localeCompare(gb ? gb.name : '');
   });
 }
