@@ -219,12 +219,16 @@
 
   /* ── Ilioupoli Bros mini-shelf — same look as the main shelf, smaller.
         4 columns inside the locked ~700-px view make it naturally compact. */
+  .ilio-shelf-wrap{
+    width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;
+    margin:0.7rem 0 0;
+  }
   .ilio-shelf{
     display:grid;grid-template-columns:repeat(4,1fr);gap:0;
     background:var(--wood);
     border:5px solid var(--wood-dark);border-radius:4px;
     box-shadow:0 6px 30px rgba(0,0,0,0.5),inset 0 0 16px rgba(0,0,0,0.15);
-    margin:0.7rem auto 0;width:100%;
+    margin:0 auto;width:100%;
   }
   /* Fixed height (not just min-height) so a very long game name's vertical
      spine text can't blow the cubby up — it clips with an ellipsis instead. */
@@ -1346,6 +1350,10 @@
        use a normal width=device-width viewport and would otherwise
        overflow horizontally on phones. */
     body.mobile-library{min-width:1200px}
+    /* On phones the 4-column mini-shelf would smoosh the spines, so give it
+       a fixed width wider than the screen — .ilio-shelf-wrap then scrolls
+       horizontally inside its own box (the page itself stays locked). */
+    .ilio-shelf{min-width:760px}
     .stats-grid{grid-template-columns:repeat(2,1fr)}
     h1{font-size:1.5rem}
     .filters{gap:0.5rem 0.6rem}
@@ -7154,7 +7162,7 @@ function showIlioupoliView() {
       </label>
     </div>
     <div class="ilio-f-count" id="ilio-f-count"></div>
-    <div class="ilio-shelf">${cubbiesHtml}</div>`;
+    <div class="ilio-shelf-wrap"><div class="ilio-shelf">${cubbiesHtml}</div></div>`;
 
   wireSubTabs();
 
