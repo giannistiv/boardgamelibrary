@@ -248,8 +248,9 @@
   }
   .oath-item{grid-template-columns:1.8rem 1fr auto}
   .oath-overrow{grid-template-columns:1.8rem 1fr auto auto}
-  .oath-item.editable{cursor:grab;user-select:none;-webkit-user-select:none;touch-action:none}
-  .oath-item.editable:active{cursor:grabbing}
+  /* Editable rows allow vertical page-scroll; only the grip handle starts
+     a drag (touch-action:none on .oath-grip below). */
+  .oath-item.editable{user-select:none;-webkit-user-select:none;touch-action:pan-y}
   .oath-item.dragging{
     opacity:0.9;cursor:grabbing;z-index:10;position:relative;
     box-shadow:0 8px 24px rgba(0,0,0,0.5);border-color:var(--accent);
@@ -259,7 +260,12 @@
     text-align:center;font-variant-numeric:tabular-nums;
   }
   .oath-name{font-size:0.9rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
-  .oath-grip{color:rgba(255,255,255,0.35);font-size:1.1rem;line-height:1}
+  /* The grip is the drag handle — bigger touch target + own touch-action. */
+  .oath-grip{
+    color:rgba(255,255,255,0.4);font-size:1.2rem;line-height:1;
+    cursor:grab;touch-action:none;padding:0.3rem 0.4rem;
+  }
+  .oath-grip:active{cursor:grabbing}
   .oath-breakdown{display:flex;gap:0.25rem;flex-wrap:wrap;justify-content:flex-end}
   .oath-chip{
     font-size:0.66rem;font-weight:600;padding:0.12rem 0.4rem;border-radius:999px;
@@ -1165,21 +1171,30 @@
   .bsv-mylist{display:flex;flex-direction:column;gap:0.45rem;margin-bottom:0.5rem}
   .bsv-myitem{
     display:grid;
-    grid-template-columns:1.6rem 2.4rem 1fr auto;
+    grid-template-columns:2.1rem 2.4rem 1fr auto;
     align-items:center;gap:0.6rem;padding:0.45rem 0.7rem;border-radius:8px;
     background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);
-    cursor:grab;user-select:none;-webkit-user-select:none;
-    touch-action:none; /* let pointer-drag work on touch instead of scrolling */
+    user-select:none;-webkit-user-select:none;
+    /* The row itself allows vertical scroll — only the rank handle starts
+       a drag (touch-action:none on .bsv-myrank below). */
+    touch-action:pan-y;
     transition:box-shadow .15s,opacity .15s;
   }
-  .bsv-myitem:active{cursor:grabbing}
   .bsv-myitem.dragging{
     opacity:0.85;cursor:grabbing;
     box-shadow:0 8px 24px rgba(0,0,0,0.5);border-color:var(--accent);
     z-index:10;position:relative;
   }
   .bsv-myitem .bsv-mybtn{cursor:pointer;touch-action:auto}
-  .bsv-myrank{font-weight:700;font-size:0.82rem;text-align:center;color:var(--accent)}
+  /* The rank cell is the drag handle: number on top, grip dots below.
+     touch-action:none here so a drag on it isn't eaten by page scroll. */
+  .bsv-myrank{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+    cursor:grab;touch-action:none;
+  }
+  .bsv-myrank:active{cursor:grabbing}
+  .bsv-myrank-num{font-weight:700;font-size:0.82rem;color:var(--accent);line-height:1}
+  .bsv-mygrip{font-size:0.8rem;line-height:0.7;color:rgba(255,255,255,0.4)}
   .bsv-mythumb{
     width:2.4rem;height:2.4rem;border-radius:6px;
     background-color:rgba(255,255,255,0.08);flex-shrink:0;overflow:hidden;
@@ -6948,6 +6963,9 @@ function _wireOathswornDrag(container, voter) {
 
   const onDown = (ev) => {
     if (ev.pointerType === 'mouse' && ev.button !== 0) return;
+    // Only the grip handle starts a drag — touching elsewhere on the row
+    // leaves the page free to scroll vertically.
+    if (!ev.target.closest('.oath-grip')) return;
     const item = ev.currentTarget;
     if (!item) return;
     ev.preventDefault();
@@ -8999,7 +9017,10 @@ function _renderBoardSouthVoteView(container) {
         const upDisabled = idx === 0 ? 'disabled' : '';
         const downDisabled = idx === myList.length - 1 ? 'disabled' : '';
         return `<div class="bsv-myitem" draggable="true" data-bsv-idx="${idx}" data-bgg-id="${bggId}">
-          <div class="bsv-myrank">${idx + 1}</div>
+          <div class="bsv-myrank" title="Drag to reorder">
+            <span class="bsv-myrank-num">${idx + 1}</span>
+            <span class="bsv-mygrip">⠿</span>
+          </div>
           ${cover}
           <div class="bsv-myname">${_escapeHtml(name)}</div>
           <div class="bsv-myactions">
@@ -9218,9 +9239,12 @@ function _wireBoardSouthDrag(container, voter, library) {
   const items = () => Array.from(container.querySelectorAll('.bsv-myitem'));
 
   const onDown = (ev) => {
-    // Ignore right-click; ignore drags initiated on action buttons.
+    // Ignore right-click.
     if (ev.pointerType === 'mouse' && ev.button !== 0) return;
-    if (ev.target.closest('.bsv-mybtn')) return;
+    // A drag only starts from the rank handle (.bsv-myrank). Touching the
+    // cover/name lets the page scroll normally — fixes the mobile issue
+    // where any touch on a row was hijacked into a reorder.
+    if (!ev.target.closest('.bsv-myrank')) return;
     const item = ev.currentTarget;
     if (!item) return;
     ev.preventDefault();
@@ -9316,7 +9340,7 @@ function _refreshBsvRanks(container) {
   const last = items.length - 1;
   items.forEach((item, i) => {
     item.dataset.bsvIdx = String(i);
-    const rankEl = item.querySelector('.bsv-myrank');
+    const rankEl = item.querySelector('.bsv-myrank-num');
     if (rankEl) rankEl.textContent = String(i + 1);
     const upBtn = item.querySelector('[data-bsv-act="up"]');
     const downBtn = item.querySelector('[data-bsv-act="down"]');
