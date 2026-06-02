@@ -9015,12 +9015,16 @@ function _boardSouthPlaysSectionHtml() {
       plays.push({ bggId: Number(bggId), idx, p });
     });
   }
-  // Newest first (full timestamp when available).
+  // Newest first. When two plays share the same timestamp they were logged
+  // together in one upload (BGStats stamps a whole batch identically), so the
+  // timestamp can't tell them apart. Break that tie in natural insertion order
+  // (ascending) rather than reversed — this matches the profile "latest plays"
+  // list and keeps a day's later-played games sitting above the earlier ones.
   plays.sort((a, b) => {
     const at = a.p.t || a.p.date, bt = b.p.t || b.p.date;
     if (at !== bt) return bt.localeCompare(at);
-    if (a.bggId !== b.bggId) return b.bggId - a.bggId;
-    return b.idx - a.idx;
+    if (a.bggId !== b.bggId) return a.bggId - b.bggId;
+    return a.idx - b.idx;
   });
 
   const formula = _boardSouthFormulaHtml(currentYear);
