@@ -1124,6 +1124,45 @@
   .lb-explain{margin-top:1.6rem;padding:0.8rem 1rem;background:rgba(255,255,255,0.03);border-radius:8px;font-size:0.72rem;opacity:0.75;line-height:1.55}
   .lb-explain b{color:var(--accent)}
 
+  /* ── Board South: scoring legend + plays list (under the leaderboard) ── */
+  .bs-plays-section{margin-top:1.2rem}
+  .bs-formula{margin-top:0.6rem;padding:0.9rem 1rem;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px}
+  .bs-formula-head{font-weight:700;font-size:0.9rem;color:var(--accent);margin-bottom:0.5rem}
+  .bs-formula-body{font-size:0.76rem;line-height:1.6;opacity:0.92}
+  .bs-formula-body p{margin:0 0 0.6rem}
+  .bs-formula-body b{color:var(--accent)}
+  .bs-formula-eq{background:rgba(0,0,0,0.28);border-radius:8px;padding:0.6rem 0.8rem;margin:0.4rem 0 0.7rem;display:flex;flex-direction:column;gap:0.25rem}
+  .bs-formula-eq>div{font-size:0.7rem;opacity:0.65}
+  .bs-formula-eq code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:0.82rem;color:#e2e8f0;background:transparent;overflow-wrap:anywhere;word-break:break-word}
+  .bs-formula-eq code sub{font-size:0.7em}
+  .bs-formula-legend{list-style:none;padding:0;margin:0 0 0.6rem;display:flex;flex-direction:column;gap:0.32rem}
+  .bs-formula-legend li{padding-left:0.1rem}
+  .bs-formula-tldr{opacity:0.88}
+  .bs-plays-head{font-weight:700;font-size:0.95rem;margin:1.3rem 0 0.7rem}
+  .bs-plays-list{display:flex;flex-direction:column;gap:0.55rem}
+  .bs-plays-list .bs-play-row.extra{display:none}
+  .bs-plays-list.expanded .bs-play-row.extra{display:flex}
+  .bs-play-row{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:0.65rem 0.75rem;display:flex;flex-direction:column;gap:0.4rem;cursor:pointer;transition:background 0.12s}
+  .bs-play-row:hover{background:rgba(255,255,255,0.07)}
+  .bs-play-top{display:flex;align-items:center;gap:0.6rem}
+  .bs-play-cover{width:44px;height:44px;border-radius:8px;flex-shrink:0;background:#222;object-fit:cover;display:block}
+  .bs-play-info{flex:1;min-width:0}
+  .bs-play-name{font-size:0.9rem;font-weight:600;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .bs-play-meta{font-size:0.7rem;opacity:0.6;margin-top:0.12rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .bs-scoreboard{border-top:1px dashed rgba(255,255,255,0.08);padding-top:0.4rem;display:flex;flex-direction:column;gap:0.22rem}
+  .bs-sb-row{display:grid;grid-template-columns:1fr auto auto;gap:0.6rem;font-size:0.76rem;line-height:1.3;align-items:baseline}
+  .bs-sb-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .bs-sb-name.winner::before{content:"👑 ";font-size:0.7rem}
+  .bs-sb-role{opacity:0.5;font-size:0.66rem}
+  .bs-sb-score{font-variant-numeric:tabular-nums;opacity:0.85;text-align:right;min-width:2.5rem}
+  .bs-sb-delta{font-variant-numeric:tabular-nums;font-size:0.72rem;text-align:right;min-width:3.4rem;opacity:0.9}
+  .bs-sb-delta.pos{color:#22c55e}
+  .bs-sb-delta.neg{color:#ef4444}
+  .bs-plays-more{margin-top:0.8rem;width:100%;padding:0.6rem;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:var(--text);font-size:0.82rem;font-weight:600;cursor:pointer;transition:background 0.12s}
+  .bs-plays-more:hover{background:rgba(255,255,255,0.1)}
+  body.mobile-library .bs-formula-body{font-size:0.9rem}
+  body.mobile-library .bs-sb-row{font-size:0.86rem}
+
   /* ── Board South sub-tabs (Leaderboard / Vote) ── */
   .bs-subtabs{display:flex;gap:0.4rem;margin:0.6rem 0 1rem 0;justify-content:center}
   .bs-subtab{
@@ -8486,7 +8525,7 @@ function _computeMainEloForYear(year) {
 // pipeline used by the leaderboard, capturing each participant's per-play
 // delta. Returned as a Map keyed by `${bggId}|${date}|${idx}` so callers can
 // look up the deltas for any specific play they hold.
-function _computePerPlayElo() {
+function _computePerPlayElo(mode) {
   const yearStart = _yearStartCutoff();
   const flat = [];
   for (const bggId in PLAY_HISTORY) {
@@ -8494,6 +8533,7 @@ function _computePerPlayElo() {
     arr.forEach((p, idx) => {
       if (!p || !p.date || !Array.isArray(p.sc)) return;
       if (p.date < yearStart) return;
+      if (mode === 'south' && !_isBoardSouthPlay(p)) return;
       flat.push({ bggId: Number(bggId), idx, p });
     });
   }
@@ -8886,7 +8926,8 @@ function _renderEloLeaderboardInto(container, mode) {
     <div class="lb-list">${listHtml}</div>
     <div class="lb-explain">
       ${isSouth ? '<b>Board South League:</b> A separate Elo using only plays where the location is "Board South". Independent of the main leaderboard.<br><br>' : ''}<b>How it works:</b> Everyone starts at 1000 on Jan 1. Each play of ${currentYear} replays in date order — winners gain, losers drop, with bigger swings when the underdog wins. Complexity scales points (a win on weight 5 = full value, lighter games = less). Losses scale down with player count, and finishing last costs more than finishing mid-pack. <b>PROV</b> means fewer than 5 plays this year (points move faster). The leaderboard resets every January 1st.
-    </div>`;
+    </div>
+    ${isSouth ? _boardSouthPlaysSectionHtml() : ''}`;
 
   container.querySelectorAll('[data-visit-player]').forEach(el => {
     el.addEventListener('click', () => {
@@ -8902,6 +8943,172 @@ function showLeaderboardView() {
   const container = document.getElementById('leaderboard-view');
   _renderEloLeaderboardInto(container, 'main');
   window.scrollTo(0, 0);
+}
+
+// ── Board South: scoring-formula legend + recent-plays list ──
+// Rendered beneath the Board South leaderboard. The legend documents the exact
+// Elo math (so the +/- numbers are explainable), and the plays list shows each
+// game's scoreboard with every player's point swing for that play.
+
+function _boardSouthFormulaHtml(year) {
+  return `<div class="bs-formula">
+    <div class="bs-formula-head">📐 How the +/- is calculated</div>
+    <div class="bs-formula-body">
+      <p>Everyone resets to <b>R&nbsp;=&nbsp;1000</b> on January&nbsp;1 (${year}). Each play is scored as a mini round-robin: you're compared head-to-head with every other ranked player at the table, and your <b>+/-</b> for that play is the sum of all those pairings.</p>
+      <div class="bs-formula-eq">
+        <div>Expected result against one opponent:</div>
+        <code>E = 1 / ( 1 + 10^((R<sub>opp</sub> − R<sub>you</sub>) / 400) )</code>
+        <div>Points earned from that pairing:</div>
+        <code>Δ = K · w · (S − E)&nbsp;&nbsp;— a loss is also × L</code>
+      </div>
+      <ul class="bs-formula-legend">
+        <li><b>R</b> — your current rating. Everyone starts at <b>1000</b> and the board resets every January&nbsp;1.</li>
+        <li><b>E</b> — your <i>expected</i> score (between 0 and 1): how likely the rating gap said you were to beat that opponent. A 400-point lead ≈ a 91% expectation.</li>
+        <li><b>S</b> — the <i>actual</i> result of the pairing: <b>1</b> if you finished ahead of them, <b>0</b> if behind. A tie between two players cancels — that pairing scores nothing for either.</li>
+        <li><b>K</b> — the step size (how fast your rating moves): <b>48</b> while you have fewer than 5 games this year (shown as <b>PROV</b>), then <b>32</b> afterwards.</li>
+        <li><b>w</b> — game weight = BGG complexity ÷ 5. A heavy weight-5 game pays full value (×1.0); a light weight-2.5 filler pays half (×0.5). Unknown weight defaults to 2.5.</li>
+        <li><b>N</b> — the number of ranked players in the play.</li>
+        <li><b>L</b> — loss softener = 3 ÷ N, capped between 0.7 and 1.0, applied <i>only</i> to points you lose — so finishing last in a big group costs less per opponent than losing a one-on-one.</li>
+      </ul>
+      <p class="bs-formula-tldr"><b>In plain words:</b> beating someone you were already expected to beat earns only a little; upsetting a higher-rated player earns a lot. Heavier games count for more than fillers, a newcomer's rating swings faster for their first five games, and one rough night in a crowded game won't sink you.</p>
+    </div>
+  </div>`;
+}
+
+// Open a game's modal from the Board South plays list (inline onclick so it
+// survives the innerHTML copy that showBoardSouthView() does).
+window.__bsOpenGame = function(bggId) {
+  const g = (typeof findGameByBggId === 'function') ? findGameByBggId(Number(bggId)) : null;
+  if (g && typeof openModal === 'function') { try { openModal(g); } catch (_) {} }
+};
+
+// Expand/collapse the "rest" of the Board South plays list.
+window.__bsTogglePlays = function(btn) {
+  const wrap = document.getElementById('bs-plays-list');
+  if (!wrap) return;
+  const expanded = wrap.classList.toggle('expanded');
+  btn.textContent = expanded
+    ? 'Show fewer plays'
+    : ('Show all ' + (btn.dataset.total || '') + ' plays');
+};
+
+function _boardSouthPlaysSectionHtml() {
+  const currentYear = new Date().getFullYear();
+  const yearStart = _yearStartCutoff();
+  const INITIAL = 6;
+
+  let perPlay;
+  try { perPlay = _computePerPlayElo('south'); } catch (_) { perPlay = new Map(); }
+
+  const esc = (s) => String(s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+
+  // Collect this year's Board South plays, keeping the PLAY_HISTORY array index
+  // so the per-play delta key (`${bggId}|${date}|${idx}`) lines up.
+  const plays = [];
+  for (const bggId in PLAY_HISTORY) {
+    PLAY_HISTORY[bggId].forEach((p, idx) => {
+      if (!p || !p.date || !Array.isArray(p.sc)) return;
+      if (p.date < yearStart) return;
+      if (!_isBoardSouthPlay(p)) return;
+      plays.push({ bggId: Number(bggId), idx, p });
+    });
+  }
+  // Newest first (full timestamp when available).
+  plays.sort((a, b) => {
+    const at = a.p.t || a.p.date, bt = b.p.t || b.p.date;
+    if (at !== bt) return bt.localeCompare(at);
+    if (a.bggId !== b.bggId) return b.bggId - a.bggId;
+    return b.idx - a.idx;
+  });
+
+  const formula = _boardSouthFormulaHtml(currentYear);
+
+  if (plays.length === 0) {
+    return `<div class="bs-plays-section">
+      ${formula}
+      <div class="bs-plays-head">🎲 Board South Plays · ${currentYear}</div>
+      <div class="lb-empty">No Board South plays recorded yet this year.</div>
+    </div>`;
+  }
+
+  const rowsHtml = plays.map((entry, i) => {
+    const { bggId, idx, p } = entry;
+    const game = findGameByBggId(bggId);
+    const name = game ? game.name : ('Game #' + bggId);
+    const deltas = perPlay.get(`${bggId}|${p.date}|${idx}`) || null;
+
+    // Order the scoreboard by computed rank (so lower-score-wins games still
+    // list the winner first); fall back to win-flag then original order.
+    const ranks = _leaderboardRanksForPlay(p.sc, bggId) || [];
+    const rankByName = {};
+    for (const r of ranks) {
+      const m = NAME_MAP[r.player] || r.player;
+      if (rankByName[m] == null || r.rank < rankByName[m]) rankByName[m] = r.rank;
+    }
+    const indexed = p.sc.map((s, k) => ({ s, k, rank: rankByName[NAME_MAP[s.n] || s.n] }));
+    indexed.sort((a, b) => {
+      if (a.rank != null && b.rank != null && a.rank !== b.rank) return a.rank - b.rank;
+      const aw = !!a.s.w, bw = !!b.s.w;
+      if (aw !== bw) return aw ? -1 : 1;
+      return a.k - b.k;
+    });
+
+    const sb = indexed.map(({ s }) => {
+      const canon = NAME_MAP[s.n] || s.n;
+      const cls = ['bs-sb-name'];
+      if (s.w) cls.push('winner');
+      const role = s.r ? ` <span class="bs-sb-role">(${esc(s.r)})</span>` : '';
+      const score = (s.s != null && s.s !== '') ? esc(s.s) : '—';
+      let dHtml = '<span class="bs-sb-delta"></span>';
+      if (deltas && Object.prototype.hasOwnProperty.call(deltas, canon)) {
+        const d = deltas[canon];
+        const c = d > 0 ? 'pos' : (d < 0 ? 'neg' : '');
+        const sign = d > 0 ? '+' : '';
+        dHtml = `<span class="bs-sb-delta ${c}">${sign}${d.toFixed(1)}</span>`;
+      }
+      return `<div class="bs-sb-row">
+        <span class="${cls.join(' ')}">${esc(canon)}${role}</span>
+        <span class="bs-sb-score">${score}</span>
+        ${dHtml}
+      </div>`;
+    }).join('');
+
+    const metaBits = [_fmtDateShort(p.date)];
+    if (p.b) metaBits.push(esc(p.b));
+    if (p.l && p.l !== 'Board South') metaBits.push(esc(p.l));
+    metaBits.push(`${p.sc.length} player${p.sc.length !== 1 ? 's' : ''}`);
+
+    const localCover = bggId > 0 ? `images/${bggId}.jpg` : '';
+    const fallback = ((game && game.urlImage) || '').replace(/'/g, "\\'");
+    const cover = (localCover || fallback)
+      ? `<img class="bs-play-cover" src="${localCover || fallback}" alt="" loading="lazy" onerror="window.__lpmImgFallback(this, '${fallback}')">`
+      : '<div class="bs-play-cover"></div>';
+
+    const extraCls = i >= INITIAL ? ' extra' : '';
+    return `<div class="bs-play-row${extraCls}" onclick="window.__bsOpenGame(${bggId})">
+      <div class="bs-play-top">
+        ${cover}
+        <div class="bs-play-info">
+          <div class="bs-play-name">${esc(name)}</div>
+          <div class="bs-play-meta">${metaBits.join(' · ')}</div>
+        </div>
+      </div>
+      <div class="bs-scoreboard">${sb}</div>
+    </div>`;
+  }).join('');
+
+  const moreBtn = plays.length > INITIAL
+    ? `<button class="bs-plays-more" data-total="${plays.length}" onclick="window.__bsTogglePlays(this)">Show all ${plays.length} plays</button>`
+    : '';
+
+  return `<div class="bs-plays-section">
+    ${formula}
+    <div class="bs-plays-head">🎲 Board South Plays · ${currentYear}</div>
+    <div class="bs-plays-list" id="bs-plays-list">${rowsHtml}</div>
+    ${moreBtn}
+  </div>`;
 }
 
 function showBoardSouthView() {
