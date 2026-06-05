@@ -8537,14 +8537,17 @@ function _computePerPlayElo(mode) {
       flat.push({ bggId: Number(bggId), idx, p });
     });
   }
-  // Same sort order as _computeEloLeaderboard: full timestamp when available,
-  // then bggId / array index as a stable tie-break.
+  // Replay oldest→newest — the exact reverse of the newest-first order the
+  // plays lists render with, so each play's +/- deltas line up with where it
+  // sits in the displayed list. Same-timestamp plays (one BGStats batch) can't
+  // be separated by time, so we mirror the display tie-break in reverse:
+  // descending bggId, then descending array index.
   flat.sort((a, b) => {
     const at = a.p.t || a.p.date;
     const bt = b.p.t || b.p.date;
     if (at !== bt) return at.localeCompare(bt);
-    if (a.bggId !== b.bggId) return a.bggId - b.bggId;
-    return a.idx - b.idx;
+    if (a.bggId !== b.bggId) return b.bggId - a.bggId;
+    return b.idx - a.idx;
   });
 
   const ratings = {}, counts = {};
@@ -8629,16 +8632,24 @@ function _computeEloLeaderboard(mode) {
   const yearStart = _yearStartCutoff();
   const flat = [];
   for (const bggId in PLAY_HISTORY) {
-    for (const p of PLAY_HISTORY[bggId]) {
-      if (!p || !p.date || !Array.isArray(p.sc)) continue;
-      if (p.date < yearStart) continue;
-      if (mode === 'south' && !_isBoardSouthPlay(p)) continue;
-      flat.push({ bggId: Number(bggId), date: p.date, t: p.t || p.date, sc: p.sc });
-    }
+    PLAY_HISTORY[bggId].forEach((p, idx) => {
+      if (!p || !p.date || !Array.isArray(p.sc)) return;
+      if (p.date < yearStart) return;
+      if (mode === 'south' && !_isBoardSouthPlay(p)) return;
+      flat.push({ bggId: Number(bggId), idx, date: p.date, t: p.t || p.date, sc: p.sc });
+    });
   }
-  // Sort by full timestamp (when present from BGStats import) so plays on
-  // the same calendar day keep their actual chronological order.
-  flat.sort((a, b) => a.t.localeCompare(b.t));
+  // Replay oldest→newest. Full timestamp first (from the BGStats import) so
+  // same-day plays keep chronological order. Plays from a single batch upload
+  // share an identical timestamp, so we break that tie as the exact reverse of
+  // the newest-first plays list (descending bggId, then descending array
+  // index) — keeping the leaderboard, the per-play deltas and the displayed
+  // play order all in agreement.
+  flat.sort((a, b) => {
+    if (a.t !== b.t) return a.t.localeCompare(b.t);
+    if (a.bggId !== b.bggId) return b.bggId - a.bggId;
+    return b.idx - a.idx;
+  });
 
   const ratings = {};
   const plays = {};
