@@ -478,6 +478,50 @@
   }
   .play-show-more:hover{opacity:0.8;background:rgba(255,255,255,0.08)}
 
+  /* ── Game Notes (shared) ── */
+  .notes-section{margin-top:1.5rem;border-top:1px solid rgba(255,255,255,0.08);padding-top:1.2rem}
+  .notes-header{display:flex;align-items:baseline;justify-content:space-between;gap:0.5rem;margin-bottom:0.8rem}
+  .notes-title{font-size:1rem;font-weight:700;color:var(--accent)}
+  .notes-sub{font-size:0.62rem;opacity:0.4;text-transform:uppercase;letter-spacing:0.05em}
+  .notes-empty{font-size:0.8rem;opacity:0.45;font-style:italic;margin-bottom:0.8rem}
+  .notes-login-hint{font-size:0.75rem;opacity:0.4;font-style:italic}
+  .notes-list{display:flex;flex-direction:column;gap:0.5rem;margin-bottom:0.9rem}
+  .note-entry{
+    padding:0.6rem 0.75rem;border-radius:10px;
+    background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);
+  }
+  .note-text{
+    font-size:0.85rem;line-height:1.45;color:var(--text);
+    white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;
+  }
+  .note-meta{display:flex;align-items:center;gap:0.5rem;margin-top:0.45rem;font-size:0.66rem;opacity:0.6}
+  .note-author{font-weight:600;color:var(--accent);opacity:0.85}
+  .note-date{opacity:0.7}
+  .note-actions{margin-left:auto;display:flex;gap:0.3rem}
+  .note-btn{
+    background:none;border:none;color:var(--text);opacity:0.45;cursor:pointer;
+    font-family:inherit;font-size:0.66rem;padding:0.1rem 0.3rem;border-radius:5px;transition:all 0.15s;
+  }
+  .note-btn:hover{opacity:0.9;background:rgba(255,255,255,0.08)}
+  .note-del:hover{color:#ef4444}
+  .note-add-wrap{display:flex;flex-direction:column;gap:0.5rem}
+  .note-textarea{
+    width:100%;box-sizing:border-box;resize:vertical;min-height:2.6rem;
+    padding:0.6rem 0.7rem;border-radius:10px;
+    background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+    color:var(--text);font-family:inherit;font-size:0.85rem;line-height:1.4;
+  }
+  .note-textarea:focus{outline:none;border-color:var(--accent)}
+  .note-textarea::placeholder{color:var(--text);opacity:0.35}
+  .note-add-btn{
+    align-self:flex-start;padding:0.45rem 1.1rem;border-radius:8px;border:none;
+    background:var(--accent);color:#1a1a2e;font-weight:600;font-size:0.8rem;
+    cursor:pointer;font-family:inherit;transition:opacity 0.2s;
+  }
+  .note-add-btn:hover{opacity:0.85}
+  .note-add-btn:disabled{opacity:0.5;cursor:default}
+  .note-edit-actions{display:flex;align-items:center;gap:0.5rem;margin-top:0.5rem}
+
   /* ── Player Picker Overlay ── */
   .picker-overlay{
     display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);
@@ -5969,6 +6013,7 @@ function openModal(game) {
       }
       ${game.bggId > 0 ? buildStarRatingHtml(game.bggId) : ''}
       ${playHistoryHtml}
+      ${game.bggId > 0 ? buildNotesHtml(game.bggId) : ''}
     </div>
   `;
   overlay.classList.add('open');
@@ -5985,6 +6030,7 @@ function openModal(game) {
 
   history.pushState({modal: true}, '');
   wireStarRating();
+  wireNotes();
   updateFavButton(game.bggId);
   wireFavButton();
 }
@@ -7825,6 +7871,51 @@ async function saveRating(playerName, bggId, rating) {
 
 function _ratingValue(r){ return typeof r === 'number' ? r : (r && r.value) || 0; }
 
+// ── Per-game shared notes ──
+// Stored in Firebase at /gameNotes/{bggId}/{noteId} = {text, author, createdAt, updatedAt}.
+// Loaded once on startup so every browser sees the same shared notes.
+let gameNotesCache = {}; // bggId -> { noteId: {text, author, createdAt, updatedAt} }
+
+async function loadAllNotes() {
+  if (!FIREBASE_DB) return;
+  try {
+    const res = await fetch(`${FIREBASE_DB}/gameNotes.json`);
+    const data = await res.json();
+    // A denied read (locked Firebase rules) returns {error: "..."} — don't let
+    // that object pollute the cache; fall back to empty.
+    gameNotesCache = (data && typeof data === 'object' && !data.error) ? data : {};
+  } catch (e) {
+    console.warn('Failed to load notes from Firebase:', e);
+  }
+}
+
+async function saveNote(bggId, noteId, obj) {
+  if (!gameNotesCache[bggId]) gameNotesCache[bggId] = {};
+  gameNotesCache[bggId][noteId] = obj;
+  if (!FIREBASE_DB) return;
+  try {
+    await fetch(`${FIREBASE_DB}/gameNotes/${bggId}/${encodeURIComponent(noteId)}.json`, {
+      method: 'PUT',
+      body: JSON.stringify(obj)
+    });
+  } catch (e) {
+    console.warn('Failed to save note to Firebase:', e);
+  }
+}
+
+async function deleteNote(bggId, noteId) {
+  if (gameNotesCache[bggId]) {
+    delete gameNotesCache[bggId][noteId];
+    if (Object.keys(gameNotesCache[bggId]).length === 0) delete gameNotesCache[bggId];
+  }
+  if (!FIREBASE_DB) return;
+  try {
+    await fetch(`${FIREBASE_DB}/gameNotes/${bggId}/${encodeURIComponent(noteId)}.json`, { method: 'DELETE' });
+  } catch (e) {
+    console.warn('Failed to delete note from Firebase:', e);
+  }
+}
+
 // ── Imported plays persistence ──
 // Stored in Firebase at /importedPlays/{uuid} = {bggId, date, sc, d?, b?}
 // Merged into the in-memory PLAY_HISTORY on startup so new browsers see them.
@@ -8032,6 +8123,131 @@ function wireStarRating() {
       }
     });
   }
+}
+
+// ── Game Notes (shared, per-game) ──
+function _notesEsc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function buildNotesHtml(bggId) {
+  const player = localStorage.getItem('bgl-player');
+  const obj = gameNotesCache[bggId] || {};
+  const notes = Object.keys(obj)
+    .map(id => ({ id, ...obj[id] }))
+    .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0)); // oldest first
+
+  const fmt = (ts) => {
+    if (!ts) return '';
+    const d = new Date(ts);
+    if (isNaN(d)) return '';
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+  };
+
+  let html = `<div class="notes-section" data-bgg="${bggId}">
+    <div class="notes-header">
+      <span class="notes-title">&#128221; Notes</span>
+      <span class="notes-sub">shared &middot; visible to everyone</span>
+    </div>`;
+
+  if (notes.length === 0) {
+    html += `<div class="notes-empty">No notes yet${player ? ' — jot down a rule you forget or a tip for next time.' : '.'}</div>`;
+  } else {
+    html += `<div class="notes-list">`;
+    for (const n of notes) {
+      const mine = player && n.author === player;
+      const edited = (n.updatedAt && n.createdAt && n.updatedAt !== n.createdAt) ? ' &middot; edited' : '';
+      html += `<div class="note-entry" data-id="${_notesEsc(n.id)}">
+        <div class="note-text">${_notesEsc(n.text || '')}</div>
+        <div class="note-meta">
+          <span class="note-author">${_notesEsc(n.author || 'Someone')}</span>
+          <span class="note-date">${fmt(n.createdAt)}${edited}</span>
+          ${mine ? `<span class="note-actions">
+            <button class="note-btn note-edit" data-id="${_notesEsc(n.id)}">edit</button>
+            <button class="note-btn note-del" data-id="${_notesEsc(n.id)}">delete</button>
+          </span>` : ''}
+        </div>
+      </div>`;
+    }
+    html += `</div>`;
+  }
+
+  if (player) {
+    html += `<div class="note-add-wrap">
+      <textarea class="note-textarea" id="note-input" rows="2" placeholder="Add a note… (rules you forget, house rules, tips for next time)"></textarea>
+      <button class="note-add-btn" id="note-add-btn">Add note</button>
+    </div>`;
+  } else {
+    html += `<div class="notes-login-hint">Pick your name (top-right) to add notes.</div>`;
+  }
+
+  html += `</div>`;
+  return html;
+}
+
+function wireNotes() {
+  const section = document.querySelector('.notes-section');
+  if (!section) return;
+  const bggId = Number(section.dataset.bgg);
+  const player = localStorage.getItem('bgl-player');
+
+  const rerender = () => {
+    const cur = document.querySelector('.notes-section');
+    if (!cur) return;
+    cur.outerHTML = buildNotesHtml(bggId);
+    wireNotes();
+  };
+
+  const addBtn = document.getElementById('note-add-btn');
+  if (addBtn) {
+    addBtn.addEventListener('click', async () => {
+      const ta = document.getElementById('note-input');
+      const text = (ta && ta.value || '').trim();
+      if (!text || !player) return;
+      addBtn.disabled = true;
+      const id = 'n' + Date.now() + Math.random().toString(36).slice(2, 8);
+      const now = Date.now();
+      await saveNote(bggId, id, { text, author: player, createdAt: now, updatedAt: now });
+      rerender();
+    });
+  }
+
+  section.querySelectorAll('.note-del').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('Delete this note?')) return;
+      await deleteNote(bggId, btn.dataset.id);
+      rerender();
+    });
+  });
+
+  section.querySelectorAll('.note-edit').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.id;
+      const entry = btn.closest('.note-entry');
+      if (!entry) return;
+      const existing = (gameNotesCache[bggId] && gameNotesCache[bggId][id]) || {};
+      entry.innerHTML = `
+        <textarea class="note-textarea note-edit-area" rows="2"></textarea>
+        <div class="note-edit-actions">
+          <button class="note-add-btn note-save">Save</button>
+          <button class="note-btn note-cancel">cancel</button>
+        </div>`;
+      const ta = entry.querySelector('.note-edit-area');
+      ta.value = existing.text || '';
+      ta.focus();
+      entry.querySelector('.note-save').addEventListener('click', async () => {
+        const text = (ta.value || '').trim();
+        if (!text) return;
+        await saveNote(bggId, id, {
+          text,
+          author: existing.author || player,
+          createdAt: existing.createdAt || Date.now(),
+          updatedAt: Date.now()
+        });
+        rerender();
+      });
+      entry.querySelector('.note-cancel').addEventListener('click', rerender);
+    });
+  });
 }
 
 // ── Pie Chart Builder ──
@@ -10393,7 +10609,7 @@ if (_sp && NAME_MAP[_sp]) localStorage.setItem('bgl-player', NAME_MAP[_sp]);
 })();
 
 // Load ratings and favorites from Firebase, then show the right view
-Promise.all([loadAllRatings(), loadAllFavorites(), loadImportedGames(), loadImportedPlays(), loadGameImages(), loadBoardSouthVotes(), loadOathswornRanks()]).then(() => {
+Promise.all([loadAllRatings(), loadAllFavorites(), loadImportedGames(), loadImportedPlays(), loadGameImages(), loadBoardSouthVotes(), loadOathswornRanks(), loadAllNotes()]).then(() => {
   if (typeof _updateBoardSouthBtnVisibility === 'function') _updateBoardSouthBtnVisibility();
   const savedPlayer = localStorage.getItem('bgl-player');
   if (savedPlayer) {
