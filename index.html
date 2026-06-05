@@ -8154,14 +8154,14 @@ function buildNotesHtml(bggId) {
   } else {
     html += `<div class="notes-list">`;
     for (const n of notes) {
-      const mine = player && n.author === player;
+      // Anyone with a name picked can edit/delete any note (shared notepad).
       const edited = (n.updatedAt && n.createdAt && n.updatedAt !== n.createdAt) ? ' &middot; edited' : '';
       html += `<div class="note-entry" data-id="${_notesEsc(n.id)}">
         <div class="note-text">${_notesEsc(n.text || '')}</div>
         <div class="note-meta">
           <span class="note-author">${_notesEsc(n.author || 'Someone')}</span>
           <span class="note-date">${fmt(n.createdAt)}${edited}</span>
-          ${mine ? `<span class="note-actions">
+          ${player ? `<span class="note-actions">
             <button class="note-btn note-edit" data-id="${_notesEsc(n.id)}">edit</button>
             <button class="note-btn note-del" data-id="${_notesEsc(n.id)}">delete</button>
           </span>` : ''}
