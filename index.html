@@ -457,7 +457,46 @@
   .cp-bar{height:100%;border-radius:5px;background:linear-gradient(90deg,#e2b04a,#f0c668);transition:width 0.5s ease}
   .cp-foot{display:flex;align-items:center;justify-content:space-between;gap:0.6rem;margin-top:0.4rem}
   .cp-reached{font-size:0.72rem;font-weight:600;color:var(--accent)}
-  .cp-pct{font-size:0.65rem;opacity:0.5}
+  .cp-pct{font-size:0.65rem;opacity:0.5;flex-shrink:0}
+  /* ── Sky Team airport checklist ── */
+  .sky-airports{
+    margin-bottom:1.1rem;padding:0.8rem 0.9rem;border-radius:12px;
+    background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.07);
+  }
+  .st-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem}
+  .st-title{font-size:0.85rem;font-weight:700;color:var(--accent);letter-spacing:0.02em}
+  .st-count{
+    font-size:0.72rem;font-weight:700;padding:0.15rem 0.55rem;border-radius:20px;
+    background:rgba(226,176,74,0.15);color:var(--accent);flex-shrink:0;
+  }
+  .st-row{display:flex;align-items:flex-start;gap:0.55rem;margin-bottom:0.5rem}
+  .st-row:last-of-type{margin-bottom:0}
+  .st-difflabel{
+    flex:0 0 54px;font-size:0.62rem;font-weight:800;text-transform:uppercase;
+    letter-spacing:0.05em;color:var(--d);padding-top:0.3rem;
+  }
+  .st-pills{display:flex;flex-wrap:wrap;gap:0.3rem;flex:1;min-width:0}
+  .st-pill{
+    display:inline-flex;align-items:center;gap:0.18rem;
+    font-size:0.7rem;font-weight:700;letter-spacing:0.02em;
+    padding:0.2rem 0.5rem;border-radius:20px;cursor:default;
+    border:1px solid color-mix(in srgb, var(--d) 50%, transparent);
+    color:color-mix(in srgb, var(--d) 75%, #f0e6d3);
+    background:color-mix(in srgb, var(--d) 10%, transparent);
+    opacity:0.55;transition:transform 0.12s ease,opacity 0.12s ease;
+  }
+  .st-pill.done{
+    opacity:1;color:#15151f;background:var(--d);border-color:var(--d);
+    box-shadow:0 1px 7px color-mix(in srgb, var(--d) 45%, transparent);
+  }
+  .st-pill.exp{border-style:dashed}
+  .st-pill:hover{transform:translateY(-1px)}
+  .st-tick{font-size:0.74rem;font-weight:900;line-height:1}
+  .st-legend{font-size:0.6rem;opacity:0.45;margin-top:0.55rem}
+  .st-exp-dash{
+    display:inline-block;width:0.8rem;vertical-align:middle;margin-right:0.25rem;
+    border-top:1.5px dashed rgba(240,230,211,0.6);
+  }
   .play-entry{
     padding:0.6rem 0.7rem;border-radius:8px;margin-bottom:0.4rem;
     background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);
@@ -5558,21 +5597,28 @@ function isNoResultGame(bggId) {
 // Campaign / legacy games played across a fixed number of stages. The current
 // stage is parsed from each play's board/scenario tag (the `b` field).
 // Two tag formats are supported:
-//   'number'       → single number, e.g. "Year 1"  (progress = highest reached)
-//   'folder-clock' → "folder-clock", e.g. "2-1"    (index = (folder-1)*perFolder + clock)
-// `wonOnly` counts only plays that were won (for win-gated campaigns).
+//   'number'       → single number, e.g. "Year 1" / "Mission 6" / "Chapter 12"
+//   'folder-clock' → "folder-clock", e.g. "2-1"  (index = (folder-1)*perFolder + clock)
+// `wonOnly` counts only plays that were won (win-gated campaigns).
+// `reached` controls the line under the bar: 'stage' = computed stage,
+//   'tag' = the raw furthest tag (e.g. the full chapter name). `reachedPrefix`
+//   is the lead-in word for that line.
 //   456440 = Cozy Stickerville (10 in-game years)
 //   440540 = Take Time (10 folders × 4 clocks = 40 missions, win-gated)
+//   413246 = Bomb Busters (66 missions, win-gated)
+//   251661 = Oathsworn (21 chapters)
 const CAMPAIGN_PROGRESS = {
-  456440: { total: 10, label: 'Year' },
-  440540: { total: 40, perFolder: 4, format: 'folder-clock', wonOnly: true },
+  456440: { total: 10, label: 'Year', format: 'number' },
+  440540: { total: 40, perFolder: 4, format: 'folder-clock', wonOnly: true, reachedPrefix: 'Furthest won' },
+  413246: { total: 66, label: 'Mission', format: 'number', wonOnly: true },
+  251661: { total: 21, label: 'Chapter', format: 'number', reached: 'tag', reachedPrefix: 'Latest' },
 };
 function campaignProgress(bggId, plays) {
   const cfg = CAMPAIGN_PROGRESS[Number(bggId)];
   if (!cfg || !plays || !plays.length) return null;
   const fmt = cfg.format || 'number';
   const perFolder = cfg.perFolder || 1;
-  let current = 0;
+  let current = 0, bestTag = '';
   for (const p of plays) {
     if (cfg.wonOnly && !(p.sc || []).some(s => s.w)) continue;
     let idx = 0;
@@ -5580,10 +5626,10 @@ function campaignProgress(bggId, plays) {
       const m = String(p.b || '').match(/(\d+)\s*-\s*(\d+)/);
       if (m) idx = (parseInt(m[1], 10) - 1) * perFolder + parseInt(m[2], 10);
     } else {
-      const m = String(p.b || '').match(/\d+/);
-      if (m) idx = parseInt(m[0], 10);
+      const m = String(p.b || '').match(/\d+(?:\.\d+)?/);
+      if (m) idx = parseFloat(m[0]);
     }
-    if (idx > current) current = idx;
+    if (idx > current) { current = idx; bestTag = String(p.b || ''); }
   }
   if (current < 1) return null;
   const capped = Math.min(current, cfg.total);
@@ -5593,11 +5639,118 @@ function campaignProgress(bggId, plays) {
     const folder = Math.ceil(capped / perFolder);
     const clock = capped - (folder - 1) * perFolder;
     stageText = `${capped} of ${cfg.total}`;
-    reachedText = `Folder ${folder}, clock ${clock}`;
+    reachedText = `${cfg.reachedPrefix || 'Furthest'}: Folder ${folder}, clock ${clock}`;
   } else {
     stageText = `${cfg.label || 'Stage'} ${capped} of ${cfg.total}`;
+    if (cfg.reached === 'tag' && bestTag) reachedText = `${cfg.reachedPrefix || 'Latest'}: ${bestTag}`;
+    else if (cfg.reached === 'stage') reachedText = `${cfg.reachedPrefix || 'Furthest'}: ${cfg.label || ''} ${capped}`.trim();
   }
   return { current: capped, total: cfg.total, pct, stageText, reachedText };
+}
+
+// ── Sky Team airport checklist ──
+// Sky Team isn't a linear campaign — instead every play is a landing at a
+// specific airport at a specific difficulty. We show all airports from the
+// official flight log, tinted by difficulty, with a tick on the ones landed
+// (a play that was *won*). Difficulty colours: Easy/green, Medium/yellow,
+// Hard/red, Extreme/(black→violet so it stays visible on the dark UI).
+const SKY_TEAM_BGGID = 373106;
+const SKY_TEAM_DIFFS = {
+  easy:    { label: 'Easy',    color: '#4caf50' },
+  medium:  { label: 'Medium',  color: '#e2b04a' },
+  hard:    { label: 'Hard',    color: '#e0613a' },
+  extreme: { label: 'Extreme', color: '#9b6bff' },
+};
+const SKY_TEAM_AIRPORTS = [
+  // Base game
+  { code: 'YUL', name: 'Montréal-Trudeau',       diff: 'easy' },
+  { code: 'HND', name: 'Haneda',                 diff: 'easy' },
+  { code: 'ATL', name: 'Hartsfield-Jackson',     diff: 'easy' },
+  { code: 'LHR', name: 'Heathrow',               diff: 'easy' },
+  { code: 'OSL', name: 'Gardermoen',             diff: 'easy' },
+  { code: 'PRG', name: 'Václav Havel',           diff: 'easy' },
+  { code: 'LHR', name: 'Heathrow',               diff: 'medium' },
+  { code: 'GIG', name: 'Galeão',                 diff: 'medium' },
+  { code: 'PRG', name: 'Václav Havel',           diff: 'medium' },
+  { code: 'TGU', name: 'Toncontín',              diff: 'medium' },
+  { code: 'KEF', name: 'Keflavík',               diff: 'medium' },
+  { code: 'KUL', name: 'Kuala Lumpur',           diff: 'medium' },
+  { code: 'ATL', name: 'Hartsfield-Jackson',     diff: 'medium' },
+  { code: 'PBH', name: 'Paro',                   diff: 'hard' },
+  { code: 'GIG', name: 'Galeão',                 diff: 'hard' },
+  { code: 'TGU', name: 'Toncontín',              diff: 'hard' },
+  { code: 'HND', name: 'Haneda',                 diff: 'hard' },
+  { code: 'OSL', name: 'Gardermoen',             diff: 'hard' },
+  { code: 'KUL', name: 'Kuala Lumpur',           diff: 'extreme' },
+  { code: 'KEF', name: 'Keflavík',               diff: 'extreme' },
+  { code: 'PBH', name: 'Paro',                   diff: 'extreme' },
+  // Expansion
+  { code: 'CDG', name: 'Paris–Charles de Gaulle', diff: 'medium',  exp: true },
+  { code: 'LGA', name: 'LaGuardia',              diff: 'medium',  exp: true },
+  { code: 'DUS', name: 'Düsseldorf',             diff: 'medium',  exp: true },
+  { code: 'TER', name: 'Lajes, Açores',          diff: 'medium',  exp: true },
+  { code: 'HND', name: 'Haneda (Rebalanced)',    diff: 'hard',    exp: true },
+  { code: 'CDG', name: 'Paris–Charles de Gaulle', diff: 'hard',    exp: true },
+  { code: 'DUS', name: 'Düsseldorf',             diff: 'extreme', exp: true },
+  { code: 'TER', name: 'Lajes, Açores',          diff: 'extreme', exp: true },
+  { code: 'LGA', name: 'LaGuardia',              diff: 'extreme', exp: true },
+];
+function _skyTeamParse(b) {
+  if (!b) return null;
+  const parts = String(b).split(/[／/]/).map(s => s.trim()).filter(Boolean);
+  let diff = null, airport = null;
+  for (const part of parts) {
+    const low = part.toLowerCase();
+    if (SKY_TEAM_DIFFS[low]) diff = low;
+    else airport = part;
+  }
+  if (!airport || !diff) return null;
+  const code = airport.split(/[-–—]/)[0].trim().toUpperCase();
+  return { diff, code };
+}
+function _skyTeamCompleted(plays) {
+  const done = new Set();
+  for (const p of (plays || [])) {
+    if (!(p.sc || []).some(s => s.w)) continue; // only successful landings count
+    const parsed = _skyTeamParse(p.b);
+    if (parsed) done.add(parsed.diff + '|' + parsed.code);
+  }
+  return done;
+}
+function buildSkyTeamHtml(plays) {
+  const done = _skyTeamCompleted(plays);
+  const total = SKY_TEAM_AIRPORTS.length;
+  let doneCount = 0;
+  const groups = { easy: [], medium: [], hard: [], extreme: [] };
+  for (const a of SKY_TEAM_AIRPORTS) {
+    const isDone = done.has(a.diff + '|' + a.code.toUpperCase());
+    if (isDone) doneCount++;
+    groups[a.diff].push({ ...a, done: isDone });
+  }
+  const rows = ['easy', 'medium', 'hard', 'extreme'].map(diff => {
+    const list = groups[diff];
+    if (!list.length) return '';
+    const meta = SKY_TEAM_DIFFS[diff];
+    const pills = list.map(a => {
+      const cls = 'st-pill' + (a.done ? ' done' : '') + (a.exp ? ' exp' : '');
+      const tick = a.done ? '<span class="st-tick">&#10003;</span>' : '';
+      const title = `${a.code} · ${a.name}${a.exp ? ' (expansion)' : ''}${a.done ? ' — landed' : ''}`;
+      return `<span class="${cls}" style="--d:${meta.color}" title="${title}">${tick}${a.code}</span>`;
+    }).join('');
+    return `<div class="st-row">
+        <span class="st-difflabel" style="--d:${meta.color}">${meta.label}</span>
+        <div class="st-pills">${pills}</div>
+      </div>`;
+  }).join('');
+  return `
+      <div class="sky-airports">
+        <div class="st-head">
+          <span class="st-title">&#9992;&#65039; Airports Landed</span>
+          <span class="st-count">${doneCount} / ${total}</span>
+        </div>
+        ${rows}
+        <div class="st-legend"><span class="st-exp-dash"></span> dashed = expansion &middot; hover for full name</div>
+      </div>`;
 }
 function isCoop(game) {
   return game.categories.includes('Co-op');
@@ -6041,10 +6194,13 @@ function openModal(game) {
           </div>
           <div class="cp-bar-wrap"><div class="cp-bar" style="width:${cp.pct}%"></div></div>
           <div class="cp-foot">
-            ${cp.reachedText ? `<span class="cp-reached">Furthest won: ${cp.reachedText}</span>` : '<span></span>'}
+            ${cp.reachedText ? `<span class="cp-reached">${cp.reachedText}</span>` : '<span></span>'}
             <span class="cp-pct">${cp.pct}% complete</span>
           </div>
         </div>` : '';
+
+    // Sky Team airport checklist (no percentage — a landed-airports board).
+    const skyTeamHtml = (Number(game.bggId) === SKY_TEAM_BGGID) ? buildSkyTeamHtml(plays) : '';
 
     const visibleHtml = visiblePlays.map(renderPlay).join('');
     const hiddenHtml = hiddenPlays.length > 0
@@ -6065,6 +6221,7 @@ function openModal(game) {
           <div class="ph-stat"><span class="ph-stat-val">${fmtDate(lastPlayed)}</span><span class="ph-stat-label">Last Played</span></div>
         </div>
         ${campaignHtml}
+        ${skyTeamHtml}
         ${visibleHtml}
         ${hiddenHtml}
       </div>`;
