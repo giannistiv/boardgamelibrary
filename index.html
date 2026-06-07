@@ -1030,6 +1030,7 @@
   }
   .lpm-row-result.win{color:#22c55e;background:rgba(34,197,94,0.12)}
   .lpm-row-result.loss{color:#f87171;background:rgba(248,113,113,0.12)}
+  .lpm-row-result.neutral{color:#8a8f98;background:rgba(138,143,152,0.12)}
   .lpm-row-tag{
     font-size:0.6rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;
     padding:0.1rem 0.35rem;border-radius:4px;background:rgba(255,255,255,0.08);
@@ -5534,6 +5535,14 @@ function difficultyBucket(complexity) {
   if (complexity <= 4.1) return 'hard';
   return 'expert';
 }
+// Games that have no winners or losers at all (purely cooperative/zen builders
+// with no win condition). Imported games carry no categories, so coop can't be
+// auto-detected — list these explicitly so plays aren't scored as losses.
+//   456440 = Cozy Stickerville
+const NO_RESULT_GAMES = new Set([456440]);
+function isNoResultGame(bggId) {
+  return NO_RESULT_GAMES.has(Number(bggId));
+}
 function isCoop(game) {
   return game.categories.includes('Co-op');
 }
@@ -5926,6 +5935,7 @@ function openModal(game) {
   // Play History
   let playHistoryHtml = '';
   const plays = PLAY_HISTORY[game.bggId];
+  const noResultGame = isNoResultGame(game.bggId);
   if (plays && plays.length > 0) {
     // Compute stats
     const totalPlays = plays.length;
@@ -5956,7 +5966,7 @@ function openModal(game) {
         return `<span class="play-score${cls}"><span class="play-player"><span class="play-player-name">${trophy}${s.n}${score}</span>${roleHtml}</span></span>`;
       }).join('');
       const boardHtml = play.b ? `<div class="play-board">&#9876; ${play.b}</div>` : '';
-      const noWinnerHtml = !hasWinner ? '<div class="play-no-winner">&#127866; The game won</div>' : '';
+      const noWinnerHtml = (!hasWinner && !noResultGame) ? '<div class="play-no-winner">&#127866; The game won</div>' : '';
       const durHtml = play.d ? `<span class="play-duration">${play.d} min</span>` : '';
       return `<div class="play-entry">
         <div class="play-entry-top"><span class="play-date">${fmtDate(play.date)}</span>${durHtml}</div>
@@ -5979,8 +5989,8 @@ function openModal(game) {
         </div>
         <div class="play-history-stats">
           <div class="ph-stat"><span class="ph-stat-val">${totalPlays}</span><span class="ph-stat-label">Plays</span></div>
-          <div class="ph-stat"><span class="ph-stat-val">${wins.length}</span><span class="ph-stat-label">Wins</span></div>
-          <div class="ph-stat"><span class="ph-stat-val">${winRate}%</span><span class="ph-stat-label">Win Rate</span></div>
+          <div class="ph-stat"><span class="ph-stat-val">${noResultGame ? '&mdash;' : wins.length}</span><span class="ph-stat-label">Wins</span></div>
+          <div class="ph-stat"><span class="ph-stat-val">${noResultGame ? '&mdash;' : winRate + '%'}</span><span class="ph-stat-label">Win Rate</span></div>
           <div class="ph-stat"><span class="ph-stat-val">${fmtDate(lastPlayed)}</span><span class="ph-stat-label">Last Played</span></div>
         </div>
         ${visibleHtml}
@@ -6516,7 +6526,7 @@ function computeAchievements(playerName) {
 
     if (meWon) totalWins++;
     if (isCoop && meWon) coopWins++;
-    if (isCoop && !meWon) mark('tragic-hero', p.date);
+    if (isCoop && !meWon && !isNoResultGame(p.bggId)) mark('tragic-hero', p.date);
 
     if (!perGameWR[p.bggId]) perGameWR[p.bggId] = { plays: 0, wins: 0 };
     perGameWR[p.bggId].plays++;
@@ -6798,12 +6808,17 @@ function _openLatestPlaysModal(playerName, plays) {
       const coverHtml = initialSrc
         ? `<img class="lpm-row-cover" src="${initialSrc}" alt="" loading="lazy" onerror="window.__lpmImgFallback(this, '${fallback}')">`
         : '<div class="lpm-row-cover"></div>';
-      const tagHtml = p.isCoop
-        ? '<span class="lpm-row-tag">Coop</span>'
-        : (p.isSolo ? '<span class="lpm-row-tag">Solo</span>' : '');
-      const resultHtml = p.won
-        ? '<span class="lpm-row-result win">WIN</span>'
-        : '<span class="lpm-row-result loss">LOSS</span>';
+      const noResult = isNoResultGame(p.game.bggId);
+      const tagHtml = noResult
+        ? ''
+        : (p.isCoop
+            ? '<span class="lpm-row-tag">Coop</span>'
+            : (p.isSolo ? '<span class="lpm-row-tag">Solo</span>' : ''));
+      const resultHtml = noResult
+        ? '<span class="lpm-row-result neutral">PLAYED</span>'
+        : (p.won
+            ? '<span class="lpm-row-result win">WIN</span>'
+            : '<span class="lpm-row-result loss">LOSS</span>');
       const metaBits = [fmt(p.date)];
       if (p.location) metaBits.push(esc(p.location));
       if (p.board) metaBits.push(esc(p.board));
@@ -7452,7 +7467,9 @@ function showStatsView(playerName, visiting) {
     return p.allScores.every(s => !!s.w === first);
   });
   const coopWins = coopPlays.filter(p => p.won).length;
-  const winRate = totalPlays > 0 ? Math.round(totalWins / totalPlays * 100) : 0;
+  // Win rate ignores no-result games (no win/loss to score).
+  const decisivePlays = recentPlays.filter(p => !isNoResultGame(p.bggId)).length;
+  const winRate = decisivePlays > 0 ? Math.round(totalWins / decisivePlays * 100) : 0;
   const uniqueGames = Object.keys(gameStats).length;
   const uniquePlayers = (() => {
     const set = new Set();
@@ -7478,10 +7495,12 @@ function showStatsView(playerName, visiting) {
   const latestPlayRowHtml = (p) => {
     const imgSrc = p.game.bggId > 0 ? `images/${p.game.bggId}.jpg` : '';
     // "No human winner" almost always means coop/solo loss (the game won),
-    // so render LOSS instead of a dash.
-    const result = p.won
-      ? '<span class="stats-game-wr" style="color:#22c55e">WIN</span>'
-      : '<span class="stats-game-wr" style="color:#f87171">LOSS</span>';
+    // so render LOSS instead of a dash — unless the game has no win/loss at all.
+    const result = isNoResultGame(p.bggId)
+      ? '<span class="stats-game-wr" style="color:#8a8f98">PLAYED</span>'
+      : (p.won
+          ? '<span class="stats-game-wr" style="color:#22c55e">WIN</span>'
+          : '<span class="stats-game-wr" style="color:#f87171">LOSS</span>');
     const scoreTxt = p.score ? ` &middot; ${p.score} pts` : '';
     const roleTxt = p.role ? ` &middot; ${p.role}` : '';
     return `<div class="stats-game-row" data-bgg-id="${p.game.bggId}">
