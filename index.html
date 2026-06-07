@@ -446,6 +446,16 @@
   .ph-stat{display:flex;flex-direction:column;align-items:center;gap:0.15rem}
   .ph-stat-val{font-weight:700;font-size:1.1rem;color:var(--accent)}
   .ph-stat-label{font-size:0.6rem;opacity:0.45;text-transform:uppercase;letter-spacing:0.05em}
+  .campaign-progress{
+    margin-bottom:1.1rem;padding:0.75rem 0.9rem;border-radius:10px;
+    background:rgba(226,176,74,0.07);border:1px solid rgba(226,176,74,0.18);
+  }
+  .cp-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem}
+  .cp-title{font-size:0.8rem;font-weight:700;color:var(--accent);letter-spacing:0.02em}
+  .cp-stage{font-size:0.72rem;opacity:0.7;font-weight:600}
+  .cp-bar-wrap{height:10px;background:rgba(255,255,255,0.08);border-radius:5px;overflow:hidden}
+  .cp-bar{height:100%;border-radius:5px;background:linear-gradient(90deg,#e2b04a,#f0c668);transition:width 0.5s ease}
+  .cp-pct{font-size:0.65rem;opacity:0.5;margin-top:0.35rem;text-align:right}
   .play-entry{
     padding:0.6rem 0.7rem;border-radius:8px;margin-bottom:0.4rem;
     background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);
@@ -5543,6 +5553,25 @@ const NO_RESULT_GAMES = new Set([456440]);
 function isNoResultGame(bggId) {
   return NO_RESULT_GAMES.has(Number(bggId));
 }
+// Campaign / legacy games played across a fixed number of stages. The current
+// stage is parsed from each play's board/scenario tag (the `b` field), e.g.
+// "Year 1". Progress = highest stage reached / total.
+//   456440 = Cozy Stickerville (10 in-game years)
+const CAMPAIGN_PROGRESS = {
+  456440: { total: 10, label: 'Year' },
+};
+function campaignProgress(bggId, plays) {
+  const cfg = CAMPAIGN_PROGRESS[Number(bggId)];
+  if (!cfg || !plays || !plays.length) return null;
+  let current = 0;
+  for (const p of plays) {
+    const m = String(p.b || '').match(/\d+/);
+    if (m) current = Math.max(current, parseInt(m[0], 10));
+  }
+  if (current < 1) return null;
+  const capped = Math.min(current, cfg.total);
+  return { current: capped, total: cfg.total, pct: Math.round((capped / cfg.total) * 100), label: cfg.label };
+}
 function isCoop(game) {
   return game.categories.includes('Co-op');
 }
@@ -5975,6 +6004,18 @@ function openModal(game) {
       </div>`;
     };
 
+    // Campaign progress bar (e.g. Cozy Stickerville's 10 in-game years).
+    const cp = campaignProgress(game.bggId, plays);
+    const campaignHtml = cp ? `
+        <div class="campaign-progress">
+          <div class="cp-top">
+            <span class="cp-title">Campaign Progress</span>
+            <span class="cp-stage">${cp.label} ${cp.current} of ${cp.total}</span>
+          </div>
+          <div class="cp-bar-wrap"><div class="cp-bar" style="width:${cp.pct}%"></div></div>
+          <div class="cp-pct">${cp.pct}% complete</div>
+        </div>` : '';
+
     const visibleHtml = visiblePlays.map(renderPlay).join('');
     const hiddenHtml = hiddenPlays.length > 0
       ? `<div class="play-history-hidden" style="display:none">${hiddenPlays.map(renderPlay).join('')}</div>
@@ -5993,6 +6034,7 @@ function openModal(game) {
           <div class="ph-stat"><span class="ph-stat-val">${noResultGame ? '&mdash;' : winRate + '%'}</span><span class="ph-stat-label">Win Rate</span></div>
           <div class="ph-stat"><span class="ph-stat-val">${fmtDate(lastPlayed)}</span><span class="ph-stat-label">Last Played</span></div>
         </div>
+        ${campaignHtml}
         ${visibleHtml}
         ${hiddenHtml}
       </div>`;
