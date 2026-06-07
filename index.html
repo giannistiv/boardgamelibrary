@@ -455,7 +455,9 @@
   .cp-stage{font-size:0.72rem;opacity:0.7;font-weight:600}
   .cp-bar-wrap{height:10px;background:rgba(255,255,255,0.08);border-radius:5px;overflow:hidden}
   .cp-bar{height:100%;border-radius:5px;background:linear-gradient(90deg,#e2b04a,#f0c668);transition:width 0.5s ease}
-  .cp-pct{font-size:0.65rem;opacity:0.5;margin-top:0.35rem;text-align:right}
+  .cp-foot{display:flex;align-items:center;justify-content:space-between;gap:0.6rem;margin-top:0.4rem}
+  .cp-reached{font-size:0.72rem;font-weight:600;color:var(--accent)}
+  .cp-pct{font-size:0.65rem;opacity:0.5}
   .play-entry{
     padding:0.6rem 0.7rem;border-radius:8px;margin-bottom:0.4rem;
     background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);
@@ -5554,23 +5556,48 @@ function isNoResultGame(bggId) {
   return NO_RESULT_GAMES.has(Number(bggId));
 }
 // Campaign / legacy games played across a fixed number of stages. The current
-// stage is parsed from each play's board/scenario tag (the `b` field), e.g.
-// "Year 1". Progress = highest stage reached / total.
+// stage is parsed from each play's board/scenario tag (the `b` field).
+// Two tag formats are supported:
+//   'number'       → single number, e.g. "Year 1"  (progress = highest reached)
+//   'folder-clock' → "folder-clock", e.g. "2-1"    (index = (folder-1)*perFolder + clock)
+// `wonOnly` counts only plays that were won (for win-gated campaigns).
 //   456440 = Cozy Stickerville (10 in-game years)
+//   440540 = Take Time (10 folders × 4 clocks = 40 missions, win-gated)
 const CAMPAIGN_PROGRESS = {
   456440: { total: 10, label: 'Year' },
+  440540: { total: 40, perFolder: 4, format: 'folder-clock', wonOnly: true },
 };
 function campaignProgress(bggId, plays) {
   const cfg = CAMPAIGN_PROGRESS[Number(bggId)];
   if (!cfg || !plays || !plays.length) return null;
+  const fmt = cfg.format || 'number';
+  const perFolder = cfg.perFolder || 1;
   let current = 0;
   for (const p of plays) {
-    const m = String(p.b || '').match(/\d+/);
-    if (m) current = Math.max(current, parseInt(m[0], 10));
+    if (cfg.wonOnly && !(p.sc || []).some(s => s.w)) continue;
+    let idx = 0;
+    if (fmt === 'folder-clock') {
+      const m = String(p.b || '').match(/(\d+)\s*-\s*(\d+)/);
+      if (m) idx = (parseInt(m[1], 10) - 1) * perFolder + parseInt(m[2], 10);
+    } else {
+      const m = String(p.b || '').match(/\d+/);
+      if (m) idx = parseInt(m[0], 10);
+    }
+    if (idx > current) current = idx;
   }
   if (current < 1) return null;
   const capped = Math.min(current, cfg.total);
-  return { current: capped, total: cfg.total, pct: Math.round((capped / cfg.total) * 100), label: cfg.label };
+  const pct = Math.round((capped / cfg.total) * 100);
+  let stageText, reachedText = null;
+  if (fmt === 'folder-clock') {
+    const folder = Math.ceil(capped / perFolder);
+    const clock = capped - (folder - 1) * perFolder;
+    stageText = `${capped} of ${cfg.total}`;
+    reachedText = `Folder ${folder}, clock ${clock}`;
+  } else {
+    stageText = `${cfg.label || 'Stage'} ${capped} of ${cfg.total}`;
+  }
+  return { current: capped, total: cfg.total, pct, stageText, reachedText };
 }
 function isCoop(game) {
   return game.categories.includes('Co-op');
@@ -6010,10 +6037,13 @@ function openModal(game) {
         <div class="campaign-progress">
           <div class="cp-top">
             <span class="cp-title">Campaign Progress</span>
-            <span class="cp-stage">${cp.label} ${cp.current} of ${cp.total}</span>
+            <span class="cp-stage">${cp.stageText}</span>
           </div>
           <div class="cp-bar-wrap"><div class="cp-bar" style="width:${cp.pct}%"></div></div>
-          <div class="cp-pct">${cp.pct}% complete</div>
+          <div class="cp-foot">
+            ${cp.reachedText ? `<span class="cp-reached">Furthest won: ${cp.reachedText}</span>` : '<span></span>'}
+            <span class="cp-pct">${cp.pct}% complete</span>
+          </div>
         </div>` : '';
 
     const visibleHtml = visiblePlays.map(renderPlay).join('');
