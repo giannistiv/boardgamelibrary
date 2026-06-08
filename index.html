@@ -5695,6 +5695,18 @@ const SKY_TEAM_AIRPORTS = [
   { code: 'TER', name: 'Lajes, Açores',          diff: 'extreme', exp: true },
   { code: 'LGA', name: 'LaGuardia',              diff: 'extreme', exp: true },
 ];
+const _ST_DIFF_ORDER = ['easy', 'medium', 'hard', 'extreme'];
+// Easiest difficulty an airport code is offered at (for old plays that only
+// recorded the airport, not the difficulty).
+function _skyTeamEasiestDiff(code) {
+  const up = String(code).toUpperCase();
+  let best = null;
+  for (const a of SKY_TEAM_AIRPORTS) {
+    if (a.code.toUpperCase() !== up) continue;
+    if (best === null || _ST_DIFF_ORDER.indexOf(a.diff) < _ST_DIFF_ORDER.indexOf(best)) best = a.diff;
+  }
+  return best;
+}
 function _skyTeamParse(b) {
   if (!b) return null;
   const parts = String(b).split(/[／/]/).map(s => s.trim()).filter(Boolean);
@@ -5704,16 +5716,23 @@ function _skyTeamParse(b) {
     if (SKY_TEAM_DIFFS[low]) diff = low;
     else airport = part;
   }
-  if (!airport || !diff) return null;
+  if (!airport) return null;
   const code = airport.split(/[-–—]/)[0].trim().toUpperCase();
-  return { diff, code };
+  if (!code) return null;
+  return { diff, code }; // diff may be null for old plays without a difficulty
 }
 function _skyTeamCompleted(plays) {
   const done = new Set();
   for (const p of (plays || [])) {
     if (!(p.sc || []).some(s => s.w)) continue; // only successful landings count
     const parsed = _skyTeamParse(p.b);
-    if (parsed) done.add(parsed.diff + '|' + parsed.code);
+    if (!parsed) continue;
+    // Old plays often omitted the difficulty — default to the easiest tier that
+    // airport is offered at (per the user's rule for past plays). New plays
+    // always specify the difficulty, so this fallback never overrides them.
+    const diff = parsed.diff || _skyTeamEasiestDiff(parsed.code);
+    if (!diff) continue; // unknown airport code
+    done.add(diff + '|' + parsed.code);
   }
   return done;
 }
