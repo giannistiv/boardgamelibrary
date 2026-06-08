@@ -6157,32 +6157,30 @@ function buildMarvelChampionsData(plays){
     aspects:Object.fromEntries(MC_ASPECTS.map(a=>[a,{status:MC_ST.NONE,count:0}])),
     combos:Object.fromEntries(MC_ASPECTS.map(a=>[a,[]])) }));
   const scen = MC_SCENARIOS.map(s=>({name:s.name, box:s.box, status:MC_ST.NONE, count:0}));
-  let unresolved = 0;
   for (const p of (plays||[])){
     const won = (p.sc||[]).some(s=>s.w);
     const b = String(p.b||'');
     const exp = /\bexpert\b/i.test(b);
     const result = won ? (exp ? MC_ST.EXP : MC_ST.STD) : MC_ST.LOST;
-    // resolve scenarios in this play
+    // resolve scenarios in this play; plays with no villain name only feed the
+    // hero×aspect matrix (the combo was still played) — never the villain list.
     const sIdx = [];
     b.split(/[／/]/).forEach(tok=>{ const k=_mcNorm(tok); if(k in SL && !sIdx.includes(SL[k])) sIdx.push(SL[k]); });
-    if (!sIdx.length && b.trim()) unresolved++;
     sIdx.forEach(i=>{ scen[i].count++; scen[i].status=_mcBetter(scen[i].status, result); });
     const scenNames = sIdx.map(i=>MC_SCENARIOS[i].name);
-    // record hero+aspect combos
+    // record hero+aspect combos (counts/status from every play; villain chips
+    // only when a real villain was logged)
     for (const s of (p.sc||[])){
       for (const [hTok,aTok] of _mcParsePairs(s.r)){
         const hk=_mcNorm(hTok); if(!(hk in HL)) continue; const H=heroes[HL[hk]];
         if(!aTok) continue;
         H.aspects[aTok].count++;
         H.aspects[aTok].status=_mcBetter(H.aspects[aTok].status, result);
-        (scenNames.length?scenNames:['(unlogged scenario)']).forEach(sn=>{
-          H.combos[aTok].push({sc:sn, won, exp});
-        });
+        scenNames.forEach(sn=>{ H.combos[aTok].push({sc:sn, won, exp}); });
       }
     }
   }
-  return {heroes, scen, unresolved};
+  return {heroes, scen};
 }
 function _mcStatusCls(st){ return st===MC_ST.EXP?'mc-exp':st===MC_ST.STD?'mc-std':st===MC_ST.LOST?'mc-lost':'mc-none'; }
 function buildMarvelChampionsHtml(bggId, plays){
@@ -6216,7 +6214,6 @@ function buildMarvelChampionsHtml(bggId, plays){
     }).join('');
     return `<div class="mc-vbox"><span class="st-difflabel mc-vboxlabel">${box}</span><div class="st-pills">${pills}</div></div>`;
   }).join('');
-  const unres = d.unresolved ? `<div class="mc-note">&#9432; ${d.unresolved} play${d.unresolved>1?'s':''} logged with only modular sets (no villain name) — not credited to a scenario.</div>` : '';
   return `
       <div class="mc-board">
         <div class="st-head"><span class="st-title">&#129504; Marvel Champions</span></div>
@@ -6233,7 +6230,6 @@ function buildMarvelChampionsHtml(bggId, plays){
         <div class="mu-divider"></div>
         <div class="mc-sec-title">&#128127; Villains &mdash; defeat them all</div>
         <div class="mc-villains">${vilRows}</div>
-        ${unres}
       </div>`;
 }
 function wireMarvelChampions(){
@@ -6254,7 +6250,10 @@ function wireMarvelChampions(){
     let vil='';
     if(selAspect){
       const list=h.combos[selAspect];
-      if(!list.length) vil=`<div class="mc-vempty">No games yet as ${h.name} / ${selAspect}.</div>`;
+      const cnt=h.aspects[selAspect].count;
+      if(!list.length) vil = cnt>0
+        ? `<div class="mc-vempty">Played ${cnt}&times; as ${h.name} / ${selAspect} &mdash; no villain logged for ${cnt>1?'these games':'this game'}.</div>`
+        : `<div class="mc-vempty">No games yet as ${h.name} / ${selAspect}.</div>`;
       else{
         // dedupe by scenario keeping best
         const best={};
