@@ -541,6 +541,96 @@
   }
   .mu-divider{height:1px;background:rgba(255,255,255,0.08);margin:0.9rem 0 0.8rem}
   .st-count.mu-count-red{background:rgba(224,97,58,0.16);color:#e0613a}
+  /* ── Marvel Champions: hero×aspect matrix + villain checklist ── */
+  .mc-board{
+    margin-bottom:1.1rem;padding:0.8rem 0.9rem;border-radius:12px;
+    background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.07);
+  }
+  .mc-exp-txt{color:#5bc46b}
+  .mc-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:0.4rem;margin-bottom:0.9rem}
+  .mc-stat{
+    display:flex;flex-direction:column;align-items:center;text-align:center;
+    padding:0.5rem 0.2rem;border-radius:9px;background:rgba(255,255,255,0.04);
+    border:1px solid rgba(255,255,255,0.06);
+  }
+  .mc-stat-val{font-size:1.15rem;font-weight:800;line-height:1;color:#f0e6d3}
+  .mc-stat-sub{font-size:0.58rem;font-weight:700;opacity:0.45;margin-top:0.1rem}
+  .mc-stat-label{font-size:0.55rem;font-weight:600;opacity:0.6;margin-top:0.25rem;letter-spacing:0.01em}
+  .mc-sec-title{font-size:0.78rem;font-weight:800;color:var(--accent);margin:0.5rem 0 0.55rem;display:flex;align-items:center;gap:0.4rem}
+  .mc-hint{font-size:0.58rem;font-weight:600;opacity:0.45;background:rgba(255,255,255,0.06);padding:0.1rem 0.4rem;border-radius:10px}
+  /* detail panel */
+  .mc-detail{
+    margin-bottom:0.7rem;padding:0.7rem 0.75rem;border-radius:10px;min-height:2.4rem;
+    background:rgba(226,176,74,0.05);border:1px solid rgba(226,176,74,0.16);
+  }
+  .mc-detail-empty,.mc-vhint,.mc-vempty{font-size:0.68rem;opacity:0.55;font-style:italic}
+  .mc-vhint{margin-top:0.5rem}
+  .mc-dhead{font-size:0.92rem;font-weight:800;color:#f0e6d3;display:flex;align-items:center;gap:0.5rem;margin-bottom:0.55rem}
+  .mc-dbox{font-size:0.55rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;opacity:0.5;background:rgba(255,255,255,0.08);padding:0.12rem 0.4rem;border-radius:8px}
+  .mc-atiles{display:grid;grid-template-columns:repeat(4,1fr);gap:0.35rem}
+  .mc-atile{
+    display:flex;flex-direction:column;align-items:center;gap:0.15rem;cursor:pointer;
+    padding:0.45rem 0.2rem;border-radius:8px;font-family:inherit;
+    background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);transition:transform 0.1s,border-color 0.1s;
+  }
+  .mc-atile:hover{transform:translateY(-1px)}
+  .mc-atile.sel{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+  .mc-aname{font-size:0.62rem;font-weight:800;color:#f0e6d3;letter-spacing:0.01em}
+  .mc-astat{font-size:0.55rem;font-weight:600;opacity:0.6}
+  .mc-atile.mc-exp{background:rgba(91,196,107,0.18);border-color:rgba(91,196,107,0.5)}
+  .mc-atile.mc-std{background:rgba(91,143,214,0.18);border-color:rgba(91,143,214,0.5)}
+  .mc-atile.mc-lost{background:rgba(224,97,58,0.16);border-color:rgba(224,97,58,0.45)}
+  .mc-cvils{display:flex;flex-wrap:wrap;gap:0.3rem;margin-top:0.6rem}
+  .mc-cvil{display:inline-flex;align-items:center;gap:0.3rem;font-size:0.66rem;font-weight:700;padding:0.2rem 0.5rem;border-radius:8px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12)}
+  .mc-cvil i{font-style:normal;font-size:0.55rem;font-weight:700;opacity:0.85;padding:0.05rem 0.3rem;border-radius:6px;background:rgba(0,0,0,0.25)}
+  .mc-cvil.mc-exp{background:rgba(91,196,107,0.18);border-color:rgba(91,196,107,0.5);color:#9fe3aa}
+  .mc-cvil.mc-std{background:rgba(91,143,214,0.18);border-color:rgba(91,143,214,0.5);color:#a9cbf2}
+  .mc-cvil.mc-lost{background:rgba(224,97,58,0.16);border-color:rgba(224,97,58,0.45);color:#f0a98f}
+  /* hero overview */
+  .mc-heroes{max-height:300px;overflow-y:auto;border-radius:9px;border:1px solid rgba(255,255,255,0.06);padding:0.3rem}
+  .mc-box{margin-bottom:0.3rem}
+  .mc-boxlabel{font-size:0.55rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;opacity:0.45;padding:0.3rem 0.3rem 0.2rem}
+  .mc-hrow{
+    display:flex;align-items:center;justify-content:space-between;width:100%;gap:0.5rem;
+    padding:0.32rem 0.4rem;border-radius:7px;cursor:pointer;font-family:inherit;text-align:left;
+    background:transparent;border:1px solid transparent;transition:background 0.1s;
+  }
+  .mc-hrow:hover{background:rgba(255,255,255,0.05)}
+  .mc-hrow.sel{background:rgba(226,176,74,0.12);border-color:rgba(226,176,74,0.4)}
+  .mc-hname{font-size:0.74rem;font-weight:700;color:#f0e6d3;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .mc-cells{display:flex;gap:0.22rem;flex-shrink:0}
+  .mc-cell{
+    position:relative;display:inline-flex;align-items:center;justify-content:center;
+    width:1.35rem;height:1.35rem;border-radius:5px;font-size:0.6rem;font-weight:800;
+    color:rgba(240,230,211,0.4);background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);
+  }
+  .mc-cell i{position:absolute;top:-3px;right:-3px;font-style:normal;font-size:0.46rem;font-weight:800;
+    min-width:0.7rem;height:0.7rem;line-height:0.7rem;text-align:center;border-radius:50%;
+    background:#15151f;color:#f0e6d3;border:1px solid rgba(255,255,255,0.2)}
+  .mc-cell.mc-exp{color:#15151f;background:#5bc46b;border-color:#5bc46b}
+  .mc-cell.mc-std{color:#15151f;background:#5b8fd6;border-color:#5b8fd6}
+  .mc-cell.mc-lost{color:#fff;background:#e0613a;border-color:#e0613a}
+  /* legend */
+  .mc-legend{display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.55rem}
+  .mc-key{font-size:0.58rem;font-weight:700;padding:0.12rem 0.45rem;border-radius:10px;display:inline-flex;align-items:center;gap:0.25rem}
+  .mc-key::before{content:'';width:0.6rem;height:0.6rem;border-radius:3px;display:inline-block}
+  .mc-key.mc-exp{color:#9fe3aa;background:rgba(91,196,107,0.12)}.mc-key.mc-exp::before{background:#5bc46b}
+  .mc-key.mc-std{color:#a9cbf2;background:rgba(91,143,214,0.12)}.mc-key.mc-std::before{background:#5b8fd6}
+  .mc-key.mc-lost{color:#f0a98f;background:rgba(224,97,58,0.12)}.mc-key.mc-lost::before{background:#e0613a}
+  .mc-key.mc-none{color:rgba(240,230,211,0.5);background:rgba(255,255,255,0.05)}.mc-key.mc-none::before{background:rgba(255,255,255,0.18)}
+  /* villains */
+  .mc-vbox{display:flex;align-items:flex-start;gap:0.55rem;margin-bottom:0.5rem}
+  .mc-vboxlabel{flex-basis:74px;color:rgba(240,230,211,0.72);text-transform:none;letter-spacing:0;font-size:0.6rem}
+  .mc-vpill{
+    display:inline-flex;align-items:center;gap:0.2rem;font-size:0.66rem;font-weight:700;
+    padding:0.18rem 0.5rem;border-radius:18px;
+    color:rgba(240,230,211,0.5);background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+  }
+  .mc-vtick{font-size:0.66rem;font-weight:900;line-height:1}
+  .mc-vpill.mc-exp{color:#15151f;background:#5bc46b;border-color:#5bc46b}
+  .mc-vpill.mc-std{color:#15151f;background:#5b8fd6;border-color:#5b8fd6}
+  .mc-vpill.mc-lost{color:#fff;background:rgba(224,97,58,0.85);border-color:#e0613a}
+  .mc-note{font-size:0.6rem;opacity:0.5;margin-top:0.6rem;line-height:1.4}
   .play-entry{
     padding:0.6rem 0.7rem;border-radius:8px;margin-bottom:0.4rem;
     background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);
@@ -5985,6 +6075,212 @@ function buildMarvelUnitedHtml(bggId){
         <div class="st-legend">Heroes tick when played &middot; villains when defeated (won) &middot; hover for set</div>
       </div>`;
 }
+// ── Marvel Champions: hero×aspect matrix + villain checklist ──
+// Goal 1: play every hero with all 4 aspects (260 combos).
+// Goal 2: defeat every scenario/villain (55 scenarios).
+// Plays log hero+aspect in each player's `r` (slash-separated, either order;
+// Spider-Woman carries 2 aspects). Difficulty + scenario/modular live in `b`.
+// Expert win = full completion (green); Standard-only win = partial (blue);
+// played-but-never-won = red; never played = dim. Scenario credited only when a
+// real villain/scenario name appears in `b` (modular-only plays stay unresolved
+// on purpose — the user will send data corrections over time).
+const MC_BGGID = 285774;
+const MC_ASPECTS = ['Aggression','Justice','Leadership','Protection'];
+const MC_ASPECT_SET = new Set(MC_ASPECTS);
+function _mcNorm(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9]/g,''); }
+const MC_HEROES = [
+  // Core + Hero Packs
+  {name:'Spider-Man',box:'Core'},{name:'Captain Marvel',box:'Core'},{name:'She-Hulk',box:'Core'},
+  {name:'Iron Man',box:'Core'},{name:'Black Panther',box:'Core'},
+  {name:'Captain America',box:'Heroes'},{name:'Ms. Marvel',box:'Heroes'},{name:'Thor',box:'Heroes'},
+  {name:'Black Widow',box:'Heroes'},{name:'Doctor Strange',box:'Heroes'},{name:'Hulk',box:'Heroes'},
+  {name:'Ant-Man',box:'Heroes'},{name:'Wasp',box:'Heroes'},{name:'Quicksilver',box:'Heroes'},{name:'Scarlet Witch',box:'Heroes'},
+  {name:'Star-Lord',box:'Heroes'},{name:'Gamora',box:'Heroes'},{name:'Drax',box:'Heroes'},{name:'Venom',box:'Heroes'},
+  {name:'Nebula',box:'Heroes'},{name:'War Machine',box:'Heroes'},{name:'Valkyrie',box:'Heroes'},{name:'Vision',box:'Heroes'},
+  {name:'Nova',box:'Heroes'},{name:'Ironheart',box:'Heroes'},{name:'Spider-Ham',box:'Heroes'},{name:'SP//dr',box:'Heroes',m:['spdr','spidr']},
+  {name:'Maria Hill',box:'Heroes'},{name:'Nick Fury',box:'Heroes'},{name:'Silk',box:'Heroes'},{name:'Falcon',box:'Heroes'},
+  {name:'Winter Soldier',box:'Heroes'},{name:'Shuri',box:'Heroes'},{name:'Wonder Man',box:'Heroes'},{name:'Hercules',box:'Heroes'},
+  // X-Men Hero Packs
+  {name:'Colossus',box:'X-Men'},{name:'Shadowcat',box:'X-Men'},{name:'Cyclops',box:'X-Men'},{name:'Phoenix',box:'X-Men'},
+  {name:'Wolverine',box:'X-Men'},{name:'Storm',box:'X-Men'},{name:'Gambit',box:'X-Men'},{name:'Rogue',box:'X-Men'},
+  {name:'Cable',box:'X-Men'},{name:'Domino',box:'X-Men'},{name:'Psylocke',box:'X-Men'},{name:'Angel',box:'X-Men'},
+  {name:'X-23',box:'X-Men'},{name:'Deadpool',box:'X-Men'},{name:'Bishop',box:'X-Men'},{name:'Magik',box:'X-Men'},
+  {name:'Iceman',box:'X-Men'},{name:'Jubilee',box:'X-Men'},{name:'Nightcrawler',box:'X-Men'},{name:'Magneto',box:'X-Men'},
+  // Campaign-box heroes
+  {name:'Hawkeye',box:'Campaign'},{name:'Spider-Woman',box:'Campaign'},{name:'Rocket Raccoon',box:'Campaign',m:['rocket']},
+  {name:'Groot',box:'Campaign'},{name:'Spectrum',box:'Campaign'},{name:'Adam Warlock',box:'Campaign'},
+  {name:'Ghost-Spider',box:'Campaign'},{name:'Miles Morales',box:'Campaign',m:['milesmorales','milesspiderman']},
+  {name:'Tigra',box:'Campaign'},{name:'Hulkling',box:'Campaign'},
+];
+const MC_SCENARIOS = [
+  {name:'Rhino',box:'Core'},{name:'Klaw',box:'Core'},{name:'Ultron',box:'Core'},
+  {name:'Crossbones',box:'Red Skull'},{name:'Absorbing Man',box:'Red Skull'},{name:'Taskmaster',box:'Red Skull'},{name:'Zola',box:'Red Skull',m:['armzola']},{name:'Red Skull',box:'Red Skull'},
+  {name:'Drang',box:"Galaxy's"},{name:'Collector: Infiltrate',box:"Galaxy's",m:['infiltratethemuseum','collector']},{name:'Collector: Escape',box:"Galaxy's",m:['escapethemuseum']},{name:'Nebula',box:"Galaxy's"},{name:'Ronan',box:"Galaxy's",m:['ronantheaccuser']},
+  {name:'Ebony Maw',box:'Mad Titan'},{name:'Tower Defense',box:'Mad Titan',m:['corvusglaive','proximamidnight']},{name:'Thanos',box:'Mad Titan'},{name:'Hela',box:'Mad Titan'},{name:'Loki',box:'Mad Titan'},
+  {name:'Sandman',box:'Sinister'},{name:'Venom',box:'Sinister'},{name:'Mysterio',box:'Sinister'},{name:'Sinister Six',box:'Sinister'},{name:'Venom Goblin',box:'Sinister'},
+  {name:'Sabretooth',box:'Mutant Gen'},{name:'Project Wideawake',box:'Mutant Gen',m:['sentinel']},{name:'Master Mold',box:'Mutant Gen'},{name:'Mansion Attack',box:'Mutant Gen'},{name:'Magneto',box:'Mutant Gen'},
+  {name:'Morlock Siege',box:'NeXt Evo',m:['marauders']},{name:'On the Run',box:'NeXt Evo'},{name:'Juggernaut',box:'NeXt Evo'},{name:'Mister Sinister',box:'NeXt Evo'},{name:'Stryfe',box:'NeXt Evo'},
+  {name:'Unus',box:'Apocalypse'},{name:'Four Horsemen',box:'Apocalypse'},{name:'Dark Beast',box:'Apocalypse'},{name:'Apocalypse',box:'Apocalypse'},{name:'En Sabah Nur',box:'Apocalypse',m:['apocalypseensabahnur']},
+  {name:'Black Widow (Yelena)',box:'SHIELD',m:['yelena','yelenabelova']},{name:'Batroc',box:'SHIELD'},{name:'M.O.D.O.K.',box:'SHIELD',m:['modok']},{name:'Citizen V',box:'SHIELD'},{name:'Baron Zemo',box:'SHIELD',m:['zemo']},
+  {name:'Green Goblin: Risky Business',box:'Packs',m:['riskybusiness']},{name:'Green Goblin: Mutagen Formula',box:'Packs',m:['mutagenformula']},
+  {name:'Wrecking Crew',box:'Packs'},{name:'Kang',box:'Packs',m:['kangtheconqueror']},{name:'The Hood',box:'Packs',m:['hood']},
+  {name:'MojoMania: Magog',box:'Packs',m:['magog']},{name:'MojoMania: Spiral',box:'Packs',m:['spiral']},{name:'MojoMania: Mojo',box:'Packs',m:['mojo']},
+  {name:'Trickster: Enchantress',box:'Packs',m:['enchantress']},{name:'Trickster: Loki, God of Lies',box:'Packs',m:['godoflies','lokigodoflies']},
+  {name:'Synthezoid: She-Hulk',box:'Packs',m:['synthezoidshehulk']},{name:'Synthezoid: Vision',box:'Packs',m:['synthezoidvision']},
+];
+// status precedence: 3 expertWin > 2 standardWin > 1 playedLost > 0 none
+const MC_ST = {NONE:0, LOST:1, STD:2, EXP:3};
+function _mcBetter(a,b){ return Math.max(a,b); }
+function _mcParsePairs(r){
+  const toks = String(r||'').split(/[／/]/).map(t=>t.trim()).filter(Boolean);
+  const heroes = toks.filter(t=>!MC_ASPECT_SET.has(t));
+  const aspects = toks.filter(t=>MC_ASPECT_SET.has(t));
+  const pairs = [];
+  if (heroes.length === 1) { aspects.forEach(a=>pairs.push([heroes[0],a])); if(!aspects.length) pairs.push([heroes[0],null]); }
+  else heroes.forEach((h,i)=>{ if(aspects[i]) pairs.push([h,aspects[i]]); });
+  return pairs;
+}
+function _mcHeroLookup(){
+  const map = {};
+  MC_HEROES.forEach((h,i)=>{ map[_mcNorm(h.name)]=i; (h.m||[]).forEach(a=>map[_mcNorm(a)]=i); });
+  return map;
+}
+function _mcScenLookup(){
+  const map = {};
+  MC_SCENARIOS.forEach((s,i)=>{ map[_mcNorm(s.name)]=i; (s.m||[]).forEach(a=>map[_mcNorm(a)]=i); });
+  return map;
+}
+function buildMarvelChampionsData(plays){
+  const HL = _mcHeroLookup(), SL = _mcScenLookup();
+  // per hero: aspects {A:{status,count}}, combos {A:[{sc,won,exp}]}
+  const heroes = MC_HEROES.map(h=>({name:h.name, box:h.box,
+    aspects:Object.fromEntries(MC_ASPECTS.map(a=>[a,{status:MC_ST.NONE,count:0}])),
+    combos:Object.fromEntries(MC_ASPECTS.map(a=>[a,[]])) }));
+  const scen = MC_SCENARIOS.map(s=>({name:s.name, box:s.box, status:MC_ST.NONE, count:0}));
+  let unresolved = 0;
+  for (const p of (plays||[])){
+    const won = (p.sc||[]).some(s=>s.w);
+    const b = String(p.b||'');
+    const exp = /\bexpert\b/i.test(b);
+    const result = won ? (exp ? MC_ST.EXP : MC_ST.STD) : MC_ST.LOST;
+    // resolve scenarios in this play
+    const sIdx = [];
+    b.split(/[／/]/).forEach(tok=>{ const k=_mcNorm(tok); if(k in SL && !sIdx.includes(SL[k])) sIdx.push(SL[k]); });
+    if (!sIdx.length && b.trim()) unresolved++;
+    sIdx.forEach(i=>{ scen[i].count++; scen[i].status=_mcBetter(scen[i].status, result); });
+    const scenNames = sIdx.map(i=>MC_SCENARIOS[i].name);
+    // record hero+aspect combos
+    for (const s of (p.sc||[])){
+      for (const [hTok,aTok] of _mcParsePairs(s.r)){
+        const hk=_mcNorm(hTok); if(!(hk in HL)) continue; const H=heroes[HL[hk]];
+        if(!aTok) continue;
+        H.aspects[aTok].count++;
+        H.aspects[aTok].status=_mcBetter(H.aspects[aTok].status, result);
+        (scenNames.length?scenNames:['(unlogged scenario)']).forEach(sn=>{
+          H.combos[aTok].push({sc:sn, won, exp});
+        });
+      }
+    }
+  }
+  return {heroes, scen, unresolved};
+}
+function _mcStatusCls(st){ return st===MC_ST.EXP?'mc-exp':st===MC_ST.STD?'mc-std':st===MC_ST.LOST?'mc-lost':'mc-none'; }
+function buildMarvelChampionsHtml(bggId, plays){
+  if (Number(bggId) !== MC_BGGID) return '';
+  const d = buildMarvelChampionsData(plays||[]);
+  window._mcData = d;
+  const totalCombos = MC_HEROES.length * 4;
+  let comboExp=0, comboPlayed=0;
+  d.heroes.forEach(h=>MC_ASPECTS.forEach(a=>{ const st=h.aspects[a].status; if(st===MC_ST.EXP)comboExp++; if(st>=MC_ST.LOST)comboPlayed++; }));
+  const vilExp = d.scen.filter(s=>s.status===MC_ST.EXP).length;
+  const vilBeat = d.scen.filter(s=>s.status>=MC_ST.STD).length;
+  // hero overview grouped by box
+  const boxes=[]; d.heroes.forEach(h=>{ if(!boxes.includes(h.box)) boxes.push(h.box); });
+  const heroRows = boxes.map(box=>{
+    const rows = d.heroes.map((h,i)=>({h,i})).filter(o=>o.h.box===box).map(({h,i})=>{
+      const cells = MC_ASPECTS.map(a=>{
+        const st=h.aspects[a].status, c=h.aspects[a].count;
+        return `<span class="mc-cell ${_mcStatusCls(st)}" title="${h.name} · ${a}${c?` — ${c} play${c>1?'s':''}`:''}">${a[0]}${c?`<i>${c}</i>`:''}</span>`;
+      }).join('');
+      return `<button class="mc-hrow" data-mc-hero="${i}"><span class="mc-hname">${h.name}</span><span class="mc-cells">${cells}</span></button>`;
+    }).join('');
+    return `<div class="mc-box"><div class="mc-boxlabel">${box}</div>${rows}</div>`;
+  }).join('');
+  // villain checklist grouped by box
+  const sboxes=[]; d.scen.forEach(s=>{ if(!sboxes.includes(s.box)) sboxes.push(s.box); });
+  const vilRows = sboxes.map(box=>{
+    const pills = d.scen.filter(s=>s.box===box).map(s=>{
+      const cls=_mcStatusCls(s.status);
+      const tick=s.status===MC_ST.EXP?'&#10003;':s.status===MC_ST.STD?'&#10003;':s.status===MC_ST.LOST?'&times;':'';
+      return `<span class="mc-vpill ${cls}" title="${s.name}${s.count?` — ${s.count} play${s.count>1?'s':''}`:''}">${tick?`<span class="mc-vtick">${tick}</span>`:''}${s.name}</span>`;
+    }).join('');
+    return `<div class="mc-vbox"><span class="st-difflabel mc-vboxlabel">${box}</span><div class="st-pills">${pills}</div></div>`;
+  }).join('');
+  const unres = d.unresolved ? `<div class="mc-note">&#9432; ${d.unresolved} play${d.unresolved>1?'s':''} logged with only modular sets (no villain name) — not credited to a scenario.</div>` : '';
+  return `
+      <div class="mc-board">
+        <div class="st-head"><span class="st-title">&#129504; Marvel Champions</span></div>
+        <div class="mc-stats">
+          <div class="mc-stat"><span class="mc-stat-val mc-exp-txt">${comboExp}</span><span class="mc-stat-sub">/ ${totalCombos}</span><span class="mc-stat-label">Combos (Expert)</span></div>
+          <div class="mc-stat"><span class="mc-stat-val">${comboPlayed}</span><span class="mc-stat-sub">/ ${totalCombos}</span><span class="mc-stat-label">Combos played</span></div>
+          <div class="mc-stat"><span class="mc-stat-val mc-exp-txt">${vilExp}</span><span class="mc-stat-sub">/ ${MC_SCENARIOS.length}</span><span class="mc-stat-label">Villains (Expert)</span></div>
+          <div class="mc-stat"><span class="mc-stat-val">${vilBeat}</span><span class="mc-stat-sub">/ ${MC_SCENARIOS.length}</span><span class="mc-stat-label">Villains beaten</span></div>
+        </div>
+        <div class="mc-sec-title">&#128081; Hero &times; Aspect <span class="mc-hint">tap a hero</span></div>
+        <div class="mc-detail" id="mc-detail"><div class="mc-detail-empty">Tap any hero to see their 4 aspects and the villains faced.</div></div>
+        <div class="mc-heroes">${heroRows}</div>
+        <div class="mc-legend"><span class="mc-key mc-exp">Expert win</span><span class="mc-key mc-std">Standard win</span><span class="mc-key mc-lost">Lost</span><span class="mc-key mc-none">Not played</span></div>
+        <div class="mu-divider"></div>
+        <div class="mc-sec-title">&#128127; Villains &mdash; defeat them all</div>
+        <div class="mc-villains">${vilRows}</div>
+        ${unres}
+      </div>`;
+}
+function wireMarvelChampions(){
+  const board = document.querySelector('.mc-board'); if(!board) return;
+  const detail = board.querySelector('#mc-detail');
+  const d = window._mcData; if(!d) return;
+  const STcls = _mcStatusCls;
+  const STtxt = st=>st===MC_ST.EXP?'Expert win':st===MC_ST.STD?'Standard win':st===MC_ST.LOST?'Played, no win':'Never played';
+  let selHero=-1, selAspect=null;
+  function renderDetail(){
+    if(selHero<0){ detail.innerHTML='<div class="mc-detail-empty">Tap any hero to see their 4 aspects and the villains faced.</div>'; return; }
+    const h=d.heroes[selHero];
+    const tiles=MC_ASPECTS.map(a=>{
+      const st=h.aspects[a].status, c=h.aspects[a].count;
+      const sel=a===selAspect?' sel':'';
+      return `<button class="mc-atile ${STcls(st)}${sel}" data-mc-aspect="${a}"><span class="mc-aname">${a}</span><span class="mc-astat">${c?`${c} play${c>1?'s':''}`:'—'}</span></button>`;
+    }).join('');
+    let vil='';
+    if(selAspect){
+      const list=h.combos[selAspect];
+      if(!list.length) vil=`<div class="mc-vempty">No games yet as ${h.name} / ${selAspect}.</div>`;
+      else{
+        // dedupe by scenario keeping best
+        const best={};
+        list.forEach(e=>{ const r=e.won?(e.exp?MC_ST.EXP:MC_ST.STD):MC_ST.LOST; best[e.sc]=Math.max(best[e.sc]||0,r); });
+        vil=`<div class="mc-cvils">`+Object.keys(best).map(sc=>{
+          const st=best[sc]; const lab=st===MC_ST.EXP?'Expert':st===MC_ST.STD?'Standard':'Lost';
+          return `<span class="mc-cvil ${STcls(st)}">${sc}<i>${lab}</i></span>`;
+        }).join('')+`</div>`;
+      }
+    }
+    detail.innerHTML=`<div class="mc-dhead">${h.name}<span class="mc-dbox">${h.box}</span></div><div class="mc-atiles">${tiles}</div>${selAspect?vil:'<div class="mc-vhint">Tap an aspect above to see villains faced with it.</div>'}`;
+  }
+  board.querySelectorAll('.mc-hrow').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const i=Number(btn.dataset.mcHero);
+      board.querySelectorAll('.mc-hrow').forEach(b=>b.classList.remove('sel'));
+      if(selHero===i){ selHero=-1; selAspect=null; } else { selHero=i; selAspect=null; btn.classList.add('sel'); }
+      renderDetail();
+      detail.scrollIntoView({behavior:'smooth',block:'nearest'});
+    });
+  });
+  detail.addEventListener('click',e=>{
+    const t=e.target.closest('[data-mc-aspect]'); if(!t) return;
+    const a=t.dataset.mcAspect; selAspect=(selAspect===a)?null:a; renderDetail();
+  });
+}
 function isCoop(game) {
   return game.categories.includes('Co-op');
 }
@@ -6467,6 +6763,7 @@ function openModal(game) {
   // Marvel United heroes/villains board — shown on the core game AND on every
   // expansion page in the line, so it lives outside the play-history block.
   const marvelUnitedHtml = buildMarvelUnitedHtml(game.bggId);
+  const marvelChampionsHtml = buildMarvelChampionsHtml(game.bggId, plays);
 
   content.innerHTML = `
     ${coverHtml}
@@ -6493,6 +6790,7 @@ function openModal(game) {
       }
       ${game.bggId > 0 ? buildStarRatingHtml(game.bggId) : ''}
       ${marvelUnitedHtml}
+      ${marvelChampionsHtml}
       ${playHistoryHtml}
       ${game.bggId > 0 ? buildNotesHtml(game.bggId) : ''}
     </div>
@@ -6512,6 +6810,7 @@ function openModal(game) {
   history.pushState({modal: true}, '');
   wireStarRating();
   wireNotes();
+  wireMarvelChampions();
   updateFavButton(game.bggId);
   wireFavButton();
 }
