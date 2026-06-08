@@ -5837,8 +5837,12 @@ function buildSkyTeamHtml(plays) {
 // "Act III - <boss>"; the Heart shows up as a tag containing "Heart".
 const SLAY_SPIRE_BGGID = 338960;
 const SLAY_SPIRE_ASCENSIONS = 10;
+// Ascensions cleared in the past but not captured in the logged plays (e.g.
+// played before tagging, or tagged without the Act III boss). New runs are
+// detected automatically from play tags, so this only backfills history.
+const SLAY_SPIRE_EXTRA_CLEARED = [3];
 function buildSlaySpireHtml(plays) {
-  const cleared = new Set();
+  const cleared = new Set(SLAY_SPIRE_EXTRA_CLEARED);
   let heartDone = false;
   for (const p of (plays || [])) {
     if (!(p.sc || []).some(s => s.w)) continue; // only won runs count
