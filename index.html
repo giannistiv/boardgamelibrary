@@ -1284,6 +1284,36 @@
   }
   .lpm-view-all-btn:hover{background:rgba(226,176,74,0.22)}
 
+  /* ── H-index ── */
+  .hi-section{margin-bottom:1.3rem}
+  .hi-card{
+    display:flex;align-items:center;gap:1rem;
+    padding:0.9rem 1rem;border-radius:14px;
+    background:linear-gradient(135deg, rgba(226,176,74,0.14), rgba(226,176,74,0.04));
+    border:1px solid rgba(226,176,74,0.28);
+  }
+  .hi-num{
+    flex-shrink:0;width:62px;height:62px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:2rem;font-weight:800;color:#0f0f12;
+    background:radial-gradient(circle at 35% 30%, #f0c668, #e2b04a);
+    box-shadow:0 2px 10px rgba(226,176,74,0.35);
+  }
+  .hi-body{flex:1;min-width:0}
+  .hi-label{font-size:0.7rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent)}
+  .hi-sub{font-size:0.82rem;opacity:0.75;margin-top:0.1rem}
+  .hi-chips{display:flex;flex-wrap:wrap;gap:0.35rem;margin-top:0.55rem}
+  .hi-chip{
+    display:inline-flex;align-items:center;gap:0.3rem;
+    padding:0.18rem 0.5rem;border-radius:999px;
+    background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);
+    font-size:0.7rem;max-width:100%;
+  }
+  .hi-chip-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:150px}
+  .hi-chip-num{font-weight:700;color:var(--accent);flex-shrink:0}
+  .hi-next{font-size:0.72rem;opacity:0.6;margin-top:0.5rem}
+  .hi-next b{color:#f0e6d3;font-weight:600}
+
   /* ── Achievements ── */
   .ach-grid{
     display:grid;grid-template-columns:repeat(auto-fill, minmax(110px, 1fr));
@@ -7600,6 +7630,75 @@ function computeAchievements(playerName) {
   return earned;
 }
 
+// ── H-index ──
+// Academic h-index applied to play counts: a player has an h-index of H when
+// they have played H distinct games at least H times each. Returns the index
+// plus the per-game play counts (sorted desc) so the UI can show which games
+// form the "core" and which game is closest to pushing the index up.
+function _computeHIndex(playerName) {
+  const counts = {}; // bggId -> number of plays this player took part in
+  for (const bggId in PLAY_HISTORY) {
+    const arr = PLAY_HISTORY[bggId];
+    if (!Array.isArray(arr)) continue;
+    for (const p of arr) {
+      if (!p || !Array.isArray(p.sc)) continue;
+      if (p.sc.some(s => s && s.n === playerName)) {
+        counts[bggId] = (counts[bggId] || 0) + 1;
+      }
+    }
+  }
+  const list = Object.keys(counts)
+    .map(b => ({ bggId: Number(b), count: counts[b] }))
+    .sort((a, b) => b.count - a.count || a.bggId - b.bggId);
+  let h = 0;
+  for (let i = 0; i < list.length; i++) {
+    if (list[i].count >= i + 1) h = i + 1;
+    else break;
+  }
+  return { h, list };
+}
+
+function buildHIndexHtml(playerName) {
+  const { h, list } = _computeHIndex(playerName);
+  const gameName = (bggId) => {
+    const g = findGameByBggId(bggId);
+    return g && g.name ? g.name : `Game ${bggId}`;
+  };
+
+  // Core games are the H games (each played ≥ H times) that define the index.
+  const core = list.slice(0, h);
+  const coreChips = core.map(it =>
+    `<span class="hi-chip"><span class="hi-chip-name">${gameName(it.bggId)}</span><span class="hi-chip-num">${it.count}&times;</span></span>`
+  ).join('');
+
+  // "Next up": the game at position H+1 (0-indexed h). To raise the index to
+  // H+1 it needs (H+1) plays — show how many more are required.
+  let nextHtml = '';
+  if (list.length > h) {
+    const nxt = list[h];
+    const need = (h + 1) - nxt.count;
+    if (need > 0) {
+      nextHtml = `<div class="hi-next">Next: <b>${gameName(nxt.bggId)}</b> needs ${need} more play${need === 1 ? '' : 's'} to reach H&nbsp;${h + 1}</div>`;
+    }
+  }
+
+  const sub = h === 0
+    ? 'No game played more than once yet'
+    : `${h} game${h === 1 ? '' : 's'} played at least ${h} time${h === 1 ? '' : 's'} each`;
+
+  return `<div class="stats-section hi-section">
+    <div class="hi-card">
+      <div class="hi-num">${h}</div>
+      <div class="hi-body">
+        <div class="hi-label">H-Index</div>
+        <div class="hi-sub">${sub}</div>
+        ${core.length ? `<div class="hi-chips">${coreChips}</div>` : ''}
+        ${nextHtml}
+      </div>
+    </div>
+  </div>`;
+}
+
 function buildAchievementsHtml(playerName) {
   const earned = computeAchievements(playerName);
   const today = new Date().toISOString().slice(0, 10);
@@ -7807,10 +7906,12 @@ function showAchievementsView(playerName) {
   const container = document.getElementById('achievements-view');
   if (!container) return;
   const { recentHtml, allHtml } = buildAchievementsHtml(playerName);
+  const hIndexHtml = buildHIndexHtml(playerName);
   container.innerHTML = `
     <div class="lb-header">
       <div class="lb-title">${playerName}'s Achievements</div>
     </div>
+    ${hIndexHtml}
     ${recentHtml}
     ${allHtml}`;
   window.scrollTo(0, 0);
