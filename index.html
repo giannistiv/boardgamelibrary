@@ -534,6 +534,13 @@
     background:rgba(255,255,255,0.08);color:rgba(240,230,211,0.55);flex-shrink:0;
   }
   .sts-heart.done .sts-heart-status{background:#c0392b;color:#fff}
+  /* ── Marvel United heroes/villains board ── */
+  .st-difflabel.mu-box{
+    flex-basis:78px;color:rgba(240,230,211,0.72);
+    text-transform:none;letter-spacing:0;font-size:0.62rem;
+  }
+  .mu-divider{height:1px;background:rgba(255,255,255,0.08);margin:0.9rem 0 0.8rem}
+  .st-count.mu-count-red{background:rgba(224,97,58,0.16);color:#e0613a}
   .play-entry{
     padding:0.6rem 0.7rem;border-radius:8px;margin-bottom:0.4rem;
     background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);
@@ -5879,6 +5886,105 @@ function buildSlaySpireHtml(plays) {
         </div>
       </div>`;
 }
+// ── Marvel United: heroes played + villains defeated ──
+// Two separate product lines (Avengers core + expansions, and X-Men core +
+// teams). Every box in a line logs its plays under that line's core game, so
+// each board pulls from the core's play history and is shown on the core page
+// AND on every expansion page in that line. Heroes come from each play's
+// per-player `r` field (played = appeared in any play); villains come from the
+// `b` field (defeated = appeared in a *won* play). Difficulty/modifier tokens
+// like "Hard" or "Secret Identity" are ignored because they match no roster
+// name. Magneto & Mystique are anti-heroes, so they appear in both lists.
+function _muNorm(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'').replace(/^the/,''); }
+const _MU_ALIASES = { jeangray:'jeangrey', sabertooth:'sabretooth' };
+function _muCanon(s){ const n=_muNorm(s); return _MU_ALIASES[n]||n; }
+const MARVEL_UNITED_LINES = {
+  avengers: {
+    bggIds: [298047, 302668, 302669, 303600, 339131, 302670],
+    playBggId: 298047,
+    heroes: [
+      {name:'Iron Man',box:'Core'},{name:'Captain America',box:'Core'},{name:'Black Widow',box:'Core'},
+      {name:'Hulk',box:'Core'},{name:'Captain Marvel',box:'Core'},{name:'Ant-Man',box:'Core'},{name:'Wasp',box:'Core'},
+      {name:'Thor',box:'Asgard'},{name:'Valkyrie',box:'Asgard'},{name:'Korg',box:'Asgard'},
+      {name:'Black Panther',box:'Black Panther'},{name:'Winter Soldier',box:'Black Panther'},{name:'Shuri',box:'Black Panther'},
+      {name:'Spider-Man',box:'Spider-Verse'},{name:'Miles Morales',box:'Spider-Verse'},{name:'Ghost-Spider',box:'Spider-Verse'},
+      {name:'Star-Lord',box:'Guardians'},{name:'Groot',box:'Guardians'},{name:'Rocket',box:'Guardians'},
+      {name:'Deadpool',box:'Deadpool'},
+    ],
+    villains: [
+      {name:'Red Skull',box:'Core'},{name:'Ultron',box:'Core'},{name:'Taskmaster',box:'Core'},
+      {name:'Loki',box:'Asgard'},{name:'Killmonger',box:'Black Panther'},{name:'Green Goblin',box:'Spider-Verse'},
+      {name:'Ronan',box:'Guardians'},{name:'Deadpool',box:'Deadpool'},{name:'Bob',key:'bob',box:'Deadpool'},
+    ],
+  },
+  xmen: {
+    bggIds: [336382, 339128, 339129],
+    playBggId: 336382,
+    heroes: [
+      {name:'Cyclops',box:'Core'},{name:'Wolverine',box:'Core'},{name:'Storm',box:'Core'},{name:'Beast',box:'Core'},
+      {name:'Jean Grey',box:'Core'},{name:'Professor X',box:'Core'},{name:'Magneto',box:'Core'},{name:'Mystique',box:'Core'},
+      {name:'Archangel',box:'Gold Team'},{name:'Bishop',box:'Gold Team'},{name:'Colossus',box:'Gold Team'},{name:'Iceman',box:'Gold Team'},
+      {name:'Psylocke',box:'Blue Team'},{name:'Jubilee',box:'Blue Team'},{name:'Rogue',box:'Blue Team'},{name:'Gambit',box:'Blue Team'},
+    ],
+    villains: [
+      {name:'Magneto',box:'Core'},{name:'Mystique',box:'Core'},{name:'Juggernaut',box:'Core'},{name:'Sabretooth',box:'Core'},
+      {name:'Sebastian Shaw',box:'Gold Team'},{name:'Mister Sinister',box:'Blue Team'},
+    ],
+  },
+};
+function _muLineFor(bggId){
+  const n = Number(bggId);
+  for (const k in MARVEL_UNITED_LINES) if (MARVEL_UNITED_LINES[k].bggIds.includes(n)) return MARVEL_UNITED_LINES[k];
+  return null;
+}
+function _muPill(name, done, color, sub){
+  const cls = 'st-pill' + (done ? ' done' : '');
+  const tick = done ? '<span class="st-tick">&#10003;</span>' : '';
+  const title = name + (sub ? ` · ${sub}` : '') + (done ? ' — done' : '');
+  return `<span class="${cls}" style="--d:${color}" title="${title}">${tick}${name}</span>`;
+}
+function buildMarvelUnitedHtml(bggId){
+  const line = _muLineFor(bggId);
+  if (!line) return '';
+  const plays = PLAY_HISTORY[line.playBggId] || [];
+  if (!plays.length) return '';
+  const playedHeroes = new Set();
+  const defeatedVillains = new Set();
+  const villainCanon = new Set(line.villains.map(v => v.key || _muCanon(v.name)));
+  for (const p of plays){
+    for (const s of (p.sc || [])){ const c = _muCanon(s.r); if (c) playedHeroes.add(c); }
+    if ((p.sc || []).some(s => s.w)){
+      for (const part of String(p.b || '').split(/[／/]/)){ const c = _muCanon(part); if (villainCanon.has(c)) defeatedVillains.add(c); }
+    }
+  }
+  const heroDone = h => playedHeroes.has(h.key || _muCanon(h.name));
+  const vilDone  = v => defeatedVillains.has(v.key || _muCanon(v.name));
+  const HERO_COLOR = '#e2b04a', VILLAIN_COLOR = '#e0613a';
+  const boxes = [];
+  line.heroes.forEach(h => { if (!boxes.includes(h.box)) boxes.push(h.box); });
+  const heroRows = boxes.map(box => {
+    const pills = line.heroes.filter(h => h.box === box).map(h => _muPill(h.name, heroDone(h), HERO_COLOR, box)).join('');
+    return `<div class="st-row"><span class="st-difflabel mu-box">${box}</span><div class="st-pills">${pills}</div></div>`;
+  }).join('');
+  const heroDoneCount = line.heroes.filter(heroDone).length;
+  const vilPills = line.villains.map(v => _muPill(v.name, vilDone(v), VILLAIN_COLOR, v.box)).join('');
+  const vilDoneCount = line.villains.filter(vilDone).length;
+  return `
+      <div class="sky-airports mu-board">
+        <div class="st-head">
+          <span class="st-title">&#129464; Heroes Played</span>
+          <span class="st-count">${heroDoneCount} / ${line.heroes.length}</span>
+        </div>
+        ${heroRows}
+        <div class="mu-divider"></div>
+        <div class="st-head">
+          <span class="st-title">&#129465; Villains Defeated</span>
+          <span class="st-count mu-count-red">${vilDoneCount} / ${line.villains.length}</span>
+        </div>
+        <div class="st-row"><div class="st-pills">${vilPills}</div></div>
+        <div class="st-legend">Heroes tick when played &middot; villains when defeated (won) &middot; hover for set</div>
+      </div>`;
+}
 function isCoop(game) {
   return game.categories.includes('Co-op');
 }
@@ -6358,6 +6464,10 @@ function openModal(game) {
       </div>`;
   }
 
+  // Marvel United heroes/villains board — shown on the core game AND on every
+  // expansion page in the line, so it lives outside the play-history block.
+  const marvelUnitedHtml = buildMarvelUnitedHtml(game.bggId);
+
   content.innerHTML = `
     ${coverHtml}
     <div class="modal-body">
@@ -6382,6 +6492,7 @@ function openModal(game) {
         : `<a class="modal-bgg-link" href="https://boardgamegeek.com/geeksearch.php?action=search&objecttype=boardgame&q=${encodeURIComponent(game.name)}" target="_blank" rel="noopener">Search on BoardGameGeek &#8594;</a>`
       }
       ${game.bggId > 0 ? buildStarRatingHtml(game.bggId) : ''}
+      ${marvelUnitedHtml}
       ${playHistoryHtml}
       ${game.bggId > 0 ? buildNotesHtml(game.bggId) : ''}
     </div>
