@@ -631,6 +631,43 @@
   .mc-vpill.mc-std{color:#15151f;background:#5b8fd6;border-color:#5b8fd6}
   .mc-vpill.mc-lost{color:#fff;background:rgba(224,97,58,0.85);border-color:#e0613a}
   .mc-note{font-size:0.6rem;opacity:0.5;margin-top:0.6rem;line-height:1.4}
+  /* ── Eternal Decks stage ladder ── */
+  .ed-box{
+    margin-bottom:1.1rem;padding:0.8rem 0.9rem;border-radius:12px;
+    background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.07);
+  }
+  .ed-tier-label{font-size:0.58rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;opacity:0.55;margin:0.2rem 0 0.45rem}
+  .ed-tier-label.ed-adv{margin-top:0.85rem;display:flex;align-items:center;gap:0.5rem}
+  .ed-tier-label.locked{opacity:0.4}
+  .ed-lockhint{font-weight:600;text-transform:none;letter-spacing:0;font-size:0.58rem;opacity:0.8}
+  .ed-stages{display:flex;flex-direction:column;gap:0.3rem}
+  .ed-stages.dimmed{opacity:0.45}
+  .ed-stage{
+    display:flex;align-items:center;gap:0.55rem;padding:0.4rem 0.5rem;border-radius:8px;
+    background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);
+  }
+  .ed-letter{
+    flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;
+    min-width:1.7rem;height:1.5rem;padding:0 0.3rem;border-radius:6px;font-size:0.7rem;font-weight:800;
+    background:rgba(255,255,255,0.07);color:rgba(240,230,211,0.55);border:1px solid rgba(255,255,255,0.1);
+  }
+  .ed-name{flex:1;min-width:0;font-size:0.76rem;font-weight:600;color:rgba(240,230,211,0.7);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ed-tick{font-size:0.8rem;font-weight:900;color:#5bc46b;line-height:1}
+  .ed-diff{
+    flex-shrink:0;font-size:0.6rem;font-weight:800;padding:0.16rem 0.5rem;border-radius:14px;
+    background:rgba(255,255,255,0.06);color:rgba(240,230,211,0.45);
+  }
+  .ed-diff.none{background:transparent}
+  .ed-diff.lostlbl{background:rgba(224,97,58,0.16);color:#e0613a}
+  .ed-diff.hard{background:rgba(226,176,74,0.22);color:#f0c668}
+  .ed-stage.done{background:rgba(91,196,107,0.1);border-color:rgba(91,196,107,0.32)}
+  .ed-stage.done .ed-letter{background:#5bc46b;color:#15151f;border-color:#5bc46b}
+  .ed-stage.done .ed-name{color:#f0e6d3}
+  .ed-stage.done .ed-diff{background:rgba(91,196,107,0.18);color:#9fe3aa}
+  .ed-stage.done.hard{background:rgba(226,176,74,0.1);border-color:rgba(226,176,74,0.35)}
+  .ed-stage.done.hard .ed-letter{background:linear-gradient(135deg,#e2b04a,#f0c668);color:#15151f;border-color:#e2b04a}
+  .ed-stage.lost{border-color:rgba(224,97,58,0.3)}
+  .ed-stage.lost .ed-letter{color:#e0613a;border-color:rgba(224,97,58,0.4)}
   .play-entry{
     padding:0.6rem 0.7rem;border-radius:8px;margin-bottom:0.4rem;
     background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);
@@ -6280,6 +6317,68 @@ function wireMarvelChampions(){
     const a=t.dataset.mcAspect; selAspect=(selAspect===a)?null:a; renderDetail();
   });
 }
+// ── Eternal Decks: stage ladder ──
+// Co-op campaign of 6 stages (A–F, F = The Dragon), each playable at Beginner /
+// Standard / Expert / Pro, plus a New Game+ tier (A+–F+) unlocked after F.
+// Plays log "Difficulty／Stage X" in `b`. A stage is cleared on a won play; we
+// surface the *best* difficulty beaten (Expert/Pro highlighted gold).
+const ED_BGGID = 424981;
+const ED_DIFFS = ['Beginner','Standard','Expert','Pro']; // rank by index
+const ED_STAGES = [
+  {id:'A', name:'Nature Star'},{id:'B', name:'Ghost Town'},{id:'C', name:'Labyrinth'},
+  {id:'D', name:'Gatekeeper'},{id:'E', name:'Silent'},{id:'F', name:'The Dragon'},
+];
+function buildEternalDecksHtml(plays){
+  // status per stage id ('A','A+',...): {won:bool, bestDiff:idx|-1, attempted:bool}
+  const st = {};
+  ED_STAGES.forEach(s=>{ st[s.id]={won:false,bestDiff:-1,attempted:false}; st[s.id+'+']={won:false,bestDiff:-1,attempted:false}; });
+  for (const p of (plays||[])){
+    const b = String(p.b||'');
+    const m = b.match(/stage\s*([a-f])\s*(\+)?/i);
+    if (!m) continue;
+    const id = m[1].toUpperCase() + (m[2]?'+':'');
+    if (!(id in st)) continue;
+    const won = (p.sc||[]).some(s=>s.w);
+    let dIdx = -1;
+    ED_DIFFS.forEach((d,i)=>{ if (new RegExp('\\b'+d+'\\b','i').test(b)) dIdx = i; });
+    if (won){ st[id].won = true; if (dIdx>st[id].bestDiff) st[id].bestDiff = dIdx; }
+    else st[id].attempted = true;
+  }
+  const rung = (s, suffix) => {
+    const id = s.id + suffix;
+    const cur = st[id];
+    let cls='ed-stage', right='', tick='';
+    if (cur.won){
+      cls += ' done';
+      const hard = cur.bestDiff>=2; // Expert or Pro
+      if (hard) cls += ' hard';
+      tick = '<span class="ed-tick">&#10003;</span>';
+      right = `<span class="ed-diff${hard?' hard':''}">${cur.bestDiff>=0?ED_DIFFS[cur.bestDiff]:'Cleared'}</span>`;
+    } else if (cur.attempted){
+      cls += ' lost';
+      right = '<span class="ed-diff lostlbl">Attempted</span>';
+    } else {
+      right = '<span class="ed-diff none">&mdash;</span>';
+    }
+    return `<div class="${cls}"><span class="ed-letter">${id}</span><span class="ed-name">${s.name}</span>${tick}${right}</div>`;
+  };
+  const clearedCount = Object.values(st).filter(x=>x.won).length;
+  const baseDone = ED_STAGES.every(s=>st[s.id].won);
+  const campaign = ED_STAGES.map(s=>rung(s,'')).join('');
+  const advanced = ED_STAGES.map(s=>rung(s,'+')).join('');
+  return `
+      <div class="ed-box">
+        <div class="st-head">
+          <span class="st-title">&#127183; Stage Ladder</span>
+          <span class="st-count">${clearedCount} / ${ED_STAGES.length*2} cleared</span>
+        </div>
+        <div class="ed-tier-label">Campaign</div>
+        <div class="ed-stages">${campaign}</div>
+        <div class="ed-tier-label ed-adv${baseDone?'':' locked'}">New Game+ ${baseDone?'':'<span class="ed-lockhint">&#128274; clears after Stage F</span>'}</div>
+        <div class="ed-stages${baseDone?'':' dimmed'}">${advanced}</div>
+        <div class="st-legend">Cleared shows best difficulty &middot; Expert / Pro highlighted gold &middot; red = attempted</div>
+      </div>`;
+}
 function isCoop(game) {
   return game.categories.includes('Co-op');
 }
@@ -6763,6 +6862,7 @@ function openModal(game) {
   // expansion page in the line, so it lives outside the play-history block.
   const marvelUnitedHtml = buildMarvelUnitedHtml(game.bggId);
   const marvelChampionsHtml = buildMarvelChampionsHtml(game.bggId, plays);
+  const eternalDecksHtml = (Number(game.bggId) === ED_BGGID) ? buildEternalDecksHtml(plays || []) : '';
 
   content.innerHTML = `
     ${coverHtml}
@@ -6790,6 +6890,7 @@ function openModal(game) {
       ${game.bggId > 0 ? buildStarRatingHtml(game.bggId) : ''}
       ${marvelUnitedHtml}
       ${marvelChampionsHtml}
+      ${eternalDecksHtml}
       ${playHistoryHtml}
       ${game.bggId > 0 ? buildNotesHtml(game.bggId) : ''}
     </div>
