@@ -455,8 +455,10 @@
   .cp-stage{font-size:0.72rem;opacity:0.7;font-weight:600}
   .cp-bar-wrap{height:10px;background:rgba(255,255,255,0.08);border-radius:5px;overflow:hidden}
   .cp-bar{height:100%;border-radius:5px;background:linear-gradient(90deg,#e2b04a,#f0c668);transition:width 0.5s ease}
+  .cp-bar.complete{background:linear-gradient(90deg,#3fa34d,#5bc46b)}
   .cp-foot{display:flex;align-items:center;justify-content:space-between;gap:0.6rem;margin-top:0.4rem}
   .cp-reached{font-size:0.72rem;font-weight:600;color:var(--accent)}
+  .cp-reached.done{color:#5bc46b}
   .cp-pct{font-size:0.65rem;opacity:0.5;flex-shrink:0}
   /* ── Sky Team airport checklist ── */
   .sky-airports{
@@ -497,6 +499,41 @@
     display:inline-block;width:0.8rem;vertical-align:middle;margin-right:0.25rem;
     border-top:1.5px dashed rgba(240,230,211,0.6);
   }
+  /* ── Slay the Spire ascension ladder + the Heart ── */
+  .sts-box{
+    margin-bottom:1.1rem;padding:0.8rem 0.9rem;border-radius:12px;
+    background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.07);
+  }
+  .sts-ladder{display:flex;flex-wrap:wrap;gap:0.3rem}
+  .sts-rung{
+    display:inline-flex;align-items:center;justify-content:center;gap:0.1rem;
+    min-width:2.1rem;font-size:0.72rem;font-weight:800;letter-spacing:0.01em;
+    padding:0.3rem 0.45rem;border-radius:8px;cursor:default;
+    border:1px solid rgba(226,176,74,0.4);color:rgba(240,230,211,0.55);
+    background:rgba(226,176,74,0.06);opacity:0.6;transition:transform 0.12s ease;
+  }
+  .sts-rung.done{
+    opacity:1;color:#15151f;border-color:#e2b04a;
+    background:linear-gradient(135deg,#e2b04a,#f0c668);
+    box-shadow:0 1px 6px rgba(226,176,74,0.35);
+  }
+  .sts-rung.peak{outline:2px solid #f0c668;outline-offset:1px}
+  .sts-rung:hover{transform:translateY(-1px)}
+  .sts-tick{font-size:0.66rem;font-weight:900;line-height:1}
+  .sts-foot{font-size:0.72rem;font-weight:700;color:var(--accent);margin-top:0.6rem}
+  .sts-foot.dim{color:rgba(240,230,211,0.5);font-weight:600}
+  .sts-heart{
+    display:flex;align-items:center;gap:0.5rem;margin-top:0.7rem;padding-top:0.65rem;
+    border-top:1px solid rgba(255,255,255,0.08);
+  }
+  .sts-heart-icon{font-size:1.05rem;filter:grayscale(0.85);opacity:0.55}
+  .sts-heart.done .sts-heart-icon{filter:none;opacity:1}
+  .sts-heart-label{font-size:0.8rem;font-weight:700;flex:1}
+  .sts-heart-status{
+    font-size:0.68rem;font-weight:700;padding:0.18rem 0.6rem;border-radius:20px;
+    background:rgba(255,255,255,0.08);color:rgba(240,230,211,0.55);flex-shrink:0;
+  }
+  .sts-heart.done .sts-heart-status{background:#c0392b;color:#fff}
   .play-entry{
     padding:0.6rem 0.7rem;border-radius:8px;margin-bottom:0.4rem;
     background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);
@@ -5603,6 +5640,9 @@ function isNoResultGame(bggId) {
 // `reached` controls the line under the bar: 'stage' = computed stage,
 //   'tag' = the raw furthest tag (e.g. the full chapter name). `reachedPrefix`
 //   is the lead-in word for that line.
+// `complete` short-circuits to a finished 100% state (green bar) — for
+//   campaigns the user has fully cleared, or ones whose plays carry no stage
+//   tags to compute progress from. `completeText` is the line under the bar.
 //   456440 = Cozy Stickerville (10 in-game years)
 //   440540 = Take Time (10 folders × 4 clocks = 40 missions, win-gated)
 //   413246 = Bomb Busters (66 missions, win-gated)
@@ -5610,6 +5650,9 @@ function isNoResultGame(bggId) {
 //   284083 = The Crew: Quest for Planet Nine (50 missions, win-gated)
 //   429293 = Fellowship of the Ring trick-taking (18 chapters; tags mix
 //            "Campaign N"/"Chapter N" — only the number matters)
+//   291457 = Gloomhaven: Jaws of the Lion (campaign finished)
+//   295770 = Frosthaven (campaign finished; plays carry no scenario tags)
+//   241451 = Aeon's End: Legacy (legacy campaign finished)
 const CAMPAIGN_PROGRESS = {
   456440: { total: 10, label: 'Year', format: 'number' },
   440540: { total: 40, perFolder: 4, format: 'folder-clock', wonOnly: true, reachedPrefix: 'Furthest won' },
@@ -5617,10 +5660,20 @@ const CAMPAIGN_PROGRESS = {
   251661: { total: 21, label: 'Chapter', format: 'number', reached: 'tag', reachedPrefix: 'Latest' },
   284083: { total: 50, label: 'Mission', format: 'number', wonOnly: true },
   429293: { total: 18, label: 'Chapter', format: 'number', wonOnly: true },
+  291457: { complete: true, completeText: '✓ Campaign finished' },
+  295770: { complete: true, completeText: '✓ Campaign finished' },
+  241451: { complete: true, completeText: '✓ Legacy finished' },
 };
 function campaignProgress(bggId, plays) {
   const cfg = CAMPAIGN_PROGRESS[Number(bggId)];
   if (!cfg || !plays || !plays.length) return null;
+  if (cfg.complete) {
+    return {
+      current: cfg.total || 0, total: cfg.total || 0, pct: 100, complete: true,
+      stageText: cfg.completeStage || 'Complete',
+      reachedText: cfg.completeText || '✓ Campaign complete',
+    };
+  }
   const fmt = cfg.format || 'number';
   const perFolder = cfg.perFolder || 1;
   let current = 0, bestTag = '';
@@ -5774,6 +5827,52 @@ function buildSkyTeamHtml(plays) {
         </div>
         ${rows}
         <div class="st-legend"><span class="st-exp-dash"></span> dashed = expansion &middot; hover for full name</div>
+      </div>`;
+}
+// ── Slay the Spire: ascension ladder + the Heart ──
+// Not a linear campaign — instead you climb 10 ascension levels. An ascension
+// is "cleared" when you win a run by beating the Act III boss at that level.
+// The Heart (Corrupt Heart, Act IV) is a separate end-game challenge, tracked
+// on its own. Plays tag the ascension as "Ascension N" and the act/boss as
+// "Act III - <boss>"; the Heart shows up as a tag containing "Heart".
+const SLAY_SPIRE_BGGID = 338960;
+const SLAY_SPIRE_ASCENSIONS = 10;
+function buildSlaySpireHtml(plays) {
+  const cleared = new Set();
+  let heartDone = false;
+  for (const p of (plays || [])) {
+    if (!(p.sc || []).some(s => s.w)) continue; // only won runs count
+    const b = String(p.b || '');
+    if (/heart/i.test(b)) heartDone = true;
+    const am = b.match(/Ascension\s*(\d+)/i);
+    const asc = am ? parseInt(am[1], 10) : 0;
+    // A standard run is cleared by defeating the Act III boss.
+    if (asc >= 1 && /Act\s*III\b/i.test(b)) cleared.add(asc);
+  }
+  const highest = cleared.size ? Math.max(...cleared) : 0;
+  let rungs = '';
+  for (let i = 1; i <= SLAY_SPIRE_ASCENSIONS; i++) {
+    const done = cleared.has(i);
+    const cls = 'sts-rung' + (done ? ' done' : '') + (i === highest ? ' peak' : '');
+    const tick = done ? '<span class="sts-tick">&#10003;</span>' : '';
+    rungs += `<span class="${cls}" title="Ascension ${i}${done ? ' — cleared' : ''}">A${i}${tick}</span>`;
+  }
+  const heartCls = 'sts-heart' + (heartDone ? ' done' : '');
+  return `
+      <div class="sts-box">
+        <div class="st-head">
+          <span class="st-title">&#128508;&#65039; Ascension Ladder</span>
+          <span class="st-count">${cleared.size} / ${SLAY_SPIRE_ASCENSIONS}</span>
+        </div>
+        <div class="sts-ladder">${rungs}</div>
+        ${highest
+          ? `<div class="sts-foot">Highest cleared: Ascension ${highest}</div>`
+          : `<div class="sts-foot dim">No ascension cleared yet</div>`}
+        <div class="${heartCls}">
+          <span class="sts-heart-icon">&#10084;&#65039;</span>
+          <span class="sts-heart-label">Defeat the Heart</span>
+          <span class="sts-heart-status">${heartDone ? '&#10003; Defeated' : 'Not yet'}</span>
+        </div>
       </div>`;
 }
 function isCoop(game) {
@@ -6216,15 +6315,18 @@ function openModal(game) {
             <span class="cp-title">Campaign Progress</span>
             <span class="cp-stage">${cp.stageText}</span>
           </div>
-          <div class="cp-bar-wrap"><div class="cp-bar" style="width:${cp.pct}%"></div></div>
+          <div class="cp-bar-wrap"><div class="cp-bar${cp.complete ? ' complete' : ''}" style="width:${cp.pct}%"></div></div>
           <div class="cp-foot">
-            ${cp.reachedText ? `<span class="cp-reached">${cp.reachedText}</span>` : '<span></span>'}
+            ${cp.reachedText ? `<span class="cp-reached${cp.complete ? ' done' : ''}">${cp.reachedText}</span>` : '<span></span>'}
             <span class="cp-pct">${cp.pct}% complete</span>
           </div>
         </div>` : '';
 
     // Sky Team airport checklist (no percentage — a landed-airports board).
     const skyTeamHtml = (Number(game.bggId) === SKY_TEAM_BGGID) ? buildSkyTeamHtml(plays) : '';
+
+    // Slay the Spire ascension ladder + the Heart (custom, not a % bar).
+    const slaySpireHtml = (Number(game.bggId) === SLAY_SPIRE_BGGID) ? buildSlaySpireHtml(plays) : '';
 
     const visibleHtml = visiblePlays.map(renderPlay).join('');
     const hiddenHtml = hiddenPlays.length > 0
@@ -6246,6 +6348,7 @@ function openModal(game) {
         </div>
         ${campaignHtml}
         ${skyTeamHtml}
+        ${slaySpireHtml}
         ${visibleHtml}
         ${hiddenHtml}
       </div>`;
