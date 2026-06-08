@@ -5607,11 +5607,16 @@ function isNoResultGame(bggId) {
 //   440540 = Take Time (10 folders × 4 clocks = 40 missions, win-gated)
 //   413246 = Bomb Busters (66 missions, win-gated)
 //   251661 = Oathsworn (21 chapters)
+//   284083 = The Crew: Quest for Planet Nine (50 missions, win-gated)
+//   429293 = Fellowship of the Ring trick-taking (18 chapters; tags mix
+//            "Campaign N"/"Chapter N" — only the number matters)
 const CAMPAIGN_PROGRESS = {
   456440: { total: 10, label: 'Year', format: 'number' },
   440540: { total: 40, perFolder: 4, format: 'folder-clock', wonOnly: true, reachedPrefix: 'Furthest won' },
   413246: { total: 66, label: 'Mission', format: 'number', wonOnly: true },
   251661: { total: 21, label: 'Chapter', format: 'number', reached: 'tag', reachedPrefix: 'Latest' },
+  284083: { total: 50, label: 'Mission', format: 'number', wonOnly: true },
+  429293: { total: 18, label: 'Chapter', format: 'number', wonOnly: true },
 };
 function campaignProgress(bggId, plays) {
   const cfg = CAMPAIGN_PROGRESS[Number(bggId)];
