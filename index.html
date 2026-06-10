@@ -1284,6 +1284,73 @@
   }
   .lpm-view-all-btn:hover{background:rgba(226,176,74,0.22)}
 
+  /* ── Challenges ── */
+  .ch-year{font-size:0.72rem;opacity:0.55;margin-top:0.25rem}
+  .ch-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:0.9rem;margin-top:1rem}
+  .ch-card{
+    border-radius:14px;padding:1rem 1.05rem 0.7rem;cursor:pointer;
+    background:linear-gradient(150deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015));
+    border:1px solid rgba(255,255,255,0.09);
+    transition:border-color 0.15s, background 0.15s;
+  }
+  .ch-card:hover{border-color:rgba(226,176,74,0.4)}
+  .ch-card.done{
+    background:linear-gradient(150deg, rgba(226,176,74,0.16), rgba(226,176,74,0.04));
+    border-color:rgba(226,176,74,0.45);
+    box-shadow:0 0 16px rgba(226,176,74,0.12);
+  }
+  .ch-head{display:flex;justify-content:space-between;align-items:flex-start;gap:0.7rem}
+  .ch-name{font-size:0.95rem;font-weight:800;color:var(--accent);letter-spacing:0.03em}
+  .ch-tag{
+    display:inline-block;vertical-align:2px;margin-left:0.3rem;padding:0.1rem 0.4rem;
+    border-radius:999px;font-size:0.52rem;font-weight:700;letter-spacing:0.08em;
+    background:rgba(226,176,74,0.15);color:#f0c668;text-transform:uppercase;
+  }
+  .ch-tag-alltime{background:rgba(91,143,214,0.18);color:#9dbef0}
+  .ch-sub{font-size:0.72rem;opacity:0.6;margin-top:0.18rem}
+  .ch-score{font-size:1.55rem;font-weight:800;color:#f0e6d3;white-space:nowrap;line-height:1.1}
+  .ch-score-sub{font-size:0.8rem;font-weight:600;opacity:0.45}
+  .ch-big{font-size:2.7rem;font-weight:800;color:#f0c668;line-height:1.05;text-align:center;margin-top:0.55rem}
+  .ch-viz{margin-top:0.75rem}
+  .ch-dotrow{display:flex;gap:0.28rem;margin-bottom:0.28rem}
+  .ch-dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.08);flex-shrink:0}
+  .ch-dot.on{background:#e2b04a;box-shadow:0 0 5px rgba(226,176,74,0.45)}
+  .ch-letters{display:flex;flex-wrap:wrap;gap:0.3rem;margin-top:0.75rem}
+  .ch-letter{
+    width:25px;height:25px;border-radius:7px;flex-shrink:0;
+    display:inline-flex;align-items:center;justify-content:center;
+    font-size:0.68rem;font-weight:700;
+    background:rgba(255,255,255,0.05);color:rgba(240,230,211,0.3);
+    border:1px solid rgba(255,255,255,0.06);
+  }
+  .ch-letter.on{
+    background:rgba(226,176,74,0.18);color:#f0c668;
+    border-color:rgba(226,176,74,0.4);
+  }
+  .ch-bar{height:6px;border-radius:3px;background:rgba(255,255,255,0.07);margin-top:0.75rem;overflow:hidden}
+  .ch-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#e2b04a,#f0c668)}
+  .ch-detail{
+    display:none;margin-top:0.8rem;padding-top:0.7rem;
+    border-top:1px solid rgba(255,255,255,0.08);
+    max-height:340px;overflow-y:auto;
+  }
+  .ch-card.open .ch-detail{display:block}
+  .ch-expand{font-size:0.62rem;opacity:0.45;text-align:center;margin-top:0.6rem;padding-bottom:0.2rem}
+  .ch-x-hide{display:none}
+  .ch-card.open .ch-x-show{display:none}
+  .ch-card.open .ch-x-hide{display:inline}
+  .ch-row{display:flex;align-items:center;gap:0.55rem;padding:0.32rem 0.4rem;border-radius:8px;cursor:pointer}
+  .ch-row:hover{background:rgba(255,255,255,0.06)}
+  .ch-row-img{width:34px;height:34px;border-radius:6px;object-fit:cover;flex-shrink:0;background:#2a2a2a}
+  .ch-row-name{flex:1;min-width:0;font-size:0.78rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ch-row-extra{font-size:0.72rem;color:var(--accent);white-space:nowrap}
+  .ch-row-extra b{font-size:0.8rem}
+  .ch-over{opacity:0.55;color:#f0e6d3}
+  .ch-empty{font-size:0.75rem;opacity:0.5;padding:0.3rem}
+  .ch-missing{font-size:0.72rem;opacity:0.65;margin-top:0.55rem;line-height:1.5}
+  .ch-missing b{color:#f0e6d3}
+  .ch-done-txt{color:#5bc46b;opacity:0.9}
+
   /* ── H-index ── */
   .hi-section{margin-bottom:1.3rem}
   .hi-card{
@@ -1857,6 +1924,7 @@
   <button class="player-bar-btn" id="btn-mystats">Profile</button>
   <button class="player-bar-btn" id="btn-leaderboard">Leaderboard</button>
   <button class="player-bar-btn" id="btn-achievements">Achievements</button>
+  <button class="player-bar-btn" id="btn-challenges">Challenges</button>
   <button class="player-bar-btn" id="btn-insights">Stats</button>
   <button class="player-bar-btn" id="btn-boardsouth" style="display:none">Board South</button>
 </div>
@@ -1938,6 +2006,7 @@
 <div class="stats-view" id="games-view"></div>
 <div class="stats-view" id="leaderboard-view"></div>
 <div class="stats-view" id="achievements-view"></div>
+<div class="stats-view" id="challenges-view"></div>
 <div class="stats-view" id="boardsouth-view"></div>
 <div class="stats-view" id="ilioupoli-view"></div>
 
@@ -6664,6 +6733,7 @@ let _modalOpenedFromGames = false;
 let _modalOpenedFromLeaderboard = false;
 let _modalOpenedFromBoardSouth = false;
 let _modalOpenedFromIlioupoli = false;
+let _modalOpenedFromChallenges = false;
 
 function _setViewport(content) {
   const vp = document.querySelector('meta[name=viewport]');
@@ -6677,7 +6747,7 @@ function _scrollToShelfCenter() {
 
 function _restoreAfterModal() {
   if (!_isTouchDevice()) return;
-  if (_modalOpenedFromStats || _modalOpenedFromInsights || _modalOpenedFromGames || _modalOpenedFromLeaderboard || _modalOpenedFromBoardSouth || _modalOpenedFromIlioupoli) {
+  if (_modalOpenedFromStats || _modalOpenedFromInsights || _modalOpenedFromGames || _modalOpenedFromLeaderboard || _modalOpenedFromBoardSouth || _modalOpenedFromIlioupoli || _modalOpenedFromChallenges) {
     document.body.style.minWidth = 'auto';
     _setViewport(VP_LOCKED);
     window.scrollTo(0, 0);
@@ -6707,6 +6777,9 @@ function closeModal() {
       showBoardSouthView();
     } else if (_modalOpenedFromIlioupoli) {
       showIlioupoliView();
+    } else if (_modalOpenedFromChallenges) {
+      const player = localStorage.getItem('bgl-player');
+      if (player) showChallengesView(player);
     }
     if (history.state && history.state.modal) history.back();
   }
@@ -6730,6 +6803,9 @@ window.addEventListener('popstate', e => {
       showBoardSouthView();
     } else if (_modalOpenedFromIlioupoli) {
       showIlioupoliView();
+    } else if (_modalOpenedFromChallenges) {
+      const player = localStorage.getItem('bgl-player');
+      if (player) showChallengesView(player);
     }
   }
 });
@@ -6741,6 +6817,7 @@ function openModal(game) {
   _modalOpenedFromLeaderboard = document.getElementById('leaderboard-view').classList.contains('open');
   _modalOpenedFromBoardSouth = document.getElementById('boardsouth-view').classList.contains('open');
   _modalOpenedFromIlioupoli = document.getElementById('ilioupoli-view').classList.contains('open');
+  _modalOpenedFromChallenges = document.getElementById('challenges-view').classList.contains('open');
   const overlay = document.getElementById('modal-overlay');
   const content = document.getElementById('modal-content');
 
@@ -7066,6 +7143,7 @@ function _deactivateAllTabs() {
   document.getElementById('games-view').classList.remove('open');
   document.getElementById('leaderboard-view').classList.remove('open');
   document.getElementById('achievements-view').classList.remove('open');
+  document.getElementById('challenges-view').classList.remove('open');
   document.getElementById('boardsouth-view').classList.remove('open');
   document.getElementById('ilioupoli-view').classList.remove('open');
   document.getElementById('btn-library').classList.remove('active');
@@ -7074,6 +7152,7 @@ function _deactivateAllTabs() {
   document.getElementById('btn-games').classList.remove('active');
   document.getElementById('btn-leaderboard').classList.remove('active');
   document.getElementById('btn-achievements').classList.remove('active');
+  document.getElementById('btn-challenges').classList.remove('active');
   document.getElementById('btn-boardsouth').classList.remove('active');
   document.getElementById('btn-ilioupoli').classList.remove('active');
 }
@@ -7129,6 +7208,17 @@ function switchToGames() {
     window.scrollTo(0, 0);
   }
   showGamesView();
+  // Ratings are fetched once at startup, but the page often stays open for
+  // days — ratings made on other devices would never appear. Refresh in the
+  // background and re-render if anything changed (skip while mid-search so
+  // we don't wipe the user's query).
+  refreshRatings().then(changed => {
+    const view = document.getElementById('games-view');
+    const search = document.getElementById('games-search');
+    if (changed && view && view.classList.contains('open') && (!search || !search.value)) {
+      showGamesView();
+    }
+  });
 }
 
 function switchToLeaderboard() {
@@ -7157,6 +7247,21 @@ function switchToAchievements() {
     window.scrollTo(0, 0);
   }
   showAchievementsView(player);
+}
+
+function switchToChallenges() {
+  const player = localStorage.getItem('bgl-player');
+  if (!player) { openPicker(); return; }
+  _deactivateAllTabs();
+  document.getElementById('challenges-view').classList.add('open');
+  document.getElementById('btn-challenges').classList.add('active');
+  if (_isTouchDevice()) {
+    document.body.style.minWidth = 'auto';
+    document.body.classList.remove('mobile-library');
+    _setViewport(VP_LOCKED);
+    window.scrollTo(0, 0);
+  }
+  showChallengesView(player);
 }
 
 function switchToBoardSouth() {
@@ -7206,6 +7311,7 @@ document.getElementById('btn-leaderboard').addEventListener('click', switchToLea
 document.getElementById('btn-mystats').addEventListener('click', switchToStats);
 document.getElementById('btn-insights').addEventListener('click', switchToInsights);
 document.getElementById('btn-achievements').addEventListener('click', switchToAchievements);
+document.getElementById('btn-challenges').addEventListener('click', switchToChallenges);
 document.getElementById('btn-boardsouth').addEventListener('click', switchToBoardSouth);
 document.getElementById('btn-ilioupoli').addEventListener('click', switchToIlioupoli);
 
@@ -7917,6 +8023,205 @@ function showAchievementsView(playerName) {
     ${recentHtml}
     ${allHtml}`;
   window.scrollTo(0, 0);
+}
+
+// ── Challenges view ──
+// Personal yearly challenges in the BGStats tradition: 10×10, Alphabet and
+// New-to-me count only the current calendar year's plays, so they reset
+// automatically every January 1st. The H-index card is all-time.
+let _chOpenCard = null; // which card's detail panel stays expanded across re-renders
+
+function computeChallenges(playerName) {
+  const year = String(new Date().getFullYear());
+  const gameName = (id) => { const g = findGameByBggId(id); return (g && g.name) || ('Game #' + id); };
+
+  const plays = [];
+  for (const bggId in PLAY_HISTORY) {
+    for (const p of PLAY_HISTORY[bggId]) {
+      if (!p || !p.date || !Array.isArray(p.sc)) continue;
+      if (p.sc.some(s => s && s.n === playerName)) plays.push({ bggId: Number(bggId), date: p.date });
+    }
+  }
+  plays.sort((a, b) => a.date.localeCompare(b.date));
+
+  // New to me: games whose first-EVER play (all history) falls in this year.
+  const firstPlay = {};
+  for (const p of plays) if (!(p.bggId in firstPlay)) firstPlay[p.bggId] = p.date;
+  const newToMe = Object.keys(firstPlay)
+    .filter(id => firstPlay[id].slice(0, 4) === year)
+    .map(id => ({ bggId: Number(id), name: gameName(id), date: firstPlay[id] }))
+    .sort((a, b) => b.date.localeCompare(a.date));
+
+  const yearPlays = plays.filter(p => p.date.slice(0, 4) === year);
+
+  // 10×10: ten games played ten times each within the year. Progress is the
+  // number of "banked" plays — each game contributes at most 10.
+  const counts = {};
+  for (const p of yearPlays) counts[p.bggId] = (counts[p.bggId] || 0) + 1;
+  const tenTop = Object.keys(counts)
+    .map(id => ({ bggId: Number(id), name: gameName(id), count: counts[id] }))
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
+    .slice(0, 10);
+  const tenFilled = tenTop.reduce((s, g) => s + Math.min(g.count, 10), 0);
+  const tenComplete = tenTop.length === 10 && tenTop.every(g => g.count >= 10);
+
+  // Alphabet: cover all 26 letters with the first A-Z letter found in each
+  // game's name ("7 Wonders" counts as W). First covering play wins.
+  const alpha = {};
+  for (const p of yearPlays) {
+    const m = gameName(p.bggId).toUpperCase().match(/[A-Z]/);
+    if (m && !alpha[m[0]]) alpha[m[0]] = { bggId: p.bggId, name: gameName(p.bggId), date: p.date };
+  }
+
+  return {
+    year, yearPlayCount: yearPlays.length, newToMe,
+    tenTop, tenFilled, tenComplete,
+    alpha, alphaCount: Object.keys(alpha).length,
+    hi: _computeHIndex(playerName)
+  };
+}
+
+function showChallengesView(playerName) {
+  const container = document.getElementById('challenges-view');
+  if (!container) return;
+  const d = computeChallenges(playerName);
+  const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+  const open = (key) => _chOpenCard === key ? ' open' : '';
+
+  const gameRow = (g, extra) => `
+    <div class="ch-row" data-bgg-id="${g.bggId}">
+      <img class="ch-row-img" src="images/${g.bggId}.jpg" alt="" onerror="this.style.display='none'">
+      <span class="ch-row-name">${g.name}</span>
+      <span class="ch-row-extra">${extra}</span>
+    </div>`;
+
+  // ── 10×10 ──
+  let dotRows = '';
+  for (let i = 0; i < 10; i++) {
+    const g = d.tenTop[i];
+    let dots = '';
+    for (let j = 0; j < 10; j++) dots += `<span class="ch-dot${g && g.count > j ? ' on' : ''}"></span>`;
+    dotRows += `<div class="ch-dotrow">${dots}</div>`;
+  }
+  const tenDetail = d.tenTop.length
+    ? d.tenTop.map(g => gameRow(g, `<b>${Math.min(g.count, 10)}</b>/10${g.count > 10 ? ` <span class="ch-over">+${g.count - 10}</span>` : ''}`)).join('')
+    : `<div class="ch-empty">No plays logged yet in ${d.year}.</div>`;
+
+  // ── Alphabet ──
+  const alphaChips = LETTERS.map(L => `<span class="ch-letter${d.alpha[L] ? ' on' : ''}">${L}</span>`).join('');
+  const missing = LETTERS.filter(L => !d.alpha[L]);
+  const alphaDetail =
+    LETTERS.filter(L => d.alpha[L]).map(L => {
+      const a = d.alpha[L];
+      return `<div class="ch-row" data-bgg-id="${a.bggId}">
+        <span class="ch-letter on">${L}</span>
+        <span class="ch-row-name">${a.name}</span>
+        <span class="ch-row-extra">${_fmtDateShort(a.date)}</span>
+      </div>`;
+    }).join('') +
+    (missing.length
+      ? `<div class="ch-missing">Missing: ${missing.join(' &middot; ')}</div>`
+      : `<div class="ch-missing ch-done-txt">Every letter covered — alphabet complete!</div>`);
+
+  // ── New to me ──
+  const newDetail = d.newToMe.length
+    ? d.newToMe.map(g => gameRow(g, _fmtDateShort(g.date))).join('')
+    : `<div class="ch-empty">No new games discovered yet in ${d.year}.</div>`;
+
+  // ── H-index (all-time) ──
+  const hiCore = d.hi.list.slice(0, d.hi.h);
+  const hiName = (id) => { const g = findGameByBggId(id); return (g && g.name) || ('Game #' + id); };
+  let hiNext = '';
+  if (d.hi.list.length > d.hi.h) {
+    const nxt = d.hi.list[d.hi.h];
+    const need = (d.hi.h + 1) - nxt.count;
+    if (need > 0) hiNext = `<div class="ch-missing">Next: <b>${hiName(nxt.bggId)}</b> needs ${need} more play${need === 1 ? '' : 's'} to reach H&nbsp;${d.hi.h + 1}</div>`;
+  }
+  const hiDetail = hiCore.map(it => gameRow({ bggId: it.bggId, name: hiName(it.bggId) }, `${it.count}&times;`)).join('') + hiNext;
+
+  container.innerHTML = `
+    <div class="lb-header">
+      <div class="lb-title">${playerName}'s Challenges</div>
+      <div class="ch-year">${d.year} season &middot; ${d.yearPlayCount} plays &middot; yearly challenges reset January 1st</div>
+    </div>
+    <div class="ch-grid">
+
+      <div class="ch-card${d.tenComplete ? ' done' : ''}${open('ten')}" data-ch="ten">
+        <div class="ch-head">
+          <div>
+            <div class="ch-name">10 &times; 10 <span class="ch-tag">${d.year}</span></div>
+            <div class="ch-sub">Play 10 games 10 times each</div>
+          </div>
+          <div class="ch-score">${d.tenFilled}<span class="ch-score-sub">/100</span></div>
+        </div>
+        <div class="ch-viz">${dotRows}</div>
+        <div class="ch-bar"><div class="ch-bar-fill" style="width:${d.tenFilled}%"></div></div>
+        <div class="ch-detail">${tenDetail}</div>
+        <div class="ch-expand"><span class="ch-x-show">&#9662; show games</span><span class="ch-x-hide">&#9652; hide</span></div>
+      </div>
+
+      <div class="ch-card${d.alphaCount === 26 ? ' done' : ''}${open('alpha')}" data-ch="alpha">
+        <div class="ch-head">
+          <div>
+            <div class="ch-name">Alphabet <span class="ch-tag">${d.year}</span></div>
+            <div class="ch-sub">Play a game for every letter A&ndash;Z</div>
+          </div>
+          <div class="ch-score">${d.alphaCount}<span class="ch-score-sub">/26</span></div>
+        </div>
+        <div class="ch-letters">${alphaChips}</div>
+        <div class="ch-bar"><div class="ch-bar-fill" style="width:${Math.round(d.alphaCount / 26 * 100)}%"></div></div>
+        <div class="ch-detail">${alphaDetail}</div>
+        <div class="ch-expand"><span class="ch-x-show">&#9662; show letters</span><span class="ch-x-hide">&#9652; hide</span></div>
+      </div>
+
+      <div class="ch-card${open('new')}" data-ch="new">
+        <div class="ch-head">
+          <div>
+            <div class="ch-name">New To Me <span class="ch-tag">${d.year}</span></div>
+            <div class="ch-sub">Games played for the very first time</div>
+          </div>
+        </div>
+        <div class="ch-big">${d.newToMe.length}</div>
+        <div class="ch-sub" style="text-align:center">new game${d.newToMe.length === 1 ? '' : 's'} discovered in ${d.year}</div>
+        <div class="ch-detail">${newDetail}</div>
+        <div class="ch-expand"><span class="ch-x-show">&#9662; show games</span><span class="ch-x-hide">&#9652; hide</span></div>
+      </div>
+
+      <div class="ch-card${open('hindex')}" data-ch="hindex">
+        <div class="ch-head">
+          <div>
+            <div class="ch-name">H-Index <span class="ch-tag ch-tag-alltime">all-time</span></div>
+            <div class="ch-sub">${d.hi.h} games played at least ${d.hi.h} times each</div>
+          </div>
+        </div>
+        <div class="ch-big">${d.hi.h}</div>
+        <div class="ch-sub" style="text-align:center">lifetime h-index</div>
+        <div class="ch-detail">${hiDetail}</div>
+        <div class="ch-expand"><span class="ch-x-show">&#9662; show games</span><span class="ch-x-hide">&#9652; hide</span></div>
+      </div>
+
+    </div>`;
+  window.scrollTo(0, 0);
+  wireChallenges();
+}
+
+function wireChallenges() {
+  const container = document.getElementById('challenges-view');
+  if (!container) return;
+  container.querySelectorAll('.ch-card').forEach(card => {
+    card.addEventListener('click', (e) => {
+      const rowEl = e.target.closest('.ch-row');
+      if (rowEl && rowEl.dataset.bggId) {
+        const g = findGameByBggId(rowEl.dataset.bggId);
+        if (g) openModal(g);
+        return;
+      }
+      const wasOpen = card.classList.contains('open');
+      container.querySelectorAll('.ch-card').forEach(c => c.classList.remove('open'));
+      if (!wasOpen) card.classList.add('open');
+      _chOpenCard = wasOpen ? null : card.dataset.ch;
+    });
+  });
 }
 
 // ── Ilioupoli Bros — Δημητρης's private library shelf ──
@@ -8834,6 +9139,30 @@ async function loadAllRatings() {
   } catch (e) {
     console.warn('Failed to load ratings from Firebase:', e);
     ratingsCacheReady = true;
+  }
+}
+
+// Re-fetch all ratings from Firebase. Returns true when the fresh data
+// differs from the in-memory cache (caller decides whether to re-render).
+// Unlike loadAllRatings this never writes migrations back — by now every
+// stored rating is already in {value, updatedAt} shape.
+async function refreshRatings() {
+  if (!FIREBASE_DB) return false;
+  try {
+    const res = await fetch(`${FIREBASE_DB}/ratings.json`);
+    const data = await res.json();
+    if (!data) return false;
+    for (const bggId in data) {
+      for (const player in data[bggId]) {
+        const v = data[bggId][player];
+        if (typeof v === 'number') data[bggId][player] = { value: v, updatedAt: 0 };
+      }
+    }
+    if (JSON.stringify(data) === JSON.stringify(ratingsCache)) return false;
+    ratingsCache = data;
+    return true;
+  } catch (_) {
+    return false;
   }
 }
 
