@@ -1341,8 +1341,10 @@
     background:var(--ch-soft);color:var(--ch-a);
     border-color:var(--ch-bord);
   }
-  .ch-bar{height:6px;border-radius:3px;background:rgba(255,255,255,0.07);margin-top:0.75rem;overflow:hidden}
-  .ch-bar-fill{height:100%;border-radius:3px;background:var(--ch-a)}
+  .ch-barrow{display:flex;align-items:center;gap:0.55rem;margin-top:1.05rem}
+  .ch-bar{flex:1;height:11px;border-radius:6px;background:rgba(255,255,255,0.07);overflow:hidden}
+  .ch-bar-fill{height:100%;border-radius:6px;background:var(--ch-a)}
+  .ch-pct{font-size:0.78rem;font-weight:700;color:var(--ch-a);min-width:2.6em;text-align:right}
   .ch-detail{
     display:none;margin-top:0.8rem;padding-top:0.7rem;
     border-top:1px solid rgba(255,255,255,0.08);
@@ -8105,7 +8107,10 @@ function showChallengesView(playerName) {
           <div class="ch-score">${d.tenFilled}<span class="ch-score-sub">/100</span></div>
         </div>
         <div class="ch-viz">${dotRows}</div>
-        <div class="ch-bar"><div class="ch-bar-fill" style="width:${d.tenFilled}%"></div></div>
+        <div class="ch-barrow">
+          <div class="ch-bar"><div class="ch-bar-fill" style="width:${d.tenFilled}%"></div></div>
+          <span class="ch-pct">${d.tenFilled}%</span>
+        </div>
       </div>
 
       <div class="ch-card${d.alphaCount === 26 ? ' done' : ''}${open('alpha')}" data-ch="alpha">
@@ -8117,7 +8122,10 @@ function showChallengesView(playerName) {
           <div class="ch-score">${d.alphaCount}<span class="ch-score-sub">/26</span></div>
         </div>
         <div class="ch-letters">${alphaChips}</div>
-        <div class="ch-bar"><div class="ch-bar-fill" style="width:${Math.round(d.alphaCount / 26 * 100)}%"></div></div>
+        <div class="ch-barrow">
+          <div class="ch-bar"><div class="ch-bar-fill" style="width:${Math.round(d.alphaCount / 26 * 100)}%"></div></div>
+          <span class="ch-pct">${Math.round(d.alphaCount / 26 * 100)}%</span>
+        </div>
         <div class="ch-detail">${alphaDetail}</div>
         <div class="ch-expand"><span class="ch-x-show">&#9662; show letters</span><span class="ch-x-hide">&#9652; hide</span></div>
       </div>
