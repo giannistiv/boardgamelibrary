@@ -1284,6 +1284,19 @@
   }
   .lpm-view-all-btn:hover{background:rgba(226,176,74,0.22)}
 
+  /* ── Explore sub-tabs ── */
+  .explore-tabs{display:flex;gap:0.5rem;justify-content:center;margin:0.3rem 0 1.2rem}
+  .explore-tab{
+    padding:0.42rem 1.15rem;border-radius:999px;
+    font-size:0.82rem;font-weight:600;font-family:inherit;
+    background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+    color:rgba(240,230,211,0.6);cursor:pointer;transition:all 0.15s;
+  }
+  .explore-tab:hover{border-color:rgba(226,176,74,0.4);color:rgba(240,230,211,0.85)}
+  .explore-tab.active{
+    background:rgba(226,176,74,0.16);border-color:rgba(226,176,74,0.5);color:#f0c668;
+  }
+
   /* ── Challenges ── */
   /* Each card carries its own accent palette via CSS variables so the tab
      doesn't repeat the site-wide gold: --ch-a (accent), --ch-soft (tinted
@@ -1906,12 +1919,11 @@
 <div class="player-bar" id="player-bar">
   <button class="player-bar-btn active" id="btn-library">Library</button>
   <button class="player-bar-btn" id="btn-ilioupoli" style="display:none">Ilioupoli Bros</button>
-  <button class="player-bar-btn" id="btn-games">Games</button>
+  <button class="player-bar-btn" id="btn-games">Explore</button>
   <button class="player-bar-btn" id="btn-mystats">Profile</button>
   <button class="player-bar-btn" id="btn-leaderboard">Leaderboard</button>
   <button class="player-bar-btn" id="btn-achievements">Achievements</button>
   <button class="player-bar-btn" id="btn-challenges">Challenges</button>
-  <button class="player-bar-btn" id="btn-insights">Stats</button>
   <button class="player-bar-btn" id="btn-boardsouth" style="display:none">Board South</button>
 </div>
 
@@ -1988,7 +2000,6 @@
 </div><!-- /library-view -->
 
 <div class="stats-view" id="stats-view"></div>
-<div class="stats-view" id="insights-view"></div>
 <div class="stats-view" id="games-view"></div>
 <div class="stats-view" id="leaderboard-view"></div>
 <div class="stats-view" id="achievements-view"></div>
@@ -6714,7 +6725,6 @@ const VP_LIBRARY = 'width=1200, user-scalable=yes';
 const VP_LOCKED  = 'width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no';
 const _isTouchDevice = () => 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 let _modalOpenedFromStats = false;
-let _modalOpenedFromInsights = false;
 let _modalOpenedFromGames = false;
 let _modalOpenedFromLeaderboard = false;
 let _modalOpenedFromBoardSouth = false;
@@ -6733,7 +6743,7 @@ function _scrollToShelfCenter() {
 
 function _restoreAfterModal() {
   if (!_isTouchDevice()) return;
-  if (_modalOpenedFromStats || _modalOpenedFromInsights || _modalOpenedFromGames || _modalOpenedFromLeaderboard || _modalOpenedFromBoardSouth || _modalOpenedFromIlioupoli || _modalOpenedFromChallenges) {
+  if (_modalOpenedFromStats || _modalOpenedFromGames || _modalOpenedFromLeaderboard || _modalOpenedFromBoardSouth || _modalOpenedFromIlioupoli || _modalOpenedFromChallenges) {
     document.body.style.minWidth = 'auto';
     _setViewport(VP_LOCKED);
     window.scrollTo(0, 0);
@@ -6750,9 +6760,7 @@ function closeModal() {
     overlay.classList.remove('open');
     document.body.classList.remove('modal-open');
     _restoreAfterModal();
-    if (_modalOpenedFromInsights) {
-      showInsightsView();
-    } else if (_modalOpenedFromStats) {
+    if (_modalOpenedFromStats) {
       const player = _viewingProfile || localStorage.getItem('bgl-player');
       if (player) showStatsView(player, _viewingProfile ? 'visiting' : undefined);
     } else if (_modalOpenedFromGames) {
@@ -6776,9 +6784,7 @@ window.addEventListener('popstate', e => {
     overlay.classList.remove('open');
     document.body.classList.remove('modal-open');
     _restoreAfterModal();
-    if (_modalOpenedFromInsights) {
-      showInsightsView();
-    } else if (_modalOpenedFromStats) {
+    if (_modalOpenedFromStats) {
       const player = _viewingProfile || localStorage.getItem('bgl-player');
       if (player) showStatsView(player, _viewingProfile ? 'visiting' : undefined);
     } else if (_modalOpenedFromGames) {
@@ -6798,7 +6804,6 @@ window.addEventListener('popstate', e => {
 
 function openModal(game) {
   _modalOpenedFromStats = document.getElementById('stats-view').classList.contains('open');
-  _modalOpenedFromInsights = document.getElementById('insights-view').classList.contains('open');
   _modalOpenedFromGames = document.getElementById('games-view').classList.contains('open');
   _modalOpenedFromLeaderboard = document.getElementById('leaderboard-view').classList.contains('open');
   _modalOpenedFromBoardSouth = document.getElementById('boardsouth-view').classList.contains('open');
@@ -7125,7 +7130,6 @@ document.getElementById('picker-overlay').addEventListener('click', e => {
 function _deactivateAllTabs() {
   document.getElementById('library-view').style.display = 'none';
   document.getElementById('stats-view').classList.remove('open');
-  document.getElementById('insights-view').classList.remove('open');
   document.getElementById('games-view').classList.remove('open');
   document.getElementById('leaderboard-view').classList.remove('open');
   document.getElementById('achievements-view').classList.remove('open');
@@ -7134,7 +7138,6 @@ function _deactivateAllTabs() {
   document.getElementById('ilioupoli-view').classList.remove('open');
   document.getElementById('btn-library').classList.remove('active');
   document.getElementById('btn-mystats').classList.remove('active');
-  document.getElementById('btn-insights').classList.remove('active');
   document.getElementById('btn-games').classList.remove('active');
   document.getElementById('btn-leaderboard').classList.remove('active');
   document.getElementById('btn-achievements').classList.remove('active');
@@ -7168,19 +7171,6 @@ function switchToStats() {
     window.scrollTo(0, 0);
   }
   showStatsView(player);
-}
-
-function switchToInsights() {
-  _deactivateAllTabs();
-  document.getElementById('insights-view').classList.add('open');
-  document.getElementById('btn-insights').classList.add('active');
-  if (_isTouchDevice()) {
-    document.body.style.minWidth = 'auto';
-    document.body.classList.remove('mobile-library');
-    _setViewport(VP_LOCKED);
-    window.scrollTo(0, 0);
-  }
-  showInsightsView();
 }
 
 function switchToGames() {
@@ -7295,7 +7285,6 @@ document.getElementById('btn-library').addEventListener('click', switchToLibrary
 document.getElementById('btn-games').addEventListener('click', switchToGames);
 document.getElementById('btn-leaderboard').addEventListener('click', switchToLeaderboard);
 document.getElementById('btn-mystats').addEventListener('click', switchToStats);
-document.getElementById('btn-insights').addEventListener('click', switchToInsights);
 document.getElementById('btn-achievements').addEventListener('click', switchToAchievements);
 document.getElementById('btn-challenges').addEventListener('click', switchToChallenges);
 document.getElementById('btn-boardsouth').addEventListener('click', switchToBoardSouth);
@@ -8603,7 +8592,7 @@ function _goBackFromProfile() {
   _statsViewSource = null;
   _viewingProfile = null;
   if (src === 'leaderboard') switchToLeaderboard();
-  else if (src === 'insights') switchToInsights();
+  else if (src === 'insights') { _exploreTab = 'players'; switchToGames(); }
   else switchToLibrary();
 }
 window._goBackFromProfile = _goBackFromProfile;
@@ -8616,7 +8605,7 @@ function showStatsView(playerName, visiting) {
   if (visiting && !isOwnProfile) {
     if (!_statsViewSource) {
       const lbOpen = document.getElementById('leaderboard-view').classList.contains('open');
-      const insOpen = document.getElementById('insights-view').classList.contains('open');
+      const insOpen = document.getElementById('games-view').classList.contains('open');
       if (lbOpen) _statsViewSource = 'leaderboard';
       else if (insOpen) _statsViewSource = 'insights';
     }
@@ -8790,7 +8779,7 @@ function showStatsView(playerName, visiting) {
   };
 
   const backBtnHtml = (!isOwnProfile && _statsViewSource)
-    ? `<button class="profile-back-btn" onclick="_goBackFromProfile()">← Back to ${_statsViewSource === 'leaderboard' ? 'Leaderboard' : 'Stats'}</button>`
+    ? `<button class="profile-back-btn" onclick="_goBackFromProfile()">← Back to ${_statsViewSource === 'leaderboard' ? 'Leaderboard' : 'Players'}</button>`
     : '';
 
   // Head-to-head when viewing someone else's profile
@@ -9576,23 +9565,26 @@ function buildChartsHtml(days, locations, total) {
 }
 
 // ── Insights View ──
-function showInsightsView() {
-  const container = document.getElementById('insights-view');
+// ── Explore (merged Games + Players + Stats) ──
+let _exploreTab = 'games'; // active sub-tab; survives re-renders and modal round-trips
 
-  // Overall game stats
+function showGamesView() {
+  const container = document.getElementById('games-view');
+
+  // ── Shared computations across all three sub-tabs ──
   const gamePlayCounts = {};
   const allDays = {};
   const allLocs = {};
   let totalPlays = 0;
   const playerStats = {};
+  const allPlays = [];
 
   for (const bggId in PLAY_HISTORY) {
-    const game = GAMES.find(g => g.bggId === Number(bggId))
-      || EXTRA_GAMES[bggId]
-      || {id:'bgg_'+bggId, name:'Game #'+bggId, bggId:Number(bggId), spineColor:'#555', categories:[]};
-
+    const game = findGameByBggId(bggId)
+      || { id: 'bgg_' + bggId, name: 'Game #' + bggId, bggId: Number(bggId), spineColor: '#555', categories: [] };
     for (const play of PLAY_HISTORY[bggId]) {
       totalPlays++;
+      allPlays.push({ game, date: play.date, sc: play.sc, b: play.b || '' });
       if (!gamePlayCounts[bggId]) gamePlayCounts[bggId] = { game, count: 0 };
       gamePlayCounts[bggId].count++;
 
@@ -9613,79 +9605,208 @@ function showInsightsView() {
       }
     }
   }
+  allPlays.sort((a, b) => b.date.localeCompare(a.date));
 
+  const gameRowHtml = (game, detail) => {
+    const imgSrc = game.bggId > 0 ? `images/${game.bggId}.jpg` : '';
+    return `<div class="stats-game-row" data-bgg-id="${game.bggId}">
+      ${imgSrc ? `<img class="stats-game-img" src="${imgSrc}" alt="" onerror="__imgFallback(this, ${game.bggId})">` : ''}
+      <div class="stats-game-info">
+        <div class="stats-game-name">${game.name}</div>
+        <div class="stats-game-detail">${detail}</div>
+      </div>
+    </div>`;
+  };
+
+  // ── Games sub-tab ──
+  const buildGamesTab = () => {
+    const cutoff = (() => {
+      const d = new Date();
+      d.setDate(d.getDate() - 90);
+      return d.toISOString().slice(0, 10);
+    })();
+    const recentCounts = {};
+    for (const p of allPlays) {
+      if (p.date < cutoff) continue;
+      const id = p.game.bggId;
+      if (!recentCounts[id]) recentCounts[id] = { game: p.game, count: 0, lastPlayed: '' };
+      recentCounts[id].count++;
+      if (p.date > recentCounts[id].lastPlayed) recentCounts[id].lastPlayed = p.date;
+    }
+    const mostPlayedRecent = Object.values(recentCounts)
+      .sort((a, b) => b.count - a.count || b.lastPlayed.localeCompare(a.lastPlayed)).slice(0, 10);
+    const topGames = Object.values(gamePlayCounts).sort((a, b) => b.count - a.count).slice(0, 15);
+
+    const newestRatings = [];
+    for (const bggId in ratingsCache) {
+      for (const player in ratingsCache[bggId]) {
+        const r = ratingsCache[bggId][player];
+        const value = typeof r === 'number' ? r : (r && r.value) || 0;
+        const updatedAt = (r && typeof r === 'object' && r.updatedAt) || 0;
+        if (!value) continue;
+        newestRatings.push({ bggId: Number(bggId), player, value, updatedAt });
+      }
+    }
+    newestRatings.sort((a, b) => b.updatedAt - a.updatedAt);
+    const newestTop = newestRatings.filter(r => r.updatedAt > 0).slice(0, 10);
+    const ratingRowHtml = (r) => {
+      const game = findGameByBggId(r.bggId) || { name: 'Game #' + r.bggId, bggId: r.bggId };
+      const imgSrc = r.bggId > 0 ? `images/${r.bggId}.jpg` : '';
+      return `<div class="stats-game-row" data-bgg-id="${r.bggId}">
+        ${imgSrc ? `<img class="stats-game-img" src="${imgSrc}" alt="" onerror="__imgFallback(this, ${r.bggId})">` : ''}
+        <div class="stats-game-info">
+          <div class="stats-game-name">${game.name}</div>
+          <div class="stats-game-detail">${r.player} &middot; ${_timeAgo(r.updatedAt)}</div>
+        </div>
+        <div class="stats-game-wr" style="color:#e2b04a">&#9733; ${r.value}</div>
+      </div>`;
+    };
+
+    return `
+      <div class="stats-section">
+        <input type="text" class="insights-search" id="games-search" placeholder="Search all games..." autocomplete="off">
+        <div id="games-search-results"></div>
+      </div>
+
+      ${mostPlayedRecent.length > 0 ? `<div class="stats-section">
+        <div class="stats-section-title">Most Played Recently</div>
+        <div class="stats-player-sub" style="margin:-0.3rem 0 0.6rem">Last 90 days</div>
+        ${mostPlayedRecent.map(gs => gameRowHtml(gs.game, `${gs.count} play${gs.count !== 1 ? 's' : ''} &middot; Last: ${_fmtDateShort(gs.lastPlayed)}`)).join('')}
+      </div>` : ''}
+
+      <div class="stats-section">
+        <div class="stats-section-title">Most Played All-Time</div>
+        ${topGames.map(gs => gameRowHtml(gs.game, `${gs.count} play${gs.count !== 1 ? 's' : ''}`)).join('')}
+      </div>
+
+      ${newestTop.length > 0 ? `<div class="stats-section">
+        <div class="stats-section-title">Newest Ratings</div>
+        ${newestTop.map(ratingRowHtml).join('')}
+      </div>` : ''}`;
+  };
+
+  // ── Players sub-tab ──
   const wrColor = (wr) => {
     if (wr >= 70) return '#22c55e';
     if (wr >= 50) return '#a3e635';
     if (wr >= 35) return '#e2b04a';
     return '#f87171';
   };
-
-  // Top games
-  const topGames = Object.values(gamePlayCounts).sort((a, b) => b.count - a.count).slice(0, 15);
-  const topGamesHtml = topGames.map(gs => {
-    const imgSrc = gs.game.bggId > 0 ? `images/${gs.game.bggId}.jpg` : '';
-    return `<div class="stats-game-row" data-bgg-id="${gs.game.bggId}">
-      ${imgSrc ? `<img class="stats-game-img" src="${imgSrc}" alt="" onerror="__imgFallback(this, ${gs.game.bggId})">` : ''}
-      <div class="stats-game-info">
-        <div class="stats-game-name">${gs.game.name}</div>
-        <div class="stats-game-detail">${gs.count} play${gs.count !== 1 ? 's' : ''}</div>
-      </div>
-    </div>`;
-  }).join('');
-
-  // Top players
   const topPlayers = Object.entries(playerStats)
     .filter(([, d]) => d.plays >= 2)
     .map(([name, d]) => ({ name, plays: d.plays, wins: d.wins, games: d.games.size, wr: Math.round(d.wins / d.plays * 100) }))
     .sort((a, b) => b.plays - a.plays);
 
-  // Charts
-  const chartsHtml = `<div class="stats-section"><div class="chart-row">${buildPieHtml(allDays, totalPlays, 'Play Days')}${buildPieHtml(allLocs, totalPlays, 'Locations', 5)}</div></div>`;
-
-  container.innerHTML = `
-    <div class="stats-header">
-      <div class="stats-player-name">Stats</div>
-      <div class="stats-player-sub">${totalPlays} plays across ${Object.keys(gamePlayCounts).length} games</div>
-    </div>
-
-    ${chartsHtml}
-
-    <div class="stats-section">
-      <div class="stats-section-title">Most Played Games</div>
-      ${topGamesHtml}
-    </div>
-
+  const buildPlayersTab = () => `
     <div class="stats-section stats-players-section">
       <div class="stats-section-title">Players</div>
       <input type="text" class="insights-search" id="insights-player-search" placeholder="Search for more..." autocomplete="off">
       <div id="insights-player-list">
         ${_renderInsightsPlayers(topPlayers.slice(0, 10), wrColor)}
       </div>
+    </div>`;
+
+  // ── Stats sub-tab ──
+  const buildStatsTab = () => {
+    const playRowHtml = (p) => {
+      const scoresHtml = p.sc.map(s => {
+        const cls = s.w ? ' winner' : '';
+        const trophy = s.w ? '<span class="trophy">&#9733;</span>' : '';
+        const score = s.s ? ` (${s.s})` : '';
+        const roleHtml = s.r ? `<span class="play-role">${s.r}</span>` : '';
+        return `<span class="play-score${cls}"><span class="play-player"><span class="play-player-name">${trophy}${s.n}${score}</span>${roleHtml}</span></span>`;
+      }).join('');
+      const boardHtml = p.b ? `<span class="stats-recent-result">&nbsp;&middot; &#9876; ${p.b}</span>` : '';
+      return `<div class="stats-recent-play" data-bgg-id="${p.game.bggId}">
+        <div class="stats-recent-top">
+          <span class="stats-recent-game">${p.game.name}</span>
+          <span class="stats-recent-date">${_fmtDateShort(p.date)}</span>
+        </div>
+        <div class="play-scores" style="margin-top:0.3rem">${scoresHtml}</div>
+        ${boardHtml}
+      </div>`;
+    };
+    return `
+      <div class="stats-section"><div class="chart-row">${buildPieHtml(allDays, totalPlays, 'Play Days')}${buildPieHtml(allLocs, totalPlays, 'Locations', 5)}</div></div>
+      <div class="stats-section">
+        <div class="stats-section-title">Recent Plays</div>
+        ${allPlays.slice(0, 20).map(playRowHtml).join('')}
+      </div>`;
+  };
+
+  const tabContent = _exploreTab === 'players' ? buildPlayersTab()
+    : _exploreTab === 'stats' ? buildStatsTab()
+    : buildGamesTab();
+
+  const tabBtn = (key, label) =>
+    `<button class="explore-tab${_exploreTab === key ? ' active' : ''}" data-tab="${key}">${label}</button>`;
+
+  container.innerHTML = `
+    <div class="stats-header">
+      <div class="stats-player-name">Explore</div>
+      <div class="stats-player-sub">${totalPlays} plays &middot; ${Object.keys(gamePlayCounts).length} games &middot; ${topPlayers.length} players</div>
     </div>
+    <div class="explore-tabs">
+      ${tabBtn('games', 'Games')}${tabBtn('players', 'Players')}${tabBtn('stats', 'Stats')}
+    </div>
+    ${tabContent}
   `;
 
-  // Wire game rows
-  container.querySelectorAll('[data-bgg-id]').forEach(el => {
+  // Sub-tab switching
+  container.querySelectorAll('.explore-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (_exploreTab === btn.dataset.tab) return;
+      _exploreTab = btn.dataset.tab;
+      showGamesView();
+    });
+  });
+
+  // Wire game/play rows (covers every sub-tab's [data-bgg-id] rows)
+  container.querySelectorAll('.stats-section [data-bgg-id]').forEach(el => {
     el.addEventListener('click', () => {
       const game = findGameByBggId(el.dataset.bggId);
       if (game) openModal(game);
     });
   });
 
-  // Wire player search
-  const searchEl = document.getElementById('insights-player-search');
-  searchEl.addEventListener('input', () => {
-    const q = searchEl.value.toLowerCase();
-    const filtered = q ? topPlayers.filter(p => p.name.toLowerCase().includes(q)) : topPlayers.slice(0, 10);
-    const listEl = document.getElementById('insights-player-list');
-    listEl.innerHTML = _renderInsightsPlayers(filtered, wrColor);
-    _wireInsightsPlayerClicks(listEl);
-  });
+  // Games sub-tab: search across every catalogue
+  const searchEl = document.getElementById('games-search');
+  if (searchEl) {
+    const resultsEl = document.getElementById('games-search-results');
+    const allGames = _allGames();
+    const renderSearch = (q) => {
+      if (!q) { resultsEl.innerHTML = ''; return; }
+      const ql = q.toLowerCase();
+      const matches = allGames
+        .filter(g => (g.name || '').toLowerCase().includes(ql))
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .slice(0, 20);
+      if (!matches.length) { resultsEl.innerHTML = '<div class="stats-player-sub" style="padding:0.6rem">No matches</div>'; return; }
+      resultsEl.innerHTML = matches.map(g => gameRowHtml(g, `${g.year || ''}${g.players ? ' &middot; ' + g.players + ' players' : ''}`)).join('');
+      resultsEl.querySelectorAll('[data-bgg-id]').forEach(el => {
+        el.addEventListener('click', () => {
+          const game = findGameByBggId(el.dataset.bggId);
+          if (game) openModal(game);
+        });
+      });
+    };
+    searchEl.addEventListener('input', () => renderSearch(searchEl.value.trim()));
+  }
 
-  _wireInsightsPlayerClicks(container);
-  window.scrollTo(0, 0);
+  // Players sub-tab: player search
+  const playerSearchEl = document.getElementById('insights-player-search');
+  if (playerSearchEl) {
+    playerSearchEl.addEventListener('input', () => {
+      const q = playerSearchEl.value.toLowerCase();
+      const filtered = q ? topPlayers.filter(p => p.name.toLowerCase().includes(q)) : topPlayers.slice(0, 10);
+      const listEl = document.getElementById('insights-player-list');
+      listEl.innerHTML = _renderInsightsPlayers(filtered, wrColor);
+      _wireInsightsPlayerClicks(listEl);
+    });
+    _wireInsightsPlayerClicks(container);
+  }
 }
+
 
 // ── Games Tab ──
 function _fmtDateShort(d) {
@@ -9727,161 +9848,7 @@ function _allGames() {
   return all;
 }
 
-function showGamesView() {
-  const container = document.getElementById('games-view');
 
-  // Global recent plays across all players
-  const allPlays = [];
-  for (const bggId in PLAY_HISTORY) {
-    const game = findGameByBggId(bggId) || { name: 'Game #' + bggId, bggId: Number(bggId) };
-    for (const play of PLAY_HISTORY[bggId]) {
-      allPlays.push({ game, date: play.date, sc: play.sc, b: play.b || '' });
-    }
-  }
-  allPlays.sort((a, b) => b.date.localeCompare(a.date));
-
-  // Most played recently (last 90 days)
-  const cutoff = (() => {
-    const d = new Date();
-    d.setDate(d.getDate() - 90);
-    return d.toISOString().slice(0, 10);
-  })();
-  const playCounts = {};
-  for (const p of allPlays) {
-    if (p.date < cutoff) continue;
-    const id = p.game.bggId;
-    if (!playCounts[id]) playCounts[id] = { game: p.game, count: 0, lastPlayed: '' };
-    playCounts[id].count++;
-    if (p.date > playCounts[id].lastPlayed) playCounts[id].lastPlayed = p.date;
-  }
-  const mostPlayed = Object.values(playCounts).sort((a,b) => b.count - a.count || b.lastPlayed.localeCompare(a.lastPlayed)).slice(0, 10);
-
-  // Newest ratings
-  const newestRatings = [];
-  for (const bggId in ratingsCache) {
-    for (const player in ratingsCache[bggId]) {
-      const r = ratingsCache[bggId][player];
-      const value = typeof r === 'number' ? r : (r && r.value) || 0;
-      const updatedAt = (r && typeof r === 'object' && r.updatedAt) || 0;
-      if (!value) continue;
-      newestRatings.push({ bggId: Number(bggId), player, value, updatedAt });
-    }
-  }
-  newestRatings.sort((a, b) => b.updatedAt - a.updatedAt);
-  const newestTop = newestRatings.filter(r => r.updatedAt > 0).slice(0, 10);
-
-  const playRowHtml = (p) => {
-    const scoresHtml = p.sc.map(s => {
-      const cls = s.w ? ' winner' : '';
-      const trophy = s.w ? '<span class="trophy">&#9733;</span>' : '';
-      const score = s.s ? ` (${s.s})` : '';
-      const roleHtml = s.r ? `<span class="play-role">${s.r}</span>` : '';
-      return `<span class="play-score${cls}"><span class="play-player"><span class="play-player-name">${trophy}${s.n}${score}</span>${roleHtml}</span></span>`;
-    }).join('');
-    const boardHtml = p.b ? `<span class="stats-recent-result">&nbsp;&middot; &#9876; ${p.b}</span>` : '';
-    return `<div class="stats-recent-play" data-bgg-id="${p.game.bggId}">
-      <div class="stats-recent-top">
-        <span class="stats-recent-game">${p.game.name}</span>
-        <span class="stats-recent-date">${_fmtDateShort(p.date)}</span>
-      </div>
-      <div class="play-scores" style="margin-top:0.3rem">${scoresHtml}</div>
-      ${boardHtml}
-    </div>`;
-  };
-
-  const gameRowHtml = (entry) => {
-    const imgSrc = entry.game.bggId > 0 ? `images/${entry.game.bggId}.jpg` : '';
-    return `<div class="stats-game-row" data-bgg-id="${entry.game.bggId}">
-      ${imgSrc ? `<img class="stats-game-img" src="${imgSrc}" alt="" onerror="__imgFallback(this, ${entry.game.bggId})">` : ''}
-      <div class="stats-game-info">
-        <div class="stats-game-name">${entry.game.name}</div>
-        <div class="stats-game-detail">${entry.count} play${entry.count!==1?'s':''} &middot; Last: ${_fmtDateShort(entry.lastPlayed)}</div>
-      </div>
-    </div>`;
-  };
-
-  const ratingRowHtml = (r) => {
-    const game = findGameByBggId(r.bggId) || { name: 'Game #' + r.bggId, bggId: r.bggId };
-    const imgSrc = r.bggId > 0 ? `images/${r.bggId}.jpg` : '';
-    return `<div class="stats-game-row" data-bgg-id="${r.bggId}">
-      ${imgSrc ? `<img class="stats-game-img" src="${imgSrc}" alt="" onerror="__imgFallback(this, ${r.bggId})">` : ''}
-      <div class="stats-game-info">
-        <div class="stats-game-name">${game.name}</div>
-        <div class="stats-game-detail">${r.player} &middot; ${_timeAgo(r.updatedAt)}</div>
-      </div>
-      <div class="stats-game-wr" style="color:#e2b04a">&#9733; ${r.value}</div>
-    </div>`;
-  };
-
-  container.innerHTML = `
-    <div class="stats-header">
-      <div class="stats-player-name">Games</div>
-      <div class="stats-player-sub">Search, rate, and explore plays</div>
-    </div>
-
-    <div class="stats-section">
-      <input type="text" class="insights-search" id="games-search" placeholder="Search all games..." autocomplete="off">
-      <div id="games-search-results"></div>
-    </div>
-
-    ${mostPlayed.length > 0 ? `<div class="stats-section">
-      <div class="stats-section-title">Most Played Recently</div>
-      <div class="stats-player-sub" style="margin:-0.3rem 0 0.6rem">Last 90 days</div>
-      ${mostPlayed.map(gameRowHtml).join('')}
-    </div>` : ''}
-
-    ${newestTop.length > 0 ? `<div class="stats-section">
-      <div class="stats-section-title">Newest Ratings</div>
-      ${newestTop.map(ratingRowHtml).join('')}
-    </div>` : ''}
-
-    <div class="stats-section">
-      <div class="stats-section-title">Recent Plays</div>
-      ${allPlays.slice(0, 20).map(playRowHtml).join('')}
-    </div>
-  `;
-
-  // Search
-  const searchEl = document.getElementById('games-search');
-  const resultsEl = document.getElementById('games-search-results');
-  const allGames = _allGames();
-  const renderSearch = (q) => {
-    if (!q) { resultsEl.innerHTML = ''; return; }
-    const ql = q.toLowerCase();
-    const matches = allGames
-      .filter(g => (g.name || '').toLowerCase().includes(ql))
-      .sort((a,b) => a.name.localeCompare(b.name))
-      .slice(0, 20);
-    if (!matches.length) { resultsEl.innerHTML = '<div class="stats-player-sub" style="padding:0.6rem">No matches</div>'; return; }
-    resultsEl.innerHTML = matches.map(g => {
-      const imgSrc = g.bggId > 0 ? `images/${g.bggId}.jpg` : '';
-      return `<div class="stats-game-row" data-bgg-id="${g.bggId}">
-        ${imgSrc ? `<img class="stats-game-img" src="${imgSrc}" alt="" onerror="__imgFallback(this, ${g.bggId})">` : ''}
-        <div class="stats-game-info">
-          <div class="stats-game-name">${g.name}</div>
-          <div class="stats-game-detail">${g.year || ''}${g.players ? ' &middot; ' + g.players + ' players' : ''}</div>
-        </div>
-      </div>`;
-    }).join('');
-    resultsEl.querySelectorAll('[data-bgg-id]').forEach(el => {
-      el.addEventListener('click', () => {
-        const game = findGameByBggId(el.dataset.bggId);
-        if (game) openModal(game);
-      });
-    });
-  };
-  searchEl.addEventListener('input', () => renderSearch(searchEl.value.trim()));
-
-  // Wire game rows
-  container.querySelectorAll('.stats-section [data-bgg-id]').forEach(el => {
-    el.addEventListener('click', () => {
-      const game = findGameByBggId(el.dataset.bggId);
-      if (game) openModal(game);
-    });
-  });
-
-  window.scrollTo(0, 0);
-}
 
 // ── Leaderboard (Elo) ──
 const AUZTRALIA_BGG_IDS = new Set([231581, 320110]); // base + Tasmania
