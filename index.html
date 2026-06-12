@@ -1314,6 +1314,9 @@
   .ch-card[data-ch="alpha"]{--ch-a:#b48ee0; --ch-soft:rgba(180,142,224,0.16); --ch-bord:rgba(180,142,224,0.42)}
   .ch-card[data-ch="new"]{--ch-a:#6fcf7c; --ch-soft:rgba(111,207,124,0.15); --ch-bord:rgba(111,207,124,0.42)}
   .ch-card[data-ch="hindex"]{--ch-a:#5b9dd6; --ch-soft:rgba(91,157,214,0.16); --ch-bord:rgba(91,157,214,0.42)}
+  .ch-card[data-ch="bingo"]{--ch-a:#e8995d; --ch-soft:rgba(232,153,93,0.15); --ch-bord:rgba(232,153,93,0.42)}
+  .ch-card[data-ch="eras"]{--ch-a:#62c4dd; --ch-soft:rgba(98,196,221,0.15); --ch-bord:rgba(98,196,221,0.42)}
+  .ch-card[data-ch="weight"]{--ch-a:#e07a93; --ch-soft:rgba(224,122,147,0.15); --ch-bord:rgba(224,122,147,0.42)}
   .ch-card:hover{border-color:var(--ch-bord)}
   .ch-card.done{
     background:linear-gradient(150deg, var(--ch-soft), rgba(255,255,255,0.015));
@@ -1354,6 +1357,43 @@
     background:var(--ch-soft);color:var(--ch-a);
     border-color:var(--ch-bord);
   }
+  /* Category Bingo 4×4 card */
+  .ch-bingo{display:grid;grid-template-columns:repeat(4,1fr);gap:0.32rem;margin-top:0.8rem}
+  .ch-bingo-cell{
+    position:relative;aspect-ratio:1;border-radius:9px;overflow:hidden;
+    background:rgba(255,255,255,0.045);border:1px solid rgba(255,255,255,0.07);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .ch-bingo-cell.on{border-color:var(--ch-bord);align-items:flex-end;cursor:pointer;box-shadow:0 0 7px var(--ch-soft)}
+  .ch-bingo-cell img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .ch-bingo-lbl{
+    position:relative;z-index:1;width:100%;text-align:center;
+    font-size:0.56rem;font-weight:700;letter-spacing:0.01em;line-height:1.15;
+    padding:0.18rem 0.15rem;color:rgba(240,230,211,0.4);
+  }
+  .ch-bingo-cell.on .ch-bingo-lbl{background:rgba(15,15,18,0.78);color:var(--ch-a)}
+  /* Time Traveler era strip */
+  .ch-eras{display:flex;gap:0.22rem;margin-top:0.85rem}
+  .ch-era{flex:1;display:flex;flex-direction:column;align-items:center;gap:0.3rem;min-width:0}
+  .ch-era-seg{width:100%;height:26px;border-radius:6px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.07)}
+  .ch-era.on .ch-era-seg{background:var(--ch-soft);border-color:var(--ch-bord);box-shadow:0 0 6px var(--ch-soft)}
+  .ch-era-lbl{font-size:0.55rem;font-weight:600;opacity:0.45;white-space:nowrap}
+  .ch-era.on .ch-era-lbl{color:var(--ch-a);opacity:1}
+  .ch-letter.ch-era-chip{width:auto;min-width:44px;padding:0 0.4rem;font-size:0.72rem}
+  /* Weight Ladder rungs */
+  .ch-rungs{margin-top:0.8rem}
+  .ch-rung{
+    display:flex;align-items:center;gap:0.55rem;
+    padding:0.3rem 0.45rem;border-radius:8px;margin-bottom:0.25rem;
+    background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);
+  }
+  .ch-rung.on{background:var(--ch-soft);border-color:var(--ch-bord);cursor:pointer}
+  .ch-rung-lbl{flex-shrink:0;width:62px;font-size:0.7rem;font-weight:700;opacity:0.55}
+  .ch-rung.on .ch-rung-lbl{color:var(--ch-a);opacity:1}
+  .ch-rung-img{width:30px;height:30px;border-radius:6px;object-fit:cover;flex-shrink:0;background:#2a2a2a}
+  .ch-rung-name{flex:1;min-width:0;font-size:0.76rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ch-rung-w{font-size:0.7rem;font-weight:700;color:var(--ch-a);flex-shrink:0}
+  .ch-rung-empty{font-size:0.75rem;opacity:0.3}
   .ch-barrow{display:flex;align-items:center;gap:0.55rem;margin-top:1.05rem}
   .ch-bar{flex:1;height:11px;border-radius:6px;background:rgba(255,255,255,0.07);overflow:hidden}
   .ch-bar-fill{height:100%;border-radius:6px;background:var(--ch-a)}
@@ -8011,13 +8051,103 @@ function computeChallenges(playerName) {
     if (m && !alpha[m[0]]) alpha[m[0]] = { bggId: p.bggId, name: gameName(p.bggId), date: p.date };
   }
 
+  // Time Traveler: play a game from every 5-year release era ('pre' = before
+  // 1980). First covering play claims the era.
+  const eras = {};
+  for (const p of yearPlays) {
+    const g = findGameByBggId(p.bggId);
+    const y = g && g.year;
+    if (!y || y < 1900) continue;
+    const k = y < 1980 ? 'pre' : String(Math.min(Math.floor(y / 5) * 5, 2025));
+    if (!eras[k]) eras[k] = { bggId: p.bggId, name: gameName(p.bggId), date: p.date, year: y };
+  }
+
+  // Weight Ladder: one game from every complexity band (heaviest first).
+  const weights = {};
+  for (const p of yearPlays) {
+    const g = findGameByBggId(p.bggId);
+    const c = g && g.complexity;
+    if (!c) continue;
+    const band = CH_WEIGHT_BANDS.find(b => c >= b.min && c < b.max);
+    if (band && !weights[band.key]) weights[band.key] = { bggId: p.bggId, name: gameName(p.bggId), date: p.date, complexity: c };
+  }
+
+  // Category Bingo: a personal 4×4 card of 16 categories, shuffled with a
+  // seed of player+year so everyone gets their own layout each season. The
+  // twist: every square must be claimed by a DIFFERENT game. Plays are
+  // walked chronologically; each new game claims the scarcest matching
+  // square still open.
+  const rng = (() => {
+    let h = 1779033703;
+    const s = playerName + '·' + year;
+    for (let i = 0; i < s.length; i++) { h = Math.imul(h ^ s.charCodeAt(i), 3432918353); h = (h << 13) | (h >>> 19); }
+    return () => { h = Math.imul(h ^ (h >>> 16), 2246822507); h = Math.imul(h ^ (h >>> 13), 3266489909); return ((h ^= h >>> 16) >>> 0) / 4294967296; };
+  })();
+  const bingoCard = CH_BINGO_CATS.slice();
+  for (let i = bingoCard.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [bingoCard[i], bingoCard[j]] = [bingoCard[j], bingoCard[i]];
+  }
+  const bingoCovered = {};
+  const bingoUsed = new Set();
+  for (const p of yearPlays) {
+    if (bingoUsed.has(p.bggId)) continue;
+    const g = findGameByBggId(p.bggId);
+    if (!g || !Array.isArray(g.categories) || !g.categories.length) continue;
+    const options = [];
+    for (let i = 0; i < 16; i++) {
+      if (!bingoCovered[i] && g.categories.includes(bingoCard[i])) options.push(i);
+    }
+    if (!options.length) continue;
+    options.sort((a, b) => CH_CAT_RARITY[bingoCard[a]] - CH_CAT_RARITY[bingoCard[b]]);
+    bingoCovered[options[0]] = { bggId: p.bggId, name: gameName(p.bggId), date: p.date };
+    bingoUsed.add(p.bggId);
+  }
+  const bingoLines = CH_BINGO_LINES.filter(L => L.every(i => bingoCovered[i])).length;
+
   return {
     year, yearPlayCount: yearPlays.length, newToMe,
     tenTop, tenFilled, tenComplete,
     alpha, alphaCount: Object.keys(alpha).length,
+    eras, eraCount: Object.keys(eras).length,
+    weights, weightCount: Object.keys(weights).length,
+    bingoCard, bingoCovered, bingoCount: Object.keys(bingoCovered).length, bingoLines,
     hi: _computeHIndex(playerName)
   };
 }
+
+// Era bands for Time Traveler: pre-1980, then 5-year steps to the present.
+const CH_ERA_BANDS = [
+  { key: 'pre',  label: "&le;'79" },
+  { key: '1980', label: "'80" }, { key: '1985', label: "'85" },
+  { key: '1990', label: "'90" }, { key: '1995', label: "'95" },
+  { key: '2000', label: "'00" }, { key: '2005', label: "'05" },
+  { key: '2010', label: "'10" }, { key: '2015', label: "'15" },
+  { key: '2020', label: "'20" }, { key: '2025', label: "'25" },
+];
+
+// Complexity rungs for the Weight Ladder, heaviest at the top.
+const CH_WEIGHT_BANDS = [
+  { key: 'w40', label: '4.0+',        min: 4.0, max: 9.9 },
+  { key: 'w35', label: '3.5–4.0', min: 3.5, max: 4.0 },
+  { key: 'w30', label: '3.0–3.5', min: 3.0, max: 3.5 },
+  { key: 'w25', label: '2.5–3.0', min: 2.5, max: 3.0 },
+  { key: 'w20', label: '2.0–2.5', min: 2.0, max: 2.5 },
+  { key: 'w15', label: '1.5–2.0', min: 1.5, max: 2.0 },
+  { key: 'w10', label: '< 1.5',        min: 0.1, max: 1.5 },
+];
+
+// The 16 bingo categories. Fantasy, Solo, Racing and Area Control are left
+// out — too few games carry them for anyone but the heaviest player to have
+// a real shot. Rarity ranks (fewest plays first) decide which square a
+// multi-category game claims.
+const CH_BINGO_CATS = ['Co-op','Strategy','Thematic','Card Game','Family','Campaign','Puzzle','Adventure','Deck Building','Euro','Abstract','Party','Deduction','Dice','Engine Building','Worker Placement'];
+const CH_CAT_RARITY = { 'Worker Placement': 0, 'Engine Building': 1, 'Dice': 2, 'Deduction': 3, 'Party': 4, 'Abstract': 5, 'Euro': 6, 'Deck Building': 7, 'Adventure': 8, 'Puzzle': 9, 'Campaign': 10, 'Family': 11, 'Card Game': 12, 'Thematic': 13, 'Strategy': 14, 'Co-op': 15 };
+const CH_BINGO_LINES = [
+  [0,1,2,3],[4,5,6,7],[8,9,10,11],[12,13,14,15],
+  [0,4,8,12],[1,5,9,13],[2,6,10,14],[3,7,11,15],
+  [0,5,10,15],[3,6,9,12],
+];
 
 function showChallengesView(playerName) {
   const container = document.getElementById('challenges-view');
@@ -8063,6 +8193,61 @@ function showChallengesView(playerName) {
     (missing.length
       ? `<div class="ch-missing">Missing: ${missing.join(' &middot; ')}</div>`
       : `<div class="ch-missing ch-done-txt">Every letter covered — alphabet complete!</div>`);
+
+  // ── Category Bingo ──
+  const bingoCells = d.bingoCard.map((cat, i) => {
+    const c = d.bingoCovered[i];
+    return c
+      ? `<div class="ch-bingo-cell on" data-bgg-id="${c.bggId}" title="${cat} — ${c.name} (${_fmtDateShort(c.date)})">
+          <img src="images/${c.bggId}.jpg" alt="" onerror="__imgFallback(this, ${c.bggId})">
+          <span class="ch-bingo-lbl">${cat}</span>
+        </div>`
+      : `<div class="ch-bingo-cell"><span class="ch-bingo-lbl">${cat}</span></div>`;
+  }).join('');
+  const bingoStatus = d.bingoCount === 16
+    ? 'BLACKOUT! Card complete'
+    : (d.bingoLines
+      ? `BINGO &times;${d.bingoLines} &mdash; blackout to finish`
+      : 'complete a row, column or diagonal for BINGO');
+
+  // ── Time Traveler ──
+  const eraSegs = CH_ERA_BANDS.map(b => {
+    const e = d.eras[b.key];
+    return `<div class="ch-era${e ? ' on' : ''}"${e ? ` title="${e.name} (${e.year})"` : ''}>
+      <div class="ch-era-seg"></div>
+      <span class="ch-era-lbl">${b.label}</span>
+    </div>`;
+  }).join('');
+  const eraMissing = CH_ERA_BANDS.filter(b => !d.eras[b.key]);
+  const eraDetail =
+    CH_ERA_BANDS.filter(b => d.eras[b.key]).map(b => {
+      const e = d.eras[b.key];
+      return `<div class="ch-row" data-bgg-id="${e.bggId}">
+        <span class="ch-letter on ch-era-chip">${b.label}</span>
+        <img class="ch-row-img" src="images/${e.bggId}.jpg" alt="" onerror="__imgFallback(this, ${e.bggId})">
+        <span class="ch-row-name">${e.name} <span class="ch-over">(${e.year})</span></span>
+        <span class="ch-row-extra">${_fmtDateShort(e.date)}</span>
+      </div>`;
+    }).join('') +
+    (eraMissing.length
+      ? `<div class="ch-missing">Missing eras: ${eraMissing.map(b => b.label).join(' &middot; ')}</div>`
+      : `<div class="ch-missing ch-done-txt">Every era visited — time traveler!</div>`);
+
+  // ── Weight Ladder ──
+  const rungs = CH_WEIGHT_BANDS.map(b => {
+    const w = d.weights[b.key];
+    return w
+      ? `<div class="ch-rung on" data-bgg-id="${w.bggId}">
+          <span class="ch-rung-lbl">${b.label}</span>
+          <img class="ch-rung-img" src="images/${w.bggId}.jpg" alt="" onerror="__imgFallback(this, ${w.bggId})">
+          <span class="ch-rung-name">${w.name}</span>
+          <span class="ch-rung-w">${w.complexity}</span>
+        </div>`
+      : `<div class="ch-rung">
+          <span class="ch-rung-lbl">${b.label}</span>
+          <span class="ch-rung-empty">&mdash;</span>
+        </div>`;
+  }).join('');
 
   // ── New to me ──
   const newDetail = d.newToMe.length
@@ -8119,6 +8304,46 @@ function showChallengesView(playerName) {
         <div class="ch-expand"><span class="ch-x-show">&#9662; show letters</span><span class="ch-x-hide">&#9652; hide</span></div>
       </div>
 
+      <div class="ch-card${d.bingoCount === 16 ? ' done' : ''}" data-ch="bingo">
+        <div class="ch-head">
+          <div>
+            <div class="ch-name">Category Bingo <span class="ch-tag">${d.year}</span></div>
+            <div class="ch-sub">Your personal card &mdash; every square needs a different game</div>
+          </div>
+          <div class="ch-score">${d.bingoCount}<span class="ch-score-sub">/16</span></div>
+        </div>
+        <div class="ch-bingo">${bingoCells}</div>
+        <div class="ch-sub" style="text-align:center;margin-top:0.55rem">${bingoStatus}</div>
+      </div>
+
+      <div class="ch-card${d.eraCount === CH_ERA_BANDS.length ? ' done' : ''}${open('eras')}" data-ch="eras">
+        <div class="ch-head">
+          <div>
+            <div class="ch-name">Time Traveler <span class="ch-tag">${d.year}</span></div>
+            <div class="ch-sub">Play a game from every 5-year era</div>
+          </div>
+          <div class="ch-score">${d.eraCount}<span class="ch-score-sub">/${CH_ERA_BANDS.length}</span></div>
+        </div>
+        <div class="ch-eras">${eraSegs}</div>
+        <div class="ch-barrow">
+          <div class="ch-bar"><div class="ch-bar-fill" style="width:${Math.round(d.eraCount / CH_ERA_BANDS.length * 100)}%"></div></div>
+          <span class="ch-pct">${Math.round(d.eraCount / CH_ERA_BANDS.length * 100)}%</span>
+        </div>
+        <div class="ch-detail">${eraDetail}</div>
+        <div class="ch-expand"><span class="ch-x-show">&#9662; show eras</span><span class="ch-x-hide">&#9652; hide</span></div>
+      </div>
+
+      <div class="ch-card${d.weightCount === CH_WEIGHT_BANDS.length ? ' done' : ''}" data-ch="weight">
+        <div class="ch-head">
+          <div>
+            <div class="ch-name">Weight Ladder <span class="ch-tag">${d.year}</span></div>
+            <div class="ch-sub">One game from every complexity band</div>
+          </div>
+          <div class="ch-score">${d.weightCount}<span class="ch-score-sub">/${CH_WEIGHT_BANDS.length}</span></div>
+        </div>
+        <div class="ch-rungs">${rungs}</div>
+      </div>
+
       <div class="ch-card${open('new')}" data-ch="new">
         <div class="ch-head">
           <div>
@@ -8155,7 +8380,7 @@ function wireChallenges() {
   if (!container) return;
   container.querySelectorAll('.ch-card').forEach(card => {
     card.addEventListener('click', (e) => {
-      const clickable = e.target.closest('.ch-row, .ch-dot-img');
+      const clickable = e.target.closest('.ch-row, .ch-dot-img, .ch-bingo-cell, .ch-rung');
       if (clickable && clickable.dataset.bggId) {
         const g = findGameByBggId(clickable.dataset.bggId);
         if (g) openModal(g);
