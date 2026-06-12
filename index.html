@@ -1321,17 +1321,19 @@
   .ch-big{font-size:2.7rem;font-weight:800;color:var(--ch-a);line-height:1.05;text-align:center;margin-top:0.55rem}
   .ch-viz{margin-top:0.75rem}
   .ch-dotrow{display:flex;align-items:center;gap:0.28rem;margin-bottom:0.3rem}
-  .ch-dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.08);flex-shrink:0}
+  .ch-dot{width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,0.08);flex-shrink:0}
   .ch-dot.on{background:var(--ch-a);box-shadow:0 0 5px var(--ch-soft)}
   .ch-dot-img{
-    width:20px;height:20px;border-radius:5px;object-fit:cover;flex-shrink:0;
-    margin-right:0.2rem;background:rgba(255,255,255,0.06);
+    width:36px;height:36px;border-radius:7px;object-fit:cover;flex-shrink:0;
+    margin-right:0.3rem;background:rgba(255,255,255,0.06);cursor:pointer;
+    transition:transform 0.12s;
   }
-  .ch-letters{display:flex;flex-wrap:wrap;gap:0.3rem;margin-top:0.75rem}
+  img.ch-dot-img:hover{transform:scale(1.12)}
+  .ch-letters{display:flex;flex-wrap:wrap;gap:0.32rem;margin-top:0.75rem}
   .ch-letter{
-    width:25px;height:25px;border-radius:7px;flex-shrink:0;
+    width:34px;height:34px;border-radius:8px;flex-shrink:0;
     display:inline-flex;align-items:center;justify-content:center;
-    font-size:0.68rem;font-weight:700;
+    font-size:0.92rem;font-weight:700;
     background:rgba(255,255,255,0.05);color:rgba(240,230,211,0.3);
     border:1px solid rgba(255,255,255,0.06);
   }
@@ -1353,7 +1355,7 @@
   .ch-card.open .ch-x-hide{display:inline}
   .ch-row{display:flex;align-items:center;gap:0.55rem;padding:0.32rem 0.4rem;border-radius:8px;cursor:pointer}
   .ch-row:hover{background:rgba(255,255,255,0.06)}
-  .ch-row-img{width:34px;height:34px;border-radius:6px;object-fit:cover;flex-shrink:0;background:#2a2a2a}
+  .ch-row-img{width:46px;height:46px;border-radius:8px;object-fit:cover;flex-shrink:0;background:#2a2a2a}
   .ch-row-name{flex:1;min-width:0;font-size:0.78rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .ch-row-extra{font-size:0.72rem;color:var(--ch-a);white-space:nowrap}
   .ch-row-extra b{font-size:0.8rem}
@@ -8035,25 +8037,24 @@ function showChallengesView(playerName) {
 
   const gameRow = (g, extra) => `
     <div class="ch-row" data-bgg-id="${g.bggId}">
-      <img class="ch-row-img" src="images/${g.bggId}.jpg" alt="" onerror="this.style.display='none'">
+      <img class="ch-row-img" src="images/${g.bggId}.jpg" alt="" onerror="__imgFallback(this, ${g.bggId})">
       <span class="ch-row-name">${g.name}</span>
       <span class="ch-row-extra">${extra}</span>
     </div>`;
 
   // ── 10×10 ──
+  // The games are visible right on the card (cover + dots), so there is no
+  // drill-down list here; clicking a cover opens the game's modal.
   let dotRows = '';
   for (let i = 0; i < 10; i++) {
     const g = d.tenTop[i];
     const thumb = g
-      ? `<img class="ch-dot-img" src="images/${g.bggId}.jpg" alt="" title="${g.name} — ${g.count} play${g.count === 1 ? '' : 's'}" onerror="this.style.opacity=0">`
+      ? `<img class="ch-dot-img" data-bgg-id="${g.bggId}" src="images/${g.bggId}.jpg" alt="" title="${g.name} — ${g.count} play${g.count === 1 ? '' : 's'}" onerror="__imgFallback(this, ${g.bggId})">`
       : `<span class="ch-dot-img"></span>`;
     let dots = '';
     for (let j = 0; j < 10; j++) dots += `<span class="ch-dot${g && g.count > j ? ' on' : ''}"></span>`;
     dotRows += `<div class="ch-dotrow">${thumb}${dots}</div>`;
   }
-  const tenDetail = d.tenTop.length
-    ? d.tenTop.map(g => gameRow(g, `<b>${Math.min(g.count, 10)}</b>/10${g.count > 10 ? ` <span class="ch-over">+${g.count - 10}</span>` : ''}`)).join('')
-    : `<div class="ch-empty">No plays logged yet in ${d.year}.</div>`;
 
   // ── Alphabet ──
   const alphaChips = LETTERS.map(L => `<span class="ch-letter${d.alpha[L] ? ' on' : ''}">${L}</span>`).join('');
@@ -8063,6 +8064,7 @@ function showChallengesView(playerName) {
       const a = d.alpha[L];
       return `<div class="ch-row" data-bgg-id="${a.bggId}">
         <span class="ch-letter on">${L}</span>
+        <img class="ch-row-img" src="images/${a.bggId}.jpg" alt="" onerror="__imgFallback(this, ${a.bggId})">
         <span class="ch-row-name">${a.name}</span>
         <span class="ch-row-extra">${_fmtDateShort(a.date)}</span>
       </div>`;
@@ -8104,8 +8106,6 @@ function showChallengesView(playerName) {
         </div>
         <div class="ch-viz">${dotRows}</div>
         <div class="ch-bar"><div class="ch-bar-fill" style="width:${d.tenFilled}%"></div></div>
-        <div class="ch-detail">${tenDetail}</div>
-        <div class="ch-expand"><span class="ch-x-show">&#9662; show games</span><span class="ch-x-hide">&#9652; hide</span></div>
       </div>
 
       <div class="ch-card${d.alphaCount === 26 ? ' done' : ''}${open('alpha')}" data-ch="alpha">
@@ -8158,12 +8158,13 @@ function wireChallenges() {
   if (!container) return;
   container.querySelectorAll('.ch-card').forEach(card => {
     card.addEventListener('click', (e) => {
-      const rowEl = e.target.closest('.ch-row');
-      if (rowEl && rowEl.dataset.bggId) {
-        const g = findGameByBggId(rowEl.dataset.bggId);
+      const clickable = e.target.closest('.ch-row, .ch-dot-img');
+      if (clickable && clickable.dataset.bggId) {
+        const g = findGameByBggId(clickable.dataset.bggId);
         if (g) openModal(g);
         return;
       }
+      if (!card.querySelector('.ch-detail')) return; // 10×10 has no drill-down
       const wasOpen = card.classList.contains('open');
       container.querySelectorAll('.ch-card').forEach(c => c.classList.remove('open'));
       if (!wasOpen) card.classList.add('open');
