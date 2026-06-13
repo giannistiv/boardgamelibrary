@@ -1357,6 +1357,15 @@
     background:var(--ch-soft);color:var(--ch-a);
     border-color:var(--ch-bord);
   }
+  .ch-letters .ch-letter{cursor:pointer;transition:transform 0.1s, box-shadow 0.1s}
+  .ch-letters .ch-letter:hover{transform:translateY(-1px)}
+  .ch-letters .ch-letter.sel{box-shadow:0 0 0 2px var(--ch-a);color:var(--ch-a)}
+  .ch-alpha-hint{font-size:0.72rem;opacity:0.55;line-height:1.45;margin-bottom:0.5rem}
+  .ch-alpha-head{font-size:0.74rem;opacity:0.7;margin-bottom:0.45rem}
+  .ch-alpha-head b{color:var(--ch-a);font-size:0.9rem}
+  .ch-opt{opacity:0.45;transition:opacity 0.12s}
+  .ch-opt:hover{opacity:1}
+  .ch-opt .ch-letter{width:26px;height:26px;font-size:0.7rem}
   /* Category Bingo 4×4 card */
   .ch-bingo{display:grid;grid-template-columns:repeat(4,1fr);gap:0.32rem;margin-top:0.8rem}
   .ch-bingo-cell{
@@ -8178,21 +8187,51 @@ function showChallengesView(playerName) {
   }
 
   // ── Alphabet ──
-  const alphaChips = LETTERS.map(L => `<span class="ch-letter${d.alpha[L] ? ' on' : ''}">${L}</span>`).join('');
+  const alphaChips = LETTERS.map(L =>
+    `<span class="ch-letter${d.alpha[L] ? ' on' : ''}" data-letter="${L}">${L}</span>`).join('');
   const missing = LETTERS.filter(L => !d.alpha[L]);
-  const alphaDetail =
-    LETTERS.filter(L => d.alpha[L]).map(L => {
-      const a = d.alpha[L];
-      return `<div class="ch-row" data-bgg-id="${a.bggId}">
-        <span class="ch-letter on">${L}</span>
-        <img class="ch-row-img" src="images/${a.bggId}.jpg" alt="" onerror="__imgFallback(this, ${a.bggId})">
-        <span class="ch-row-name">${a.name}</span>
-        <span class="ch-row-extra">${_fmtDateShort(a.date)}</span>
-      </div>`;
-    }).join('') +
+  const alphaDetail = `<div class="ch-alpha-hint">Tap a letter above to see what you played &mdash; or, for an empty letter, what you could play.</div>` +
     (missing.length
       ? `<div class="ch-missing">Missing: ${missing.join(' &middot; ')}</div>`
       : `<div class="ch-missing ch-done-txt">Every letter covered — alphabet complete!</div>`);
+
+  // Candidate games per letter (from every catalogue) for empty-letter hints.
+  const alphaCandidates = {};
+  const seenCand = new Set();
+  _allGames().forEach(g => {
+    if (!g || g.bggId == null || seenCand.has(g.bggId)) return;
+    const m = String(g.name || '').toUpperCase().match(/[A-Z]/);
+    if (!m) return;
+    seenCand.add(g.bggId);
+    (alphaCandidates[m[0]] = alphaCandidates[m[0]] || []).push({ bggId: g.bggId, name: g.name });
+  });
+  Object.values(alphaCandidates).forEach(list => list.sort((a, b) => a.name.localeCompare(b.name)));
+
+  // Detail panel for one clicked letter: the claiming game if done, else a
+  // faded list of games (from any list) that start with that letter.
+  const renderAlphaLetter = (L) => {
+    const a = d.alpha[L];
+    if (a) {
+      return `<div class="ch-alpha-head"><b>${L}</b> &mdash; played this year</div>
+        <div class="ch-row" data-bgg-id="${a.bggId}">
+          <span class="ch-letter on">${L}</span>
+          <img class="ch-row-img" src="images/${a.bggId}.jpg" alt="" onerror="__imgFallback(this, ${a.bggId})">
+          <span class="ch-row-name">${a.name}</span>
+          <span class="ch-row-extra">${_fmtDateShort(a.date)}</span>
+        </div>`;
+    }
+    const cands = alphaCandidates[L] || [];
+    if (!cands.length) return `<div class="ch-alpha-head"><b>${L}</b> &mdash; not played yet</div>
+      <div class="ch-missing">No game starting with ${L} in any collection.</div>`;
+    const shown = cands.slice(0, 40);
+    return `<div class="ch-alpha-head"><b>${L}</b> &mdash; not played yet &middot; play one of these:</div>
+      ${shown.map(g => `<div class="ch-row ch-opt" data-bgg-id="${g.bggId}">
+        <span class="ch-letter">${L}</span>
+        <img class="ch-row-img" src="images/${g.bggId}.jpg" alt="" onerror="__imgFallback(this, ${g.bggId})">
+        <span class="ch-row-name">${g.name}</span>
+      </div>`).join('')}
+      ${cands.length > shown.length ? `<div class="ch-missing">+${cands.length - shown.length} more in your collections</div>` : ''}`;
+  };
 
   // ── Category Bingo ──
   const bingoCells = d.bingoCard.map((cat, i) => {
@@ -8373,6 +8412,34 @@ function showChallengesView(playerName) {
     </div>`;
   window.scrollTo(0, 0);
   wireChallenges();
+
+  // Alphabet: clicking a letter shows that letter's detail in-place (the
+  // played game, or faded candidates for an empty letter) without collapsing
+  // the card. stopPropagation keeps the card-level toggle from firing.
+  const alphaCard = container.querySelector('.ch-card[data-ch="alpha"]');
+  if (alphaCard) {
+    const detail = alphaCard.querySelector('.ch-detail');
+    const wireDetailRows = () => detail.querySelectorAll('[data-bgg-id]').forEach(el => {
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const g = findGameByBggId(el.dataset.bggId);
+        if (g) openModal(g);
+      });
+    });
+    alphaCard.querySelectorAll('.ch-letters .ch-letter').forEach(chip => {
+      chip.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const L = chip.dataset.letter;
+        alphaCard.querySelectorAll('.ch-letters .ch-letter').forEach(c => c.classList.remove('sel'));
+        chip.classList.add('sel');
+        container.querySelectorAll('.ch-card').forEach(c => c.classList.remove('open'));
+        alphaCard.classList.add('open');
+        _chOpenCard = 'alpha';
+        detail.innerHTML = renderAlphaLetter(L);
+        wireDetailRows();
+      });
+    });
+  }
 }
 
 function wireChallenges() {
