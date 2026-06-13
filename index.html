@@ -1194,6 +1194,32 @@
   }
   .profile-back-btn:hover{background:rgba(226,176,74,0.22)}
 
+  /* Profile name editing (own profile) */
+  .profile-edit-btn{
+    background:rgba(226,176,74,0.15);border:1px solid rgba(226,176,74,0.35);
+    color:var(--accent);border-radius:8px;font-size:0.85rem;line-height:1;
+    padding:0.2rem 0.5rem;cursor:pointer;vertical-align:middle;margin-left:0.45rem;
+    transition:background 0.15s;
+  }
+  .profile-edit-btn:hover{background:rgba(226,176,74,0.3)}
+  .profile-edit-form{display:none;max-width:340px;margin:0.7rem auto 0}
+  .profile-edit-form.open{display:block}
+  .profile-name-input{
+    width:100%;box-sizing:border-box;padding:0.55rem 0.8rem;border-radius:10px;
+    background:rgba(255,255,255,0.06);border:1px solid rgba(226,176,74,0.45);
+    color:var(--text);font-family:inherit;font-size:1.05rem;text-align:center;
+  }
+  .profile-name-input:focus{outline:none;border-color:var(--accent)}
+  .profile-edit-actions{display:flex;gap:0.5rem;justify-content:center;margin-top:0.55rem}
+  .profile-edit-save,.profile-edit-cancel{
+    padding:0.42rem 1.1rem;border-radius:999px;font-family:inherit;
+    font-size:0.82rem;font-weight:600;cursor:pointer;transition:opacity 0.15s;
+  }
+  .profile-edit-save{background:var(--accent);color:#0f0f12;border:none}
+  .profile-edit-save:disabled{opacity:0.5;cursor:default}
+  .profile-edit-cancel{background:rgba(255,255,255,0.06);color:var(--text);border:1px solid rgba(255,255,255,0.14)}
+  .profile-edit-err{font-size:0.76rem;color:#f0a868;text-align:center;margin-top:0.45rem;min-height:1em}
+
   /* ── Head-to-Head ── */
   .h2h-section{
     background:rgba(255,255,255,0.03);
@@ -6936,8 +6962,8 @@ function openModal(game) {
   if (plays && plays.length > 0) {
     // Compute stats
     const totalPlays = plays.length;
-    const userPlays = plays.filter(p => p.sc.some(s => s.n === 'Στιβ'));
-    const wins = plays.filter(p => p.sc.some(s => s.n === 'Στιβ' && s.w));
+    const userPlays = plays.filter(p => p.sc.some(s => _origCanon(s.n) === 'Στιβ'));
+    const wins = plays.filter(p => p.sc.some(s => _origCanon(s.n) === 'Στιβ' && s.w));
     const winRate = userPlays.length > 0 ? Math.round((wins.length / userPlays.length) * 100) : 0;
     const lastPlayed = plays[0].date;
 
@@ -7596,7 +7622,7 @@ function computeAchievements(playerName) {
         // Beat Στιβ: any competitive win where Στιβ was a participant who lost.
         if (playerName !== 'Στιβ') {
           for (const s of p.sc) {
-            if (s && s.n === 'Στιβ' && !s.w) { mark('beat-stiv', p.date); break; }
+            if (s && _origCanon(s.n) === 'Στιβ' && !s.w) { mark('beat-stiv', p.date); break; }
           }
         }
       } else {
@@ -9181,8 +9207,16 @@ function showStatsView(playerName, visiting) {
   container.innerHTML = `
     ${backBtnHtml}
     <div class="stats-header">
-      <div class="stats-player-name">${playerName}</div>
+      <div class="stats-player-name">${playerName}${isOwnProfile ? ` <button class="profile-edit-btn" id="btn-edit-name" title="Edit your name" aria-label="Edit your name">&#9998;</button>` : ''}</div>
       <div class="stats-player-sub">${isOwnProfile ? 'Your Profile' : 'Player Profile'}</div>
+      ${isOwnProfile ? `<div class="profile-edit-form" id="profile-edit-form">
+        <input type="text" id="profile-name-input" class="profile-name-input" maxlength="40" autocomplete="off" value="${playerName.replace(/"/g, '&quot;')}">
+        <div class="profile-edit-actions">
+          <button class="profile-edit-save" id="profile-name-save">Save</button>
+          <button class="profile-edit-cancel" id="profile-name-cancel">Cancel</button>
+        </div>
+        <div class="profile-edit-err" id="profile-name-err"></div>
+      </div>` : ''}
       ${_bggCollectionUrl(playerName)
         ? `<a class="stats-bgg-btn" href="${_bggCollectionUrl(playerName)}" target="_blank" rel="noopener">
              View collection on BGG ↗
@@ -9252,14 +9286,14 @@ function showStatsView(playerName, visiting) {
       }).join('')}
     </div>` : ''}
 
-    ${playerName === 'Στιβ' ? `<div class="qr-section">
+    ${_origCanon(playerName) === 'Στιβ' ? `<div class="qr-section">
       <div class="stats-section-title" style="border:none;text-align:center">Share This Library</div>
       <div class="qr-canvas"><img id="qr-img" width="150" height="150" alt="QR Code" style="border-radius:8px"></div>
       <div class="qr-label">Scan to open on your phone</div>
     </div>` : ''}
 
     <!-- ── JSON Import (Στιβ only) ── -->
-  ${playerName === 'Στιβ' ? (() => {
+  ${_origCanon(playerName) === 'Στιβ' ? (() => {
     // Find the most recent play date across PLAY_HISTORY so the user can
     // tell from which day onwards they still need to upload.
     let latest = '';
@@ -9292,7 +9326,7 @@ function showStatsView(playerName, visiting) {
   `;
 
   // Wire up importer for Στιβ
-  if (playerName === 'Στιβ' && typeof window.initImporter === 'function') {
+  if (_origCanon(playerName) === 'Στιβ' && typeof window.initImporter === 'function') {
     window.initImporter();
   }
 
@@ -9346,6 +9380,34 @@ function showStatsView(playerName, visiting) {
       localStorage.removeItem('bgl-player');
       if (typeof _updateBoardSouthBtnVisibility === 'function') _updateBoardSouthBtnVisibility();
       openPicker();
+    });
+  }
+
+  // Edit-name (own profile only): reveal an inline editor, save to Firebase,
+  // then reload so the rename propagates through the startup machinery.
+  const editBtn = document.getElementById('btn-edit-name');
+  const editForm = document.getElementById('profile-edit-form');
+  if (editBtn && editForm) {
+    const input = document.getElementById('profile-name-input');
+    const errEl = document.getElementById('profile-name-err');
+    const close = () => { editForm.classList.remove('open'); errEl.textContent = ''; input.value = playerName; };
+    editBtn.addEventListener('click', () => {
+      const opening = !editForm.classList.contains('open');
+      editForm.classList.toggle('open', opening);
+      if (opening) { input.focus(); input.select(); }
+    });
+    document.getElementById('profile-name-cancel').addEventListener('click', close);
+    const doSave = async () => {
+      const saveBtn = document.getElementById('profile-name-save');
+      saveBtn.disabled = true; errEl.style.color = ''; errEl.textContent = 'Saving…';
+      const r = await _saveProfileName(input.value);
+      if (r.ok) { window.location.reload(); }
+      else { errEl.textContent = r.err; saveBtn.disabled = false; }
+    };
+    document.getElementById('profile-name-save').addEventListener('click', doSave);
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); doSave(); }
+      else if (e.key === 'Escape') close();
     });
   }
 
@@ -12173,7 +12235,120 @@ if (_sp && NAME_MAP[_sp]) localStorage.setItem('bgl-player', NAME_MAP[_sp]);
 })();
 
 // Load ratings and favorites from Firebase, then show the right view
-Promise.all([loadAllRatings(), loadAllFavorites(), loadImportedGames(), loadImportedPlays(), loadGameImages(), loadBoardSouthVotes(), loadOathswornRanks(), loadAllNotes()]).then(() => {
+// ── User profiles (Firebase-backed display-name overrides) ──
+// A logged-in player can rename how they appear everywhere. Stored at
+// profiles/{originalCanonicalName} = { name, updatedAt } — a `photo` field is
+// reserved here for a future per-profile picture. The rename is applied at
+// startup the same way NAME_MAP is: it folds into NAME_MAP, rewrites play
+// names and remaps the Firebase caches, so the new name shows up on every
+// device. Inert (no behaviour change) until at least one profile is renamed.
+let PROFILE_OVERRIDES = {};   // originalCanonicalName → chosen display name
+let PROFILE_DATA = {};        // originalCanonicalName → { name, photo, … }
+let DISPLAY_TO_CANON = {};    // display name → originalCanonicalName (for re-renames)
+
+async function loadProfiles() {
+  if (!FIREBASE_DB) return;
+  try {
+    const res = await fetch(`${FIREBASE_DB}/profiles.json`);
+    const data = await res.json();
+    if (!data) return;
+    for (const enc in data) {
+      const canon = decodeURIComponent(enc);
+      const entry = data[enc] || {};
+      PROFILE_DATA[canon] = entry;
+      if (entry.name && entry.name !== canon) PROFILE_OVERRIDES[canon] = entry.name;
+    }
+  } catch (e) { console.warn('Failed to load profiles:', e); }
+}
+
+// Remap an object's player-name keys through NAME_MAP, merging collisions.
+function _rekeyByNameMap(obj) {
+  if (!obj || typeof obj !== 'object') return obj;
+  const out = {};
+  for (const k in obj) {
+    const nk = NAME_MAP[k] || k;
+    if (out[nk] && obj[k] && typeof out[nk] === 'object' && typeof obj[k] === 'object'
+        && !Array.isArray(out[nk]) && !Array.isArray(obj[k])) {
+      Object.assign(out[nk], obj[k]);
+    } else {
+      out[nk] = obj[k];
+    }
+  }
+  return out;
+}
+
+// Original canonical name behind a (possibly renamed) display name.
+function _origCanon(name) { return DISPLAY_TO_CANON[name] || name; }
+
+function _applyProfileOverrides() {
+  if (!PROFILE_OVERRIDES || !Object.keys(PROFILE_OVERRIDES).length) return;
+  // 1. Fold renames into NAME_MAP so every NAME_MAP[x]||x read resolves to the
+  //    new name; record the reverse map and update identity-sensitive lists.
+  for (const orig in PROFILE_OVERRIDES) {
+    const disp = PROFILE_OVERRIDES[orig];
+    for (const k in NAME_MAP) if (NAME_MAP[k] === orig) NAME_MAP[k] = disp;
+    NAME_MAP[orig] = disp;
+    DISPLAY_TO_CANON[disp] = orig;
+    if (typeof ILIOUPOLI_MEMBERS !== 'undefined' && ILIOUPOLI_MEMBERS.has(orig)) {
+      ILIOUPOLI_MEMBERS.delete(orig); ILIOUPOLI_MEMBERS.add(disp);
+    }
+    if (typeof OATHSWORN_VOTERS !== 'undefined') {
+      const oi = OATHSWORN_VOTERS.indexOf(orig); if (oi >= 0) OATHSWORN_VOTERS[oi] = disp;
+    }
+  }
+  // 2. Re-run the play-name rewrite for the freshly-added mappings.
+  for (const bggId in PLAY_HISTORY)
+    for (const play of PLAY_HISTORY[bggId])
+      for (const s of play.sc) if (NAME_MAP[s.n]) s.n = NAME_MAP[s.n];
+  // 3. Remap the Firebase caches keyed by player name.
+  if (typeof favoritesCache === 'object') favoritesCache = _rekeyByNameMap(favoritesCache);
+  if (typeof oathswornRanks === 'object') oathswornRanks = _rekeyByNameMap(oathswornRanks);
+  if (typeof ratingsCache === 'object') for (const b in ratingsCache) ratingsCache[b] = _rekeyByNameMap(ratingsCache[b]);
+  if (typeof boardSouthVotes === 'object') for (const lib in boardSouthVotes) boardSouthVotes[lib] = _rekeyByNameMap(boardSouthVotes[lib]);
+  if (typeof gameNotesCache === 'object') for (const b in gameNotesCache) for (const id in gameNotesCache[b]) {
+    const n = gameNotesCache[b][id];
+    if (n && n.author && NAME_MAP[n.author]) n.author = NAME_MAP[n.author];
+  }
+  // 4. Migrate this device's login so the logged-in identity follows the rename.
+  const raw = localStorage.getItem('bgl-player');
+  if (raw) { const m = NAME_MAP[raw] || raw; if (m !== raw) localStorage.setItem('bgl-player', m); }
+}
+
+// Distinct player names currently in play history (post-remap).
+function _knownPlayerNames() {
+  const s = new Set();
+  for (const bggId in PLAY_HISTORY)
+    for (const play of PLAY_HISTORY[bggId])
+      for (const sc of play.sc) if (sc && sc.n) s.add(sc.n);
+  return s;
+}
+
+// Save the logged-in player's chosen display name, keyed by their ORIGINAL
+// canonical name so repeated renames always rewrite the same identity.
+async function _saveProfileName(newName) {
+  newName = (newName || '').trim().replace(/\s+/g, ' ');
+  const cur = localStorage.getItem('bgl-player');
+  if (!cur) return { ok: false, err: 'Not logged in.' };
+  if (!newName) return { ok: false, err: 'Name cannot be empty.' };
+  if (newName.length > 40) return { ok: false, err: 'Name is too long (40 max).' };
+  if (newName === cur) return { ok: false, err: 'That is already your name.' };
+  const others = _knownPlayerNames(); others.delete(cur);
+  if (others.has(newName)) return { ok: false, err: 'Another player already uses that name.' };
+  if (!FIREBASE_DB) return { ok: false, err: 'No connection.' };
+  const orig = _origCanon(cur) || (NAME_MAP[cur] || cur);
+  try {
+    const existing = PROFILE_DATA[orig] || {};
+    await fetch(`${FIREBASE_DB}/profiles/${encodeURIComponent(orig)}.json`, {
+      method: 'PUT',
+      body: JSON.stringify({ ...existing, name: newName, updatedAt: Date.now() })
+    });
+    localStorage.setItem('bgl-player', newName);
+    return { ok: true };
+  } catch (e) { return { ok: false, err: 'Save failed — try again.' }; }
+}
+
+Promise.all([loadAllRatings(), loadAllFavorites(), loadImportedGames(), loadImportedPlays(), loadGameImages(), loadBoardSouthVotes(), loadOathswornRanks(), loadAllNotes(), loadProfiles()]).then(() => {
+  _applyProfileOverrides();
   if (typeof _updateBoardSouthBtnVisibility === 'function') _updateBoardSouthBtnVisibility();
   const savedPlayer = localStorage.getItem('bgl-player');
   if (savedPlayer) {
