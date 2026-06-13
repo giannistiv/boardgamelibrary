@@ -1090,6 +1090,12 @@
 
   /* ── Profile Visit ── */
   .stats-players-section{margin-top:1.5rem}
+  .insights-player-scroll{
+    max-height:60vh;overflow-y:auto;margin-top:0.4rem;
+    padding-right:0.3rem;
+  }
+  .insights-player-scroll::-webkit-scrollbar{width:8px}
+  .insights-player-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.12);border-radius:4px}
   .stats-player-row{
     display:flex;align-items:center;gap:0.7rem;
     padding:0.5rem 0.6rem;border-radius:8px;margin-bottom:0.3rem;
@@ -9992,16 +9998,16 @@ function showGamesView() {
     return '#f87171';
   };
   const topPlayers = Object.entries(playerStats)
-    .filter(([, d]) => d.plays >= 2)
+    .filter(([, d]) => d.plays >= 1)
     .map(([name, d]) => ({ name, plays: d.plays, wins: d.wins, games: d.games.size, wr: Math.round(d.wins / d.plays * 100) }))
     .sort((a, b) => b.plays - a.plays);
 
   const buildPlayersTab = () => `
     <div class="stats-section stats-players-section">
-      <div class="stats-section-title">Players</div>
-      <input type="text" class="insights-search" id="insights-player-search" placeholder="Search for more..." autocomplete="off">
-      <div id="insights-player-list">
-        ${_renderInsightsPlayers(topPlayers.slice(0, 10), wrColor)}
+      <div class="stats-section-title">Players (${topPlayers.length})</div>
+      <input type="text" class="insights-search" id="insights-player-search" placeholder="Search players..." autocomplete="off">
+      <div id="insights-player-list" class="insights-player-scroll">
+        ${_renderInsightsPlayers(topPlayers, wrColor)}
       </div>
     </div>`;
 
@@ -10097,7 +10103,7 @@ function showGamesView() {
   if (playerSearchEl) {
     playerSearchEl.addEventListener('input', () => {
       const q = playerSearchEl.value.toLowerCase();
-      const filtered = q ? topPlayers.filter(p => p.name.toLowerCase().includes(q)) : topPlayers.slice(0, 10);
+      const filtered = q ? topPlayers.filter(p => p.name.toLowerCase().includes(q)) : topPlayers;
       const listEl = document.getElementById('insights-player-list');
       listEl.innerHTML = _renderInsightsPlayers(filtered, wrColor);
       _wireInsightsPlayerClicks(listEl);
