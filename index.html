@@ -6877,7 +6877,7 @@ function openModal(game) {
 
   // Build cover image section
   let coverHtml;
-  if (game.bggId > 0) {
+  if (game.bggId >= 0) {
     coverHtml = `
       <div class="modal-cover">
         <img class="modal-cover-img"
@@ -7872,7 +7872,7 @@ function _openLatestPlaysModal(playerName, plays) {
     list.innerHTML = '<div class="lpm-empty">No plays recorded yet.</div>';
   } else {
     list.innerHTML = plays.map(p => {
-      const localCover = p.game.bggId > 0 ? `images/${p.game.bggId}.jpg` : '';
+      const localCover = p.game.bggId >= 0 ? `images/${p.game.bggId}.jpg` : '';
       const fallback = (p.game.urlImage || '').replace(/'/g, "\\'");
       // <img> with onerror chain so missing local files fall through to the
       // BGG-hosted urlImage (same pattern the BS vote modal uses).
@@ -9016,7 +9016,7 @@ function showStatsView(playerName, visiting) {
   // Latest individual plays (recentPlays is already sorted newest-first above).
   const latestPlays = recentPlays.slice(0, 10);
   const latestPlayRowHtml = (p) => {
-    const imgSrc = p.game.bggId > 0 ? `images/${p.game.bggId}.jpg` : '';
+    const imgSrc = p.game.bggId >= 0 ? `images/${p.game.bggId}.jpg` : '';
     // "No human winner" almost always means coop/solo loss (the game won),
     // so render LOSS instead of a dash — unless the game has no win/loss at all.
     const result = isNoResultGame(p.bggId)
@@ -9066,7 +9066,7 @@ function showStatsView(playerName, visiting) {
 
   const gameRowHtml = (gs) => {
     const wr = gs.plays > 0 ? Math.round(gs.wins / gs.plays * 100) : 0;
-    const imgSrc = gs.game.bggId > 0 ? `images/${gs.game.bggId}.jpg` : '';
+    const imgSrc = gs.game.bggId >= 0 ? `images/${gs.game.bggId}.jpg` : '';
     return `<div class="stats-game-row" data-bgg-id="${gs.game.bggId}">
       ${imgSrc ? `<img class="stats-game-img" src="${imgSrc}" alt="" onerror="__imgFallback(this, ${gs.game.bggId})">` : ''}
       <div class="stats-game-info">
@@ -9231,7 +9231,7 @@ function showStatsView(playerName, visiting) {
       <div class="stats-section-title">Recommended for You</div>
       <div class="stats-player-sub" style="margin:-0.3rem 0 0.6rem">Top-rated games from the shelf you haven't tried yet</div>
       ${recommendations.map(g => {
-        const imgSrc = g.bggId > 0 ? `images/${g.bggId}.jpg` : '';
+        const imgSrc = g.bggId >= 0 ? `images/${g.bggId}.jpg` : '';
         return `<div class="stats-rec-row" data-bgg-id="${g.bggId}">
           ${imgSrc ? `<img class="stats-game-img" src="${imgSrc}" alt="" onerror="__imgFallback(this, ${g.bggId})">` : ''}
           <div class="stats-game-info">
@@ -9907,7 +9907,7 @@ function showGamesView() {
   allPlays.sort((a, b) => b.date.localeCompare(a.date));
 
   const gameRowHtml = (game, detail) => {
-    const imgSrc = game.bggId > 0 ? `images/${game.bggId}.jpg` : '';
+    const imgSrc = game.bggId >= 0 ? `images/${game.bggId}.jpg` : '';
     return `<div class="stats-game-row" data-bgg-id="${game.bggId}">
       ${imgSrc ? `<img class="stats-game-img" src="${imgSrc}" alt="" onerror="__imgFallback(this, ${game.bggId})">` : ''}
       <div class="stats-game-info">
@@ -9950,7 +9950,7 @@ function showGamesView() {
     const newestTop = newestRatings.filter(r => r.updatedAt > 0).slice(0, 10);
     const ratingRowHtml = (r) => {
       const game = findGameByBggId(r.bggId) || { name: 'Game #' + r.bggId, bggId: r.bggId };
-      const imgSrc = r.bggId > 0 ? `images/${r.bggId}.jpg` : '';
+      const imgSrc = r.bggId >= 0 ? `images/${r.bggId}.jpg` : '';
       return `<div class="stats-game-row" data-bgg-id="${r.bggId}">
         ${imgSrc ? `<img class="stats-game-img" src="${imgSrc}" alt="" onerror="__imgFallback(this, ${r.bggId})">` : ''}
         <div class="stats-game-info">
@@ -10855,7 +10855,7 @@ function _boardSouthPlaysSectionHtml() {
     if (p.l && p.l !== 'Board South') metaBits.push(esc(p.l));
     metaBits.push(`${p.sc.length} player${p.sc.length !== 1 ? 's' : ''}`);
 
-    const localCover = bggId > 0 ? `images/${bggId}.jpg` : '';
+    const localCover = bggId >= 0 ? `images/${bggId}.jpg` : '';
     const fallback = ((game && game.urlImage) || '').replace(/'/g, "\\'");
     const cover = (localCover || fallback)
       ? `<img class="bs-play-cover" src="${localCover || fallback}" alt="" loading="lazy" onerror="window.__lpmImgFallback(this, '${fallback}')">`
@@ -10931,7 +10931,7 @@ const _BSV_PLACEHOLDER = 'images/game-placeholder.svg';
 function _bsvCoverHtml(game, size) {
   // size is the CSS size class suffix (my / agg / modal)
   const cls = `bsv-${size}thumb`;
-  const local = (game && game.bggId > 0) ? `images/${game.bggId}.jpg` : '';
+  const local = (game && game.bggId >= 0) ? `images/${game.bggId}.jpg` : '';
   const fallback = (game && game.urlImage || '').replace(/'/g, "\\'");
   // Resolution chain: local → urlImage → generic placeholder. Always render
   // an <img> so the visual is consistent (no empty divs in the list).
