@@ -1374,9 +1374,15 @@
     display:flex;align-items:center;justify-content:center;
   }
   .ch-bingo-cell.on{border-color:var(--ch-bord);align-items:flex-end;cursor:pointer;box-shadow:0 0 7px var(--ch-soft)}
-  .ch-bingo-cell img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .ch-bingo-name{
+    position:absolute;inset:0;z-index:0;
+    display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:0.2rem 0.22rem 1.05rem;overflow:hidden;
+    font-size:0.5rem;font-weight:600;line-height:1.2;color:rgba(240,230,211,0.8);
+  }
+  .ch-bingo-cell img{position:absolute;inset:0;z-index:1;width:100%;height:100%;object-fit:cover}
   .ch-bingo-lbl{
-    position:relative;z-index:1;width:100%;text-align:center;
+    position:relative;z-index:2;width:100%;text-align:center;
     font-size:0.56rem;font-weight:700;letter-spacing:0.01em;line-height:1.15;
     padding:0.18rem 0.15rem;color:rgba(240,230,211,0.4);
   }
@@ -8238,6 +8244,7 @@ function showChallengesView(playerName) {
     const c = d.bingoCovered[i];
     return c
       ? `<div class="ch-bingo-cell on" data-bgg-id="${c.bggId}" title="${cat} — ${c.name} (${_fmtDateShort(c.date)})">
+          <span class="ch-bingo-name">${c.name}</span>
           <img src="images/${c.bggId}.jpg" alt="" onerror="__imgFallback(this, ${c.bggId})">
           <span class="ch-bingo-lbl">${cat}</span>
         </div>`
