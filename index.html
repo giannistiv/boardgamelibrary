@@ -7983,7 +7983,10 @@ window.__lpmImgFallback = function(img, fallback) {
     img.src = fallback;
     return;
   }
-  img.style.visibility = 'hidden';
+  if (!img.dataset.ph) {
+    img.dataset.ph = '1';
+    img.src = 'images/game-placeholder.svg';
+  }
 };
 
 function _closeLatestPlaysModal() {
@@ -11720,15 +11723,26 @@ window.__favPickerImgFallback = function(img, urlImage) {
 };
 
 window.__imgFallback = function(img, bggId){
+  // Resolution chain: local file → stored BGG urlImage → final fallback.
   if (!img.dataset.fb) {
     img.dataset.fb = '1';
     const game = findGameByBggId(bggId);
     if (game && game.urlImage) { img.src = game.urlImage; return; }
-    _hideImgWithFallback(img);
-    return;
   }
-  // Stored urlImage also failed — give up.
-  _hideImgWithFallback(img);
+  // Final fallback. Two contexts keep their nicer specialised fallback: the
+  // game modal (a colored box with the game's name) and Category Bingo cells
+  // (the name shown inside the square). Everywhere else, show the default
+  // dice placeholder instead of leaving a blank gap.
+  const sib = img.nextElementSibling;
+  const hasModalBox = sib && sib.classList && sib.classList.contains('modal-cover-fallback');
+  const hasBingoName = img.parentElement && img.parentElement.querySelector('.ch-bingo-name');
+  if (hasModalBox || hasBingoName) {
+    _hideImgWithFallback(img);
+  } else if (!img.dataset.ph) {
+    img.dataset.ph = '1';
+    img.style.display = '';
+    img.src = 'images/game-placeholder.svg';
+  }
 };
 
 // ── Game image overrides (Firebase-backed) ──
