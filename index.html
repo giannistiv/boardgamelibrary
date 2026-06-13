@@ -826,7 +826,7 @@
   }
   .stats-view.open{display:block}
   .stats-header{
-    text-align:center;margin-bottom:1.5rem;
+    text-align:center;margin-bottom:1.5rem;position:relative;
   }
   .stats-player-name{font-size:1.6rem;font-weight:700;color:var(--accent)}
   .stats-player-sub{font-size:0.8rem;opacity:0.4;margin-top:0.2rem}
@@ -1194,15 +1194,16 @@
   }
   .profile-back-btn:hover{background:rgba(226,176,74,0.22)}
 
-  /* Profile name editing (own profile) */
-  .profile-edit-btn{
-    background:rgba(226,176,74,0.15);border:1px solid rgba(226,176,74,0.35);
-    color:var(--accent);border-radius:8px;font-size:0.85rem;line-height:1;
-    padding:0.2rem 0.5rem;cursor:pointer;vertical-align:middle;margin-left:0.45rem;
-    transition:background 0.15s;
+  /* Profile name editing (own profile) — tucked behind a corner settings cog */
+  .profile-cog{
+    position:absolute;top:0;right:0;
+    background:transparent;border:none;color:var(--text);
+    opacity:0.3;font-size:1.2rem;line-height:1;padding:0.25rem;
+    cursor:pointer;transition:opacity 0.15s, transform 0.2s;
   }
-  .profile-edit-btn:hover{background:rgba(226,176,74,0.3)}
-  .profile-edit-form{display:none;max-width:340px;margin:0.7rem auto 0}
+  .profile-cog:hover{opacity:0.75;transform:rotate(40deg)}
+  .profile-edit-label{font-size:0.7rem;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:var(--accent);opacity:0.7;margin-bottom:0.4rem}
+  .profile-edit-form{display:none;max-width:340px;margin:0.9rem auto 0;padding:0.9rem;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08)}
   .profile-edit-form.open{display:block}
   .profile-name-input{
     width:100%;box-sizing:border-box;padding:0.55rem 0.8rem;border-radius:10px;
@@ -9207,9 +9208,11 @@ function showStatsView(playerName, visiting) {
   container.innerHTML = `
     ${backBtnHtml}
     <div class="stats-header">
-      <div class="stats-player-name">${playerName}${isOwnProfile ? ` <button class="profile-edit-btn" id="btn-edit-name" title="Edit your name" aria-label="Edit your name">&#9998;</button>` : ''}</div>
+      ${isOwnProfile ? `<button class="profile-cog" id="btn-edit-name" title="Profile settings" aria-label="Profile settings">&#9881;</button>` : ''}
+      <div class="stats-player-name">${playerName}</div>
       <div class="stats-player-sub">${isOwnProfile ? 'Your Profile' : 'Player Profile'}</div>
       ${isOwnProfile ? `<div class="profile-edit-form" id="profile-edit-form">
+        <div class="profile-edit-label">Display name</div>
         <input type="text" id="profile-name-input" class="profile-name-input" maxlength="40" autocomplete="off" value="${playerName.replace(/"/g, '&quot;')}">
         <div class="profile-edit-actions">
           <button class="profile-edit-save" id="profile-name-save">Save</button>
