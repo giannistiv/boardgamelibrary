@@ -12248,18 +12248,27 @@ if (_sp && NAME_MAP[_sp]) localStorage.setItem('bgl-player', NAME_MAP[_sp]);
 let PROFILE_OVERRIDES = {};   // originalCanonicalName → chosen display name
 let PROFILE_DATA = {};        // originalCanonicalName → { name, photo, … }
 let DISPLAY_TO_CANON = {};    // display name → originalCanonicalName (for re-renames)
+// The Firebase security rules only permit writes under a fixed allowlist of
+// top-level keys (a dedicated /profiles key is denied). We store profiles as
+// a namespaced child of the writable gameImages node — loadGameImages ignores
+// it (no .url). Per-user children so concurrent renames don't clobber.
+const PROFILE_STORE = 'gameImages/_bglProfiles';
 
 async function loadProfiles() {
   if (!FIREBASE_DB) return;
   try {
-    const res = await fetch(`${FIREBASE_DB}/profiles.json`);
+    const res = await fetch(`${FIREBASE_DB}/${PROFILE_STORE}.json`);
+    if (!res.ok) return;
     const data = await res.json();
-    if (!data) return;
+    if (!data || typeof data !== 'object') return;
     for (const enc in data) {
+      const entry = data[enc];
+      if (!entry || typeof entry !== 'object') continue;
       const canon = decodeURIComponent(enc);
-      const entry = data[enc] || {};
       PROFILE_DATA[canon] = entry;
-      if (entry.name && entry.name !== canon) PROFILE_OVERRIDES[canon] = entry.name;
+      if (entry.name && typeof entry.name === 'string' && entry.name !== canon) {
+        PROFILE_OVERRIDES[canon] = entry.name;
+      }
     }
   } catch (e) { console.warn('Failed to load profiles:', e); }
 }
@@ -12341,10 +12350,14 @@ async function _saveProfileName(newName) {
   const orig = _origCanon(cur) || (NAME_MAP[cur] || cur);
   try {
     const existing = PROFILE_DATA[orig] || {};
-    await fetch(`${FIREBASE_DB}/profiles/${encodeURIComponent(orig)}.json`, {
+    const res = await fetch(`${FIREBASE_DB}/${PROFILE_STORE}/${encodeURIComponent(orig)}.json`, {
       method: 'PUT',
       body: JSON.stringify({ ...existing, name: newName, updatedAt: Date.now() })
     });
+    // fetch resolves even on HTTP errors — verify the write actually landed,
+    // otherwise we'd point this device at a name with no play data.
+    if (!res || !res.ok) return { ok: false, err: `Save failed (${res ? res.status : 'no response'}).` };
+    PROFILE_DATA[orig] = { ...existing, name: newName };
     localStorage.setItem('bgl-player', newName);
     return { ok: true };
   } catch (e) { return { ok: false, err: 'Save failed — try again.' }; }
@@ -12354,12 +12367,19 @@ Promise.all([loadAllRatings(), loadAllFavorites(), loadImportedGames(), loadImpo
   _applyProfileOverrides();
   if (typeof _updateBoardSouthBtnVisibility === 'function') _updateBoardSouthBtnVisibility();
   const savedPlayer = localStorage.getItem('bgl-player');
-  if (savedPlayer) {
+  // Self-heal: a login can only ever be a player who exists in the play
+  // history. If localStorage points at a name with no plays (e.g. a rename
+  // that failed to persist), recover by sending them back to the picker
+  // instead of rendering an empty zero-games profile.
+  const isOrphanLogin = savedPlayer && !_knownPlayerNames().has(savedPlayer);
+  if (savedPlayer && !isOrphanLogin) {
     // The boot-to-profile CSS hook already hid the library shell on first
     // paint; drop the class now so subsequent navigation works normally.
     document.documentElement.classList.remove('boot-to-profile');
     showStatsView(savedPlayer);
   } else {
+    if (isOrphanLogin) localStorage.removeItem('bgl-player');
+    document.documentElement.classList.remove('boot-to-profile');
     openPicker();
   }
 });
