@@ -9352,9 +9352,12 @@ function showStatsView(playerName, visiting) {
     });
   }
 
-  // Refresh favorites from Firebase for cross-device sync
+  // Refresh favorites from Firebase for cross-device sync. Favorites are
+  // stored under the player's ORIGINAL canonical name, so a renamed player
+  // must read by that key — otherwise this fetch returns nothing and wipes
+  // their favorites.
   if (FIREBASE_DB) {
-    fetch(`${FIREBASE_DB}/favorites/${encodeURIComponent(playerName)}.json`)
+    fetch(`${FIREBASE_DB}/favorites/${encodeURIComponent(_origCanon(playerName))}.json`)
       .then(r => r.json())
       .then(data => {
         if (!data) data = [];
@@ -9495,11 +9498,14 @@ async function saveRating(playerName, bggId, rating) {
   }
 
   if (!FIREBASE_DB) return;
+  // Persist under the original canonical name so a renamed player's ratings
+  // stay keyed consistently (matching how they're loaded).
+  const key = encodeURIComponent(_origCanon(playerName));
   try {
     if (rating === 0) {
-      await fetch(`${FIREBASE_DB}/ratings/${bggId}/${encodeURIComponent(playerName)}.json`, { method: 'DELETE' });
+      await fetch(`${FIREBASE_DB}/ratings/${bggId}/${key}.json`, { method: 'DELETE' });
     } else {
-      await fetch(`${FIREBASE_DB}/ratings/${bggId}/${encodeURIComponent(playerName)}.json`, {
+      await fetch(`${FIREBASE_DB}/ratings/${bggId}/${key}.json`, {
         method: 'PUT',
         body: JSON.stringify(ratingsCache[bggId][playerName])
       });
@@ -11672,7 +11678,16 @@ async function loadAllFavorites() {
 }
 
 function getPlayerFavorites(playerName) {
-  return favoritesCache[playerName] || [];
+  let f = favoritesCache[playerName];
+  // Defensive: if a rename left nothing under the display name, fall back to
+  // the original canonical name's favorites.
+  if ((!Array.isArray(f) || !f.length) && typeof _origCanon === 'function') {
+    const c = _origCanon(playerName);
+    if (c !== playerName && Array.isArray(favoritesCache[c]) && favoritesCache[c].length) {
+      f = favoritesCache[c];
+    }
+  }
+  return Array.isArray(f) ? f : [];
 }
 
 async function saveFavorites(playerName, bggIds) {
@@ -11680,7 +11695,9 @@ async function saveFavorites(playerName, bggIds) {
   _saveFavoritesToLocal();
   if (!FIREBASE_DB) return;
   try {
-    await fetch(`${FIREBASE_DB}/favorites/${encodeURIComponent(playerName)}.json`, {
+    // Persist under the original canonical name so favorites stay keyed
+    // consistently across a rename (everyone else's data is keyed that way).
+    await fetch(`${FIREBASE_DB}/favorites/${encodeURIComponent(_origCanon(playerName))}.json`, {
       method: 'PUT',
       body: JSON.stringify(bggIds)
     });
@@ -12279,11 +12296,20 @@ function _rekeyByNameMap(obj) {
   const out = {};
   for (const k in obj) {
     const nk = NAME_MAP[k] || k;
-    if (out[nk] && obj[k] && typeof out[nk] === 'object' && typeof obj[k] === 'object'
-        && !Array.isArray(out[nk]) && !Array.isArray(obj[k])) {
-      Object.assign(out[nk], obj[k]);
+    const val = obj[k];
+    if (!(nk in out)) { out[nk] = val; continue; }
+    // Collision (e.g. an old name and a stale renamed key both mapping here).
+    const cur = out[nk];
+    if (Array.isArray(cur) || Array.isArray(val)) {
+      // Lists (favorites, votes): keep the richer one so a stale empty key
+      // can never clobber real data — order-independent.
+      const a = Array.isArray(cur) ? cur : [];
+      const b = Array.isArray(val) ? val : [];
+      out[nk] = b.length > a.length ? b : a;
+    } else if (cur && val && typeof cur === 'object' && typeof val === 'object') {
+      Object.assign(cur, val);
     } else {
-      out[nk] = obj[k];
+      out[nk] = val || cur;
     }
   }
   return out;
@@ -12306,6 +12332,9 @@ function _applyProfileOverrides() {
     }
     if (typeof OATHSWORN_VOTERS !== 'undefined') {
       const oi = OATHSWORN_VOTERS.indexOf(orig); if (oi >= 0) OATHSWORN_VOTERS[oi] = disp;
+    }
+    if (typeof BOARD_SOUTH_REGULARS !== 'undefined' && BOARD_SOUTH_REGULARS.has(orig)) {
+      BOARD_SOUTH_REGULARS.delete(orig); BOARD_SOUTH_REGULARS.add(disp);
     }
   }
   // 2. Re-run the play-name rewrite for the freshly-added mappings.
