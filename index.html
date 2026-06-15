@@ -1468,6 +1468,84 @@
   .ch-missing b{color:#f0e6d3}
   .ch-done-txt{color:#5bc46b;opacity:0.9}
 
+  /* ── Year in Review ("Wrapped") ── */
+  .wr-banner{
+    display:flex;align-items:center;gap:0.9rem;cursor:pointer;
+    margin:0 0 1.3rem;padding:0.85rem 1rem;border-radius:16px;
+    background:linear-gradient(110deg,#5b2c9c,#c0399b 55%,#e2761b);
+    border:1px solid rgba(255,255,255,0.18);
+    box-shadow:0 6px 22px rgba(150,40,140,0.35);
+    position:relative;overflow:hidden;transition:transform 0.15s, box-shadow 0.15s;
+  }
+  .wr-banner:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(150,40,140,0.5)}
+  .wr-banner::after{content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;
+    background:linear-gradient(100deg,transparent,rgba(255,255,255,0.35),transparent);
+    transform:skewX(-18deg);animation:wr-sheen 4.5s ease-in-out infinite}
+  @keyframes wr-sheen{0%,60%{left:-60%}100%{left:160%}}
+  .wr-banner-spark{font-size:1.6rem;flex-shrink:0}
+  .wr-banner-text{flex:1;min-width:0;color:#fff}
+  .wr-banner-title{font-weight:800;font-size:1rem;letter-spacing:0.02em}
+  .wr-banner-sub{font-size:0.74rem;opacity:0.9;margin-top:0.15rem}
+  .wr-banner-go{font-size:1.8rem;color:#fff;opacity:0.85;flex-shrink:0}
+
+  .wr-overlay{position:fixed;inset:0;z-index:1000;display:none;background:#000}
+  .wr-overlay.open{display:block}
+  .wr-modal{position:absolute;inset:0;display:flex;flex-direction:column;max-width:520px;margin:0 auto;overflow:hidden}
+  .wr-bars{display:flex;gap:4px;padding:0.6rem 0.7rem 0.3rem;position:relative;z-index:6}
+  .wr-bar{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,0.25);overflow:hidden}
+  .wr-bar span{display:block;height:100%;width:0;background:#fff;border-radius:2px;transition:width 0.3s}
+  .wr-bar.seen span{width:100%}
+  .wr-close{position:absolute;top:0.55rem;right:0.7rem;z-index:12;background:rgba(0,0,0,0.25);
+    border:none;color:#fff;font-size:1.5rem;line-height:1;width:34px;height:34px;border-radius:50%;cursor:pointer}
+  .wr-stage{position:relative;flex:1;overflow:hidden}
+  .wr-slide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    padding:2rem 1.6rem;opacity:0;pointer-events:none;transition:opacity 0.35s}
+  .wr-slide.active{opacity:1;pointer-events:auto}
+  .wr-slide-inner{width:100%;max-width:420px;text-align:center;color:#fff;
+    transform:translateY(14px);opacity:0;transition:transform 0.45s 0.05s, opacity 0.45s 0.05s}
+  .wr-slide.active .wr-slide-inner{transform:translateY(0);opacity:1}
+  .wr-nav{position:absolute;top:0;bottom:0;z-index:5;cursor:pointer}
+  .wr-nav-prev{left:0;width:28%}
+  .wr-nav-next{right:0;width:72%}
+  .wr-kicker{font-size:0.72rem;font-weight:800;letter-spacing:0.18em;opacity:0.8;margin-bottom:1rem}
+  .wr-num{font-size:5rem;font-weight:800;line-height:1;text-shadow:0 4px 18px rgba(0,0,0,0.25)}
+  .wr-big{font-weight:800;margin:0.2rem 0}
+  .wr-label{font-size:1.05rem;font-weight:600;opacity:0.92;margin-top:0.5rem}
+  .wr-label b{color:#ffe08a}
+  .wr-lead{font-size:0.9rem;opacity:0.85;margin-top:1rem;line-height:1.5}
+  .wr-lead b{color:#fff}
+  .wr-taphint{font-size:0.72rem;opacity:0.6;margin-top:1.6rem;letter-spacing:0.05em}
+  .wr-badge{font-size:3.2rem;margin-bottom:0.6rem}
+  .wr-cover-wrap{display:flex;justify-content:center;margin-bottom:1rem}
+  .wr-cover{width:140px;height:auto;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.4)}
+  .wr-toplist{display:flex;flex-direction:column;gap:0.5rem;margin-top:1.1rem;text-align:left}
+  .wr-toprow{display:flex;align-items:center;gap:0.6rem;background:rgba(0,0,0,0.18);border-radius:10px;padding:0.4rem 0.6rem}
+  .wr-toprank{font-weight:800;font-size:1.05rem;width:1.2em;flex-shrink:0;opacity:0.9}
+  .wr-topcover{width:34px;height:34px;border-radius:6px;object-fit:cover;flex-shrink:0;background:rgba(255,255,255,0.1)}
+  .wr-avatar{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+    font-weight:800;background:rgba(255,255,255,0.2)}
+  .wr-topname{flex:1;min-width:0;font-size:0.86rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .wr-topcount{font-weight:800;font-size:0.9rem;color:#ffe08a;flex-shrink:0}
+  .wr-guess{display:flex;flex-direction:column;gap:0.55rem;margin-top:1.3rem;position:relative;z-index:11}
+  .wr-guess-opt{padding:0.7rem 0.9rem;border-radius:12px;border:1px solid rgba(255,255,255,0.35);
+    background:rgba(255,255,255,0.1);color:#fff;font-family:inherit;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.15s}
+  .wr-guess-opt:hover{background:rgba(255,255,255,0.2)}
+  .wr-guess-opt.locked{cursor:default}
+  .wr-guess-opt.right{background:#2ecc71;border-color:#2ecc71}
+  .wr-guess-opt.wrong{background:#e74c3c;border-color:#e74c3c;opacity:0.85}
+  .wr-guess-result{font-size:0.92rem;margin-top:1rem;line-height:1.5}
+  .wr-guess-result b{color:#ffe08a}
+  .wr-quests{display:flex;justify-content:center;gap:1.3rem;margin-top:1.2rem}
+  .wr-quest{display:flex;flex-direction:column;align-items:center;gap:0.3rem}
+  .wr-qnum{font-size:2.1rem;font-weight:800}
+  .wr-qden{font-size:0.9rem;opacity:0.6;font-weight:600}
+  .wr-qlbl{font-size:0.7rem;letter-spacing:0.06em;opacity:0.8;text-transform:uppercase}
+  .wr-finale-stats{display:flex;flex-wrap:wrap;justify-content:center;gap:0.5rem;margin-top:1.3rem}
+  .wr-finale-stats span{background:rgba(0,0,0,0.22);border-radius:999px;padding:0.3rem 0.8rem;font-size:0.8rem;font-weight:600}
+  .wr-download{margin-top:1.6rem;padding:0.7rem 1.3rem;border-radius:999px;border:none;cursor:pointer;
+    background:#fff;color:#3a1c71;font-family:inherit;font-weight:800;font-size:0.92rem;position:relative;z-index:11}
+  .wr-download:hover{transform:scale(1.04)}
+
   /* ── Achievements ── */
   .ach-grid{
     display:grid;grid-template-columns:repeat(auto-fill, minmax(110px, 1fr));
@@ -2127,6 +2205,8 @@
     <div id="modal-content"></div>
   </div>
 </div>
+
+<div class="wr-overlay" id="wrapped-overlay" aria-hidden="true"></div>
 
 <script>
 // =============================================
@@ -8505,6 +8585,491 @@ function wireChallenges() {
   });
 }
 
+// ── Year in Review ("Wrapped") ──────────────────────────────────────────
+// A Spotify-Wrapped-style, story-paced recap of a player's year at the table.
+// Surfaces as a banner on the profile that opens a full-screen slide modal.
+// Available mid-December → mid-January; force any time with the preview flag
+// localStorage['bgl-wrapped-preview']='1' or the ?wrapped URL param.
+const WRAPPED_OWNER = 'Στιβ'; // the library owner — excluded from others' "most played with"
+
+function _wrappedYear() {
+  const d = new Date();
+  return d.getMonth() === 0 ? d.getFullYear() - 1 : d.getFullYear();
+}
+function _wrappedAvailable() {
+  try {
+    if (localStorage.getItem('bgl-wrapped-preview') === '1') return true;
+    if (location.search.indexOf('wrapped') !== -1) return true;
+  } catch (_) {}
+  const d = new Date(), m = d.getMonth(), day = d.getDate();
+  return (m === 11 && day >= 15) || (m === 0 && day <= 15); // Dec 15 – Jan 15
+}
+function _estPlayMinutes(game) {
+  const t = game && game.playTime;
+  if (!t) return 45;
+  const nums = String(t).match(/\d+/g);
+  if (!nums || !nums.length) return 45;
+  const v = nums.map(Number);
+  return v.length > 1 ? (v[0] + v[v.length - 1]) / 2 : v[0];
+}
+
+function computeWrapped(playerName, year) {
+  year = String(year || _wrappedYear());
+  const isOwner = _origCanon(playerName) === WRAPPED_OWNER || playerName === WRAPPED_OWNER;
+  const DOW = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const MON = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+  const plays = [];
+  for (const bggId in PLAY_HISTORY) {
+    for (const p of PLAY_HISTORY[bggId]) {
+      if (!p || !p.date || p.date.slice(0, 4) !== year || !Array.isArray(p.sc)) continue;
+      const me = p.sc.find(s => s && s.n === playerName);
+      if (!me) continue;
+      plays.push({ bggId: Number(bggId), date: p.date, sc: p.sc, me, b: p.b, l: p.l });
+    }
+  }
+  const totalPlays = plays.length;
+  let wins = 0, minutes = 0, coop = 0, pvp = 0;
+  const gameCount = {}, comp = {}, mech = {}, cat = {}, byDate = {}, byDow = {}, byMonth = {}, byLoc = {};
+  let wSum = 0, wN = 0, heaviest = null, lightest = null;
+  const rivalStats = {}; // opponent → {games, myWins, theirWins}
+
+  for (const p of plays) {
+    const g = findGameByBggId(p.bggId);
+    if (p.me.w) wins++;
+    minutes += _estPlayMinutes(g);
+    gameCount[p.bggId] = (gameCount[p.bggId] || 0) + 1;
+    if (g && g.complexity) { wSum += g.complexity; wN++;
+      if (!heaviest || g.complexity > heaviest.complexity) heaviest = g;
+      if (!lightest || g.complexity < lightest.complexity) lightest = g;
+    }
+    if (g && Array.isArray(g.mechanics)) g.mechanics.forEach(m => mech[m] = (mech[m] || 0) + 1);
+    if (g && Array.isArray(g.categories)) g.categories.forEach(c => cat[c] = (cat[c] || 0) + 1);
+    const [yy, mm, dd] = p.date.split('-').map(Number);
+    byDate[p.date] = (byDate[p.date] || 0) + 1;
+    byDow[new Date(yy, mm - 1, dd).getDay()] = (byDow[new Date(yy, mm - 1, dd).getDay()] || 0) + 1;
+    byMonth[mm - 1] = (byMonth[mm - 1] || 0) + 1;
+    if (p.l) byLoc[p.l] = (byLoc[p.l] || 0) + 1;
+
+    const isSolo = p.sc.length === 1;
+    const allSame = p.sc.every(s => !!s.w === !!p.sc[0].w);
+    const isCoop = !isSolo && allSame;
+    if (isCoop) coop++;
+    const isPvP = !isSolo && !isCoop;
+    if (isPvP) pvp++;
+    for (const s of p.sc) {
+      if (!s || !s.n || s.n === playerName || HIDDEN_PLAYERS.has(s.n)) continue;
+      const isOwnerCo = _origCanon(s.n) === WRAPPED_OWNER || s.n === WRAPPED_OWNER;
+      if (!isOwner && isOwnerCo) continue; // exclude the owner from others' crew
+      comp[s.n] = (comp[s.n] || 0) + 1;
+      if (isPvP) {
+        const r = rivalStats[s.n] || (rivalStats[s.n] = { games: 0, myWins: 0, theirWins: 0 });
+        r.games++; if (p.me.w) r.myWins++; if (s.w) r.theirWins++;
+      }
+    }
+  }
+
+  const sortEnt = (o) => Object.entries(o).sort((a, b) => b[1] - a[1]);
+  const topGames = Object.keys(gameCount).map(b => ({ bggId: Number(b), count: gameCount[b], game: findGameByBggId(b) })).sort((a, b) => b.count - a.count);
+  const companions = sortEnt(comp).map(([name, count]) => ({ name, count }));
+  const rivals = Object.keys(rivalStats).map(n => ({ name: n, ...rivalStats[n] })).sort((a, b) => b.games - a.games);
+
+  // first-ever play per game (all history) → which were new this year
+  const firstEver = {};
+  for (const bggId in PLAY_HISTORY) for (const p of PLAY_HISTORY[bggId]) {
+    if (!p || !p.date || !Array.isArray(p.sc) || !p.sc.some(s => s && s.n === playerName)) continue;
+    const k = Number(bggId);
+    if (!(k in firstEver) || p.date < firstEver[k]) firstEver[k] = p.date;
+  }
+  const newToMe = Object.keys(firstEver).filter(k => firstEver[k].slice(0, 4) === year).map(Number);
+
+  const avgWeight = wN ? wSum / wN : 0;
+  const topMech = sortEnt(mech)[0] || null;
+  const topCat = sortEnt(cat)[0] || null;
+  const busiestDay = sortEnt(byDate)[0] || null;
+  const favDow = sortEnt(byDow)[0] || null;
+  const favMonth = sortEnt(byMonth)[0] || null;
+  const favLoc = sortEnt(byLoc)[0] || null;
+  const winRate = totalPlays ? Math.round(wins / totalPlays * 100) : 0;
+  const coopRatio = totalPlays ? coop / totalPlays : 0;
+  const newRatio = topGames.length ? newToMe.length / topGames.length : 0;
+
+  let ch = null; try { ch = computeChallenges(playerName); } catch (_) {}
+
+  const bsNames = (typeof _allBoardSouthVoterNames === 'function') ? _allBoardSouthVoterNames() : new Set();
+  const isBoardSouth = bsNames.has(playerName) || (typeof playerName === 'string' && playerName.includes(' - BS'));
+  const isIlioupoli = (typeof ILIOUPOLI_MEMBERS !== 'undefined') && ILIOUPOLI_MEMBERS.has(playerName);
+
+  // gamer archetype
+  const arch = (() => {
+    if (totalPlays < 5) return { title: 'The Newcomer', sub: 'Your table legend is just beginning.' };
+    if (coopRatio >= 0.6) return { title: 'The Team Player', sub: 'You win together — or not at all.' };
+    if (avgWeight >= 3.2) return { title: 'The Heavyweight', sub: 'The crunchier the rulebook, the better.' };
+    if (newRatio >= 0.5) return { title: 'The Explorer', sub: 'Always chasing the next new box.' };
+    if (winRate >= 65) return { title: 'The Closer', sub: 'You came to win. And you did.' };
+    if (avgWeight && avgWeight < 1.9) return { title: 'The Socialite', sub: 'Light games, loud table, big laughs.' };
+    return { title: 'The All-Rounder', sub: 'A little of everything, mastered.' };
+  })();
+
+  return {
+    playerName, year, isOwner, totalPlays, wins, winRate, minutes,
+    hours: Math.round(minutes / 60), distinct: topGames.length,
+    topGames, companions, rivals, newToMe, newCount: newToMe.length,
+    avgWeight, heaviest, lightest, topMech, topCat,
+    busiestDay, favDow: favDow ? { name: DOW[favDow[0]], count: favDow[1] } : null,
+    favMonth: favMonth ? { name: MON[favMonth[0]], count: favMonth[1] } : null,
+    favLoc: favLoc ? { name: favLoc[0], count: favLoc[1] } : null,
+    coop, pvp, ch, isBoardSouth, isIlioupoli, arch
+  };
+}
+
+function buildWrappedBanner(playerName) {
+  if (!_wrappedAvailable()) return '';
+  const d = computeWrapped(playerName);
+  if (!d.totalPlays) return '';
+  return `<div class="wr-banner" id="wrapped-banner" role="button" tabindex="0">
+    <div class="wr-banner-spark">&#10024;</div>
+    <div class="wr-banner-text">
+      <div class="wr-banner-title">${d.year} Wrapped is here</div>
+      <div class="wr-banner-sub">${d.totalPlays} plays. ${d.distinct} games. One unforgettable year &mdash; tap to relive it.</div>
+    </div>
+    <div class="wr-banner-go">&rsaquo;</div>
+  </div>`;
+}
+
+function openWrappedModal(playerName, isOwnProfile) {
+  const overlay = document.getElementById('wrapped-overlay');
+  if (!overlay) return;
+  const d = computeWrapped(playerName);
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+  const cover = (bggId) => `images/${bggId}.jpg`;
+  const ord = ['st','nd','rd'];
+
+  // ── Build slides ──
+  const slides = [];
+  const G = {
+    purple: 'linear-gradient(160deg,#3a1c71,#6a2c9c,#b34bd4)',
+    sunset: 'linear-gradient(160deg,#c0392b,#e2761b,#f0b429)',
+    teal:   'linear-gradient(160deg,#0b6e6e,#119da4,#5bd6c0)',
+    pink:   'linear-gradient(160deg,#7a1f6b,#c0399b,#ff7ab6)',
+    blue:   'linear-gradient(160deg,#13294b,#1f5fa8,#4ec3f0)',
+    forest: 'linear-gradient(160deg,#14432a,#1f7a44,#6fcf7c)',
+    gold:   'linear-gradient(160deg,#4a2f00,#a06a12,#f0c14b)',
+    night:  'linear-gradient(160deg,#0f1020,#2a2350,#5b4b9c)'
+  };
+  const slide = (bg, body) => slides.push({ bg, body });
+
+  slide(G.night, `
+    <div class="wr-kicker">${esc(d.year)} WRAPPED</div>
+    <div class="wr-big" style="font-size:2.3rem;line-height:1.15">${esc(d.playerName)}'s<br>Year at the Table</div>
+    <div class="wr-lead">A year of dice, cards, and questionable alliances. Let's relive it.</div>
+    <div class="wr-taphint">tap to begin &rsaquo;</div>`);
+
+  slide(G.purple, `
+    <div class="wr-kicker">YOU SHOWED UP</div>
+    <div class="wr-num">${d.totalPlays}</div>
+    <div class="wr-label">plays logged in ${esc(d.year)}</div>
+    <div class="wr-lead">${d.totalPlays >= 200 ? "That's borderline professional." : d.totalPlays >= 80 ? "A seriously well-played year." : d.totalPlays >= 30 ? "A great year of gaming." : "Every session counts."}</div>`);
+
+  slide(G.teal, `
+    <div class="wr-kicker">TIME WELL SPENT</div>
+    <div class="wr-num">${d.hours}</div>
+    <div class="wr-label">hours around the table</div>
+    <div class="wr-lead">That's about ${Math.max(1, Math.round(d.hours / 24))} full day${Math.round(d.hours / 24) === 1 ? '' : 's'} of pure gaming${d.hours >= 100 ? " — no regrets." : "."}</div>`);
+
+  slide(G.forest, `
+    <div class="wr-kicker">YOUR LIBRARY</div>
+    <div class="wr-num">${d.distinct}</div>
+    <div class="wr-label">different games played</div>
+    <div class="wr-lead">${d.newCount} of them you tried for the very first time this year.</div>`);
+
+  // Guess slide (own profile, enough data) — guess your #1 game
+  const topG = d.topGames[0];
+  if (topG && d.topGames.length >= 3) {
+    const distractors = d.topGames.slice(1, 6);
+    // shuffle topG + up to 3 distractors deterministically-ish
+    const opts = [topG, ...distractors.slice(0, 3)]
+      .map(x => ({ bggId: x.bggId, name: (x.game && x.game.name) || ('Game #' + x.bggId), correct: x.bggId === topG.bggId }))
+      .sort(() => Math.random() - 0.5);
+    if (isOwnProfile) {
+      slide(G.gold, `
+        <div class="wr-kicker">QUICK — GUESS</div>
+        <div class="wr-big" style="font-size:1.5rem">What did you play<br>the most this year?</div>
+        <div class="wr-guess" data-guess="1">
+          ${opts.map(o => `<button class="wr-guess-opt" data-correct="${o.correct ? 1 : 0}" data-bgg="${o.bggId}">${esc(o.name)}</button>`).join('')}
+        </div>
+        <div class="wr-guess-result" style="display:none"></div>`);
+    } else {
+      slide(G.gold, `
+        <div class="wr-kicker">MOST PLAYED</div>
+        <div class="wr-cover-wrap"><img class="wr-cover" src="${cover(topG.bggId)}" onerror="__imgFallback(this, ${topG.bggId})"></div>
+        <div class="wr-big" style="font-size:1.6rem">${esc((topG.game && topG.game.name) || 'Game')}</div>
+        <div class="wr-label">${topG.count} plays</div>`);
+    }
+  }
+
+  // Top games podium
+  if (d.topGames.length) {
+    const top5 = d.topGames.slice(0, 5);
+    slide(G.sunset, `
+      <div class="wr-kicker">YOUR TOP GAMES</div>
+      <div class="wr-toplist">
+        ${top5.map((t, i) => `<div class="wr-toprow">
+          <span class="wr-toprank">${i + 1}</span>
+          <img class="wr-topcover" src="${cover(t.bggId)}" onerror="__imgFallback(this, ${t.bggId})">
+          <span class="wr-topname">${esc((t.game && t.game.name) || ('Game #' + t.bggId))}</span>
+          <span class="wr-topcount">${t.count}&times;</span>
+        </div>`).join('')}
+      </div>`);
+  }
+
+  // Weight class
+  if (d.avgWeight) {
+    const wLabel = d.avgWeight >= 3.5 ? 'Brain-Melting' : d.avgWeight >= 2.8 ? 'Heavy' : d.avgWeight >= 2.2 ? 'Medium-Heavy' : d.avgWeight >= 1.7 ? 'Medium-Light' : 'Filler-Friendly';
+    slide(G.blue, `
+      <div class="wr-kicker">YOUR WEIGHT CLASS</div>
+      <div class="wr-num" style="font-size:3.2rem">${d.avgWeight.toFixed(2)}</div>
+      <div class="wr-label">average complexity &mdash; <b>${wLabel}</b></div>
+      ${d.heaviest ? `<div class="wr-lead">Your heaviest brain-burner: <b>${esc(d.heaviest.name)}</b> (${d.heaviest.complexity}).</div>` : ''}`);
+  }
+
+  // Favorite mechanic
+  if (d.topMech) {
+    slide(G.pink, `
+      <div class="wr-kicker">YOUR SIGNATURE MOVE</div>
+      <div class="wr-big" style="font-size:1.9rem">${esc(d.topMech[0])}</div>
+      <div class="wr-label">your most-played mechanic</div>
+      <div class="wr-lead">It showed up in ${d.topMech[1]} of your plays${d.topCat ? `. You can't resist a good <b>${esc(d.topCat[0])}</b> game either.` : '.'}</div>`);
+  }
+
+  // Crew / most played with (owner excluded for others)
+  if (d.companions.length) {
+    const top = d.companions.slice(0, 5);
+    slide(G.purple, `
+      <div class="wr-kicker">YOUR CREW</div>
+      <div class="wr-big" style="font-size:1.5rem">You played most with</div>
+      <div class="wr-toplist">
+        ${top.map((c, i) => `<div class="wr-toprow">
+          <span class="wr-toprank">${i + 1}</span>
+          <span class="wr-avatar">${esc((c.name[0] || '?').toUpperCase())}</span>
+          <span class="wr-topname">${esc(c.name)}</span>
+          <span class="wr-topcount">${c.count}&times;</span>
+        </div>`).join('')}
+      </div>`);
+  } else {
+    slide(G.purple, `
+      <div class="wr-kicker">LONE WOLF</div>
+      <div class="wr-big" style="font-size:1.7rem">A solo year</div>
+      <div class="wr-lead">Most of your battles this year were fought alone. Respect.</div>`);
+  }
+
+  // Rival
+  const rival = d.rivals.find(r => r.games >= 3);
+  if (rival) {
+    const edge = rival.myWins > rival.theirWins ? `You hold the edge: <b>${rival.myWins}&ndash;${rival.theirWins}</b>.`
+      : rival.myWins < rival.theirWins ? `They've got your number: <b>${rival.myWins}&ndash;${rival.theirWins}</b>. Time for revenge.`
+      : `Dead even: <b>${rival.myWins}&ndash;${rival.theirWins}</b>. The rivalry continues.`;
+    slide(G.sunset, `
+      <div class="wr-kicker">YOUR NEMESIS</div>
+      <div class="wr-big" style="font-size:1.8rem">${esc(rival.name)}</div>
+      <div class="wr-label">faced ${rival.games} times across the table</div>
+      <div class="wr-lead">${edge}</div>`);
+  }
+
+  // Win rate
+  slide(G.gold, `
+    <div class="wr-kicker">THE SCOREBOARD</div>
+    <div class="wr-num">${d.winRate}<span style="font-size:2rem">%</span></div>
+    <div class="wr-label">win rate &middot; ${d.wins} wins</div>
+    <div class="wr-lead">${d.winRate >= 65 ? 'Ruthless. The table fears you.' : d.winRate >= 45 ? 'A worthy and balanced opponent.' : 'You play for the love of the game (and snacks).'}</div>`);
+
+  // Challenges progress
+  if (d.ch) {
+    slide(G.teal, `
+      <div class="wr-kicker">YOUR ${esc(d.year)} QUESTS</div>
+      <div class="wr-quests">
+        <div class="wr-quest"><span class="wr-qnum">${d.ch.tenFilled}<span class="wr-qden">/100</span></span><span class="wr-qlbl">10&times;10</span></div>
+        <div class="wr-quest"><span class="wr-qnum">${d.ch.alphaCount}<span class="wr-qden">/26</span></span><span class="wr-qlbl">Alphabet</span></div>
+        <div class="wr-quest"><span class="wr-qnum">${d.ch.hi.h}</span><span class="wr-qlbl">H-Index</span></div>
+      </div>
+      <div class="wr-lead">${d.ch.tenComplete ? '10&times;10 complete — legendary.' : d.ch.alphaCount === 26 ? 'Full alphabet cleared!' : 'Plenty of quests still calling your name.'}</div>`);
+  }
+
+  // Busiest day
+  if (d.busiestDay) {
+    slide(G.blue, `
+      <div class="wr-kicker">YOUR BIGGEST DAY</div>
+      <div class="wr-big" style="font-size:1.7rem">${esc(_fmtDateShort(d.busiestDay[0]))}</div>
+      <div class="wr-label">${d.busiestDay[1]} games in a single day</div>
+      ${d.favDow ? `<div class="wr-lead"><b>${esc(d.favDow.name)}</b> was your power day${d.favLoc ? `, usually at <b>${esc(d.favLoc.name)}</b>.` : '.'}</div>` : ''}`);
+  }
+
+  // Special badges
+  if (d.isBoardSouth) {
+    slide(G.forest, `
+      <div class="wr-badge">&#9876;</div>
+      <div class="wr-kicker">BOARD SOUTH REGULAR</div>
+      <div class="wr-big" style="font-size:1.7rem">A true Souther</div>
+      <div class="wr-lead">You're part of the Board South crew that keeps the table alive.</div>`);
+  }
+  if (d.isIlioupoli) {
+    slide(G.night, `
+      <div class="wr-badge">&#127968;</div>
+      <div class="wr-kicker">ILIOUPOLI BROS</div>
+      <div class="wr-big" style="font-size:1.7rem">Inner circle</div>
+      <div class="wr-lead">One of the Ilioupoli Bros — the games hit different at home.</div>`);
+  }
+  const duo = d.companions[0];
+  if (duo && duo.count >= 40) {
+    slide(G.pink, `
+      <div class="wr-badge">&#129309;</div>
+      <div class="wr-kicker">DYNAMIC DUO</div>
+      <div class="wr-big" style="font-size:1.6rem">You &amp; ${esc(duo.name)}</div>
+      <div class="wr-label">${duo.count} games together this year</div>
+      <div class="wr-lead">Some partnerships are just meant to be.</div>`);
+  }
+
+  // Finale + archetype + download
+  slide(G.purple, `
+    <div class="wr-kicker">YOUR ${esc(d.year)} PERSONA</div>
+    <div class="wr-big" style="font-size:2.1rem;background:linear-gradient(90deg,#ffd86b,#ff9ec7);-webkit-background-clip:text;background-clip:text;color:transparent">${esc(d.arch.title)}</div>
+    <div class="wr-lead">${esc(d.arch.sub)}</div>
+    <div class="wr-finale-stats">
+      <span>${d.totalPlays} plays</span><span>${d.distinct} games</span><span>${d.hours}h</span><span>${d.winRate}% wins</span>
+    </div>
+    <button class="wr-download" id="wr-download">&#11015; Download your card</button>
+    <div class="wr-taphint" id="wr-replay">tap to close &times;</div>`);
+
+  // ── Render ──
+  let idx = 0;
+  const bars = slides.map((_, i) => `<div class="wr-bar" data-i="${i}"><span></span></div>`).join('');
+  overlay.innerHTML = `
+    <div class="wr-modal">
+      <div class="wr-bars">${bars}</div>
+      <button class="wr-close" id="wr-close" aria-label="Close">&times;</button>
+      <div class="wr-stage" id="wr-stage">
+        ${slides.map((s, i) => `<div class="wr-slide" data-idx="${i}" style="background:${s.bg}"><div class="wr-slide-inner">${s.body}</div></div>`).join('')}
+      </div>
+      <div class="wr-nav wr-nav-prev" id="wr-prev"></div>
+      <div class="wr-nav wr-nav-next" id="wr-next"></div>
+    </div>`;
+  overlay.classList.add('open');
+  overlay.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('modal-open');
+
+  const slideEls = Array.from(overlay.querySelectorAll('.wr-slide'));
+  const barEls = Array.from(overlay.querySelectorAll('.wr-bar'));
+  const show = (n) => {
+    idx = Math.max(0, Math.min(slides.length - 1, n));
+    slideEls.forEach((el, i) => el.classList.toggle('active', i === idx));
+    barEls.forEach((el, i) => el.classList.toggle('seen', i <= idx));
+  };
+  show(0);
+
+  const close = () => {
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('modal-open');
+    overlay.innerHTML = '';
+    if (overlay._wrKey) { document.removeEventListener('keydown', overlay._wrKey); overlay._wrKey = null; }
+  };
+  const next = () => { if (idx >= slides.length - 1) { close(); } else { show(idx + 1); } };
+  const prev = () => show(idx - 1);
+
+  overlay.querySelector('#wr-next').addEventListener('click', next);
+  overlay.querySelector('#wr-prev').addEventListener('click', prev);
+  overlay.querySelector('#wr-close').addEventListener('click', (e) => { e.stopPropagation(); close(); });
+
+  // Guess interaction
+  const guessWrap = overlay.querySelector('.wr-guess');
+  if (guessWrap) {
+    guessWrap.querySelectorAll('.wr-guess-opt').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (guessWrap.dataset.done) return;
+        guessWrap.dataset.done = '1';
+        const correct = btn.dataset.correct === '1';
+        guessWrap.querySelectorAll('.wr-guess-opt').forEach(b => {
+          b.classList.add('locked');
+          if (b.dataset.correct === '1') b.classList.add('right');
+          else if (b === btn) b.classList.add('wrong');
+        });
+        const res = guessWrap.parentElement.querySelector('.wr-guess-result');
+        const top = d.topGames[0];
+        if (res) {
+          res.style.display = 'block';
+          res.innerHTML = `${correct ? '&#127881; Nailed it!' : 'Not quite!'} You played <b>${esc((top.game && top.game.name) || 'it')}</b> <b>${top.count}</b> times.<div class="wr-taphint" style="margin-top:0.6rem">tap to continue &rsaquo;</div>`;
+        }
+      });
+    });
+  }
+
+  // Download
+  const dl = overlay.querySelector('#wr-download');
+  if (dl) dl.addEventListener('click', (e) => { e.stopPropagation(); _downloadWrapped(d); });
+
+  // Keyboard
+  overlay._wrKey = (e) => {
+    if (e.key === 'Escape') close();
+    else if (e.key === 'ArrowRight') next();
+    else if (e.key === 'ArrowLeft') prev();
+  };
+  document.addEventListener('keydown', overlay._wrKey);
+}
+
+// Render the year's highlights to a shareable PNG (story size). Same-origin
+// covers draw without tainting the canvas, so toBlob works.
+async function _downloadWrapped(d) {
+  try {
+    const W = 1080, H = 1920;
+    const cv = document.createElement('canvas');
+    cv.width = W; cv.height = H;
+    const ctx = cv.getContext('2d');
+    const grad = ctx.createLinearGradient(0, 0, W, H);
+    grad.addColorStop(0, '#3a1c71'); grad.addColorStop(0.55, '#6a2c9c'); grad.addColorStop(1, '#b34bd4');
+    ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
+    ctx.textAlign = 'center'; ctx.fillStyle = '#fff';
+    ctx.font = '700 56px sans-serif'; ctx.fillText(`${d.year} WRAPPED`, W / 2, 150);
+    ctx.font = '800 84px sans-serif'; ctx.fillText(d.playerName, W / 2, 250);
+
+    const loadImg = (src) => new Promise(res => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = src; });
+    const top3 = d.topGames.slice(0, 3);
+    const imgs = await Promise.all(top3.map(t => loadImg(`images/${t.bggId}.jpg`)));
+    const cw = 240, gap = 60, startX = (W - (cw * 3 + gap * 2)) / 2, y = 360;
+    top3.forEach((t, i) => {
+      const x = startX + i * (cw + gap);
+      ctx.save();
+      if (imgs[i]) ctx.drawImage(imgs[i], x, y, cw, cw * 1.3);
+      else { ctx.fillStyle = 'rgba(255,255,255,0.15)'; ctx.fillRect(x, y, cw, cw * 1.3); }
+      ctx.restore();
+      ctx.fillStyle = '#ffd86b'; ctx.font = '700 40px sans-serif';
+      ctx.fillText(`${t.count}×`, x + cw / 2, y + cw * 1.3 + 50);
+    });
+
+    const stats = [[d.totalPlays, 'PLAYS'], [d.distinct, 'GAMES'], [d.hours + 'h', 'PLAYED'], [d.winRate + '%', 'WINS']];
+    const sy = 1080;
+    stats.forEach((s, i) => {
+      const x = (i % 2 === 0) ? W * 0.3 : W * 0.7;
+      const yy = sy + Math.floor(i / 2) * 230;
+      ctx.fillStyle = '#fff'; ctx.font = '800 110px sans-serif'; ctx.fillText(String(s[0]), x, yy);
+      ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = '600 38px sans-serif'; ctx.fillText(s[1], x, yy + 56);
+    });
+
+    ctx.fillStyle = '#ffd86b'; ctx.font = '800 76px sans-serif'; ctx.fillText(d.arch.title, W / 2, 1640);
+    ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.font = '400 38px sans-serif'; ctx.fillText(d.arch.sub, W / 2, 1700);
+    ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '600 34px sans-serif'; ctx.fillText('Board Game Library', W / 2, 1850);
+
+    cv.toBlob((blob) => {
+      if (!blob) return;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `${d.playerName}-wrapped-${d.year}.png`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+    }, 'image/png');
+  } catch (e) { console.warn('Wrapped download failed:', e); }
+}
+
 // ── Ilioupoli Bros — Δημητρης's private library shelf ──
 // Tab visible only to these players.
 const ILIOUPOLI_MEMBERS = new Set(['Στιβ', 'Δημητρης', 'Μαντσος']);
@@ -9227,6 +9792,8 @@ function showStatsView(playerName, visiting) {
         : ''}
     </div>
 
+    ${buildWrappedBanner(playerName)}
+
     ${favoritesHtml}
 
     ${h2hHtml}
@@ -9387,6 +9954,12 @@ function showStatsView(playerName, visiting) {
       if (typeof _updateBoardSouthBtnVisibility === 'function') _updateBoardSouthBtnVisibility();
       openPicker();
     });
+  }
+
+  // Year-in-Review "Wrapped" banner → opens the story modal.
+  const wrappedBanner = container.querySelector('#wrapped-banner');
+  if (wrappedBanner) {
+    wrappedBanner.addEventListener('click', () => openWrappedModal(playerName, isOwnProfile));
   }
 
   // Edit-name (own profile only): reveal an inline editor, save to Firebase,
