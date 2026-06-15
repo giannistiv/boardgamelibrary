@@ -1499,11 +1499,37 @@
     border:none;color:#fff;font-size:1.5rem;line-height:1;width:34px;height:34px;border-radius:50%;cursor:pointer}
   .wr-stage{position:relative;flex:1;overflow:hidden}
   .wr-slide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-    padding:2rem 1.6rem;opacity:0;pointer-events:none;transition:opacity 0.35s}
+    padding:2rem 1.6rem;opacity:0;pointer-events:none;transition:opacity 0.4s;overflow:hidden}
   .wr-slide.active{opacity:1;pointer-events:auto}
-  .wr-slide-inner{width:100%;max-width:420px;text-align:center;color:#fff;
-    transform:translateY(14px);opacity:0;transition:transform 0.45s 0.05s, opacity 0.45s 0.05s}
-  .wr-slide.active .wr-slide-inner{transform:translateY(0);opacity:1}
+  /* drifting soft glow for liveliness */
+  .wr-slide::before{content:'';position:absolute;width:120%;height:60%;left:-10%;top:-10%;
+    background:radial-gradient(circle at 30% 30%, rgba(255,255,255,0.28), transparent 60%);
+    opacity:0;pointer-events:none}
+  .wr-slide.active::before{animation:wr-drift 9s ease-in-out infinite alternate;opacity:1}
+  @keyframes wr-drift{0%{transform:translate(-6%,-4%) scale(1)}100%{transform:translate(12%,30%) scale(1.25)}}
+  .wr-slide-inner{position:relative;width:100%;max-width:420px;text-align:center;color:#fff;
+    transform:translateY(18px) scale(0.98);opacity:0;transition:transform 0.5s cubic-bezier(.2,.8,.2,1) 0.06s, opacity 0.5s 0.06s}
+  .wr-slide.active .wr-slide-inner{transform:translateY(0) scale(1);opacity:1}
+  /* big number pop + staggered row/chip entrances */
+  .wr-slide.active .wr-num{animation:wr-pop 0.7s cubic-bezier(.2,1.3,.4,1) both}
+  @keyframes wr-pop{0%{transform:scale(0.3);opacity:0}60%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+  .wr-slide.active .wr-toprow,.wr-slide.active .wr-quest,.wr-slide.active .wr-finale-stats span,.wr-slide.active .wr-guess-opt{
+    animation:wr-rise 0.55s cubic-bezier(.2,.8,.2,1) both}
+  @keyframes wr-rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+  .wr-slide.active .wr-toprow:nth-child(1),.wr-slide.active .wr-guess-opt:nth-child(1){animation-delay:.18s}
+  .wr-slide.active .wr-toprow:nth-child(2),.wr-slide.active .wr-guess-opt:nth-child(2){animation-delay:.28s}
+  .wr-slide.active .wr-toprow:nth-child(3),.wr-slide.active .wr-guess-opt:nth-child(3){animation-delay:.38s}
+  .wr-slide.active .wr-toprow:nth-child(4),.wr-slide.active .wr-guess-opt:nth-child(4){animation-delay:.48s}
+  .wr-slide.active .wr-toprow:nth-child(5){animation-delay:.58s}
+  .wr-slide.active .wr-quest:nth-child(2){animation-delay:.15s}
+  .wr-slide.active .wr-quest:nth-child(3){animation-delay:.3s}
+  .wr-badge{display:inline-block}
+  .wr-slide.active .wr-badge{animation:wr-pop 0.8s cubic-bezier(.2,1.4,.4,1) both}
+  /* confetti */
+  .wr-confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:8}
+  .wr-confetti i{position:absolute;top:-12px;width:9px;height:14px;border-radius:2px;
+    animation:wr-fall linear forwards}
+  @keyframes wr-fall{0%{transform:translateY(-20px) rotate(0);opacity:1}100%{transform:translateY(105vh) rotate(540deg);opacity:0.9}}
   .wr-nav{position:absolute;top:0;bottom:0;z-index:5;cursor:pointer}
   .wr-nav-prev{left:0;width:28%}
   .wr-nav-next{right:0;width:72%}
@@ -8602,7 +8628,7 @@ function _wrappedAvailable() {
     if (location.search.indexOf('wrapped') !== -1) return true;
   } catch (_) {}
   const d = new Date(), m = d.getMonth(), day = d.getDate();
-  return (m === 11 && day >= 15) || (m === 0 && day <= 15); // Dec 15 – Jan 15
+  return (m === 11 && day >= 15) || (m === 0 && day <= 18); // Dec 15 – mid-Jan
 }
 function _estPlayMinutes(game) {
   const t = game && game.playTime;
@@ -8743,19 +8769,20 @@ function openWrappedModal(playerName, isOwnProfile) {
   const d = computeWrapped(playerName);
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
   const cover = (bggId) => `images/${bggId}.jpg`;
-  const ord = ['st','nd','rd'];
+  // count-up number (animated from 0 when its slide becomes active)
+  const cnum = (val, dec = 0) => `<span class="wr-count" data-count="${val}" data-dec="${dec}">${dec ? (0).toFixed(dec) : '0'}</span>`;
 
   // ── Build slides ──
   const slides = [];
   const G = {
-    purple: 'linear-gradient(160deg,#3a1c71,#6a2c9c,#b34bd4)',
-    sunset: 'linear-gradient(160deg,#c0392b,#e2761b,#f0b429)',
-    teal:   'linear-gradient(160deg,#0b6e6e,#119da4,#5bd6c0)',
-    pink:   'linear-gradient(160deg,#7a1f6b,#c0399b,#ff7ab6)',
-    blue:   'linear-gradient(160deg,#13294b,#1f5fa8,#4ec3f0)',
-    forest: 'linear-gradient(160deg,#14432a,#1f7a44,#6fcf7c)',
-    gold:   'linear-gradient(160deg,#4a2f00,#a06a12,#f0c14b)',
-    night:  'linear-gradient(160deg,#0f1020,#2a2350,#5b4b9c)'
+    purple: 'linear-gradient(155deg,#7928ca 0%,#b14bff 45%,#ff0080 100%)',
+    sunset: 'linear-gradient(155deg,#ee0979 0%,#ff6a00 60%,#ffd200 100%)',
+    teal:   'linear-gradient(155deg,#0cebeb 0%,#11998e 50%,#38ef7d 100%)',
+    pink:   'linear-gradient(155deg,#fc466b 0%,#a020f0 55%,#3f5efb 100%)',
+    blue:   'linear-gradient(155deg,#00c6ff 0%,#0072ff 55%,#5f2c82 100%)',
+    forest: 'linear-gradient(155deg,#11998e 0%,#1f7a44 45%,#aef359 100%)',
+    gold:   'linear-gradient(155deg,#f7971e 0%,#ff5e62 55%,#ffd200 100%)',
+    night:  'linear-gradient(160deg,#0f0c29 0%,#302b63 50%,#9d50bb 100%)'
   };
   const slide = (bg, body) => slides.push({ bg, body });
 
@@ -8767,19 +8794,19 @@ function openWrappedModal(playerName, isOwnProfile) {
 
   slide(G.purple, `
     <div class="wr-kicker">YOU SHOWED UP</div>
-    <div class="wr-num">${d.totalPlays}</div>
+    <div class="wr-num">${cnum(d.totalPlays)}</div>
     <div class="wr-label">plays logged in ${esc(d.year)}</div>
     <div class="wr-lead">${d.totalPlays >= 200 ? "That's borderline professional." : d.totalPlays >= 80 ? "A seriously well-played year." : d.totalPlays >= 30 ? "A great year of gaming." : "Every session counts."}</div>`);
 
   slide(G.teal, `
     <div class="wr-kicker">TIME WELL SPENT</div>
-    <div class="wr-num">${d.hours}</div>
+    <div class="wr-num">${cnum(d.hours)}</div>
     <div class="wr-label">hours around the table</div>
     <div class="wr-lead">That's about ${Math.max(1, Math.round(d.hours / 24))} full day${Math.round(d.hours / 24) === 1 ? '' : 's'} of pure gaming${d.hours >= 100 ? " — no regrets." : "."}</div>`);
 
   slide(G.forest, `
     <div class="wr-kicker">YOUR LIBRARY</div>
-    <div class="wr-num">${d.distinct}</div>
+    <div class="wr-num">${cnum(d.distinct)}</div>
     <div class="wr-label">different games played</div>
     <div class="wr-lead">${d.newCount} of them you tried for the very first time this year.</div>`);
 
@@ -8828,7 +8855,7 @@ function openWrappedModal(playerName, isOwnProfile) {
     const wLabel = d.avgWeight >= 3.5 ? 'Brain-Melting' : d.avgWeight >= 2.8 ? 'Heavy' : d.avgWeight >= 2.2 ? 'Medium-Heavy' : d.avgWeight >= 1.7 ? 'Medium-Light' : 'Filler-Friendly';
     slide(G.blue, `
       <div class="wr-kicker">YOUR WEIGHT CLASS</div>
-      <div class="wr-num" style="font-size:3.2rem">${d.avgWeight.toFixed(2)}</div>
+      <div class="wr-num" style="font-size:3.2rem">${cnum(+d.avgWeight.toFixed(2), 2)}</div>
       <div class="wr-label">average complexity &mdash; <b>${wLabel}</b></div>
       ${d.heaviest ? `<div class="wr-lead">Your heaviest brain-burner: <b>${esc(d.heaviest.name)}</b> (${d.heaviest.complexity}).</div>` : ''}`);
   }
@@ -8879,7 +8906,7 @@ function openWrappedModal(playerName, isOwnProfile) {
   // Win rate
   slide(G.gold, `
     <div class="wr-kicker">THE SCOREBOARD</div>
-    <div class="wr-num">${d.winRate}<span style="font-size:2rem">%</span></div>
+    <div class="wr-num">${cnum(d.winRate)}<span style="font-size:2rem">%</span></div>
     <div class="wr-label">win rate &middot; ${d.wins} wins</div>
     <div class="wr-lead">${d.winRate >= 65 ? 'Ruthless. The table fears you.' : d.winRate >= 45 ? 'A worthy and balanced opponent.' : 'You play for the love of the game (and snacks).'}</div>`);
 
@@ -8959,10 +8986,14 @@ function openWrappedModal(playerName, isOwnProfile) {
 
   const slideEls = Array.from(overlay.querySelectorAll('.wr-slide'));
   const barEls = Array.from(overlay.querySelectorAll('.wr-bar'));
+  const isFinale = (i) => i === slides.length - 1;
   const show = (n) => {
     idx = Math.max(0, Math.min(slides.length - 1, n));
     slideEls.forEach((el, i) => el.classList.toggle('active', i === idx));
     barEls.forEach((el, i) => el.classList.toggle('seen', i <= idx));
+    const cur = slideEls[idx];
+    cur.querySelectorAll('.wr-count').forEach(_wrCountUp);
+    if (isFinale(idx)) _wrConfetti(cur);
   };
   show(0);
 
@@ -9000,6 +9031,7 @@ function openWrappedModal(playerName, isOwnProfile) {
           res.style.display = 'block';
           res.innerHTML = `${correct ? '&#127881; Nailed it!' : 'Not quite!'} You played <b>${esc((top.game && top.game.name) || 'it')}</b> <b>${top.count}</b> times.<div class="wr-taphint" style="margin-top:0.6rem">tap to continue &rsaquo;</div>`;
         }
+        if (correct) _wrConfetti(guessWrap.closest('.wr-slide'));
       });
     });
   }
@@ -9015,6 +9047,42 @@ function openWrappedModal(playerName, isOwnProfile) {
     else if (e.key === 'ArrowLeft') prev();
   };
   document.addEventListener('keydown', overlay._wrKey);
+}
+
+// Animate a number from 0 → its data-count when its slide appears.
+function _wrCountUp(el) {
+  const target = parseFloat(el.dataset.count) || 0;
+  const dec = parseInt(el.dataset.dec, 10) || 0;
+  const fmt = (v) => dec ? v.toFixed(dec) : Math.round(v).toLocaleString();
+  if (target === 0) { el.textContent = fmt(0); return; }
+  const dur = 900, start = performance.now();
+  const step = (t) => {
+    let p = Math.min(1, (t - start) / dur);
+    p = 1 - Math.pow(1 - p, 3); // ease-out cubic
+    el.textContent = fmt(target * p);
+    if (p < 1) requestAnimationFrame(step); else el.textContent = fmt(target);
+  };
+  requestAnimationFrame(step);
+}
+
+// A short, lightweight confetti burst inside a slide.
+function _wrConfetti(slideEl) {
+  if (!slideEl || slideEl._confettied) return;
+  slideEl._confettied = true;
+  const colors = ['#ffd86b', '#ff7ab6', '#5bd6c0', '#9d8bff', '#ff9e6b', '#7af0c0'];
+  const layer = document.createElement('div');
+  layer.className = 'wr-confetti';
+  for (let i = 0; i < 36; i++) {
+    const p = document.createElement('i');
+    p.style.left = Math.random() * 100 + '%';
+    p.style.background = colors[i % colors.length];
+    p.style.animationDelay = (Math.random() * 0.5) + 's';
+    p.style.animationDuration = (1.6 + Math.random() * 1.4) + 's';
+    p.style.transform = `rotate(${Math.random() * 360}deg)`;
+    layer.appendChild(p);
+  }
+  slideEl.appendChild(layer);
+  setTimeout(() => { if (layer.parentNode) layer.remove(); }, 3600);
 }
 
 // Render the year's highlights to a shareable PNG (story size). Same-origin
