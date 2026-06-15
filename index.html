@@ -12265,29 +12265,37 @@ if (_sp && NAME_MAP[_sp]) localStorage.setItem('bgl-player', NAME_MAP[_sp]);
 let PROFILE_OVERRIDES = {};   // originalCanonicalName → chosen display name
 let PROFILE_DATA = {};        // originalCanonicalName → { name, photo, … }
 let DISPLAY_TO_CANON = {};    // display name → originalCanonicalName (for re-renames)
-// The Firebase security rules only permit writes under a fixed allowlist of
-// top-level keys (a dedicated /profiles key is denied). We store profiles as
-// a namespaced child of the writable gameImages node — loadGameImages ignores
-// it (no .url). Per-user children so concurrent renames don't clobber.
-const PROFILE_STORE = 'gameImages/_bglProfiles';
+// Profiles live at the clean /profiles node once a Firebase rule permits it.
+// Until then we fall back to a namespaced child of the already-writable
+// gameImages node (loadGameImages ignores it — no .url). Reads merge both
+// (primary wins); writes try /profiles first, then the fallback. This makes
+// the migration seamless: add the /profiles rule and it upgrades on its own.
+const PROFILE_STORE_PRIMARY = 'profiles';
+const PROFILE_STORE_FALLBACK = 'gameImages/_bglProfiles';
+
+async function _fetchProfileStore(path) {
+  try {
+    const res = await fetch(`${FIREBASE_DB}/${path}.json`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return (data && typeof data === 'object') ? data : null;
+  } catch (e) { return null; }
+}
 
 async function loadProfiles() {
   if (!FIREBASE_DB) return;
-  try {
-    const res = await fetch(`${FIREBASE_DB}/${PROFILE_STORE}.json`);
-    if (!res.ok) return;
-    const data = await res.json();
-    if (!data || typeof data !== 'object') return;
-    for (const enc in data) {
-      const entry = data[enc];
-      if (!entry || typeof entry !== 'object') continue;
-      const canon = decodeURIComponent(enc);
-      PROFILE_DATA[canon] = entry;
-      if (entry.name && typeof entry.name === 'string' && entry.name !== canon) {
-        PROFILE_OVERRIDES[canon] = entry.name;
-      }
+  const fallback = await _fetchProfileStore(PROFILE_STORE_FALLBACK);
+  const primary = await _fetchProfileStore(PROFILE_STORE_PRIMARY);
+  const data = Object.assign({}, fallback || {}, primary || {}); // primary wins
+  for (const enc in data) {
+    const entry = data[enc];
+    if (!entry || typeof entry !== 'object') continue;
+    const canon = decodeURIComponent(enc);
+    PROFILE_DATA[canon] = entry;
+    if (entry.name && typeof entry.name === 'string' && entry.name !== canon) {
+      PROFILE_OVERRIDES[canon] = entry.name;
     }
-  } catch (e) { console.warn('Failed to load profiles:', e); }
+  }
 }
 
 // Remap an object's player-name keys through NAME_MAP, merging collisions.
@@ -12377,19 +12385,23 @@ async function _saveProfileName(newName) {
   if (others.has(newName)) return { ok: false, err: 'Another player already uses that name.' };
   if (!FIREBASE_DB) return { ok: false, err: 'No connection.' };
   const orig = _origCanon(cur) || (NAME_MAP[cur] || cur);
-  try {
-    const existing = PROFILE_DATA[orig] || {};
-    const res = await fetch(`${FIREBASE_DB}/${PROFILE_STORE}/${encodeURIComponent(orig)}.json`, {
-      method: 'PUT',
-      body: JSON.stringify({ ...existing, name: newName, updatedAt: Date.now() })
-    });
-    // fetch resolves even on HTTP errors — verify the write actually landed,
-    // otherwise we'd point this device at a name with no play data.
-    if (!res || !res.ok) return { ok: false, err: `Save failed (${res ? res.status : 'no response'}).` };
-    PROFILE_DATA[orig] = { ...existing, name: newName };
-    localStorage.setItem('bgl-player', newName);
-    return { ok: true };
-  } catch (e) { return { ok: false, err: 'Save failed — try again.' }; }
+  const existing = PROFILE_DATA[orig] || {};
+  const body = JSON.stringify({ ...existing, name: newName, updatedAt: Date.now() });
+  const put = async (path) => {
+    try {
+      const res = await fetch(`${FIREBASE_DB}/${path}/${encodeURIComponent(orig)}.json`, { method: 'PUT', body });
+      return !!(res && res.ok);
+    } catch (e) { return false; }
+  };
+  // Prefer the clean /profiles node; fall back to the gameImages piggyback if
+  // its rule isn't in place yet. fetch resolves even on HTTP errors, so we
+  // check ok — otherwise we'd point this device at a name with no play data.
+  let ok = await put(PROFILE_STORE_PRIMARY);
+  if (!ok) ok = await put(PROFILE_STORE_FALLBACK);
+  if (!ok) return { ok: false, err: 'Save failed — try again.' };
+  PROFILE_DATA[orig] = { ...existing, name: newName };
+  localStorage.setItem('bgl-player', newName);
+  return { ok: true };
 }
 
 Promise.all([loadAllRatings(), loadAllFavorites(), loadImportedGames(), loadImportedPlays(), loadGameImages(), loadBoardSouthVotes(), loadOathswornRanks(), loadAllNotes(), loadProfiles()]).then(() => {
