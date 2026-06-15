@@ -1559,8 +1559,15 @@
   .wr-guess-opt.locked{cursor:default}
   .wr-guess-opt.right{background:#2ecc71;border-color:#2ecc71}
   .wr-guess-opt.wrong{background:#e74c3c;border-color:#e74c3c;opacity:0.85}
-  .wr-guess-result{font-size:0.92rem;margin-top:1rem;line-height:1.5}
+  .wr-guess-result{display:none;font-size:0.92rem;margin-top:1rem;line-height:1.5}
+  .wr-guess-result.show{display:block;animation:wr-rise 0.4s both}
   .wr-guess-result b{color:#ffe08a}
+  .wr-verdict{font-weight:800}
+  .wr-splitbar{display:flex;height:22px;border-radius:11px;overflow:hidden;margin:1.1rem 0 0.7rem;background:rgba(0,0,0,0.2)}
+  .wr-splitbar span{height:100%;transition:width 0.5s}
+  .wr-splitkey{display:flex;flex-wrap:wrap;justify-content:center;gap:0.5rem 1rem;font-size:0.78rem;font-weight:600}
+  .wr-splitkey span{display:inline-flex;align-items:center;gap:0.35rem}
+  .wr-splitkey i{width:11px;height:11px;border-radius:3px;display:inline-block}
   .wr-quests{display:flex;justify-content:center;gap:1.3rem;margin-top:1.2rem}
   .wr-quest{display:flex;flex-direction:column;align-items:center;gap:0.3rem}
   .wr-qnum{font-size:2.1rem;font-weight:800}
@@ -8655,32 +8662,47 @@ function computeWrapped(playerName, year) {
     }
   }
   const totalPlays = plays.length;
-  let wins = 0, minutes = 0, coop = 0, pvp = 0;
-  const gameCount = {}, comp = {}, mech = {}, cat = {}, byDate = {}, byDow = {}, byMonth = {}, byLoc = {};
+  let wins = 0, minutes = 0, coop = 0, pvp = 0, solo = 0, coopWins = 0, maxTable = 0;
+  let biggestTablePlay = null;
+  const gameCount = {}, gameWins = {}, comp = {}, mech = {}, cat = {}, byDate = {}, byDow = {}, byMonth = {}, byLoc = {}, byDateMin = {}, designer = {};
   let wSum = 0, wN = 0, heaviest = null, lightest = null;
+  let oldest = null, newest = null;
   const rivalStats = {}; // opponent → {games, myWins, theirWins}
 
   for (const p of plays) {
     const g = findGameByBggId(p.bggId);
+    const mins = _estPlayMinutes(g);
     if (p.me.w) wins++;
-    minutes += _estPlayMinutes(g);
+    minutes += mins;
     gameCount[p.bggId] = (gameCount[p.bggId] || 0) + 1;
+    gameWins[p.bggId] = (gameWins[p.bggId] || 0) + (p.me.w ? 1 : 0);
     if (g && g.complexity) { wSum += g.complexity; wN++;
       if (!heaviest || g.complexity > heaviest.complexity) heaviest = g;
       if (!lightest || g.complexity < lightest.complexity) lightest = g;
     }
+    if (g && g.year && g.year > 1900) {
+      if (!oldest || g.year < oldest.year) oldest = g;
+      if (!newest || g.year > newest.year) newest = g;
+    }
+    if (g && g.designer) String(g.designer).split(',').forEach(name => {
+      const dn = name.trim(); if (dn) designer[dn] = (designer[dn] || 0) + 1;
+    });
     if (g && Array.isArray(g.mechanics)) g.mechanics.forEach(m => mech[m] = (mech[m] || 0) + 1);
     if (g && Array.isArray(g.categories)) g.categories.forEach(c => cat[c] = (cat[c] || 0) + 1);
     const [yy, mm, dd] = p.date.split('-').map(Number);
     byDate[p.date] = (byDate[p.date] || 0) + 1;
+    byDateMin[p.date] = (byDateMin[p.date] || 0) + mins;
     byDow[new Date(yy, mm - 1, dd).getDay()] = (byDow[new Date(yy, mm - 1, dd).getDay()] || 0) + 1;
     byMonth[mm - 1] = (byMonth[mm - 1] || 0) + 1;
     if (p.l) byLoc[p.l] = (byLoc[p.l] || 0) + 1;
 
+    const tableSize = p.sc.filter(s => s && s.n).length;
+    if (tableSize > maxTable) { maxTable = tableSize; biggestTablePlay = { game: g, bggId: p.bggId, date: p.date, size: tableSize }; }
     const isSolo = p.sc.length === 1;
+    if (isSolo) solo++;
     const allSame = p.sc.every(s => !!s.w === !!p.sc[0].w);
     const isCoop = !isSolo && allSame;
-    if (isCoop) coop++;
+    if (isCoop) { coop++; if (p.me.w) coopWins++; }
     const isPvP = !isSolo && !isCoop;
     if (isPvP) pvp++;
     for (const s of p.sc) {
@@ -8719,6 +8741,57 @@ function computeWrapped(playerName, year) {
   const winRate = totalPlays ? Math.round(wins / totalPlays * 100) : 0;
   const coopRatio = totalPlays ? coop / totalPlays : 0;
   const newRatio = topGames.length ? newToMe.length / topGames.length : 0;
+  const topDesigner = sortEnt(designer)[0] || null;
+  const mechCount = Object.keys(mech).length;
+  const marathon = sortEnt(byDateMin)[0] || null; // [date, minutes]
+
+  // Longest consecutive-win run (over plays that had a winner), chronological.
+  const chrono = plays.slice().sort((a, b) => a.date.localeCompare(b.date));
+  let winStreak = 0, curStreak = 0;
+  for (const p of chrono) {
+    const someoneWon = p.sc.some(s => s && s.w);
+    if (!someoneWon) continue;
+    if (p.me.w) { curStreak++; if (curStreak > winStreak) winStreak = curStreak; }
+    else curStreak = 0;
+  }
+
+  // Bogey (most-played low-win game) & specialty (most-played high-win game).
+  let bogey = null, specialty = null;
+  for (const bId in gameCount) {
+    const c = gameCount[bId]; if (c < 5) continue;
+    const wr = (gameWins[bId] || 0) / c;
+    const g = findGameByBggId(bId);
+    if (wr <= 0.30 && (!bogey || wr < bogey.wr || (wr === bogey.wr && c > bogey.count))) bogey = { game: g, bggId: Number(bId), count: c, wins: gameWins[bId] || 0, wr };
+    if (wr >= 0.70 && (!specialty || wr > specialty.wr || (wr === specialty.wr && c > specialty.count))) specialty = { game: g, bggId: Number(bId), count: c, wins: gameWins[bId] || 0, wr };
+  }
+
+  // "Love at first play" — a game discovered this year and then played a lot.
+  let loveAtFirst = null;
+  for (const id of newToMe) {
+    const c = gameCount[id] || 0;
+    if (c >= 5 && (!loveAtFirst || c > loveAtFirst.count)) loveAtFirst = { game: findGameByBggId(id), bggId: id, count: c, firstDate: firstEver[id] };
+  }
+
+  // Plays last year (for year-over-year) and rank among players this year.
+  const ly = String(Number(year) - 1);
+  let lastYearPlays = 0;
+  const yearCounts = {}; // every non-hidden player's plays this year (for ranking)
+  for (const bggId in PLAY_HISTORY) for (const p of PLAY_HISTORY[bggId]) {
+    if (!p || !p.date || !Array.isArray(p.sc)) continue;
+    const yr = p.date.slice(0, 4);
+    if (yr === ly && p.sc.some(s => s && s.n === playerName)) lastYearPlays++;
+    if (yr === year) for (const s of p.sc) {
+      if (!s || !s.n || HIDDEN_PLAYERS.has(s.n)) continue;
+      yearCounts[s.n] = (yearCounts[s.n] || 0) + 1;
+    }
+  }
+  // rank: exclude the owner from the field for everyone but the owner themselves
+  const field = Object.keys(yearCounts).filter(n => isOwner || !(_origCanon(n) === WRAPPED_OWNER || n === WRAPPED_OWNER));
+  field.sort((a, b) => yearCounts[b] - yearCounts[a]);
+  const rankPos = field.indexOf(playerName) + 1;
+  const rank = rankPos > 0 ? { pos: rankPos, of: field.length } : null;
+
+  const firstPlay = chrono[0] ? { game: findGameByBggId(chrono[0].bggId), bggId: chrono[0].bggId, date: chrono[0].date } : null;
 
   let ch = null; try { ch = computeChallenges(playerName); } catch (_) {}
 
@@ -8745,7 +8818,12 @@ function computeWrapped(playerName, year) {
     busiestDay, favDow: favDow ? { name: DOW[favDow[0]], count: favDow[1] } : null,
     favMonth: favMonth ? { name: MON[favMonth[0]], count: favMonth[1] } : null,
     favLoc: favLoc ? { name: favLoc[0], count: favLoc[1] } : null,
-    coop, pvp, ch, isBoardSouth, isIlioupoli, arch
+    coop, pvp, solo, coopWins, ch, isBoardSouth, isIlioupoli, arch,
+    // newer slices
+    firstPlay, loveAtFirst, winStreak, bogey, specialty,
+    biggestTable: biggestTablePlay,
+    marathonHours: marathon ? Math.round(marathon[1] / 60) : 0, marathonDate: marathon ? marathon[0] : null,
+    lastYearPlays, rank, topDesigner, mechCount, oldest, newest
   };
 }
 
@@ -8771,6 +8849,16 @@ function openWrappedModal(playerName, isOwnProfile) {
   const cover = (bggId) => `images/${bggId}.jpg`;
   // count-up number (animated from 0 when its slide becomes active)
   const cnum = (val, dec = 0) => `<span class="wr-count" data-count="${val}" data-dec="${dec}">${dec ? (0).toFixed(dec) : '0'}</span>`;
+  const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  // an interactive guess slide: options carry data-correct; the prebaked
+  // result reveals (with count-ups) when an option is tapped.
+  const guessSlide = (kicker, question, options, revealHtml) => `
+    <div class="wr-kicker">${kicker}</div>
+    <div class="wr-big" style="font-size:1.5rem">${question}</div>
+    <div class="wr-guess">
+      ${options.map(o => `<button class="wr-guess-opt" data-correct="${o.correct ? 1 : 0}">${esc(o.label)}</button>`).join('')}
+    </div>
+    <div class="wr-guess-result"><span class="wr-verdict"></span><span class="wr-fact">${revealHtml}</span><div class="wr-taphint" style="margin-top:0.6rem">tap to continue &rsaquo;</div></div>`;
 
   // ── Build slides ──
   const slides = [];
@@ -8798,11 +8886,22 @@ function openWrappedModal(playerName, isOwnProfile) {
     <div class="wr-label">plays logged in ${esc(d.year)}</div>
     <div class="wr-lead">${d.totalPlays >= 200 ? "That's borderline professional." : d.totalPlays >= 80 ? "A seriously well-played year." : d.totalPlays >= 30 ? "A great year of gaming." : "Every session counts."}</div>`);
 
-  slide(G.teal, `
-    <div class="wr-kicker">TIME WELL SPENT</div>
-    <div class="wr-num">${cnum(d.hours)}</div>
-    <div class="wr-label">hours around the table</div>
-    <div class="wr-lead">That's about ${Math.max(1, Math.round(d.hours / 24))} full day${Math.round(d.hours / 24) === 1 ? '' : 's'} of pure gaming${d.hours >= 100 ? " — no regrets." : "."}</div>`);
+  const daysFlavor = `That's about ${Math.max(1, Math.round(d.hours / 24))} full day${Math.round(d.hours / 24) === 1 ? '' : 's'} of pure gaming${d.hours >= 100 ? " — no regrets." : "."}`;
+  if (isOwnProfile && d.hours >= 20) {
+    // Guess your hours
+    const H = d.hours;
+    const cand = Array.from(new Set([H, Math.max(5, Math.round(H * 0.45)), Math.round(H * 0.75), Math.round(H * 1.6)]));
+    while (cand.length < 4) cand.push(Math.round(H * (1.2 + cand.length * 0.5)));
+    const opts = shuffle(cand.slice(0, 4).map(v => ({ label: `~${v} hours`, correct: v === H })));
+    slide(G.teal, guessSlide('TIME WELL SPENT', 'How many hours do you<br>think you played?', opts,
+      `You spent about ${cnum(d.hours)} hours at the table. ${daysFlavor}`));
+  } else {
+    slide(G.teal, `
+      <div class="wr-kicker">TIME WELL SPENT</div>
+      <div class="wr-num">${cnum(d.hours)}</div>
+      <div class="wr-label">hours around the table</div>
+      <div class="wr-lead">${daysFlavor}</div>`);
+  }
 
   slide(G.forest, `
     <div class="wr-kicker">YOUR LIBRARY</div>
@@ -8810,22 +8909,37 @@ function openWrappedModal(playerName, isOwnProfile) {
     <div class="wr-label">different games played</div>
     <div class="wr-lead">${d.newCount} of them you tried for the very first time this year.</div>`);
 
+  // How it began (first play of the year)
+  if (d.totalPlays >= 8 && d.firstPlay) {
+    slide(G.night, `
+      <div class="wr-kicker">HOW IT ALL BEGAN</div>
+      <div class="wr-cover-wrap"><img class="wr-cover" src="${cover(d.firstPlay.bggId)}" onerror="__imgFallback(this, ${d.firstPlay.bggId})"></div>
+      <div class="wr-big" style="font-size:1.5rem">${esc((d.firstPlay.game && d.firstPlay.game.name) || 'a game')}</div>
+      <div class="wr-label">your first play of ${esc(d.year)}, on ${esc(_fmtDateShort(d.firstPlay.date))}</div>
+      <div class="wr-lead">Little did you know what kind of year it would become.</div>`);
+  }
+
+  // You vs last year
+  if (d.lastYearPlays >= 10 && d.totalPlays >= 10) {
+    const diff = d.totalPlays - d.lastYearPlays;
+    const pct = Math.round(Math.abs(diff) / d.lastYearPlays * 100);
+    const up = diff >= 0;
+    slide(G.blue, `
+      <div class="wr-kicker">YOU vs LAST YEAR</div>
+      <div class="wr-num">${up ? '+' : '&minus;'}${cnum(Math.abs(diff))}</div>
+      <div class="wr-label">${up ? 'more' : 'fewer'} plays than ${Number(d.year) - 1} <b>(${up ? '+' : '&minus;'}${pct}%)</b></div>
+      <div class="wr-lead">${up ? (pct >= 30 ? 'You seriously leveled up this year.' : 'Trending up — nicely done.') : 'Quality over quantity, clearly.'}</div>`);
+  }
+
   // Guess slide (own profile, enough data) — guess your #1 game
   const topG = d.topGames[0];
   if (topG && d.topGames.length >= 3) {
-    const distractors = d.topGames.slice(1, 6);
-    // shuffle topG + up to 3 distractors deterministically-ish
-    const opts = [topG, ...distractors.slice(0, 3)]
-      .map(x => ({ bggId: x.bggId, name: (x.game && x.game.name) || ('Game #' + x.bggId), correct: x.bggId === topG.bggId }))
-      .sort(() => Math.random() - 0.5);
     if (isOwnProfile) {
-      slide(G.gold, `
-        <div class="wr-kicker">QUICK — GUESS</div>
-        <div class="wr-big" style="font-size:1.5rem">What did you play<br>the most this year?</div>
-        <div class="wr-guess" data-guess="1">
-          ${opts.map(o => `<button class="wr-guess-opt" data-correct="${o.correct ? 1 : 0}" data-bgg="${o.bggId}">${esc(o.name)}</button>`).join('')}
-        </div>
-        <div class="wr-guess-result" style="display:none"></div>`);
+      const opts = shuffle([topG, ...d.topGames.slice(1, 4)].map(x => ({
+        label: (x.game && x.game.name) || ('Game #' + x.bggId), correct: x.bggId === topG.bggId
+      })));
+      slide(G.gold, guessSlide('QUICK — GUESS', 'What did you play<br>the most this year?', opts,
+        `You played <b>${esc((topG.game && topG.game.name) || 'it')}</b> ${cnum(topG.count)} times.`));
     } else {
       slide(G.gold, `
         <div class="wr-kicker">MOST PLAYED</div>
@@ -8850,6 +8964,26 @@ function openWrappedModal(playerName, isOwnProfile) {
       </div>`);
   }
 
+  // Love at first play — a game discovered this year and then played a lot
+  if (d.loveAtFirst) {
+    const lf = d.loveAtFirst;
+    slide(G.pink, `
+      <div class="wr-kicker">LOVE AT FIRST PLAY</div>
+      <div class="wr-cover-wrap"><img class="wr-cover" src="${cover(lf.bggId)}" onerror="__imgFallback(this, ${lf.bggId})"></div>
+      <div class="wr-big" style="font-size:1.5rem">${esc((lf.game && lf.game.name) || 'a new game')}</div>
+      <div class="wr-label">discovered ${esc(_fmtDateShort(lf.firstDate))} &middot; played ${lf.count}&times;</div>
+      <div class="wr-lead">Some games you just know from the first turn.</div>`);
+  }
+
+  // Genre/decade traveler — span between oldest & newest game played
+  if (d.oldest && d.newest && (d.newest.year - d.oldest.year) >= 25) {
+    slide(G.forest, `
+      <div class="wr-kicker">TIME TRAVELER</div>
+      <div class="wr-big" style="font-size:1.6rem">${d.oldest.year} &rarr; ${d.newest.year}</div>
+      <div class="wr-label">${d.newest.year - d.oldest.year} years of game design in one year of play</div>
+      <div class="wr-lead">From <b>${esc(d.oldest.name)}</b> to <b>${esc(d.newest.name)}</b> — you play across the eras.</div>`);
+  }
+
   // Weight class
   if (d.avgWeight) {
     const wLabel = d.avgWeight >= 3.5 ? 'Brain-Melting' : d.avgWeight >= 2.8 ? 'Heavy' : d.avgWeight >= 2.2 ? 'Medium-Heavy' : d.avgWeight >= 1.7 ? 'Medium-Light' : 'Filler-Friendly';
@@ -8860,13 +8994,44 @@ function openWrappedModal(playerName, isOwnProfile) {
       ${d.heaviest ? `<div class="wr-lead">Your heaviest brain-burner: <b>${esc(d.heaviest.name)}</b> (${d.heaviest.complexity}).</div>` : ''}`);
   }
 
+  // Play style split (co-op / competitive / solo)
+  if (d.totalPlays >= 10) {
+    const pc = (n) => Math.round(n / d.totalPlays * 100);
+    const coopP = pc(d.coop), pvpP = pc(d.pvp), soloP = pc(d.solo);
+    const dominant = coopP >= pvpP && coopP >= soloP ? 'a co-op soul at heart'
+      : pvpP >= coopP && pvpP >= soloP ? 'here to compete'
+      : 'a master of the solo table';
+    slide(G.teal, `
+      <div class="wr-kicker">YOUR PLAY STYLE</div>
+      <div class="wr-splitbar">
+        <span style="width:${coopP}%;background:#38ef7d" title="Co-op"></span>
+        <span style="width:${pvpP}%;background:#ff5e62" title="Competitive"></span>
+        <span style="width:${soloP}%;background:#9d8bff" title="Solo"></span>
+      </div>
+      <div class="wr-splitkey">
+        <span><i style="background:#38ef7d"></i>Co-op ${coopP}%</span>
+        <span><i style="background:#ff5e62"></i>Competitive ${pvpP}%</span>
+        <span><i style="background:#9d8bff"></i>Solo ${soloP}%</span>
+      </div>
+      <div class="wr-lead">You're ${dominant}.</div>`);
+  }
+
   // Favorite mechanic
   if (d.topMech) {
     slide(G.pink, `
       <div class="wr-kicker">YOUR SIGNATURE MOVE</div>
       <div class="wr-big" style="font-size:1.9rem">${esc(d.topMech[0])}</div>
       <div class="wr-label">your most-played mechanic</div>
-      <div class="wr-lead">It showed up in ${d.topMech[1]} of your plays${d.topCat ? `. You can't resist a good <b>${esc(d.topCat[0])}</b> game either.` : '.'}</div>`);
+      <div class="wr-lead">It showed up in ${d.topMech[1]} of your plays${d.mechCount >= 8 ? ` — across <b>${d.mechCount}</b> different mechanics in all` : ''}${d.topCat ? `. You can't resist a good <b>${esc(d.topCat[0])}</b> game either.` : '.'}</div>`);
+  }
+
+  // Designer of the year
+  if (d.topDesigner && d.topDesigner[1] >= 5) {
+    slide(G.gold, `
+      <div class="wr-kicker">DESIGNER OF YOUR YEAR</div>
+      <div class="wr-big" style="font-size:1.8rem">${esc(d.topDesigner[0])}</div>
+      <div class="wr-label">behind ${d.topDesigner[1]} of your plays</div>
+      <div class="wr-lead">When their name's on the box, you're in.</div>`);
   }
 
   // Crew / most played with (owner excluded for others)
@@ -8890,6 +9055,24 @@ function openWrappedModal(playerName, isOwnProfile) {
       <div class="wr-lead">Most of your battles this year were fought alone. Respect.</div>`);
   }
 
+  // Guess your crew (own profile) — who you played with most (owner excluded)
+  if (isOwnProfile && d.companions.length >= 3) {
+    const topC = d.companions[0];
+    const opts = shuffle(d.companions.slice(0, 4).map(c => ({ label: c.name, correct: c.name === topC.name })));
+    slide(G.purple, guessSlide('ONE MORE GUESS', 'Who did you share the<br>table with most?', opts,
+      `You played with <b>${esc(topC.name)}</b> ${cnum(topC.count)} times.`));
+  }
+
+  // Biggest table
+  if (d.biggestTable && d.biggestTable.size >= 5) {
+    const bt = d.biggestTable;
+    slide(G.sunset, `
+      <div class="wr-kicker">THE FULL HOUSE</div>
+      <div class="wr-num">${cnum(bt.size)}</div>
+      <div class="wr-label">players at your biggest table</div>
+      <div class="wr-lead">${esc((bt.game && bt.game.name) || 'A big game')} on ${esc(_fmtDateShort(bt.date))} — the more the merrier.</div>`);
+  }
+
   // Rival
   const rival = d.rivals.find(r => r.games >= 3);
   if (rival) {
@@ -8903,12 +9086,53 @@ function openWrappedModal(playerName, isOwnProfile) {
       <div class="wr-lead">${edge}</div>`);
   }
 
+  // Your specialty (most-played high-win game)
+  if (d.specialty) {
+    const sp = d.specialty;
+    slide(G.forest, `
+      <div class="wr-kicker">YOUR SPECIALTY</div>
+      <div class="wr-cover-wrap"><img class="wr-cover" src="${cover(sp.bggId)}" onerror="__imgFallback(this, ${sp.bggId})"></div>
+      <div class="wr-big" style="font-size:1.5rem">${esc((sp.game && sp.game.name) || 'a game')}</div>
+      <div class="wr-label">${Math.round(sp.wr * 100)}% wins over ${sp.count} plays</div>
+      <div class="wr-lead">When this hits the table, you're the one to beat.</div>`);
+  }
+
+  // The one that got away (most-played low-win game)
+  if (d.bogey) {
+    const bg = d.bogey;
+    slide(G.blue, `
+      <div class="wr-kicker">THE ONE THAT GOT AWAY</div>
+      <div class="wr-cover-wrap"><img class="wr-cover" src="${cover(bg.bggId)}" onerror="__imgFallback(this, ${bg.bggId})"></div>
+      <div class="wr-big" style="font-size:1.5rem">${esc((bg.game && bg.game.name) || 'a game')}</div>
+      <div class="wr-label">${bg.count} plays &middot; only ${bg.wins} win${bg.wins === 1 ? '' : 's'}</div>
+      <div class="wr-lead">Your white whale. ${Number(d.year) + 1} is for revenge.</div>`);
+  }
+
+  // Longest win streak
+  if (d.winStreak >= 4) {
+    slide(G.gold, `
+      <div class="wr-kicker">ON FIRE</div>
+      <div class="wr-num">${cnum(d.winStreak)}</div>
+      <div class="wr-label">wins in a row &mdash; your hottest streak</div>
+      <div class="wr-lead">For a while there, you simply could not lose.</div>`);
+  }
+
   // Win rate
   slide(G.gold, `
     <div class="wr-kicker">THE SCOREBOARD</div>
     <div class="wr-num">${cnum(d.winRate)}<span style="font-size:2rem">%</span></div>
     <div class="wr-label">win rate &middot; ${d.wins} wins</div>
     <div class="wr-lead">${d.winRate >= 65 ? 'Ruthless. The table fears you.' : d.winRate >= 45 ? 'A worthy and balanced opponent.' : 'You play for the love of the game (and snacks).'}</div>`);
+
+  // Co-op record
+  if (d.coop >= 10) {
+    const cwr = Math.round(d.coopWins / d.coop * 100);
+    slide(G.teal, `
+      <div class="wr-kicker">TEAM RECORD</div>
+      <div class="wr-num">${cnum(cwr)}<span style="font-size:2rem">%</span></div>
+      <div class="wr-label">co-op win rate &middot; ${d.coopWins}/${d.coop} beaten</div>
+      <div class="wr-lead">${cwr >= 65 ? 'Your table tackles the toughest games and wins.' : 'The games fought back — but what a ride.'}</div>`);
+  }
 
   // Challenges progress
   if (d.ch) {
@@ -8929,6 +9153,27 @@ function openWrappedModal(playerName, isOwnProfile) {
       <div class="wr-big" style="font-size:1.7rem">${esc(_fmtDateShort(d.busiestDay[0]))}</div>
       <div class="wr-label">${d.busiestDay[1]} games in a single day</div>
       ${d.favDow ? `<div class="wr-lead"><b>${esc(d.favDow.name)}</b> was your power day${d.favLoc ? `, usually at <b>${esc(d.favLoc.name)}</b>.` : '.'}</div>` : ''}`);
+  }
+
+  // Marathon day (most hours in a single day)
+  if (d.marathonHours >= 5 && d.marathonDate) {
+    slide(G.sunset, `
+      <div class="wr-kicker">MARATHON MODE</div>
+      <div class="wr-num">${cnum(d.marathonHours)}</div>
+      <div class="wr-label">hours of gaming in one day</div>
+      <div class="wr-lead">On ${esc(_fmtDateShort(d.marathonDate))} you went the distance. Iron stamina.</div>`);
+  }
+
+  // Where you rank among the crew
+  if (d.rank && d.totalPlays >= 10 && d.rank.of >= 3) {
+    const r = d.rank;
+    const sup = r.pos === 1 ? '' : r.pos === 2 ? 'nd' : r.pos === 3 ? 'rd' : 'th';
+    const num = r.pos === 1 ? '#1' : r.pos + sup;
+    slide(G.night, `
+      <div class="wr-kicker">LEADERBOARD</div>
+      <div class="wr-num" style="font-size:4.2rem">${num}</div>
+      <div class="wr-label">most active player of ${esc(d.year)}${d.isOwner ? '' : ' (of the crew)'}</div>
+      <div class="wr-lead">${r.pos === 1 ? 'Nobody logged more games than you. The MVP.' : `Out of ${r.of} players — a serious presence at the table.`}</div>`);
   }
 
   // Special badges
@@ -9011,30 +9256,31 @@ function openWrappedModal(playerName, isOwnProfile) {
   overlay.querySelector('#wr-prev').addEventListener('click', prev);
   overlay.querySelector('#wr-close').addEventListener('click', (e) => { e.stopPropagation(); close(); });
 
-  // Guess interaction
-  const guessWrap = overlay.querySelector('.wr-guess');
-  if (guessWrap) {
-    guessWrap.querySelectorAll('.wr-guess-opt').forEach(btn => {
+  // Guess interactions (any number of guess slides). Each reveals its own
+  // prebaked result with count-ups; a correct answer fires confetti.
+  overlay.querySelectorAll('.wr-guess').forEach(gw => {
+    gw.querySelectorAll('.wr-guess-opt').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (guessWrap.dataset.done) return;
-        guessWrap.dataset.done = '1';
+        if (gw.dataset.done) return;
+        gw.dataset.done = '1';
         const correct = btn.dataset.correct === '1';
-        guessWrap.querySelectorAll('.wr-guess-opt').forEach(b => {
+        gw.querySelectorAll('.wr-guess-opt').forEach(b => {
           b.classList.add('locked');
           if (b.dataset.correct === '1') b.classList.add('right');
           else if (b === btn) b.classList.add('wrong');
         });
-        const res = guessWrap.parentElement.querySelector('.wr-guess-result');
-        const top = d.topGames[0];
+        const res = gw.parentElement.querySelector('.wr-guess-result');
         if (res) {
-          res.style.display = 'block';
-          res.innerHTML = `${correct ? '&#127881; Nailed it!' : 'Not quite!'} You played <b>${esc((top.game && top.game.name) || 'it')}</b> <b>${top.count}</b> times.<div class="wr-taphint" style="margin-top:0.6rem">tap to continue &rsaquo;</div>`;
+          const v = res.querySelector('.wr-verdict');
+          if (v) v.innerHTML = correct ? '&#127881; Nailed it! ' : 'Not quite! ';
+          res.classList.add('show');
+          res.querySelectorAll('.wr-count').forEach(_wrCountUp);
         }
-        if (correct) _wrConfetti(guessWrap.closest('.wr-slide'));
+        if (correct) _wrConfetti(gw.closest('.wr-slide'));
       });
     });
-  }
+  });
 
   // Download
   const dl = overlay.querySelector('#wr-download');
