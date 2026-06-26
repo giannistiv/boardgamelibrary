@@ -10463,6 +10463,7 @@ function _mergePlayIntoHistory(uuid, p) {
   }
   if (p.l && LOCATION_MAP[p.l]) p.l = LOCATION_MAP[p.l];
   const entry = { date: p.date, sc: p.sc, _uuid: uuid };
+  if (p.t) entry.t = p.t;
   if (p.d) entry.d = p.d;
   if (p.b) entry.b = p.b;
   if (p.l) entry.l = p.l;
@@ -13324,11 +13325,18 @@ window.initImporter = function(){
   if(!dropZone || !fileInput) return;
 
   function showResult(type, title, lines){
-    result.className = 'import-result ' + type;
-    result.style.display = 'block';
-    resTitle.textContent = title;
-    resLines.innerHTML = lines.filter(Boolean).join('<br>');
-    if(imgDls) imgDls.innerHTML = '';
+    // Re-query by id so this still works after a view re-render rebuilds the
+    // import panel (the closure-captured elements would otherwise be stale).
+    const r = document.getElementById('importResult');
+    const rt = document.getElementById('importResultTitle');
+    const rl = document.getElementById('importResultLines');
+    const ri = document.getElementById('importImgDownloads');
+    if(!r || !rt || !rl) return;
+    r.className = 'import-result ' + type;
+    r.style.display = 'block';
+    rt.textContent = title;
+    rl.innerHTML = lines.filter(Boolean).join('<br>');
+    if(ri) ri.innerHTML = '';
   }
 
   async function fetchDescription(bggId){
@@ -13495,37 +13503,43 @@ window.initImporter = function(){
     await Promise.all(gamePersists);
     await Promise.all(playPersists);
 
-    // Re-render if stats view is open
-    if(typeof showStatsView === 'function' && window.currentStatsPlayer){
-      showStatsView(window.currentStatsPlayer);
-    }
+    // Build the result message.
+    const nothingNew = (newPlays === 0 && updatedPlays === 0 && newGames === 0 && newPlayers === 0);
+    const resType  = nothingNew ? 'info' : 'success';
+    const resTitle = nothingNew ? 'Nothing new' : 'Import successful ✓';
+    const resLines = nothingNew
+      ? ['All entries in this file already exist.', skipped ? `${skipped} duplicate(s) skipped.` : '']
+      : [
+          newPlays     ? `+${newPlays} new play${newPlays!==1?'s':''}` : '',
+          updatedPlays ? `✏️ ${updatedPlays} play${updatedPlays!==1?'s':''} updated` : '',
+          newGames     ? `+${newGames} new game${newGames!==1?'s':''}` : '',
+          newPlayers   ? `+${newPlayers} new player${newPlayers!==1?'s':''}` : '',
+          skipped      ? `${skipped} duplicate${skipped!==1?'s':''} skipped` : '',
+        ];
 
-    if(newPlays === 0 && newGames === 0 && newPlayers === 0){
-      showResult('info','Nothing new',['All entries in this file already exist.', skipped ? `${skipped} duplicate(s) skipped.` : '']);
-      return;
-    }
+    // Refresh every open view so updated plays — including changed locations —
+    // appear immediately, instead of only after a reload/navigation. The
+    // profile (where the importer lives) is re-rendered too; the result panel
+    // is re-shown afterwards (showResult re-queries by id) and scrolled to.
+    const isOpen = (id) => { const el = document.getElementById(id); return el && el.classList.contains('open'); };
+    const player = (typeof localStorage !== 'undefined') ? localStorage.getItem('bgl-player') : null;
+    try {
+      if (isOpen('stats-view') && player && typeof showStatsView === 'function') {
+        showStatsView((typeof _viewingProfile !== 'undefined' && _viewingProfile) || player,
+                      (typeof _viewingProfile !== 'undefined' && _viewingProfile) ? 'visiting' : undefined);
+      }
+      if (isOpen('games-view') && typeof showGamesView === 'function') showGamesView();
+      if (isOpen('challenges-view') && player && typeof showChallengesView === 'function') showChallengesView(player);
+      if (isOpen('leaderboard-view') && typeof showLeaderboardView === 'function') showLeaderboardView();
+      if (isOpen('boardsouth-view') && typeof showBoardSouthView === 'function') showBoardSouthView();
+    } catch (_) {}
+    if (typeof _updateBoardSouthBtnVisibility === 'function') { try { _updateBoardSouthBtnVisibility(); } catch (_) {} }
 
-    showResult('success','Import successful ✓',[
-      newPlays    ? `+${newPlays} new play${newPlays!==1?'s':''}` : '',
-      updatedPlays ? `✏️ ${updatedPlays} play${updatedPlays!==1?'s':''} updated` : '',
-      newGames    ? `+${newGames} new game${newGames!==1?'s':''}` : '',
-      newPlayers  ? `+${newPlayers} new player${newPlayers!==1?'s':''}` : '',
-      skipped     ? `${skipped} duplicate${skipped!==1?'s':''} skipped` : '',
-    ]);
-
-    const lbView = document.getElementById('leaderboard-view');
-    if (lbView && lbView.classList.contains('open')) {
-      try { showLeaderboardView(); } catch (_) {}
-    }
-    const bsView = document.getElementById('boardsouth-view');
-    if (bsView && bsView.classList.contains('open')) {
-      try { showBoardSouthView(); } catch (_) {}
-    }
-    if (typeof _updateBoardSouthBtnVisibility === 'function') {
-      try { _updateBoardSouthBtnVisibility(); } catch (_) {}
-    }
-
-    fileInput.value = '';
+    showResult(resType, resTitle, resLines);
+    const rEl = document.getElementById('importResult');
+    if (rEl) rEl.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    const fi = document.getElementById('importFileInput');
+    if (fi) fi.value = '';
   }
 
   fileInput.addEventListener('change', e => processImport(e.target.files[0]));
