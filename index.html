@@ -632,6 +632,38 @@
   .mc-vpill.mc-lost{color:#fff;background:rgba(224,97,58,0.85);border-color:#e0613a}
   .mc-note{font-size:0.6rem;opacity:0.5;margin-top:0.6rem;line-height:1.4}
   /* ── Eternal Decks stage ladder ── */
+  /* ── Aeon's End Nemesis Codex ── */
+  .ae-box{
+    margin-bottom:1.1rem;padding:0.8rem 0.9rem;border-radius:12px;
+    background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.07);
+  }
+  .ae-stats{display:flex;gap:1.4rem;margin-bottom:0.9rem}
+  .ae-stat{display:flex;flex-direction:column}
+  .ae-stat-val{font-size:1.5rem;font-weight:800;color:#f0e6d3;line-height:1}
+  .ae-stat-lbl{font-size:0.56rem;font-weight:600;opacity:0.55;text-transform:uppercase;letter-spacing:0.04em;margin-top:0.2rem}
+  .ae-won-txt{color:#5bc46b}
+  .ae-tier{margin-bottom:0.7rem}
+  .ae-tier-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:0.35rem}
+  .ae-tier-name{font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;opacity:0.6}
+  .ae-tier-count{font-size:0.62rem;font-weight:700;opacity:0.45}
+  .ae-pills{display:flex;flex-wrap:wrap;gap:0.32rem}
+  .ae-pill{
+    display:inline-flex;align-items:center;gap:0.3rem;
+    padding:0.2rem 0.5rem;border-radius:999px;font-size:0.72rem;
+    border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);
+  }
+  .ae-pill .ae-ic{font-size:0.7rem;opacity:0.9}
+  .ae-pill .ae-d{font-size:0.58rem;font-weight:800;opacity:0.6;background:rgba(0,0,0,0.25);border-radius:5px;padding:0 0.3rem;margin-left:0.1rem}
+  .ae-won{background:rgba(91,196,107,0.18);border-color:rgba(91,196,107,0.5);color:#bdf0c6}
+  .ae-won .ae-ic{color:#5bc46b}
+  .ae-lost{background:rgba(224,97,58,0.16);border-color:rgba(224,97,58,0.45);color:#f0c0ad}
+  .ae-lost .ae-ic{color:#e0613a}
+  .ae-none{opacity:0.5}
+  .ae-legacy{margin-top:0.9rem;padding:0.65rem 0.8rem;border-radius:10px;background:rgba(120,90,170,0.16);border:1px solid rgba(150,110,210,0.35)}
+  .ae-legacy-top{display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:0.82rem}
+  .ae-legacy-stat{font-weight:700;color:#c9aef0}
+  .ae-legacy-sub{font-size:0.66rem;opacity:0.6;margin-top:0.2rem}
+
   .ed-box{
     margin-bottom:1.1rem;padding:0.8rem 0.9rem;border-radius:12px;
     background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.07);
@@ -6724,6 +6756,122 @@ function buildEternalDecksHtml(plays){
         <div class="st-legend">Cleared shows best difficulty &middot; Expert / Pro highlighted gold &middot; red = attempted</div>
       </div>`;
 }
+// ── Aeon's End — Nemesis Codex ──────────────────────────────────────────
+// Goal: defeat every nemesis. Each Aeon's End nemesis has its own printed
+// difficulty rating, so the codex groups them by difficulty tier. Seeded with
+// the documented nemeses + ratings (Aeon's End wiki / community index); ANY
+// nemesis you actually play is auto-added even if not in this list, so the
+// board always reflects your real games and grows with new waves. The Legacy
+// campaign is tracked separately and spoiler-free.
+const AE_LEGACY_BGGID = 241451;
+function _isAeonsEnd(bggId){ const g = findGameByBggId(bggId); return !!(g && /aeon.?s?\s*end/i.test(g.name || '')); }
+function _aeNorm(s){ return String(s || '').toLowerCase().replace(/[^a-z0-9]/g, ''); }
+// {n: name, d: difficulty rating (0 = unrated), x: expansion if known}
+const AE_NEMESES = [
+  { n:'Rageborne', d:2, x:"Aeon's End" },
+  { n:'Carapace Queen', d:3, x:"Aeon's End" },
+  { n:'Crooked Mask', d:5, x:"Aeon's End" },
+  { n:'Prince of Gluttons', d:5, x:"Aeon's End" },
+  { n:'Umbra Titan', d:3, x:'War Eternal' },
+  { n:'Hollow Crown', d:5, x:'War Eternal' },
+  { n:'Magus of Cloaks', d:7, x:'War Eternal' },
+  { n:'Gate Witch', d:7, x:'War Eternal' },
+  { n:'Horde-Crone', d:6, x:'The Depths' },
+  { n:'Maggoth', d:3, x:'The New Age' },
+  { n:'Arachnos', d:4, x:'The New Age' },
+  { n:'Ageless Walker', d:5, x:'The New Age' },
+  { n:'Blight Lord', d:4 },
+  { n:'Wayward One', d:7 },
+  { n:'Haze Fiend', d:5 },
+  { n:'Risen Thrall', d:5 },
+  { n:'Rust Superion', d:5 },
+  { n:'The Coven', d:5 },
+  { n:'The Endless Decay', d:5 },
+  { n:'The Terror in Brass', d:5 },
+  { n:'The Wanderer', d:5 },
+  { n:'Thrice-Dead Prophet', d:5 },
+  { n:'Fortress', d:5 },
+  { n:'Paradox of Myth and Bone', d:5 },
+];
+
+function buildAeonsEndHtml(bggId){
+  if (!_isAeonsEnd(bggId)) return '';
+  // Aggregate nemesis outcomes across every Aeon's End game (the system is
+  // split across several bggIds in BGStats), except the spoiler-laden Legacy.
+  const faced = {}; // norm → {name, won, attempts}
+  let legacyPlays = 0, legacyWins = 0;
+  for (const id in PLAY_HISTORY){
+    if (!_isAeonsEnd(id)) continue;
+    const isLegacy = Number(id) === AE_LEGACY_BGGID;
+    for (const p of PLAY_HISTORY[id]){
+      const won = (p.sc || []).some(s => s && s.w);
+      if (isLegacy){ legacyPlays++; if (won) legacyWins++; continue; }
+      const nem = String(p.b || '').trim();
+      if (!nem) continue;
+      const k = _aeNorm(nem);
+      const f = faced[k] || (faced[k] = { name: nem, won: false, attempts: 0 });
+      f.attempts++; if (won) f.won = true;
+    }
+  }
+  const dbKeys = new Set(AE_NEMESES.map(x => _aeNorm(x.n)));
+  const rows = AE_NEMESES.map(x => {
+    const f = faced[_aeNorm(x.n)];
+    return { name: x.n, d: x.d || 0, x: x.x || '', won: !!(f && f.won), attempted: !!(f && !f.won && f.attempts), faced: !!f };
+  });
+  // Any nemesis you've actually faced that isn't in the seed list (e.g. newer
+  // waves) gets added so your real history is always represented.
+  Object.keys(faced).forEach(k => {
+    if (dbKeys.has(k)) return;
+    const f = faced[k];
+    rows.push({ name: f.name, d: 0, x: '', won: f.won, attempted: !f.won, faced: true, discovered: true });
+  });
+
+  const defeated = rows.filter(r => r.won).length;
+  const total = rows.length;
+  const facedLost = rows.filter(r => r.attempted).length;
+  const bestDiff = rows.filter(r => r.won && r.d).reduce((m, r) => Math.max(m, r.d), 0);
+
+  // group by difficulty tier (0 → "Unrated / other", shown last)
+  const tiers = {};
+  rows.forEach(r => { const t = r.d || 0; (tiers[t] = tiers[t] || []).push(r); });
+  const tierKeys = Object.keys(tiers).map(Number).sort((a, b) => (a === 0 ? 99 : a) - (b === 0 ? 99 : b));
+
+  const pill = (r) => {
+    const cls = r.won ? 'ae-won' : r.attempted ? 'ae-lost' : 'ae-none';
+    const icon = r.won ? '&#10003;' : r.attempted ? '&#10007;' : '&#9675;';
+    const tip = [r.x || (r.discovered ? 'from your plays' : ''), r.won ? 'defeated' : r.attempted ? 'attempted' : 'not yet faced'].filter(Boolean).join(' · ');
+    return `<span class="ae-pill ${cls}" title="${tip}"><span class="ae-ic">${icon}</span>${r.name}${r.d ? `<span class="ae-d">${r.d}</span>` : ''}</span>`;
+  };
+  const tiersHtml = tierKeys.map(t => {
+    const label = t === 0 ? 'Unrated / other' : `Difficulty ${t}`;
+    const list = tiers[t].slice().sort((a, b) => (b.won - a.won) || a.name.localeCompare(b.name));
+    const done = list.filter(r => r.won).length;
+    return `<div class="ae-tier">
+      <div class="ae-tier-head"><span class="ae-tier-name">${label}</span><span class="ae-tier-count">${done}/${list.length}</span></div>
+      <div class="ae-pills">${list.map(pill).join('')}</div>
+    </div>`;
+  }).join('');
+
+  const legacyHtml = legacyPlays > 0 ? `
+    <div class="ae-legacy">
+      <div class="ae-legacy-top"><span>&#128274; Legacy Campaign</span><span class="ae-legacy-stat">${legacyWins} won · ${legacyPlays} sessions</span></div>
+      <div class="ae-legacy-sub">Hidden to keep the story spoiler-free.</div>
+    </div>` : '';
+
+  return `
+    <div class="ae-box">
+      <div class="st-head"><span class="st-title">&#128128; Nemesis Codex</span><span class="st-count">${defeated} / ${total} defeated</span></div>
+      <div class="ae-stats">
+        <div class="ae-stat"><span class="ae-stat-val ae-won-txt">${defeated}</span><span class="ae-stat-lbl">Defeated</span></div>
+        <div class="ae-stat"><span class="ae-stat-val">${facedLost}</span><span class="ae-stat-lbl">Attempted</span></div>
+        <div class="ae-stat"><span class="ae-stat-val">${bestDiff || '&mdash;'}</span><span class="ae-stat-lbl">Top difficulty</span></div>
+      </div>
+      ${tiersHtml}
+      ${legacyHtml}
+      <div class="st-legend"><span class="ae-pill ae-won" style="pointer-events:none"><span class="ae-ic">&#10003;</span>defeated</span> <span class="ae-pill ae-lost" style="pointer-events:none"><span class="ae-ic">&#10007;</span>attempted</span> <span class="ae-pill ae-none" style="pointer-events:none"><span class="ae-ic">&#9675;</span>not yet</span> &middot; number = nemesis difficulty</div>
+    </div>`;
+}
+
 function isCoop(game) {
   return game.categories.includes('Co-op');
 }
@@ -7210,6 +7358,7 @@ function openModal(game) {
   const marvelUnitedHtml = buildMarvelUnitedHtml(game.bggId);
   const marvelChampionsHtml = buildMarvelChampionsHtml(game.bggId, plays);
   const eternalDecksHtml = (Number(game.bggId) === ED_BGGID) ? buildEternalDecksHtml(plays || []) : '';
+  const aeonsEndHtml = buildAeonsEndHtml(game.bggId);
 
   content.innerHTML = `
     ${coverHtml}
@@ -7238,6 +7387,7 @@ function openModal(game) {
       ${marvelUnitedHtml}
       ${marvelChampionsHtml}
       ${eternalDecksHtml}
+      ${aeonsEndHtml}
       ${playHistoryHtml}
       ${game.bggId > 0 ? buildNotesHtml(game.bggId) : ''}
     </div>
