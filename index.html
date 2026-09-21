@@ -664,6 +664,10 @@
   .ae-pill .ae-d{font-size:0.58rem;font-weight:800;opacity:0.6;background:rgba(0,0,0,0.25);border-radius:5px;padding:0 0.3rem;margin-left:0.1rem}
   .ae-won{background:rgba(91,196,107,0.18);border-color:rgba(91,196,107,0.5);color:#bdf0c6}
   .ae-won .ae-ic{color:#5bc46b}
+  .ae-inc{background:rgba(240,190,90,0.20);border-color:rgba(240,190,90,0.6);color:#f6dfa4}
+  .ae-inc .ae-ic{opacity:1}
+  .ae-inc .ae-d{background:rgba(120,80,0,0.3)}
+  .ae-inc-txt{color:#f0c766}
   .ae-lost{background:rgba(224,97,58,0.16);border-color:rgba(224,97,58,0.45);color:#f0c0ad}
   .ae-lost .ae-ic{color:#e0613a}
   .ae-none{opacity:0.5}
@@ -6904,7 +6908,7 @@ function buildAeonsEndHtml(bggId){
   if (!_isAeonsEnd(bggId)) return '';
   // Aggregate nemesis outcomes across every Aeon's End bggId except the
   // spoiler-laden Legacy campaign (tracked separately, name-free).
-  const faced = {}; // norm → {name, won, attempts}
+  const faced = {}; // norm → {name, won, wonNormal, wonIncreased, attempts}
   let legacyPlays = 0, legacyWins = 0;
   for (const id in PLAY_HISTORY){
     if (!_isAeonsEnd(id)) continue;
@@ -6914,28 +6918,44 @@ function buildAeonsEndHtml(bggId){
       if (isLegacy){ legacyPlays++; if (won) legacyWins++; continue; }
       const parsed = _aeParseNemesis(p.b);
       if (!parsed) continue;
-      const f = faced[parsed.key] || (faced[parsed.key] = { name: parsed.name, won: false, attempts: 0 });
-      f.attempts++; if (won) f.won = true;
+      // "Increased difficulty" is a BGStats board tag alongside the nemesis;
+      // its absence means the play was on the default (Normal) difficulty.
+      const inc = /increas/i.test(String(p.b || ''));
+      const f = faced[parsed.key] || (faced[parsed.key] = { name: parsed.name, won: false, wonNormal: false, wonIncreased: false, attempts: 0 });
+      f.attempts++;
+      if (won){ f.won = true; if (inc) f.wonIncreased = true; else f.wonNormal = true; }
     }
   }
-  const stat = (name) => { const f = faced[_aeNorm(name)]; return { won: !!(f && f.won), attempted: !!(f && !f.won && f.attempts) }; };
+  const stat = (name) => {
+    const f = faced[_aeNorm(name)];
+    return {
+      won: !!(f && f.won),
+      wonIncreased: !!(f && f.wonIncreased),
+      wonNormalOnly: !!(f && f.won && !f.wonIncreased),
+      attempted: !!(f && !f.won && f.attempts)
+    };
+  };
 
   // Tally goal progress over OWNED boxes only.
   const ownedBoxNames = new Set(AE_BOXES.filter(b => b.owned).map(b => b.x));
-  let defeated = 0, totalOwned = 0, bestDiff = 0, attemptedN = 0;
+  let defeated = 0, totalOwned = 0, bestDiff = 0, incN = 0;
   AE_NEMESES.forEach(n => {
     if (!ownedBoxNames.has(n.x)) return;
     totalOwned++;
     const s = stat(n.n);
-    if (s.won){ defeated++; if (n.d > bestDiff) bestDiff = n.d; }
-    else if (s.attempted) attemptedN++;
+    if (s.won){ defeated++; if (n.d > bestDiff) bestDiff = n.d; if (s.wonIncreased) incN++; }
   });
 
+  // 🍺 = beaten on Increased difficulty · ✓ = beaten on Normal only
+  // (still to conquer on Increased) · ✗ = attempted · ○ = not yet faced.
   const pill = (n) => {
     const s = stat(n.n);
-    const cls = s.won ? 'ae-won' : s.attempted ? 'ae-lost' : 'ae-none';
-    const icon = s.won ? '&#10003;' : s.attempted ? '&#10007;' : '&#9675;';
-    return `<span class="ae-pill ${cls}" title="${n.n} · difficulty ${n.d} · ${s.won?'defeated':s.attempted?'attempted':'not yet faced'}"><span class="ae-ic">${icon}</span>${n.n}<span class="ae-d">${n.d}</span></span>`;
+    let cls, icon, state;
+    if (s.wonIncreased){ cls = 'ae-won ae-inc'; icon = '&#127866;'; state = 'defeated on Increased difficulty'; }
+    else if (s.won){ cls = 'ae-won'; icon = '&#10003;'; state = 'defeated on Normal (not yet on Increased)'; }
+    else if (s.attempted){ cls = 'ae-lost'; icon = '&#10007;'; state = 'attempted'; }
+    else { cls = 'ae-none'; icon = '&#9675;'; state = 'not yet faced'; }
+    return `<span class="ae-pill ${cls}" title="${n.n} · difficulty ${n.d} · ${state}"><span class="ae-ic">${icon}</span>${n.n}<span class="ae-d">${n.d}</span></span>`;
   };
 
   const boxesHtml = AE_BOXES.map(box => {
@@ -6956,7 +6976,7 @@ function buildAeonsEndHtml(bggId){
   // its own group so your real history is always represented.
   const known = new Set(AE_NEMESES.map(n => _aeNorm(n.n)));
   const extras = Object.keys(faced).filter(k => !known.has(k)).map(k => faced[k]);
-  const extrasHtml = extras.length ? `<div class="ae-grp"><div class="ae-grp-head"><span class="ae-grp-name">Other (from your plays)</span><span class="ae-grp-count">${extras.filter(e=>e.won).length}/${extras.length}</span></div><div class="ae-pills">${extras.map(e=>`<span class="ae-pill ${e.won?'ae-won':'ae-lost'}"><span class="ae-ic">${e.won?'&#10003;':'&#10007;'}</span>${e.name}</span>`).join('')}</div></div>` : '';
+  const extrasHtml = extras.length ? `<div class="ae-grp"><div class="ae-grp-head"><span class="ae-grp-name">Other (from your plays)</span><span class="ae-grp-count">${extras.filter(e=>e.won).length}/${extras.length}</span></div><div class="ae-pills">${extras.map(e=>{const cls=e.won?('ae-won'+(e.wonIncreased?' ae-inc':'')):'ae-lost';const ic=e.won?(e.wonIncreased?'&#127866;':'&#10003;'):'&#10007;';return `<span class="ae-pill ${cls}"><span class="ae-ic">${ic}</span>${e.name}</span>`;}).join('')}</div></div>` : '';
 
   const legacyHtml = legacyPlays > 0 ? `
     <div class="ae-legacy">
@@ -6969,13 +6989,13 @@ function buildAeonsEndHtml(bggId){
       <div class="st-head"><span class="st-title">&#128128; Nemesis Codex</span><span class="st-count">${defeated} / ${totalOwned} defeated</span></div>
       <div class="ae-stats">
         <div class="ae-stat"><span class="ae-stat-val ae-won-txt">${defeated}</span><span class="ae-stat-lbl">Defeated</span></div>
-        <div class="ae-stat"><span class="ae-stat-val">${attemptedN}</span><span class="ae-stat-lbl">Attempted</span></div>
+        <div class="ae-stat"><span class="ae-stat-val ae-inc-txt">${incN}</span><span class="ae-stat-lbl">On Increased &#127866;</span></div>
         <div class="ae-stat"><span class="ae-stat-val">${bestDiff || '&mdash;'}</span><span class="ae-stat-lbl">Top difficulty</span></div>
       </div>
       ${boxesHtml}
       ${extrasHtml}
       ${legacyHtml}
-      <div class="st-legend"><span class="ae-pill ae-won" style="pointer-events:none"><span class="ae-ic">&#10003;</span>defeated</span> <span class="ae-pill ae-lost" style="pointer-events:none"><span class="ae-ic">&#10007;</span>attempted</span> <span class="ae-pill ae-none" style="pointer-events:none"><span class="ae-ic">&#9675;</span>not yet</span> &middot; small number = nemesis difficulty</div>
+      <div class="st-legend"><span class="ae-pill ae-inc" style="pointer-events:none"><span class="ae-ic">&#127866;</span>Increased</span> <span class="ae-pill ae-won" style="pointer-events:none"><span class="ae-ic">&#10003;</span>Normal only</span> <span class="ae-pill ae-lost" style="pointer-events:none"><span class="ae-ic">&#10007;</span>attempted</span> <span class="ae-pill ae-none" style="pointer-events:none"><span class="ae-ic">&#9675;</span>not yet</span> &middot; small number = nemesis difficulty</div>
     </div>`;
 }
 
