@@ -6775,6 +6775,37 @@ function buildEternalDecksHtml(plays){
 const AE_LEGACY_BGGID = 241451;
 function _isAeonsEnd(bggId){ const g = findGameByBggId(bggId); return !!(g && /aeon.?s?\s*end/i.test(g.name || '')); }
 function _aeNorm(s){ return String(s || '').toLowerCase().replace(/[^a-z0-9]/g, ''); }
+// BGStats stores several "board"/variant selections in one field joined by a
+// fullwidth solidus (／, U+FF0F); users also separate with /, |, comma, etc.
+// So a play logged as "Rageborne／Increased difficulty" carries the nemesis in
+// one token and difficulty/variant tags in the others. Split, then match any
+// token against the roster instead of comparing the whole raw string.
+const _AE_SPLIT = /[／｜\/|,;\n]+/;
+let _aeRosterMap = null;
+function _aeRoster(){
+  if (_aeRosterMap) return _aeRosterMap;
+  _aeRosterMap = {};
+  for (const n of AE_NEMESES) _aeRosterMap[_aeNorm(n.n)] = n;
+  return _aeRosterMap;
+}
+// Tokens that are difficulty/variant modifiers, never a nemesis name.
+function _aeIsModifier(tok){
+  return /difficulty|expedition|nightmare|expert|casual|increased|reduced|standard|(^|\b)(lvl|level|diff|easy|hard|normal)\b|^\s*\d+\s*$/i.test(tok);
+}
+// Parse a raw board string → {key, name} for the nemesis (or null).
+function _aeParseNemesis(raw){
+  const parts = String(raw || '').split(_AE_SPLIT).map(s => s.trim()).filter(Boolean);
+  if (!parts.length) return null;
+  const roster = _aeRoster();
+  for (const part of parts){
+    const hit = roster[_aeNorm(part)];
+    if (hit) return { key: _aeNorm(hit.n), name: hit.n };
+  }
+  // Unknown nemesis (future content): pick the first non-modifier token so a
+  // difficulty tag never becomes the displayed name.
+  const named = parts.find(p => !_aeIsModifier(p)) || parts[0];
+  return { key: _aeNorm(named), name: named };
+}
 // {n: name, d: difficulty, x: box}. Legacy-campaign nemeses are intentionally
 // omitted (tracked spoiler-free below).
 const AE_NEMESES = [
@@ -6881,10 +6912,9 @@ function buildAeonsEndHtml(bggId){
     for (const p of PLAY_HISTORY[id]){
       const won = (p.sc || []).some(s => s && s.w);
       if (isLegacy){ legacyPlays++; if (won) legacyWins++; continue; }
-      const nem = String(p.b || '').trim();
-      if (!nem) continue;
-      const k = _aeNorm(nem);
-      const f = faced[k] || (faced[k] = { name: nem, won: false, attempts: 0 });
+      const parsed = _aeParseNemesis(p.b);
+      if (!parsed) continue;
+      const f = faced[parsed.key] || (faced[parsed.key] = { name: parsed.name, won: false, attempts: 0 });
       f.attempts++; if (won) f.won = true;
     }
   }
