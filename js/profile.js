@@ -1,5 +1,6 @@
 let _viewingProfile = null; // null = own profile, string = visiting someone
 let _statsViewSource = null; // 'leaderboard' | 'insights' | null — where the visit was triggered from
+let _rlgDismissed = false; // "rate last game" bar dismissed for this session (resets on refresh)
 
 function _goBackFromProfile() {
   const src = _statsViewSource;
@@ -18,6 +19,7 @@ window._goBackFromProfile = _goBackFromProfile;
 function _rlgEsc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
 function buildRateLastGameBar(playerName, isOwnProfile, recentPlays) {
+  if (_rlgDismissed) return '';
   if (!isOwnProfile || !recentPlays || !recentPlays.length) return '';
   // Walk plays newest-first, one game each, until we hit an unrated one.
   const seen = new Set();
@@ -35,6 +37,7 @@ function buildRateLastGameBar(playerName, isOwnProfile, recentPlays) {
   for (let i = 1; i <= 10; i++) stars += `<span class="star" data-val="${i}">&#9733;</span>`;
   const prompt = isLatest ? 'Rate your last game' : 'Rate a recent game';
   return `<div class="rate-last-bar" id="rate-last-bar" data-bgg="${bggId}">
+    <button class="rate-last-close" id="rate-last-close" type="button" aria-label="Hide">&times;</button>
     <div class="rate-last-cover"><img class="rate-last-cover-img" src="${imgSrc}" alt="" onerror="__imgFallback(this, ${bggId})"></div>
     <div class="rate-last-body">
       <div class="rate-last-prompt">${prompt}</div>
@@ -51,6 +54,17 @@ function wireRateLastGame(container, playerName, isOwnProfile, recentPlays) {
   if (!starsRow) return;
   const stars = starsRow.querySelectorAll('.star');
   const bggId = Number(bar.dataset.bgg);
+
+  // Dismiss for this session (reappears on a page refresh).
+  const closeBtn = bar.querySelector('#rate-last-close');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      _rlgDismissed = true;
+      bar.classList.add('rate-last-hide');
+      setTimeout(() => bar.remove(), 320);
+    });
+  }
 
   stars.forEach(star => {
     star.addEventListener('mouseenter', () => {
