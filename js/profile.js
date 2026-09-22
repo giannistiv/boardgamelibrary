@@ -11,6 +11,79 @@ function _goBackFromProfile() {
 }
 window._goBackFromProfile = _goBackFromProfile;
 
+// ── "Rate your last game" nudge ──
+// A banner near the top of your OWN profile that offers to rate the most recent
+// game you played but haven't rated yet. Returns '' when there is nothing to
+// nudge (visiting someone else, no plays, or every recent game already rated).
+function _rlgEsc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function buildRateLastGameBar(playerName, isOwnProfile, recentPlays) {
+  if (!isOwnProfile || !recentPlays || !recentPlays.length) return '';
+  // Walk plays newest-first, one game each, until we hit an unrated one.
+  const seen = new Set();
+  let target = null, isLatest = false;
+  for (let i = 0; i < recentPlays.length; i++) {
+    const p = recentPlays[i];
+    if (!p.game || !(p.bggId >= 0) || seen.has(p.bggId)) continue;
+    seen.add(p.bggId);
+    if (getPlayerRating(playerName, p.bggId) === 0) { target = p; isLatest = (i === 0); break; }
+  }
+  if (!target) return '';
+  const bggId = target.bggId;
+  const imgSrc = `images/${bggId}.jpg`;
+  let stars = '';
+  for (let i = 1; i <= 10; i++) stars += `<span class="star" data-val="${i}">&#9733;</span>`;
+  const prompt = isLatest ? 'Rate your last game' : 'Rate a recent game';
+  return `<div class="rate-last-bar" id="rate-last-bar" data-bgg="${bggId}">
+    <div class="rate-last-cover"><img class="rate-last-cover-img" src="${imgSrc}" alt="" onerror="__imgFallback(this, ${bggId})"></div>
+    <div class="rate-last-body">
+      <div class="rate-last-prompt">${prompt}</div>
+      <div class="rate-last-game" title="${_rlgEsc(target.game.name)}">${_rlgEsc(target.game.name)}</div>
+      <div class="rate-last-stars" id="rate-last-stars">${stars}</div>
+    </div>
+  </div>`;
+}
+
+function wireRateLastGame(container, playerName, isOwnProfile, recentPlays) {
+  const bar = container.querySelector('#rate-last-bar');
+  if (!bar) return;
+  const starsRow = bar.querySelector('#rate-last-stars');
+  if (!starsRow) return;
+  const stars = starsRow.querySelectorAll('.star');
+  const bggId = Number(bar.dataset.bgg);
+
+  stars.forEach(star => {
+    star.addEventListener('mouseenter', () => {
+      const val = Number(star.dataset.val);
+      stars.forEach(s => s.classList.toggle('hovered', Number(s.dataset.val) <= val));
+    });
+  });
+  starsRow.addEventListener('mouseleave', () => stars.forEach(s => s.classList.remove('hovered')));
+
+  stars.forEach(star => {
+    star.addEventListener('click', async () => {
+      const val = Number(star.dataset.val);
+      stars.forEach(s => { s.classList.toggle('filled', Number(s.dataset.val) <= val); s.classList.remove('hovered'); });
+      await saveRating(playerName, bggId, val);
+      // Brief confirmation, then advance to the next unrated game (or fade out).
+      const body = bar.querySelector('.rate-last-body');
+      if (body && !body.querySelector('.rate-last-done')) {
+        body.insertAdjacentHTML('beforeend', `<div class="rate-last-done">Saved &mdash; ${val}/10 &#10003;</div>`);
+      }
+      setTimeout(() => {
+        const html = buildRateLastGameBar(playerName, isOwnProfile, recentPlays);
+        if (html) {
+          bar.outerHTML = html;
+          wireRateLastGame(container, playerName, isOwnProfile, recentPlays);
+        } else {
+          bar.classList.add('rate-last-hide');
+          setTimeout(() => bar.remove(), 320);
+        }
+      }, 900);
+    });
+  });
+}
+
 function showStatsView(playerName, visiting) {
   const loggedInPlayer = localStorage.getItem('bgl-player');
   const isOwnProfile = !visiting || visiting === loggedInPlayer;
@@ -308,6 +381,8 @@ function showStatsView(playerName, visiting) {
 
     ${buildWrappedBanner(playerName)}
 
+    ${buildRateLastGameBar(playerName, isOwnProfile, recentPlays)}
+
     ${favoritesHtml}
 
     ${h2hHtml}
@@ -477,6 +552,9 @@ function showStatsView(playerName, visiting) {
   if (wrappedBanner) {
     wrappedBanner.addEventListener('click', () => openWrappedModal(playerName, isOwnProfile));
   }
+
+  // "Rate your last game" nudge (own profile only).
+  wireRateLastGame(container, playerName, isOwnProfile, recentPlays);
 
   // Play heatmap (year nav + tap-a-day).
   _wireHeatmap(playerName);
