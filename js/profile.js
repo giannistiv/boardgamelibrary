@@ -33,8 +33,9 @@ function buildRateLastGameBar(playerName, isOwnProfile, recentPlays) {
   if (!target) return '';
   const bggId = target.bggId;
   const imgSrc = `images/${bggId}.jpg`;
-  let stars = '';
-  for (let i = 1; i <= 10; i++) stars += `<span class="star" data-val="${i}">&#9733;</span>`;
+  // Letterboxd-style: 5 stars with half-star precision → the 1-10 scale
+  // (half star = odd value). Each star layers a gold fill over a grey base.
+  const star = '<span class="rlg-star"><span class="rlg-star-bg">&#9733;</span><span class="rlg-star-fill">&#9733;</span></span>';
   const prompt = isLatest ? 'Rate your last game' : 'Rate a recent game';
   return `<div class="rate-last-bar" id="rate-last-bar" data-bgg="${bggId}">
     <button class="rate-last-close" id="rate-last-close" type="button" aria-label="Hide">&times;</button>
@@ -42,7 +43,11 @@ function buildRateLastGameBar(playerName, isOwnProfile, recentPlays) {
     <div class="rate-last-body">
       <div class="rate-last-prompt">${prompt}</div>
       <div class="rate-last-game" title="${_rlgEsc(target.game.name)}">${_rlgEsc(target.game.name)}</div>
-      <div class="rate-last-stars" id="rate-last-stars">${stars}</div>
+      <div class="rate-last-rate">
+        <div class="rlg-stars" id="rlg-stars" role="slider" tabindex="0" aria-label="Rate this game from 1 to 10" aria-valuemin="1" aria-valuemax="10" aria-valuenow="0">${star.repeat(5)}</div>
+        <span class="rlg-value" id="rlg-value"></span>
+        <button class="rlg-submit" id="rlg-submit" type="button" disabled>Rate</button>
+      </div>
     </div>
   </div>`;
 }
@@ -50,10 +55,12 @@ function buildRateLastGameBar(playerName, isOwnProfile, recentPlays) {
 function wireRateLastGame(container, playerName, isOwnProfile, recentPlays) {
   const bar = container.querySelector('#rate-last-bar');
   if (!bar) return;
-  const starsRow = bar.querySelector('#rate-last-stars');
-  if (!starsRow) return;
-  const stars = starsRow.querySelectorAll('.star');
+  const starsEl = bar.querySelector('#rlg-stars');
+  const valueEl = bar.querySelector('#rlg-value');
+  const submitBtn = bar.querySelector('#rlg-submit');
+  if (!starsEl || !submitBtn) return;
   const bggId = Number(bar.dataset.bgg);
+  const starEls = [...starsEl.querySelectorAll('.rlg-star')]; // 5 stars
 
   // Dismiss for this session (reappears on a page refresh).
   const closeBtn = bar.querySelector('#rate-last-close');
@@ -66,36 +73,89 @@ function wireRateLastGame(container, playerName, isOwnProfile, recentPlays) {
     });
   }
 
-  stars.forEach(star => {
-    star.addEventListener('mouseenter', () => {
-      const val = Number(star.dataset.val);
-      stars.forEach(s => s.classList.toggle('hovered', Number(s.dataset.val) <= val));
-    });
-  });
-  starsRow.addEventListener('mouseleave', () => stars.forEach(s => s.classList.remove('hovered')));
+  let pending = 0; // committed rating (0 = none yet)
 
-  stars.forEach(star => {
-    star.addEventListener('click', async () => {
-      const val = Number(star.dataset.val);
-      stars.forEach(s => { s.classList.toggle('filled', Number(s.dataset.val) <= val); s.classList.remove('hovered'); });
-      await saveRating(playerName, bggId, val);
-      // Brief confirmation, then advance to the next unrated game (or fade out).
-      const body = bar.querySelector('.rate-last-body');
-      if (body && !body.querySelector('.rate-last-done')) {
-        body.insertAdjacentHTML('beforeend', `<div class="rate-last-done">Saved &mdash; ${val}/10 &#10003;</div>`);
+  // Paint the 5 stars for a 1-10 value (each star = 2 points; half = odd).
+  const render = (v) => {
+    for (let i = 0; i < 5; i++) {
+      const el = starEls[i];
+      el.classList.remove('full', 'half');
+      if (v >= (i + 1) * 2) el.classList.add('full');
+      else if (v === (i + 1) * 2 - 1) el.classList.add('half');
+    }
+    valueEl.textContent = v ? `${v}/10` : '';
+    starsEl.setAttribute('aria-valuenow', String(v || 0));
+  };
+
+  // Map an x-coordinate to a 1-10 value using the real star rects (so the gaps
+  // between stars and any letter-spacing don't skew the half-star boundaries).
+  const valueFromX = (clientX) => {
+    for (let i = 0; i < 5; i++) {
+      const r = starEls[i].getBoundingClientRect();
+      if (clientX <= r.right) {
+        const leftHalf = clientX < r.left + r.width / 2;
+        return Math.max(1, i * 2 + (leftHalf ? 1 : 2));
       }
-      setTimeout(() => {
-        const html = buildRateLastGameBar(playerName, isOwnProfile, recentPlays);
-        if (html) {
-          bar.outerHTML = html;
-          wireRateLastGame(container, playerName, isOwnProfile, recentPlays);
-        } else {
-          bar.classList.add('rate-last-hide');
-          setTimeout(() => bar.remove(), 320);
-        }
-      }, 900);
-    });
+    }
+    return 10;
+  };
+
+  const setPending = (v) => {
+    pending = v;
+    render(v);
+    submitBtn.disabled = !pending;
+  };
+
+  let dragging = false;
+  starsEl.addEventListener('pointerdown', (e) => {
+    dragging = true;
+    try { starsEl.setPointerCapture(e.pointerId); } catch (_) {}
+    setPending(valueFromX(e.clientX));
+    e.preventDefault();
   });
+  starsEl.addEventListener('pointermove', (e) => {
+    if (dragging) setPending(valueFromX(e.clientX));  // slide to adjust
+    else render(valueFromX(e.clientX));                // hover preview (no commit)
+  });
+  const endDrag = (e) => {
+    if (!dragging) return;
+    dragging = false;
+    try { starsEl.releasePointerCapture(e.pointerId); } catch (_) {}
+  };
+  starsEl.addEventListener('pointerup', endDrag);
+  starsEl.addEventListener('pointercancel', endDrag);
+  // Restore the committed value when the mouse leaves without a new pick.
+  starsEl.addEventListener('pointerleave', () => { if (!dragging) render(pending); });
+
+  // Keyboard: arrows adjust, Enter submits.
+  starsEl.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { setPending(Math.min(10, (pending || 0) + 1)); e.preventDefault(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { setPending(Math.max(1, (pending || 1) - 1)); e.preventDefault(); }
+    else if (e.key === 'Enter' && pending) { submit(); }
+  });
+
+  async function submit() {
+    if (!pending) return;
+    const saved = pending;
+    submitBtn.disabled = true;
+    await saveRating(playerName, bggId, saved);
+    // Brief confirmation, then advance to the next unrated game (or fade out).
+    const body = bar.querySelector('.rate-last-body');
+    if (body && !body.querySelector('.rate-last-done')) {
+      body.insertAdjacentHTML('beforeend', `<div class="rate-last-done">Saved &mdash; ${saved}/10 &#10003;</div>`);
+    }
+    setTimeout(() => {
+      const html = buildRateLastGameBar(playerName, isOwnProfile, recentPlays);
+      if (html) {
+        bar.outerHTML = html;
+        wireRateLastGame(container, playerName, isOwnProfile, recentPlays);
+      } else {
+        bar.classList.add('rate-last-hide');
+        setTimeout(() => bar.remove(), 320);
+      }
+    }, 900);
+  }
+  submitBtn.addEventListener('click', submit);
 }
 
 function showStatsView(playerName, visiting) {
