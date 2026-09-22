@@ -2714,7 +2714,7 @@ const NAME_MAP = {
   'George Ios - BS':'Γιωργος Ιος - BS','Giannis A - Argo':'Γιαννης Αγγουριδακης',
   'Giannis Fot - BS':'Γιαννης Φωτοπουλος','Giannis Frantz':'Γιαννης Φρατζεσκακης',
   'Giannis Giaour - BS':'Γιαννης Γιαουριδακης','Giannis Kz':'Γιαννης Κζ',
-  'Giorgos - Argo':'Γιωργος Γεωργιαδης','Giorgos - Sleeping':'Γιωργος Τσερβενης',
+  'Giorgos - Argo':'Γιωργος Γεωργιαδης','Giorgos - Sleeping':'Γιωργος - Sleeping',
   'Giorgos - filos Dimitri':'Γιωργος - φιλος Δημητρη',
   'Giorgos 2 - filos Dimitri':'Γιωργος 2 - φιλος Δημητρη',
   'Iasonas':'Ιασονας','Ilias - BS':'Ηλιας - BS','Javier':'Javi',
@@ -2754,6 +2754,32 @@ for (const bggId in PLAY_HISTORY) {
     if (play.l && LOCATION_MAP[play.l]) play.l = LOCATION_MAP[play.l];
   }
 }
+
+// ── Distinct "Giorgos" identity corrections ──
+// Several different Georges were logged under overlapping names; a plain
+// NAME_MAP swap would chain-corrupt (Τσερβενης is both a source and a target).
+// These per-play rules read the co-players, so they separate the people safely:
+//  • The person tagged "Γιωργος Τσερβενης" who never plays with Τσαπ is really
+//    "Γιωργος - Sleeping"; the REAL Τσερβενης is the friend-of-Dimitri who does.
+//  • That friend-of-Dimitri pool also hides "Γιωργος 2 - φιλος Δημητρη", who
+//    plays only with Δημητρης+Στιβ (no Τσαπ).
+// Idempotent: the real Τσερβενης always has Τσαπ, so re-running never re-touches
+// him, and none of the resulting names are NAME_MAP keys.
+function _fixGiorgosInPlay(play){
+  if (!play || !Array.isArray(play.sc)) return;
+  const chap = play.sc.some(x => x && x.n === 'Τσαπ');
+  for (const s of play.sc){
+    if (!s) continue;
+    if (s.n === 'Γιωργος Τσερβενης' && !chap) s.n = 'Γιωργος - Sleeping';
+    else if (s.n === 'Γιωργος - φιλος Δημητρη') s.n = chap ? 'Γιωργος Τσερβενης' : 'Γιωργος 2 - φιλος Δημητρη';
+  }
+}
+function _fixGiorgosIdentities(){
+  for (const bggId in PLAY_HISTORY)
+    for (const play of PLAY_HISTORY[bggId])
+      _fixGiorgosInPlay(play);
+}
+_fixGiorgosIdentities();
 
 // Games with play history that aren't on the shelf (for stats/modal)
 const EXTRA_GAMES = {
@@ -10939,6 +10965,7 @@ function _mergePlayIntoHistory(uuid, p) {
   for (const s of p.sc) {
     if (s && s.n && NAME_MAP[s.n]) s.n = NAME_MAP[s.n];
   }
+  _fixGiorgosInPlay(p);
   if (p.l && LOCATION_MAP[p.l]) p.l = LOCATION_MAP[p.l];
   const entry = { date: p.date, sc: p.sc, _uuid: uuid };
   if (p.t) entry.t = p.t;
@@ -13772,6 +13799,7 @@ async function _saveProfileName(newName) {
 
 Promise.all([loadAllRatings(), loadAllFavorites(), loadImportedGames(), loadImportedPlays(), loadGameImages(), loadBoardSouthVotes(), loadOathswornRanks(), loadAllNotes(), loadProfiles()]).then(() => {
   _applyProfileOverrides();
+  _fixGiorgosIdentities();
   if (typeof _updateBoardSouthBtnVisibility === 'function') _updateBoardSouthBtnVisibility();
   const savedPlayer = localStorage.getItem('bgl-player');
   // Self-heal: a login can only ever be a player who exists in the play
