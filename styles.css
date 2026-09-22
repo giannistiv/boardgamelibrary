@@ -1569,13 +1569,10 @@
   .rate-last-prompt{font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:#e2b04a}
   .rate-last-game{font-size:0.92rem;font-weight:700;color:#f0e6d3;margin:0.05rem 0 0.35rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .rate-last-rate{display:flex;align-items:center;gap:0.55rem;flex-wrap:wrap;margin-top:0.05rem}
-  .rlg-stars{position:relative;display:inline-flex;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;line-height:1;padding:0.1rem 0}
-  .rlg-star{position:relative;display:inline-block;font-size:1.35rem;line-height:1}
-  .rlg-star + .rlg-star{margin-left:0.14rem}
-  .rlg-star-bg{color:rgba(255,255,255,0.2)}
-  .rlg-star-fill{position:absolute;top:0;left:0;width:0;overflow:hidden;color:#e2b04a;white-space:nowrap}
-  .rlg-star.full .rlg-star-fill{width:100%}
-  .rlg-star.half .rlg-star-fill{width:50%}
+  .rlg-stars{display:inline-flex;flex-wrap:nowrap;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;line-height:1;padding:0.1rem 0}
+  .rlg-star{font-size:1.3rem;line-height:1;color:rgba(255,255,255,0.2);transition:color 0.08s}
+  .rlg-star + .rlg-star{margin-left:0.07rem}
+  .rlg-star.filled{color:#e2b04a}
   .rlg-value{font-size:0.85rem;font-weight:800;color:#f0e6d3;min-width:2.9em}
   .rlg-submit{font-size:0.72rem;font-weight:800;letter-spacing:0.02em;padding:0.3rem 0.8rem;border-radius:8px;
     border:1px solid rgba(226,176,74,0.55);background:rgba(226,176,74,0.16);color:#f6e4b8;cursor:pointer;
@@ -1584,8 +1581,8 @@
   .rlg-submit:not(:disabled):hover{background:rgba(226,176,74,0.32)}
   .rate-last-done{font-size:0.76rem;font-weight:700;color:#5bc46b;margin-top:0.3rem}
   @media (max-width:600px){
-    .rlg-star{font-size:1.7rem}
-    .rlg-star + .rlg-star{margin-left:0.2rem}
+    .rlg-star{font-size:1.5rem}
+    .rlg-star + .rlg-star{margin-left:0.04rem}
     .rlg-value{font-size:0.95rem}
     .rlg-submit{font-size:0.82rem;padding:0.38rem 0.95rem}
     .rate-last-body{padding-right:0.9rem}

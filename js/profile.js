@@ -33,9 +33,9 @@ function buildRateLastGameBar(playerName, isOwnProfile, recentPlays) {
   if (!target) return '';
   const bggId = target.bggId;
   const imgSrc = `images/${bggId}.jpg`;
-  // Letterboxd-style: 5 stars with half-star precision → the 1-10 scale
-  // (half star = odd value). Each star layers a gold fill over a grey base.
-  const star = '<span class="rlg-star"><span class="rlg-star-bg">&#9733;</span><span class="rlg-star-fill">&#9733;</span></span>';
+  // 10 whole stars on the 1-10 scale. Set the score by clicking a star or
+  // sliding across them (mouse or touch), then Submit.
+  const star = '<span class="rlg-star">&#9733;</span>';
   const prompt = isLatest ? 'Rate your last game' : 'Rate a recent game';
   return `<div class="rate-last-bar" id="rate-last-bar" data-bgg="${bggId}">
     <button class="rate-last-close" id="rate-last-close" type="button" aria-label="Hide">&times;</button>
@@ -44,7 +44,7 @@ function buildRateLastGameBar(playerName, isOwnProfile, recentPlays) {
       <div class="rate-last-prompt">${prompt}</div>
       <div class="rate-last-game" title="${_rlgEsc(target.game.name)}">${_rlgEsc(target.game.name)}</div>
       <div class="rate-last-rate">
-        <div class="rlg-stars" id="rlg-stars" role="slider" tabindex="0" aria-label="Rate this game from 1 to 10" aria-valuemin="1" aria-valuemax="10" aria-valuenow="0">${star.repeat(5)}</div>
+        <div class="rlg-stars" id="rlg-stars" role="slider" tabindex="0" aria-label="Rate this game from 1 to 10" aria-valuemin="1" aria-valuemax="10" aria-valuenow="0">${star.repeat(10)}</div>
         <span class="rlg-value" id="rlg-value"></span>
         <button class="rlg-submit" id="rlg-submit" type="button" disabled>Rate</button>
       </div>
@@ -60,7 +60,7 @@ function wireRateLastGame(container, playerName, isOwnProfile, recentPlays) {
   const submitBtn = bar.querySelector('#rlg-submit');
   if (!starsEl || !submitBtn) return;
   const bggId = Number(bar.dataset.bgg);
-  const starEls = [...starsEl.querySelectorAll('.rlg-star')]; // 5 stars
+  const starEls = [...starsEl.querySelectorAll('.rlg-star')]; // 10 stars
 
   // Dismiss for this session (reappears on a page refresh).
   const closeBtn = bar.querySelector('#rate-last-close');
@@ -75,27 +75,18 @@ function wireRateLastGame(container, playerName, isOwnProfile, recentPlays) {
 
   let pending = 0; // committed rating (0 = none yet)
 
-  // Paint the 5 stars for a 1-10 value (each star = 2 points; half = odd).
+  // Fill stars 1..v for a 1-10 value.
   const render = (v) => {
-    for (let i = 0; i < 5; i++) {
-      const el = starEls[i];
-      el.classList.remove('full', 'half');
-      if (v >= (i + 1) * 2) el.classList.add('full');
-      else if (v === (i + 1) * 2 - 1) el.classList.add('half');
-    }
+    for (let i = 0; i < starEls.length; i++) starEls[i].classList.toggle('filled', (i + 1) <= v);
     valueEl.textContent = v ? `${v}/10` : '';
     starsEl.setAttribute('aria-valuenow', String(v || 0));
   };
 
-  // Map an x-coordinate to a 1-10 value using the real star rects (so the gaps
-  // between stars and any letter-spacing don't skew the half-star boundaries).
+  // Map an x-coordinate to a 1-10 value from the real star rects (robust to the
+  // gaps between stars). The star the pointer is over is the score.
   const valueFromX = (clientX) => {
-    for (let i = 0; i < 5; i++) {
-      const r = starEls[i].getBoundingClientRect();
-      if (clientX <= r.right) {
-        const leftHalf = clientX < r.left + r.width / 2;
-        return Math.max(1, i * 2 + (leftHalf ? 1 : 2));
-      }
+    for (let i = 0; i < starEls.length; i++) {
+      if (clientX <= starEls[i].getBoundingClientRect().right) return i + 1;
     }
     return 10;
   };
