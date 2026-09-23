@@ -12,55 +12,75 @@ function _goBackFromProfile() {
 }
 window._goBackFromProfile = _goBackFromProfile;
 
-// ── "Rate your last game" nudge ──
-// A banner near the top of your OWN profile that offers to rate the most recent
-// game you played but haven't rated yet. Returns '' when there is nothing to
-// nudge (visiting someone else, no plays, or every recent game already rated).
+// ── "Rate your games" carousel ──
+// A banner near the top of your OWN profile: a swipeable carousel of your most
+// recent games. Each card rates a game with 10 whole stars (click a position or
+// slide across them, then Submit). Rated games show their existing score so you
+// can browse previous ratings and change them. Returns '' when there is nothing
+// to show (visiting someone else, or no plays).
+const RLG_MAX_GAMES = 15;
 function _rlgEsc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
 function buildRateLastGameBar(playerName, isOwnProfile, recentPlays) {
   if (_rlgDismissed) return '';
   if (!isOwnProfile || !recentPlays || !recentPlays.length) return '';
-  // Walk plays newest-first, one game each, until we hit an unrated one.
+  // Distinct recent games, newest first, capped.
   const seen = new Set();
-  let target = null, isLatest = false;
-  for (let i = 0; i < recentPlays.length; i++) {
-    const p = recentPlays[i];
+  const games = [];
+  for (const p of recentPlays) {
     if (!p.game || !(p.bggId >= 0) || seen.has(p.bggId)) continue;
     seen.add(p.bggId);
-    if (getPlayerRating(playerName, p.bggId) === 0) { target = p; isLatest = (i === 0); break; }
+    games.push({ bggId: p.bggId, name: p.game.name });
+    if (games.length >= RLG_MAX_GAMES) break;
   }
-  if (!target) return '';
-  const bggId = target.bggId;
-  const imgSrc = `images/${bggId}.jpg`;
-  // 10 whole stars on the 1-10 scale. Set the score by clicking a star or
-  // sliding across them (mouse or touch), then Submit.
+  if (!games.length) return '';
+  // Open on the first unrated game (fall back to the newest).
+  let start = games.findIndex(g => getPlayerRating(playerName, g.bggId) === 0);
+  if (start < 0) start = 0;
+
   const star = '<span class="rlg-star">&#9733;</span>';
-  const prompt = isLatest ? 'Rate your last game' : 'Rate a recent game';
-  return `<div class="rate-last-bar" id="rate-last-bar" data-bgg="${bggId}">
-    <button class="rate-last-close" id="rate-last-close" type="button" aria-label="Hide">&times;</button>
-    <div class="rate-last-cover"><img class="rate-last-cover-img" src="${imgSrc}" alt="" onerror="__imgFallback(this, ${bggId})"></div>
-    <div class="rate-last-body">
-      <div class="rate-last-prompt">${prompt}</div>
-      <div class="rate-last-game" title="${_rlgEsc(target.game.name)}">${_rlgEsc(target.game.name)}</div>
-      <div class="rate-last-rate">
-        <div class="rlg-stars" id="rlg-stars" role="slider" tabindex="0" aria-label="Rate this game from 1 to 10" aria-valuemin="1" aria-valuemax="10" aria-valuenow="0">${star.repeat(10)}</div>
-        <span class="rlg-value" id="rlg-value"></span>
-        <button class="rlg-submit" id="rlg-submit" type="button" disabled>Rate</button>
+  const card = (g, i) => {
+    const rating = getPlayerRating(playerName, g.bggId);
+    const rated = rating > 0;
+    const prompt = rated ? 'Your rating' : (i === 0 ? 'Rate your last game' : 'Rate a recent game');
+    return `<div class="rlg-card" data-bgg="${g.bggId}" data-saved="${rating}">
+      <div class="rate-last-cover"><img class="rate-last-cover-img" src="images/${g.bggId}.jpg" alt="" onerror="__imgFallback(this, ${g.bggId})"></div>
+      <div class="rate-last-body">
+        <div class="rate-last-prompt">${prompt}</div>
+        <div class="rate-last-game" title="${_rlgEsc(g.name)}">${_rlgEsc(g.name)}</div>
+        <div class="rate-last-rate">
+          <div class="rlg-stars" role="slider" tabindex="0" aria-label="Rate ${_rlgEsc(g.name)} from 1 to 10" aria-valuemin="1" aria-valuemax="10" aria-valuenow="${rating}">${star.repeat(10)}</div>
+          <span class="rlg-value"></span>
+          <button class="rlg-submit" type="button" disabled>${rated ? 'Update' : 'Rate'}</button>
+        </div>
       </div>
+    </div>`;
+  };
+  const nav = games.length > 1
+    ? `<div class="rlg-nav">
+         <button class="rlg-arrow rlg-prev" type="button" aria-label="Previous game">&#8249;</button>
+         <span class="rlg-count"></span>
+         <button class="rlg-arrow rlg-next" type="button" aria-label="Next game">&#8250;</button>
+       </div>`
+    : '';
+  return `<div class="rate-last-bar" id="rate-last-bar" data-start="${start}">
+    <button class="rate-last-close" id="rate-last-close" type="button" aria-label="Hide">&times;</button>
+    <div class="rlg-viewport" id="rlg-viewport">
+      <div class="rlg-track" id="rlg-track">${games.map(card).join('')}</div>
     </div>
+    ${nav}
   </div>`;
 }
 
 function wireRateLastGame(container, playerName, isOwnProfile, recentPlays) {
   const bar = container.querySelector('#rate-last-bar');
   if (!bar) return;
-  const starsEl = bar.querySelector('#rlg-stars');
-  const valueEl = bar.querySelector('#rlg-value');
-  const submitBtn = bar.querySelector('#rlg-submit');
-  if (!starsEl || !submitBtn) return;
-  const bggId = Number(bar.dataset.bgg);
-  const starEls = [...starsEl.querySelectorAll('.rlg-star')]; // 10 stars
+  const track = bar.querySelector('#rlg-track');
+  const viewport = bar.querySelector('#rlg-viewport');
+  if (!track || !viewport) return;
+  const cards = [...track.querySelectorAll('.rlg-card')];
+  const count = cards.length;
+  let current = Math.max(0, Math.min(count - 1, Number(bar.dataset.start) || 0));
 
   // Dismiss for this session (reappears on a page refresh).
   const closeBtn = bar.querySelector('#rate-last-close');
@@ -73,80 +93,126 @@ function wireRateLastGame(container, playerName, isOwnProfile, recentPlays) {
     });
   }
 
-  let pending = 0; // committed rating (0 = none yet)
+  const countEl = bar.querySelector('.rlg-count');
+  const prevBtn = bar.querySelector('.rlg-prev');
+  const nextBtn = bar.querySelector('.rlg-next');
 
-  // Fill stars 1..v for a 1-10 value.
-  const render = (v) => {
-    for (let i = 0; i < starEls.length; i++) starEls[i].classList.toggle('filled', (i + 1) <= v);
-    valueEl.textContent = v ? `${v}/10` : '';
-    starsEl.setAttribute('aria-valuenow', String(v || 0));
+  // Card width == viewport width, so a % transform is resize-proof.
+  const goTo = (i, animate = true) => {
+    current = Math.max(0, Math.min(count - 1, i));
+    track.style.transition = animate ? 'transform 0.3s ease' : 'none';
+    track.style.transform = `translateX(${-current * 100}%)`;
+    if (countEl) countEl.textContent = `${current + 1} / ${count}`;
+    if (prevBtn) prevBtn.disabled = current === 0;
+    if (nextBtn) nextBtn.disabled = current === count - 1;
   };
 
-  // Map an x-coordinate to a 1-10 value from the real star rects (robust to the
-  // gaps between stars). The star the pointer is over is the score.
-  const valueFromX = (clientX) => {
-    for (let i = 0; i < starEls.length; i++) {
-      if (clientX <= starEls[i].getBoundingClientRect().right) return i + 1;
+  // Per-card rating slider (each card is independent; pre-filled to its rating).
+  cards.forEach((card, cardIdx) => {
+    const bggId = Number(card.dataset.bgg);
+    let saved = Number(card.dataset.saved) || 0;
+    const starsEl = card.querySelector('.rlg-stars');
+    const starEls = [...starsEl.querySelectorAll('.rlg-star')];
+    const valueEl = card.querySelector('.rlg-value');
+    const submitBtn = card.querySelector('.rlg-submit');
+    let pending = saved;
+
+    const render = (v) => {
+      for (let i = 0; i < starEls.length; i++) starEls[i].classList.toggle('filled', (i + 1) <= v);
+      valueEl.textContent = v ? `${v}/10` : '';
+      starsEl.setAttribute('aria-valuenow', String(v || 0));
+    };
+    const valueFromX = (clientX) => {
+      for (let i = 0; i < starEls.length; i++) if (clientX <= starEls[i].getBoundingClientRect().right) return i + 1;
+      return 10;
+    };
+    const refreshSubmit = () => {
+      submitBtn.disabled = !pending || pending === saved;
+      submitBtn.textContent = saved ? 'Update' : 'Rate';
+    };
+    const setPending = (v) => { pending = v; render(v); refreshSubmit(); };
+
+    render(saved);
+    refreshSubmit();
+
+    let dragging = false;
+    starsEl.addEventListener('pointerdown', (e) => {
+      e.stopPropagation();                 // don't let the carousel swipe start
+      dragging = true;
+      try { starsEl.setPointerCapture(e.pointerId); } catch (_) {}
+      setPending(valueFromX(e.clientX));
+      e.preventDefault();
+    });
+    starsEl.addEventListener('pointermove', (e) => {
+      if (dragging) setPending(valueFromX(e.clientX));
+      else render(valueFromX(e.clientX));   // hover preview (no commit)
+    });
+    const endDrag = (e) => { if (!dragging) return; dragging = false; try { starsEl.releasePointerCapture(e.pointerId); } catch (_) {} };
+    starsEl.addEventListener('pointerup', endDrag);
+    starsEl.addEventListener('pointercancel', endDrag);
+    starsEl.addEventListener('pointerleave', () => { if (!dragging) render(pending); });
+    starsEl.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { setPending(Math.min(10, (pending || 0) + 1)); e.preventDefault(); }
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { setPending(Math.max(1, (pending || 1) - 1)); e.preventDefault(); }
+      else if (e.key === 'Enter' && !submitBtn.disabled) { submit(); }
+    });
+
+    async function submit() {
+      if (submitBtn.disabled) return;
+      const val = pending;
+      submitBtn.disabled = true;
+      await saveRating(playerName, bggId, val);
+      saved = val;
+      card.dataset.saved = String(val);
+      card.querySelector('.rate-last-prompt').textContent = 'Your rating';
+      const body = card.querySelector('.rate-last-body');
+      let done = body.querySelector('.rate-last-done');
+      if (!done) { body.insertAdjacentHTML('beforeend', '<div class="rate-last-done"></div>'); done = body.querySelector('.rate-last-done'); }
+      done.innerHTML = `Saved &mdash; ${val}/10 &#10003;`;
+      refreshSubmit();
+      // Gentle flow: clear the note and advance to the next game, if any.
+      setTimeout(() => {
+        if (done) done.remove();
+        if (current === cardIdx && current < count - 1) goTo(current + 1);
+      }, 900);
     }
-    return 10;
-  };
-
-  const setPending = (v) => {
-    pending = v;
-    render(v);
-    submitBtn.disabled = !pending;
-  };
-
-  let dragging = false;
-  starsEl.addEventListener('pointerdown', (e) => {
-    dragging = true;
-    try { starsEl.setPointerCapture(e.pointerId); } catch (_) {}
-    setPending(valueFromX(e.clientX));
-    e.preventDefault();
-  });
-  starsEl.addEventListener('pointermove', (e) => {
-    if (dragging) setPending(valueFromX(e.clientX));  // slide to adjust
-    else render(valueFromX(e.clientX));                // hover preview (no commit)
-  });
-  const endDrag = (e) => {
-    if (!dragging) return;
-    dragging = false;
-    try { starsEl.releasePointerCapture(e.pointerId); } catch (_) {}
-  };
-  starsEl.addEventListener('pointerup', endDrag);
-  starsEl.addEventListener('pointercancel', endDrag);
-  // Restore the committed value when the mouse leaves without a new pick.
-  starsEl.addEventListener('pointerleave', () => { if (!dragging) render(pending); });
-
-  // Keyboard: arrows adjust, Enter submits.
-  starsEl.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { setPending(Math.min(10, (pending || 0) + 1)); e.preventDefault(); }
-    else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { setPending(Math.max(1, (pending || 1) - 1)); e.preventDefault(); }
-    else if (e.key === 'Enter' && pending) { submit(); }
+    submitBtn.addEventListener('click', submit);
   });
 
-  async function submit() {
-    if (!pending) return;
-    const saved = pending;
-    submitBtn.disabled = true;
-    await saveRating(playerName, bggId, saved);
-    // Brief confirmation, then advance to the next unrated game (or fade out).
-    const body = bar.querySelector('.rate-last-body');
-    if (body && !body.querySelector('.rate-last-done')) {
-      body.insertAdjacentHTML('beforeend', `<div class="rate-last-done">Saved &mdash; ${saved}/10 &#10003;</div>`);
-    }
-    setTimeout(() => {
-      const html = buildRateLastGameBar(playerName, isOwnProfile, recentPlays);
-      if (html) {
-        bar.outerHTML = html;
-        wireRateLastGame(container, playerName, isOwnProfile, recentPlays);
-      } else {
-        bar.classList.add('rate-last-hide');
-        setTimeout(() => bar.remove(), 320);
-      }
-    }, 900);
+  // Arrow navigation.
+  if (prevBtn) prevBtn.addEventListener('click', () => goTo(current - 1));
+  if (nextBtn) nextBtn.addEventListener('click', () => goTo(current + 1));
+
+  // Swipe navigation — active only outside the stars/buttons so rating still works.
+  if (count > 1) {
+    let swiping = false, startX = 0, basePx = 0;
+    viewport.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('.rlg-stars') || e.target.closest('button')) return;
+      swiping = true;
+      startX = e.clientX;
+      basePx = -current * viewport.clientWidth;
+      track.style.transition = 'none';
+      try { viewport.setPointerCapture(e.pointerId); } catch (_) {}
+    });
+    viewport.addEventListener('pointermove', (e) => {
+      if (!swiping) return;
+      track.style.transform = `translateX(${basePx + (e.clientX - startX)}px)`;
+    });
+    const endSwipe = (e) => {
+      if (!swiping) return;
+      swiping = false;
+      try { viewport.releasePointerCapture(e.pointerId); } catch (_) {}
+      const dx = e.clientX - startX;
+      const threshold = viewport.clientWidth * 0.2;
+      if (dx <= -threshold && current < count - 1) goTo(current + 1);
+      else if (dx >= threshold && current > 0) goTo(current - 1);
+      else goTo(current);
+    };
+    viewport.addEventListener('pointerup', endSwipe);
+    viewport.addEventListener('pointercancel', endSwipe);
   }
-  submitBtn.addEventListener('click', submit);
+
+  goTo(current, false);
 }
 
 function showStatsView(playerName, visiting) {
