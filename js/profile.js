@@ -44,7 +44,7 @@ function buildRateLastGameBar(playerName, isOwnProfile, recentPlays) {
     const rated = rating > 0;
     const prompt = rated ? 'Your rating' : (i === 0 ? 'Rate your last game' : 'Rate a recent game');
     return `<div class="rlg-card" data-bgg="${g.bggId}" data-saved="${rating}">
-      <div class="rate-last-cover"><img class="rate-last-cover-img" src="images/${g.bggId}.jpg" alt="" onerror="__imgFallback(this, ${g.bggId})"></div>
+      <div class="rate-last-cover" role="button" tabindex="0" title="Open ${_rlgEsc(g.name)}"><img class="rate-last-cover-img" src="images/${g.bggId}.jpg" alt="" onerror="__imgFallback(this, ${g.bggId})"></div>
       <div class="rate-last-body">
         <div class="rate-last-prompt">${prompt}</div>
         <div class="rate-last-game" title="${_rlgEsc(g.name)}">${_rlgEsc(g.name)}</div>
@@ -111,6 +111,14 @@ function wireRateLastGame(container, playerName, isOwnProfile, recentPlays) {
   cards.forEach((card, cardIdx) => {
     const bggId = Number(card.dataset.bgg);
     let saved = Number(card.dataset.saved) || 0;
+
+    // Cover opens the game's page (modal). Closing it returns to this profile.
+    const cover = card.querySelector('.rate-last-cover');
+    if (cover) {
+      const openGame = () => { const g = findGameByBggId(bggId); if (g) openModal(g); };
+      cover.addEventListener('click', openGame);
+      cover.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openGame(); } });
+    }
     const starsEl = card.querySelector('.rlg-stars');
     const starEls = [...starsEl.querySelectorAll('.rlg-star')];
     const valueEl = card.querySelector('.rlg-value');
@@ -187,7 +195,7 @@ function wireRateLastGame(container, playerName, isOwnProfile, recentPlays) {
   if (count > 1) {
     let swiping = false, startX = 0, basePx = 0;
     viewport.addEventListener('pointerdown', (e) => {
-      if (e.target.closest('.rlg-stars') || e.target.closest('button')) return;
+      if (e.target.closest('.rlg-stars') || e.target.closest('button') || e.target.closest('.rate-last-cover')) return;
       swiping = true;
       startX = e.clientX;
       basePx = -current * viewport.clientWidth;
