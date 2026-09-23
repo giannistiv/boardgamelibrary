@@ -1,6 +1,8 @@
 let _viewingProfile = null; // null = own profile, string = visiting someone
 let _statsViewSource = null; // 'leaderboard' | 'insights' | null — where the visit was triggered from
 let _rlgDismissed = false; // "rate last game" bar dismissed for this session (resets on refresh)
+let _rlgPosBgg = null;     // bggId of the rating-carousel card currently shown
+let _rlgResume = false;    // set when a modal opened from the profile closes → keep that card
 
 function _goBackFromProfile() {
   const src = _statsViewSource;
@@ -14,28 +16,39 @@ window._goBackFromProfile = _goBackFromProfile;
 
 // ── "Rate your games" carousel ──
 // A banner near the top of your OWN profile: a swipeable carousel of your most
-// recent games. Each card rates a game with 10 whole stars (click a position or
-// slide across them, then Submit). Rated games show their existing score so you
-// can browse previous ratings and change them. Returns '' when there is nothing
-// to show (visiting someone else, no plays, or every recent game already rated).
-const RLG_MAX_GAMES = 15;
+// recent games, followed by older games you still haven't rated. Each card rates
+// a game with 10 whole stars (click a position or slide across them, then
+// Submit). Rated games show their existing score so you can browse previous
+// ratings and change them. Returns '' when there is nothing left to rate
+// (visiting someone else, no plays, or every game in reach already rated).
+const RLG_MAX_GAMES = 15;          // most recent games (rated or not)
+const RLG_MAX_OLDER_UNRATED = 20;  // then up to this many older, still-unrated games
 
 function buildRateLastGameBar(playerName, isOwnProfile, recentPlays) {
+  const resume = _rlgResume;       // consumed: applies only to the render right after a modal closes
+  _rlgResume = false;
   if (_rlgDismissed) return '';
   if (!isOwnProfile || !recentPlays || !recentPlays.length) return '';
-  // Distinct recent games, newest first, capped.
+  // Distinct games, newest play first: the most recent RLG_MAX_GAMES (rated or
+  // not), then older ones only if still unrated, up to RLG_MAX_OLDER_UNRATED.
   const seen = new Set();
   const games = [];
+  let olderCount = 0;
   for (const p of recentPlays) {
     if (!p.game || !(p.bggId >= 0) || seen.has(p.bggId)) continue;
     seen.add(p.bggId);
-    games.push({ bggId: p.bggId, name: p.game.name });
-    if (games.length >= RLG_MAX_GAMES) break;
+    const older = seen.size > RLG_MAX_GAMES;
+    if (older) {
+      if (getPlayerRating(playerName, p.bggId) !== 0) continue;
+      if (olderCount >= RLG_MAX_OLDER_UNRATED) break;
+      olderCount++;
+    }
+    games.push({ bggId: p.bggId, name: p.game.name, date: p.date, older });
   }
   if (!games.length) return '';
   // Track order: oldest → latest (left → right). With natural finger-following
   // swipe, dragging left moves toward the most-recent/just-rated card and right
-  // toward the next (older) game to rate. Open on the latest game (rightmost).
+  // toward the next (older) game to rate.
   const ordered = games.slice().reverse();
   const latestIdx = ordered.length - 1;
   // Open on the most-recent game the player hasn't rated yet. If every recent
@@ -45,14 +58,21 @@ function buildRateLastGameBar(playerName, isOwnProfile, recentPlays) {
     if (getPlayerRating(playerName, ordered[i].bggId) === 0) { start = i; break; }
   }
   if (start < 0) return '';
+  // Back from a game opened on this profile: stay on the card you were viewing.
+  if (resume && _rlgPosBgg != null) {
+    const at = ordered.findIndex(g => g.bggId === _rlgPosBgg);
+    if (at >= 0) start = at;
+  }
 
   const star = '<span class="rlg-star">&#9733;</span>';
   const card = (g, i) => {
     const rating = getPlayerRating(playerName, g.bggId);
     const rated = rating > 0;
-    const prompt = rated ? 'Your rating' : (i === latestIdx ? 'Rate your last game' : 'Rate a recent game');
+    const prompt = rated ? 'Your rating'
+      : g.older ? `Not rated yet · played ${_fmtDateShort(g.date)}`
+      : (i === latestIdx ? 'Rate your last game' : 'Rate a recent game');
     return `<div class="rlg-card" data-bgg="${g.bggId}" data-saved="${rating}">
-      <div class="rate-last-cover" role="button" tabindex="0" title="Open ${_escapeHtml(g.name)}"><img class="rate-last-cover-img" src="images/${g.bggId}.jpg" alt="" onerror="__imgFallback(this, ${g.bggId})"></div>
+      <div class="rate-last-cover" role="button" tabindex="0" title="Open ${_escapeHtml(g.name)}"><img class="rate-last-cover-img" src="images/${g.bggId}.jpg" alt="" loading="lazy" onerror="__imgFallback(this, ${g.bggId})"></div>
       <div class="rate-last-body">
         <div class="rate-last-prompt">${prompt}</div>
         <div class="rate-last-game" title="${_escapeHtml(g.name)}">${_escapeHtml(g.name)}</div>
@@ -106,6 +126,7 @@ function wireRateLastGame(container, playerName, isOwnProfile, recentPlays) {
   // Card width == viewport width, so a % transform is resize-proof.
   const goTo = (i, animate = true) => {
     current = Math.max(0, Math.min(count - 1, i));
+    _rlgPosBgg = Number(cards[current].dataset.bgg);
     track.style.transition = animate ? 'transform 0.3s ease' : 'none';
     track.style.transform = `translateX(${-current * 100}%)`;
     if (backBtn) backBtn.disabled = current >= count - 1; // at latest, nothing newer

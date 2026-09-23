@@ -283,6 +283,7 @@ function closeModal() {
     _restoreAfterModal();
     if (_modalOpenedFromStats) {
       const player = _viewingProfile || localStorage.getItem('bgl-player');
+      _rlgResume = true; // keep the rating carousel on the card you were viewing
       if (player) showStatsView(player, _viewingProfile ? 'visiting' : undefined);
     } else if (_modalOpenedFromGames) {
       showGamesView();
@@ -307,6 +308,7 @@ window.addEventListener('popstate', e => {
     _restoreAfterModal();
     if (_modalOpenedFromStats) {
       const player = _viewingProfile || localStorage.getItem('bgl-player');
+      _rlgResume = true; // keep the rating carousel on the card you were viewing
       if (player) showStatsView(player, _viewingProfile ? 'visiting' : undefined);
     } else if (_modalOpenedFromGames) {
       showGamesView();
