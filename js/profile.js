@@ -38,8 +38,13 @@ function buildRateLastGameBar(playerName, isOwnProfile, recentPlays) {
   // swipe, dragging left moves toward the most-recent/just-rated card and right
   // toward the next (older) game to rate. Open on the latest game (rightmost).
   const ordered = games.slice().reverse();
-  const start = ordered.length - 1;
   const latestIdx = ordered.length - 1;
+  // Open on the most-recent game the player hasn't rated yet (fall back to the
+  // latest game if everything recent is already rated).
+  let start = latestIdx;
+  for (let i = latestIdx; i >= 0; i--) {
+    if (getPlayerRating(playerName, ordered[i].bggId) === 0) { start = i; break; }
+  }
 
   const star = '<span class="rlg-star">&#9733;</span>';
   const card = (g, i) => {
