@@ -1,0 +1,5 @@
+#!/bin/sh
+# Keep index.html's ?v= asset stamps in sync with what's being committed.
+# Enabled per clone with:  git config core.hooksPath .githooks
+python3 tools/stamp-assets.py || exit 1
+git add index.html
