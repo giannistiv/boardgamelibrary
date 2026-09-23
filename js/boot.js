@@ -108,6 +108,8 @@ function _applyProfileOverrides() {
       BOARD_SOUTH_REGULARS.delete(orig); BOARD_SOUTH_REGULARS.add(disp);
     }
   }
+  // A new display name could itself be a NAME_MAP key — keep the map chain-free.
+  _resolveNameMapChains();
   // 2. Re-run the play-name rewrite for the freshly-added mappings.
   for (const bggId in PLAY_HISTORY)
     for (const play of PLAY_HISTORY[bggId])
@@ -169,7 +171,7 @@ async function _saveProfileName(newName) {
 
 Promise.all([loadAllRatings(), loadAllFavorites(), loadImportedGames(), loadImportedPlays(), loadGameImages(), loadBoardSouthVotes(), loadOathswornRanks(), loadAllNotes(), loadProfiles()]).then(() => {
   _applyProfileOverrides();
-  _fixGiorgosIdentities();
+  _applyAllPlayOverrides();
   if (typeof _updateBoardSouthBtnVisibility === 'function') _updateBoardSouthBtnVisibility();
   const savedPlayer = localStorage.getItem('bgl-player');
   // Self-heal: a login can only ever be a player who exists in the play

@@ -43,7 +43,10 @@ const NAME_MAP = {
   'Giannis Fot - BS':'Γιαννης Φωτοπουλος','Giannis Frantz':'Γιαννης Φρατζεσκακης',
   'Giannis Giaour - BS':'Γιαννης Γιαουριδακης','Giannis Kz':'Γιαννης Κζ',
   'Giorgos - Argo':'Γιωργος Γεωργιαδης','Giorgos - Sleeping':'Γιωργος - Sleeping',
-  'Giorgos - filos Dimitri':'Γιωργος - φιλος Δημητρη',
+  // The shared friend-of-Dimitri tag is the real Τσερβενης; Giorgos 2 has his
+  // own tag. Older logs that break this rule are fixed in PLAY_NAME_OVERRIDES.
+  'Giorgos - filos Dimitri':'Γιωργος Τσερβενης',
+  'Γιωργος - φιλος Δημητρη':'Γιωργος Τσερβενης',
   'Giorgos 2 - filos Dimitri':'Γιωργος 2 - φιλος Δημητρη',
   'Iasonas':'Ιασονας','Ilias - BS':'Ηλιας - BS','Javier':'Javi',
   'Kornilia':'Κορνηλια','Kostas - Argo':'Κωστας Ρεταλης',
@@ -73,6 +76,19 @@ const LOCATION_MAP = {
   'South Board': 'Board South',
 };
 
+// Resolve remap chains once (a→b, b→c ⇒ a→c) so a single application always
+// gives the final name, no matter how many times NAME_MAP is applied later.
+// Re-run after profile renames fold into NAME_MAP (see _applyProfileOverrides).
+function _resolveNameMapChains() {
+  for (const k in NAME_MAP) {
+    let v = NAME_MAP[k];
+    const seen = new Set([k]);
+    while (NAME_MAP[v] !== undefined && NAME_MAP[v] !== v && !seen.has(v)) { seen.add(v); v = NAME_MAP[v]; }
+    NAME_MAP[k] = v;
+  }
+}
+_resolveNameMapChains();
+
 // Apply name + location conversions to PLAY_HISTORY
 for (const bggId in PLAY_HISTORY) {
   for (const play of PLAY_HISTORY[bggId]) {
@@ -83,31 +99,37 @@ for (const bggId in PLAY_HISTORY) {
   }
 }
 
-// ── Distinct "Giorgos" identity corrections ──
-// Several different Georges were logged under overlapping names; a plain
-// NAME_MAP swap would chain-corrupt (Τσερβενης is both a source and a target).
-// These per-play rules read the co-players, so they separate the people safely:
-//  • The person tagged "Γιωργος Τσερβενης" who never plays with Τσαπ is really
-//    "Γιωργος - Sleeping"; the REAL Τσερβενης is the friend-of-Dimitri who does.
-//  • That friend-of-Dimitri pool also hides "Γιωργος 2 - φιλος Δημητρη", who
-//    plays only with Δημητρης+Στιβ (no Τσαπ).
-// Idempotent: the real Τσερβενης always has Τσαπ, so re-running never re-touches
-// him, and none of the resulting names are NAME_MAP keys.
-function _fixGiorgosInPlay(play){
+// ── Per-play identity corrections ──
+// For logs whose name can't tell two people apart, list the exact plays:
+// game (bggId) + date + the post-NAME_MAP name to replace → the right person.
+// Applied after NAME_MAP (static load, every import, and after profile renames);
+// idempotent since no `to` name is ever a `from`.
+const PLAY_NAME_OVERRIDES = [
+  // 2022-23 logs of the Sleeping George that were saved as "Γιωργος Τσερβενης".
+  { b: 161970, d: '2022-02-27', from: 'Γιωργος Τσερβενης', to: 'Γιωργος - Sleeping' },
+  { b: 275974, d: '2023-02-21', from: 'Γιωργος Τσερβενης', to: 'Γιωργος - Sleeping' },
+  { b: 304783, d: '2022-07-13', from: 'Γιωργος Τσερβενης', to: 'Γιωργος - Sleeping' },
+  { b: 316554, d: '2022-07-13', from: 'Γιωργος Τσερβενης', to: 'Γιωργος - Sleeping' },
+  // Giorgos 2 logged under the shared friend-of-Dimitri tag, before he had his own.
+  { b: 253344, d: '2024-08-19', from: 'Γιωργος Τσερβενης', to: 'Γιωργος 2 - φιλος Δημητρη' },
+  { b: 279537, d: '2025-09-04', from: 'Γιωργος Τσερβενης', to: 'Γιωργος 2 - φιλος Δημητρη' },
+  { b: 454103, d: '2026-08-06', from: 'Γιωργος Τσερβενης', to: 'Γιωργος 2 - φιλος Δημητρη' },
+];
+const _playOverrideIndex = new Map(PLAY_NAME_OVERRIDES.map(o => [o.b + '|' + o.d + '|' + o.from, o.to]));
+function _applyPlayOverrides(bggId, play) {
   if (!play || !Array.isArray(play.sc)) return;
-  const chap = play.sc.some(x => x && x.n === 'Τσαπ');
-  for (const s of play.sc){
+  for (const s of play.sc) {
     if (!s) continue;
-    if (s.n === 'Γιωργος Τσερβενης' && !chap) s.n = 'Γιωργος - Sleeping';
-    else if (s.n === 'Γιωργος - φιλος Δημητρη') s.n = chap ? 'Γιωργος Τσερβενης' : 'Γιωργος 2 - φιλος Δημητρη';
+    const to = _playOverrideIndex.get(Number(bggId) + '|' + play.date + '|' + s.n);
+    if (to) s.n = to;
   }
 }
-function _fixGiorgosIdentities(){
+function _applyAllPlayOverrides() {
   for (const bggId in PLAY_HISTORY)
     for (const play of PLAY_HISTORY[bggId])
-      _fixGiorgosInPlay(play);
+      _applyPlayOverrides(bggId, play);
 }
-_fixGiorgosIdentities();
+_applyAllPlayOverrides();
 
 // Games with play history that aren't on the shelf (for stats/modal)
 

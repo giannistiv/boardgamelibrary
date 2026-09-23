@@ -145,7 +145,7 @@ function _mergePlayIntoHistory(uuid, p) {
   for (const s of p.sc) {
     if (s && s.n && NAME_MAP[s.n]) s.n = NAME_MAP[s.n];
   }
-  _fixGiorgosInPlay(p);
+  _applyPlayOverrides(p.bggId, p);
   if (p.l && LOCATION_MAP[p.l]) p.l = LOCATION_MAP[p.l];
   const entry = { date: p.date, sc: p.sc, _uuid: uuid };
   if (p.t) entry.t = p.t;
