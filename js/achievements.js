@@ -513,9 +513,6 @@ function _openLatestPlaysModal(playerName, plays) {
     const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     return `${months[parseInt(m, 10) - 1]} ${parseInt(day, 10)}, ${y}`;
   };
-  const esc = (s) => String(s).replace(/[&<>"']/g, c => ({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-  }[c]));
 
   titleEl.textContent = `${playerName}'s Plays`;
   countEl.textContent = `${plays.length} play${plays.length !== 1 ? 's' : ''}`;
@@ -544,8 +541,8 @@ function _openLatestPlaysModal(playerName, plays) {
             ? '<span class="lpm-row-result win">WIN</span>'
             : '<span class="lpm-row-result loss">LOSS</span>');
       const metaBits = [fmt(p.date)];
-      if (p.location) metaBits.push(esc(p.location));
-      if (p.board) metaBits.push(esc(p.board));
+      if (p.location) metaBits.push(_escapeHtml(p.location));
+      if (p.board) metaBits.push(_escapeHtml(p.board));
       metaBits.push(`${p.players} player${p.players !== 1 ? 's' : ''}`);
 
       const key = `${p.bggId}|${p.date}|${p.playIdx}`;
@@ -574,8 +571,8 @@ function _openLatestPlaysModal(playerName, plays) {
         const cls = ['lpm-sb-name'];
         if (s.n === playerName) cls.push('me');
         if (s.w) cls.push('winner');
-        const roleSuffix = s.r ? ` <span style="opacity:0.5;font-size:0.66rem">(${esc(s.r)})</span>` : '';
-        const score = (s.s != null && s.s !== '') ? esc(s.s) : '—';
+        const roleSuffix = s.r ? ` <span style="opacity:0.5;font-size:0.66rem">(${_escapeHtml(s.r)})</span>` : '';
+        const score = (s.s != null && s.s !== '') ? _escapeHtml(s.s) : '—';
         let deltaHtml = '<span class="lpm-sb-delta"></span>';
         if (playDeltas && Object.prototype.hasOwnProperty.call(playDeltas, s.n)) {
           const d = playDeltas[s.n];
@@ -584,7 +581,7 @@ function _openLatestPlaysModal(playerName, plays) {
           deltaHtml = `<span class="lpm-sb-delta ${cls2}">${sign}${d.toFixed(1)}</span>`;
         }
         return `<div class="lpm-sb-row">
-          <span class="${cls.join(' ')}">${esc(s.n || '?')}${roleSuffix}</span>
+          <span class="${cls.join(' ')}">${_escapeHtml(s.n || '?')}${roleSuffix}</span>
           <span class="lpm-sb-score">${score}</span>
           ${deltaHtml}
         </div>`;
@@ -594,7 +591,7 @@ function _openLatestPlaysModal(playerName, plays) {
         <div class="lpm-row-top">
           ${coverHtml}
           <div class="lpm-row-info">
-            <div class="lpm-row-name">${esc(p.game.name)}</div>
+            <div class="lpm-row-name">${_escapeHtml(p.game.name)}</div>
             <div class="lpm-row-meta">${metaBits.join(' · ')}</div>
           </div>
           ${tagHtml}

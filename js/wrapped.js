@@ -220,7 +220,6 @@ function openWrappedModal(playerName, isOwnProfile) {
   const overlay = document.getElementById('wrapped-overlay');
   if (!overlay) return;
   const d = computeWrapped(playerName);
-  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
   const cover = (bggId) => `images/${bggId}.jpg`;
   // count-up number (animated from 0 when its slide becomes active)
   const cnum = (val, dec = 0) => `<span class="wr-count" data-count="${val}" data-dec="${dec}">${dec ? (0).toFixed(dec) : '0'}</span>`;
@@ -231,7 +230,7 @@ function openWrappedModal(playerName, isOwnProfile) {
     <div class="wr-kicker">${kicker}</div>
     <div class="wr-big" style="font-size:1.5rem">${question}</div>
     <div class="wr-guess">
-      ${options.map(o => `<button class="wr-guess-opt" data-correct="${o.correct ? 1 : 0}">${esc(o.label)}</button>`).join('')}
+      ${options.map(o => `<button class="wr-guess-opt" data-correct="${o.correct ? 1 : 0}">${_escapeHtml(o.label)}</button>`).join('')}
     </div>
     <div class="wr-guess-result"><span class="wr-verdict"></span><span class="wr-fact">${revealHtml}</span><div class="wr-taphint" style="margin-top:0.6rem">tap to continue &rsaquo;</div></div>`;
 
@@ -250,15 +249,15 @@ function openWrappedModal(playerName, isOwnProfile) {
   const slide = (bg, body) => slides.push({ bg, body });
 
   slide(G.night, `
-    <div class="wr-kicker">${esc(d.year)} WRAPPED</div>
-    <div class="wr-big" style="font-size:2.3rem;line-height:1.15">${esc(d.playerName)}'s<br>Year at the Table</div>
+    <div class="wr-kicker">${_escapeHtml(d.year)} WRAPPED</div>
+    <div class="wr-big" style="font-size:2.3rem;line-height:1.15">${_escapeHtml(d.playerName)}'s<br>Year at the Table</div>
     <div class="wr-lead">A year of dice, cards, and questionable alliances. Let's relive it.</div>
     <div class="wr-taphint">tap to begin &rsaquo;</div>`);
 
   slide(G.purple, `
     <div class="wr-kicker">YOU SHOWED UP</div>
     <div class="wr-num">${cnum(d.totalPlays)}</div>
-    <div class="wr-label">plays logged in ${esc(d.year)}</div>
+    <div class="wr-label">plays logged in ${_escapeHtml(d.year)}</div>
     <div class="wr-lead">${d.totalPlays >= 200 ? "That's borderline professional." : d.totalPlays >= 80 ? "A seriously well-played year." : d.totalPlays >= 30 ? "A great year of gaming." : "Every session counts."}</div>`);
 
   const daysFlavor = `That's about ${Math.max(1, Math.round(d.hours / 24))} full day${Math.round(d.hours / 24) === 1 ? '' : 's'} of pure gaming${d.hours >= 100 ? " — no regrets." : "."}`;
@@ -289,8 +288,8 @@ function openWrappedModal(playerName, isOwnProfile) {
     slide(G.night, `
       <div class="wr-kicker">HOW IT ALL BEGAN</div>
       <div class="wr-cover-wrap"><img class="wr-cover" src="${cover(d.firstPlay.bggId)}" onerror="__imgFallback(this, ${d.firstPlay.bggId})"></div>
-      <div class="wr-big" style="font-size:1.5rem">${esc((d.firstPlay.game && d.firstPlay.game.name) || 'a game')}</div>
-      <div class="wr-label">your first play of ${esc(d.year)}, on ${esc(_fmtDateShort(d.firstPlay.date))}</div>
+      <div class="wr-big" style="font-size:1.5rem">${_escapeHtml((d.firstPlay.game && d.firstPlay.game.name) || 'a game')}</div>
+      <div class="wr-label">your first play of ${_escapeHtml(d.year)}, on ${_escapeHtml(_fmtDateShort(d.firstPlay.date))}</div>
       <div class="wr-lead">Little did you know what kind of year it would become.</div>`);
   }
 
@@ -314,12 +313,12 @@ function openWrappedModal(playerName, isOwnProfile) {
         label: (x.game && x.game.name) || ('Game #' + x.bggId), correct: x.bggId === topG.bggId
       })));
       slide(G.gold, guessSlide('QUICK — GUESS', 'What did you play<br>the most this year?', opts,
-        `You played <b>${esc((topG.game && topG.game.name) || 'it')}</b> ${cnum(topG.count)} times.`));
+        `You played <b>${_escapeHtml((topG.game && topG.game.name) || 'it')}</b> ${cnum(topG.count)} times.`));
     } else {
       slide(G.gold, `
         <div class="wr-kicker">MOST PLAYED</div>
         <div class="wr-cover-wrap"><img class="wr-cover" src="${cover(topG.bggId)}" onerror="__imgFallback(this, ${topG.bggId})"></div>
-        <div class="wr-big" style="font-size:1.6rem">${esc((topG.game && topG.game.name) || 'Game')}</div>
+        <div class="wr-big" style="font-size:1.6rem">${_escapeHtml((topG.game && topG.game.name) || 'Game')}</div>
         <div class="wr-label">${topG.count} plays</div>`);
     }
   }
@@ -333,7 +332,7 @@ function openWrappedModal(playerName, isOwnProfile) {
         ${top5.map((t, i) => `<div class="wr-toprow">
           <span class="wr-toprank">${i + 1}</span>
           <img class="wr-topcover" src="${cover(t.bggId)}" onerror="__imgFallback(this, ${t.bggId})">
-          <span class="wr-topname">${esc((t.game && t.game.name) || ('Game #' + t.bggId))}</span>
+          <span class="wr-topname">${_escapeHtml((t.game && t.game.name) || ('Game #' + t.bggId))}</span>
           <span class="wr-topcount">${t.count}&times;</span>
         </div>`).join('')}
       </div>`);
@@ -345,8 +344,8 @@ function openWrappedModal(playerName, isOwnProfile) {
     slide(G.pink, `
       <div class="wr-kicker">LOVE AT FIRST PLAY</div>
       <div class="wr-cover-wrap"><img class="wr-cover" src="${cover(lf.bggId)}" onerror="__imgFallback(this, ${lf.bggId})"></div>
-      <div class="wr-big" style="font-size:1.5rem">${esc((lf.game && lf.game.name) || 'a new game')}</div>
-      <div class="wr-label">discovered ${esc(_fmtDateShort(lf.firstDate))} &middot; played ${lf.count}&times;</div>
+      <div class="wr-big" style="font-size:1.5rem">${_escapeHtml((lf.game && lf.game.name) || 'a new game')}</div>
+      <div class="wr-label">discovered ${_escapeHtml(_fmtDateShort(lf.firstDate))} &middot; played ${lf.count}&times;</div>
       <div class="wr-lead">Some games you just know from the first turn.</div>`);
   }
 
@@ -356,7 +355,7 @@ function openWrappedModal(playerName, isOwnProfile) {
       <div class="wr-kicker">TIME TRAVELER</div>
       <div class="wr-big" style="font-size:1.6rem">${d.oldest.year} &rarr; ${d.newest.year}</div>
       <div class="wr-label">${d.newest.year - d.oldest.year} years of game design in one year of play</div>
-      <div class="wr-lead">From <b>${esc(d.oldest.name)}</b> to <b>${esc(d.newest.name)}</b> — you play across the eras.</div>`);
+      <div class="wr-lead">From <b>${_escapeHtml(d.oldest.name)}</b> to <b>${_escapeHtml(d.newest.name)}</b> — you play across the eras.</div>`);
   }
 
   // Weight class
@@ -366,7 +365,7 @@ function openWrappedModal(playerName, isOwnProfile) {
       <div class="wr-kicker">YOUR WEIGHT CLASS</div>
       <div class="wr-num" style="font-size:3.2rem">${cnum(+d.avgWeight.toFixed(2), 2)}</div>
       <div class="wr-label">average complexity &mdash; <b>${wLabel}</b></div>
-      ${d.heaviest ? `<div class="wr-lead">Your heaviest brain-burner: <b>${esc(d.heaviest.name)}</b> (${d.heaviest.complexity}).</div>` : ''}`);
+      ${d.heaviest ? `<div class="wr-lead">Your heaviest brain-burner: <b>${_escapeHtml(d.heaviest.name)}</b> (${d.heaviest.complexity}).</div>` : ''}`);
   }
 
   // Play style split (co-op / competitive / solo)
@@ -395,16 +394,16 @@ function openWrappedModal(playerName, isOwnProfile) {
   if (d.topMech) {
     slide(G.pink, `
       <div class="wr-kicker">YOUR SIGNATURE MOVE</div>
-      <div class="wr-big" style="font-size:1.9rem">${esc(d.topMech[0])}</div>
+      <div class="wr-big" style="font-size:1.9rem">${_escapeHtml(d.topMech[0])}</div>
       <div class="wr-label">your most-played mechanic</div>
-      <div class="wr-lead">It showed up in ${d.topMech[1]} of your plays${d.mechCount >= 8 ? ` — across <b>${d.mechCount}</b> different mechanics in all` : ''}${d.topCat ? `. You can't resist a good <b>${esc(d.topCat[0])}</b> game either.` : '.'}</div>`);
+      <div class="wr-lead">It showed up in ${d.topMech[1]} of your plays${d.mechCount >= 8 ? ` — across <b>${d.mechCount}</b> different mechanics in all` : ''}${d.topCat ? `. You can't resist a good <b>${_escapeHtml(d.topCat[0])}</b> game either.` : '.'}</div>`);
   }
 
   // Designer of the year
   if (d.topDesigner && d.topDesigner[1] >= 5) {
     slide(G.gold, `
       <div class="wr-kicker">DESIGNER OF YOUR YEAR</div>
-      <div class="wr-big" style="font-size:1.8rem">${esc(d.topDesigner[0])}</div>
+      <div class="wr-big" style="font-size:1.8rem">${_escapeHtml(d.topDesigner[0])}</div>
       <div class="wr-label">behind ${d.topDesigner[1]} of your plays</div>
       <div class="wr-lead">When their name's on the box, you're in.</div>`);
   }
@@ -418,8 +417,8 @@ function openWrappedModal(playerName, isOwnProfile) {
       <div class="wr-toplist">
         ${top.map((c, i) => `<div class="wr-toprow">
           <span class="wr-toprank">${i + 1}</span>
-          <span class="wr-avatar">${esc((c.name[0] || '?').toUpperCase())}</span>
-          <span class="wr-topname">${esc(c.name)}</span>
+          <span class="wr-avatar">${_escapeHtml((c.name[0] || '?').toUpperCase())}</span>
+          <span class="wr-topname">${_escapeHtml(c.name)}</span>
           <span class="wr-topcount">${c.count}&times;</span>
         </div>`).join('')}
       </div>`);
@@ -435,7 +434,7 @@ function openWrappedModal(playerName, isOwnProfile) {
     const topC = d.companions[0];
     const opts = shuffle(d.companions.slice(0, 4).map(c => ({ label: c.name, correct: c.name === topC.name })));
     slide(G.purple, guessSlide('ONE MORE GUESS', 'Who did you share the<br>table with most?', opts,
-      `You played with <b>${esc(topC.name)}</b> ${cnum(topC.count)} times.`));
+      `You played with <b>${_escapeHtml(topC.name)}</b> ${cnum(topC.count)} times.`));
   }
 
   // Biggest table
@@ -445,7 +444,7 @@ function openWrappedModal(playerName, isOwnProfile) {
       <div class="wr-kicker">THE FULL HOUSE</div>
       <div class="wr-num">${cnum(bt.size)}</div>
       <div class="wr-label">players at your biggest table</div>
-      <div class="wr-lead">${esc((bt.game && bt.game.name) || 'A big game')} on ${esc(_fmtDateShort(bt.date))} — the more the merrier.</div>`);
+      <div class="wr-lead">${_escapeHtml((bt.game && bt.game.name) || 'A big game')} on ${_escapeHtml(_fmtDateShort(bt.date))} — the more the merrier.</div>`);
   }
 
   // Rival
@@ -456,7 +455,7 @@ function openWrappedModal(playerName, isOwnProfile) {
       : `Dead even: <b>${rival.myWins}&ndash;${rival.theirWins}</b>. The rivalry continues.`;
     slide(G.sunset, `
       <div class="wr-kicker">YOUR NEMESIS</div>
-      <div class="wr-big" style="font-size:1.8rem">${esc(rival.name)}</div>
+      <div class="wr-big" style="font-size:1.8rem">${_escapeHtml(rival.name)}</div>
       <div class="wr-label">faced ${rival.games} times across the table</div>
       <div class="wr-lead">${edge}</div>`);
   }
@@ -467,7 +466,7 @@ function openWrappedModal(playerName, isOwnProfile) {
     slide(G.forest, `
       <div class="wr-kicker">YOUR SPECIALTY</div>
       <div class="wr-cover-wrap"><img class="wr-cover" src="${cover(sp.bggId)}" onerror="__imgFallback(this, ${sp.bggId})"></div>
-      <div class="wr-big" style="font-size:1.5rem">${esc((sp.game && sp.game.name) || 'a game')}</div>
+      <div class="wr-big" style="font-size:1.5rem">${_escapeHtml((sp.game && sp.game.name) || 'a game')}</div>
       <div class="wr-label">${Math.round(sp.wr * 100)}% wins over ${sp.count} plays</div>
       <div class="wr-lead">When this hits the table, you're the one to beat.</div>`);
   }
@@ -478,7 +477,7 @@ function openWrappedModal(playerName, isOwnProfile) {
     slide(G.blue, `
       <div class="wr-kicker">THE ONE THAT GOT AWAY</div>
       <div class="wr-cover-wrap"><img class="wr-cover" src="${cover(bg.bggId)}" onerror="__imgFallback(this, ${bg.bggId})"></div>
-      <div class="wr-big" style="font-size:1.5rem">${esc((bg.game && bg.game.name) || 'a game')}</div>
+      <div class="wr-big" style="font-size:1.5rem">${_escapeHtml((bg.game && bg.game.name) || 'a game')}</div>
       <div class="wr-label">${bg.count} plays &middot; only ${bg.wins} win${bg.wins === 1 ? '' : 's'}</div>
       <div class="wr-lead">Your white whale. ${Number(d.year) + 1} is for revenge.</div>`);
   }
@@ -512,7 +511,7 @@ function openWrappedModal(playerName, isOwnProfile) {
   // Challenges progress
   if (d.ch) {
     slide(G.teal, `
-      <div class="wr-kicker">YOUR ${esc(d.year)} QUESTS</div>
+      <div class="wr-kicker">YOUR ${_escapeHtml(d.year)} QUESTS</div>
       <div class="wr-quests">
         <div class="wr-quest"><span class="wr-qnum">${d.ch.tenFilled}<span class="wr-qden">/100</span></span><span class="wr-qlbl">10&times;10</span></div>
         <div class="wr-quest"><span class="wr-qnum">${d.ch.alphaCount}<span class="wr-qden">/26</span></span><span class="wr-qlbl">Alphabet</span></div>
@@ -525,9 +524,9 @@ function openWrappedModal(playerName, isOwnProfile) {
   if (d.busiestDay) {
     slide(G.blue, `
       <div class="wr-kicker">YOUR BIGGEST DAY</div>
-      <div class="wr-big" style="font-size:1.7rem">${esc(_fmtDateShort(d.busiestDay[0]))}</div>
+      <div class="wr-big" style="font-size:1.7rem">${_escapeHtml(_fmtDateShort(d.busiestDay[0]))}</div>
       <div class="wr-label">${d.busiestDay[1]} games in a single day</div>
-      ${d.favDow ? `<div class="wr-lead"><b>${esc(d.favDow.name)}</b> was your power day${d.favLoc ? `, usually at <b>${esc(d.favLoc.name)}</b>.` : '.'}</div>` : ''}`);
+      ${d.favDow ? `<div class="wr-lead"><b>${_escapeHtml(d.favDow.name)}</b> was your power day${d.favLoc ? `, usually at <b>${_escapeHtml(d.favLoc.name)}</b>.` : '.'}</div>` : ''}`);
   }
 
   // Marathon day (most hours in a single day)
@@ -536,7 +535,7 @@ function openWrappedModal(playerName, isOwnProfile) {
       <div class="wr-kicker">MARATHON MODE</div>
       <div class="wr-num">${cnum(d.marathonHours)}</div>
       <div class="wr-label">hours of gaming in one day</div>
-      <div class="wr-lead">On ${esc(_fmtDateShort(d.marathonDate))} you went the distance. Iron stamina.</div>`);
+      <div class="wr-lead">On ${_escapeHtml(_fmtDateShort(d.marathonDate))} you went the distance. Iron stamina.</div>`);
   }
 
   // Where you rank among the crew
@@ -547,7 +546,7 @@ function openWrappedModal(playerName, isOwnProfile) {
     slide(G.night, `
       <div class="wr-kicker">LEADERBOARD</div>
       <div class="wr-num" style="font-size:4.2rem">${num}</div>
-      <div class="wr-label">most active player of ${esc(d.year)}${d.isOwner ? '' : ' (of the crew)'}</div>
+      <div class="wr-label">most active player of ${_escapeHtml(d.year)}${d.isOwner ? '' : ' (of the crew)'}</div>
       <div class="wr-lead">${r.pos === 1 ? 'Nobody logged more games than you. The MVP.' : `Out of ${r.of} players — a serious presence at the table.`}</div>`);
   }
 
@@ -571,16 +570,16 @@ function openWrappedModal(playerName, isOwnProfile) {
     slide(G.pink, `
       <div class="wr-badge">&#129309;</div>
       <div class="wr-kicker">DYNAMIC DUO</div>
-      <div class="wr-big" style="font-size:1.6rem">You &amp; ${esc(duo.name)}</div>
+      <div class="wr-big" style="font-size:1.6rem">You &amp; ${_escapeHtml(duo.name)}</div>
       <div class="wr-label">${duo.count} games together this year</div>
       <div class="wr-lead">Some partnerships are just meant to be.</div>`);
   }
 
   // Finale + archetype + download
   slide(G.purple, `
-    <div class="wr-kicker">YOUR ${esc(d.year)} PERSONA</div>
-    <div class="wr-big" style="font-size:2.1rem;background:linear-gradient(90deg,#ffd86b,#ff9ec7);-webkit-background-clip:text;background-clip:text;color:transparent">${esc(d.arch.title)}</div>
-    <div class="wr-lead">${esc(d.arch.sub)}</div>
+    <div class="wr-kicker">YOUR ${_escapeHtml(d.year)} PERSONA</div>
+    <div class="wr-big" style="font-size:2.1rem;background:linear-gradient(90deg,#ffd86b,#ff9ec7);-webkit-background-clip:text;background-clip:text;color:transparent">${_escapeHtml(d.arch.title)}</div>
+    <div class="wr-lead">${_escapeHtml(d.arch.sub)}</div>
     <div class="wr-finale-stats">
       <span>${d.totalPlays} plays</span><span>${d.distinct} games</span><span>${d.hours}h</span><span>${d.winRate}% wins</span>
     </div>

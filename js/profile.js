@@ -19,7 +19,6 @@ window._goBackFromProfile = _goBackFromProfile;
 // can browse previous ratings and change them. Returns '' when there is nothing
 // to show (visiting someone else, no plays, or every recent game already rated).
 const RLG_MAX_GAMES = 15;
-function _rlgEsc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
 function buildRateLastGameBar(playerName, isOwnProfile, recentPlays) {
   if (_rlgDismissed) return '';
@@ -53,12 +52,12 @@ function buildRateLastGameBar(playerName, isOwnProfile, recentPlays) {
     const rated = rating > 0;
     const prompt = rated ? 'Your rating' : (i === latestIdx ? 'Rate your last game' : 'Rate a recent game');
     return `<div class="rlg-card" data-bgg="${g.bggId}" data-saved="${rating}">
-      <div class="rate-last-cover" role="button" tabindex="0" title="Open ${_rlgEsc(g.name)}"><img class="rate-last-cover-img" src="images/${g.bggId}.jpg" alt="" onerror="__imgFallback(this, ${g.bggId})"></div>
+      <div class="rate-last-cover" role="button" tabindex="0" title="Open ${_escapeHtml(g.name)}"><img class="rate-last-cover-img" src="images/${g.bggId}.jpg" alt="" onerror="__imgFallback(this, ${g.bggId})"></div>
       <div class="rate-last-body">
         <div class="rate-last-prompt">${prompt}</div>
-        <div class="rate-last-game" title="${_rlgEsc(g.name)}">${_rlgEsc(g.name)}</div>
+        <div class="rate-last-game" title="${_escapeHtml(g.name)}">${_escapeHtml(g.name)}</div>
         <div class="rate-last-rate">
-          <div class="rlg-stars" role="slider" tabindex="0" aria-label="Rate ${_rlgEsc(g.name)} from 1 to 10" aria-valuemin="1" aria-valuemax="10" aria-valuenow="${rating}">${star.repeat(10)}</div>
+          <div class="rlg-stars" role="slider" tabindex="0" aria-label="Rate ${_escapeHtml(g.name)} from 1 to 10" aria-valuemin="1" aria-valuemax="10" aria-valuenow="${rating}">${star.repeat(10)}</div>
           <span class="rlg-value"></span>
           <button class="rlg-submit" type="button" disabled>${rated ? 'Update' : 'Rate'}</button>
         </div>

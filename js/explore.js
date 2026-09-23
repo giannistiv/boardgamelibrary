@@ -189,13 +189,7 @@ function showGamesView() {
   // ── Stats sub-tab ──
   const buildStatsTab = () => {
     const playRowHtml = (p) => {
-      const scoresHtml = p.sc.map(s => {
-        const cls = s.w ? ' winner' : '';
-        const trophy = s.w ? '<span class="trophy">&#9733;</span>' : '';
-        const score = s.s ? ` (${s.s})` : '';
-        const roleHtml = s.r ? `<span class="play-role">${s.r}</span>` : '';
-        return `<span class="play-score${cls}"><span class="play-player"><span class="play-player-name">${trophy}${s.n}${score}</span>${roleHtml}</span></span>`;
-      }).join('');
+      const scoresHtml = p.sc.map(_playScoreChipHtml).join('');
       const boardHtml = p.b ? `<span class="stats-recent-result">&nbsp;&middot; &#9876; ${p.b}</span>` : '';
       return `<div class="stats-recent-play" data-bgg-id="${p.game.bggId}">
         <div class="stats-recent-top">

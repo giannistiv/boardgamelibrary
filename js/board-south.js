@@ -21,10 +21,6 @@ function _boardSouthPlaysSectionHtml() {
   let perPlay;
   try { perPlay = _computePerPlayElo('south'); } catch (_) { perPlay = new Map(); }
 
-  const esc = (s) => String(s).replace(/[&<>"']/g, c => ({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-  }[c]));
-
   // Collect this year's Board South plays, keeping the PLAY_HISTORY array index
   // so the per-play delta key (`${bggId}|${date}|${idx}`) lines up.
   const plays = [];
@@ -84,8 +80,8 @@ function _boardSouthPlaysSectionHtml() {
       const canon = NAME_MAP[s.n] || s.n;
       const cls = ['bs-sb-name'];
       if (s.w) cls.push('winner');
-      const role = s.r ? ` <span class="bs-sb-role">(${esc(s.r)})</span>` : '';
-      const score = (s.s != null && s.s !== '') ? esc(s.s) : '—';
+      const role = s.r ? ` <span class="bs-sb-role">(${_escapeHtml(s.r)})</span>` : '';
+      const score = (s.s != null && s.s !== '') ? _escapeHtml(s.s) : '—';
       let dHtml = '<span class="bs-sb-delta"></span>';
       if (deltas && Object.prototype.hasOwnProperty.call(deltas, canon)) {
         const d = deltas[canon];
@@ -94,15 +90,15 @@ function _boardSouthPlaysSectionHtml() {
         dHtml = `<span class="bs-sb-delta ${c}">${sign}${d.toFixed(1)}</span>`;
       }
       return `<div class="bs-sb-row">
-        <span class="${cls.join(' ')}">${esc(canon)}${role}</span>
+        <span class="${cls.join(' ')}">${_escapeHtml(canon)}${role}</span>
         <span class="bs-sb-score">${score}</span>
         ${dHtml}
       </div>`;
     }).join('');
 
     const metaBits = [_fmtDateShort(p.date)];
-    if (p.b) metaBits.push(esc(p.b));
-    if (p.l && p.l !== 'Board South') metaBits.push(esc(p.l));
+    if (p.b) metaBits.push(_escapeHtml(p.b));
+    if (p.l && p.l !== 'Board South') metaBits.push(_escapeHtml(p.l));
     metaBits.push(`${p.sc.length} player${p.sc.length !== 1 ? 's' : ''}`);
 
     const localCover = bggId >= 0 ? `images/${bggId}.jpg` : '';
@@ -116,7 +112,7 @@ function _boardSouthPlaysSectionHtml() {
       <div class="bs-play-top">
         ${cover}
         <div class="bs-play-info">
-          <div class="bs-play-name">${esc(name)}</div>
+          <div class="bs-play-name">${_escapeHtml(name)}</div>
           <div class="bs-play-meta">${metaBits.join(' · ')}</div>
         </div>
       </div>
@@ -768,16 +764,6 @@ function _openBoardSouthAddModal(skipFlagSet) {
   // Focus the search box and render initial results
   setTimeout(() => searchEl.focus(), 30);
   renderResults();
-}
-
-function _escapeHtml(str) {
-  if (str == null) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
 }
 
 function _renderInsightsPlayers(players, wrColor) {

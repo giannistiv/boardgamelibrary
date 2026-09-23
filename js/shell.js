@@ -415,13 +415,7 @@ function openModal(game) {
 
     const renderPlay = (play) => {
       const hasWinner = play.sc.some(s => s.w);
-      const scoreHtml = play.sc.map(s => {
-        const cls = s.w ? ' winner' : '';
-        const trophy = s.w ? '<span class="trophy">&#9733;</span>' : '';
-        const score = s.s ? ` (${s.s})` : '';
-        const roleHtml = s.r ? `<span class="play-role">${s.r}</span>` : '';
-        return `<span class="play-score${cls}"><span class="play-player"><span class="play-player-name">${trophy}${s.n}${score}</span>${roleHtml}</span></span>`;
-      }).join('');
+      const scoreHtml = play.sc.map(_playScoreChipHtml).join('');
       const boardHtml = play.b ? `<div class="play-board">&#9876; ${play.b}</div>` : '';
       const noWinnerHtml = (!hasWinner && !noResultGame) ? '<div class="play-no-winner">&#9760;&#65038; The game won</div>' : '';
       const durHtml = play.d ? `<span class="play-duration">${play.d} min</span>` : '';

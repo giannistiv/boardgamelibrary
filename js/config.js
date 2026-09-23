@@ -16,6 +16,28 @@ const CATEGORIES = [
 const EXPANSION_IDS = new Set(["mu_asgard", "mu_panther", "mu_spider", "mu_deadpool", "mu_xmen_gold", "mu_gotg", "mu_xmen_blue", "rove_xulc", "crimson_scales", "caverna_forgotten", "spirit_island_je", "spirit_ff", "spirit_bc", "feast_for_odin_exp", "heat_heavy_rain", "dune_immortality", "witcher_skellige", "witcher_wild_hunt", "kelp_expansion", "planet_unknown_super", "mdt_deadpool", "witcher_monster_trail_os", "witcher_mages_os", "witcher_legend_hunt_os", "etherfields_harpy_os", "earthborne_legacy_os", "gh_forgotten_circles_os", "on_mars_alien_os", "alchemists_golem_os", "hegemony_crisis_os", "crimson_scales_os", "dune_rise_ix_os", "kingdom_legacy_os", "auztralia_taz_os", "thunder_road_cc_os", "gh_buttons_bugs_os", "smartphone_update_os", "paleo_new_beg_os", "final_girl_ht_os", "azul_crystal_os", "magic_maze_ms_os", "paint_roses_esc_os", "abyss_leviathan_os", "underwater_data_os", "detective_bullets_os", "detective_saints_os", "sherlock_thames_os", "cthulhu_dmd_s2", "targi_exp_os"]);
 
 
+// ── Shared render helpers ──
+// The one HTML-escape used everywhere: null/undefined → '', escapes & < > " '.
+function _escapeHtml(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// A player's chip in a play's score line (winner star, name, score, role).
+// Shared by the game modal's play history and Explore's recent plays.
+function _playScoreChipHtml(s) {
+  const cls = s.w ? ' winner' : '';
+  const trophy = s.w ? '<span class="trophy">&#9733;</span>' : '';
+  const score = s.s ? ` (${s.s})` : '';
+  const roleHtml = s.r ? `<span class="play-role">${s.r}</span>` : '';
+  return `<span class="play-score${cls}"><span class="play-player"><span class="play-player-name">${trophy}${s.n}${score}</span>${roleHtml}</span></span>`;
+}
+
 // ── Filter helpers ──
 function parseMaxTime(playTime) {
   // "60-120 min" → 120, "40 min" → 40

@@ -345,7 +345,6 @@ function wireStarRating() {
 }
 
 // ── Game Notes (shared, per-game) ──
-function _notesEsc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 function buildNotesHtml(bggId) {
   const player = localStorage.getItem('bgl-player');
@@ -375,14 +374,14 @@ function buildNotesHtml(bggId) {
     for (const n of notes) {
       // Anyone with a name picked can edit/delete any note (shared notepad).
       const edited = (n.updatedAt && n.createdAt && n.updatedAt !== n.createdAt) ? ' &middot; edited' : '';
-      html += `<div class="note-entry" data-id="${_notesEsc(n.id)}">
-        <div class="note-text">${_notesEsc(n.text || '')}</div>
+      html += `<div class="note-entry" data-id="${_escapeHtml(n.id)}">
+        <div class="note-text">${_escapeHtml(n.text || '')}</div>
         <div class="note-meta">
-          <span class="note-author">${_notesEsc(n.author || 'Someone')}</span>
+          <span class="note-author">${_escapeHtml(n.author || 'Someone')}</span>
           <span class="note-date">${fmt(n.createdAt)}${edited}</span>
           ${player ? `<span class="note-actions">
-            <button class="note-btn note-edit" data-id="${_notesEsc(n.id)}">edit</button>
-            <button class="note-btn note-del" data-id="${_notesEsc(n.id)}">delete</button>
+            <button class="note-btn note-edit" data-id="${_escapeHtml(n.id)}">edit</button>
+            <button class="note-btn note-del" data-id="${_escapeHtml(n.id)}">delete</button>
           </span>` : ''}
         </div>
       </div>`;
