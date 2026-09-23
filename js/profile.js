@@ -17,7 +17,7 @@ window._goBackFromProfile = _goBackFromProfile;
 // recent games. Each card rates a game with 10 whole stars (click a position or
 // slide across them, then Submit). Rated games show their existing score so you
 // can browse previous ratings and change them. Returns '' when there is nothing
-// to show (visiting someone else, or no plays).
+// to show (visiting someone else, no plays, or every recent game already rated).
 const RLG_MAX_GAMES = 15;
 function _rlgEsc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
@@ -39,12 +39,13 @@ function buildRateLastGameBar(playerName, isOwnProfile, recentPlays) {
   // toward the next (older) game to rate. Open on the latest game (rightmost).
   const ordered = games.slice().reverse();
   const latestIdx = ordered.length - 1;
-  // Open on the most-recent game the player hasn't rated yet (fall back to the
-  // latest game if everything recent is already rated).
-  let start = latestIdx;
+  // Open on the most-recent game the player hasn't rated yet. If every recent
+  // game is already rated there's nothing to nudge, so hide the banner.
+  let start = -1;
   for (let i = latestIdx; i >= 0; i--) {
     if (getPlayerRating(playerName, ordered[i].bggId) === 0) { start = i; break; }
   }
+  if (start < 0) return '';
 
   const star = '<span class="rlg-star">&#9733;</span>';
   const card = (g, i) => {
@@ -186,6 +187,12 @@ function wireRateLastGame(container, playerName, isOwnProfile, recentPlays) {
       // Gentle flow: clear the note and advance to the next game, if any.
       setTimeout(() => {
         if (done) done.remove();
+        // Nothing left unrated → no reason to keep the banner; fade it out.
+        if (!cards.some(c => !(Number(c.dataset.saved) > 0))) {
+          bar.classList.add('rate-last-hide');
+          setTimeout(() => bar.remove(), 320);
+          return;
+        }
         // Slide on to the next (older) game to rate.
         if (current === cardIdx && current > 0) goTo(current - 1);
       }, 900);
