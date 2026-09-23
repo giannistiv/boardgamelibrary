@@ -223,6 +223,37 @@ function wireRateLastGame(container, playerName, isOwnProfile, recentPlays) {
   goTo(current, false);
 }
 
+// Letterboxd-style ratings histogram: one bar per score 1-10, height by how
+// many games the player rated that score. Returns '' if they've rated nothing.
+function buildRatingsGraphHtml(playerName) {
+  const counts = new Array(11).fill(0); // counts[1..10]
+  let total = 0, sum = 0;
+  for (const bggId in ratingsCache) {
+    const entry = ratingsCache[bggId];
+    if (!entry) continue;
+    const v = _ratingValue(entry[playerName]);
+    if (v >= 1 && v <= 10) { counts[v]++; total++; sum += v; }
+  }
+  if (!total) return '';
+  const max = Math.max.apply(null, counts.slice(1));
+  const avg = (sum / total).toFixed(1);
+  let cols = '';
+  for (let v = 1; v <= 10; v++) {
+    const c = counts[v];
+    const pct = c && max ? Math.max(Math.round(c / max * 100), 5) : 0;
+    cols += `<div class="rg-col" title="${c} game${c === 1 ? '' : 's'} rated ${v}/10">
+      <div class="rg-cnt">${c || ''}</div>
+      <div class="rg-track"><div class="rg-bar${c ? '' : ' rg-bar-empty'}"${c ? ` style="height:${pct}%"` : ''}></div></div>
+      <div class="rg-num">${v}</div>
+    </div>`;
+  }
+  return `<div class="stats-section">
+    <div class="stats-section-title">Ratings</div>
+    <div class="rg-graph">${cols}</div>
+    <div class="rg-summary"><span>${total} game${total === 1 ? '' : 's'} rated</span><span>avg ${avg}/10</span></div>
+  </div>`;
+}
+
 function showStatsView(playerName, visiting) {
   const loggedInPlayer = localStorage.getItem('bgl-player');
   const isOwnProfile = !visiting || visiting === loggedInPlayer;
@@ -363,20 +394,6 @@ function showStatsView(playerName, visiting) {
     </div>`;
   };
 
-  // Best PvP win rates (min 3 competitive plays). Coop and solo games are
-  // excluded since they don't produce a meaningful per-player win rate.
-  const bestWR = Object.values(gameStats)
-    .filter(g => g.pvpPlays >= 3)
-    .map(g => ({
-      ...g,
-      // Display the PvP plays/wins under the row so the percentage matches.
-      plays: g.pvpPlays,
-      wins:  g.pvpWins,
-      wr: Math.round(g.pvpWins / g.pvpPlays * 100),
-    }))
-    .sort((a, b) => b.wr - a.wr || b.plays - a.plays)
-    .slice(0, 8);
-
   // Recommendations: games they haven't played, sorted by rating
   const playedBggIds = new Set(Object.keys(gameStats).map(Number));
   const recommendations = GAMES
@@ -389,19 +406,6 @@ function showStatsView(playerName, visiting) {
     if (wr >= 50) return '#a3e635';
     if (wr >= 35) return '#e2b04a';
     return '#f87171';
-  };
-
-  const gameRowHtml = (gs) => {
-    const wr = gs.plays > 0 ? Math.round(gs.wins / gs.plays * 100) : 0;
-    const imgSrc = gs.game.bggId >= 0 ? `images/${gs.game.bggId}.jpg` : '';
-    return `<div class="stats-game-row" data-bgg-id="${gs.game.bggId}">
-      ${imgSrc ? `<img class="stats-game-img" src="${imgSrc}" alt="" onerror="__imgFallback(this, ${gs.game.bggId})">` : ''}
-      <div class="stats-game-info">
-        <div class="stats-game-name">${gs.game.name}</div>
-        <div class="stats-game-detail">${gs.plays} play${gs.plays !== 1 ? 's' : ''} &middot; ${gs.wins} win${gs.wins !== 1 ? 's' : ''} &middot; Last: ${fmtDate(gs.lastPlayed)}</div>
-      </div>
-      <div class="stats-game-wr" style="color:${wrColor(wr)}">${wr}%</div>
-    </div>`;
   };
 
   const backBtnHtml = (!isOwnProfile && _statsViewSource)
@@ -563,10 +567,7 @@ function showStatsView(playerName, visiting) {
       ${recentPlays.length > 0 ? `<button class="lpm-view-all-btn" data-lpm-open="${playerName.replace(/"/g,'&quot;')}">View all ${recentPlays.length} plays →</button>` : ''}
     </div>
 
-    ${bestWR.length > 0 ? `<div class="stats-section">
-      <div class="stats-section-title">Best Win Rate in PvP (3+ plays)</div>
-      ${bestWR.map(gameRowHtml).join('')}
-    </div>` : ''}
+    ${buildRatingsGraphHtml(playerName)}
 
     ${chartsHtml}
 

@@ -1592,6 +1592,17 @@
   .rlg-submit:disabled{opacity:0.4;cursor:default}
   .rlg-submit:not(:disabled):hover{background:rgba(226,176,74,0.32)}
   .rate-last-done{font-size:0.76rem;font-weight:700;color:#5bc46b;margin-top:0.3rem}
+
+  /* Ratings histogram (Letterboxd-style) */
+  .rg-graph{display:flex;align-items:flex-end;gap:0.2rem;margin:0.55rem 0 0.35rem}
+  .rg-col{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:0.2rem;cursor:default}
+  .rg-cnt{font-size:0.6rem;font-weight:800;color:#e2b04a;height:0.75rem;line-height:1}
+  .rg-track{width:100%;height:74px;display:flex;align-items:flex-end;justify-content:center}
+  .rg-bar{width:74%;min-height:2px;border-radius:3px 3px 0 0;background:linear-gradient(180deg,#f2cd76,#e2b04a);transition:filter 0.12s}
+  .rg-bar-empty{width:74%;height:3px;background:rgba(255,255,255,0.14);border-radius:2px}
+  .rg-col:hover .rg-bar{filter:brightness(1.18)}
+  .rg-num{font-size:0.62rem;font-weight:700;color:#f0e6d3;opacity:0.5}
+  .rg-summary{display:flex;justify-content:space-between;font-size:0.68rem;font-weight:600;color:#f0e6d3;opacity:0.6;padding:0 0.1rem}
   @media (max-width:600px){
     .rlg-star{font-size:1.5rem}
     .rlg-star + .rlg-star{margin-left:0.04rem}
