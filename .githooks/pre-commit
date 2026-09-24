@@ -1,5 +1,10 @@
 #!/bin/sh
-# Keep index.html's ?v= asset stamps in sync with what's being committed.
 # Enabled per clone with:  git config core.hooksPath .githooks
+
+# 1) Download a cover for any game (in the data files or imported through the
+#    app) that doesn't have one yet, and add it to this commit. Never blocks.
+python3 tools/fetch-covers.py --auto || true
+
+# 2) Keep index.html's ?v= asset stamps in sync with what's being committed.
 python3 tools/stamp-assets.py || exit 1
 git add index.html
