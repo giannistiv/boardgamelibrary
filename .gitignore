@@ -2,3 +2,5 @@ BGStatsExport.json
 .claude/
 .DS_Store
 __pycache__/
+tools/.bgg-token
+tools/.collections-synced

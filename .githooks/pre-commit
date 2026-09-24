@@ -1,10 +1,14 @@
 #!/bin/sh
 # Enabled per clone with:  git config core.hooksPath .githooks
 
-# 1) Download a cover for any game (in the data files or imported through the
+# 1) Bring the friends' game lists in line with their BGG collections. Needs a
+#    BGG token in tools/.bgg-token; at most hourly. Never blocks.
+python3 tools/sync-collections.py --auto || true
+
+# 2) Download a cover for any game (in the data files or imported through the
 #    app) that doesn't have one yet, and add it to this commit. Never blocks.
 python3 tools/fetch-covers.py --auto || true
 
-# 2) Keep index.html's ?v= asset stamps in sync with what's being committed.
+# 3) Keep index.html's ?v= asset stamps in sync with what's being committed.
 python3 tools/stamp-assets.py || exit 1
 git add index.html
