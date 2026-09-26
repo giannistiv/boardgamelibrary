@@ -467,6 +467,7 @@ function openModal(game) {
           <div class="ph-stat"><span class="ph-stat-val">${noResultGame ? '&mdash;' : winRate + '%'}</span><span class="ph-stat-label">Win Rate</span></div>
           <div class="ph-stat"><span class="ph-stat-val">${fmtDate(lastPlayed)}</span><span class="ph-stat-label">Last Played</span></div>
         </div>
+        ${buildGameRecordsHtml(game, plays)}
         ${campaignHtml}
         ${skyTeamHtml}
         ${slaySpireHtml}
