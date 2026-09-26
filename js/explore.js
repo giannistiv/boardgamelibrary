@@ -142,12 +142,8 @@ function showGamesView() {
       </div>`;
     };
 
-    return `
-      <div class="stats-section">
-        <input type="text" class="insights-search" id="games-search" placeholder="Search all games..." autocomplete="off">
-        <div id="games-search-results"></div>
-      </div>
-
+    return `${buildGameBrowserHtml()}
+      <div id="games-curated">
       ${mostPlayedRecent.length > 0 ? `<div class="stats-section">
         <div class="stats-section-title">Most Played Recently</div>
         <div class="stats-player-sub" style="margin:-0.3rem 0 0.6rem">Last 90 days</div>
@@ -162,7 +158,8 @@ function showGamesView() {
       ${newestTop.length > 0 ? `<div class="stats-section">
         <div class="stats-section-title">Newest Ratings</div>
         ${newestTop.map(ratingRowHtml).join('')}
-      </div>` : ''}`;
+      </div>` : ''}
+      </div>`;
   };
 
   // ── Players sub-tab ──
@@ -243,29 +240,8 @@ function showGamesView() {
     });
   });
 
-  // Games sub-tab: search across every catalogue
-  const searchEl = document.getElementById('games-search');
-  if (searchEl) {
-    const resultsEl = document.getElementById('games-search-results');
-    const allGames = _allGames();
-    const renderSearch = (q) => {
-      if (!q) { resultsEl.innerHTML = ''; return; }
-      const ql = q.toLowerCase();
-      const matches = allGames
-        .filter(g => (g.name || '').toLowerCase().includes(ql))
-        .sort((a, b) => a.name.localeCompare(b.name))
-        .slice(0, 20);
-      if (!matches.length) { resultsEl.innerHTML = '<div class="stats-player-sub" style="padding:0.6rem">No matches</div>'; return; }
-      resultsEl.innerHTML = matches.map(g => gameRowHtml(g, `${g.year || ''}${g.players ? ' &middot; ' + g.players + ' players' : ''}`)).join('');
-      resultsEl.querySelectorAll('[data-bgg-id]').forEach(el => {
-        el.addEventListener('click', () => {
-          const game = findGameByBggId(el.dataset.bggId);
-          if (game) openModal(game);
-        });
-      });
-    };
-    searchEl.addEventListener('input', () => renderSearch(searchEl.value.trim()));
-  }
+  // Games sub-tab: search + filters across every catalogue
+  if (_exploreTab === 'games') wireGameBrowser(container);
 
   // Players sub-tab: player search
   const playerSearchEl = document.getElementById('insights-player-search');
