@@ -2426,7 +2426,7 @@ const GAMES = [
 
   {id:"bomb_busters",name:"Bomb Busters"
    ,row:2,col:1,categories:["Co-op", "Family", "Card Game"]
-   ,players:"2-6",playTime:"15-30 min"
+   ,players:"2-5",playTime:"15-30 min"
    ,complexity:2.0,bggId:413246
    ,spineColor:"#7f2a34",boxSize:"md"
    ,designer:"Hisashi Hayashi"
