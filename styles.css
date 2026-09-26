@@ -1584,8 +1584,8 @@
     font-size:1.15rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;
     opacity:0;pointer-events:none;transition:opacity 0.15s ease,background 0.15s ease;
   }
-  .rlg-back{left:5px}
-  .rlg-next{right:5px}
+  .rlg-left{left:5px}
+  .rlg-right{right:5px}
   /* Only reveal the arrows on genuine mouse hover (desktop). On touch devices
      :hover sticks after a tap, so gate it to fine/hover pointers; touch = swipe. */
   @media (hover: hover) and (pointer: fine){

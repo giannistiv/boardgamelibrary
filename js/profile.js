@@ -15,49 +15,60 @@ function _goBackFromProfile() {
 window._goBackFromProfile = _goBackFromProfile;
 
 // ── "Rate your games" carousel ──
-// A banner near the top of your OWN profile: a swipeable carousel of your most
-// recent games, followed by older games you still haven't rated. Each card rates
-// a game with 10 whole stars (click a position or slide across them, then
-// Submit). Rated games show their existing score so you can browse previous
-// ratings and change them. Returns '' when there is nothing left to rate
-// (visiting someone else, no plays, or every game in reach already rated).
-const RLG_MAX_GAMES = 15;          // most recent games (rated or not)
-const RLG_MAX_OLDER_UNRATED = 20;  // then up to this many older, still-unrated games
+// A banner near the top of your OWN profile. It opens on the most recently
+// played game you haven't rated. One way lie your other unrated games (newest
+// play first); the other way the games you've rated, most recently rated
+// first, so going back always shows what you rated last, refresh or not. Each
+// card rates a game with 10 whole stars (click a position or slide across
+// them, then Submit). Returns '' when there is nothing left to rate (visiting
+// someone else, no plays, or every game in reach already rated).
+//
+// The layout follows the device. With a mouse it reads left to right: past
+// ratings, the current game, games to rate; ‹ › arrows on hover, a two-finger
+// trackpad swipe or ←/→ step through it. On touch it's mirrored, so swiping
+// left goes back to what you just rated and swiping right to the next game.
+const RLG_MAX_RATED = 15;    // how far back the rated side reaches
+const RLG_MAX_UNRATED = 35;  // unrated games offered, newest play first
+
+function _rlgDesktop() {
+  return !!(window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches);
+}
 
 function buildRateLastGameBar(playerName, isOwnProfile, recentPlays) {
   const resume = _rlgResume;       // consumed: applies only to the render right after a modal closes
   _rlgResume = false;
   if (_rlgDismissed) return '';
   if (!isOwnProfile || !recentPlays || !recentPlays.length) return '';
-  // Distinct games, newest play first: the most recent RLG_MAX_GAMES (rated or
-  // not), then older ones only if still unrated, up to RLG_MAX_OLDER_UNRATED.
+
+  // Still to rate: distinct games, most recently played first.
   const seen = new Set();
-  const games = [];
-  let olderCount = 0;
+  const unrated = [];
   for (const p of recentPlays) {
     if (!p.game || !(p.bggId >= 0) || seen.has(p.bggId)) continue;
     seen.add(p.bggId);
-    const older = seen.size > RLG_MAX_GAMES;
-    if (older) {
-      if (getPlayerRating(playerName, p.bggId) !== 0) continue;
-      if (olderCount >= RLG_MAX_OLDER_UNRATED) break;
-      olderCount++;
-    }
-    games.push({ bggId: p.bggId, name: p.game.name, date: p.date, older });
+    if (getPlayerRating(playerName, p.bggId) !== 0) continue;
+    unrated.push({ bggId: p.bggId, name: p.game.name, date: p.date, latest: seen.size === 1 });
+    if (unrated.length >= RLG_MAX_UNRATED) break;
   }
-  if (!games.length) return '';
-  // Track order: oldest → latest (left → right). With natural finger-following
-  // swipe, dragging left moves toward the most-recent/just-rated card and right
-  // toward the next (older) game to rate.
-  const ordered = games.slice().reverse();
-  const latestIdx = ordered.length - 1;
-  // Open on the most-recent game the player hasn't rated yet. If every recent
-  // game is already rated there's nothing to nudge, so hide the banner.
-  let start = -1;
-  for (let i = latestIdx; i >= 0; i--) {
-    if (getPlayerRating(playerName, ordered[i].bggId) === 0) { start = i; break; }
+  // Every game in reach is rated: no reason to show the banner.
+  if (!unrated.length) return '';
+
+  // Already rated: most recently rated first.
+  const rated = [];
+  for (const bggId in ratingsCache) {
+    const r = ratingsCache[bggId] && ratingsCache[bggId][playerName];
+    if (!(_ratingValue(r) > 0)) continue;
+    const g = findGameByBggId(bggId);
+    if (g) rated.push({ bggId: Number(bggId), name: g.name, ratedAt: (r && r.updatedAt) || 0 });
   }
-  if (start < 0) return '';
+  rated.sort((a, b) => b.ratedAt - a.ratedAt);
+  rated.length = Math.min(rated.length, RLG_MAX_RATED);
+
+  // Desktop, left → right: oldest rating … latest rating | next to rate …
+  const desktop = _rlgDesktop();
+  const ordered = rated.slice().reverse().concat(unrated);
+  let start = rated.length;
+  if (!desktop) { ordered.reverse(); start = ordered.length - 1 - start; }
   // Back from a game opened on this profile: stay on the card you were viewing.
   if (resume && _rlgPosBgg != null) {
     const at = ordered.findIndex(g => g.bggId === _rlgPosBgg);
@@ -65,12 +76,11 @@ function buildRateLastGameBar(playerName, isOwnProfile, recentPlays) {
   }
 
   const star = '<span class="rlg-star">&#9733;</span>';
-  const card = (g, i) => {
+  const card = (g) => {
     const rating = getPlayerRating(playerName, g.bggId);
-    const rated = rating > 0;
-    const prompt = rated ? 'Your rating'
-      : g.older ? `Not rated yet · played ${_fmtDateShort(g.date)}`
-      : (i === latestIdx ? 'Rate your last game' : 'Rate a recent game');
+    const prompt = rating > 0
+      ? (g.ratedAt ? `Your rating &middot; ${_timeAgo(g.ratedAt)}` : 'Your rating')
+      : g.latest ? 'Rate your last game' : `Not rated yet &middot; played ${_fmtDateShort(g.date)}`;
     return `<div class="rlg-card" data-bgg="${g.bggId}" data-saved="${rating}">
       <div class="rate-last-cover" role="button" tabindex="0" title="Open ${_escapeHtml(g.name)}"><img class="rate-last-cover-img" src="images/${g.bggId}.jpg" alt="" loading="lazy" onerror="__imgFallback(this, ${g.bggId})"></div>
       <div class="rate-last-body">
@@ -79,22 +89,45 @@ function buildRateLastGameBar(playerName, isOwnProfile, recentPlays) {
         <div class="rate-last-rate">
           <div class="rlg-stars" role="slider" tabindex="0" aria-label="Rate ${_escapeHtml(g.name)} from 1 to 10" aria-valuemin="1" aria-valuemax="10" aria-valuenow="${rating}">${star.repeat(10)}</div>
           <span class="rlg-value"></span>
-          <button class="rlg-submit" type="button" disabled>${rated ? 'Update' : 'Rate'}</button>
+          <button class="rlg-submit" type="button" disabled>${rating > 0 ? 'Update' : 'Rate'}</button>
         </div>
       </div>
     </div>`;
   };
+  const prevLabel = 'Your previous rating', nextLabel = 'Next game to rate';
+  const leftLabel = desktop ? prevLabel : nextLabel;
+  const rightLabel = desktop ? nextLabel : prevLabel;
   const arrows = ordered.length > 1
-    ? `<button class="rlg-arrow rlg-back" type="button" aria-label="Back to the game you just rated">&#8249;</button>
-       <button class="rlg-arrow rlg-next" type="button" aria-label="Next game to rate">&#8250;</button>`
+    ? `<button class="rlg-arrow rlg-left" type="button" aria-label="${leftLabel}" title="${leftLabel}">&#8249;</button>
+       <button class="rlg-arrow rlg-right" type="button" aria-label="${rightLabel}" title="${rightLabel}">&#8250;</button>`
     : '';
-  return `<div class="rate-last-bar" id="rate-last-bar" data-start="${start}">
+  return `<div class="rate-last-bar" id="rate-last-bar" data-start="${start}" data-next="${desktop ? 1 : -1}">
     <button class="rate-last-close" id="rate-last-close" type="button" aria-label="Hide">&times;</button>
     <div class="rlg-viewport" id="rlg-viewport">
       <div class="rlg-track" id="rlg-track">${ordered.map(card).join('')}</div>
     </div>
     ${arrows}
   </div>`;
+}
+
+// ←/→ step through the carousel while the pointer is over it or focus is in
+// it (but not on the stars, where the arrow keys change the rating). One
+// document listener for the page's lifetime; it drives whichever banner is
+// currently rendered.
+let _rlgKeysWired = false;
+function _rlgWireKeys() {
+  if (_rlgKeysWired) return;
+  _rlgKeysWired = true;
+  document.addEventListener('keydown', (e) => {
+    if ((e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    const bar = document.getElementById('rate-last-bar');
+    if (!bar || !bar._rlgStep) return;
+    const a = document.activeElement;
+    if (!(bar.matches(':hover') || (a && bar.contains(a)))) return;
+    if (a && (a.closest('.rlg-stars') || /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) || a.isContentEditable)) return;
+    e.preventDefault();
+    bar._rlgStep(e.key === 'ArrowLeft' ? -1 : 1);
+  });
 }
 
 function wireRateLastGame(container, playerName, isOwnProfile, recentPlays) {
@@ -105,6 +138,7 @@ function wireRateLastGame(container, playerName, isOwnProfile, recentPlays) {
   if (!track || !viewport) return;
   const cards = [...track.querySelectorAll('.rlg-card')];
   const count = cards.length;
+  const next = Number(bar.dataset.next) || 1;   // index step toward the next game to rate
   let current = Math.max(0, Math.min(count - 1, Number(bar.dataset.start) || 0));
 
   // Dismiss for this session (reappears on a page refresh).
@@ -118,10 +152,8 @@ function wireRateLastGame(container, playerName, isOwnProfile, recentPlays) {
     });
   }
 
-  // ‹ back = toward the just-rated/most-recent (higher index); › next = toward
-  // the next (older) game to rate (lower index).
-  const backBtn = bar.querySelector('.rlg-back');
-  const nextBtn = bar.querySelector('.rlg-next');
+  const leftBtn = bar.querySelector('.rlg-left');
+  const rightBtn = bar.querySelector('.rlg-right');
 
   // Card width == viewport width, so a % transform is resize-proof.
   const goTo = (i, animate = true) => {
@@ -129,8 +161,19 @@ function wireRateLastGame(container, playerName, isOwnProfile, recentPlays) {
     _rlgPosBgg = Number(cards[current].dataset.bgg);
     track.style.transition = animate ? 'transform 0.3s ease' : 'none';
     track.style.transform = `translateX(${-current * 100}%)`;
-    if (backBtn) backBtn.disabled = current >= count - 1; // at latest, nothing newer
-    if (nextBtn) nextBtn.disabled = current <= 0;          // at oldest, nothing older
+    if (leftBtn) leftBtn.disabled = current <= 0;
+    if (rightBtn) rightBtn.disabled = current >= count - 1;
+  };
+  bar._rlgStep = (d) => goTo(current + d);
+  _rlgWireKeys();
+
+  // After a new rating, move on: the nearest unrated card in the "next"
+  // direction, else the nearest one the other way.
+  const nextUnrated = (from) => {
+    const open = cards.map((c, i) => (Number(c.dataset.saved) > 0 ? -1 : i)).filter(i => i >= 0);
+    const byDistance = (a, b) => Math.abs(a - from) - Math.abs(b - from);
+    const ahead = open.filter(i => (i - from) * next > 0).sort(byDistance);
+    return ahead.length ? ahead[0] : open.sort(byDistance)[0];
   };
 
   // Per-card rating slider (each card is independent; pre-filled to its rating).
@@ -194,6 +237,7 @@ function wireRateLastGame(container, playerName, isOwnProfile, recentPlays) {
     async function submit() {
       if (submitBtn.disabled) return;
       const val = pending;
+      const isNew = !saved;
       submitBtn.disabled = true;
       await saveRating(playerName, bggId, val);
       saved = val;
@@ -204,7 +248,6 @@ function wireRateLastGame(container, playerName, isOwnProfile, recentPlays) {
       if (!done) { body.insertAdjacentHTML('beforeend', '<div class="rate-last-done"></div>'); done = body.querySelector('.rate-last-done'); }
       done.innerHTML = `Saved &mdash; ${val}/10 &#10003;`;
       refreshSubmit();
-      // Gentle flow: clear the note and advance to the next game, if any.
       setTimeout(() => {
         if (done) done.remove();
         // Nothing left unrated → no reason to keep the banner; fade it out.
@@ -213,21 +256,23 @@ function wireRateLastGame(container, playerName, isOwnProfile, recentPlays) {
           setTimeout(() => bar.remove(), 320);
           return;
         }
-        // Slide on to the next (older) game to rate.
-        if (current === cardIdx && current > 0) goTo(current - 1);
+        // A first rating slides on to the next game to rate; changing an old
+        // rating stays put. Either way, not if you've already moved on.
+        if (isNew && current === cardIdx) goTo(nextUnrated(cardIdx));
       }, 900);
     }
     submitBtn.addEventListener('click', submit);
   });
 
-  // Arrow navigation (‹ back = higher index, › next = lower index).
-  if (backBtn) backBtn.addEventListener('click', () => goTo(current + 1));
-  if (nextBtn) nextBtn.addEventListener('click', () => goTo(current - 1));
+  if (leftBtn) leftBtn.addEventListener('click', () => goTo(current - 1));
+  if (rightBtn) rightBtn.addEventListener('click', () => goTo(current + 1));
 
-  // Swipe navigation — active only outside the stars/buttons so rating still works.
   if (count > 1) {
+    // Finger swipe (touch and pen). A mouse doesn't drag it: it has the
+    // arrows, the keys and the trackpad instead.
     let swiping = false, startX = 0, basePx = 0;
     viewport.addEventListener('pointerdown', (e) => {
+      if (e.pointerType === 'mouse') return;
       if (e.target.closest('.rlg-stars') || e.target.closest('button') || e.target.closest('.rate-last-cover')) return;
       swiping = true;
       startX = e.clientX;
@@ -251,6 +296,19 @@ function wireRateLastGame(container, playerName, isOwnProfile, recentPlays) {
     };
     viewport.addEventListener('pointerup', endSwipe);
     viewport.addEventListener('pointercancel', endSwipe);
+
+    // Two-finger trackpad swipe: one card per gesture. Momentum events keep
+    // arriving after the fingers lift, so stay locked until they stop.
+    let wheelAcc = 0, wheelLocked = false, wheelQuiet = null;
+    viewport.addEventListener('wheel', (e) => {
+      if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;   // vertical: let the page scroll
+      e.preventDefault();                                      // and no browser back/forward swipe
+      clearTimeout(wheelQuiet);
+      wheelQuiet = setTimeout(() => { wheelLocked = false; wheelAcc = 0; }, 180);
+      if (wheelLocked) return;
+      wheelAcc += e.deltaX;
+      if (Math.abs(wheelAcc) >= 40) { wheelLocked = true; goTo(current + Math.sign(wheelAcc)); }
+    }, { passive: false });
   }
 
   goTo(current, false);
