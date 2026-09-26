@@ -1323,7 +1323,33 @@ const EXTRA_GAMES = {
     description:"A geography-themed party game celebrating how fascinating and fun the world of geography can be. Players engage with maps, locations, and spatial knowledge in a casual and entertaining setting.",
     categories:["Party","Family","Puzzle"],players:"2-8",playTime:"20-30 min",
     complexity:1.5,bggRating:7.0,spineColor:"#2080C0",boxSize:"sm",
-    mechanics:["Trivia","Team Play"]}
+    mechanics:["Trivia","Team Play"]},
+  // Sold from Στιβ's shelf (2026-09): kept so their plays keep full details.
+  281442:{id:"trismegistus",name:"Trismegistus: The Ultimate Formula",bggId:281442,year:2019,designer:"Federico Pierlorenzi, Daniele Tascini",
+    description:"Players are alchemists competing to master the art of transmutation and claim the title of Hermes Trismegistus's successor. Each round, dice are rolled and players draft them by color — each color corresponds to one of three alchemical stages, and the die value determines how many steps you advance. Use acquired elements to perform experiments, complete publications, and craft artifacts for points. A follow mechanism lets others benefit from your chosen action at reduced effect. For players who enjoy dice drafting and heavy engine-building with interconnected systems.",
+    categories:["Strategy","Euro","Dice"],players:"1-4",playTime:"60-90 min",
+    complexity:4.19,bggRating:7.5,spineColor:"#3f3f2c",boxSize:"md",
+    mechanics:["Action Points","Contracts","Dice Rolling","End Game Bonuses","Follow","Open Drafting"]},
+  97842:{id:"last_will",name:"Last Will",bggId:97842,year:2011,designer:"Vladimír Suchý",
+    description:"Your uncle's will states that his fortune goes to the nephew who can spend money the fastest. Players use worker placement and card play to burn through cash — buying depreciating properties, hiring expensive companions, hosting lavish events, and dining at overpriced restaurants. Properties lose value each turn, so buying high and selling low is the strategy. First player to go completely broke wins. A Euro played in reverse. For players who enjoy economic games with a comedic twist.",
+    categories:["Strategy","Euro","Worker Placement"],players:"2-5",playTime:"45-75 min",
+    complexity:2.72,bggRating:7.2,spineColor:"#4e3123",boxSize:"md",
+    mechanics:["Action Points","Hand Management","Victory Points as a Resource","Worker Placement"]},
+  361545:{id:"twilight_inscription",name:"Twilight Inscription",bggId:361545,year:2022,designer:"James Kniffen",
+    description:"A roll-and-write game set in the Twilight Imperium universe. Each player has four large sheets — navigation, expansion, industry, and warfare — and uses shared dice rolls each round to fill in sections, unlock abilities, and score points. Event cards add narrative flavor and interaction between players. Supports up to eight players with minimal downtime since everyone writes simultaneously. For fans of Twilight Imperium who want the flavor without the eight-hour commitment.",
+    categories:["Strategy","Euro"],players:"1-8",playTime:"90-120 min",
+    complexity:3.21,bggRating:7.4,spineColor:"#13133f",boxSize:"md",
+    mechanics:["Dice Rolling","Paper-and-Pencil","Variable Player Powers"]},
+  245934:{id:"carpe_diem",name:"Carpe Diem",bggId:245934,year:2018,designer:"Stefan Feld",
+    description:"Players are wealthy patricians in ancient Rome competing to build the most prestigious city district. Each turn you move a token along a shared selection track to draft a building tile, then place it in your personal grid. Buildings score based on adjacency and how well you fulfill end-game scoring cards, which are different each game. The selection track creates natural competition for tiles. A Stefan Feld design — elegant, modular scoring, and more depth than the setup suggests.",
+    categories:["Strategy","Euro"],players:"2-4",playTime:"45-75 min",
+    complexity:2.54,bggRating:7.5,spineColor:"#59707f",boxSize:"md",
+    mechanics:["Area Movement","Contracts","End Game Bonuses","Open Drafting","Tile Placement","Turn Order: Progressive"]},
+  312318:{id:"century_golem_os",name:"Century: Golem Edition",bggId:312318,year:2017,designer:"Emerson Matsuuchi",
+    description:"A re-themed edition of Century: Spice Road with gorgeous golem artwork. Players build a card engine to acquire and upgrade gems, trading them for valuable golem cards.",
+    categories:["Strategy","Card Game","Family"],players:"2-5",playTime:"30-45 min",
+    complexity:1.8,bggRating:7.6,spineColor:"#2e86c1",boxSize:"sm",
+    mechanics:["Card Drafting","Hand Management","Engine Building"]}
 };
 
 const GIANNIS_GAMES = {
@@ -2561,17 +2587,6 @@ const GAMES = [
    ,mechanics:["Cooperative Game", "Scenario / Mission / Campaign Game", "Solo / Solitaire Game", "Storytelling"]
    ,description:"A cooperative crime-solving game driven by a companion app. The board displays locations around the city; character and item cards have QR codes you scan to unlock clues, dialogue, and evidence. You can even examine crime scenes in VR through your phone. Each scenario is a unique case with a time limit based on actions taken. Scored by how quickly and accurately you solve the case. For groups who enjoy immersive detective experiences with modern tech integration."},
 
-  {id:"twilight_inscription",name:"Twilight Inscription"
-   ,row:3,col:3,categories:["Strategy", "Euro"]
-   ,players:"1-8",playTime:"90-120 min"
-   ,complexity:3.21,bggId:361545
-   ,spineColor:"#13133f",boxSize:"md"
-   ,designer:"James Kniffen"
-   ,year:2022
-   ,bggRating:7.4
-   ,mechanics:["Dice Rolling", "Paper-and-Pencil", "Variable Player Powers"]
-   ,description:"A roll-and-write game set in the Twilight Imperium universe. Each player has four large sheets — navigation, expansion, industry, and warfare — and uses shared dice rolls each round to fill in sections, unlock abilities, and score points. Event cards add narrative flavor and interaction between players. Supports up to eight players with minimal downtime since everyone writes simultaneously. For fans of Twilight Imperium who want the flavor without the eight-hour commitment."},
-
   {id:"mistborn",name:"Mistborn: The Deckbuilding Game",bggId:422780,year:2024,designer:"John D. Clair",row:3,col:3,categories:["Card Game","Fantasy"],players:"1-4",playTime:"30-60 min",complexity:2.68,bggRating:7.7,spineColor:"#2c2c3f",boxSize:"md",mechanics:["Cooperative Game","Deck, Bag, and Pool Building","Market","Solo / Solitaire Game"],description:"Based on Brandon Sanderson's Mistborn novel series, players control iconic characters — Vin, Kelsier, Marsh, or Shan — and burn metals to unlock Allomantic powers in fast-paced battles. Build and improve your deck by purchasing cards from a shared market. Each metal type has different strengths: damaging opponents, earning mission points, or manipulating allies. Win through allomantic combat or by completing perilous missions. Play head-to-head or take on The Lord Ruler in solo or co-op mode."},
 
   {id:"empires_of_the_north",name:"Imperial Settlers: Empires of the North"
@@ -2716,17 +2731,6 @@ const GAMES = [
    ,bggRating:7.0
    ,mechanics:["Neighbor Scope", "Open Drafting", "Set Collection", "Variable Player Powers"]
    ,description:"Players each receive an unconstructed wonder and race to complete it first. On your turn, draw a card from one of three face-down or face-up decks shared with your neighbors. Cards provide resources to build wonder stages, military strength for periodic conflicts, or science symbols for set bonuses. Simple drafting with no hand management — you play every card immediately. A gateway game that plays in about 25 minutes with up to seven players."},
-
-  {id:"last_will",name:"Last Will"
-   ,row:4,col:2,categories:["Strategy", "Euro", "Worker Placement"]
-   ,players:"2-5",playTime:"45-75 min"
-   ,complexity:2.72,bggId:97842
-   ,spineColor:"#4e3123",boxSize:"md"
-   ,designer:"Vladimír Suchý"
-   ,year:2011
-   ,bggRating:7.2
-   ,mechanics:["Action Points", "Hand Management", "Victory Points as a Resource", "Worker Placement"]
-   ,description:"Your uncle's will states that his fortune goes to the nephew who can spend money the fastest. Players use worker placement and card play to burn through cash — buying depreciating properties, hiring expensive companions, hosting lavish events, and dining at overpriced restaurants. Properties lose value each turn, so buying high and selling low is the strategy. First player to go completely broke wins. A Euro played in reverse. For players who enjoy economic games with a comedic twist."},
 
   {id:"feast_for_odin_exp",name:"A Feast for Odin: The Norwegians"
    ,row:4,col:2,categories:["Strategy", "Euro", "Worker Placement"]
@@ -2962,17 +2966,6 @@ const GAMES = [
    ,mechanics:["End Game Bonuses", "Modular Board", "Open Drafting", "Pattern Building", "Set Collection", "Square Grid"]
    ,description:"A two-player worker placement game set among Tuareg desert tribes. Players place three workers along the outer edges of a 5x5 card grid, then claim the inner cards at the intersections of their workers' rows and columns. Cards provide resources (dates, salt, pepper, gold) or tribe members that form scoring tableaux. A robber token blocks one edge space each round, shifting available options. Tight, clever, and plays in about an hour. For couples or duos who enjoy spatial strategy and indirect competition."},
 
-  {id:"carpe_diem",name:"Carpe Diem"
-   ,row:6,col:1,categories:["Strategy", "Euro"]
-   ,players:"2-4",playTime:"45-75 min"
-   ,complexity:2.54,bggId:245934
-   ,spineColor:"#59707f",boxSize:"md"
-   ,designer:"Stefan Feld"
-   ,year:2018
-   ,bggRating:7.5
-   ,mechanics:["Area Movement", "Contracts", "End Game Bonuses", "Open Drafting", "Tile Placement", "Turn Order: Progressive"]
-   ,description:"Players are wealthy patricians in ancient Rome competing to build the most prestigious city district. Each turn you move a token along a shared selection track to draft a building tile, then place it in your personal grid. Buildings score based on adjacency and how well you fulfill end-game scoring cards, which are different each game. The selection track creates natural competition for tiles. A Stefan Feld design — elegant, modular scoring, and more depth than the setup suggests."},
-
   {id:"hallertau",name:"Hallertau"
    ,row:6,col:1,categories:["Strategy", "Euro", "Worker Placement"]
    ,players:"1-4",playTime:"50-140 min"
@@ -3203,17 +3196,6 @@ const GAMES = [
    ,mechanics:["Action / Event", "Cooperative Game", "Deck, Bag, and Pool Building", "Memory", "Scenario / Mission / Campaign Game", "Simultaneous Action Selection"]
    ,description:"A cooperative Stone Age survival game played over a series of missions. Each round, players select card stacks from a shared pool without knowing what they contain, then reveal them simultaneously to face dangers, gather resources, or discover tools. Humans die permanently if the skull track fills. The long-term goal is completing a cave painting requiring specific materials collected over many sessions. For groups who enjoy narrative cooperative games with meaningful risk and resource decisions."},
 
-  {id:"trismegistus",name:"Trismegistus: The Ultimate Formula"
-   ,row:6,col:6,categories:["Strategy", "Euro", "Dice"]
-   ,players:"1-4",playTime:"60-90 min"
-   ,complexity:4.19,bggId:281442
-   ,spineColor:"#3f3f2c",boxSize:"md"
-   ,designer:"Federico Pierlorenzi, Daniele Tascini"
-   ,year:2019
-   ,bggRating:7.5
-   ,mechanics:["Action Points", "Contracts", "Dice Rolling", "End Game Bonuses", "Follow", "Open Drafting"]
-   ,description:"Players are alchemists competing to master the art of transmutation and claim the title of Hermes Trismegistus's successor. Each round, dice are rolled and players draft them by color — each color corresponds to one of three alchemical stages, and the die value determines how many steps you advance. Use acquired elements to perform experiments, complete publications, and craft artifacts for points. A follow mechanism lets others benefit from your chosen action at reduced effect. For players who enjoy dice drafting and heavy engine-building with interconnected systems."},
-
   {id:"marvel_champions",name:"Marvel Champions: The Card Game"
    ,row:6,col:6,categories:["Co-op", "Card Game", "Thematic", "Deck Building"]
    ,players:"1-4",playTime:"45-90 min"
@@ -3251,7 +3233,6 @@ const GAMES = [
   // ── Row 2, Col 6 ──
   {id:"heat_pedal_os",name:"Heat: Pedal to the Metal",bggId:366013,year:2022,designer:"Asger Harding Granerud, Daniel Skjold Pedersen",row:2,col:6,otherSide:true,categories:["Racing","Strategy"],players:"1-6",playTime:"30-60 min",complexity:2.0,bggRating:7.9,spineColor:"#cc3300",boxSize:"sm",mechanics:["Hand Management","Push Your Luck","Simultaneous Action Selection"],description:"A racing game where players manage a hand of speed cards and a personal heat engine. Pushing too hard overheats your car, but playing it safe lets rivals pull ahead."},
   {id:"furnace_os",name:"Furnace",bggId:318084,year:2021,designer:"Ivan Lashin",row:2,col:6,otherSide:true,categories:["Strategy","Euro","Engine Building"],players:"2-4",playTime:"30-60 min",complexity:2.1,bggRating:7.6,spineColor:"#c0392b",boxSize:"sm",mechanics:["Auction","Engine Building","Resource Management"],description:"An engine-building auction game set during the industrial revolution. Players bid on factory cards, but losing bids grant compensation resources, making every auction outcome strategically valuable."},
-  {id:"century_golem_os",name:"Century: Golem Edition",bggId:312318,year:2017,designer:"Emerson Matsuuchi",row:2,col:6,otherSide:true,categories:["Strategy","Card Game","Family"],players:"2-5",playTime:"30-45 min",complexity:1.8,bggRating:7.6,spineColor:"#2e86c1",boxSize:"sm",mechanics:["Card Drafting","Hand Management","Engine Building"],description:"A re-themed edition of Century: Spice Road with gorgeous golem artwork. Players build a card engine to acquire and upgrade gems, trading them for valuable golem cards."},
   {id:"splendor_marvel_os",name:"Splendor: Marvel",bggId:293296,year:2020,designer:"Marc André",row:2,col:6,otherSide:true,categories:["Strategy","Card Game","Family"],players:"2-4",playTime:"30 min",complexity:1.8,bggRating:7.3,spineColor:"#1a1a8b",boxSize:"sm",mechanics:["Card Drafting","Engine Building","Set Collection"],description:"A Marvel-themed reimplementation of Splendor where players collect infinity gems to recruit heroes and complete the Infinity Gauntlet. Adds new Avengers Assemble location tiles."},
   {id:"legacy_of_yu_os",name:"Legacy of Yu",bggId:354934,year:2023,designer:"Shem Phillips",row:2,col:6,otherSide:true,categories:["Solo","Strategy"],players:"1-1",playTime:"60 min",complexity:2.5,bggRating:8.1,spineColor:"#b8860b",boxSize:"sm",mechanics:["Deck Building","Hand Management","Campaign"],description:"A solo-only campaign game about the legendary Chinese figure Yu the Great. Players manage workers and resources across a branching campaign to build canals and control devastating floods."},
   {id:"pandemic_legacy_s1_os",name:"Pandemic Legacy: Season 1",bggId:161936,year:2015,designer:"Rob Daviau, Matt Leacock",row:2,col:6,otherSide:true,categories:["Co-op","Strategy","Campaign"],players:"2-4",playTime:"60 min",complexity:2.8,bggRating:8.6,spineColor:"#2a1a00",boxSize:"sm",mechanics:["Cooperative Game","Legacy Game","Hand Management","Variable Player Powers"],description:"A campaign evolution of Pandemic where the world map, rules, and characters permanently change across a 12-month story. Stickers, destroyed cities, and evolving abilities create a deeply personal narrative."},
