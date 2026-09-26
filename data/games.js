@@ -17,62 +17,62 @@ const EXTRA_GAMES = {
   200511:{id:"after_the_empire",name:"After the Empire",bggId:200511,year:2021,designer:"Evan Halbert, Ryan Mauk",
     description:"Set in the aftermath of a collapsed empire, players manage a medieval realm balancing resource production, population growth, and defensive fortifications against barbarian raids. Simultaneous action selection and a shared threat create tense decisions about whether to invest in your own kingdom or prepare for the coming onslaught.",
     categories:["Strategy","Worker Placement","Euro"],players:"2-4",playTime:"60-120 min",
-    complexity:2.8,bggRating:7.3,spineColor:"#7f8c8d",boxSize:"md",
+    complexity:3.11,bggRating:7.3,spineColor:"#7f8c8d",boxSize:"md",
     mechanics:["Simultaneous Action Selection","Resource Management","Variable Player Powers"]},
   6707:{id:"age_of_mythology",name:"Age of Mythology: The Boardgame",bggId:6707,year:2003,designer:"Glenn Drover",
     description:"Based on the classic PC game, players command Greek, Egyptian, or Norse civilizations competing for territorial dominance through armies, mythological creatures, and divine favor. Players gather resources, build settlements, recruit units, and invoke god powers to conquer opponents across a modular map.",
     categories:["Strategy","Thematic","Area Control"],players:"2-4",playTime:"120 min",
-    complexity:3.0,bggRating:6.8,spineColor:"#8e44ad",boxSize:"lg",
+    complexity:3.0,bggRating:6.1,spineColor:"#8e44ad",boxSize:"lg",
     mechanics:["Area Control","Variable Player Powers","Resource Management"]},
   247367:{id:"air_land_and_sea",name:"Air, Land, and Sea",bggId:247367,year:2019,designer:"Jon Perry",
     description:"A tense two-player card game of bluffing and tactical placement where players battle for control of three theaters of war using a hand of just six cards. Players may choose to withdraw and concede fewer points rather than risk a devastating loss, creating constant psychological pressure.",
-    categories:["Card Game","Strategy","Abstract"],players:"2-2",playTime:"15-30 min",
-    complexity:1.9,bggRating:7.5,spineColor:"#2c3e50",boxSize:"sm",
+    categories:["Card Game","Strategy","Abstract"],players:"2-2",playTime:"20 min",
+    complexity:1.74,bggRating:7.5,spineColor:"#2c3e50",boxSize:"sm",
     mechanics:["Hand Management","Bluffing","Area Control"]},
-  380844:{id:"altar_of_the_gods",name:"Altar of the Gods",bggId:380844,year:2023,designer:"Vasilis Patroulias",
+  380844:{id:"altar_of_the_gods",name:"Altar of the Gods",bggId:380844,year:2024,designer:"Vasilis Patroulias",
     description:"Players take on the roles of Greek heroes exploring a mythological landscape, collecting offerings and completing rituals to earn the favor of the Olympian gods. The game blends tile placement and set collection as heroes race to build the most impressive altar before the final ceremony.",
-    categories:["Strategy","Card Game","Family"],players:"2-5",playTime:"30-60 min",
-    complexity:2.0,bggRating:7.0,spineColor:"#f39c12",boxSize:"md",
+    categories:["Strategy","Card Game","Family"],players:"2-5",playTime:"30 min",
+    complexity:2.4,bggRating:7.5,spineColor:"#f39c12",boxSize:"md",
     mechanics:["Tile Placement","Set Collection","Hand Management"]},
   185343:{id:"anachrony",name:"Anachrony",bggId:185343,year:2017,designer:"Dávid Turczi, Richard Amann, Viktor Peter",
     description:"In a post-apocalyptic Earth, players lead one of four ideological factions mining resources, constructing buildings, and recruiting workers—even borrowing resources from their own future selves through time travel. The looming impact of a meteorite creates a ticking-clock urgency as factions race to power their exosuits and evacuate survivors.",
     categories:["Strategy","Worker Placement","Euro","Solo"],players:"1-4",playTime:"30-120 min",
-    complexity:3.7,bggRating:7.9,spineColor:"#1a252f",boxSize:"lg",
+    complexity:4.0,bggRating:7.9,spineColor:"#1a252f",boxSize:"lg",
     mechanics:["Worker Placement","Resource Management","Time Travel","Variable Player Powers"]},
-  380681:{id:"apex_legends_board_game",name:"Apex Legends: The Board Game",bggId:380681,year:2025,designer:"Thanos Argyris, Michalis A. Nikolaou",
+  380681:{id:"apex_legends_board_game",name:"Apex Legends: The Board Game",bggId:380681,year:2025,designer:"Thanos Argyris, Michalis Nikolaou",
     description:"Based on the hit battle royale video game, squads of Legends compete across a shrinking map using unique character abilities, weapon loadouts, and tactical positioning to be the last team standing. Players manage action points, loot drops, and ring closures in a dynamic skirmish experience faithful to the source material.",
     categories:["Thematic","Strategy","Area Control"],players:"2-6",playTime:"60-90 min",
-    complexity:2.8,bggRating:7.2,spineColor:"#c0392b",boxSize:"lg",
+    complexity:3.39,bggRating:7.9,spineColor:"#c0392b",boxSize:"lg",
     mechanics:["Variable Player Powers","Area Control","Action Points","Modular Board"]},
   105551:{id:"archipelago",name:"Archipelago",bggId:105551,year:2012,designer:"Christophe Boelinger",
     description:"Players are European powers colonizing a tropical archipelago, exploring islands, harvesting resources, and building markets and cities while managing a restless native population. A semi-cooperative element looms as a shared rebellion track threatens everyone with defeat if the indigenous people revolt.",
     categories:["Strategy","Euro","Area Control","Thematic"],players:"2-5",playTime:"30-240 min",
-    complexity:3.9,bggRating:7.3,spineColor:"#16a085",boxSize:"lg",
+    complexity:3.74,bggRating:7.3,spineColor:"#16a085",boxSize:"lg",
     mechanics:["Area Control","Worker Placement","Resource Management","Variable Player Powers"]},
   359871:{id:"arcs",name:"Arcs",bggId:359871,year:2024,designer:"Cole Wehrle",
     description:"A sci-fi card-driven game of galactic empire-building where players vie for dominance across a crumbling interstellar civilization through clever card play and political maneuvering. The trick-taking-inspired action system creates cascading turns where seizing initiative forces opponents into reactive spirals.",
     categories:["Strategy","Area Control","Card Game"],players:"2-4",playTime:"60-120 min",
-    complexity:3.6,bggRating:8.2,spineColor:"#2c3e50",boxSize:"md",
+    complexity:3.6,bggRating:8.0,spineColor:"#2c3e50",boxSize:"md",
     mechanics:["Card Drafting","Area Control","Variable Player Powers","Action Points"]},
-  359609:{id:"arkham_horror_lcg_revised",name:"Arkham Horror: The Card Game (Revised Edition)",bggId:359609,year:2021,designer:"Nate French, Maxine Juniper Newman",
+  359609:{id:"arkham_horror_lcg_revised",name:"Arkham Horror: The Card Game (Revised Edition)",bggId:359609,year:2021,designer:"Nate French, MJ Newman",
     description:"A cooperative Living Card Game set in H.P. Lovecraft's Cthulhu Mythos where investigators build custom decks to explore haunted locations, uncover dark conspiracies, and battle unspeakable horrors. Choices carry lasting consequences across linked campaign scenarios as investigators gain trauma, earn experience, and upgrade their decks between sessions.",
     categories:["Card Game","Co-op","Campaign","Thematic","Adventure"],players:"1-4",playTime:"45-180 min",
-    complexity:3.6,bggRating:8.4,spineColor:"#2e4a2e",boxSize:"md",
+    complexity:3.6,bggRating:8.6,spineColor:"#2e4a2e",boxSize:"md",
     mechanics:["Deck Building","Cooperative Play","Campaign","Variable Player Powers"]},
   378574:{id:"ascension_tactics_inferno",name:"Ascension Tactics: Inferno",bggId:378574,year:2025,designer:"Gary Arant, Justin Gary",
     description:"A tactical miniatures game fusing deck-building with skirmish combat, where players draft cards to summon heroes and monsters onto a grid battlefield. Each card purchase strengthens your deck while immediately deploying forces, blending the strategic depth of deckbuilding with dynamic positional combat.",
     categories:["Strategy","Deck Building","Thematic"],players:"1-4",playTime:"45-90 min",
-    complexity:2.8,bggRating:7.3,spineColor:"#8e2020",boxSize:"lg",
+    complexity:2.33,bggRating:8.0,spineColor:"#8e2020",boxSize:"lg",
     mechanics:["Deck Building","Grid Movement","Variable Player Powers","Modular Board"]},
   176544:{id:"automania",name:"Automania",bggId:176544,year:2015,designer:"Kenneth Minde, Kristian Amundsen Østby",
     description:"Players run competing automobile factories, hiring workers to research upgrades, manufacture cars, and satisfy the ever-changing demands of global markets. Worker placement on a shared factory floor creates tense competition for limited spaces while players optimize their production lines for maximum profit.",
     categories:["Strategy","Worker Placement","Euro"],players:"2-4",playTime:"60-90 min",
-    complexity:2.7,bggRating:7.0,spineColor:"#e74c3c",boxSize:"md",
+    complexity:2.7,bggRating:7.3,spineColor:"#e74c3c",boxSize:"md",
     mechanics:["Worker Placement","Resource Management","Set Collection"]},
   3955:{id:"bang",name:"BANG!",bggId:3955,year:2002,designer:"Emiliano Sciarra",
     description:"A hidden role card game set in the Wild West where a Sheriff, Deputies, Outlaws, and a Renegade face off in a chaotic gunfight. Players use distance and character abilities to shoot, heal, and manipulate, with each secret role pursuing conflicting win conditions that create bluffing and paranoia.",
     categories:["Card Game","Party","Thematic"],players:"4-7",playTime:"20-40 min",
-    complexity:1.7,bggRating:6.9,spineColor:"#a04000",boxSize:"sm",
+    complexity:1.7,bggRating:6.5,spineColor:"#a04000",boxSize:"sm",
     mechanics:["Hand Management","Hidden Roles","Variable Player Powers"]},
   143741:{id:"bang_dice_game",name:"BANG! The Dice Game",bggId:143741,year:2013,designer:"Michael Palm, Lukas Zach",
     description:"A streamlined dice version of the classic BANG! hidden role game, where players roll custom dice to shoot rivals, draw cards, drink beer, and trigger dynamic events. The push-your-luck dice rolling keeps the Wild West chaos alive in a much faster and more accessible format.",
@@ -82,27 +82,27 @@ const EXTRA_GAMES = {
   344114:{id:"bag_of_chips",name:"Bag of Chips",bggId:344114,year:2021,designer:"Mathieu Aubert, Théo Rivière",
     description:"A light card game where players draw multicolored chip tokens from a bag and bet on which color will score most, then play cards to manipulate the final tally in their favor. Simple rules and quick decisions make it an engaging filler with a satisfying push-your-luck element.",
     categories:["Card Game","Party","Family"],players:"2-5",playTime:"15-20 min",
-    complexity:1.2,bggRating:6.8,spineColor:"#e91e63",boxSize:"sm",
+    complexity:1.2,bggRating:6.4,spineColor:"#e91e63",boxSize:"sm",
     mechanics:["Push Your Luck","Hand Management","Betting"]},
   25417:{id:"battlelore",name:"BattleLore",bggId:25417,year:2006,designer:"Richard Borg",
     description:"A fantasy tactical battle game using the Commands & Colors system, where players command armies of humans, goblins, dwarves, and creatures across historical and mystical battlefields. Lore cards summon powerful creatures and cast spells, adding a magical layer to the classic command card-driven unit maneuvering.",
     categories:["Strategy","Thematic","Area Control"],players:"2-2",playTime:"60 min",
     complexity:2.7,bggRating:7.2,spineColor:"#1565c0",boxSize:"lg",
     mechanics:["Grid Movement","Hand Management","Variable Player Powers","Modular Board"]},
-  358504:{id:"betrayal_3rd_edition",name:"Betrayal at House on the Hill: 3rd Edition",bggId:358504,year:2022,designer:"Dave Chalker, Banana Chan",
+  358504:{id:"betrayal_3rd_edition",name:"Betrayal at House on the Hill: 3rd Edition",bggId:358504,year:2022,designer:"Dave Chalker, Banana Chan, Noah Cohen, Bruce Glassco, Brian Neff, Will Sobel, Jabari Weathers",
     description:"Players explore a haunted mansion room by room, revealing tiles and triggering omens until one player becomes a traitor and unleashes one of dozens of unique horror scenarios. The game splits into a cooperative exploration phase followed by a dramatic asymmetric haunt where the traitor pursues their secret goal against the surviving heroes.",
     categories:["Thematic","Adventure","Co-op"],players:"3-6",playTime:"60 min",
-    complexity:2.4,bggRating:7.0,spineColor:"#4a235a",boxSize:"lg",
+    complexity:2.4,bggRating:7.3,spineColor:"#4a235a",boxSize:"lg",
     mechanics:["Tile Placement","Variable Player Powers","Modular Board","Hidden Roles"]},
   317985:{id:"beyond_the_sun",name:"Beyond the Sun",bggId:317985,year:2020,designer:"Dennis K. Chan",
     description:"Players lead interstellar civilizations competing to develop technologies, colonize star systems, and achieve political dominance in a shared tech tree space opera. Strategic choices about which technologies to advance shape each faction's unique development path while fleets vie for control of planetary systems.",
     categories:["Strategy","Worker Placement","Euro"],players:"2-4",playTime:"60-120 min",
-    complexity:2.9,bggRating:7.8,spineColor:"#1a237e",boxSize:"lg",
+    complexity:3.15,bggRating:7.8,spineColor:"#1a237e",boxSize:"lg",
     mechanics:["Worker Placement","Technology Trees","Area Control","Resource Management"]},
   70:{id:"big_city",name:"Big City",bggId:70,year:1999,designer:"Franz-Benno Delonge",
     description:"Players collaboratively and competitively build a growing metropolis by placing buildings like parks, banks, hotels, and stadiums on a shared city grid. Clever tile placement scores points for adjacency and connectivity, but placing buildings in the wrong order can benefit opponents as much as yourself.",
     categories:["Family","Strategy","Abstract"],players:"2-5",playTime:"60 min",
-    complexity:2.0,bggRating:7.1,spineColor:"#546e7a",boxSize:"md",
+    complexity:2.22,bggRating:6.8,spineColor:"#546e7a",boxSize:"md",
     mechanics:["Tile Placement","Hand Management","Set Collection"]},
   170216:{id:"blood_rage",name:"Blood Rage",bggId:170216,year:2015,designer:"Eric M. Lang",
     description:"Viking clans draft cards granting powerful saga abilities, then wage war, quest, and pillage across a mythological Norse map as Ragnarok destroys the world province by province. Death is not feared—warriors sent to Valhalla still score glory—making aggression a viable and dramatic path to victory.",
@@ -112,37 +112,37 @@ const EXTRA_GAMES = {
   21882:{id:"blue_moon_city",name:"Blue Moon City",bggId:21882,year:2006,designer:"Reiner Knizia",
     description:"Players work together and against each other to reconstruct the ancient city of Blue Moon by contributing colored cards to building sites spread across a modular tile map. Completing buildings earns crystals that are offered to the central Obelisk, and the first player to donate enough offerings claims victory.",
     categories:["Strategy","Card Game","Family"],players:"2-4",playTime:"30-50 min",
-    complexity:1.8,bggRating:6.9,spineColor:"#1e88e5",boxSize:"md",
+    complexity:2.29,bggRating:6.9,spineColor:"#1e88e5",boxSize:"md",
     mechanics:["Hand Management","Tile Placement","Set Collection"]},
   300367:{id:"boomerang_europe",name:"Boomerang: Europe",bggId:300367,year:2020,designer:"Scott Almes",
     description:"Players draft cards depicting European countries and tourist attractions, simultaneously selecting one card to keep and passing the rest, then scoring points from completed sets and collections. The game evokes a whirlwind sightseeing tour with scoring categories for collections, landmarks, and round-trip routes.",
     categories:["Card Game","Family","Puzzle"],players:"2-4",playTime:"15-30 min",
-    complexity:1.5,bggRating:7.0,spineColor:"#1565c0",boxSize:"sm",
+    complexity:1.5,bggRating:6.8,spineColor:"#1565c0",boxSize:"sm",
     mechanics:["Card Drafting","Set Collection","Hand Management"]},
   343905:{id:"boonlake",name:"Boonlake",bggId:343905,year:2021,designer:"Alexander Pfister",
     description:"Players settle an unspoiled wilderness region by claiming land tiles, developing settlements, and fulfilling contracts in a rich multi-layered Euro game. An innovative card-based action system lets players activate sequences of developments, creating powerful chain effects as their personal tableau grows.",
     categories:["Strategy","Euro","Worker Placement"],players:"1-4",playTime:"80-160 min",
-    complexity:3.5,bggRating:7.8,spineColor:"#2e7d32",boxSize:"lg",
+    complexity:3.8,bggRating:7.6,spineColor:"#2e7d32",boxSize:"lg",
     mechanics:["Action Chaining","Tile Placement","Resource Management","Variable Player Powers"]},
   337765:{id:"brian_boru",name:"Brian Boru: High King of Ireland",bggId:337765,year:2021,designer:"Peer Sylvester",
     description:"Players vie to become the dominant king in medieval Ireland through a trick-taking card game that drives area control, marriage alliances, and Viking raids. The results of each trick cascade into map influence and scoring bonuses, creating an elegant fusion of card game tactics and strategic board presence.",
     categories:["Strategy","Card Game","Area Control"],players:"3-5",playTime:"60-90 min",
-    complexity:2.8,bggRating:7.3,spineColor:"#4e342e",boxSize:"md",
+    complexity:2.56,bggRating:7.3,spineColor:"#4e342e",boxSize:"md",
     mechanics:["Trick Taking","Area Control","Hand Management"]},
   172308:{id:"broom_service",name:"Broom Service",bggId:172308,year:2015,designer:"Andreas Pelikan, Alexander Pfister",
     description:"Witches and druids race across an enchanted forest to deliver potions, with players choosing between brave and cowardly versions of their character roles each round. Playing brave grants a stronger action but risks being blocked by opponents who also declare the same role, creating a delightful bluffing and prediction mechanic.",
     categories:["Strategy","Card Game","Family"],players:"2-5",playTime:"30-75 min",
-    complexity:2.1,bggRating:7.0,spineColor:"#6a1b9a",boxSize:"md",
+    complexity:2.39,bggRating:7.2,spineColor:"#6a1b9a",boxSize:"md",
     mechanics:["Hand Management","Bluffing","Variable Player Powers","Action Selection"]},
   172081:{id:"burgle_bros",name:"Burgle Bros.",bggId:172081,year:2015,designer:"Tim Fowers",
     description:"A cooperative heist game where a crew of quirky thieves must crack safes on multiple floors of a procedurally generated building while evading patrolling guards. Players coordinate movement, share special abilities, and manage limited tools to pull off the perfect robbery without getting caught.",
     categories:["Co-op","Thematic","Adventure"],players:"1-4",playTime:"45-90 min",
-    complexity:2.5,bggRating:7.5,spineColor:"#e65100",boxSize:"md",
+    complexity:2.31,bggRating:7.5,spineColor:"#e65100",boxSize:"md",
     mechanics:["Cooperative Play","Modular Board","Hand Management","Variable Player Powers"]},
   283155:{id:"calico",name:"Calico",bggId:283155,year:2020,designer:"Kevin Russ",
     description:"Players sew a patchwork quilt by placing hexagonal tiles of different colors and patterns, trying to attract cats while fulfilling design goals that score for color groups and pattern sequences. The puzzle of simultaneously satisfying multiple overlapping scoring criteria in a limited grid space creates a meditative and satisfying challenge.",
     categories:["Abstract","Puzzle","Family","Solo"],players:"1-4",playTime:"30-45 min",
-    complexity:2.0,bggRating:7.5,spineColor:"#f48fb1",boxSize:"sm",
+    complexity:2.2,bggRating:7.5,spineColor:"#f48fb1",boxSize:"sm",
     mechanics:["Tile Placement","Pattern Building","Hand Management"]},
   290236:{id:"canvas",name:"Canvas",bggId:290236,year:2021,designer:"Jeff Chin, Andrew Nerger",
     description:"Players layer transparent art cards to compose paintings that score points based on the unique symbol combinations visible through the overlapping layers. The striking visual result of each painting and the puzzle of optimizing symbol visibility makes Canvas a deeply satisfying and artistically beautiful experience.",
@@ -152,27 +152,27 @@ const EXTRA_GAMES = {
   171131:{id:"captain_sonar",name:"Captain Sonar",bggId:171131,year:2016,designer:"Roberto Fraga, Yohan Lemonnier",
     description:"Two submarine crews face off in a real-time or turn-based battle, with each player taking a specialized role—captain, first mate, radio operator, or engineer—to track, maneuver, and fire upon the enemy sub. The split roles create exhilarating team communication and deduction as each crew tries to locate and destroy the other before their own systems fail.",
     categories:["Thematic","Deduction","Party"],players:"2-8",playTime:"45-60 min",
-    complexity:2.0,bggRating:7.6,spineColor:"#0d47a1",boxSize:"md",
+    complexity:2.21,bggRating:7.6,spineColor:"#0d47a1",boxSize:"md",
     mechanics:["Real-Time","Deduction","Cooperative Play","Variable Player Powers"]},
   364405:{id:"carcassonne_big_box_7",name:"Carcassonne Big Box 7",bggId:364405,year:2021,designer:"Klaus-Jürgen Wrede",
     description:"The classic tile-laying game bundled with multiple expansions, where players build a medieval landscape of cities, roads, farms, and monasteries by placing tiles and deploying meeple followers to claim features. Competing for the same incomplete features creates constant tension as players decide when to commit their limited followers.",
     categories:["Family","Strategy","Abstract"],players:"2-6",playTime:"35 min",
-    complexity:1.8,bggRating:7.4,spineColor:"#795548",boxSize:"xl",
+    complexity:1.96,bggRating:8.2,spineColor:"#795548",boxSize:"xl",
     mechanics:["Tile Placement","Area Control","Hand Management"]},
   295947:{id:"cascadia",name:"Cascadia",bggId:295947,year:2021,designer:"Randy Flynn",
     description:"Players build a Pacific Northwest habitat by drafting terrain tiles and wildlife tokens, creating interconnected ecosystems of forests, rivers, and prairies to score points. Each game uses a different set of wildlife scoring cards, ensuring that optimal placement of bears, salmon, foxes, hawks, and elk changes every session.",
     categories:["Family","Abstract","Puzzle","Solo"],players:"1-4",playTime:"30-45 min",
-    complexity:1.8,bggRating:7.7,spineColor:"#388e3c",boxSize:"md",
+    complexity:1.8,bggRating:7.9,spineColor:"#388e3c",boxSize:"md",
     mechanics:["Tile Placement","Pattern Building","Set Collection"]},
   345972:{id:"cat_in_the_box",name:"Cat in the Box: Deluxe Edition",bggId:345972,year:2022,designer:"Muneyuki Yokouchi",
     description:"A quantum-physics-themed trick-taking game where cards have no fixed suit—players declare the suit of each card as they play it, placing a token on a shared research board to mark that suit's use. The board creates a secondary puzzle as players risk paradox if the suit they declare is already exhausted.",
     categories:["Card Game","Abstract","Strategy"],players:"2-5",playTime:"20-40 min",
-    complexity:2.1,bggRating:7.7,spineColor:"#7b1fa2",boxSize:"sm",
+    complexity:2.1,bggRating:7.4,spineColor:"#7b1fa2",boxSize:"sm",
     mechanics:["Trick Taking","Hand Management","Pattern Building"]},
   377449:{id:"chomp",name:"Chomp",bggId:377449,year:2023,designer:"Clarence Simpson",
     description:"A light and colorful card game where players compete to feed their hungry creatures by matching and collecting the tastiest food combinations. Quick turns and accessible rules make it a great family filler with just enough tactical bite in the card management.",
     categories:["Card Game","Family","Party"],players:"1-4",playTime:"20 min",
-    complexity:1.2,bggRating:6.7,spineColor:"#f9a825",boxSize:"sm",
+    complexity:1.6,bggRating:6.7,spineColor:"#f9a825",boxSize:"sm",
     mechanics:["Hand Management","Set Collection","Card Drafting"]},
   300300:{id:"chronicles_of_crime_1400",name:"Chronicles of Crime: 1400",bggId:300300,year:2020,designer:"David Cicurel, Wojciech Grajkowski",
     description:"A cooperative mystery-solving game set in medieval Paris, where players use a companion app to scan cards and investigate crime scenes, interrogate suspects, and piece together clues from the 15th century. The app drives narrative branching and location exploration, blending tactile card play with a rich historical detective story.",
@@ -187,87 +187,87 @@ const EXTRA_GAMES = {
   314503:{id:"codex_naturalis",name:"Codex Naturalis",bggId:314503,year:2021,designer:"Thomas Dupont",
     description:"Players build expanding tableaux of illustrated nature cards—depicting plants, animals, fungi, and insects—by overlapping them to cover resource symbols and satisfy scoring objectives. The elegantly simple placement rules give way to a satisfying spatial puzzle of maximizing visible resources and unlocking high-value cards.",
     categories:["Card Game","Abstract","Family"],players:"1-4",playTime:"20-30 min",
-    complexity:1.8,bggRating:7.4,spineColor:"#558b2f",boxSize:"sm",
+    complexity:1.8,bggRating:7.2,spineColor:"#558b2f",boxSize:"sm",
     mechanics:["Tile Placement","Hand Management","Pattern Building","Set Collection"]},
   447850:{id:"colosseum_grand_spectacle",name:"Colosseum: The Grand Spectacle",bggId:447850,year:2026,designer:"Wolfgang Kramer, Markus Lübke",
     description:"Players manage competing Roman entertainment impresarios putting on ever-grander spectacles in the Colosseum, recruiting performers, trading assets, and staging events to draw the largest crowds. Strategic trading, performer management, and timing of star performer appearances create a rich economic competition with theatrical flair.",
     categories:["Strategy","Euro","Family"],players:"1-5",playTime:"60-90 min",
-    complexity:2.5,bggRating:7.5,spineColor:"#c09b5a",boxSize:"lg",
+    complexity:2.71,bggRating:7.8,spineColor:"#c09b5a",boxSize:"lg",
     mechanics:["Set Collection","Trading","Resource Management","Variable Player Powers"]},
   158899:{id:"colt_express",name:"Colt Express",bggId:158899,year:2014,designer:"Christophe Raimbault",
     description:"Players are bandits robbing a moving train in the Wild West, programming their actions into a shared deck that resolves in chaotic, unpredictable sequence. The 3D train model serves as the board while bullets, punches, and sudden marshal interventions disrupt even the best-laid plans.",
     categories:["Family","Thematic","Card Game"],players:"2-6",playTime:"40 min",
-    complexity:1.9,bggRating:6.9,spineColor:"#bf360c",boxSize:"md",
+    complexity:1.9,bggRating:7.1,spineColor:"#bf360c",boxSize:"md",
     mechanics:["Action Programming","Hand Management","Modular Board"]},
   124361:{id:"concordia",name:"Concordia",bggId:124361,year:2013,designer:"Mac Gerdts",
     description:"Players expand a Roman trading empire across the Mediterranean by acquiring colonists, building houses, and purchasing cards that both enable actions and score victory points. The elegant card-driven action system and the dual role of cards as actions and end-game scoring ensures every purchase is a meaningful strategic decision.",
     categories:["Strategy","Euro","Card Game"],players:"2-5",playTime:"100 min",
     complexity:2.9,bggRating:8.0,spineColor:"#b5651d",boxSize:"md",
     mechanics:["Hand Management","Route Building","Resource Management","Engine Building"]},
-  39463:{id:"cosmic_encounter",name:"Cosmic Encounter",bggId:39463,year:2008,designer:"Bill Eberle, Jack Kittredge, Bill Norton, Peter Olotka",
+  39463:{id:"cosmic_encounter",name:"Cosmic Encounter",bggId:39463,year:2008,designer:"Bill Eberle, Jack Kittredge, Bill Norton, Peter Olotka, Kevin Wilson",
     description:"Alien races compete to be the first to establish five colonies in other players' systems, each species wielding a unique and often rule-breaking power that shapes its entire strategy. Negotiation, bluffing, and the ever-present option to ally with attackers or defenders creates explosive diplomatic chaos with every encounter.",
     categories:["Strategy","Thematic","Card Game","Party"],players:"3-5",playTime:"60-120 min",
-    complexity:2.2,bggRating:7.4,spineColor:"#6a1b9a",boxSize:"md",
+    complexity:2.58,bggRating:7.4,spineColor:"#6a1b9a",boxSize:"md",
     mechanics:["Variable Player Powers","Negotiation","Hand Management","Bluffing"]},
   377716:{id:"couture",name:"Couture",bggId:377716,year:2023,designer:"Yusuke Sato",
     description:"Players are fashion designers competing to create the most stunning outfits by drafting and layering card elements representing fabrics, colors, and accessories. Scoring rewards both individual garment elegance and stylistic coherence across a complete seasonal collection.",
     categories:["Card Game","Family","Abstract"],players:"3-6",playTime:"20 min",
-    complexity:1.5,bggRating:7.0,spineColor:"#e91e63",boxSize:"sm",
+    complexity:1.84,bggRating:6.8,spineColor:"#e91e63",boxSize:"sm",
     mechanics:["Card Drafting","Set Collection","Hand Management"]},
   8172:{id:"coyote",name:"Coyote",bggId:8172,year:2003,designer:"Spartaco Albertarelli",
     description:"A bluffing game where players hold a card on their forehead—visible to everyone except themselves—and must collectively bid on the total value of all cards in play without seeing their own. Players escalate bids or challenge the current bid, and the combination of hidden information and social deduction creates constant laughs.",
     categories:["Party","Card Game","Deduction"],players:"3-6",playTime:"20-30 min",
-    complexity:1.2,bggRating:6.9,spineColor:"#d4ac0d",boxSize:"sm",
+    complexity:1.2,bggRating:6.6,spineColor:"#d4ac0d",boxSize:"sm",
     mechanics:["Bluffing","Hidden Information","Bidding"]},
   246784:{id:"cryptid",name:"Cryptid",bggId:246784,year:2018,designer:"Hal Duncan, Ruth Veevers",
     description:"A deduction game where each player holds one secret clue about the habitat of a hidden cryptid. Players take turns questioning each other and placing cubes or discs on the map to logically eliminate possibilities until one player can pinpoint the exact location. Pure logical deduction with no hidden traitor mechanics.",
     categories:["Deduction","Strategy"],players:"3-5",playTime:"30-50 min",
-    complexity:2.27,bggRating:7.6,spineColor:"#3a6b4a",boxSize:"md",
+    complexity:2.27,bggRating:7.4,spineColor:"#3a6b4a",boxSize:"md",
     mechanics:["Deduction","Map Deduction"]},
   245476:{id:"cubirds",name:"CuBirds",bggId:245476,year:2018,designer:"Stefan Alexander",
     description:"A card-collecting game where players lay bird cards in rows shared by all players, triggering flock effects to gather cards into their hands. Collect enough birds of a species to add them to your personal collection, and be the first to complete sets of different species. Light and breezy with lovely illustrated bird artwork.",
     categories:["Card Game","Family"],players:"2-5",playTime:"20 min",
-    complexity:1.38,bggRating:7.1,spineColor:"#4a9e6b",boxSize:"sm",
+    complexity:1.38,bggRating:6.9,spineColor:"#4a9e6b",boxSize:"sm",
     mechanics:["Set Collection","Hand Management"]},
   298069:{id:"cubitos",name:"Cubitos",bggId:298069,year:2021,designer:"John D. Clair",
     description:"A dice-building racing game where players draft and purchase custom dice representing various abilities, then roll them each round to power their runner around the track. Each die face shows different symbols that trigger movement, money, or special powers — but rolling blanks ends your turn early. Tense push-your-luck decisions meet deckbuilding.",
     categories:["Dice","Racing","Engine Building"],players:"2-4",playTime:"30-60 min",
-    complexity:2.5,bggRating:7.4,spineColor:"#d45f1a",boxSize:"md",
+    complexity:2.17,bggRating:7.4,spineColor:"#d45f1a",boxSize:"md",
     mechanics:["Dice Building","Push Your Luck","Racing"]},
   286158:{id:"dei_divide_et_impera",name:"D.E.I.: Divide et Impera",bggId:286158,year:2022,designer:"Tommaso Battista",
     description:"An area control game set in ancient Rome where players expand their influence across territories by deploying legions and managing political alliances. Players balance military conquest with economic development, using action cards to outmaneuver rivals and claim dominance over the Mediterranean world. Strategic depth emerges from the tension between expansion and consolidation.",
     categories:["Area Control","Strategy"],players:"2-4",playTime:"60-90 min",
-    complexity:2.9,bggRating:7.0,spineColor:"#8b2020",boxSize:"md",
+    complexity:3.17,bggRating:7.5,spineColor:"#8b2020",boxSize:"md",
     mechanics:["Area Control","Hand Management","Variable Player Powers"]},
   8946:{id:"da_vinci_code",name:"Da Vinci Code",bggId:8946,year:2002,designer:"Hiroaki Suzuki, Eiji Wakasugi",
     description:"A deduction game where each player arranges a secret row of numbered tiles in ascending order and opponents must guess their values. On your turn, place a new tile in your row and challenge others to identify it — guess correctly and it stays face-up, guess wrong and you give away free information. Tense bluffing meets logical elimination.",
     categories:["Deduction","Family"],players:"2-4",playTime:"15 min",
-    complexity:1.27,bggRating:6.5,spineColor:"#1a1a2e",boxSize:"sm",
+    complexity:1.48,bggRating:6.1,spineColor:"#1a1a2e",boxSize:"sm",
     mechanics:["Deduction","Bluffing"]},
   304985:{id:"dark_ages_holy_roman_empire",name:"Dark Ages: Holy Roman Empire",bggId:304985,year:2021,designer:"Adam Kwapiński, Andrei Novac",
     description:"A competitive strategy game set in the turbulent medieval Holy Roman Empire where players build armies, seize territories, and vie for the Imperial Crown. Players recruit followers from a shared pool, manage resources, and engage in tactical battles across a modular board representing medieval Europe. Deep asymmetric factions and shifting political alliances drive the conflict.",
     categories:["Strategy","Area Control","Thematic"],players:"1-4",playTime:"120-180 min",
-    complexity:3.4,bggRating:7.3,spineColor:"#5c3d1e",boxSize:"lg",
+    complexity:3.4,bggRating:7.8,spineColor:"#5c3d1e",boxSize:"lg",
     mechanics:["Area Control","Variable Player Powers","Hand Management"]},
   225694:{id:"decrypto",name:"Decrypto",bggId:225694,year:2018,designer:"Thomas Dagenais-Lespérance",
     description:"A team word game where each side must transmit a secret code using clue words, but cannot be too obvious or the opposing team will intercept. Over multiple rounds, both teams accumulate knowledge of the other's keywords, creating escalating tension as giving vague clues risks your own team misunderstanding. Clever wordplay and strategic misdirection in one.",
     categories:["Party","Card Game"],players:"3-8",playTime:"15-45 min",
     complexity:1.8,bggRating:7.7,spineColor:"#1a4a6b",boxSize:"sm",
     mechanics:["Team-Based Game","Clue Giving","Pattern Recognition"]},
-  285192:{id:"destinies",name:"Destinies",bggId:285192,year:2021,designer:"Michał Gołębiowski, Filip Miłuński",
+  285192:{id:"destinies",name:"Destinies",bggId:285192,year:2021,designer:"Michał Gołąb Gołębiowski, Filip Miłuński",
     description:"An app-driven competitive adventure game where players explore a richly detailed medieval world pursuing their own hidden quests. The companion app serves as the game master, tracking your choices and dynamically responding to your actions with narrative outcomes. Each scenario tells a branching story through investigation, combat, and moral decisions.",
     categories:["Thematic","Adventure","Solo"],players:"1-3",playTime:"90-150 min",
-    complexity:2.5,bggRating:7.6,spineColor:"#3d2a5e",boxSize:"lg",
+    complexity:1.92,bggRating:7.6,spineColor:"#3d2a5e",boxSize:"lg",
     mechanics:["App-Driven","Storytelling","Variable Player Powers"]},
   218121:{id:"dice_hospital",name:"Dice Hospital",bggId:218121,year:2018,designer:"Stan Kordonskiy, Mike Nudd",
     description:"A worker placement game where players run competing hospitals, admitting patients represented by dice and treating them to raise their pip values before discharging them for points. Specialized wards and staff cards give different abilities for manipulating dice, and new patients arrive each round adding urgent triage decisions. Clever thematic integration of dice as patients with clever euro mechanics.",
     categories:["Worker Placement","Dice","Strategy"],players:"1-4",playTime:"45-90 min",
-    complexity:2.7,bggRating:7.3,spineColor:"#2a7a9e",boxSize:"md",
+    complexity:2.34,bggRating:7.1,spineColor:"#2a7a9e",boxSize:"md",
     mechanics:["Worker Placement","Dice Manipulation","Set Collection"]},
-  256382:{id:"disney_villainous",name:"Disney Villainous",bggId:256382,year:2018,designer:"Prospero Hall",
+  256382:{id:"disney_villainous",name:"Disney Villainous",bggId:256382,year:2018,designer:"Aaron Donogh, Prospero Hall, Brian Kirk",
     description:"An asymmetric strategy game where each player takes on the role of a classic Disney villain with a unique board, card deck, and victory condition. Players move between locations to perform actions like playing cards, gaining power, and advancing their own nefarious scheme while playing fate cards to hinder opponents. A thematic showcase of beloved villains with surprising strategic depth.",
-    categories:["Strategy","Thematic","Family"],players:"2-6",playTime:"50 min",
-    complexity:2.3,bggRating:7.4,spineColor:"#2a1a5e",boxSize:"md",
+    categories:["Strategy","Thematic","Family"],players:"2-6",playTime:"45-120 min",
+    complexity:2.48,bggRating:6.9,spineColor:"#2a1a5e",boxSize:"md",
     mechanics:["Variable Player Powers","Hand Management","Asymmetric Game"]},
   39856:{id:"dixit",name:"Dixit",bggId:39856,year:2008,designer:"Jean-Louis Roubira",
     description:"A storytelling game where players give a clue — a word, phrase, sound, or song — for one of their beautifully illustrated cards, then others secretly choose which of their own cards best matches. Points go to the clue-giver only if some but not all players identify the right card, rewarding creativity over obviousness. Dreamy surrealist artwork drives this gentle party gem.",
@@ -277,57 +277,57 @@ const EXTRA_GAMES = {
   397598:{id:"dune_imperium_uprising",name:"Dune: Imperium – Uprising",bggId:397598,year:2023,designer:"Paul Dennen",
     description:"An expanded standalone deck-building worker placement game set in the Dune universe, introducing six-player support, a new Maker mechanic for riding sandworms, and two-sided board with new locations. Players send agents to contested locations while building their intrigue deck, balancing military strength with political maneuvering for control of Arrakis. More factions, more betrayal, and deeper strategic options than the original.",
     categories:["Deck Building","Worker Placement","Strategy"],players:"1-6",playTime:"60-120 min",
-    complexity:3.0,bggRating:8.3,spineColor:"#c8761a",boxSize:"lg",
+    complexity:3.53,bggRating:8.7,spineColor:"#c8761a",boxSize:"lg",
     mechanics:["Deck Building","Worker Placement","Area Control"]},
   210232:{id:"dungeon_degenerates_hand_of_doom",name:"Dungeon Degenerates: Hand of Doom",bggId:210232,year:2017,designer:"Eric Radey",
     description:"A cooperative sandbox adventure through a gritty, darkly humorous fantasy world where players travel between locations completing quests and battling bizarre monsters. The game features an enormous illustrated event deck and a sandbox map crawl dripping with pulp horror aesthetic and counterculture art. Variable scenario lengths and a sprawling encounter system make each playthrough feel chaotic and unpredictable.",
     categories:["Co-op","Thematic","Adventure","Campaign"],players:"1-4",playTime:"30-360 min",
-    complexity:3.0,bggRating:7.5,spineColor:"#3a1a0a",boxSize:"lg",
+    complexity:3.64,bggRating:8.0,spineColor:"#3a1a0a",boxSize:"lg",
     mechanics:["Cooperative Game","Sandbox","Storytelling"]},
   320097:{id:"eck_solo_trick_taking",name:"ECK: A solo trick-taking card game",bggId:320097,year:2020,designer:"John Burton",
     description:"A solo trick-taking puzzle where a single player competes against a simulated opponent governed by a simple algorithmic ruleset, trying to win a precise number of tricks across multiple hands. The challenge lies in reading the automa's predictable behavior and exploiting it just enough to hit your exact target — no more, no less. A clever rethinking of trick-taking conventions for one.",
     categories:["Solo","Card Game","Puzzle"],players:"1-1",playTime:"15-30 min",
-    complexity:2.0,bggRating:7.0,spineColor:"#2a4a2a",boxSize:"sm",
+    complexity:1.38,bggRating:6.3,spineColor:"#2a4a2a",boxSize:"sm",
     mechanics:["Trick-Taking","Solo / Solitaire Game"]},
-  342900:{id:"earthborne_rangers",name:"Earthborne Rangers",bggId:342900,year:2023,designer:"Andrew Fischer, Brooks Flugaur-Leavitt",
+  342900:{id:"earthborne_rangers",name:"Earthborne Rangers",bggId:342900,year:2023,designer:"Andrew Fischer, Brooks Flugaur-Leavitt, Andrew Navaro, Adam Sadler, Brady Sadler",
     description:"A cooperative card-driven campaign game set in a far-future wilderness where players are rangers protecting the natural world from encroaching industrial threats. Each player builds a personal deck over the campaign, exploring modular terrain tiles, uncovering narrative events, and managing stamina and resources in a richly detailed ecological setting. Expansive campaign length and deep character customization reward long-term investment.",
     categories:["Co-op","Campaign","Deck Building","Adventure"],players:"1-4",playTime:"60-240 min",
-    complexity:3.0,bggRating:8.1,spineColor:"#2d5c3a",boxSize:"lg",
+    complexity:3.48,bggRating:8.1,spineColor:"#2d5c3a",boxSize:"lg",
     mechanics:["Deck Building","Cooperative Game","Campaign / Legacy"]},
   246900:{id:"eclipse_second_dawn",name:"Eclipse: Second Dawn for the Galaxy",bggId:246900,year:2020,designer:"Touko Tahkokallio",
     description:"A grand 4X space epic where players expand their civilization across a hex-tile galaxy, researching technologies, building fleets, and fighting for control of rare resource sectors. The game balances economic engine-building with sudden tactical fleet combat, and a traitor-free diplomatic system creates tense negotiations. The revised second edition streamlines rules and updates components dramatically.",
     categories:["Strategy","Area Control","Euro"],players:"2-6",playTime:"60-200 min",
-    complexity:3.67,bggRating:8.0,spineColor:"#0d1a3a",boxSize:"xl",
+    complexity:3.67,bggRating:8.4,spineColor:"#0d1a3a",boxSize:"xl",
     mechanics:["Area Control","Technology Trees","Variable Player Powers"]},
   218509:{id:"empires_of_the_void_ii",name:"Empires of the Void II",bggId:218509,year:2018,designer:"Ryan Laukat",
     description:"A 4X space exploration and conquest game with rich narrative flavor where players spread across a galaxy of alien worlds, each with unique traits and inhabitants to ally with or subjugate. Players build their empire's military, technology, and political influence while encountering event cards and story beats that give the game a storybook quality. Laukat's distinctive illustrated art style brings a whimsical edge to a crunchy strategy game.",
     categories:["Strategy","Area Control","Thematic"],players:"2-5",playTime:"90-180 min",
-    complexity:3.2,bggRating:7.7,spineColor:"#1a2a5e",boxSize:"lg",
+    complexity:3.5,bggRating:7.4,spineColor:"#1a2a5e",boxSize:"lg",
     mechanics:["Area Control","Variable Player Powers","Hand Management"]},
   233398:{id:"endeavor_age_of_sail",name:"Endeavor: Age of Sail",bggId:233398,year:2018,designer:"Carl de Visser, Jarratt Gray",
     description:"A streamlined euro game of exploration and colonialism where players build up attributes — industry, culture, finance, and influence — to open new sea routes and occupy cities across a world map. Buildings placed in your home city grant recurring actions while tokens placed on the board earn end-game points and special abilities. Elegant action selection and tight resource interplay reward careful planning.",
     categories:["Euro","Strategy","Area Control"],players:"2-5",playTime:"60-90 min",
-    complexity:2.72,bggRating:7.6,spineColor:"#1a4a6b",boxSize:"md",
+    complexity:2.72,bggRating:7.8,spineColor:"#1a4a6b",boxSize:"md",
     mechanics:["Area Control","Variable Phase Order","Engine Building"]},
   142379:{id:"escape_plan",name:"Escape Plan",bggId:142379,year:2019,designer:"Vital Lacerda",
     description:"A competitive heist game where players are criminals who just robbed a bank and must escape the city before the police lock it down entirely. Each turn the city loses more exit points and accessible zones as a modular tension track advances, forcing players to decide when to cash out their loot and flee. Lacerda's signature interlocking action systems create a tense puzzle of diminishing options.",
     categories:["Strategy","Euro","Thematic"],players:"1-5",playTime:"60-120 min",
-    complexity:3.9,bggRating:7.7,spineColor:"#1a1a1a",boxSize:"lg",
+    complexity:3.68,bggRating:7.5,spineColor:"#1a1a1a",boxSize:"lg",
     mechanics:["Variable Phase Order","Network Building","Modular Board"]},
   280794:{id:"etherfields",name:"Etherfields",bggId:280794,year:2020,designer:"Michał Oracz",
     description:"A cooperative campaign game set in a dreamlike world where players take on the roles of dreamers navigating surreal landscapes filled with strange creatures and cryptic puzzles. Actions are powered by cards played from a shared hand, and the game's dream logic means narrative surprises can fundamentally alter how mechanics work from scenario to scenario. Hauntingly beautiful miniatures and deeply atmospheric art define the experience.",
     categories:["Co-op","Campaign","Thematic","Adventure"],players:"1-4",playTime:"90-180 min",
-    complexity:3.1,bggRating:7.8,spineColor:"#2d1a5e",boxSize:"xl",
+    complexity:3.59,bggRating:7.8,spineColor:"#2d1a5e",boxSize:"xl",
     mechanics:["Cooperative Game","Campaign / Legacy","Hand Management"]},
   172225:{id:"exploding_kittens",name:"Exploding Kittens",bggId:172225,year:2015,designer:"Matthew Inman, Elan Lee, Shane Small",
     description:"A fast card game of kitty-powered Russian roulette where players draw cards hoping to avoid the dreaded Exploding Kitten card. A hand full of action cards lets you skip draws, peek at the deck, shuffle, steal, or force others to take their turn — all to ensure someone else blows up first. Absurdist humor and quick plays make it a go-to party opener.",
     categories:["Party","Card Game","Family"],players:"2-5",playTime:"15 min",
-    complexity:1.07,bggRating:5.9,spineColor:"#e8a020",boxSize:"sm",
+    complexity:1.07,bggRating:6.1,spineColor:"#e8a020",boxSize:"sm",
     mechanics:["Hand Management","Take That","Press Your Luck"]},
   171273:{id:"fuse",name:"FUSE",bggId:171273,year:2015,designer:"Kane Klenko",
     description:"A real-time cooperative game where players race against a 10-minute timer to defuse a series of bombs by placing dice matching specific color and number requirements on bomb cards. All players roll their dice simultaneously each round and must quickly negotiate who places which die where — every second counts. Frantic, loud, and enormously replayable with increasing difficulty options.",
     categories:["Co-op","Dice","Party"],players:"1-5",playTime:"10 min",
-    complexity:1.63,bggRating:7.3,spineColor:"#c0392b",boxSize:"sm",
+    complexity:1.63,bggRating:7.0,spineColor:"#c0392b",boxSize:"sm",
     mechanics:["Cooperative Game","Real-Time","Dice Rolling"]},
   223040:{id:"fantasy_realms",name:"Fantasy Realms",bggId:223040,year:2017,designer:"Bruce Glassco",
     description:"A hand-optimization card game where players draft cards from a central tableau to build a hand of exactly seven cards, maximizing the synergistic bonuses and penalties between them. Every card has a scoring rule that interacts with other cards in your hand — royals boost armies, wizards negate dragons, floods wipe out lands. A single game plays in 20 minutes but produces remarkably surprising combinations.",
@@ -336,13 +336,13 @@ const EXTRA_GAMES = {
     mechanics:["Hand Management","Set Collection","Card Drafting"]},
   385761:{id:"faraway",name:"Faraway",bggId:385761,year:2023,designer:"Johannes Goupy, Corentin Lebrat",
     description:"A card drafting game where players journey into an unexplored land by playing region cards one at a time, then score sanctuary cards in reverse order of play — meaning your first choices are scored last. This unusual scoring twist demands you think backward from the destination to the starting point. Simple rules mask a deeply puzzly optimization challenge.",
-    categories:["Card Game","Strategy","Puzzle"],players:"2-6",playTime:"15-30 min",
+    categories:["Card Game","Strategy","Puzzle"],players:"2-6",playTime:"25 min",
     complexity:1.8,bggRating:7.4,spineColor:"#6b9e4a",boxSize:"sm",
     mechanics:["Card Drafting","Hand Management","Set Collection"]},
   347703:{id:"first_rat",name:"First Rat",bggId:347703,year:2022,designer:"Gabriele Ausiello, Virginio Gigli",
     description:"A family racing game where players move their colony of rats along a track toward a rocket ship, collecting resources and building shortcuts to accelerate their journey. The path is shared by all, and positioning determines what resources you can collect, creating meaningful interaction without direct conflict. Charming artwork and accessible rules make it equally enjoyable for families and hobby gamers.",
     categories:["Racing","Family","Euro"],players:"1-5",playTime:"30-75 min",
-    complexity:1.9,bggRating:7.3,spineColor:"#c8a020",boxSize:"md",
+    complexity:2.27,bggRating:7.5,spineColor:"#c8a020",boxSize:"md",
     mechanics:["Racing","Network Building","Set Collection"]},
   157354:{id:"five_tribes",name:"Five Tribes",bggId:157354,year:2014,designer:"Bruno Cathala",
     description:"A mancala-inspired euro game set in the Arabian Nights world of Naqala where players move colored meeples across a grid of tiles, claiming locations by ending a move on a tile whose last meeple matches its color. The five tribes each grant unique powers — assassins eliminate meeples, merchants generate gold, builders score tiles — and turn order is bid for each round. A brilliant blend of area control and hand-feel puzzle.",
@@ -352,7 +352,7 @@ const EXTRA_GAMES = {
   245961:{id:"fleet_dice_game",name:"Fleet: The Dice Game",bggId:245961,year:2018,designer:"Ben Pinchback, Matt Riddle",
     description:"A press-your-luck dice game of deep-sea fishing where players roll and assign dice to launch boats, catch fish, and process their haul for points. Licensing different boat types unlocks new dice symbols and chain-reaction bonuses, building a personal tableau engine over the course of the game. Satisfying escalation as your fishing fleet grows more capable each round.",
     categories:["Dice","Engine Building","Solo"],players:"1-4",playTime:"30-45 min",
-    complexity:1.8,bggRating:7.3,spineColor:"#1a5e8b",boxSize:"sm",
+    complexity:2.5,bggRating:7.6,spineColor:"#1a5e8b",boxSize:"sm",
     mechanics:["Dice Rolling","Push Your Luck","Engine Building"]},
   175155:{id:"forbidden_stars",name:"Forbidden Stars",bggId:175155,year:2015,designer:"Samuel Bailey, James Kniffen, Corey Konieczka",
     description:"A Warhammer 40,000 strategic conquest game where players command Space Marines, Orks, Eldar, or Chaos Marines competing to retrieve ancient objective tokens scattered across a modular star system. Orders are placed simultaneously on planets using stacking order tokens that resolve in layered priority, creating deep bluffing and read-your-opponent gameplay. Intricate combat resolution and rich faction asymmetry reward deep study.",
@@ -362,17 +362,17 @@ const EXTRA_GAMES = {
   30334:{id:"fort_boyard",name:"Fort Boyard",bggId:30334,year:1998,designer:"(Uncredited)",
     description:"A family game based on the French television adventure show of the same name where players send their team on challenges across the famous fort to collect keys and earn the final treasure code. Largely luck-driven mini-challenges and card draws replicate the chaotic game-show energy of the original program. A nostalgic curiosity piece for fans of the beloved European TV franchise.",
     categories:["Family","Party","Thematic"],players:"2-6",playTime:"45 min",
-    complexity:1.3,bggRating:5.8,spineColor:"#c8a020",boxSize:"md",
+    complexity:1.0,bggRating:5.0,spineColor:"#c8a020",boxSize:"md",
     mechanics:["Variable Player Powers","Hand Management","Push Your Luck"]},
   284189:{id:"foundations_of_rome",name:"Foundations of Rome",bggId:284189,year:2022,designer:"Emerson Matsuuchi",
     description:"A city-building game where players purchase land plots in an ever-growing ancient Rome and construct residences, shops, and grand monuments to score income and prestige. The shared city board means every building placement directly impacts what neighboring opponents can build, turning spatial competition into a delicious puzzle. Stunning production with detailed miniature buildings brings the city to life visually.",
     categories:["Strategy","Euro","Family"],players:"1-5",playTime:"60-90 min",
-    complexity:2.4,bggRating:7.6,spineColor:"#c87840",boxSize:"xl",
+    complexity:2.02,bggRating:8.0,spineColor:"#c87840",boxSize:"xl",
     mechanics:["Area Control","Network Building","Income"]},
   370581:{id:"fractured_sky",name:"Fractured Sky",bggId:370581,year:2024,designer:"Max Anderson, Zac Dixon, Austin Harrison",
     description:"A competitive strategy game where players command factions vying for dominance across a world of floating islands, deploying airships and units to capture territory and control powerful sky rifts. Resource management, area control, and asymmetric faction powers combine in a layered conflict over a modular board that changes with each setup. Dynamic momentum swings reward aggressive tactical play.",
     categories:["Strategy","Area Control","Thematic"],players:"1-5",playTime:"45-75 min",
-    complexity:2.8,bggRating:7.5,spineColor:"#3a6b9e",boxSize:"lg",
+    complexity:2.37,bggRating:7.5,spineColor:"#3a6b9e",boxSize:"lg",
     mechanics:["Area Control","Variable Player Powers","Modular Board"]},
   140603:{id:"francis_drake",name:"Francis Drake",bggId:140603,year:2013,designer:"Peter Hawes",
     description:"A simultaneous action selection and pickup-and-deliver game where players outfit their ships in Plymouth's harbor before setting sail on a shared Caribbean adventure. In the harbor phase, players race to claim limited supplies and crew from a shared track using hidden planning; at sea, they visit ports, attack enemies, and race home with their plunder. Elegant dual-phase structure creates high tension in both halves.",
@@ -382,27 +382,27 @@ const EXTRA_GAMES = {
   43570:{id:"friday",name:"Friday",bggId:43570,year:2011,designer:"Friedemann Friese",
     description:"A solo deck-building survival game where you play as Friday helping Robinson Crusoe battle the hazards of a tropical island and grow strong enough to defeat the pirates who arrive at the game's end. Each failed encounter forces you to age Robinson's deck with useless aging cards, while successful fights let you absorb powerful hazard cards as skills. A cleverly designed solo puzzle with escalating pressure.",
     categories:["Solo","Deck Building","Card Game"],players:"1-1",playTime:"25 min",
-    complexity:1.99,bggRating:7.1,spineColor:"#2d7a3a",boxSize:"sm",
+    complexity:2.16,bggRating:7.1,spineColor:"#2d7a3a",boxSize:"sm",
     mechanics:["Deck Building","Solo / Solitaire Game","Hand Management"]},
   384213:{id:"fromage",name:"Fromage",bggId:384213,year:2024,designer:"Matthew OMalley, Ben Rosset",
     description:"A card-drafting and set-collection game themed around artisanal cheese-making where players select cheese wheels and pairings to build a scoring tableau. Each card scores differently depending on adjacent cards and fulfilled conditions, rewarding careful arrangement over simple accumulation. Delightfully flavorful theme is matched by satisfying puzzle-like card placement decisions.",
     categories:["Card Game","Strategy","Puzzle"],players:"1-4",playTime:"30-45 min",
-    complexity:1.9,bggRating:7.3,spineColor:"#e0c050",boxSize:"sm",
+    complexity:2.37,bggRating:7.7,spineColor:"#e0c050",boxSize:"sm",
     mechanics:["Card Drafting","Set Collection","Tableau Building"]},
   318084:{id:"furnace",name:"Furnace",bggId:318084,year:2020,designer:"Ivan Lashin",
     description:"An industrial engine-building game set in the steam age where players bid on company cards to build their industrial empire, then use their acquired companies to process resources into goods and goods into points. The clever bidding mechanism means that outbid players receive compensation tokens to power their existing engines, ensuring no turn is ever wasted. A tight, satisfying euro with minimal downtime.",
     categories:["Euro","Engine Building","Strategy"],players:"2-4",playTime:"30-60 min",
-    complexity:2.35,bggRating:7.6,spineColor:"#8b3a1a",boxSize:"sm",
+    complexity:2.35,bggRating:7.4,spineColor:"#8b3a1a",boxSize:"sm",
     mechanics:["Auction / Bidding","Engine Building","Commodity Speculation"]},
   336794:{id:"galaxy_trucker",name:"Galaxy Trucker",bggId:336794,year:2021,designer:"Vlaada Chvátil",
     description:"A chaotic ship-building and space-trucking race where players frantically grab tiles in real time to assemble their spacecraft before launching into a shared adventure deck full of meteors, pirates, and slavers trying to demolish everything you built. The faster you finish building, the earlier you depart — but a rushed ship falls apart spectacularly under fire. Hilarious entropy as lovingly built ships disintegrate piece by piece.",
     categories:["Racing","Family","Thematic"],players:"2-4",playTime:"20-30 min",
-    complexity:2.24,bggRating:7.6,spineColor:"#1a3a6b",boxSize:"md",
+    complexity:2.24,bggRating:7.4,spineColor:"#1a3a6b",boxSize:"md",
     mechanics:["Real-Time","Modular Board","Racing"]},
-  204837:{id:"game_of_thrones_iron_throne",name:"Game of Thrones: The Iron Throne",bggId:204837,year:2016,designer:"Bill Eberle, Justin Kemppainen",
+  204837:{id:"game_of_thrones_iron_throne",name:"Game of Thrones: The Iron Throne",bggId:204837,year:2016,designer:"Bill Eberle, Justin Kemppainen, Peter Olotka, Greg Olotka",
     description:"A negotiation and betrayal game set in the HBO Game of Thrones universe where players represent the great houses competing for dominance of the Seven Kingdoms through shifting alliances and backstabbing deals. Players make and break promises freely as they maneuver characters to claim objectives, with the Iron Throne offering powerful abilities to whoever holds it. Unabashedly political with constant table talk and treachery.",
     categories:["Thematic","Strategy","Party"],players:"3-5",playTime:"30-60 min",
-    complexity:2.2,bggRating:6.2,spineColor:"#1a1a1a",boxSize:"md",
+    complexity:2.7,bggRating:6.8,spineColor:"#1a1a1a",boxSize:"md",
     mechanics:["Negotiation","Variable Player Powers","Area Control"]},
   265188:{id:"glen_more_ii_chronicles",name:"Glen More II: Chronicles",bggId:265188,year:2019,designer:"Matthias Cramer",
     description:"A tile-drafting and area-expansion euro game set in the Scottish Highlands where players build their clan's estate by acquiring land tiles representing villages, pastures, lochs, and whisky distilleries. Players move a shared market pawn to select tiles, meaning going further ahead for a better tile lets opponents take more turns. Modular chronicle cards introduce new rules that make each game distinctly different.",
@@ -411,13 +411,13 @@ const EXTRA_GAMES = {
     mechanics:["Tile Placement","Variable Phase Order","Engine Building"]},
   393672:{id:"gloomhaven_buttons_and_bugs",name:"Gloomhaven: Buttons & Bugs",bggId:393672,year:2024,designer:"Joe Klipfel, Nikki Valens",
     description:"A tiny solo adaptation of Gloomhaven where you play a miniaturized mercenary battling insects and household hazards across a grid-based dungeon on a deck of cards. The core Gloomhaven card-play system — choosing two cards each round for top and bottom actions — is faithfully preserved in a remarkably compact format. A surprisingly deep dungeon crawl that fits in your pocket.",
-    categories:["Solo","Co-op","Card Game","Adventure"],players:"1-1",playTime:"20-30 min",
-    complexity:2.3,bggRating:7.9,spineColor:"#3a5a2a",boxSize:"sm",
+    categories:["Solo","Co-op","Card Game","Adventure"],players:"1-1",playTime:"20 min",
+    complexity:3.32,bggRating:7.5,spineColor:"#3a5a2a",boxSize:"sm",
     mechanics:["Hand Management","Cooperative Game","Grid Movement"]},
-  250337:{id:"gloomhaven_forgotten_circles",name:"Gloomhaven: Forgotten Circles",bggId:250337,year:2019,designer:"Isaac Childres, Marcel Cwertetschka-Mattasits",
+  250337:{id:"gloomhaven_forgotten_circles",name:"Gloomhaven: Forgotten Circles",bggId:250337,year:2019,designer:"Isaac Childres, Marcel Dragomir",
     description:"An expansion campaign for Gloomhaven featuring a new Aesther Diviner character class and a story that ties into the lore of the mysterious Gloom itself. Players work through a series of new scenarios with revised puzzle elements and level designs that challenge experienced Gloomhaven veterans. Introduces circles as interactive map elements that add new tactical dimensions to combat.",
     categories:["Co-op","Campaign","Thematic","Adventure"],players:"1-4",playTime:"60-120 min",
-    complexity:3.6,bggRating:8.0,spineColor:"#2a3a5e",boxSize:"md",
+    complexity:4.3,bggRating:7.7,spineColor:"#2a3a5e",boxSize:"md",
     mechanics:["Cooperative Game","Campaign / Legacy","Hand Management"]},
   291457:{id:"gloomhaven_jaws_of_the_lion",name:"Gloomhaven: Jaws of the Lion",bggId:291457,year:2020,designer:"Isaac Childres",
     description:"A streamlined standalone entry point into the Gloomhaven universe where four new mercenaries investigate the sinister Vermling cult in a 25-scenario campaign. The box includes simplified setup with dungeon books replacing map tiles, and a tutorial-style first few scenarios that gradually introduce the deep card-management combat system. Excellent value and accessibility make it the best Gloomhaven starting point.",
@@ -432,27 +432,27 @@ const EXTRA_GAMES = {
   380607:{id:"great_western_trail_new_zealand",name:"Great Western Trail: New Zealand",bggId:380607,year:2023,designer:"Alexander Pfister",
     description:"A standalone reimplementation of Great Western Trail set in New Zealand where players drive sheep instead of cattle, navigating a new map with distinctive terrain and updated mechanics. Players build their personal trail network, hire skilled workers, and deliver livestock to Auckland via routes that interact with opponents' trails in new ways. Fresh setting and refined mechanics offer familiar depth with new strategic wrinkles.",
     categories:["Euro","Strategy","Engine Building"],players:"1-4",playTime:"75-150 min",
-    complexity:3.5,bggRating:8.1,spineColor:"#3a7a3a",boxSize:"lg",
+    complexity:3.99,bggRating:8.4,spineColor:"#3a7a3a",boxSize:"lg",
     mechanics:["Network Building","Hand Management","Engine Building"]},
   250458:{id:"gugong",name:"Gùgōng",bggId:250458,year:2018,designer:"Andreas Steding",
     description:"A worker placement game set in the Forbidden City of imperial China where players send servants to exchange gifts with officials, gaining favors and influence by giving higher-value cards than those they receive. The gift exchange mechanism ensures cards continuously cycle through the game, creating meaningful card management decisions alongside classic worker placement competition. Elegant theme integration and tight action economy reward careful planning.",
     categories:["Euro","Strategy","Worker Placement"],players:"1-5",playTime:"60-90 min",
-    complexity:2.8,bggRating:7.7,spineColor:"#c82020",boxSize:"md",
+    complexity:3.08,bggRating:7.4,spineColor:"#c82020",boxSize:"md",
     mechanics:["Worker Placement","Hand Management","Variable Player Powers"]},
-  214484:{id:"hexplore_it_valley",name:"HEXplore It: The Valley of the Dead King",bggId:214484,year:2017,designer:"Jeff Carmickle",
+  214484:{id:"hexplore_it_valley",name:"HEXplore It: The Valley of the Dead King",bggId:214484,year:2017,designer:"Kat Kimoundri, Nathan Loos, Jonathan Mariucci",
     description:"A cooperative hex-based adventure game set in a dark fantasy world where players build heroes and explore a modular board filled with monsters, dungeons, and deadly encounters. Players level up their characters by combining role cards, collecting items, and growing stronger to ultimately challenge the Dead King.",
     categories:["Co-op","Adventure","Thematic"],players:"1-6",playTime:"60-180 min",
-    complexity:3.2,bggRating:8.1,spineColor:"#3a1a4a",boxSize:"lg",
+    complexity:3.2,bggRating:7.8,spineColor:"#3a1a4a",boxSize:"lg",
     mechanics:["Cooperative Game","Modular Board","Role Playing","Variable Player Powers"]},
   371688:{id:"huang",name:"HUANG",bggId:371688,year:2024,designer:"Reiner Knizia",
     description:"An abstract area-control game set in ancient China where players compete to dominate provinces along the Yellow River. Players place tiles to claim regions, balancing expansion with defensive positioning as the river's course shifts the value of territories.",
     categories:["Abstract","Area Control","Strategy"],players:"2-4",playTime:"90 min",
-    complexity:2.5,bggRating:7.4,spineColor:"#c8860a",boxSize:"md",
+    complexity:3.07,bggRating:7.9,spineColor:"#c8860a",boxSize:"md",
     mechanics:["Area Majority / Influence","Tile Placement","Hand Management"]},
   276086:{id:"hamlet_village_building",name:"Hamlet: The Village Building Game",bggId:276086,year:2022,designer:"David Chircop",
     description:"Players cooperate to grow a small hamlet into a thriving village by placing buildings and connecting roads across a modular hex board. Resources are transported along paths between buildings, and players must efficiently route goods to complete construction projects before time runs out.",
     categories:["Euro","Strategy","Co-op"],players:"1-4",playTime:"25-100 min",
-    complexity:2.8,bggRating:7.8,spineColor:"#5a7a3a",boxSize:"md",
+    complexity:2.8,bggRating:6.8,spineColor:"#5a7a3a",boxSize:"md",
     mechanics:["Cooperative Game","Network and Route Building","Tile Placement","Resource Management"]},
   98778:{id:"hanabi",name:"Hanabi",bggId:98778,year:2010,designer:"Antoine Bauza",
     description:"A cooperative card game where players hold their hands facing outward so only their teammates can see their cards. Using carefully worded clues, players work together to play numbered fireworks cards in the correct sequence without ever seeing their own hand.",
@@ -464,22 +464,22 @@ const EXTRA_GAMES = {
     categories:["Card Game","Strategy","Abstract"],players:"2-2",playTime:"15 min",
     complexity:1.8,bggRating:7.4,spineColor:"#b03060",boxSize:"sm",
     mechanics:["Hand Management","Set Collection","Simultaneous Action Selection"]},
-  199042:{id:"harry_potter_hogwarts_battle",name:"Harry Potter: Hogwarts Battle",bggId:199042,year:2016,designer:"Kami Mandell, Andrew Wolf",
+  199042:{id:"harry_potter_hogwarts_battle",name:"Harry Potter: Hogwarts Battle",bggId:199042,year:2016,designer:"Sean Fletcher, Forrest-Pruzan Creative, Kami Mandell, Andrew Wolf",
     description:"A cooperative deck-building game that follows the story of all seven Harry Potter books, with each chapter introducing new cards, villains, and mechanics into the box. Players build their decks by acquiring spells, items, and allies to push back Dark Arts cards and defeat villains before Hogwarts locations fall.",
     categories:["Co-op","Deck Building","Thematic"],players:"2-4",playTime:"30-60 min",
-    complexity:2.0,bggRating:7.7,spineColor:"#5c1a1a",boxSize:"lg",
+    complexity:2.0,bggRating:7.3,spineColor:"#5c1a1a",boxSize:"lg",
     mechanics:["Cooperative Game","Deck Construction","Hand Management","Variable Set-up"]},
-  366013:{id:"heat_pedal_to_metal",name:"Heat: Pedal to the Metal",bggId:366013,year:2022,designer:"Asger Harding Granerud, Daniel Skjold Pedersen",
+  366013:{id:"heat_pedal_to_metal",name:"Heat: Pedal to the Metal",bggId:366013,year:2022,designer:"Asger Aleksandrov Granerud, Daniel Skjold Pedersen",
     description:"A racing game that uses hand management to simulate the push and pull of high-speed driving, where players must manage heat cards that accumulate in their deck when pushing too hard on straights or failing to brake for corners. The risk of crossing the finish line with too much heat creates thrilling last-lap decisions.",
     categories:["Racing","Card Game","Family"],players:"1-6",playTime:"30-60 min",
-    complexity:2.0,bggRating:7.9,spineColor:"#c0392b",boxSize:"lg",
+    complexity:2.2,bggRating:7.9,spineColor:"#c0392b",boxSize:"lg",
     mechanics:["Hand Management","Push Your Luck","Race","Variable Player Powers"]},
-  355326:{id:"heroes_might_magic_3",name:"Heroes of Might & Magic III: The Board Game",bggId:355326,year:2024,designer:"Michał Oracz, Błażej Kubacki",
+  355326:{id:"heroes_might_magic_3",name:"Heroes of Might & Magic III: The Board Game",bggId:355326,year:2024,designer:"Kamil Białkowski, Jakub S. Olekszyk",
     description:"A faithful adaptation of the beloved PC strategy classic, where players command heroes exploring a fantasy world, recruiting creature stacks and capturing resource mines. Turn-based combat occurs on a grid battlefield when armies meet, recreating the iconic hex-combat system of the original game.",
-    categories:["Strategy","Thematic","Area Control"],players:"1-4",playTime:"90-120 min",
-    complexity:3.5,bggRating:8.0,spineColor:"#2e4a1e",boxSize:"xl",
+    categories:["Strategy","Thematic","Area Control"],players:"1-3",playTime:"90-120 min",
+    complexity:3.5,bggRating:7.7,spineColor:"#2e4a1e",boxSize:"xl",
     mechanics:["Area Majority / Influence","Grid Movement","Modular Board","Variable Player Powers"]},
-  448713:{id:"heroes_shire_light_shadow",name:"Heroes of the Shire: Light & Shadow",bggId:448713,year:2026,designer:"",
+  448713:{id:"heroes_shire_light_shadow",name:"Heroes of the Shire: Light & Shadow",bggId:448713,year:2026,designer:"Damian Senior",
     description:"A cooperative adventure game set in a Tolkien-inspired world where players take on the roles of hobbit heroes defending the Shire from encroaching darkness. Players explore modular tiles, manage limited resources, and face escalating shadow threats in a campaign-style narrative adventure.",
     categories:["Co-op","Adventure","Thematic"],players:"1-6",playTime:"30-180 min",
     complexity:2.8,bggRating:7.5,spineColor:"#3a5a2a",boxSize:"lg",
@@ -487,37 +487,37 @@ const EXTRA_GAMES = {
   304847:{id:"hidden_games_new_haven",name:"Hidden Games Crime Scene: The New Haven Case",bggId:304847,year:2019,designer:"",
     description:"A real crime-scene investigation game where players examine physical evidence cards, photographs, and documents to solve an authentic unsolved case. Players piece together clues, research leads online, and submit their conclusions through a website to receive feedback on their detective work.",
     categories:["Co-op","Deduction","Puzzle"],players:"1-6",playTime:"90-180 min",
-    complexity:2.0,bggRating:7.2,spineColor:"#2a2a3a",boxSize:"sm",
+    complexity:2.43,bggRating:8.0,spineColor:"#2a2a3a",boxSize:"sm",
     mechanics:["Cooperative Game","Deduction","Storytelling"]},
   254888:{id:"high_rise",name:"High Rise",bggId:254888,year:2020,designer:"Gil Hova",
     description:"A cutthroat city-building game where players construct skyscrapers across a Manhattan-inspired grid, competing to have the tallest buildings in as many neighborhoods as possible. Corruption is an ever-present temptation — taking corrupt actions accelerates your building but permanently handicaps your final scoring.",
     categories:["Strategy","Euro","Worker Placement"],players:"1-4",playTime:"100-150 min",
-    complexity:3.4,bggRating:7.5,spineColor:"#1a2a4a",boxSize:"lg",
+    complexity:2.94,bggRating:7.1,spineColor:"#1a2a4a",boxSize:"lg",
     mechanics:["Area Majority / Influence","Worker Placement","Hand Management","Income"]},
-  282524:{id:"horrified",name:"Horrified",bggId:282524,year:2019,designer:"Prospero Hall",
+  282524:{id:"horrified",name:"Horrified",bggId:282524,year:2019,designer:"Prospero Hall, Peter Lee",
     description:"A cooperative game where players work together to defeat iconic Universal Monsters roaming a town, each with their own unique defeat condition and threatening behavior. Players move around the board collecting items, rescuing villagers, and fulfilling multi-step monster-specific tasks before the terror track reaches the end.",
     categories:["Co-op","Thematic","Family"],players:"1-5",playTime:"60 min",
     complexity:2.0,bggRating:7.5,spineColor:"#2a1a3a",boxSize:"md",
     mechanics:["Cooperative Game","Modular Board","Variable Player Powers","Hand Management"]},
   318184:{id:"imperium_classics",name:"Imperium: Classics",bggId:318184,year:2021,designer:"Nigel Buckle, Dávid Turczi",
     description:"An asymmetric deck-building game where each player leads a historical civilization — from Rome to Carthage — through a unique development path from barbarism to empire. Each nation plays completely differently, with special cards and mechanics that reflect its historical character, creating highly varied game experiences.",
-    categories:["Deck Building","Strategy","Card Game"],players:"1-4",playTime:"60-120 min",
-    complexity:3.5,bggRating:7.9,spineColor:"#7a4a1a",boxSize:"lg",
+    categories:["Deck Building","Strategy","Card Game"],players:"1-4",playTime:"40-160 min",
+    complexity:3.5,bggRating:7.7,spineColor:"#7a4a1a",boxSize:"lg",
     mechanics:["Deck Construction","Asymmetric Factions","Hand Management","Variable Player Powers"]},
   15512:{id:"incan_gold",name:"Incan Gold",bggId:15512,year:2005,designer:"Bruno Faidutti, Alan R. Moon",
     description:"A push-your-luck exploration game where players venture deeper into an Incan temple, voting simultaneously each round whether to press on for more treasure or retreat to safety. Hazard cards accumulate with each deck shuffle, and any explorer caught in the temple when a second hazard of the same type appears loses everything.",
-    categories:["Card Game","Party","Family"],players:"3-8",playTime:"30 min",
+    categories:["Card Game","Party","Family"],players:"3-8",playTime:"20-40 min",
     complexity:1.1,bggRating:6.9,spineColor:"#c8a020",boxSize:"sm",
     mechanics:["Push Your Luck","Simultaneous Action Selection","Negotiation"]},
   155821:{id:"inis",name:"Inis",bggId:155821,year:2016,designer:"Christian Martinez",
     description:"An area-control game steeped in Celtic mythology where players draft action cards each round and use them to move clans, gather deeds, and contest territories across a modular island map. Victory requires holding three of the four win conditions simultaneously — being a king of a territory, leading a sanctuary, or presiding over a large clan gathering.",
     categories:["Area Control","Strategy","Thematic"],players:"2-4",playTime:"60-90 min",
-    complexity:2.8,bggRating:7.8,spineColor:"#2a5a2a",boxSize:"md",
+    complexity:2.95,bggRating:7.8,spineColor:"#2a5a2a",boxSize:"md",
     mechanics:["Area Majority / Influence","Card Drafting","Modular Board","Variable Player Powers"]},
   347305:{id:"inventions_evolution_ideas",name:"Inventions: Evolution of Ideas",bggId:347305,year:2024,designer:"Vital Lacerda",
     description:"A worker-placement and engine-building game tracing humanity's technological progress, where players develop inventions that build upon each other in a vast innovation tree. Players share discoveries with opponents in exchange for future benefits, creating an intricate web of interdependencies that rewards long-term planning.",
-    categories:["Strategy","Euro","Worker Placement","Engine Building"],players:"2-4",playTime:"120-150 min",
-    complexity:4.0,bggRating:7.9,spineColor:"#3a4a6a",boxSize:"xl",
+    categories:["Strategy","Euro","Worker Placement","Engine Building"],players:"1-4",playTime:"60-150 min",
+    complexity:4.6,bggRating:7.9,spineColor:"#3a4a6a",boxSize:"xl",
     mechanics:["Worker Placement","Engine Building","Technology Trees / Tech Tracks","Hand Management"]},
   176494:{id:"isle_of_skye",name:"Isle of Skye: From Chieftain to King",bggId:176494,year:2015,designer:"Andreas Pelikan, Alexander Pfister",
     description:"A tile-laying game where players bid on landscape tiles to build their Scottish kingdoms, but the twist is that each player sets the prices for their own tiles before seeing what others will pay. The shifting scoring categories each game ensure that different tile combinations matter in every play.",
@@ -527,27 +527,27 @@ const EXTRA_GAMES = {
   251219:{id:"istanbul_big_box",name:"Istanbul: Big Box",bggId:251219,year:2018,designer:"Rüdiger Dorn",
     description:"The complete Istanbul collection combines the base game and all expansions, where players race through a bustling bazaar by moving merchant tokens across a grid of tiles to gather resources and collect rubies. A unique stack mechanism means leaving assistants behind and returning to collect them forms the core optimization puzzle.",
     categories:["Euro","Strategy","Family"],players:"2-5",playTime:"40-90 min",
-    complexity:2.3,bggRating:7.8,spineColor:"#c87820",boxSize:"xl",
+    complexity:2.51,bggRating:8.0,spineColor:"#c87820",boxSize:"xl",
     mechanics:["Grid Movement","Modular Board","Variable Set-up","Route / Network Building"]},
   314530:{id:"iwari_deluxe",name:"Iwari: Deluxe Edition",bggId:314530,year:2020,designer:"Michael Schacht",
     description:"A rethemed and expanded version of Kahuna, Iwari is a spiritual area-control game where players place totems across a map of islands connected by bridges. Controlling a majority of a region's connections lets you remove opponent totems, creating a fluid back-and-forth territorial struggle.",
     categories:["Area Control","Abstract","Strategy"],players:"1-6",playTime:"45 min",
-    complexity:2.0,bggRating:7.2,spineColor:"#6a4a2a",boxSize:"md",
+    complexity:2.43,bggRating:7.7,spineColor:"#6a4a2a",boxSize:"md",
     mechanics:["Area Majority / Influence","Hand Management","Network and Route Building"]},
   28023:{id:"jamaica",name:"Jamaica",bggId:28023,year:2007,designer:"Malcolm Braff, Bruno Cathala, Sébastien Pauchon",
     description:"A pirate racing game around the island of Jamaica where players roll dice and assign them to movement and storage actions, managing their hold to carry food, gold, and cannons. Ships collide at sea ports and fight with cannon dice, making this a lively family game that blends racing with light combat.",
     categories:["Racing","Family","Dice"],players:"2-6",playTime:"30-60 min",
-    complexity:1.9,bggRating:7.0,spineColor:"#1a3a5a",boxSize:"md",
+    complexity:1.66,bggRating:7.0,spineColor:"#1a3a5a",boxSize:"md",
     mechanics:["Dice Rolling","Race","Variable Player Powers","Hand Management"]},
   34010:{id:"journey_center_earth",name:"Journey to the Center of the Earth",bggId:34010,year:2008,designer:"Rüdiger Dorn",
     description:"An adventure game inspired by Jules Verne's classic novel, where players lead expeditions through underground passages collecting minerals and fossils. Players must manage limited resources while racing to reach the earth's core, balancing exploration with the danger of being left behind.",
     categories:["Adventure","Family","Strategy"],players:"2-4",playTime:"60 min",
-    complexity:2.2,bggRating:6.5,spineColor:"#4a2a1a",boxSize:"md",
+    complexity:2.03,bggRating:6.3,spineColor:"#4a2a1a",boxSize:"md",
     mechanics:["Hand Management","Route / Network Building","Variable Player Powers"]},
   8098:{id:"jungle_speed",name:"Jungle Speed",bggId:8098,year:1997,designer:"Thomas Vuarchex, Pierrick Yakovenko",
     description:"A fast-paced reflex card game where players flip cards onto personal discard piles and race to grab a central totem whenever their symbol matches another player's. Special cards add chaos with color matching, reversals, and everyone-grabs moments, making each round unpredictably frantic.",
     categories:["Card Game","Party","Family"],players:"2-10",playTime:"10 min",
-    complexity:1.0,bggRating:6.8,spineColor:"#2a7a2a",boxSize:"sm",
+    complexity:1.0,bggRating:6.4,spineColor:"#2a7a2a",boxSize:"sm",
     mechanics:["Real-Time","Pattern Recognition","Take That"]},
   254640:{id:"just_one",name:"Just One",bggId:254640,year:2018,designer:"Ludovic Roudy, Bruno Sautter",
     description:"A cooperative party game where one player must guess a secret word based on single-word clues written by all other players, but duplicate clues are cancelled out before the guesser sees them. The challenge is writing a clue unique enough to survive the duplicate-elimination while still being helpful.",
@@ -562,11 +562,11 @@ const EXTRA_GAMES = {
   411894:{id:"kinfire_council",name:"Kinfire Council",bggId:411894,year:2025,designer:"Kevin Wilson",
     description:"A competitive deck-building game set in the Kinfire universe where players lead councils competing to complete quests and earn influence. Players build decks of advisors and resources while navigating political intrigue and tactical quest competition against opponents.",
     categories:["Deck Building","Strategy","Card Game"],players:"2-6",playTime:"90-120 min",
-    complexity:2.8,bggRating:7.6,spineColor:"#4a2a6a",boxSize:"lg",
+    complexity:3.24,bggRating:7.6,spineColor:"#4a2a6a",boxSize:"lg",
     mechanics:["Deck Construction","Hand Management","Variable Player Powers","Action Points"]},
   404538:{id:"kinfire_delve_scorns_stockade",name:"Kinfire Delve: Scorn's Stockade",bggId:404538,year:2024,designer:"Kevin Wilson",
     description:"A solo or two-player dungeon-crawling card game where players explore a dungeon by revealing cards and managing limited hand resources against escalating threats. Each room presents a unique puzzle of resource management and card play as heroes delve deeper into Scorn's fortress.",
-    categories:["Deck Building","Card Game","Puzzle"],players:"1-2",playTime:"45-60 min",
+    categories:["Deck Building","Card Game","Puzzle"],players:"1-2",playTime:"60 min",
     complexity:2.2,bggRating:7.8,spineColor:"#3a1a2a",boxSize:"sm",
     mechanics:["Deck Construction","Hand Management","Solo / Solitaire Game","Push Your Luck"]},
   70323:{id:"king_of_tokyo",name:"King of Tokyo",bggId:70323,year:2011,designer:"Richard Garfield",
@@ -577,119 +577,119 @@ const EXTRA_GAMES = {
   415776:{id:"kingdom_legacy_feudal",name:"Kingdom Legacy: Feudal Kingdom",bggId:415776,year:2024,designer:"Jonathan Fryxelius",
     description:"A solo epic kingdom-management legacy game where a single player builds and defends a feudal realm across a sweeping campaign spanning hundreds of decisions. Players manage resources, expand territory, and respond to events that permanently alter the game's map and rules over many sessions.",
     categories:["Solo","Campaign","Strategy"],players:"1-1",playTime:"360-480 min",
-    complexity:3.8,bggRating:7.5,spineColor:"#6a4a1a",boxSize:"xl",
+    complexity:2.26,bggRating:8.0,spineColor:"#6a4a1a",boxSize:"xl",
     mechanics:["Campaign / Legacy","Solo / Solitaire Game","Variable Set-up","Resource Management"]},
-  272533:{id:"kingdom_rush_rift_in_time",name:"Kingdom Rush: Rift in Time",bggId:272533,year:2020,designer:"Nuno Bizarro Sentieiro, Paulo Soledade",
+  272533:{id:"kingdom_rush_rift_in_time",name:"Kingdom Rush: Rift in Time",bggId:272533,year:2020,designer:"Alara Cameron, Helana Hope, Sen-Foong Lim",
     description:"A cooperative tower-defense game based on the popular video game series, where players place portal and tower pieces on a puzzle board to stop waves of enemies from reaching the exit. Each scenario has unique maps and enemy patterns, scaling in difficulty across a full campaign.",
     categories:["Co-op","Puzzle","Strategy"],players:"1-4",playTime:"45-90 min",
-    complexity:2.6,bggRating:7.7,spineColor:"#3a1a1a",boxSize:"lg",
+    complexity:2.98,bggRating:7.3,spineColor:"#3a1a1a",boxSize:"lg",
     mechanics:["Cooperative Game","Puzzle","Variable Set-up","Modular Board"]},
-  394193:{id:"kosmogonia_2086_kronos",name:"Kosmogonia 2086: Kronos Epilogue",bggId:394193,year:2023,designer:"",
+  394193:{id:"kosmogonia_2086_kronos",name:"Kosmogonia 2086: Kronos Epilogue",bggId:394193,year:2023,designer:"Isidoros Davazoglou, Panagiotis Vasilakos",
     description:"A science-fiction card game set in a post-apocalyptic future where players compete to shape the remnants of civilization through faction cards and resource management. Players balance short-term tactical plays with long-term strategic goals in a tense card-driven struggle for dominance.",
     categories:["Card Game","Strategy","Thematic"],players:"1-4",playTime:"25-45 min",
-    complexity:2.5,bggRating:7.0,spineColor:"#1a1a4a",boxSize:"sm",
+    complexity:2.0,bggRating:7.7,spineColor:"#1a1a4a",boxSize:"sm",
     mechanics:["Hand Management","Deck Construction","Variable Player Powers"]},
-  243993:{id:"la_stanza",name:"La Stanza",bggId:243993,year:2019,designer:"Virginio Gigli, Flaminia Brasini",
+  243993:{id:"la_stanza",name:"La Stanza",bggId:243993,year:2019,designer:"Nuno Bizarro Sentieiro, Paulo Soledade",
     description:"A worker-placement game set in the salons of Renaissance Italy where players compete to commission artworks, collect paintings, and build the most prestigious collection. Players move shared noble pawns around a grand room to activate locations, creating an elegant tension between helping yourself and advancing opponents.",
     categories:["Euro","Strategy","Worker Placement"],players:"2-4",playTime:"60-90 min",
-    complexity:2.9,bggRating:7.5,spineColor:"#7a4a2a",boxSize:"md",
+    complexity:2.9,bggRating:6.7,spineColor:"#7a4a2a",boxSize:"md",
     mechanics:["Worker Placement","Set Collection","Hand Management","Shared Action Queue"]},
   96913:{id:"lancaster",name:"Lancaster",bggId:96913,year:2011,designer:"Matthias Cramer",
     description:"A worker-placement game set in medieval England where players command knights to claim valuable regions and influence laws being debated in Parliament. Knights can be outbid by opponents, so players must decide how many squires to assign to protect key positions while still expanding across the kingdom.",
     categories:["Strategy","Euro","Worker Placement"],players:"2-5",playTime:"60 min",
-    complexity:2.7,bggRating:7.2,spineColor:"#8a2a1a",boxSize:"md",
+    complexity:2.99,bggRating:7.4,spineColor:"#8a2a1a",boxSize:"md",
     mechanics:["Worker Placement","Area Majority / Influence","Voting","Variable Player Powers"]},
   35677:{id:"le_havre",name:"Le Havre",bggId:35677,year:2008,designer:"Uwe Rosenberg",
     description:"An economic city-building game set in the French port of Le Havre, where players use actions to collect resources, construct buildings, and ship goods for profit. Buildings become available to all players once built, so acquiring them early grants income while denying opponents free use, creating a deep web of economic decisions.",
     categories:["Strategy","Euro","Worker Placement"],players:"1-5",playTime:"30-150 min",
-    complexity:3.5,bggRating:7.9,spineColor:"#2a3a5a",boxSize:"lg",
+    complexity:3.71,bggRating:7.9,spineColor:"#2a3a5a",boxSize:"lg",
     mechanics:["Worker Placement","Hand Management","Income","Variable Set-up"]},
   354934:{id:"legacy_of_yu",name:"Legacy of Yu",bggId:354934,year:2023,designer:"Shem Phillips",
     description:"A solo deck-building game set in ancient China where the player must construct canals to tame the Yellow River while simultaneously defending against barbarian invasions. The game features a persistent campaign where each session's outcome shapes the starting conditions of the next, telling the legendary story of Yu the Great.",
     categories:["Solo","Deck Building","Co-op"],players:"1-1",playTime:"60 min",
-    complexity:2.5,bggRating:7.8,spineColor:"#c87820",boxSize:"sm",
+    complexity:2.88,bggRating:8.1,spineColor:"#c87820",boxSize:"sm",
     mechanics:["Deck Construction","Solo / Solitaire Game","Campaign / Legacy","Hand Management"]},
   129437:{id:"legendary_marvel",name:"Legendary: A Marvel Deck Building Game",bggId:129437,year:2012,designer:"Devin Low",
     description:"A cooperative deck-building game where players recruit Marvel heroes and build powerful combos to fight iconic villains and a mastermind. Each villain scheme creates unique win and loss conditions, while hero decks feature distinct abilities that reward thoughtful team composition and card synergy.",
     categories:["Co-op","Deck Building","Thematic"],players:"1-5",playTime:"30-60 min",
-    complexity:2.8,bggRating:7.7,spineColor:"#8a1a1a",boxSize:"lg",
+    complexity:2.43,bggRating:7.5,spineColor:"#8a1a1a",boxSize:"lg",
     mechanics:["Cooperative Game","Deck Construction","Hand Management","Variable Player Powers"]},
   358737:{id:"leviathan_wilds",name:"Leviathan Wilds",bggId:358737,year:2024,designer:"Justin Kemppainen",
     description:"A cooperative game of monster hunting where players work as a team to study and bring down massive leviathans using specialized equipment and coordinated attacks. Players must read the monster's behavior patterns and exploit weaknesses while managing stamina and positioning on a dynamic encounter board.",
     categories:["Co-op","Thematic","Adventure"],players:"1-4",playTime:"45-90 min",
-    complexity:2.8,bggRating:7.9,spineColor:"#1a3a5a",boxSize:"lg",
+    complexity:2.6,bggRating:7.9,spineColor:"#1a3a5a",boxSize:"lg",
     mechanics:["Cooperative Game","Variable Player Powers","Modular Board","Hand Management"]},
   356033:{id:"libertalia_winds_galecrest",name:"Libertalia: Winds of Galecrest",bggId:356033,year:2022,designer:"Paolo Mori",
     description:"A simultaneous-action game of pirate plunder where players select crew members from identical starting hands to send on shared voyages, each member resolving in a strict priority order. Reading opponents' likely plays and timing your own characters to trigger at advantageous moments is the heart of this elegant deduction puzzle.",
     categories:["Card Game","Strategy","Thematic"],players:"1-6",playTime:"45-60 min",
-    complexity:2.2,bggRating:7.6,spineColor:"#1a3a6a",boxSize:"md",
+    complexity:2.2,bggRating:7.4,spineColor:"#1a3a6a",boxSize:"md",
     mechanics:["Simultaneous Action Selection","Hand Management","Variable Player Powers","Deduction"]},
   295374:{id:"long_shot_dice_game",name:"Long Shot: The Dice Game",bggId:295374,year:2022,designer:"Chris Handy",
     description:"A horse racing dice game where players bet on and sponsor competing horses while rolling dice to advance them around the track. Players use money management and timely card plays to influence which horses run well, making it a light gambling experience that plays quickly with many players.",
     categories:["Dice","Racing","Family"],players:"1-8",playTime:"25 min",
-    complexity:1.4,bggRating:7.1,spineColor:"#2a5a2a",boxSize:"sm",
+    complexity:1.96,bggRating:7.5,spineColor:"#2a5a2a",boxSize:"sm",
     mechanics:["Dice Rolling","Race","Betting / Wagering","Push Your Luck"]},
   222509:{id:"lords_of_hellas",name:"Lords of Hellas",bggId:222509,year:2018,designer:"Adam Kwapiński",
     description:"An area-control game blending ancient Greek mythology with action-figure miniatures, where players command heroes and armies competing to achieve one of several alternate victory conditions. Building colossal monuments grants powerful abilities and points toward an instant-win condition, while military conquest and monster hunting offer alternative paths to glory.",
     categories:["Area Control","Thematic","Strategy"],players:"1-4",playTime:"60-90 min",
-    complexity:3.0,bggRating:7.6,spineColor:"#c8a020",boxSize:"xl",
+    complexity:3.32,bggRating:7.6,spineColor:"#c8a020",boxSize:"xl",
     mechanics:["Area Majority / Influence","Variable Player Powers","Modular Board","Hand Management"]},
   118247:{id:"lucky_numbers",name:"Lucky Numbers",bggId:118247,year:2012,designer:"Michael Schacht",
     description:"A fast filler game where players draw number tiles and arrange them in a 4x4 grid that must remain in ascending order both horizontally and vertically. Discarded tiles are available to opponents, so every draw and discard has a strategic ripple effect as players race to complete their grids.",
     categories:["Abstract","Family","Puzzle"],players:"1-4",playTime:"20 min",
-    complexity:1.2,bggRating:7.1,spineColor:"#e8c020",boxSize:"sm",
+    complexity:1.2,bggRating:6.4,spineColor:"#e8c020",boxSize:"sm",
     mechanics:["Tile Placement","Pattern Building","Solo / Solitaire Game"]},
-  248562:{id:"mage_knight_ultimate",name:"Mage Knight: Ultimate Edition",bggId:248562,year:2018,designer:"Vlaada Chvátil",
+  248562:{id:"mage_knight_ultimate",name:"Mage Knight: Ultimate Edition",bggId:248562,year:2018,designer:"Vlaada Chvátil, Paul Grogan, Phil Pettifer",
     description:"An epic deck-building exploration game where players command powerful Mage Knights conquering a mysterious land filled with cities, dungeons, and enemies. The complex interplay between card combinations, terrain exploration, and tactical combat makes it one of the deepest solo or cooperative experiences in board gaming.",
     categories:["Co-op","Deck Building","Adventure"],players:"1-5",playTime:"150 min",
-    complexity:4.6,bggRating:8.1,spineColor:"#2a1a4a",boxSize:"xl",
+    complexity:4.6,bggRating:8.8,spineColor:"#2a1a4a",boxSize:"xl",
     mechanics:["Deck Construction","Cooperative Game","Modular Board","Hand Management","Variable Player Powers"]},
   258242:{id:"magnate_first_city",name:"Magnate: The First City",bggId:258242,year:2021,designer:"James Naylor",
     description:"A real-estate speculation game where players construct buildings on a city grid, pricing and selling properties to generate cash flow in a market that will eventually crash. The game ends when the property bubble bursts, rewarding players who cashed out at the right time rather than those who over-leveraged.",
     categories:["Strategy","Euro"],players:"1-5",playTime:"60-120 min",
-    complexity:3.4,bggRating:7.8,spineColor:"#2a3a2a",boxSize:"lg",
+    complexity:3.12,bggRating:7.4,spineColor:"#2a3a2a",boxSize:"lg",
     mechanics:["Auction / Bidding","Network and Route Building","Variable Set-up","Market"]},
   8147:{id:"maka_bana",name:"Maka Bana",bggId:8147,year:2003,designer:"François Haffner",
     description:"A light strategy game where players compete to harvest coconuts from a shared island, taking turns placing and moving monkeys to claim fruit. The placement and blocking mechanics create a gentle abstract puzzle that plays quickly and accessibly for all ages.",
     categories:["Abstract","Family","Strategy"],players:"3-6",playTime:"45-60 min",
-    complexity:1.6,bggRating:6.2,spineColor:"#5a8a2a",boxSize:"sm",
+    complexity:2.01,bggRating:6.7,spineColor:"#5a8a2a",boxSize:"sm",
     mechanics:["Area Majority / Influence","Tile Placement","Pattern Building"]},
   205059:{id:"mansions_madness_2e",name:"Mansions of Madness: Second Edition",bggId:205059,year:2016,designer:"Nikki Valens",
     description:"A cooperative app-driven horror adventure game set in the Arkham Horror universe, where an app controls the mansion's monster placement, narrative events, and puzzle solutions while players explore room by room. Investigators solve mysteries, fight eldritch creatures, and struggle to maintain their sanity across richly illustrated scenario books.",
     categories:["Co-op","Thematic","Adventure"],players:"1-5",playTime:"120-180 min",
-    complexity:3.1,bggRating:7.9,spineColor:"#2a1a1a",boxSize:"xl",
+    complexity:2.69,bggRating:7.9,spineColor:"#2a1a1a",boxSize:"xl",
     mechanics:["Cooperative Game","Modular Board","Variable Player Powers","Storytelling"]},
   291847:{id:"mantis_falls",name:"Mantis Falls",bggId:291847,year:2021,designer:"Adrian Kerrihard",
     description:"A tense 2-3 player hidden-role card game where witnesses to a crime attempt to escape a corrupt town, but one or two players may secretly be assassins sabotaging the escape. Players cooperate to play survival cards in sequence while carefully reading each other for signs of betrayal.",
     categories:["Card Game","Thematic","Deduction"],players:"2-3",playTime:"60-90 min",
-    complexity:2.2,bggRating:7.8,spineColor:"#2a3a2a",boxSize:"sm",
+    complexity:2.74,bggRating:7.1,spineColor:"#2a3a2a",boxSize:"sm",
     mechanics:["Hand Management","Deduction","Hidden Roles","Cooperative Game"]},
   276025:{id:"maracaibo",name:"Maracaibo",bggId:276025,year:2019,designer:"Alexander Pfister",
     description:"A campaign-style strategy game set in the 17th-century Caribbean where players sail between ports, fulfilling contracts, building influence, and advancing a narrative story across multiple rounds. Each voyage balances immediate scoring opportunities against long-term engine development through cards and player boards.",
     categories:["Strategy","Euro","Adventure","Campaign"],players:"1-4",playTime:"30-120 min",
-    complexity:3.9,bggRating:8.1,spineColor:"#1a5276",boxSize:"lg",
+    complexity:3.9,bggRating:7.9,spineColor:"#1a5276",boxSize:"lg",
     mechanics:["Hand Management","Route Building","Variable Player Powers","Campaign"]},
   403495:{id:"marvel_dice_throne_missions",name:"Marvel Dice Throne Missions",bggId:403495,year:2025,designer:"Gavan Brown, Nate Chatellier",
     description:"A cooperative expansion for Marvel Dice Throne that introduces mission-based scenarios where players team up as Marvel heroes to overcome escalating threats. Players combine their unique dice-rolling hero abilities and special cards to complete objectives before the villain's plan succeeds.",
-    categories:["Dice","Thematic","Co-op"],players:"1-4",playTime:"30-90 min",
-    complexity:2.5,bggRating:8.0,spineColor:"#8e1a1a",boxSize:"md",
+    categories:["Dice","Thematic","Co-op"],players:"1-4",playTime:"30-75 min",
+    complexity:2.27,bggRating:8.3,spineColor:"#8e1a1a",boxSize:"md",
     mechanics:["Cooperative Game","Dice Rolling","Variable Player Powers"]},
   360153:{id:"marvel_dice_throne_sw_thor_loki_spiderman",name:"Marvel Dice Throne: Scarlet Witch v. Thor v. Loki v. Spider-Man",bggId:360153,year:2022,designer:"Gavan Brown, Nate Chatellier, Manny Trembley",
     description:"A head-to-head dice combat game featuring four iconic Marvel heroes and villains, each with a unique deck of cards and custom dice representing their powers. Players roll and re-roll dice to trigger powerful abilities, deflect attacks, and whittle down opponents' health in fast, tactical duels.",
     categories:["Dice","Thematic","Card Game"],players:"2-4",playTime:"20-40 min",
-    complexity:2.2,bggRating:8.0,spineColor:"#6e2090",boxSize:"md",
+    complexity:2.44,bggRating:7.6,spineColor:"#6e2090",boxSize:"md",
     mechanics:["Dice Rolling","Hand Management","Variable Player Powers","Take That"]},
   351817:{id:"marvel_zombies",name:"Marvel Zombies: A Zombicide Game",bggId:351817,year:2023,designer:"Fabio Cury, Michael Shinall",
     description:"A cooperative dungeon crawler using the Zombicide system where players control zombie Marvel heroes hunting for flesh across modular tile maps. Balancing hunger and evolving zombie powers, teams must complete mission objectives before their hunger drives them to devour each other.",
     categories:["Thematic","Co-op","Adventure"],players:"1-6",playTime:"60 min",
-    complexity:3.0,bggRating:8.0,spineColor:"#2c2c2c",boxSize:"xl",
+    complexity:2.35,bggRating:8.0,spineColor:"#2c2c2c",boxSize:"xl",
     mechanics:["Cooperative Game","Modular Board","Variable Player Powers","Action Points"]},
   315610:{id:"massive_darkness_2_hellscape",name:"Massive Darkness 2: Hellscape",bggId:315610,year:2022,designer:"Alex Olteanu, Marco Portugal",
     description:"A dungeon-crawl cooperative game where heroes descend into demon-filled levels, leveling up characters and finding loot while battling roaming monsters. The light and shadow system creates tactical positioning choices, as heroes in darkness gain bonuses while enemies lurk unseen.",
     categories:["Thematic","Co-op","Adventure"],players:"1-6",playTime:"60 min",
-    complexity:2.8,bggRating:7.8,spineColor:"#3d0000",boxSize:"xl",
+    complexity:2.8,bggRating:8.0,spineColor:"#3d0000",boxSize:"xl",
     mechanics:["Cooperative Game","Modular Board","Dice Rolling","Variable Player Powers","Action Points"]},
-  209010:{id:"mechs_vs_minions",name:"Mechs vs. Minions",bggId:209010,year:2016,designer:"Chris Cantrell, Rick Ernst, Stone Librande",
+  209010:{id:"mechs_vs_minions",name:"Mechs vs. Minions",bggId:209010,year:2016,designer:"Chris Cantrell, Rick Ernst, Stone Librande, Prashant Saraswat, Nathan Tiras",
     description:"A cooperative programming game set in the League of Legends universe where players command giant mechs through a series of campaign missions against waves of minions. Each round players draft command cards to program their mech's actions, then execute them simultaneously — with chaotic but satisfying results.",
     categories:["Co-op","Thematic","Campaign"],players:"2-4",playTime:"60-120 min",
     complexity:2.6,bggRating:7.8,spineColor:"#4a3000",boxSize:"xl",
@@ -697,12 +697,12 @@ const EXTRA_GAMES = {
   404431:{id:"men_nefer",name:"Men-Nefer",bggId:404431,year:2024,designer:"Germán P. Millán",
     description:"A worker placement and area control game set in ancient Memphis, Egypt, where players act as nobles vying for influence by constructing monuments and managing resources along the Nile. Strategic placement of workers and clever use of the rotating action board creates a tight, evolving competition.",
     categories:["Strategy","Euro","Worker Placement","Area Control"],players:"1-4",playTime:"60-120 min",
-    complexity:3.0,bggRating:7.6,spineColor:"#b8860b",boxSize:"md",
+    complexity:3.68,bggRating:8.1,spineColor:"#b8860b",boxSize:"md",
     mechanics:["Worker Placement","Area Control","Resource Management"]},
   318977:{id:"micromacro_crime_city",name:"MicroMacro: Crime City",bggId:318977,year:2020,designer:"Johannes Sich",
     description:"A cooperative mystery game played on a single giant black-and-white map of a dense city, where players follow trails of clues across the illustration to solve criminal cases. Each case unfolds sequentially through a deck of cards guiding detectives from crime scene to resolution.",
     categories:["Co-op","Deduction","Family"],players:"1-4",playTime:"15-45 min",
-    complexity:1.2,bggRating:7.7,spineColor:"#2c2c2c",boxSize:"md",
+    complexity:1.2,bggRating:7.4,spineColor:"#2c2c2c",boxSize:"md",
     mechanics:["Cooperative Game","Deduction","Storytelling"]},
   377420:{id:"mind_space",name:"Mind Space",bggId:377420,year:2023,designer:"Nao Shimamura",
     description:"A puzzle-style polyomino game where players fill their personal brain-shaped boards with differently shaped thought tiles scored based on color adjacency and placement patterns. Each round players simultaneously choose from a shared market of tiles, making efficient spatial decisions against limited space.",
@@ -714,7 +714,7 @@ const EXTRA_GAMES = {
     categories:["Card Game","Strategy","Abstract"],players:"2-2",playTime:"15-25 min",
     complexity:1.9,bggRating:7.5,spineColor:"#1a3a1a",boxSize:"sm",
     mechanics:["Hand Management","Take That","Variable Player Powers"]},
-  311715:{id:"mini_rogue",name:"Mini Rogue",bggId:311715,year:2021,designer:"Paolo Di Stefano, Gabriel Gendron",
+  311715:{id:"mini_rogue",name:"Mini Rogue",bggId:311715,year:2020,designer:"Paolo Di Stefano, Gabriel Gendron",
     description:"A tiny dungeon-crawl game played with a small deck of cards and two dice where heroes descend through randomized rooms, fighting monsters, collecting treasure, and growing in power. Each run is quick and deadly, with meaningful choices about when to risk deeper floors versus collecting resources.",
     categories:["Dice","Adventure","Solo","Co-op"],players:"1-2",playTime:"30-45 min",
     complexity:2.0,bggRating:7.2,spineColor:"#5c3317",boxSize:"sm",
@@ -722,7 +722,7 @@ const EXTRA_GAMES = {
   366251:{id:"mistwind",name:"Mistwind",bggId:366251,year:2024,designer:"Adrian Adamescu, Daryl Andrews",
     description:"A fantasy adventure game set in a world of floating islands where players explore, gather resources, and build their tableau of abilities while navigating shifting wind currents. Drafting cards each round shapes each player's unique strategy as they race to complete objectives across the archipelago.",
     categories:["Strategy","Euro","Adventure"],players:"1-5",playTime:"75-120 min",
-    complexity:2.8,bggRating:7.6,spineColor:"#4a7fbf",boxSize:"md",
+    complexity:3.17,bggRating:7.6,spineColor:"#4a7fbf",boxSize:"md",
     mechanics:["Card Drafting","Hand Management","Tableau Building","Variable Player Powers"]},
   21763:{id:"mr_jack",name:"Mr. Jack",bggId:21763,year:2006,designer:"Bruno Cathala, Ludovic Maublanc",
     description:"An asymmetric two-player deduction game set in Victorian London where one player controls Jack the Ripper trying to escape the city while the other moves detective characters to narrow down which suspect Jack is hiding among. Clever use of the rotating character order and alibi system creates deep bluffing opportunities each round.",
@@ -732,22 +732,22 @@ const EXTRA_GAMES = {
   1927:{id:"munchkin",name:"Munchkin",bggId:1927,year:2001,designer:"Steve Jackson",
     description:"A satirical dungeon-crawl card game where players kick open doors, fight monsters for levels, and backstab each other on the way to level 10. Loaded with humor and take-that mechanics, every fight can be interrupted by other players offering help — for a steep price.",
     categories:["Card Game","Party","Thematic"],players:"3-6",playTime:"60-120 min",
-    complexity:1.7,bggRating:6.6,spineColor:"#c0392b",boxSize:"sm",
+    complexity:1.7,bggRating:5.9,spineColor:"#c0392b",boxSize:"sm",
     mechanics:["Hand Management","Take That","Player Elimination","Negotiation"]},
   181304:{id:"mysterium",name:"Mysterium",bggId:181304,year:2015,designer:"Oleksandr Nevskiy, Oleg Sidorenko",
     description:"A cooperative deduction game where one player acts as a ghost communicating through abstract dream-vision cards while other players act as psychic investigators trying to identify the murderer, location, and weapon. Interpreting the ghost's surreal imagery collaboratively is both the puzzle and the pleasure.",
     categories:["Co-op","Deduction","Party","Thematic"],players:"2-7",playTime:"42 min",
-    complexity:1.9,bggRating:7.6,spineColor:"#2e0854",boxSize:"md",
+    complexity:1.9,bggRating:7.2,spineColor:"#2e0854",boxSize:"md",
     mechanics:["Cooperative Game","Deduction","Communication Limits","Storytelling"]},
   153912:{id:"mystery_of_the_abbey",name:"Mystery of the Abbey",bggId:153912,year:2007,designer:"Bruno Faidutti, Serge Laget",
     description:"A deduction mystery game set in a medieval monastery where players move through rooms gathering clues to identify a murderous monk. Players question each other about suspects and use mass and chapter-house events to gain and share information across the abbey.",
     categories:["Deduction","Strategy"],players:"3-6",playTime:"60-90 min",
-    complexity:2.1,bggRating:6.8,spineColor:"#4a3800",boxSize:"md",
+    complexity:2.1,bggRating:7.0,spineColor:"#4a3800",boxSize:"md",
     mechanics:["Deduction","Movement","Hidden Information"]},
   249746:{id:"nanty_narking",name:"Nanty Narking",bggId:249746,year:2019,designer:"Martin Wallace",
     description:"A reimplementation of Discworld: Ankh-Morpork set in a colorful Victorian-fantasy city where players control hidden factions with secret victory conditions, competing for control of districts through cards, agents, and events. Each faction wins differently, creating layers of bluffing and deduction about opponents' goals.",
     categories:["Strategy","Area Control","Thematic"],players:"2-4",playTime:"60 min",
-    complexity:2.6,bggRating:7.4,spineColor:"#8b4513",boxSize:"md",
+    complexity:2.32,bggRating:7.4,spineColor:"#8b4513",boxSize:"md",
     mechanics:["Area Control","Hand Management","Hidden Objectives","Variable Player Powers"]},
   66589:{id:"navegador",name:"Navegador",bggId:66589,year:2010,designer:"Mac Gerdts",
     description:"A rondel-action strategy game about Portuguese maritime exploration where players use sailing, building, and trading actions to colonize new territories and profit from goods markets. Timing your rondel movements and reading the market before competitors drives the deep economic tension.",
@@ -757,12 +757,12 @@ const EXTRA_GAMES = {
   174660:{id:"new_york_1901",name:"New York 1901",bggId:174660,year:2015,designer:"Chénier La Salle",
     description:"A tile-laying game set in turn-of-the-century Manhattan where players acquire lots and construct skyscrapers of different sizes across city blocks, scoring for clustering buildings of the same type. Upgrading old buildings by demolishing and rebuilding adds a tense timing element to the spatial puzzle.",
     categories:["Strategy","Euro","Family"],players:"2-4",playTime:"30-60 min",
-    complexity:2.0,bggRating:7.0,spineColor:"#1a3a5c",boxSize:"md",
+    complexity:2.0,bggRating:6.8,spineColor:"#1a3a5c",boxSize:"md",
     mechanics:["Tile Placement","Area Control","Set Collection"]},
   15363:{id:"nexus_ops",name:"Nexus Ops",bggId:15363,year:2005,designer:"Charlie Catino, Steven Kimball",
     description:"A sci-fi area control and combat game where players mine energy, recruit alien units, and battle across a hexagonal moonscape to complete secret mission cards for points. The energize mechanic rewards the losing side after bad luck, keeping all players competitive until the final mission is scored.",
     categories:["Strategy","Thematic","Area Control","Dice"],players:"2-4",playTime:"90 min",
-    complexity:2.3,bggRating:7.0,spineColor:"#1a1a4a",boxSize:"md",
+    complexity:2.3,bggRating:7.2,spineColor:"#1a1a4a",boxSize:"md",
     mechanics:["Area Control","Dice Rolling","Variable Player Powers","Hand Management"]},
   284435:{id:"nova_luna",name:"Nova Luna",bggId:284435,year:2019,designer:"Uwe Rosenberg, Corné van Moorsel",
     description:"An abstract tile placement game where players fill their personal tableau with moon tiles, completing the color-adjacency tasks printed on each tile to score tokens. A shared rondel determines the cost and timing of tile selection, making turn order itself a key resource to manage.",
@@ -772,17 +772,17 @@ const EXTRA_GAMES = {
   343362:{id:"oak",name:"Oak",bggId:343362,year:2022,designer:"Wim Goossens",
     description:"A deck-building game themed around druid clans nurturing a sacred forest over generations, where players cultivate their decks with animal and nature cards to grow the great oak and fulfill seasonal rituals. The generational reset mechanic periodically reshapes what cards remain, adding a unique twist to the deckbuilding arc.",
     categories:["Deck Building","Strategy","Euro"],players:"1-4",playTime:"60-90 min",
-    complexity:2.7,bggRating:7.5,spineColor:"#2d5a1b",boxSize:"md",
+    complexity:3.13,bggRating:7.1,spineColor:"#2d5a1b",boxSize:"md",
     mechanics:["Deck Building","Hand Management","Engine Building","Variable Player Powers"]},
   291572:{id:"oath",name:"Oath",bggId:291572,year:2021,designer:"Cole Wehrle",
     description:"A deeply asymmetric political strategy game about power and legacy in an ancient land, where one player controls the Chancellor defending the realm while others play Exiles or Denizens seeking to seize or reshape power. Each game's outcome permanently alters the starting conditions for the next, creating a living chronicle.",
     categories:["Strategy","Area Control","Campaign","Thematic"],players:"1-6",playTime:"45-150 min",
-    complexity:3.8,bggRating:7.9,spineColor:"#3d1a00",boxSize:"lg",
+    complexity:4.13,bggRating:7.7,spineColor:"#3d1a00",boxSize:"lg",
     mechanics:["Area Control","Hand Management","Asymmetric Gameplay","Variable Player Powers","Legacy"]},
   251661:{id:"oathsworn_into_the_deepwood",name:"Oathsworn: Into the Deepwood",bggId:251661,year:2022,designer:"Jamie Jolly",
     description:"A narrative-driven cooperative campaign game where players guide a band of mercenaries through a dark, story-rich world, fighting massive creatures using an innovative card-combat system tied to an audio soundtrack. Boss battles unfold through multi-stage encounter decks with dramatic twists unique to each monster.",
     categories:["Co-op","Thematic","Adventure","Campaign"],players:"1-4",playTime:"30-90 min",
-    complexity:3.2,bggRating:8.7,spineColor:"#1a2a10",boxSize:"xl",
+    complexity:3.69,bggRating:8.7,spineColor:"#1a2a10",boxSize:"xl",
     mechanics:["Cooperative Game","Deck Building","Campaign","Storytelling","Variable Player Powers"]},
   273477:{id:"obscurio",name:"Obscurio",bggId:273477,year:2019,designer:"L'Atelier",
     description:"A cooperative deduction game set in a magical library where a Grimoire player gives visual clues via an illustrated book to guide teammates to the correct exit card, while a traitor among the group secretly tries to mislead the team. Managing trust and reading subtle illusions makes every round tense.",
@@ -792,17 +792,17 @@ const EXTRA_GAMES = {
   160477:{id:"onitama",name:"Onitama",bggId:160477,year:2014,designer:"Shimpei Sato",
     description:"A two-player abstract strategy game played on a 5x5 grid where each player uses a pair of move cards drawn from a shared rotating pool to advance pawns toward the opponent's master or temple. With only five move cards in circulation at any time, anticipating your opponent's options is central to the deep tactical play.",
     categories:["Abstract","Strategy"],players:"2-2",playTime:"15-20 min",
-    complexity:1.9,bggRating:7.6,spineColor:"#8b1a1a",boxSize:"sm",
+    complexity:1.66,bggRating:7.3,spineColor:"#8b1a1a",boxSize:"sm",
     mechanics:["Grid Movement","Hand Management","Variable Player Powers","Asymmetric Gameplay"]},
   253759:{id:"paint_the_roses",name:"Paint the Roses",bggId:253759,year:2022,designer:"Ben Goldman",
     description:"A cooperative logic puzzle game set in Wonderland where players deduce the Queen of Hearts' secret gardening rules by placing and observing hedge tile patterns. Each player knows one part of the rule but cannot speak freely, making the shared tableau of clues the only language available.",
     categories:["Co-op","Deduction","Puzzle","Family"],players:"2-5",playTime:"50-70 min",
-    complexity:2.5,bggRating:7.5,spineColor:"#c0003c",boxSize:"md",
+    complexity:2.5,bggRating:7.1,spineColor:"#c0003c",boxSize:"md",
     mechanics:["Cooperative Game","Deduction","Communication Limits","Tile Placement"]},
   131287:{id:"panamax",name:"Panamax",bggId:131287,year:2014,designer:"Gil d'Orey, Nuno Bizarro Sentieiro, Paulo Soledade",
     description:"A logistics and economic strategy game about shipping companies navigating the Panama Canal, where players load cargo onto ships, manage locks, and invest in shared shipping lines for profit. The joint ownership of ships and competitive use of canal infrastructure creates layered negotiation and blocking opportunities.",
     categories:["Strategy","Euro"],players:"2-4",playTime:"90-120 min",
-    complexity:3.3,bggRating:7.2,spineColor:"#005f87",boxSize:"md",
+    complexity:3.76,bggRating:7.2,spineColor:"#005f87",boxSize:"md",
     mechanics:["Route Building","Stock Holding","Negotiation","Action Points"]},
   30549:{id:"pandemic",name:"Pandemic",bggId:30549,year:2008,designer:"Matt Leacock",
     description:"The landmark cooperative game where players work as disease-fighting specialists to contain and cure four viral outbreaks spreading across a global map. Balancing outbreak prevention with the race to discover cures creates intense collaborative decisions under mounting pressure each turn.",
@@ -817,32 +817,32 @@ const EXTRA_GAMES = {
   141572:{id:"paperback",name:"Paperback",bggId:141572,year:2014,designer:"Tim Fowers",
     description:"A deck-building word game where players buy letter cards to build their deck and then use those cards to spell words, with longer and rarer letters scoring more victory points. Balancing the acquisition of useful consonants, vowels, and wild cards makes each deck feel like a personal word-crafting engine.",
     categories:["Deck Building","Card Game","Family"],players:"2-5",playTime:"45 min",
-    complexity:2.1,bggRating:7.3,spineColor:"#8b4513",boxSize:"sm",
+    complexity:2.1,bggRating:7.1,spineColor:"#8b4513",boxSize:"sm",
     mechanics:["Deck Building","Word Game","Hand Management"]},
   163412:{id:"patchwork",name:"Patchwork",bggId:163412,year:2014,designer:"Uwe Rosenberg",
     description:"A two-player tile-placement game where players purchase irregularly shaped button-covered patches to fill their 9x9 quilting board, paying in both time and buttons. The shared time track governs turn order and income, making the race to earn the most buttons while minimizing holes into a tight spatial duel.",
     categories:["Abstract","Puzzle","Family"],players:"2-2",playTime:"15-30 min",
-    complexity:2.0,bggRating:7.8,spineColor:"#d4748a",boxSize:"sm",
+    complexity:1.6,bggRating:7.6,spineColor:"#d4748a",boxSize:"sm",
     mechanics:["Tile Placement","Puzzle","Resource Management","Pattern Building"]},
   308119:{id:"pax_renaissance_2e",name:"Pax Renaissance: 2nd Edition",bggId:308119,year:2021,designer:"Phil Eklund, Matt Eklund",
     description:"A card-driven historical game set during the Renaissance where players are banking families funding wars, trade, and religious movements to steer Europe toward one of four ideological endgames. Dense iconography and deeply interlocking systems reward study and create remarkable historical emergence.",
     categories:["Strategy","Card Game","Thematic"],players:"1-4",playTime:"60-120 min",
-    complexity:4.5,bggRating:7.9,spineColor:"#6b3a00",boxSize:"sm",
+    complexity:4.65,bggRating:8.4,spineColor:"#6b3a00",boxSize:"sm",
     mechanics:["Hand Management","Card Drafting","Area Control","Variable Player Powers","Auction"]},
   21954:{id:"perikles",name:"Perikles",bggId:21954,year:2006,designer:"Martin Wallace",
     description:"A strategic game of ancient Greek politics and warfare where players compete for leadership of city-states and then command those states' armies in battles across the Aegean. The split between the political influence phase and the military resolution phase creates a game of long commitments and uncertain payoffs.",
     categories:["Strategy","Area Control","Thematic"],players:"3-5",playTime:"120 min",
-    complexity:3.5,bggRating:7.0,spineColor:"#c8a850",boxSize:"md",
+    complexity:3.28,bggRating:6.8,spineColor:"#c8a850",boxSize:"md",
     mechanics:["Area Control","Auction","Dice Rolling","Hand Management"]},
-  256997:{id:"perseverance_castaway_chronicles",name:"Perseverance: Castaway Chronicles",bggId:256997,year:2022,designer:"Richard Amann, Dávid Turczi",
+  256997:{id:"perseverance_castaway_chronicles",name:"Perseverance: Castaway Chronicles",bggId:256997,year:2022,designer:"Richard Ámann, Thomas Vande Ginste, Viktor Péter, Wolf Plancke, Dávid Turczi",
     description:"A narrative campaign game where shipwrecked survivors explore a dinosaur-inhabited island, building a settlement and uncovering the island's secrets across multiple episodes. Players choose between cooperation and competition for resources while the branching story adapts to collective decisions.",
     categories:["Strategy","Adventure","Campaign","Thematic"],players:"1-4",playTime:"80-180 min",
-    complexity:3.5,bggRating:8.0,spineColor:"#2d5a1b",boxSize:"lg",
+    complexity:4.23,bggRating:7.7,spineColor:"#2d5a1b",boxSize:"lg",
     mechanics:["Worker Placement","Deck Building","Campaign","Variable Player Powers","Storytelling"]},
   402126:{id:"pocket_cats",name:"Pocket Cats",bggId:402126,year:2024,designer:"Alexandre Aguilar, Romaric Galonnier",
     description:"A tiny two-player card game where players compete to collect sets of charming cat cards by playing hand cards to claim cats from a central market. Quick to learn and play, it packs sharp bluffing and set-collection decisions into a pocket-sized package.",
     categories:["Card Game","Abstract","Family"],players:"2-2",playTime:"15 min",
-    complexity:1.2,bggRating:7.0,spineColor:"#e8a0c0",boxSize:"sm",
+    complexity:1.52,bggRating:6.1,spineColor:"#e8a0c0",boxSize:"sm",
     mechanics:["Hand Management","Set Collection","Take That"]},
   266830:{id:"qe",name:"QE",bggId:266830,year:2019,designer:"Gavin Birnbaum",
     description:"A bidding game where players representing central banks print unlimited money to acquire industries, with the twist that the player who bids the most total money across the entire game is eliminated from scoring. Tracking approximate competitor spending to stay under the elimination threshold while winning valuable tiles is the core tension.",
@@ -852,12 +852,12 @@ const EXTRA_GAMES = {
   300700:{id:"quetzal",name:"Quetzal",bggId:300700,year:2020,designer:"Alexandre Garcia",
     description:"A worker placement game set in a Mesoamerican archaeological excavation where players place workers of different expertise levels to excavate artifacts and sell them at market. The shared excavation grid means workers of the same type block each other, creating tense competition for the best dig sites.",
     categories:["Strategy","Euro","Worker Placement"],players:"2-5",playTime:"30-75 min",
-    complexity:2.5,bggRating:7.3,spineColor:"#1a6b30",boxSize:"md",
+    complexity:2.15,bggRating:6.8,spineColor:"#1a6b30",boxSize:"md",
     mechanics:["Worker Placement","Set Collection","Market","Variable Player Powers"]},
   624:{id:"quoridor",name:"Quoridor",bggId:624,year:1997,designer:"Mirko Marchesi",
     description:"An abstract two or four-player game where each player races their pawn to the opposite side of the board while using fence tiles to create walls that redirect opponents. The interplay between moving forward and placing walls creates elegant spatial puzzles with no randomness and infinite depth.",
     categories:["Abstract","Family"],players:"2-4",playTime:"15 min",
-    complexity:1.8,bggRating:7.1,spineColor:"#8b6914",boxSize:"sm",
+    complexity:1.8,bggRating:6.6,spineColor:"#8b6914",boxSize:"sm",
     mechanics:["Grid Movement","Network Building","Blocking"]},
   28143:{id:"race_for_the_galaxy",name:"Race for the Galaxy",bggId:28143,year:2007,designer:"Thomas Lehmann",
     description:"A card game of galactic civilization building where players simultaneously and secretly choose actions from the same set, activating them for everyone but granting bonuses only to the chooser. Reading opponents' likely selections while optimizing your own tableau of world and development cards creates deep strategic tension.",
@@ -872,12 +872,12 @@ const EXTRA_GAMES = {
   220877:{id:"rajas_of_the_ganges",name:"Rajas of the Ganges",bggId:220877,year:2017,designer:"Inka Brand, Markus Brand",
     description:"A dice-worker-placement game set in Mughal India where players use dice as workers to build provinces, trade goods, and sail the Ganges River, with two separate tracks — money and fame — racing toward each other to determine the winner. The dual-track victory condition creates perpetual tension between competing economic strategies.",
     categories:["Strategy","Euro","Dice","Worker Placement"],players:"2-4",playTime:"45-75 min",
-    complexity:2.6,bggRating:7.5,spineColor:"#c07820",boxSize:"md",
+    complexity:2.9,bggRating:7.7,spineColor:"#c07820",boxSize:"md",
     mechanics:["Dice Placement","Worker Placement","Resource Management","Set Collection"]},
   312959:{id:"rallyman_dirt",name:"Rallyman: DIRT",bggId:312959,year:2022,designer:"Jean-Christophe Bouvier",
     description:"A rally racing game where players roll gear dice and push their luck to move along modular track sections, managing speed versus the risk of accumulating danger tokens. Drafting the route you'll race before the game and then executing it under dice pressure captures the tension of real off-road rallying.",
     categories:["Dice","Racing","Strategy","Solo"],players:"1-6",playTime:"45-60 min",
-    complexity:2.3,bggRating:7.7,spineColor:"#c04000",boxSize:"md",
+    complexity:2.3,bggRating:7.4,spineColor:"#c04000",boxSize:"md",
     mechanics:["Dice Rolling","Push Your Luck","Racing","Modular Board"]},
   351040:{id:"ready_set_bet",name:"Ready Set Bet",bggId:351040,year:2022,designer:"John D. Clair",
     description:"A real-time horse racing betting game where one player rolls dice to advance horses while all other players simultaneously place bets on the evolving race using betting tiles on a central board. The excitement of watching probabilities shift and scrambling to secure the best odds before others captures the energy of a real racetrack.",
@@ -887,12 +887,12 @@ const EXTRA_GAMES = {
   51:{id:"ricochet_robots",name:"Ricochet Robots",bggId:51,year:1999,designer:"Alex Randolph",
     description:"A simultaneous puzzle game played on a grid where players race to find the minimum number of moves to slide robots to a target square, with robots stopping only when they hit a wall or another robot. The pure logic challenge rewards spatial reasoning and creates vocal, competitive fun as players shout out solutions.",
     categories:["Abstract","Puzzle","Family"],players:"1-99",playTime:"30 min",
-    complexity:2.0,bggRating:7.5,spineColor:"#cc3300",boxSize:"md",
+    complexity:2.37,bggRating:7.0,spineColor:"#cc3300",boxSize:"md",
     mechanics:["Puzzle","Simultaneous Action Selection","Grid Movement"]},
   30658:{id:"rise_of_empires",name:"Rise of Empires",bggId:30658,year:2009,designer:"Martin Wallace",
     description:"A civilization-building game spanning ancient to medieval history where players develop cities, expand territory, and compete for dominance across three ages. Workers are placed on a central board to gather resources and trigger developments, while barbarian invasions threaten everyone equally and force temporary cooperation.",
     categories:["Strategy","Area Control","Worker Placement"],players:"2-5",playTime:"150 min",
-    complexity:3.2,bggRating:7.1,spineColor:"#8b6914",boxSize:"lg",
+    complexity:3.54,bggRating:7.1,spineColor:"#8b6914",boxSize:"lg",
     mechanics:["Area Majority / Influence","Worker Placement","Variable Setup"]},
   132531:{id:"roll_for_the_galaxy",name:"Roll for the Galaxy",bggId:132531,year:2014,designer:"Wei-Hwa Huang, Thomas Lehmann",
     description:"A dice-based reimagining of Race for the Galaxy where players simultaneously assign custom dice to five phases — explore, develop, settle, produce, ship — then reveal to see which phases everyone activates. Building a tableau of worlds and developments creates special powers that multiply your dice pool and scoring options.",
@@ -902,72 +902,72 @@ const EXTRA_GAMES = {
   284217:{id:"rush_md",name:"Rush M.D.",bggId:284217,year:2020,designer:"Anthony Howgego, Konstantinos Kokkinis, Dávid Turczi",
     description:"A real-time cooperative game set in a hospital emergency room where players race against sand timers to treat patients, run tests, and perform operations simultaneously. Each role has a different set of actions and the group must coordinate flipping timers, moving resources, and completing treatment chains before patients deteriorate.",
     categories:["Co-op","Dice","Strategy"],players:"1-4",playTime:"30-45 min",
-    complexity:2.7,bggRating:7.2,spineColor:"#1a6e4a",boxSize:"md",
+    complexity:2.37,bggRating:7.4,spineColor:"#1a6e4a",boxSize:"md",
     mechanics:["Cooperative Game","Real-Time","Worker Placement"]},
   291453:{id:"scout",name:"SCOUT",bggId:291453,year:2019,designer:"Kei Kajino",
     description:"A hand-management card game where players cannot rearrange their hand — cards are held in the order dealt and may only be played from either end. On your turn you play a set that beats the current top combination, or you scout a card from the field, inserting it anywhere in your hand.",
-    categories:["Card Game","Abstract"],players:"2-5",playTime:"15 min",
-    complexity:1.8,bggRating:7.6,spineColor:"#c84b2f",boxSize:"sm",
+    categories:["Card Game","Abstract"],players:"2-5",playTime:"20 min",
+    complexity:1.4,bggRating:7.8,spineColor:"#c84b2f",boxSize:"sm",
     mechanics:["Hand Management","Ladder Climbing","Take That"]},
   418059:{id:"seti",name:"SETI: Search for Extraterrestrial Intelligence",bggId:418059,year:2024,designer:"Tomáš Holek",
     description:"Players run competing research organizations scanning the cosmos for alien signals, launching probes, analyzing data, and advancing technologies across a modular board representing deep space. The asymmetric factions and layered action-selection create an engine-building race where different scientific breakthroughs score differently for each player.",
     categories:["Strategy","Euro","Engine Building"],players:"1-4",playTime:"40-160 min",
-    complexity:3.5,bggRating:8.0,spineColor:"#0d1b3e",boxSize:"lg",
+    complexity:3.84,bggRating:8.4,spineColor:"#0d1b3e",boxSize:"lg",
     mechanics:["Action Selection","Engine Building","Variable Player Powers","Solo / Solitaire Game"]},
   9220:{id:"saboteur",name:"Saboteur",bggId:9220,year:2004,designer:"Fréderic Moyersoen",
     description:"A hidden-role card game where dwarf miners race to dig a tunnel to the gold, but one or more secret saboteurs among them want the excavation to fail. Players play path cards to extend the mine or action cards to block tools and destroy tunnels, with identities only revealed at round's end.",
     categories:["Card Game","Party","Deduction"],players:"3-10",playTime:"30 min",
     complexity:1.4,bggRating:6.6,spineColor:"#7a5c1e",boxSize:"sm",
     mechanics:["Hand Management","Hidden Roles","Take That"]},
-  377470:{id:"sail",name:"Sail",bggId:377470,year:2023,designer:"Akiyama Koryo, Korzu Yusei",
+  377470:{id:"sail",name:"Sail",bggId:377470,year:2023,designer:"Akiyama Koryo, Kozu Yusei",
     description:"A two-player cooperative trick-taking game where partners sail a ship together by winning tricks to fill wind and current conditions. Players must communicate only through the cards they play, reading the situation to time their contributions and steer the vessel safely to its destination.",
     categories:["Co-op","Card Game","Abstract"],players:"2-2",playTime:"20 min",
-    complexity:2.0,bggRating:7.3,spineColor:"#1e5f8c",boxSize:"sm",
+    complexity:2.21,bggRating:7.3,spineColor:"#1e5f8c",boxSize:"sm",
     mechanics:["Cooperative Game","Trick-taking"]},
   169786:{id:"scythe",name:"Scythe",bggId:169786,year:2016,designer:"Jamey Stegmaier",
     description:"An alternate-history 1920s Europe game where factions of mechs and workers compete to control a mysterious factory on a modular board. Players choose from five actions each turn using a personal action mat — the catch being you cannot repeat your previous action — building an economic engine while positioning for military confrontations that rarely escalate into full war.",
-    categories:["Strategy","Area Control","Engine Building"],players:"1-5",playTime:"90-115 min",
+    categories:["Strategy","Area Control","Engine Building"],players:"1-5",playTime:"115 min",
     complexity:3.4,bggRating:8.2,spineColor:"#4a3728",boxSize:"xl",
     mechanics:["Area Majority / Influence","Engine Building","Variable Player Powers","Action Retrieval","Solo / Solitaire Game"]},
   408180:{id:"shackleton_base",name:"Shackleton Base: A Journey to the Moon",bggId:408180,year:2024,designer:"Fabio Lopiano, Nestore Mangone",
     description:"Players are competing space agencies developing a permanent lunar base at the Moon's south pole, managing resources, constructing facilities, and sending specialists to complete missions. A rondel-driven action system governs resource extraction and building, while shared infrastructure creates interdependence and tension between rivals.",
     categories:["Strategy","Euro","Worker Placement"],players:"1-4",playTime:"60-120 min",
-    complexity:3.3,bggRating:7.8,spineColor:"#2c3d5a",boxSize:"lg",
+    complexity:3.93,bggRating:8.0,spineColor:"#2c3d5a",boxSize:"lg",
     mechanics:["Rondel","Worker Placement","Network and Route Building","Variable Setup"]},
   15062:{id:"shadows_over_camelot",name:"Shadows over Camelot",bggId:15062,year:2005,designer:"Bruno Cathala, Serge Laget",
     description:"King Arthur's knights cooperate to complete quests — retrieving Excalibur, defending Camelot, seeking the Grail — while Siege engines accumulate and evil progresses. The twist is that one player may secretly be a traitor working to ensure the knights fail, creating paranoia and uncertainty at the table throughout.",
-    categories:["Co-op","Thematic","Adventure"],players:"3-7",playTime:"60-80 min",
+    categories:["Co-op","Thematic","Adventure"],players:"3-7",playTime:"60-90 min",
     complexity:2.5,bggRating:7.1,spineColor:"#6b1a1a",boxSize:"lg",
     mechanics:["Cooperative Game","Hidden Roles","Hand Management","Variable Player Powers"]},
-  2511:{id:"sherlock_holmes_consulting_detective",name:"Sherlock Holmes Consulting Detective: The Thames Murders & Other Cases",bggId:2511,year:1982,designer:"Raymond Edwards, Suzanne Goldberg, Gary Grady",
+  2511:{id:"sherlock_holmes_consulting_detective",name:"Sherlock Holmes Consulting Detective: The Thames Murders & Other Cases",bggId:2511,year:1981,designer:"Raymond Edwards, Suzanne Goldberg, Gary Grady",
     description:"Players become investigators working through ten interconnected murder cases set in Victorian London, consulting newspapers, directories, and a map to visit witnesses and gather clues. There are no game mechanics in the traditional sense — success depends entirely on deductive reasoning, and your score is compared to Holmes's own solution path.",
     categories:["Deduction","Adventure","Co-op"],players:"1-8",playTime:"60-120 min",
-    complexity:2.2,bggRating:7.9,spineColor:"#3a2a1a",boxSize:"md",
+    complexity:2.66,bggRating:7.6,spineColor:"#3a2a1a",boxSize:"md",
     mechanics:["Cooperative Game","Narrative Choice / Paragraph","Role Playing"]},
   386366:{id:"shipwrights_of_the_north_sea_redux",name:"Shipwrights of the North Sea: Redux",bggId:386366,year:2024,designer:"Shem Phillips",
     description:"A Viking-era worker placement game where players compete to construct the greatest longships by gathering timber, wool, and iron from a shared marketplace and hiring skilled craftsmen. The revised edition overhauls card art and component quality while preserving the original's tight engine of resource collection and ship construction.",
     categories:["Strategy","Euro","Worker Placement"],players:"1-5",playTime:"60-80 min",
-    complexity:2.5,bggRating:7.4,spineColor:"#2e4a3a",boxSize:"md",
+    complexity:2.7,bggRating:7.6,spineColor:"#2e4a3a",boxSize:"md",
     mechanics:["Worker Placement","Hand Management","Set Collection"]},
   55600:{id:"shipyard",name:"Shipyard",bggId:55600,year:2009,designer:"Vladimír Suchý",
     description:"Players run competing shipyards, assembling steamships piece by piece from bow to stern before sending them on voyages for prestige. A canal-like action track moves you through resource acquisition, hiring specialists, and completing ships — the further around the track a space is, the longer until you return to it.",
     categories:["Strategy","Euro","Engine Building"],players:"2-4",playTime:"120 min",
-    complexity:3.6,bggRating:7.6,spineColor:"#1a3a5e",boxSize:"lg",
+    complexity:3.6,bggRating:7.3,spineColor:"#1a3a5e",boxSize:"lg",
     mechanics:["Action Selection","Network and Route Building","Set Collection","Track Movement"]},
   196379:{id:"shit_happens",name:"Shit Happens",bggId:196379,year:2016,designer:"Andy Breckman",
     description:"A party card game of relative misfortune where players must correctly rank nasty scenarios by their official Misery Index score. Each turn you see a new situation and must decide where it falls in your ordered row of cards — too high or too low and the card goes to another player.",
     categories:["Party","Card Game"],players:"2-8",playTime:"20-60 min",
-    complexity:1.0,bggRating:6.1,spineColor:"#8b2a2a",boxSize:"sm",
+    complexity:1.0,bggRating:5.3,spineColor:"#8b2a2a",boxSize:"sm",
     mechanics:["Ordering","Simultaneous Action Selection"]},
   239175:{id:"shiver_me_timbers",name:"Shiver Me Timbers",bggId:239175,year:2021,designer:"Michal Vitkovsky",
     description:"A pirate-themed adventure game where players captain ships across an archipelago, trading goods, hiring crew, and raiding rivals to amass the greatest fortune. The open-world feel comes from a modular island map and emergent conflicts as players compete over the same trade routes and buried treasures.",
     categories:["Strategy","Adventure","Thematic"],players:"2-4",playTime:"90-150 min",
-    complexity:2.8,bggRating:6.8,spineColor:"#1a3e5a",boxSize:"lg",
+    complexity:3.35,bggRating:7.9,spineColor:"#1a3e5a",boxSize:"lg",
     mechanics:["Hand Management","Modular Board","Route/Network Building","Variable Player Powers"]},
   373106:{id:"sky_team",name:"Sky Team",bggId:373106,year:2023,designer:"Luc Rémond",
     description:"A two-player cooperative game where one player is the pilot and the other the co-pilot of a commercial airliner, silently assigning dice to cockpit controls to land the plane safely. Communication is prohibited during dice placement, so partners must read each other's intentions and manage speed, altitude, engine power, and brake deployment without speaking.",
-    categories:["Co-op","Dice","Strategy"],players:"2-2",playTime:"15 min",
-    complexity:2.2,bggRating:8.1,spineColor:"#1b3a6b",boxSize:"sm",
+    categories:["Co-op","Dice","Strategy"],players:"2-2",playTime:"20 min",
+    complexity:2.04,bggRating:8.1,spineColor:"#1b3a6b",boxSize:"sm",
     mechanics:["Cooperative Game","Dice Placement","Simultaneous Action Selection"]},
   359438:{id:"skymines",name:"Skymines",bggId:359438,year:2022,designer:"Viktor Kobilke, Alexander Pfister",
     description:"A reimagining of Mombasa set on the moon where players invest in competing mining corporations, expand their networks of extraction sites, and build up personal action tracks across five areas. The interplay between hand management and the advancement tracks rewards players who plan several turns ahead and read the corporate stock trajectories.",
@@ -977,12 +977,12 @@ const EXTRA_GAMES = {
   338960:{id:"slay_the_spire",name:"Slay the Spire: The Board Game",bggId:338960,year:2024,designer:"Gary Dworetsky, Anthony Giovannetti, Casey Yano",
     description:"A cooperative adaptation of the video game where players ascend a procedurally generated dungeon, building card-based combat decks and acquiring relics that alter the rules. Each character starts with a different starter deck and evolves uniquely as the group fights monsters and chooses paths through branching encounter maps.",
     categories:["Co-op","Deck Building","Campaign"],players:"1-4",playTime:"30-150 min",
-    complexity:3.0,bggRating:8.3,spineColor:"#2a1a3e",boxSize:"xl",
+    complexity:3.0,bggRating:8.6,spineColor:"#2a1a3e",boxSize:"xl",
     mechanics:["Cooperative Game","Deck Building","Modular Board","Variable Player Powers"]},
   255984:{id:"sleeping_gods",name:"Sleeping Gods",bggId:255984,year:2021,designer:"Ryan Laukat",
     description:"A narrative campaign game where players are the crew of a 1929 steam ship transported to a strange atlas of islands, searching for totems to awaken the gods and return home. The atlas is a large hand-illustrated map explored by moving the ship between ports and encounters, with persistent consequences tracked across sessions.",
     categories:["Adventure","Campaign","Thematic"],players:"1-4",playTime:"60-1200 min",
-    complexity:3.1,bggRating:8.2,spineColor:"#1a2e4a",boxSize:"xl",
+    complexity:3.26,bggRating:8.2,spineColor:"#1a2e4a",boxSize:"xl",
     mechanics:["Cooperative Game","Narrative Choice / Paragraph","Modular Board","Action Points"]},
   358320:{id:"sleeping_gods_distant_skies",name:"Sleeping Gods: Distant Skies",bggId:358320,year:2023,designer:"Ryan Laukat",
     description:"A standalone companion to Sleeping Gods where players pilot an airship through a surreal sky world in search of totems, encountering strange civilizations and ancient dangers. The adventure uses the same exploration and card-driven combat system as the original but features an entirely new illustrated atlas and story.",
@@ -997,37 +997,37 @@ const EXTRA_GAMES = {
   122522:{id:"smash_up",name:"Smash Up",bggId:122522,year:2012,designer:"Paul Peterson",
     description:"A shufflebuilding game where each player selects two faction decks — pirates, ninjas, zombies, aliens, and more — and shuffles them into a single 40-card deck. Players then race to capture bases by accumulating enough minion and action power, with each faction interaction producing wild and surprising combo chains.",
     categories:["Card Game","Thematic","Strategy"],players:"2-4",playTime:"45 min",
-    complexity:1.9,bggRating:6.9,spineColor:"#8b1a4a",boxSize:"md",
+    complexity:2.06,bggRating:6.7,spineColor:"#8b1a4a",boxSize:"md",
     mechanics:["Hand Management","Area Majority / Influence","Take That","Variable Player Powers"]},
   329839:{id:"so_clover",name:"So Clover!",bggId:329839,year:2021,designer:"François Romain",
     description:"A cooperative word-association game where each player writes one clue for each pair of adjacent keywords on their four-sided clover card, then the group collaboratively reconstructs whose clues belong to which board and in what orientation. The deduction phase — piecing together the original arrangements — is where the laughs and misdirections emerge.",
     categories:["Co-op","Party","Card Game"],players:"3-6",playTime:"30 min",
-    complexity:1.3,bggRating:7.8,spineColor:"#2a7a3e",boxSize:"sm",
+    complexity:1.12,bggRating:7.6,spineColor:"#2a7a3e",boxSize:"sm",
     mechanics:["Cooperative Game","Deduction","Word Association"]},
   38453:{id:"space_alert",name:"Space Alert",bggId:38453,year:2008,designer:"Vlaada Chvátil",
     description:"A real-time cooperative game played against a ten-minute audio track that announces incoming threats to your spaceship. During the action phase, players simultaneously program a sequence of moves and actions; afterward, the program runs and the group discovers whether their plan actually worked — or spectacularly failed.",
     categories:["Co-op","Strategy","Thematic"],players:"1-5",playTime:"30 min",
-    complexity:3.1,bggRating:7.6,spineColor:"#0d2a4a",boxSize:"md",
+    complexity:3.1,bggRating:7.4,spineColor:"#0d2a4a",boxSize:"md",
     mechanics:["Cooperative Game","Real-Time","Action Queue","Programmed Movement"]},
   293296:{id:"splendor_marvel",name:"Splendor: Marvel",bggId:293296,year:2020,designer:"Marc André",
     description:"A Marvel-skinned redesign of Splendor where players recruit heroes to form teams, collect Infinity Stones as currency, and compete to recruit the most powerful Avengers and Guardians. Locations replace the original's noble tiles, and hero cards still chain into powerful free recruitment as your team grows.",
     categories:["Strategy","Card Game","Family"],players:"2-4",playTime:"30 min",
-    complexity:1.8,bggRating:7.0,spineColor:"#8b1a1a",boxSize:"md",
+    complexity:1.8,bggRating:7.6,spineColor:"#8b1a1a",boxSize:"md",
     mechanics:["Set Collection","Hand Management","Engine Building"]},
   271896:{id:"star_wars_outer_rim",name:"Star Wars: Outer Rim",bggId:271896,year:2019,designer:"Corey Konieczka, Tony Fanchi",
     description:"An open-world adventure game where players take on roles of iconic scoundrels — Boba Fett, Han Solo, Greedo — roaming the outer rim completing jobs, upgrading ships, and building a crew while managing bounties on their heads. Fame tracks and patrol encounters give each session a different competitive tension as outlaws pursue their own agendas.",
     categories:["Adventure","Thematic","Strategy"],players:"1-4",playTime:"120-180 min",
-    complexity:3.0,bggRating:7.5,spineColor:"#2a1a0d",boxSize:"xl",
+    complexity:2.6,bggRating:7.8,spineColor:"#2a1a0d",boxSize:"xl",
     mechanics:["Hand Management","Modular Board","Variable Player Powers","Route/Network Building"]},
   374173:{id:"star_wars_deckbuilding",name:"Star Wars: The Deckbuilding Game",bggId:374173,year:2023,designer:"Caleb Grace",
     description:"A head-to-head deckbuilding game where one player commands the Rebel Alliance and the other the Galactic Empire, each acquiring iconic characters and vehicles to attack the opponent's bases. Destroying three enemy bases wins the game, and a central galaxy row of cards shifts with each purchase, creating dynamic card availability.",
     categories:["Deck Building","Card Game","Strategy"],players:"2-2",playTime:"30 min",
-    complexity:2.2,bggRating:7.5,spineColor:"#1a1a2e",boxSize:"md",
+    complexity:2.05,bggRating:7.8,spineColor:"#1a1a2e",boxSize:"md",
     mechanics:["Deck Building","Hand Management","Take That"]},
-  257193:{id:"starcadia_quest",name:"Starcadia Quest",bggId:257193,year:2020,designer:"Leo Almeida, Thiago Aranha, Eric M. Lang",
+  257193:{id:"starcadia_quest",name:"Starcadia Quest",bggId:257193,year:2020,designer:"Leo Almeida, Thiago Aranha, Guilherme Goulart, Eric M. Lang, Fred Perret",
     description:"A sci-fi dungeon-crawl campaign game where teams of galactic heroes battle through modular space stations in a PvE-meets-PvP structure — players cooperate against the boss but compete to land the killing blow and earn glory. Heroes level up, collect loot, and unlock new abilities across a branching campaign.",
     categories:["Adventure","Thematic","Campaign"],players:"2-4",playTime:"60 min",
-    complexity:2.4,bggRating:7.4,spineColor:"#2a1a4e",boxSize:"xl",
+    complexity:2.67,bggRating:7.4,spineColor:"#2a1a4e",boxSize:"xl",
     mechanics:["Dice Rolling","Modular Board","Take That","Variable Player Powers","Campaign / Legacy"]},
   329845:{id:"stella_dixit_universe",name:"Stella: Dixit Universe",bggId:329845,year:2021,designer:"Gérald Cattiaux, Jean-Louis Roubira",
     description:"A word-association game in the Dixit universe where all players simultaneously write a secret word they believe connects several cards in the central display, then reveal and score points for matching others without matching everyone. The risk-reward of picking popular versus niche associations gives it a distinct feel from Dixit itself.",
@@ -1047,22 +1047,22 @@ const EXTRA_GAMES = {
   133473:{id:"sushi_go",name:"Sushi Go!",bggId:133473,year:2013,designer:"Phil Walker-Harding",
     description:"A fast card-drafting game where players simultaneously choose one card from their hand and pass the rest, collecting sets of sushi dishes that score differently depending on who has the most, the fewest, or complete combinations. Three short rounds keep the game breezy while the hidden drafting adds light strategic tension.",
     categories:["Card Game","Family","Party"],players:"2-5",playTime:"15 min",
-    complexity:1.2,bggRating:7.2,spineColor:"#e02a5a",boxSize:"sm",
+    complexity:1.2,bggRating:7.0,spineColor:"#e02a5a",boxSize:"sm",
     mechanics:["Card Drafting","Hand Management","Set Collection"]},
   181289:{id:"terra_mystica_big_box",name:"Terra Mystica: Big Box",bggId:181289,year:2015,designer:"Jens Drögemüller, Helge Ostertag",
     description:"A deep fantasy area-expansion game where fourteen asymmetric factions terraform a shared landscape of seven terrain types, each building on only their home terrain while paying to convert adjacent land. The base game and both expansions are included, adding factions, maps, and additional cult track and town tile options.",
     categories:["Strategy","Euro","Area Control"],players:"2-5",playTime:"60-150 min",
-    complexity:3.9,bggRating:8.1,spineColor:"#2a4a1a",boxSize:"xl",
+    complexity:3.9,bggRating:8.5,spineColor:"#2a4a1a",boxSize:"xl",
     mechanics:["Area Majority / Influence","Network and Route Building","Variable Player Powers","Income","End Game Bonuses"]},
   364186:{id:"terra_nova",name:"Terra Nova",bggId:364186,year:2022,designer:"Andreas Faul",
     description:"A streamlined area-enclosure game inspired by Terra Mystica where players expand their faction's settlements across a shared terrain, scoring by enclosing regions and building structures. Simplified resource and cult systems make the strategic landscape accessible without sacrificing the satisfaction of tight territorial competition.",
     categories:["Strategy","Euro","Abstract"],players:"2-4",playTime:"60-90 min",
-    complexity:2.5,bggRating:7.2,spineColor:"#3a6a2a",boxSize:"md",
+    complexity:2.87,bggRating:7.2,spineColor:"#3a6a2a",boxSize:"md",
     mechanics:["Area Majority / Influence","Network and Route Building","Variable Player Powers"]},
   350458:{id:"terracotta_army",name:"Terracotta Army",bggId:350458,year:2022,designer:"Przemysław Fornal, Adam Kwapiński",
     description:"Players are workshops competing to craft the most distinguished warriors for the First Emperor's burial mound, placing workers on a rotating central wheel to gather clay, tools, and craftsmen. The unique rondel-like action wheel forces you to plan ahead as spaces shift each round, rewarding long-term efficiency over short-term grabs.",
     categories:["Strategy","Euro","Worker Placement"],players:"1-4",playTime:"90-120 min",
-    complexity:3.1,bggRating:7.7,spineColor:"#8b5a2a",boxSize:"lg",
+    complexity:3.4,bggRating:7.4,spineColor:"#8b5a2a",boxSize:"lg",
     mechanics:["Worker Placement","Rondel","Set Collection","End Game Bonuses"]},
   167791:{id:"terraforming_mars",name:"Terraforming Mars",bggId:167791,year:2016,designer:"Jacob Fryxelius",
     description:"Players are corporations competing to raise oxygen, temperature, and ocean coverage on Mars to habitable levels while building the highest-scoring personal engine of cities, greeneries, and special projects. Hundreds of unique project cards drive wildly different strategies, and the corporation selection at setup determines your starting economic engine.",
@@ -1072,47 +1072,47 @@ const EXTRA_GAMES = {
   371433:{id:"terrorscape",name:"Terrorscape",bggId:371433,year:2023,designer:"Jeffrey CCH",
     description:"A hidden-movement horror game where one player takes the role of a slasher villain stalking survivors through a haunted location, while the other players cooperate to complete objectives and escape. The asymmetric roles create a tense cat-and-mouse dynamic as survivors deduce the killer's position from clues and noise tokens.",
     categories:["Thematic","Deduction","Co-op"],players:"2-4",playTime:"30-45 min",
-    complexity:2.5,bggRating:7.1,spineColor:"#2a0a0a",boxSize:"md",
+    complexity:2.27,bggRating:8.1,spineColor:"#2a0a0a",boxSize:"md",
     mechanics:["Hidden Movement","Cooperative Game","Deduction","Variable Player Powers"]},
   180263:{id:"the_7th_continent",name:"The 7th Continent",bggId:180263,year:2017,designer:"Ludovic Roudy, Bruno Sautter",
     description:"A solo or cooperative exploration game where players wander a vast, folding card-based continent trying to lift an ancient curse that kills the explorer at a random moment. The continent unfolds as you move, with every action — walking, searching, crafting, fighting — consuming cards from a shared action deck that also functions as your life total.",
     categories:["Co-op","Adventure","Campaign"],players:"1-4",playTime:"5-1000 min",
-    complexity:3.5,bggRating:8.0,spineColor:"#2a4a1a",boxSize:"xl",
+    complexity:2.9,bggRating:7.7,spineColor:"#2a4a1a",boxSize:"xl",
     mechanics:["Cooperative Game","Narrative Choice / Paragraph","Modular Board","Hand Management","Solo / Solitaire Game"]},
   336844:{id:"binding_of_isaac_four_souls_requiem",name:"The Binding of Isaac: Four Souls Requiem",bggId:336844,year:2023,designer:"Edmund McMillen",
     description:"A competitive card game based on the video game where players collect soul cards by defeating monsters using loot cards and items from personal play areas, with the first to four souls winning. Chaotic interaction between hundreds of items and loot effects rewards familiarity with the dense combo possibilities drawn from the cult PC game.",
     categories:["Card Game","Thematic","Strategy"],players:"1-4",playTime:"20-60 min",
-    complexity:2.5,bggRating:7.7,spineColor:"#3a2a0a",boxSize:"md",
+    complexity:2.72,bggRating:8.3,spineColor:"#3a2a0a",boxSize:"md",
     mechanics:["Hand Management","Take That","Variable Player Powers","Deck Building"]},
   325038:{id:"the_brambles",name:"The Brambles: A Solo Card Game",bggId:325038,year:2020,designer:"John Burton",
     description:"A compact solo card game where the player navigates a thorny forest of overlapping cards, revealing paths and managing a limited hand to reach an exit before resources run out. Simple rules create a tight spatial puzzle that fits in a pocket while delivering meaningful decisions across its short play time.",
     categories:["Solo","Card Game","Puzzle"],players:"1-1",playTime:"15-25 min",
-    complexity:1.8,bggRating:6.9,spineColor:"#2a4a1a",boxSize:"sm",
+    complexity:2.0,bggRating:7.3,spineColor:"#2a4a1a",boxSize:"sm",
     mechanics:["Cooperative Game","Solo / Solitaire Game","Hand Management","Puzzle"]},
   271320:{id:"castles_of_burgundy",name:"The Castles of Burgundy",bggId:271320,year:2019,designer:"Stefan Feld",
     description:"Players are medieval princes developing their personal estates by drafting hex tiles — mines, pastures, cities, monasteries — and placing them in matching regions for immediate and end-game bonuses. Two dice rolled each turn determine which tiles are available, but a silver token system lets you compensate for bad rolls, keeping luck from overwhelming planning.",
     categories:["Strategy","Euro","Dice"],players:"1-4",playTime:"70-120 min",
-    complexity:3.0,bggRating:8.1,spineColor:"#6b3a1a",boxSize:"lg",
+    complexity:3.0,bggRating:8.5,spineColor:"#6b3a1a",boxSize:"lg",
     mechanics:["Dice Rolling","Tile Placement","Set Collection","End Game Bonuses"]},
   284083:{id:"the_crew_quest_for_planet_nine",name:"The Crew: The Quest for Planet Nine",bggId:284083,year:2019,designer:"Thomas Sing",
     description:"A cooperative trick-taking game where players work together to complete 50 missions, each assigning specific cards as tasks that must be won by designated players in the correct order. Communication is limited to a single token per round, so reading your partners' leads and adjusting on the fly is the core challenge.",
     categories:["Co-op","Card Game","Deduction"],players:"2-5",playTime:"20 min",
     complexity:2.0,bggRating:7.8,spineColor:"#0d2a4a",boxSize:"sm",
     mechanics:["Cooperative Game","Trick-taking","Hand Management","Campaign / Legacy"]},
-  429293:{id:"fellowship_of_the_ring_trick_taking",name:"The Fellowship of the Ring: Trick-Taking Game",bggId:429293,year:2024,designer:"Bryan Bornmueller",
+  429293:{id:"fellowship_of_the_ring_trick_taking",name:"The Fellowship of the Ring: Trick-Taking Game",bggId:429293,year:2025,designer:"Bryan Bornmueller",
     description:"A cooperative trick-taking game following the Fellowship's journey from the Shire to Mordor, where players must collectively win tricks in ways that fulfill quest objectives without communicating card contents. Each chapter presents new constraints and dangers that map the story beats onto evolving trick-taking rules.",
     categories:["Co-op","Card Game","Adventure"],players:"1-4",playTime:"20 min",
-    complexity:2.0,bggRating:7.5,spineColor:"#2a3a1a",boxSize:"sm",
+    complexity:2.0,bggRating:8.0,spineColor:"#2a3a1a",boxSize:"sm",
     mechanics:["Cooperative Game","Trick-taking","Hand Management"]},
   173090:{id:"the_game",name:"The Game",bggId:173090,year:2015,designer:"Steffen Benndorf",
     description:"A cooperative card game where players collectively try to play all 98 numbered cards onto four discard piles — two counting up, two counting down — without violating pile direction. Limited communication rules make coordinating who plays what and when surprisingly tense, and losing by a handful of cards feels devastatingly close.",
     categories:["Co-op","Card Game","Abstract"],players:"1-5",playTime:"20 min",
-    complexity:1.7,bggRating:7.1,spineColor:"#1a1a3a",boxSize:"sm",
+    complexity:1.24,bggRating:6.7,spineColor:"#1a1a3a",boxSize:"sm",
     mechanics:["Cooperative Game","Hand Management","Sorting"]},
   195539:{id:"the_godfather_corleones_empire",name:"The Godfather: Corleone's Empire",bggId:195539,year:2017,designer:"Eric M. Lang",
     description:"A streamlined area-control game set in the Godfather's New York where mob families compete to control neighborhoods through worker placement and extortion. Each round, underbosses and thugs occupy city locations to collect cash and favors, but at the end of each act, most workers are recalled and the Don cleans up loose ends — the player with the most money wins.",
     categories:["Strategy","Area Control","Thematic"],players:"2-5",playTime:"60-90 min",
-    complexity:2.6,bggRating:7.2,spineColor:"#1a1a1a",boxSize:"md",
+    complexity:2.6,bggRating:7.5,spineColor:"#1a1a1a",boxSize:"md",
     mechanics:["Area Majority / Influence","Worker Placement","Hand Management","Take That"]},
   929:{id:"the_great_dalmuti",name:"The Great Dalmuti",bggId:929,year:1995,designer:"Richard Garfield",
     description:"A card shedding game of social hierarchy where players race to empty their hands and climb the ranks from Greater Dalmuti to lowly Peon. Each round reshuffles the social order based on performance, creating a lively and often hilarious power dynamic.",
@@ -1122,17 +1122,17 @@ const EXTRA_GAMES = {
   281259:{id:"the_isle_of_cats",name:"The Isle of Cats",bggId:281259,year:2019,designer:"Frank West",
     description:"Players are explorers rescuing cats from a cursed island by drafting polyomino cat tiles and fitting them into their boats. The puzzle of arranging cats into families while managing lesson cards creates a rich blend of drafting and spatial optimization.",
     categories:["Euro","Puzzle","Family"],players:"1-4",playTime:"60-90 min",
-    complexity:2.9,bggRating:7.8,spineColor:"#E8A020",boxSize:"md",
+    complexity:2.37,bggRating:7.6,spineColor:"#E8A020",boxSize:"md",
     mechanics:["Tile Placement","Drafting","Hand Management"]},
   245655:{id:"the_kings_dilemma",name:"The King's Dilemma",bggId:245655,year:2019,designer:"Hjalmar Hach, Lorenzo Silva",
     description:"A legacy narrative game where players represent noble houses advising a king through a series of moral and political dilemmas that permanently alter the kingdom. Choices ripple across sessions as the kingdom's stats shift and the story evolves based on collective decisions.",
     categories:["Thematic","Campaign","Card Game"],players:"3-5",playTime:"45-60 min",
-    complexity:2.5,bggRating:7.6,spineColor:"#4A2060",boxSize:"md",
+    complexity:2.26,bggRating:7.6,spineColor:"#4A2060",boxSize:"md",
     mechanics:["Voting","Legacy","Hand Management"]},
   244992:{id:"the_mind",name:"The Mind",bggId:244992,year:2018,designer:"Wolfgang Warsch",
     description:"A cooperative card game where players must silently play numbered cards in ascending order without communicating, relying purely on intuition and timing. The tension escalates as the deck grows and the team must synchronize without words.",
     categories:["Card Game","Co-op","Party"],players:"2-4",playTime:"20 min",
-    complexity:1.0,bggRating:7.1,spineColor:"#1A1A4E",boxSize:"sm",
+    complexity:1.0,bggRating:6.7,spineColor:"#1A1A4E",boxSize:"sm",
     mechanics:["Cooperative","Real-Time","Hand Management"]},
   172047:{id:"the_others",name:"The Others",bggId:172047,year:2016,designer:"Eric M. Lang",
     description:"An asymmetric miniature game where one player controls a demonic force of one of the Seven Sins while other players cooperate as the FAITH organization fighting to stop them. Intense thematic combat takes place across a gritty urban environment filled with corruption and despair.",
@@ -1147,7 +1147,7 @@ const EXTRA_GAMES = {
   349955:{id:"the_quacks_of_quedlinburg_megabox",name:"The Quacks of Quedlinburg: MegaBox",bggId:349955,year:2021,designer:"Wolfgang Warsch",
     description:"A comprehensive collection of The Quacks of Quedlinburg base game bundled with major expansions including The Alchemists and The Herb Witches. It offers enormous variety in ingredient books and game modes, supporting up to five players with expanded content.",
     categories:["Family","Dice","Engine Building"],players:"2-5",playTime:"45-60 min",
-    complexity:2.1,bggRating:8.0,spineColor:"#8B2500",boxSize:"xl",
+    complexity:2.1,bggRating:8.2,spineColor:"#8B2500",boxSize:"xl",
     mechanics:["Push Your Luck","Bag Building","Engine Building"]},
   41114:{id:"the_resistance",name:"The Resistance",bggId:41114,year:2009,designer:"Don Eskridge",
     description:"A social deduction game of spies and traitors where resistance fighters try to complete missions while government spies secretly sabotage them. Players vote on mission teams and analyze behavior to root out the hidden spies in their midst.",
@@ -1162,22 +1162,22 @@ const EXTRA_GAMES = {
   371942:{id:"the_white_castle",name:"The White Castle",bggId:371942,year:2023,designer:"Isra C., Shei S.",
     description:"A worker placement and dice game set in feudal Japan where players send courtiers into the stunning Himeji Castle to gain influence and resources. The elegant design revolves around clever use of dice bridges to place workers at discounted costs.",
     categories:["Euro","Worker Placement","Dice"],players:"1-4",playTime:"80 min",
-    complexity:2.8,bggRating:7.8,spineColor:"#C8B090",boxSize:"md",
+    complexity:3.07,bggRating:8.0,spineColor:"#C8B090",boxSize:"md",
     mechanics:["Worker Placement","Dice Placement","Action Selection"]},
   331106:{id:"the_witcher_old_world",name:"The Witcher: Old World",bggId:331106,year:2023,designer:"Łukasz Woźniak",
     description:"Players take on the roles of Witchers from rival schools traveling the Continent to slay monsters, explore locations, and build their combat decks in a time before Geralt. The game blends deck building and adventure with rich lore from the Witcher universe.",
     categories:["Adventure","Deck Building","Campaign"],players:"1-5",playTime:"90-150 min",
-    complexity:3.2,bggRating:7.7,spineColor:"#2E4A1C",boxSize:"lg",
+    complexity:2.88,bggRating:7.9,spineColor:"#2E4A1C",boxSize:"lg",
     mechanics:["Deck Building","Dice Rolling","Action Points"]},
   141019:{id:"thermopyles",name:"Thermopyles",bggId:141019,year:2013,designer:"Touko Tahkokallio",
     description:"A cooperative abstract game inspired by the Battle of Thermopylae where Spartan defenders must hold a narrow pass against overwhelming Persian forces. Players coordinate tile placement and unit positioning to survive wave after wave of attackers.",
     categories:["Co-op","Abstract","Strategy"],players:"1-4",playTime:"20 min",
-    complexity:2.0,bggRating:6.4,spineColor:"#8B6914",boxSize:"sm",
+    complexity:1.21,bggRating:3.9,spineColor:"#8B6914",boxSize:"sm",
     mechanics:["Cooperative","Tile Placement","Area Control"]},
   503:{id:"through_the_desert",name:"Through the Desert",bggId:503,year:1998,designer:"Reiner Knizia",
     description:"Players place pastel-colored camel trains across a desert landscape to claim oases and cut off opponents in this elegant abstract area-control game. The simultaneously simple and deep design rewards territorial thinking and long-term planning.",
     categories:["Abstract","Area Control","Strategy"],players:"2-5",playTime:"45 min",
-    complexity:2.0,bggRating:7.1,spineColor:"#D4A050",boxSize:"md",
+    complexity:2.16,bggRating:7.1,spineColor:"#D4A050",boxSize:"md",
     mechanics:["Area Control","Network Building","Enclosure"]},
   14996:{id:"ticket_to_ride_europe",name:"Ticket to Ride: Europe",bggId:14996,year:2005,designer:"Alan R. Moon",
     description:"Players collect colored train cards to claim railway routes across a beautifully illustrated map of Europe, completing destination tickets for points. Tunnels, ferries, and stations add new strategic layers beyond the original Ticket to Ride.",
@@ -1192,32 +1192,32 @@ const EXTRA_GAMES = {
   351913:{id:"tiletum",name:"Tiletum",bggId:351913,year:2022,designer:"Simone Luciani, Daniele Tascini",
     description:"Set during the flourishing Renaissance, players travel across Europe to collect resources and construct magnificent buildings using a unique dice selection mechanism. The interplay between dice drafting and action activation creates a deeply strategic Euro experience.",
     categories:["Euro","Strategy","Worker Placement"],players:"1-4",playTime:"60-100 min",
-    complexity:3.5,bggRating:7.7,spineColor:"#7B3F00",boxSize:"md",
+    complexity:3.5,bggRating:7.9,spineColor:"#7B3F00",boxSize:"md",
     mechanics:["Dice Drafting","Action Selection","Route Building"]},
   321277:{id:"tinners_trail",name:"Tinners' Trail",bggId:321277,year:2021,designer:"Martin Wallace",
     description:"Players are Victorian-era mining entrepreneurs in Cornwall bidding on land parcels and extracting tin and copper while managing their companies' finances. The revised edition streamlines Wallace's original design into a tense economic contest of investment and exploitation.",
     categories:["Euro","Strategy"],players:"1-5",playTime:"60-90 min",
-    complexity:3.0,bggRating:7.5,spineColor:"#5A7A5A",boxSize:"md",
+    complexity:3.0,bggRating:7.1,spineColor:"#5A7A5A",boxSize:"md",
     mechanics:["Bidding","Action Points","Network Building"]},
   201921:{id:"tiny_epic_quest",name:"Tiny Epic Quest",bggId:201921,year:2017,designer:"Scott Almes",
     description:"A pocket-sized adventure game where heroes explore a fantasy world to recover stolen ancient artifacts from marauding goblins, moving across a modular board by day and managing perilous quests by night. The ITEMeeples system cleverly incorporates equipment directly onto the hero meeples.",
     categories:["Adventure","Family","Solo"],players:"1-4",playTime:"30-60 min",
-    complexity:2.2,bggRating:6.8,spineColor:"#2A5C2A",boxSize:"sm",
+    complexity:2.69,bggRating:6.8,spineColor:"#2A5C2A",boxSize:"sm",
     mechanics:["Modular Board","Action Points","Hand Management"]},
   192135:{id:"too_many_bones",name:"Too Many Bones",bggId:192135,year:2017,designer:"Josh J. Carlson, Adam Carlson",
     description:"A cooperative RPG-style dice builder where players control unique Gearloc characters venturing across a dangerous world to defeat a Baddie threatening the land. The game features stunning production with custom dice representing each character's unique skills and abilities.",
     categories:["Co-op","Dice","Adventure"],players:"1-4",playTime:"60-120 min",
-    complexity:3.5,bggRating:8.1,spineColor:"#3A6A3A",boxSize:"lg",
+    complexity:3.87,bggRating:8.3,spineColor:"#3A6A3A",boxSize:"lg",
     mechanics:["Dice Building","Cooperative","Variable Player Powers"]},
   441548:{id:"trickerion_anniversary_edition",name:"Trickerion: Anniversary Edition",bggId:441548,year:2025,designer:"Richard Amann, Viktor Peter",
     description:"Players are rival stage magicians competing for fame in a dark steampunk city by learning spectacular tricks and performing them at the grand Trickerion theater. This anniversary edition collects the base game and expansions into one definitive package with updated components.",
     categories:["Euro","Worker Placement","Strategy"],players:"1-4",playTime:"60-180 min",
-    complexity:3.8,bggRating:8.0,spineColor:"#1A0A2E",boxSize:"xl",
+    complexity:4.59,bggRating:8.9,spineColor:"#1A0A2E",boxSize:"xl",
     mechanics:["Worker Placement","Action Planning","Hand Management"]},
   371873:{id:"trolls_and_princesses",name:"Trolls & Princesses",bggId:371873,year:2023,designer:"Pim Thunborg",
     description:"An asymmetric game where one side plays cunning trolls and the other plays resourceful princesses in a battle of wits across a fairy-tale landscape. Players use unique abilities to outsmart and outwit their opponents through clever card play and board positioning.",
     categories:["Thematic","Strategy","Family"],players:"2-4",playTime:"90-120 min",
-    complexity:2.5,bggRating:6.9,spineColor:"#4A7A3A",boxSize:"md",
+    complexity:3.26,bggRating:7.5,spineColor:"#4A7A3A",boxSize:"md",
     mechanics:["Asymmetric","Action Selection","Hand Management"]},
   233078:{id:"twilight_imperium_fourth_edition",name:"Twilight Imperium: Fourth Edition",bggId:233078,year:2017,designer:"Dane Beltrami, Corey Konieczka, Christian T. Petersen",
     description:"An epic space opera of galactic conquest where 3-6 players command unique alien civilizations vying for control of the galaxy's seat of power through warfare, diplomacy, and political maneuvering. Each session is a massive multi-hour saga with shifting alliances and dramatic reversals.",
@@ -1232,47 +1232,47 @@ const EXTRA_GAMES = {
   376740:{id:"undergrove",name:"Undergrove",bggId:376740,year:2024,designer:"Elizabeth Hargrave, Mark Wootton",
     description:"Players grow forests and build the underground fungal networks that connect trees, sharing nutrients and supporting the ecosystem in this gentle Euro game. Taking inspiration from forest ecology, players cultivate trees and mycorrhizal connections to score points and thrive.",
     categories:["Euro","Engine Building","Solo"],players:"1-4",playTime:"60-75 min",
-    complexity:2.5,bggRating:7.4,spineColor:"#2A5C2A",boxSize:"md",
+    complexity:2.9,bggRating:7.0,spineColor:"#2A5C2A",boxSize:"md",
     mechanics:["Network Building","Engine Building","Set Collection"]},
   290484:{id:"unsettled",name:"Unsettled",bggId:290484,year:2021,designer:"Tom Mattson, Marc Neidlinger",
     description:"A cooperative survival game where players are stranded on bizarre alien worlds with unique rules and mechanics on each planet, struggling to gather resources and repair their ship. The game's modular planet design ensures no two sessions feel alike as players adapt to strange new environments.",
     categories:["Co-op","Adventure","Strategy"],players:"2-4",playTime:"60-90 min",
-    complexity:3.0,bggRating:7.5,spineColor:"#204060",boxSize:"md",
+    complexity:3.29,bggRating:8.0,spineColor:"#204060",boxSize:"md",
     mechanics:["Cooperative","Modular Board","Hand Management"]},
   340325:{id:"vagrantsong",name:"Vagrantsong",bggId:340325,year:2022,designer:"Matt Carter, Justin Gibbs, Kyle Rowan",
     description:"A cooperative campaign game set on a haunted ghost train where players are drifters working together to help the spirits of the dead find peace and pass on. Each scenario unfolds a new ghostly story with evolving mechanics and character progression between sessions.",
     categories:["Co-op","Campaign","Thematic"],players:"2-4",playTime:"45-120 min",
-    complexity:2.8,bggRating:8.1,spineColor:"#2A2A2A",boxSize:"md",
+    complexity:3.19,bggRating:7.4,spineColor:"#2A2A2A",boxSize:"md",
     mechanics:["Cooperative","Campaign","Dice Rolling"]},
   420033:{id:"vantage",name:"Vantage",bggId:420033,year:2025,designer:"Jamey Stegmaier",
     description:"Players build mountain communities in a stunning landscape, placing structures on tiered terrain to capture views and generate resources in this tableau-building Euro game. The layered mountain board creates a striking visual experience while rewarding clever spatial planning.",
     categories:["Euro","Engine Building","Strategy"],players:"1-6",playTime:"120-180 min",
-    complexity:3.0,bggRating:7.6,spineColor:"#4A6A8A",boxSize:"lg",
+    complexity:2.34,bggRating:8.2,spineColor:"#4A6A8A",boxSize:"lg",
     mechanics:["Tile Placement","Engine Building","Set Collection"]},
   7479:{id:"warcraft_the_board_game",name:"WarCraft: The Board Game",bggId:7479,year:2003,designer:"Kevin Wilson",
     description:"Based on Blizzard's legendary RTS video game, players command the armies of the Alliance or Horde across scenario maps, gathering resources and battling for control of the land. The game faithfully recreates the unit upgrade trees and faction asymmetry of its digital inspiration.",
     categories:["Thematic","Area Control","Strategy"],players:"2-4",playTime:"120 min",
-    complexity:3.0,bggRating:6.8,spineColor:"#5A1A00",boxSize:"lg",
+    complexity:2.76,bggRating:6.1,spineColor:"#5A1A00",boxSize:"lg",
     mechanics:["Area Control","Variable Player Powers","Dice Rolling"]},
   274364:{id:"watergate",name:"Watergate",bggId:274364,year:2019,designer:"Matthias Cramer",
     description:"A tense two-player card-driven game recreating the political crisis as one player controls the Nixon administration trying to stonewall investigations while the other plays determined journalists racing to connect informants to the President. Momentum cards create swinging narrative tension in every game.",
     categories:["Strategy","Card Game","Deduction"],players:"2-2",playTime:"30-60 min",
-    complexity:2.5,bggRating:7.7,spineColor:"#1A1A1A",boxSize:"sm",
+    complexity:2.3,bggRating:7.7,spineColor:"#1A1A1A",boxSize:"sm",
     mechanics:["Card Drafting","Asymmetric","Network Building"]},
   262543:{id:"wavelength",name:"Wavelength",bggId:262543,year:2019,designer:"Alex Hague, Justin Vickers, Wolfgang Warsch",
     description:"A social party game where a clue giver tries to guide their team to the correct spot on a spectrum between two opposing concepts by giving a single clever clue. The game sparks hilarious debate about how concepts relate to each other on a psychic wavelength.",
     categories:["Party","Deduction","Card Game"],players:"2-12",playTime:"30-45 min",
-    complexity:1.2,bggRating:7.4,spineColor:"#E040A0",boxSize:"md",
+    complexity:1.2,bggRating:7.2,spineColor:"#E040A0",boxSize:"md",
     mechanics:["Clue Giving","Deduction","Team Play"]},
   233867:{id:"welcome_to",name:"Welcome To...",bggId:233867,year:2018,designer:"Benoit Turpin",
     description:"A flip-and-write game where players are architects designing the perfect 1950s American suburb by assigning house numbers to streets and constructing parks and pools. Because everyone plays with the same cards simultaneously, it scales to any group size without conflict.",
     categories:["Family","Puzzle","Solo"],players:"1-100",playTime:"25 min",
-    complexity:1.7,bggRating:7.3,spineColor:"#4A8AC0",boxSize:"sm",
+    complexity:1.7,bggRating:7.5,spineColor:"#4A8AC0",boxSize:"sm",
     mechanics:["Roll and Write","Simultaneous Action","Set Collection"]},
   339789:{id:"welcome_to_the_moon",name:"Welcome to the Moon",bggId:339789,year:2021,designer:"Alexis Allard, Benoit Turpin",
     description:"A flip-and-write sequel to Welcome To... featuring eight standalone scenarios of increasing complexity that can be chained together into a campaign. Players fill rockets and lunar colonies with clever number placement as the narrative escalates from Earth to deep space.",
     categories:["Family","Puzzle","Campaign"],players:"1-6",playTime:"25-30 min",
-    complexity:2.0,bggRating:7.7,spineColor:"#1A2A5E",boxSize:"sm",
+    complexity:2.46,bggRating:7.7,spineColor:"#1A2A5E",boxSize:"sm",
     mechanics:["Roll and Write","Simultaneous Action","Campaign"]},
   232405:{id:"western_legends",name:"Western Legends",bggId:232405,year:2018,designer:"Hervé Lemaître",
     description:"An open-world sandbox game set in the American Wild West where players pursue their own legend as outlaws, lawmen, or everything in between through poker, cattle drives, and shootouts. The narrative freedom and emergent storytelling make every game a unique tale of the frontier.",
@@ -1282,7 +1282,7 @@ const EXTRA_GAMES = {
   422121:{id:"witness_the_treasure_of_othesis",name:"Witness: The Treasure of Othesis",bggId:422121,year:2024,designer:"Dominique Bodin",
     description:"A cooperative deduction game where four players must pass a secret clue around the table by whispering only to their neighbors, reconstructing the original message to solve a mystery. The telephone-game mechanic creates both hilarity and satisfying detective work as clues evolve through transmission.",
     categories:["Co-op","Deduction","Party"],players:"4-4",playTime:"10-25 min",
-    complexity:1.5,bggRating:7.1,spineColor:"#6A3A1A",boxSize:"sm",
+    complexity:1.5,bggRating:6.6,spineColor:"#6A3A1A",boxSize:"sm",
     mechanics:["Cooperative","Deduction","Clue Giving"]},
   227935:{id:"wonderlands_war",name:"Wonderland's War",bggId:227935,year:2022,designer:"Tim Eisner, Ben Eisner, Ian Moss",
     description:"Set in a twisted version of Wonderland, players act as Alice, the Queen of Hearts, and other iconic characters competing for control of the Mad Land through deck building and area control. Chaotic, colorful battles are resolved by drawing chips from a bag in a blend of bag building and deckbuilding.",
@@ -1297,7 +1297,7 @@ const EXTRA_GAMES = {
   2243:{id:"yahtzee",name:"Yahtzee",bggId:2243,year:1956,designer:"Edwin S. Lowe",
     description:"A classic dice game where players roll and re-roll five dice up to three times per turn to achieve specific combinations for points, such as full houses, straights, and the coveted Yahtzee. Balancing risk and reward in choosing which categories to fill makes each turn a mini-decision.",
     categories:["Dice","Family","Party"],players:"2-10",playTime:"30 min",
-    complexity:1.0,bggRating:5.6,spineColor:"#CC2200",boxSize:"sm",
+    complexity:1.17,bggRating:5.6,spineColor:"#CC2200",boxSize:"sm",
     mechanics:["Dice Rolling","Push Your Luck","Set Collection"]},
   281466:{id:"yedo_deluxe_master_set",name:"Yedo: Deluxe Master Set",bggId:281466,year:2020,designer:"Thomas Vande Ginste, Wolf Plancke",
     description:"Players lead clans of samurai in feudal Edo-era Japan, sending agents across the city to complete missions and gain influence over the Shogun's court. The action selection system with its moving guard mechanic creates dynamic tension and shifting opportunities each round.",
@@ -1307,7 +1307,7 @@ const EXTRA_GAMES = {
   296557:{id:"zen_garden",name:"Zen Garden",bggId:296557,year:2020,designer:"Mike Georgiou",
     description:"A tranquil abstract game where players rake sand and place stones and plants to create a serene Japanese garden while scoring for patterns and symmetry. The soothing theme and beautiful components make this a meditative yet tactically interesting experience.",
     categories:["Abstract","Puzzle","Family"],players:"2-4",playTime:"30-40 min",
-    complexity:1.8,bggRating:6.8,spineColor:"#8AB090",boxSize:"md",
+    complexity:1.8,bggRating:7.0,spineColor:"#8AB090",boxSize:"md",
     mechanics:["Tile Placement","Pattern Recognition","Area Control"]},
   9149:{id:"zitternix",name:"Zitternix",bggId:9149,year:2000,designer:"Heinz Meister",
     description:"A dexterity game where players carefully remove colored sticks from a bundle balanced on a hedgehog figure without causing the stack to collapse. Simple enough for young children but with genuine nail-biting tension in every trembling extraction.",
@@ -1317,7 +1317,7 @@ const EXTRA_GAMES = {
   355433:{id:"boop",name:"boop.",bggId:355433,year:2022,designer:"Scott Brady",
     description:"A delightful two-player abstract game where players place kittens on a soft quilted bed, and each placement boops nearby pieces away in potentially chain-reactive fashion. The goal is to graduate three kittens into cats and align three cats in a row to win.",
     categories:["Abstract","Strategy"],players:"2-2",playTime:"20-30 min",
-    complexity:1.8,bggRating:7.6,spineColor:"#E890B0",boxSize:"sm",
+    complexity:1.36,bggRating:7.0,spineColor:"#E890B0",boxSize:"sm",
     mechanics:["Placement","Pattern Building","Displacement"]},
   0:{id:"i_geografia_einai_poly_koul",name:"Η γεωγραφία ειναι πολυ κουλ",bggId:0,year:0,designer:"Unknown",
     description:"A geography-themed party game celebrating how fascinating and fun the world of geography can be. Players engage with maps, locations, and spatial knowledge in a casual and entertaining setting.",
@@ -1327,7 +1327,7 @@ const EXTRA_GAMES = {
   // Sold from Στιβ's shelf (2026-09): kept so their plays keep full details.
   281442:{id:"trismegistus",name:"Trismegistus: The Ultimate Formula",bggId:281442,year:2019,designer:"Federico Pierlorenzi, Daniele Tascini",
     description:"Players are alchemists competing to master the art of transmutation and claim the title of Hermes Trismegistus's successor. Each round, dice are rolled and players draft them by color — each color corresponds to one of three alchemical stages, and the die value determines how many steps you advance. Use acquired elements to perform experiments, complete publications, and craft artifacts for points. A follow mechanism lets others benefit from your chosen action at reduced effect. For players who enjoy dice drafting and heavy engine-building with interconnected systems.",
-    categories:["Strategy","Euro","Dice"],players:"1-4",playTime:"60-90 min",
+    categories:["Strategy","Euro","Dice"],players:"1-4",playTime:"90-120 min",
     complexity:4.19,bggRating:7.5,spineColor:"#3f3f2c",boxSize:"md",
     mechanics:["Action Points","Contracts","Dice Rolling","End Game Bonuses","Follow","Open Drafting"]},
   97842:{id:"last_will",name:"Last Will",bggId:97842,year:2011,designer:"Vladimír Suchý",
@@ -1345,11 +1345,39 @@ const EXTRA_GAMES = {
     categories:["Strategy","Euro"],players:"2-4",playTime:"45-75 min",
     complexity:2.54,bggRating:7.5,spineColor:"#59707f",boxSize:"md",
     mechanics:["Area Movement","Contracts","End Game Bonuses","Open Drafting","Tile Placement","Turn Order: Progressive"]},
-  312318:{id:"century_golem_os",name:"Century: Golem Edition",bggId:312318,year:2017,designer:"Emerson Matsuuchi",
+  312318:{id:"century_golem_os",name:"Century: Golem Edition",bggId:312318,year:2020,designer:"Emerson Matsuuchi",
     description:"A re-themed edition of Century: Spice Road with gorgeous golem artwork. Players build a card engine to acquire and upgrade gems, trading them for valuable golem cards.",
-    categories:["Strategy","Card Game","Family"],players:"2-5",playTime:"30-45 min",
-    complexity:1.8,bggRating:7.6,spineColor:"#2e86c1",boxSize:"sm",
-    mechanics:["Card Drafting","Hand Management","Engine Building"]}
+    categories:["Strategy","Card Game","Family"],players:"2-4",playTime:"30-45 min",
+    complexity:2.16,bggRating:7.6,spineColor:"#2e86c1",boxSize:"sm",
+    mechanics:["Card Drafting","Hand Management","Engine Building"]},
+  // Imported through the app (these used to come only from Firebase); numbers checked against BGG, 2026-09.
+  200680:{id:"imported_200680",name:"Agricola (Revised Edition)",bggId:200680,year:2016,designer:"Uwe Rosenberg",players:"1-4",playTime:"30-120 min",complexity:3.45,bggRating:8.0,urlImage:"https://cf.geekdo-images.com/YCGWJMFwOI5efji2RJ2mSw__original/img/jC_He46LcIcKWU-kSwkYdr9Z45E=/0x0/filters:format(jpeg)/pic8093340.jpg"},
+  334649:{id:"imported_334649",name:"Bullet: Orange",bggId:334649,year:2021,designer:"Joshua Van Laningham",players:"1-4",playTime:"15-30 min",complexity:2.2,bggRating:8.1,urlImage:"https://cf.geekdo-images.com/NiU6SgW3L4tumEqpUtECag__original/img/MT5GGDpmCxvA4eiZmflOI5n0H24=/0x0/filters:format(jpeg)/pic9053253.jpg"},
+  307305:{id:"imported_307305",name:"Bullet♥︎",bggId:307305,year:2021,designer:"Joshua Van Laningham",players:"1-4",playTime:"10-20 min",complexity:2.15,bggRating:7.6,urlImage:"https://cf.geekdo-images.com/315gnIdET7dlQ_fASt8p0w__original/img/X2MDGNIMouqDtC6617rzlxW5LDw=/0x0/filters:format(jpeg)/pic6007944.jpg"},
+  147:{id:"imported_147",name:"Crude: The Oil Game",bggId:147,year:1974,designer:"James J. St. Laurent",players:"2-4",playTime:"90 min",complexity:2.73,bggRating:6.7,urlImage:"https://cf.geekdo-images.com/I3eBzN15oKeaTLEdjdUEXA__original/img/XAeJPfkjBXikQHsWt9OnbU2Pw44=/0x0/filters:format(jpeg)/pic1389675.jpg"},
+  276182:{id:"imported_276182",name:"Dead Reckoning",bggId:276182,year:2022,designer:"John D. Clair",players:"1-4",playTime:"90-150 min",complexity:3.44,bggRating:8.1,urlImage:"https://cf.geekdo-images.com/4q_5Ox7oYtK3Ma73iRtfAg__original/img/67KL6z6m8eD2MprJ7JfsxXoAPlM=/0x0/filters:format(jpeg)/pic4650725.jpg"},
+  397931:{id:"imported_397931",name:"Deep Regrets",bggId:397931,year:2025,designer:"Judson Cowan",players:"1-5",playTime:"30-150 min",complexity:2.34,bggRating:7.3,urlImage:"https://cf.geekdo-images.com/WUvpRzsNSZgq1gyvjiQcWw__original/img/wXnREOcKLkysXorXqRQXKslz-iI=/0x0/filters:format(jpeg)/pic8156363.jpg"},
+  254683:{id:"imported_254683",name:"Dodos Riding Dinos",bggId:254683,year:2021,designer:"Rubén Hernández",players:"1-8",playTime:"20 min",complexity:1.63,bggRating:7.5,urlImage:"https://cf.geekdo-images.com/qqpMTyv4vy-q7qYpl0NLFA__original/img/zOuoaKc0Q3Zc8m1gJLxGJlqvrXI=/0x0/filters:format(png)/pic5182751.png"},
+  463441:{id:"imported_463441",name:"Flip 7: With A Vengeance",bggId:463441,year:2026,designer:"Eric Olsen, Alyssa Swatek",players:"3-28",playTime:"20 min",complexity:1.05,bggRating:7.1,urlImage:"https://cf.geekdo-images.com/ZW3pPCcG069GkXkk7HSHlg__original/img/A-MS4ZUWEhiaDBSKChOq50Qcdnw=/0x0/filters:format(jpeg)/pic9385115.jpg"},
+  360899:{id:"imported_360899",name:"Harrow County: The Game of Gothic Conflict",bggId:360899,year:2024,designer:"Jay Cormier, Shad",players:"1-3",playTime:"45-90 min",complexity:3.6,bggRating:7.7,urlImage:"https://cf.geekdo-images.com/dXOckpZFmnRjTGnPq8bH_A__original/img/rGJEOjI0nFaR6VG2VP8ssBMTKH0=/0x0/filters:format(png)/pic7104746.png"},
+  271088:{id:"imported_271088",name:"Ishtar: Gardens of Babylon",bggId:271088,year:2019,designer:"Bruno Cathala, Evan Singh",players:"2-4",playTime:"45 min",complexity:2.28,bggRating:7.0,urlImage:"https://cf.geekdo-images.com/xXXGSdY52lm_CjMibn0aWQ__original/img/Wugkl4LbYYpP8IrCQ6vIlOVWyxQ=/0x0/filters:format(jpeg)/pic4775121.jpg"},
+  1219:{id:"imported_1219",name:"Labyrinth",bggId:1219,year:1986,designer:"Max J. Kobbert",players:"2-4",playTime:"20 min",complexity:1.35,bggRating:6.4,urlImage:"https://cf.geekdo-images.com/qpL225YNN5iKRPotB7Q7MA__original/img/5ZGo501PquASeGxpQLBIglcVSYs=/0x0/filters:format(jpeg)/pic6173371.jpg"},
+  143063:{id:"imported_143063",name:"Last Will: Getting Sacked",bggId:143063,year:2013,designer:"Vladimír Suchý",players:"2-5",playTime:"45-75 min",complexity:2.67,bggRating:7.5,urlImage:"https://cf.geekdo-images.com/tvUdzkyc5bne9hnqowl-HQ__original/img/H98XC9XNLqF8wcx5s6QPg1et8B4=/0x0/filters:format(jpeg)/pic1788540.jpg"},
+  454103:{id:"imported_454103",name:"Magical Athlete",bggId:454103,year:2025,designer:"Richard Garfield, Takashi Ishida",players:"2-6",playTime:"30 min",complexity:1.21,bggRating:7.8,urlImage:"https://cf.geekdo-images.com/1uW8t9AkuqOF0xjv_sXKgw__original/img/iBRrCDdqyVY1ckqWIjo0xQ_k70A=/0x0/filters:format(png)/pic9106864.png"},
+  238799:{id:"imported_238799",name:"Messina 1347",bggId:238799,year:2021,designer:"Raúl Fernández Aparicio, Vladimír Suchý",players:"1-4",playTime:"60-140 min",complexity:3.61,bggRating:7.5,urlImage:"https://cf.geekdo-images.com/Pw9TGohEb7PITFJnuq48bQ__original/img/W4JriNN41N9CK2e2pQgmz9Ud9bY=/0x0/filters:format(jpeg)/pic6397342.jpg"},
+  310100:{id:"imported_310100",name:"Nemesis: Lockdown",bggId:310100,year:2022,designer:"Adam Kwapiński",players:"1-5",playTime:"90-180 min",complexity:3.92,bggRating:8.2,urlImage:"https://cf.geekdo-images.com/NEbmFFGhKwegIryUArgw6w__original/img/YCDNmHN9DiyAnjSvFRen1sjAug4=/0x0/filters:format(jpeg)/pic7110034.jpg"},
+  434367:{id:"imported_434367",name:"Nippon: Zaibatsu",bggId:434367,year:2026,designer:"Nuno Bizarro Sentieiro, Paulo Soledade",players:"1-4",playTime:"60-120 min",complexity:3.61,bggRating:8.5,urlImage:"https://cf.geekdo-images.com/bOs_Um4cUUOpKnypCMykJA__original/img/RE_9_-ioTp31Fq_r5GZ_XKVGwzw=/0x0/filters:format(png)/pic8844519.png"},
+  431929:{id:"imported_431929",name:"Onward",bggId:431929,year:2025,designer:"Giacomo Neri, Riccardo Neri",players:"2-4",playTime:"45-90 min",complexity:3.09,bggRating:8.4,urlImage:"https://cf.geekdo-images.com/As2LEVwwoHE9UEmaCekgAQ__original/img/WIa__KGWhvVDjq426Nib9GUgQoM=/0x0/filters:format(jpeg)/pic8729695.jpg"},
+  205896:{id:"imported_205896",name:"Rising Sun",bggId:205896,year:2018,designer:"Eric M. Lang",players:"3-5",playTime:"90-120 min",complexity:3.3,bggRating:7.8,urlImage:"https://cf.geekdo-images.com/iwevA6XmiNLHn1QnGUucqw__original/img/pKJ1XyLN4hvHim5eRj2VJHijv1E=/0x0/filters:format(jpeg)/pic3880340.jpg"},
+  169426:{id:"imported_169426",name:"Roll Player",bggId:169426,year:2016,designer:"Keith Matejka",players:"1-4",playTime:"60-90 min",complexity:2.42,bggRating:7.4,urlImage:"https://cf.geekdo-images.com/enmQAOQl99U6wiQvZoL5GQ__original/img/iiKhufERu8v8JpErc5kUoO8WiNw=/0x0/filters:format(jpeg)/pic2556921.jpg"},
+  196202:{id:"imported_196202",name:"Rum & Bones: Second Tide",bggId:196202,year:2017,designer:"Michael Shinall",players:"2-6",playTime:"60 min",complexity:2.83,bggRating:7.6,urlImage:"https://cf.geekdo-images.com/IiZsfcuK9NrVwRBqvLyO0A__original/img/VzTm4d6ckh7xLvqsZ5C-s789Ve4=/0x0/filters:format(jpeg)/pic2945727.jpg"},
+  303553:{id:"imported_303553",name:"Skulls of Sedlec",bggId:303553,year:2020,designer:"Dustin Dobson",players:"2-3",playTime:"20 min",complexity:1.24,bggRating:7.3,urlImage:"https://cf.geekdo-images.com/LR0EXZNM9ISEF11WmMM-Lw__original/img/KfhEVVprCfmI8iihlHklomP5nN4=/0x0/filters:format(png)/pic8332459.png"},
+  316251:{id:"imported_316251",name:"Skulls of Sedlec: Executioners",bggId:316251,year:2020,designer:"Dustin Dobson",players:"1-4",playTime:"15-30 min",complexity:2.0,bggRating:7.6,urlImage:"https://cf.geekdo-images.com/RjhWfCszhp1K9wex2OK3Ww__original/img/M4Cpy3O9nes0mAtxtYqTcquu4LU=/0x0/filters:format(png)/pic7007053.png"},
+  375459:{id:"imported_375459",name:"Speakeasy",bggId:375459,year:2025,designer:"Vital Lacerda",players:"1-4",playTime:"50-180 min",complexity:4.44,bggRating:8.4,urlImage:"https://cf.geekdo-images.com/Y7vIlh-m_Ugnv0jrUuOW3g__original/img/anztl_yjkT6QMcW4p5Dit7KAChE=/0x0/filters:format(jpeg)/pic8165052.jpg"},
+  302882:{id:"imported_302882",name:"The Dwarves: Big Box",bggId:302882,year:2021,designer:"Michael Palm, Lukas Zach",players:"2-6",playTime:"60-90 min",complexity:2.07,bggRating:7.4,urlImage:"https://cf.geekdo-images.com/QTMskhIW33ud8GSfh42bbw__original/img/Y5ZaHPr_4YxNMhnOZ4gUyHZhEYQ=/0x0/filters:format(jpeg)/pic6502437.jpg"},
+  275557:{id:"imported_275557",name:"The Last Bottle of Rum",bggId:275557,year:2021,designer:"Quentin Vernet",players:"2-5",playTime:"45-60 min",complexity:1.92,bggRating:7.1,urlImage:"https://cf.geekdo-images.com/W-28SI7dtFwOM6KYD9egrQ__original/img/LBChAU399HrE1U1nnWmk9_l-WzQ=/0x0/filters:format(jpeg)/pic5715210.jpg"},
+  160069:{id:"imported_160069",name:"Ticket to Ride: 10th Anniversary",bggId:160069,year:2014,designer:"Alan R. Moon",players:"2-5",playTime:"30-60 min",complexity:1.88,bggRating:8.2,urlImage:"https://cf.geekdo-images.com/oXUOPeRynJB1sLEYQiKzTg__original/img/rioxsnue27C86XI-zWTuG_c-GuE=/0x0/filters:format(jpeg)/pic1927856.jpg"},
+  241491:{id:"imported_241491",name:"Who Did It?",bggId:241491,year:2018,designer:"Jonathan Favre-Godal",players:"3-6",playTime:"15 min",complexity:1.02,bggRating:6.6,urlImage:"https://cf.geekdo-images.com/OiQ8TUN72CTd732UjHqXXw__original/img/pEiUXL_99NxxTiRIbmYlJfJ3_RI=/0x0/filters:format(jpeg)/pic3981301.jpg"}
 };
 
 const GIANNIS_GAMES = {
@@ -1498,7 +1526,7 @@ const GIANNIS_GAMES = {
   295535:{name:"Dark Ages: Heritage of Charlemagne",bggId:295535,year:2021,complexity:3.52,players:"1-4",playTime:"180 min",bggRating:7.8},
   304985:{name:"Dark Ages: Holy Roman Empire",bggId:304985,year:2021,complexity:3.48,players:"1-4",playTime:"180 min",bggRating:7.8},
   418826:{name:"Dark Blood",bggId:418826,year:2025,complexity:3.33,players:"1-4",playTime:"120 min",bggRating:7.8},
-  353677:{name:"Darkest Doom",bggId:353677,year:2025,complexity:3.27,players:"1-4",playTime:"150 min",bggRating:7.6},
+  353677:{name:"Darkest Doom",bggId:353677,year:2025,complexity:3.27,players:"1-4",playTime:"150 min",bggRating:7.3},
   264321:{name:"Dead Man's Cabal",bggId:264321,year:2019,complexity:2.67,players:"2-4",playTime:"60 min",bggRating:6.7},
   286070:{name:"Dead Man's Cabal: Undeading Pack",bggId:286070,year:2019,players:"2-4",playTime:"90 min",bggRating:6.2},
   149155:{name:"Dead Man's Draw",bggId:149155,year:2014,complexity:1.32,players:"2-4",playTime:"15 min",bggRating:6.9},
@@ -1542,7 +1570,7 @@ const GIANNIS_GAMES = {
   187121:{name:"Far East War 1592",bggId:187121,year:2016,complexity:2.5,players:"2-4",playTime:"120 min",bggRating:6.9},
   198609:{name:"Fate of the Elder Gods",bggId:198609,year:2017,complexity:2.83,players:"1-4",playTime:"90 min",bggRating:7.2},
   7805:{name:"Fearsome Floors",bggId:7805,year:2003,complexity:1.81,players:"2-7",playTime:"60 min",bggRating:6.7},
-  278304:{name:"Fief: France",bggId:278304,year:2021,complexity:3.92,players:"3-6",playTime:"180 min",bggRating:7.6},
+  278304:{name:"Fief: France",bggId:278304,year:2023,complexity:3.92,players:"3-6",playTime:"180 min",bggRating:7.6},
   233020:{name:"Fireball Island: The Curse of Vul-Kar",bggId:233020,year:2018,complexity:1.46,players:"2-4",playTime:"60 min",bggRating:6.7},
   249326:{name:"Fireball Island: The Curse of Vul-Kar – Crouching Tiger, Hidden Bees!",bggId:249326,year:2018,complexity:1.29,players:"2-4",playTime:"60 min",bggRating:7.2},
   274536:{name:"Fireball Island: The Curse of Vul-Kar – Spider Springs",bggId:274536,year:2019,complexity:1.33,players:"2-4",playTime:"60 min",bggRating:7.3},
@@ -1648,7 +1676,7 @@ const GIANNIS_GAMES = {
   14808:{name:"Marvel Heroes",bggId:14808,year:2006,complexity:3.08,players:"2-4",playTime:"120 min",bggRating:6.4},
   351817:{name:"Marvel Zombies: A Zombicide Game",bggId:351817,year:2023,complexity:2.39,players:"1-6",playTime:"60 min",bggRating:7.9},
   356524:{name:"Marvel Zombies: A Zombicide Game – Clash of the Sinister Six",bggId:356524,year:2023,complexity:3.0,players:"1-6",playTime:"60 min",bggRating:8.5},
-  355481:{name:"Marvel Zombies: A Zombicide Game – Fantastic 4: Under Siege",bggId:355481,year:2023,complexity:3.0,players:"1-6",playTime:"60 min",bggRating:8.5},
+  355481:{name:"Marvel Zombies: A Zombicide Game – Fantastic 4: Under Siege",bggId:355481,year:2023,complexity:2.67,players:"1-6",playTime:"60 min",bggRating:8.5},
   355817:{name:"Marvel Zombies: A Zombicide Game – Guardians of the Galaxy Set",bggId:355817,year:2023,complexity:3.0,players:"1-6",playTime:"60 min",bggRating:8.4},
   355200:{name:"Marvel Zombies: X-Men Resistance",bggId:355200,year:2023,complexity:2.53,players:"1-6",playTime:"60 min",bggRating:8.5},
   139030:{name:"Mascarade",bggId:139030,year:2013,complexity:1.53,players:"2-13",playTime:"30 min",bggRating:6.5},
@@ -1706,7 +1734,7 @@ const GIANNIS_GAMES = {
   434367:{name:"Nippon: Zaibatsu",bggId:434367,year:2026,complexity:3.59,players:"1-4",playTime:"120 min",bggRating:8.6},
   213984:{name:"Notre Dame: 10th Anniversary",bggId:213984,year:2017,complexity:2.52,players:"2-5",playTime:"75 min",bggRating:7.5},
   324538:{name:"Nova Aetas Renaissance: Hyperion",bggId:324538,year:2023,players:"1-6",playTime:"90 min",bggRating:8.4},
-  324537:{name:"Nova Aetas Renaissance: The Mediceo",bggId:324537,year:2023,players:"1-6",playTime:"90 min",bggRating:8.1},
+  324537:{name:"Nova Aetas Renaissance: The Mediceo",bggId:324537,year:2023,players:"1-6",playTime:"90 min",bggRating:8.3},
   396790:{name:"Nucleum",bggId:396790,year:2023,complexity:4.19,players:"1-4",playTime:"150 min",bggRating:8.1},
   65515:{name:"Nuns on the Run",bggId:65515,year:2010,complexity:2.07,players:"2-8",playTime:"60 min",bggRating:6.5},
   343362:{name:"Oak",bggId:343362,year:2022,complexity:3.13,players:"1-4",playTime:"90 min",bggRating:7.1},
@@ -1978,7 +2006,7 @@ const LGEORGE_GAMES = {
   380681:{name:"Apex Legends: The Board Game",bggId:380681,year:2025,complexity:3.33,players:"2-6",playTime:"90 min",bggRating:7.9},
   359871:{name:"Arcs",bggId:359871,year:2024,complexity:3.44,players:"2-4",playTime:"120 min",bggRating:8.0},
   378574:{name:"Ascension Tactics: Inferno",bggId:378574,year:2025,complexity:2.25,players:"1-4",playTime:"90 min",bggRating:8.1},
-  176544:{name:"Automania",bggId:176544,year:2016,complexity:2.76,players:"2-4",playTime:"90 min",bggRating:7.3},
+  176544:{name:"Automania",bggId:176544,year:2015,complexity:2.76,players:"2-4",playTime:"90 min",bggRating:7.3},
   172308:{name:"Broom Service",bggId:172308,year:2015,complexity:2.39,players:"2-5",playTime:"75 min",bggRating:7.2},
   397598:{name:"Dune: Imperium – Uprising",bggId:397598,year:2023,complexity:3.52,players:"1-6",playTime:"120 min",bggRating:8.7},
   246900:{name:"Eclipse: Second Dawn for the Galaxy",bggId:246900,year:2020,complexity:3.67,players:"2-6",playTime:"200 min",bggRating:8.4},
@@ -1988,8 +2016,8 @@ const LGEORGE_GAMES = {
   271088:{name:"Ishtar: Gardens of Babylon",bggId:271088,year:2019,complexity:2.28,players:"2-4",playTime:"45 min",bggRating:7.0},
   411894:{name:"Kinfire Council",bggId:411894,year:2025,complexity:3.25,players:"2-6",playTime:"120 min",bggRating:7.8},
   363622:{name:"The Castles of Burgundy: Special Edition",bggId:363622,year:2023,complexity:2.85,players:"1-4",playTime:"120 min",bggRating:9.1},
-  325293:{name:"The Pursuit of Happiness: Big Box",bggId:325293,year:2023,complexity:2.9,players:"1-5",playTime:"120 min",bggRating:7.8},
-  42:{name:"Tigris & Euphrates",bggId:42,year:2015,complexity:3.48,players:"2-4",playTime:"120 min",bggRating:7.7},
+  325293:{name:"The Pursuit of Happiness: Big Box",bggId:325293,year:2022,complexity:2.9,players:"1-5",playTime:"120 min",bggRating:7.8},
+  42:{name:"Tigris & Euphrates",bggId:42,year:1997,complexity:3.48,players:"2-4",playTime:"120 min",bggRating:7.7},
   227935:{name:"Wonderland's War",bggId:227935,year:2022,complexity:3.04,players:"2-5",playTime:"125 min",bggRating:8.0},
 };
 
@@ -2058,10 +2086,10 @@ const DIMITRIS_GAMES = {
   96848:{name:"Mage Knight Board Game",bggId:96848,spineColor:"#6e2e2e",boxSize:"xl",year:2011,complexity:4.38,players:"1-4",playTime:"240 min",bggRating:8.1},
   209778:{name:"Magic Maze",bggId:209778,spineColor:"#2e5a7a",boxSize:"md",year:2017,complexity:1.75,players:"1-8",playTime:"15 min",bggRating:6.9},
   8147:{name:"Maka Bana",bggId:8147,spineColor:"#2e3a6e",boxSize:"md",year:2003,complexity:2.01,players:"3-6",playTime:"60 min",bggRating:6.7},
-  311715:{name:"Mini Rogue",bggId:311715,spineColor:"#7a6b2e",boxSize:"md",year:2021,complexity:2.02,players:"1-2",playTime:"45 min",bggRating:7.3},
+  311715:{name:"Mini Rogue",bggId:311715,spineColor:"#7a6b2e",boxSize:"md",year:2020,complexity:2.02,players:"1-2",playTime:"45 min",bggRating:7.3},
   363396:{name:"Mini Rogue: Coaster Expansion",bggId:363396,spineColor:"#2e3a6e",boxSize:"md",year:2021,bggRating:7.3},
-  420358:{name:"Mini Rogue: Forgotten Guardians",bggId:420358,spineColor:"#444b6e",boxSize:"md",year:2026,players:"1-4",playTime:"60 min",bggRating:8.3},
-  424603:{name:"Mini Rogue: Literature-Inspired Lore Cards",bggId:424603,spineColor:"#3b7a4f",boxSize:"md",year:2026,bggRating:8.2},
+  420358:{name:"Mini Rogue: Forgotten Guardians",bggId:420358,spineColor:"#444b6e",boxSize:"md",year:2026,players:"1-4",playTime:"60 min",bggRating:8.5},
+  424603:{name:"Mini Rogue: Literature-Inspired Lore Cards",bggId:424603,spineColor:"#3b7a4f",boxSize:"md",year:2026,bggRating:8.5},
   418367:{name:"Mini Rogue: Mountain of Torments",bggId:418367,spineColor:"#3b7a4f",boxSize:"md",year:2026,players:"1-3",playTime:"60 min",bggRating:8.2},
   417020:{name:"Mini Rogue: The Council",bggId:417020,spineColor:"#7a6b2e",boxSize:"md",year:2026,complexity:2.0,players:"1-3",playTime:"60 min",bggRating:8.0},
   424602:{name:"Mini Rogue: Treasure Map",bggId:424602,spineColor:"#7a2e52",boxSize:"md",year:2026,bggRating:8.1},
@@ -2134,7 +2162,7 @@ const DIMITRIS_GAMES = {
 const GAMES = [
   {id:"mu_asgard",name:"Marvel United: Tales of Asgard"
    ,row:1,col:1,categories:["Co-op", "Thematic", "Family"]
-   ,players:"1-4",playTime:"40 min"
+   ,players:"1-4",playTime:"30-45 min"
    ,complexity:2.19,bggId:302668
    ,spineColor:"#195436",boxSize:"md"
    ,designer:"Andrea Chiarvesio, Eric M. Lang"
@@ -2145,7 +2173,7 @@ const GAMES = [
 
   {id:"mu_panther",name:"Marvel United: Rise of the Black Panther"
    ,row:1,col:1,categories:["Co-op", "Thematic", "Family"]
-   ,players:"1-4",playTime:"40 min"
+   ,players:"1-4",playTime:"30-45 min"
    ,complexity:2.14,bggId:302669
    ,spineColor:"#6a1f1f",boxSize:"md"
    ,designer:"Andrea Chiarvesio, Eric M. Lang"
@@ -2156,7 +2184,7 @@ const GAMES = [
 
   {id:"mu_spider",name:"Marvel United: Enter the Spider-Verse"
    ,row:1,col:1,categories:["Co-op", "Thematic", "Family"]
-   ,players:"1-4",playTime:"40 min"
+   ,players:"1-4",playTime:"30-45 min"
    ,complexity:2.2,bggId:303600
    ,spineColor:"#65597f",boxSize:"md"
    ,designer:"Andrea Chiarvesio, Eric M. Lang"
@@ -2167,7 +2195,7 @@ const GAMES = [
 
   {id:"mu_deadpool",name:"Marvel United: Deadpool"
    ,row:1,col:1,categories:["Co-op", "Thematic", "Family"]
-   ,players:"1-4",playTime:"40 min"
+   ,players:"1-5",playTime:"40 min"
    ,complexity:1.8,bggId:339131
    ,spineColor:"#3f2c2c",boxSize:"md"
    ,designer:"Andrea Chiarvesio, Eric M. Lang, Francesco Rugerfred Sedda"
@@ -2177,7 +2205,7 @@ const GAMES = [
 
   {id:"mu_xmen_gold",name:"Marvel United: X-Men - Gold Team"
    ,row:1,col:1,categories:["Co-op", "Thematic", "Family"]
-   ,players:"1-4",playTime:"40 min"
+   ,players:"1-6",playTime:"40 min"
    ,complexity:1.8,bggId:339128
    ,spineColor:"#132b3f",boxSize:"md"
    ,designer:"Andrea Chiarvesio, Eric M. Lang, Francesco Rugerfred Sedda"
@@ -2187,7 +2215,7 @@ const GAMES = [
 
   {id:"mu_gotg",name:"Marvel United: Guardians of the Galaxy Remix"
    ,row:1,col:1,categories:["Co-op", "Thematic", "Family"]
-   ,players:"1-4",playTime:"40 min"
+   ,players:"1-4",playTime:"30-45 min"
    ,complexity:2.07,bggId:302670
    ,spineColor:"#1b1b3f",boxSize:"md"
    ,designer:"Andrea Chiarvesio, Eric M. Lang"
@@ -2197,7 +2225,7 @@ const GAMES = [
 
   {id:"mu_xmen_blue",name:"Marvel United: X-Men - Blue Team"
    ,row:1,col:1,categories:["Co-op", "Thematic", "Family"]
-   ,players:"1-4",playTime:"40 min"
+   ,players:"1-6",playTime:"40 min"
    ,complexity:2.0,bggId:339129
    ,spineColor:"#142643",boxSize:"lg"
    ,designer:"Andrea Chiarvesio, Eric M. Lang, Francesco Rugerfred Sedda"
@@ -2219,9 +2247,9 @@ const GAMES = [
   {id:"horrified_am",name:"Horrified: American Monsters"
    ,row:1,col:2,categories:["Co-op", "Family", "Thematic"]
    ,players:"1-5",playTime:"60 min"
-   ,complexity:2.06,bggId:343562
+   ,complexity:2.25,bggId:343562
    ,spineColor:"#3f243f",boxSize:"md"
-   ,designer:"Prospero Hall"
+   ,designer:"Michael Mulvihill"
    ,year:2021
    ,bggRating:7.5
    ,mechanics:["Action Points", "Cooperative Game", "Pick-up and Deliver", "Point to Point Movement", "Solo / Solitaire Game"]
@@ -2273,7 +2301,7 @@ const GAMES = [
 
   {id:"margraves_of_valeria",name:"Margraves of Valeria"
    ,row:1,col:3,categories:["Strategy", "Euro", "Worker Placement"]
-   ,players:"1-4",playTime:"45-75 min"
+   ,players:"2-5",playTime:"60-120 min"
    ,complexity:2.7,bggId:275974
    ,spineColor:"#26697f",boxSize:"md"
    ,designer:"Isaias Vallejo"
@@ -2295,7 +2323,7 @@ const GAMES = [
 
   {id:"kelp",name:"Kelp: Shark vs Octopus"
    ,row:1,col:4,categories:["Strategy", "Thematic"]
-   ,players:"2",playTime:"30-45 min"
+   ,players:"2",playTime:"40-60 min"
    ,complexity:2.4,bggId:374595
    ,spineColor:"#154848",boxSize:"md"
    ,designer:"Carl Robinson"
@@ -2317,7 +2345,7 @@ const GAMES = [
 
   {id:"eternal_decks",name:"Eternal Decks"
    ,row:1,col:4,categories:["Card Game", "Strategy"]
-   ,players:"1-4",playTime:"30-60 min"
+   ,players:"1-4",playTime:"30-40 min"
    ,complexity:2.81,bggId:424981
    ,spineColor:"#62597f",boxSize:"md"
    ,designer:"Hiroken"
@@ -2327,7 +2355,7 @@ const GAMES = [
 
   {id:"parks",name:"PARKS"
    ,row:1,col:4,categories:["Family", "Strategy", "Thematic"]
-   ,players:"1-5",playTime:"40-70 min"
+   ,players:"1-5",playTime:"30-60 min"
    ,complexity:2.12,bggId:266524
    ,spineColor:"#3f3927",boxSize:"md"
    ,designer:"Henry Audubon"
@@ -2350,28 +2378,28 @@ const GAMES = [
   {id:"rove",name:"Rove"
    ,row:1,col:5,categories:["Co-op", "Thematic", "Campaign"]
    ,players:"1-4",playTime:"60-120 min"
-   ,complexity:3.3,bggId:365670
+   ,complexity:3.5,bggId:365670
    ,spineColor:"#3d5e7f",boxSize:"md"
-   ,designer:"Addax Games"
-   ,year:2024
-   ,bggRating:8.2
+   ,designer:"Motti Eisenbach, Tyvan Grossi"
+   ,year:2025
+   ,bggRating:7.9
    ,mechanics:["Cooperative Game", "Grid Movement", "Hand Management", "Variable Player Powers", "Scenario / Mission / Campaign Game"]
    ,description:"An immersive cooperative campaign board game set on Chorus, a world on the brink of being consumed by nature. Players take on roles as Rovers — adventurers exploring a wild planet filled with dangerous flora and fauna. Features a branching story with consequences, turn-based tactical combat inspired by classic strategy RPGs, and a 25-encounter campaign with deep progression and leveling choices. Double-faced Rally and Rave cards flip when played, creating unique tactical decisions. For groups who enjoy Gloomhaven-style cooperative adventure with narrative depth."},
 
   {id:"rove_xulc",name:"Rove: Xulc Expansion"
    ,row:1,col:5,categories:["Co-op", "Thematic", "Campaign"]
-   ,players:"1-4",playTime:"60-120 min"
+   ,players:"1-4",playTime:"45-90 min"
    ,complexity:3.3,bggId:439995
    ,spineColor:"#4e546f",boxSize:"md"
-   ,designer:"Addax Games"
-   ,year:2024
+   ,designer:"Motti Eisenbach, Tyvan Grossi"
+   ,year:2025
    ,bggRating:8.3
    ,mechanics:["Cooperative Game", "Grid Movement", "Hand Management", "Variable Player Powers", "Scenario / Mission / Campaign Game"]
    ,description:"The story continues as the Rovers face a new threat that has emerged on Chorus. This expansion adds 10 new scenarios, new playable Xulc classes with unique parasitic-ally mechanics, additional tracking components, and Xulc Dice. Extends the campaign with fresh encounters and deeper strategic options. Requires the Rove base game."},
 
   {id:"detective_coa",name:"Detective: City of Angels"
    ,row:1,col:6,categories:["Thematic", "Deduction"]
-   ,players:"1-5",playTime:"90-150 min"
+   ,players:"1-5",playTime:"30-150 min"
    ,complexity:2.36,bggId:218074
    ,spineColor:"#2c2c3f",boxSize:"lg"
    ,designer:"Evan Derrick"
@@ -2426,7 +2454,7 @@ const GAMES = [
 
   {id:"bomb_busters",name:"Bomb Busters"
    ,row:2,col:1,categories:["Co-op", "Family", "Card Game"]
-   ,players:"2-5",playTime:"15-30 min"
+   ,players:"2-5",playTime:"30 min"
    ,complexity:2.0,bggId:413246
    ,spineColor:"#7f2a34",boxSize:"md"
    ,designer:"Hisashi Hayashi"
@@ -2447,7 +2475,7 @@ const GAMES = [
 
   {id:"hansa_teutonica",name:"Hansa Teutonica: Big Box"
    ,row:2,col:1,categories:["Strategy", "Euro", "Area Control"]
-   ,players:"2-5",playTime:"45-90 min"
+   ,players:"3-5",playTime:"45-90 min"
    ,complexity:2.96,bggId:286749
    ,spineColor:"#3f362c",boxSize:"md"
    ,designer:"Andreas Steding"
@@ -2513,7 +2541,7 @@ const GAMES = [
 
   {id:"planet_unknown_super",name:"Planet Unknown: Supermoon"
    ,row:2,col:3,categories:["Strategy", "Puzzle"]
-   ,players:"1-6",playTime:"60-80 min"
+   ,players:"1-6",playTime:"65-80 min"
    ,complexity:2.5,bggId:393509
    ,spineColor:"#1c475f",boxSize:"md"
    ,designer:"Ryan Lambert, Adam Rehberg"
@@ -2534,10 +2562,10 @@ const GAMES = [
 
   {id:"dead_cells",name:"Dead Cells: The Rogue-Lite Board Game"
    ,row:2,col:3,categories:["Co-op", "Thematic", "Dice"]
-   ,players:"1-4",playTime:"45-75 min"
+   ,players:"1-4",playTime:"45 min"
    ,complexity:2.36,bggId:380135
    ,spineColor:"#221d3f",boxSize:"lg"
-   ,designer:"Antoine Bauza, Corentin Lebrat, Ludovic Maublanc"
+   ,designer:"Antoine Bauza, Corentin Lebrat, Ludovic Maublanc, Théo Rivière"
    ,year:2024
    ,bggRating:7.6
    ,mechanics:["Action Queue", "Communication Limits", "Cooperative Game", "Deck, Bag, and Pool Building", "Delayed Purchase", "Legacy Game"]
@@ -2545,7 +2573,7 @@ const GAMES = [
 
   {id:"frosthaven",name:"Frosthaven"
    ,row:3,col:1,categories:["Strategy", "Co-op", "Campaign", "Thematic"]
-   ,players:"1-4",playTime:"30-120 min"
+   ,players:"1-4",playTime:"90-180 min"
    ,complexity:4.41,bggId:295770
    ,spineColor:"#59727f",boxSize:"xl"
    ,designer:"Isaac Childres"
@@ -2567,7 +2595,7 @@ const GAMES = [
 
   {id:"bad_company",name:"Bad Company"
    ,row:3,col:3,categories:["Strategy", "Engine Building", "Dice"]
-   ,players:"1-6",playTime:"30-60 min"
+   ,players:"1-6",playTime:"30 min"
    ,complexity:1.93,bggId:340677
    ,spineColor:"#5f422f",boxSize:"md"
    ,designer:"Kenneth Minde, Kristian Amundsen Østby, Eilif Svensson"
@@ -2627,7 +2655,7 @@ const GAMES = [
    ,players:"2-4",playTime:"45-75 min"
    ,complexity:1.97,bggId:342070
    ,spineColor:"#432b30",boxSize:"lg"
-   ,designer:"Dave Chalker, Brett Myers, Noah Cohen"
+   ,designer:"Dave Chalker, Brett Myers, Noah Cohen, Rob Daviau, Justin D. Jacobson, Jim Keifer, Brian Neff"
    ,year:2023
    ,bggRating:7.9
    ,mechanics:["Dice Rolling", "Die Icon Resolution", "Grid Movement", "Hexagon Grid", "Player Elimination", "Roll / Spin and Move"]
@@ -2646,7 +2674,7 @@ const GAMES = [
 
   {id:"mystic_vale",name:"Mystic Vale"
    ,row:3,col:5,categories:["Card Game", "Strategy", "Engine Building"]
-   ,players:"2-4",playTime:"45-60 min"
+   ,players:"2-4",playTime:"45 min"
    ,complexity:2.26,bggId:194607
    ,spineColor:"#2c3f2c",boxSize:"md"
    ,designer:"John D. Clair"
@@ -2745,7 +2773,7 @@ const GAMES = [
 
   {id:"carnegie",name:"Carnegie"
    ,row:4,col:2,categories:["Strategy", "Euro", "Worker Placement", "Engine Building"]
-   ,players:"1-4",playTime:"120-180 min"
+   ,players:"1-4",playTime:"90-120 min"
    ,complexity:3.82,bggId:310873
    ,spineColor:"#36464e",boxSize:"lg"
    ,designer:"Xavier Georges"
@@ -2756,7 +2784,7 @@ const GAMES = [
 
   {id:"adventure_tactics",name:"Adventure Tactics: Domianne's Tower"
    ,row:4,col:3,categories:["Co-op", "Campaign", "Strategy", "Thematic"]
-   ,players:"1-5",playTime:"60-90 min"
+   ,players:"1-5",playTime:"45-90 min"
    ,complexity:2.54,bggId:268504
    ,spineColor:"#133f3f",boxSize:"xl"
    ,designer:"Nicholas Yu"
@@ -2767,7 +2795,7 @@ const GAMES = [
 
   {id:"heat_heavy_rain",name:"Heat: Heavy Rain"
    ,row:4,col:4,categories:["Racing", "Thematic", "Family"]
-   ,players:"1-6",playTime:"30-60 min"
+   ,players:"1-7",playTime:"30-60 min"
    ,complexity:2.4,bggId:410291
    ,spineColor:"#22303f",boxSize:"md"
    ,designer:"Asger Aleksandrov Granerud, Daniel Skjold Pedersen"
@@ -2799,7 +2827,7 @@ const GAMES = [
 
   {id:"thunderbirds",name:"Thunderbirds"
    ,row:4,col:4,categories:["Co-op", "Thematic", "Family"]
-   ,players:"1-4",playTime:"45-75 min"
+   ,players:"1-4",playTime:"45-60 min"
    ,complexity:2.48,bggId:160610
    ,spineColor:"#38557b",boxSize:"md"
    ,designer:"Matt Leacock"
@@ -2821,7 +2849,7 @@ const GAMES = [
 
   {id:"mdt_deadpool",name:"Marvel Dice Throne: Deadpool"
    ,row:4,col:6,categories:["Dice", "Card Game", "Thematic"]
-   ,players:"2",playTime:"20-40 min"
+   ,players:"2-6",playTime:"20-40 min"
    ,complexity:2.0,bggId:403511
    ,spineColor:"#3f1313",boxSize:"md"
    ,designer:"Gavan Brown, Nate Chatellier, Manny Trembley"
@@ -2852,7 +2880,7 @@ const GAMES = [
 
   {id:"kill_hitler",name:"I Would Kill Hitler"
    ,row:5,col:1,categories:["Party", "Card Game"]
-   ,players:"3-8",playTime:"15-30 min"
+   ,players:"3-8",playTime:"20-60 min"
    ,complexity:1.0,bggId:335204
    ,spineColor:"#645b1e",boxSize:"md"
    ,designer:"(Uncredited)"
@@ -2862,7 +2890,7 @@ const GAMES = [
 
   {id:"kitchen_rush",name:"Kitchen Rush (Revised Edition)"
    ,row:5,col:5,categories:["Co-op", "Family", "Worker Placement"]
-   ,players:"1-4",playTime:"20-60 min"
+   ,players:"2-4",playTime:"20-60 min"
    ,complexity:2.12,bggId:287938
    ,spineColor:"#56567b",boxSize:"md"
    ,designer:"Vangelis Bagiartakis, Dávid Turczi"
@@ -2894,7 +2922,7 @@ const GAMES = [
 
   {id:"kelp_expansion",name:"Kelp: Brilliant Behaviours"
    ,row:5,col:5,categories:["Strategy", "Thematic"]
-   ,players:"2",playTime:"30-45 min"
+   ,players:"2",playTime:"45-60 min"
    ,complexity:2.25,bggId:405987
    ,spineColor:"#314e36",boxSize:"md"
    ,designer:"Carl Robinson"
@@ -2915,7 +2943,7 @@ const GAMES = [
 
   {id:"spirit_ff",name:"Spirit Island: Feather & Flame"
    ,row:5,col:6,categories:["Co-op", "Strategy", "Thematic"]
-   ,players:"1-6",playTime:"90-120 min"
+   ,players:"1-4",playTime:"90-120 min"
    ,complexity:4.55,bggId:356510
    ,spineColor:"#7f6e2d",boxSize:"md"
    ,designer:"R. Eric Reuss"
@@ -2947,7 +2975,7 @@ const GAMES = [
 
   {id:"l_project",name:"Project L"
    ,row:5,col:6,categories:["Strategy", "Abstract"]
-   ,players:"2",playTime:"15-30 min"
+   ,players:"1-4",playTime:"20-40 min"
    ,complexity:1.56,bggId:260180
    ,spineColor:"#24667b",boxSize:"md"
    ,designer:"Michal Mikeš, Jan Soukal, Adam Španěl"
@@ -2979,7 +3007,7 @@ const GAMES = [
 
   {id:"mu_xmen",name:"Marvel United: X-Men"
    ,row:6,col:1,categories:["Co-op", "Thematic", "Family"]
-   ,players:"1-4",playTime:"40 min"
+   ,players:"1-5",playTime:"40 min"
    ,complexity:1.99,bggId:336382
    ,spineColor:"#14343f",boxSize:"md"
    ,designer:"Andrea Chiarvesio, Eric M. Lang, Francesco Rugerfred Sedda"
@@ -3012,7 +3040,7 @@ const GAMES = [
 
   {id:"witcher_skellige",name:"The Witcher: Old World - Skellige"
    ,row:6,col:2,categories:["Strategy", "Thematic"]
-   ,players:"2-4",playTime:"60-90 min"
+   ,players:"1-5",playTime:"90-150 min"
    ,complexity:2.33,bggId:340529
    ,spineColor:"#1f343f",boxSize:"md"
    ,designer:"Łukasz Woźniak"
@@ -3055,7 +3083,7 @@ const GAMES = [
 
   {id:"mind_mgmt",name:"Mind MGMT: The Psychic Espionage Game"
    ,row:6,col:3,categories:["Strategy", "Deduction", "Thematic"]
-   ,players:"1-5",playTime:"45-75 min"
+   ,players:"1-5",playTime:"60 min"
    ,complexity:2.92,bggId:284653
    ,spineColor:"#7f7358",boxSize:"md"
    ,designer:"Jay Cormier, Sen-Foong Lim"
@@ -3110,7 +3138,7 @@ const GAMES = [
 
   {id:"burano",name:"Burano"
    ,row:6,col:4,categories:["Strategy", "Euro"]
-   ,players:"2-4",playTime:"60-90 min"
+   ,players:"2-4",playTime:"90-120 min"
    ,complexity:3.79,bggId:181260
    ,spineColor:"#7b422f",boxSize:"md"
    ,designer:"Yu-Chen Tseng, Eros Lin"
@@ -3187,7 +3215,7 @@ const GAMES = [
 
   {id:"paleo",name:"Paleo"
    ,row:6,col:6,categories:["Co-op", "Thematic", "Card Game"]
-   ,players:"1-4",playTime:"45-60 min"
+   ,players:"2-4",playTime:"45-60 min"
    ,complexity:2.66,bggId:300531
    ,spineColor:"#596c7f",boxSize:"md"
    ,designer:"Peter Rustemeyer"
@@ -3222,103 +3250,103 @@ const GAMES = [
   // ══════════════════════════════════════════
 
   // ── Row 2, Col 4 ──
-  {id:"witcher_old_world_os",name:"The Witcher: Old World",bggId:331106,year:2023,designer:"Łukasz Woźniak",row:2,col:4,otherSide:true,categories:["Adventure","Thematic"],players:"1-5",playTime:"90-150 min",complexity:3.2,bggRating:7.7,spineColor:"#2e4a1e",boxSize:"sm",mechanics:["Deck Building","Variable Player Powers","Hand Management"],description:"Competitive adventure game set in the Witcher universe before the saga. Players train as witcher apprentices, exploring the Continent, fighting monsters, and developing combat skills through deck building."},
-  {id:"etherfields_os",name:"Etherfields",bggId:280794,year:2020,designer:"Michał Oracz",row:2,col:4,otherSide:true,categories:["Adventure","Thematic","Co-op"],players:"1-4",playTime:"90-180 min",complexity:3.4,bggRating:7.4,spineColor:"#4a2060",boxSize:"sm",mechanics:["Cooperative Game","Dice Rolling","Hand Management","Variable Player Powers"],description:"A dreamworld exploration game where players navigate surreal landscapes through an innovative map system. Each dream has its own logic and rules that players must discover through experimentation and storytelling."},
-  {id:"marvel_zombies_os",name:"Marvel Zombies: A Zombicide Game",bggId:351817,year:2023,designer:"Fabio Cury, Michael Shinall",row:2,col:4,otherSide:true,categories:["Thematic","Co-op","Adventure"],players:"1-6",playTime:"60 min",complexity:2.8,bggRating:7.7,spineColor:"#8b0000",boxSize:"sm",mechanics:["Cooperative Game","Dice Rolling","Modular Board","Variable Player Powers"],description:"A Zombicide game where players control zombie Marvel heroes hunting for flesh across modular maps. Balancing hunger and evolving zombie powers while completing mission objectives."},
-  {id:"the_7th_citadel",name:"The 7th Citadel",bggId:286063,year:2024,designer:"Ludovic Roudy, Bruno Sautter",row:2,col:4,otherSide:true,categories:["Adventure","Co-op"],players:"1-4",playTime:"5-1000 min",complexity:3,bggRating:8.3,spineColor:"#3d1f5e",boxSize:"sm",mechanics:["Cooperative Game","Hand Management","Map Addition","Push Your Luck","Solo / Solitaire Game","Variable Player Powers"],description:"A cooperative card-based exploration and adventure game set in a post-apocalyptic medieval fantasy world, from the creators of The 7th Continent. You play as a slave-gardener who has escaped the Citadel of Necrodruid Ninidazir', only to face an even greater Threat. Gradually unveil the board using numbered terrain and event cards, interact with inhabitants, and build a city to signal renewal. Challenges are resolved by drawing cards in a push-your-luck system. Features persistent campaign play across multiple episodes, a save-anywhere mechanism, and hundreds of hours of content."},  {id:"cthulhu_dmd_s2",name:"Cthulhu: Death May Die – Season 2",bggId:256972,year:2020,designer:"Rob Daviau, Eric M. Lang",row:2,col:4,otherSide:true,categories:["Adventure","Thematic","Co-op"],players:"1-5",playTime:"90-120 min",complexity:2.8,bggRating:8.2,spineColor:"#1a1a2e",boxSize:"sm",mechanics:["Cooperative Game","Dice Rolling","Modular Board","Variable Player Powers"],description:"Season 2 expands Cthulhu: Death May Die with new investigators, Elder Gods, and episode tiles. Players stop Lovecraftian horrors while deliberately driving their investigators insane to gain power."},
-  {id:"slay_the_spire_os",name:"Slay the Spire: The Board Game",bggId:338960,year:2024,designer:"Gary Dworetsky, Anthony Giovannetti, Casey Yano",row:2,col:4,otherSide:true,categories:["Co-op","Deck Building","Adventure"],players:"1-4",playTime:"30-150 min",complexity:3.2,bggRating:8.5,spineColor:"#1a2a3a",boxSize:"sm",mechanics:["Cooperative Game","Deck Building","Hand Management","Variable Player Powers"],description:"Faithful adaptation of the hit video game. Players ascend a spire of increasingly dangerous encounters, building a unique deck of cards through choices at each node of a branching map."},
-  {id:"earthborne_rangers_os",name:"Earthborne Rangers",bggId:342900,year:2023,designer:"Andrew Navaro, Adam Sadler, Brady Sadler",row:2,col:4,otherSide:true,categories:["Adventure","Co-op"],players:"1-4",playTime:"60-240 min",complexity:3.0,bggRating:8.4,spineColor:"#4a7c59",boxSize:"sm",mechanics:["Cooperative Game","Deck Building","Hand Management","Variable Player Powers"],description:"A cooperative open-world card game set in a lush far-future Earth. Rangers explore, build relationships, and protect communities using a living card system where players craft their own decks."},
-  {id:"sleeping_gods_ds",name:"Sleeping Gods: Distant Skies",bggId:358320,year:2023,designer:"Ryan Laukat",row:2,col:4,otherSide:true,categories:["Adventure","Co-op"],players:"1-4",playTime:"60-600 min",complexity:3.0,bggRating:8.5,spineColor:"#2a4a6a",boxSize:"sm",mechanics:["Cooperative Game","Storytelling","Hand Management","Variable Player Powers"],description:"A cooperative storybook adventure where players explore a vast world map, encounter strange civilizations, and uncover mysteries. Each session continues a persistent campaign with hundreds of branching narrative paths."},
-  {id:"wonderlands_war_os",name:"Wonderland's War",bggId:227935,year:2022,designer:"Tim Eisner, Ben Eisner, Ian Moss",row:2,col:4,otherSide:true,categories:["Strategy","Thematic"],players:"2-5",playTime:"45-125 min",complexity:2.8,bggRating:7.8,spineColor:"#6a1b6a",boxSize:"sm",mechanics:["Bag Building","Area Control","Worker Placement","Variable Player Powers"],description:"Players are Wonderland factions preparing for war through a tea party draft phase, then battling for territory using a bag-building combat system with push-your-luck chip draws."},
+  {id:"witcher_old_world_os",name:"The Witcher: Old World",bggId:331106,year:2023,designer:"Łukasz Woźniak",row:2,col:4,otherSide:true,categories:["Adventure","Thematic"],players:"1-5",playTime:"90-150 min",complexity:2.88,bggRating:7.9,spineColor:"#2e4a1e",boxSize:"sm",mechanics:["Deck Building","Variable Player Powers","Hand Management"],description:"Competitive adventure game set in the Witcher universe before the saga. Players train as witcher apprentices, exploring the Continent, fighting monsters, and developing combat skills through deck building."},
+  {id:"etherfields_os",name:"Etherfields",bggId:280794,year:2020,designer:"Michał Oracz",row:2,col:4,otherSide:true,categories:["Adventure","Thematic","Co-op"],players:"1-4",playTime:"90-180 min",complexity:3.59,bggRating:7.8,spineColor:"#4a2060",boxSize:"sm",mechanics:["Cooperative Game","Dice Rolling","Hand Management","Variable Player Powers"],description:"A dreamworld exploration game where players navigate surreal landscapes through an innovative map system. Each dream has its own logic and rules that players must discover through experimentation and storytelling."},
+  {id:"marvel_zombies_os",name:"Marvel Zombies: A Zombicide Game",bggId:351817,year:2023,designer:"Fabio Cury, Michael Shinall",row:2,col:4,otherSide:true,categories:["Thematic","Co-op","Adventure"],players:"1-6",playTime:"60 min",complexity:2.35,bggRating:7.9,spineColor:"#8b0000",boxSize:"sm",mechanics:["Cooperative Game","Dice Rolling","Modular Board","Variable Player Powers"],description:"A Zombicide game where players control zombie Marvel heroes hunting for flesh across modular maps. Balancing hunger and evolving zombie powers while completing mission objectives."},
+  {id:"the_7th_citadel",name:"The 7th Citadel",bggId:286063,year:2024,designer:"Ludovic Roudy, Bruno Sautter",row:2,col:4,otherSide:true,categories:["Adventure","Co-op"],players:"1-4",playTime:"5-1000 min",complexity:3,bggRating:8.3,spineColor:"#3d1f5e",boxSize:"sm",mechanics:["Cooperative Game","Hand Management","Map Addition","Push Your Luck","Solo / Solitaire Game","Variable Player Powers"],description:"A cooperative card-based exploration and adventure game set in a post-apocalyptic medieval fantasy world, from the creators of The 7th Continent. You play as a slave-gardener who has escaped the Citadel of Necrodruid Ninidazir', only to face an even greater Threat. Gradually unveil the board using numbered terrain and event cards, interact with inhabitants, and build a city to signal renewal. Challenges are resolved by drawing cards in a push-your-luck system. Features persistent campaign play across multiple episodes, a save-anywhere mechanism, and hundreds of hours of content."},  {id:"cthulhu_dmd_s2",name:"Cthulhu: Death May Die – Season 2",bggId:256972,year:2019,designer:"Rob Daviau, Eric M. Lang",row:2,col:4,otherSide:true,categories:["Adventure","Thematic","Co-op"],players:"1-5",playTime:"90-120 min",complexity:2.8,bggRating:8.7,spineColor:"#1a1a2e",boxSize:"sm",mechanics:["Cooperative Game","Dice Rolling","Modular Board","Variable Player Powers"],description:"Season 2 expands Cthulhu: Death May Die with new investigators, Elder Gods, and episode tiles. Players stop Lovecraftian horrors while deliberately driving their investigators insane to gain power."},
+  {id:"slay_the_spire_os",name:"Slay the Spire: The Board Game",bggId:338960,year:2024,designer:"Gary Dworetsky, Anthony Giovannetti, Casey Yano",row:2,col:4,otherSide:true,categories:["Co-op","Deck Building","Adventure"],players:"1-4",playTime:"30-150 min",complexity:2.91,bggRating:8.5,spineColor:"#1a2a3a",boxSize:"sm",mechanics:["Cooperative Game","Deck Building","Hand Management","Variable Player Powers"],description:"Faithful adaptation of the hit video game. Players ascend a spire of increasingly dangerous encounters, building a unique deck of cards through choices at each node of a branching map."},
+  {id:"earthborne_rangers_os",name:"Earthborne Rangers",bggId:342900,year:2023,designer:"Andrew Fischer, Brooks Flugaur-Leavitt, Andrew Navaro, Adam Sadler, Brady Sadler",row:2,col:4,otherSide:true,categories:["Adventure","Co-op"],players:"1-4",playTime:"60-240 min",complexity:3.48,bggRating:8.0,spineColor:"#4a7c59",boxSize:"sm",mechanics:["Cooperative Game","Deck Building","Hand Management","Variable Player Powers"],description:"A cooperative open-world card game set in a lush far-future Earth. Rangers explore, build relationships, and protect communities using a living card system where players craft their own decks."},
+  {id:"sleeping_gods_ds",name:"Sleeping Gods: Distant Skies",bggId:358320,year:2023,designer:"Ryan Laukat",row:2,col:4,otherSide:true,categories:["Adventure","Co-op"],players:"1-4",playTime:"60-600 min",complexity:3.0,bggRating:8.3,spineColor:"#2a4a6a",boxSize:"sm",mechanics:["Cooperative Game","Storytelling","Hand Management","Variable Player Powers"],description:"A cooperative storybook adventure where players explore a vast world map, encounter strange civilizations, and uncover mysteries. Each session continues a persistent campaign with hundreds of branching narrative paths."},
+  {id:"wonderlands_war_os",name:"Wonderland's War",bggId:227935,year:2022,designer:"Tim Eisner, Ben Eisner, Ian Moss",row:2,col:4,otherSide:true,categories:["Strategy","Thematic"],players:"2-5",playTime:"45-125 min",complexity:3.05,bggRating:8.0,spineColor:"#6a1b6a",boxSize:"sm",mechanics:["Bag Building","Area Control","Worker Placement","Variable Player Powers"],description:"Players are Wonderland factions preparing for war through a tea party draft phase, then battling for territory using a bag-building combat system with push-your-luck chip draws."},
   // ── Row 2, Col 6 ──
-  {id:"heat_pedal_os",name:"Heat: Pedal to the Metal",bggId:366013,year:2022,designer:"Asger Harding Granerud, Daniel Skjold Pedersen",row:2,col:6,otherSide:true,categories:["Racing","Strategy"],players:"1-6",playTime:"30-60 min",complexity:2.0,bggRating:7.9,spineColor:"#cc3300",boxSize:"sm",mechanics:["Hand Management","Push Your Luck","Simultaneous Action Selection"],description:"A racing game where players manage a hand of speed cards and a personal heat engine. Pushing too hard overheats your car, but playing it safe lets rivals pull ahead."},
-  {id:"furnace_os",name:"Furnace",bggId:318084,year:2021,designer:"Ivan Lashin",row:2,col:6,otherSide:true,categories:["Strategy","Euro","Engine Building"],players:"2-4",playTime:"30-60 min",complexity:2.1,bggRating:7.6,spineColor:"#c0392b",boxSize:"sm",mechanics:["Auction","Engine Building","Resource Management"],description:"An engine-building auction game set during the industrial revolution. Players bid on factory cards, but losing bids grant compensation resources, making every auction outcome strategically valuable."},
-  {id:"splendor_marvel_os",name:"Splendor: Marvel",bggId:293296,year:2020,designer:"Marc André",row:2,col:6,otherSide:true,categories:["Strategy","Card Game","Family"],players:"2-4",playTime:"30 min",complexity:1.8,bggRating:7.3,spineColor:"#1a1a8b",boxSize:"sm",mechanics:["Card Drafting","Engine Building","Set Collection"],description:"A Marvel-themed reimplementation of Splendor where players collect infinity gems to recruit heroes and complete the Infinity Gauntlet. Adds new Avengers Assemble location tiles."},
-  {id:"legacy_of_yu_os",name:"Legacy of Yu",bggId:354934,year:2023,designer:"Shem Phillips",row:2,col:6,otherSide:true,categories:["Solo","Strategy"],players:"1-1",playTime:"60 min",complexity:2.5,bggRating:8.1,spineColor:"#b8860b",boxSize:"sm",mechanics:["Deck Building","Hand Management","Campaign"],description:"A solo-only campaign game about the legendary Chinese figure Yu the Great. Players manage workers and resources across a branching campaign to build canals and control devastating floods."},
+  {id:"heat_pedal_os",name:"Heat: Pedal to the Metal",bggId:366013,year:2022,designer:"Asger Aleksandrov Granerud, Daniel Skjold Pedersen",row:2,col:6,otherSide:true,categories:["Racing","Strategy"],players:"1-6",playTime:"30-60 min",complexity:2.2,bggRating:7.9,spineColor:"#cc3300",boxSize:"sm",mechanics:["Hand Management","Push Your Luck","Simultaneous Action Selection"],description:"A racing game where players manage a hand of speed cards and a personal heat engine. Pushing too hard overheats your car, but playing it safe lets rivals pull ahead."},
+  {id:"furnace_os",name:"Furnace",bggId:318084,year:2020,designer:"Ivan Lashin",row:2,col:6,otherSide:true,categories:["Strategy","Euro","Engine Building"],players:"2-4",playTime:"30-60 min",complexity:2.32,bggRating:7.4,spineColor:"#c0392b",boxSize:"sm",mechanics:["Auction","Engine Building","Resource Management"],description:"An engine-building auction game set during the industrial revolution. Players bid on factory cards, but losing bids grant compensation resources, making every auction outcome strategically valuable."},
+  {id:"splendor_marvel_os",name:"Splendor: Marvel",bggId:293296,year:2020,designer:"Marc André",row:2,col:6,otherSide:true,categories:["Strategy","Card Game","Family"],players:"2-4",playTime:"30 min",complexity:1.8,bggRating:7.6,spineColor:"#1a1a8b",boxSize:"sm",mechanics:["Card Drafting","Engine Building","Set Collection"],description:"A Marvel-themed reimplementation of Splendor where players collect infinity gems to recruit heroes and complete the Infinity Gauntlet. Adds new Avengers Assemble location tiles."},
+  {id:"legacy_of_yu_os",name:"Legacy of Yu",bggId:354934,year:2023,designer:"Shem Phillips",row:2,col:6,otherSide:true,categories:["Solo","Strategy"],players:"1-1",playTime:"60 min",complexity:2.88,bggRating:8.1,spineColor:"#b8860b",boxSize:"sm",mechanics:["Deck Building","Hand Management","Campaign"],description:"A solo-only campaign game about the legendary Chinese figure Yu the Great. Players manage workers and resources across a branching campaign to build canals and control devastating floods."},
   {id:"pandemic_legacy_s1_os",name:"Pandemic Legacy: Season 1",bggId:161936,year:2015,designer:"Rob Daviau, Matt Leacock",row:2,col:6,otherSide:true,categories:["Co-op","Strategy","Campaign"],players:"2-4",playTime:"60 min",complexity:2.8,bggRating:8.6,spineColor:"#2a1a00",boxSize:"sm",mechanics:["Cooperative Game","Legacy Game","Hand Management","Variable Player Powers"],description:"A campaign evolution of Pandemic where the world map, rules, and characters permanently change across a 12-month story. Stickers, destroyed cities, and evolving abilities create a deeply personal narrative."},
-  {id:"terracotta_army_os",name:"Terracotta Army",bggId:350458,year:2022,designer:"Przemysław Fornal, Adam Kwapiński",row:2,col:6,otherSide:true,categories:["Strategy","Euro","Worker Placement"],players:"1-4",playTime:"90-120 min",complexity:3.3,bggRating:7.7,spineColor:"#8b6914",boxSize:"sm",mechanics:["Worker Placement","Area Control","Resource Management"],description:"Players craft the famous Terracotta Army of Emperor Qin, placing warrior figures in the mausoleum while managing resources and competing for the emperor's favor through area majority."},
+  {id:"terracotta_army_os",name:"Terracotta Army",bggId:350458,year:2022,designer:"Przemysław Fornal, Adam Kwapiński",row:2,col:6,otherSide:true,categories:["Strategy","Euro","Worker Placement"],players:"1-4",playTime:"90-120 min",complexity:3.3,bggRating:7.4,spineColor:"#8b6914",boxSize:"sm",mechanics:["Worker Placement","Area Control","Resource Management"],description:"Players craft the famous Terracotta Army of Emperor Qin, placing warrior figures in the mausoleum while managing resources and competing for the emperor's favor through area majority."},
   {id:"kings_dilemma_os",name:"The King's Dilemma",bggId:245655,year:2019,designer:"Hjalmar Hach, Lorenzo Silva",row:2,col:6,otherSide:true,categories:["Strategy","Thematic"],players:"3-5",playTime:"45-60 min",complexity:2.2,bggRating:7.6,spineColor:"#c8a850",boxSize:"sm",mechanics:["Negotiation","Voting","Legacy Game","Hand Management"],description:"A legacy negotiation game where players are members of the king's council voting on dilemmas that permanently shape the kingdom. Secret agendas and alliances shift across an evolving political narrative."},
-  {id:"lands_of_galzyr_os",name:"Lands of Galzyr",bggId:281474,year:2022,designer:"Seppo Kuukasjärvi, Sami Laakso",row:2,col:6,otherSide:true,categories:["Adventure","Thematic"],players:"1-4",playTime:"60-150 min",complexity:2.3,bggRating:7.6,spineColor:"#5c3317",boxSize:"sm",mechanics:["Dice Rolling","Variable Player Powers","Storytelling"],description:"An open-world adventure game with anthropomorphic animal characters exploring a fantasy world through an ever-evolving story. Decisions are remembered across sessions with no campaign end."},
+  {id:"lands_of_galzyr_os",name:"Lands of Galzyr",bggId:281474,year:2022,designer:"Seppo Kuukasjärvi, Sami Laakso",row:2,col:6,otherSide:true,categories:["Adventure","Thematic"],players:"1-4",playTime:"60-150 min",complexity:1.71,bggRating:7.9,spineColor:"#5c3317",boxSize:"sm",mechanics:["Dice Rolling","Variable Player Powers","Storytelling"],description:"An open-world adventure game with anthropomorphic animal characters exploring a fantasy world through an ever-evolving story. Decisions are remembered across sessions with no campaign end."},
   // ── Row 3, Col 2 ──
   {id:"codenames_os",name:"Codenames",bggId:178900,year:2015,designer:"Vlaada Chvátil",row:3,col:2,otherSide:true,categories:["Party","Card Game","Deduction"],players:"2-8",playTime:"15 min",complexity:1.3,bggRating:7.6,spineColor:"#b22222",boxSize:"sm",mechanics:["Communication Limits","Team-Based Game"],description:"Two rival spymasters give one-word clues to guide teammates in identifying secret agents hidden among a grid of word cards. A modern classic of deductive word play."},
   {id:"decrypto_os",name:"Decrypto",bggId:225694,year:2018,designer:"Thomas Dagenais-Lespérance",row:3,col:2,otherSide:true,categories:["Party","Deduction"],players:"3-8",playTime:"15-45 min",complexity:1.8,bggRating:7.7,spineColor:"#1a1a1a",boxSize:"sm",mechanics:["Communication Limits","Deduction","Team-Based Game"],description:"Teams give coded clues to communicate secret numbers while opponents try to intercept the pattern. Getting intercepted twice loses; miscommunicating twice also loses."},
-  {id:"so_clover_os",name:"So Clover!",bggId:329839,year:2021,designer:"François Romain",row:3,col:2,otherSide:true,categories:["Party","Co-op"],players:"3-6",playTime:"30 min",complexity:1.3,bggRating:7.5,spineColor:"#2e7d32",boxSize:"sm",mechanics:["Cooperative Game","Communication Limits"],description:"Players write one-word clues linking pairs of keywords on a four-leaf clover board. Others must reconstruct which words were paired from the clues alone."},
+  {id:"so_clover_os",name:"So Clover!",bggId:329839,year:2021,designer:"François Romain",row:3,col:2,otherSide:true,categories:["Party","Co-op"],players:"3-6",playTime:"30 min",complexity:1.12,bggRating:7.5,spineColor:"#2e7d32",boxSize:"sm",mechanics:["Cooperative Game","Communication Limits"],description:"Players write one-word clues linking pairs of keywords on a four-leaf clover board. Others must reconstruct which words were paired from the clues alone."},
   {id:"hanamikoji_os",name:"Hanamikoji",bggId:158600,year:2013,designer:"Kota Nakayama",row:3,col:2,otherSide:true,categories:["Card Game","Abstract"],players:"2-2",playTime:"15 min",complexity:1.7,bggRating:7.5,spineColor:"#c0392b",boxSize:"sm",mechanics:["Hand Management","Set Collection"],description:"A two-player card game of elegant tension where players use four unique actions to offer gifts to geishas, always giving opponents a choice. Winning requires reading your opponent's desires."},
-  {id:"the_crew_os",name:"The Crew: The Quest for Planet Nine",bggId:284083,year:2019,designer:"Thomas Sing",row:3,col:2,otherSide:true,categories:["Co-op","Card Game"],players:"2-5",playTime:"20 min",complexity:2.0,bggRating:8.0,spineColor:"#1a3a6b",boxSize:"sm",mechanics:["Cooperative Game","Trick-Taking","Communication Limits"],description:"A cooperative trick-taking game where players must win specific tricks assigned as mission tasks. Communication is severely limited, making each card play a nail-biting deduction exercise."},
-  {id:"air_land_sea_os",name:"Air, Land, and Sea",bggId:247367,year:2019,designer:"Jon Perry",row:3,col:2,otherSide:true,categories:["Card Game","Strategy"],players:"2-2",playTime:"15-30 min",complexity:1.9,bggRating:7.5,spineColor:"#2c3e50",boxSize:"sm",mechanics:["Hand Management","Bluffing","Area Control"],description:"A tense two-player card game where players battle for control of three theaters of war with just six cards. Withdrawing early concedes fewer points, creating constant psychological pressure."},
-  {id:"mind_extreme_os",name:"The Mind Extreme",bggId:287607,year:2019,designer:"Wolfgang Warsch",row:3,col:2,otherSide:true,categories:["Party","Card Game","Co-op"],players:"2-4",playTime:"20 min",complexity:1.1,bggRating:7.1,spineColor:"#ff6600",boxSize:"sm",mechanics:["Cooperative Game","Real-Time"],description:"Standalone sequel to The Mind adding ascending AND descending card piles simultaneously. No verbal communication allowed — only shared intuition and nerve."},
+  {id:"the_crew_os",name:"The Crew: The Quest for Planet Nine",bggId:284083,year:2019,designer:"Thomas Sing",row:3,col:2,otherSide:true,categories:["Co-op","Card Game"],players:"2-5",playTime:"20 min",complexity:2.0,bggRating:7.7,spineColor:"#1a3a6b",boxSize:"sm",mechanics:["Cooperative Game","Trick-Taking","Communication Limits"],description:"A cooperative trick-taking game where players must win specific tricks assigned as mission tasks. Communication is severely limited, making each card play a nail-biting deduction exercise."},
+  {id:"air_land_sea_os",name:"Air, Land, and Sea",bggId:247367,year:2019,designer:"Jon Perry",row:3,col:2,otherSide:true,categories:["Card Game","Strategy"],players:"2-2",playTime:"20 min",complexity:1.74,bggRating:7.5,spineColor:"#2c3e50",boxSize:"sm",mechanics:["Hand Management","Bluffing","Area Control"],description:"A tense two-player card game where players battle for control of three theaters of war with just six cards. Withdrawing early concedes fewer points, creating constant psychological pressure."},
+  {id:"mind_extreme_os",name:"The Mind Extreme",bggId:287607,year:2019,designer:"Wolfgang Warsch",row:3,col:2,otherSide:true,categories:["Party","Card Game","Co-op"],players:"2-4",playTime:"20 min",complexity:1.33,bggRating:6.9,spineColor:"#ff6600",boxSize:"sm",mechanics:["Cooperative Game","Real-Time"],description:"Standalone sequel to The Mind adding ascending AND descending card piles simultaneously. No verbal communication allowed — only shared intuition and nerve."},
   {id:"avalon_os",name:"The Resistance: Avalon",bggId:128882,year:2012,designer:"Don Eskridge",row:3,col:2,otherSide:true,categories:["Party","Deduction"],players:"5-10",playTime:"30 min",complexity:1.7,bggRating:7.5,spineColor:"#1a237e",boxSize:"sm",mechanics:["Hidden Identity","Voting","Deduction","Team-Based Game"],description:"A social deduction game set in Arthurian legend. Loyal servants of Arthur must complete quests while hidden minions of Mordred try to sabotage them. Merlin knows the traitors but must stay hidden."},
-  {id:"sail_os",name:"Sail",bggId:377470,year:2023,designer:"Akiyama Koryo, Korzu Yusei",row:3,col:2,otherSide:true,categories:["Co-op","Card Game"],players:"2-2",playTime:"20 min",complexity:1.8,bggRating:7.5,spineColor:"#0077b6",boxSize:"sm",mechanics:["Cooperative Game","Hand Management","Communication Limits"],description:"A two-player cooperative card game where players navigate a ship through dangerous waters. Communication is limited — you can only signal through which cards you play, not discuss strategy."},
+  {id:"sail_os",name:"Sail",bggId:377470,year:2023,designer:"Akiyama Koryo, Kozu Yusei",row:3,col:2,otherSide:true,categories:["Co-op","Card Game"],players:"2-2",playTime:"20 min",complexity:2.21,bggRating:7.3,spineColor:"#0077b6",boxSize:"sm",mechanics:["Cooperative Game","Hand Management","Communication Limits"],description:"A two-player cooperative card game where players navigate a ship through dangerous waters. Communication is limited — you can only signal through which cards you play, not discuss strategy."},
   // ── Row 4, Col 5 ──
-  {id:"sky_team_os",name:"Sky Team",bggId:373106,year:2023,designer:"Luc Rémond",row:4,col:5,otherSide:true,categories:["Co-op","Strategy"],players:"2-2",playTime:"15 min",complexity:2.2,bggRating:8.1,spineColor:"#1b3a6b",boxSize:"sm",mechanics:["Cooperative Game","Dice Rolling","Communication Limits"],description:"A two-player cooperative game where pilot and co-pilot must land a plane by silently assigning dice to shared controls. Communication is forbidden once dice are rolled."},
-  {id:"marvel_dt_scarlet_os",name:"Marvel Dice Throne: Scarlet Witch v. Thor v. Loki v. Spider-Man",bggId:360153,year:2022,designer:"Gavan Brown, Nate Chatellier, Manny Trembley",row:4,col:5,otherSide:true,categories:["Dice","Thematic","Card Game"],players:"2-4",playTime:"20-40 min",complexity:2.2,bggRating:8.0,spineColor:"#6e2090",boxSize:"sm",mechanics:["Dice Rolling","Hand Management","Variable Player Powers"],description:"Four Marvel heroes clash in dice-powered combat. Each hero has unique dice, ability cards, and combo chains for fast tactical duels."},
-  {id:"three_sisters_os",name:"Three Sisters",bggId:291845,year:2022,designer:"Ben Pinchback, Matt Riddle",row:4,col:5,otherSide:true,categories:["Dice","Strategy"],players:"1-4",playTime:"30-60 min",complexity:2.3,bggRating:7.8,spineColor:"#2e7d32",boxSize:"sm",mechanics:["Dice Rolling","Paper-and-Pencil"],description:"A roll-and-write game about companion planting: corn, beans, and squash. Players draft dice to fill their garden sheets, unlocking abilities and scoring objectives."},
-  {id:"boomerang_europe_os",name:"Boomerang: Europe",bggId:300367,year:2019,designer:"Scott Almes",row:4,col:5,otherSide:true,categories:["Card Game","Family"],players:"2-4",playTime:"15-30 min",complexity:1.7,bggRating:6.8,spineColor:"#2980b9",boxSize:"sm",mechanics:["Card Drafting","Set Collection"],description:"A draft-and-write game themed around European travel. Players draft cards and mark visited countries, collecting sets of activities, landmarks, and regions for points."},
-  {id:"fellowship_ring_os",name:"The Fellowship of the Ring: Trick-Taking Game",bggId:429293,year:2024,designer:"Bryan Bornmueller",row:4,col:5,otherSide:true,categories:["Card Game","Co-op"],players:"1-4",playTime:"20 min",complexity:1.8,bggRating:7.6,spineColor:"#2c1a0e",boxSize:"sm",mechanics:["Cooperative Game","Trick-Taking","Hand Management"],description:"A cooperative trick-taking game following the Fellowship's journey through Middle-earth. Players must carefully manage which tricks to win and lose to overcome challenges on the path."},
-  {id:"friday_os",name:"Friday",bggId:43570,year:2011,designer:"Friedemann Friese",row:4,col:5,otherSide:true,categories:["Solo","Card Game","Deck Building"],players:"1-1",playTime:"25 min",complexity:2.0,bggRating:7.2,spineColor:"#2e7d32",boxSize:"sm",mechanics:["Deck Building","Hand Management","Push Your Luck"],description:"A solo-only deck-building game where you help Robinson Crusoe survive on a deserted island. Deliberately losing fights lets you thin your deck of weak cards to build toward defeating pirates."},
+  {id:"sky_team_os",name:"Sky Team",bggId:373106,year:2023,designer:"Luc Rémond",row:4,col:5,otherSide:true,categories:["Co-op","Strategy"],players:"2-2",playTime:"20 min",complexity:2.04,bggRating:8.1,spineColor:"#1b3a6b",boxSize:"sm",mechanics:["Cooperative Game","Dice Rolling","Communication Limits"],description:"A two-player cooperative game where pilot and co-pilot must land a plane by silently assigning dice to shared controls. Communication is forbidden once dice are rolled."},
+  {id:"marvel_dt_scarlet_os",name:"Marvel Dice Throne: Scarlet Witch v. Thor v. Loki v. Spider-Man",bggId:360153,year:2022,designer:"Gavan Brown, Nate Chatellier, Manny Trembley",row:4,col:5,otherSide:true,categories:["Dice","Thematic","Card Game"],players:"2-4",playTime:"20-40 min",complexity:2.44,bggRating:7.6,spineColor:"#6e2090",boxSize:"sm",mechanics:["Dice Rolling","Hand Management","Variable Player Powers"],description:"Four Marvel heroes clash in dice-powered combat. Each hero has unique dice, ability cards, and combo chains for fast tactical duels."},
+  {id:"three_sisters_os",name:"Three Sisters",bggId:291845,year:2022,designer:"Ben Pinchback, Matt Riddle",row:4,col:5,otherSide:true,categories:["Dice","Strategy"],players:"1-4",playTime:"30-60 min",complexity:2.63,bggRating:7.5,spineColor:"#2e7d32",boxSize:"sm",mechanics:["Dice Rolling","Paper-and-Pencil"],description:"A roll-and-write game about companion planting: corn, beans, and squash. Players draft dice to fill their garden sheets, unlocking abilities and scoring objectives."},
+  {id:"boomerang_europe_os",name:"Boomerang: Europe",bggId:300367,year:2020,designer:"Scott Almes",row:4,col:5,otherSide:true,categories:["Card Game","Family"],players:"2-4",playTime:"15-30 min",complexity:1.7,bggRating:6.8,spineColor:"#2980b9",boxSize:"sm",mechanics:["Card Drafting","Set Collection"],description:"A draft-and-write game themed around European travel. Players draft cards and mark visited countries, collecting sets of activities, landmarks, and regions for points."},
+  {id:"fellowship_ring_os",name:"The Fellowship of the Ring: Trick-Taking Game",bggId:429293,year:2025,designer:"Bryan Bornmueller",row:4,col:5,otherSide:true,categories:["Card Game","Co-op"],players:"1-4",playTime:"20 min",complexity:1.8,bggRating:8.0,spineColor:"#2c1a0e",boxSize:"sm",mechanics:["Cooperative Game","Trick-Taking","Hand Management"],description:"A cooperative trick-taking game following the Fellowship's journey through Middle-earth. Players must carefully manage which tricks to win and lose to overcome challenges on the path."},
+  {id:"friday_os",name:"Friday",bggId:43570,year:2011,designer:"Friedemann Friese",row:4,col:5,otherSide:true,categories:["Solo","Card Game","Deck Building"],players:"1-1",playTime:"25 min",complexity:2.16,bggRating:7.2,spineColor:"#2e7d32",boxSize:"sm",mechanics:["Deck Building","Hand Management","Push Your Luck"],description:"A solo-only deck-building game where you help Robinson Crusoe survive on a deserted island. Deliberately losing fights lets you thin your deck of weak cards to build toward defeating pirates."},
   {id:"mind_space_os",name:"Mind Space",bggId:377420,year:2023,designer:"Nao Shimamura",row:4,col:5,otherSide:true,categories:["Puzzle","Abstract"],players:"1-5",playTime:"30 min",complexity:1.8,bggRating:7.2,spineColor:"#6a3d8f",boxSize:"sm",mechanics:["Tile Placement","Puzzle","Simultaneous Action Selection"],description:"A puzzle polyomino game where players fill brain-shaped boards with thought tiles scored on color adjacency and placement patterns."},
   {id:"qe_os",name:"QE",bggId:266830,year:2019,designer:"Gavin Birnbaum",row:4,col:5,otherSide:true,categories:["Strategy","Party"],players:"3-5",playTime:"45 min",complexity:1.7,bggRating:7.3,spineColor:"#006400",boxSize:"sm",mechanics:["Auction","Hidden Information","Set Collection"],description:"Players are central banks printing unlimited money to buy industries — but the player who spends the most total is eliminated. A brilliantly simple auction game of hidden brinkmanship."},
   // ── Row 5, Col 2 ──
-  {id:"paint_roses_os",name:"Paint the Roses",bggId:253759,year:2022,designer:"Ben Goldman",row:5,col:2,otherSide:true,categories:["Co-op","Deduction","Puzzle"],players:"2-5",playTime:"50-70 min",complexity:2.5,bggRating:7.5,spineColor:"#c0003c",boxSize:"sm",mechanics:["Cooperative Game","Deduction","Communication Limits","Tile Placement"],description:"A cooperative logic puzzle set in Wonderland. Players deduce the Queen's secret gardening rules by placing tiles and observing patterns. Each player knows part of the rule but cannot speak freely."},
-  {id:"watergate_os",name:"Watergate",bggId:274364,year:2019,designer:"Matthias Cramer",row:5,col:2,otherSide:true,categories:["Strategy","Card Game"],players:"2-2",playTime:"30-60 min",complexity:2.4,bggRating:8.0,spineColor:"#1a2a4a",boxSize:"sm",mechanics:["Hand Management","Tug of War"],description:"An asymmetric two-player card game recreating the Watergate scandal. Nixon tries to build momentum while the Editor connects informants to evidence on a shared investigation board."},
-  {id:"patchwork_os",name:"Patchwork",bggId:163412,year:2014,designer:"Uwe Rosenberg",row:5,col:2,otherSide:true,categories:["Abstract","Puzzle"],players:"2-2",playTime:"15-30 min",complexity:2.0,bggRating:7.8,spineColor:"#d4748a",boxSize:"sm",mechanics:["Tile Placement","Puzzle","Resource Management"],description:"A two-player tile-placement game where players purchase patches to fill their quilting board, paying in time and buttons. The shared time track governs turn order and income."},
-  {id:"final_girl_os",name:"Final Girl",bggId:277659,year:2021,designer:"Evan Derrick, A. J. Porfirio",row:5,col:2,otherSide:true,categories:["Solo","Thematic"],players:"1-1",playTime:"20-60 min",complexity:2.6,bggRating:7.7,spineColor:"#8b0000",boxSize:"sm",mechanics:["Deck Building","Hand Management","Variable Player Powers"],description:"A solo horror game where you play the lone survivor facing a supernatural killer. Manage action cards, track the killer, and save victims before the final confrontation."},
+  {id:"paint_roses_os",name:"Paint the Roses",bggId:253759,year:2022,designer:"Ben Goldman",row:5,col:2,otherSide:true,categories:["Co-op","Deduction","Puzzle"],players:"2-5",playTime:"50-70 min",complexity:2.5,bggRating:7.1,spineColor:"#c0003c",boxSize:"sm",mechanics:["Cooperative Game","Deduction","Communication Limits","Tile Placement"],description:"A cooperative logic puzzle set in Wonderland. Players deduce the Queen's secret gardening rules by placing tiles and observing patterns. Each player knows part of the rule but cannot speak freely."},
+  {id:"watergate_os",name:"Watergate",bggId:274364,year:2019,designer:"Matthias Cramer",row:5,col:2,otherSide:true,categories:["Strategy","Card Game"],players:"2-2",playTime:"30-60 min",complexity:2.4,bggRating:7.7,spineColor:"#1a2a4a",boxSize:"sm",mechanics:["Hand Management","Tug of War"],description:"An asymmetric two-player card game recreating the Watergate scandal. Nixon tries to build momentum while the Editor connects informants to evidence on a shared investigation board."},
+  {id:"patchwork_os",name:"Patchwork",bggId:163412,year:2014,designer:"Uwe Rosenberg",row:5,col:2,otherSide:true,categories:["Abstract","Puzzle"],players:"2-2",playTime:"15-30 min",complexity:1.6,bggRating:7.6,spineColor:"#d4748a",boxSize:"sm",mechanics:["Tile Placement","Puzzle","Resource Management"],description:"A two-player tile-placement game where players purchase patches to fill their quilting board, paying in time and buttons. The shared time track governs turn order and income."},
+  {id:"final_girl_os",name:"Final Girl",bggId:277659,year:2021,designer:"Evan Derrick, A. J. Porfirio",row:5,col:2,otherSide:true,categories:["Solo","Thematic"],players:"1-1",playTime:"20-60 min",complexity:2.76,bggRating:8.2,spineColor:"#8b0000",boxSize:"sm",mechanics:["Deck Building","Hand Management","Variable Player Powers"],description:"A solo horror game where you play the lone survivor facing a supernatural killer. Manage action cards, track the killer, and save victims before the final confrontation."},
   {id:"radlands_os",name:"Radlands",bggId:329082,year:2021,designer:"Daniel Piechnick",row:5,col:2,otherSide:true,categories:["Card Game","Strategy"],players:"2-2",playTime:"20-40 min",complexity:2.4,bggRating:7.7,spineColor:"#8b3a00",boxSize:"sm",mechanics:["Hand Management","Resource Management","Take That"],description:"A post-apocalyptic two-player card game where players manage camps and deploy fighters to destroy the opponent's three camp cards. Water is both currency and lifeblood."},
   {id:"flip_7_os",name:"Flip 7",bggId:420087,year:2024,designer:"Eric Olsen",row:5,col:2,otherSide:true,categories:["Card Game","Party"],players:"3-18",playTime:"20 min",complexity:1.1,bggRating:7.1,spineColor:"#d94f30",boxSize:"sm",mechanics:["Push Your Luck","Take That"],description:"A press-your-luck card game where players flip cards one at a time, trying to collect up to seven without a duplicate number. The pyramid distribution plus action cards make each flip tense."},
   {id:"mindbug_os",name:"Mindbug: First Contact",bggId:345584,year:2022,designer:"Skaff Elias, Richard Garfield, Marvin Hegen, Christian Kudahl",row:5,col:2,otherSide:true,categories:["Card Game","Strategy"],players:"2-2",playTime:"15-25 min",complexity:1.9,bggRating:7.5,spineColor:"#1a3a1a",boxSize:"sm",mechanics:["Hand Management","Take That","Variable Player Powers"],description:"A two-player combat card game where either player can use a Mindbug token to steal any creature played by the opponent. Every card play becomes a tense bluff and counter-bluff."},
-  {id:"paperback_os",name:"Paperback",bggId:141572,year:2014,designer:"Tim Fowers",row:5,col:2,otherSide:true,categories:["Deck Building","Card Game"],players:"2-5",playTime:"45 min",complexity:2.1,bggRating:7.3,spineColor:"#8b4513",boxSize:"sm",mechanics:["Deck Building","Word Game","Hand Management"],description:"A deck-building word game where players buy letter cards to build their deck and spell words. Longer and rarer letters score more, making each deck a personal word-crafting engine."},
-  {id:"cat_in_box_os",name:"Cat in the Box",bggId:345972,year:2022,designer:"Muneyuki Yokouchi",row:5,col:2,otherSide:true,categories:["Card Game","Strategy"],players:"2-5",playTime:"30 min",complexity:2.1,bggRating:7.5,spineColor:"#2c3e50",boxSize:"sm",mechanics:["Trick-Taking","Deduction"],description:"A quantum trick-taking game where cards have no fixed suit until played. Players declare colors when playing, marking a shared board and trying not to create paradoxes."},
+  {id:"paperback_os",name:"Paperback",bggId:141572,year:2014,designer:"Tim Fowers",row:5,col:2,otherSide:true,categories:["Deck Building","Card Game"],players:"2-5",playTime:"45 min",complexity:2.1,bggRating:7.1,spineColor:"#8b4513",boxSize:"sm",mechanics:["Deck Building","Word Game","Hand Management"],description:"A deck-building word game where players buy letter cards to build their deck and spell words. Longer and rarer letters score more, making each deck a personal word-crafting engine."},
+  {id:"cat_in_box_os",name:"Cat in the Box",bggId:345972,year:2022,designer:"Muneyuki Yokouchi",row:5,col:2,otherSide:true,categories:["Card Game","Strategy"],players:"2-5",playTime:"20-40 min",complexity:2.1,bggRating:7.5,spineColor:"#2c3e50",boxSize:"sm",mechanics:["Trick-Taking","Deduction"],description:"A quantum trick-taking game where cards have no fixed suit until played. Players declare colors when playing, marking a shared board and trying not to create paradoxes."},
   // ── Row 5, Col 4 ──
-  {id:"vagrantsong_os",name:"Vagrantsong",bggId:340325,year:2022,designer:"Matt Carter, Justin Gibbs, Kyle Rowan",row:5,col:4,otherSide:true,categories:["Co-op","Adventure","Thematic"],players:"2-4",playTime:"45-120 min",complexity:2.5,bggRating:7.8,spineColor:"#4a3000",boxSize:"sm",mechanics:["Cooperative Game","Dice Rolling","Variable Player Powers"],description:"A cooperative boss-battler set on a haunted train during the Great Depression. Vagrant heroes face ghostly Haints in scenario-based encounters using a unique skill-coin system."},
-  {id:"sw_deckbuilding_os",name:"Star Wars: The Deckbuilding Game",bggId:374173,year:2023,designer:"Caleb Grace",row:5,col:4,otherSide:true,categories:["Card Game","Deck Building"],players:"2-2",playTime:"30 min",complexity:2.0,bggRating:7.5,spineColor:"#1a1a1a",boxSize:"sm",mechanics:["Deck Building","Hand Management"],description:"A two-player deckbuilding duel between the Rebel Alliance and Galactic Empire. Players buy cards from a shared galaxy row and attack each other's bases to win."},
+  {id:"vagrantsong_os",name:"Vagrantsong",bggId:340325,year:2022,designer:"Matt Carter, Justin Gibbs, Kyle Rowan",row:5,col:4,otherSide:true,categories:["Co-op","Adventure","Thematic"],players:"2-4",playTime:"45-120 min",complexity:3.19,bggRating:7.4,spineColor:"#4a3000",boxSize:"sm",mechanics:["Cooperative Game","Dice Rolling","Variable Player Powers"],description:"A cooperative boss-battler set on a haunted train during the Great Depression. Vagrant heroes face ghostly Haints in scenario-based encounters using a unique skill-coin system."},
+  {id:"sw_deckbuilding_os",name:"Star Wars: The Deckbuilding Game",bggId:374173,year:2023,designer:"Caleb Grace",row:5,col:4,otherSide:true,categories:["Card Game","Deck Building"],players:"2-2",playTime:"30 min",complexity:2.0,bggRating:7.8,spineColor:"#1a1a1a",boxSize:"sm",mechanics:["Deck Building","Hand Management"],description:"A two-player deckbuilding duel between the Rebel Alliance and Galactic Empire. Players buy cards from a shared galaxy row and attack each other's bases to win."},
   {id:"dwar7s_fall_os",name:"Dwar7s Fall",bggId:193483,year:2016,designer:"Luís Brüeh",row:5,col:4,otherSide:true,categories:["Strategy","Fantasy"],players:"2-4",playTime:"20-60 min",complexity:2.23,bggRating:6.5,spineColor:"#d2691e",boxSize:"sm",mechanics:["Worker Placement","Hand Management","Tile Placement","Set Collection"],description:"To survive the long and terrible winter approaching, the dwarves need to prepare. Collect gems, build castles, and stock up enough food. Dwar7s Fall is a fast-paced worker placement and resource management game where players take turns placing dwarves on realm tiles to mine gems, fight monsters, and build their dwarf kingdom. Multiple paths to victory — be the first to complete three goals to trigger the endgame."},  
-  {id:"katamino_os",name:"Katamino",bggId:6931,year:1991,designer:"André Perriolat",row:5,col:4,otherSide:true,categories:["Puzzle","Abstract"],players:"1-2",playTime:"15-30 min",complexity:1.5,bggRating:6.8,spineColor:"#e63946",boxSize:"sm",mechanics:["Tile Placement","Pattern Recognition"],description:"A classic wooden puzzle game using pentomino pieces to fill a segmented tray. Hundreds of solo challenges of increasing difficulty, plus a two-player speed mode."},
-  {id:"hot_streak_os",name:"Hot Streak",bggId:446497,year:2025,designer:"Jon Perry",row:5,col:4,otherSide:true,categories:["Racing","Party"],players:"2-6",playTime:"30-45 min",complexity:1.3,bggRating:8.1,spineColor:"#ff8c00",boxSize:"sm",mechanics:["Betting","Push Your Luck","Racing"],description:"A chaotic betting and racing game where hard luck gamblers bet on off-brand mascots. Draft betting tickets and decide between risk and safety payouts as races run continuously."},
-  {id:"dt_vl_seraph_os",name:"Dice Throne: Seraph v. Vampire Lord",bggId:266964,year:2018,designer:"Nate Chatellier, Manny Trembley",row:5,col:4,otherSide:true,categories:["Dice","Card Game"],players:"2-2",playTime:"20-40 min",complexity:2.1,bggRating:8.0,spineColor:"#4b0082",boxSize:"sm",mechanics:["Dice Rolling","Hand Management","Variable Player Powers"],description:"Two heroes from Dice Throne Season Two: the holy Seraph and the dark Vampire Lord clash with unique dice, ability cards, and combo chains."},
-  {id:"marvel_dt_bw_ds_os",name:"Marvel Dice Throne: Black Widow v. Doctor Strange",bggId:360152,year:2022,designer:"Gavan Brown, Nate Chatellier, Manny Trembley",row:5,col:4,otherSide:true,categories:["Dice","Thematic"],players:"2-2",playTime:"30 min",complexity:2.1,bggRating:7.9,spineColor:"#8b0000",boxSize:"sm",mechanics:["Dice Rolling","Hand Management","Variable Player Powers"],description:"Black Widow and Doctor Strange face off in Marvel Dice Throne combat. Each hero has unique dice and ability cards for asymmetric head-to-head duels."},
-  {id:"cartographers_os",name:"Cartographers",bggId:263918,year:2019,designer:"Jordy Adan",row:5,col:4,otherSide:true,categories:["Strategy","Puzzle"],players:"1-100",playTime:"30-45 min",complexity:1.9,bggRating:7.7,spineColor:"#4b6858",boxSize:"sm",mechanics:["Grid Coverage","Paper-and-Pencil"],description:"A flip-and-write mapping game where players draw terrain shapes on their map sheets to fulfill seasonal royal edicts. Accessible, quick, and excellent solo support."},
+  {id:"katamino_os",name:"Katamino",bggId:6931,year:1992,designer:"André Perriolat",row:5,col:4,otherSide:true,categories:["Puzzle","Abstract"],players:"1-2",playTime:"10 min",complexity:1.75,bggRating:6.5,spineColor:"#e63946",boxSize:"sm",mechanics:["Tile Placement","Pattern Recognition"],description:"A classic wooden puzzle game using pentomino pieces to fill a segmented tray. Hundreds of solo challenges of increasing difficulty, plus a two-player speed mode."},
+  {id:"hot_streak_os",name:"Hot Streak",bggId:446497,year:2025,designer:"Jon Perry",row:5,col:4,otherSide:true,categories:["Racing","Party"],players:"2-8",playTime:"20 min",complexity:1.3,bggRating:7.8,spineColor:"#ff8c00",boxSize:"sm",mechanics:["Betting","Push Your Luck","Racing"],description:"A chaotic betting and racing game where hard luck gamblers bet on off-brand mascots. Draft betting tickets and decide between risk and safety payouts as races run continuously."},
+  {id:"dt_vl_seraph_os",name:"Dice Throne: Seraph v. Vampire Lord",bggId:266964,year:2018,designer:"Nate Chatellier, Manny Trembley",row:5,col:4,otherSide:true,categories:["Dice","Card Game"],players:"2-2",playTime:"20-40 min",complexity:2.1,bggRating:7.7,spineColor:"#4b0082",boxSize:"sm",mechanics:["Dice Rolling","Hand Management","Variable Player Powers"],description:"Two heroes from Dice Throne Season Two: the holy Seraph and the dark Vampire Lord clash with unique dice, ability cards, and combo chains."},
+  {id:"marvel_dt_bw_ds_os",name:"Marvel Dice Throne: Black Widow v. Doctor Strange",bggId:360152,year:2022,designer:"Gavan Brown, Nate Chatellier, Manny Trembley",row:5,col:4,otherSide:true,categories:["Dice","Thematic"],players:"2-2",playTime:"30 min",complexity:2.4,bggRating:7.9,spineColor:"#8b0000",boxSize:"sm",mechanics:["Dice Rolling","Hand Management","Variable Player Powers"],description:"Black Widow and Doctor Strange face off in Marvel Dice Throne combat. Each hero has unique dice and ability cards for asymmetric head-to-head duels."},
+  {id:"cartographers_os",name:"Cartographers",bggId:263918,year:2019,designer:"Jordy Adan",row:5,col:4,otherSide:true,categories:["Strategy","Puzzle"],players:"1-100",playTime:"30-45 min",complexity:1.9,bggRating:7.5,spineColor:"#4b6858",boxSize:"sm",mechanics:["Grid Coverage","Paper-and-Pencil"],description:"A flip-and-write mapping game where players draw terrain shapes on their map sheets to fulfill seasonal royal edicts. Accessible, quick, and excellent solo support."},
   {id:"poly_koul_os",name:"Η γεωγραφία ειναι πολυ κουλ",bggId:0,year:0,designer:"",row:5,col:4,otherSide:true,categories:["Family","Party"],players:"2-8",playTime:"20-30 min",complexity:1.0,bggRating:0,spineColor:"#3498db",boxSize:"sm",mechanics:["Trivia"],description:"A fun Greek geography trivia game. Players answer questions about geography in an entertaining and educational format."},
   // ══════════════════════════════════════════
   // ROW 7 - OTHER SIDE OVERFLOW (swap view)
   // ══════════════════════════════════════════
 
   // ── Row 7, Col 1 ──
-  {id:"marvel_legendary_os",name:"Legendary: A Marvel Deck Building Game",bggId:129437,year:2012,designer:"Devin Low",row:7,col:1,otherSide:true,categories:["Deck Building","Co-op","Thematic"],players:"1-5",playTime:"30-60 min",complexity:2.5,bggRating:7.3,spineColor:"#1a237e",boxSize:"sm",mechanics:["Cooperative Game","Deck Building","Hand Management"],description:"A semi-cooperative deck-building game where players recruit Marvel heroes to battle iconic villains and masterminds. Build synergistic hero combos to defeat escalating threats."},
-  {id:"drunagor_os",name:"Chronicles of Drunagor: Age of Darkness",bggId:268012,year:2021,designer:"Murilo Batista, Gabriel Guaragna, Leandro Mittelmann",row:7,col:1,otherSide:true,categories:["Co-op","Adventure","Thematic"],players:"1-5",playTime:"60-120 min",complexity:3.0,bggRating:7.9,spineColor:"#1c1c3a",boxSize:"sm",mechanics:["Cooperative Game","Dice Rolling","Modular Board","Variable Player Powers"],description:"A cooperative dungeon-crawler with 3D terrain, detailed miniatures, and a deep campaign. Heroes battle through a dark fantasy world corrupted by an ancient evil."},
-  {id:"tanares_os",name:"Arena: The Contest – Tanares Adventures",bggId:298627,year:2023,designer:"Alexandre Aboud, Clayton Machado",row:7,col:1,otherSide:true,categories:["Co-op","Adventure","Thematic"],players:"1-8",playTime:"45-90 min",complexity:3.2,bggRating:7.8,spineColor:"#1a237e",boxSize:"sm",mechanics:["Cooperative Game","Dice Rolling","Variable Player Powers"],description:"A cooperative dungeon-crawl campaign expansion for Arena: The Contest. Players work together through a narrative campaign using the arena combat system."},
-  {id:"lobotomy_2_os",name:"Lobotomy 2: Manhunt",bggId:348877,year:2022,designer:"Judgement Dave, Sebastian Kozak",row:7,col:1,otherSide:true,categories:["Thematic","Co-op"],players:"1-5",playTime:"60-120 min",complexity:3.2,bggRating:7.4,spineColor:"#2c0b0b",boxSize:"sm",mechanics:["Cooperative Game","Dice Rolling","Modular Board","Variable Player Powers"],description:"A dungeon-crawler set in a nightmarish asylum overrun by monsters from patients' nightmares. Psychotic anti-heroes hunt creatures through tile-based corridors with campaign progression."},
-  {id:"witcher_monster_trail_os",name:"The Witcher: Old World – Monster Trail",bggId:341023,year:2023,designer:"Łukasz Woźniak",row:7,col:1,otherSide:true,categories:["Adventure","Thematic"],players:"1-5",playTime:"90-150 min",complexity:3.1,bggRating:7.8,spineColor:"#2e4a1e",boxSize:"sm",mechanics:["Deck Building","Modular Board","Variable Player Powers"],description:"Expansion adding new monster hunting mechanics, trail tokens, and additional monster cards. Deepens the competitive monster-hunting experience."},
-  {id:"witcher_mages_os",name:"The Witcher: Old World – Mages",bggId:340523,year:2023,designer:"Łukasz Woźniak",row:7,col:1,otherSide:true,categories:["Adventure","Thematic"],players:"1-5",playTime:"90-150 min",complexity:3.1,bggRating:7.7,spineColor:"#6a0dad",boxSize:"sm",mechanics:["Deck Building","Variable Player Powers"],description:"Expansion adding powerful mage characters with spell-based abilities and new location cards associated with magical factions."},
+  {id:"marvel_legendary_os",name:"Legendary: A Marvel Deck Building Game",bggId:129437,year:2012,designer:"Devin Low",row:7,col:1,otherSide:true,categories:["Deck Building","Co-op","Thematic"],players:"1-5",playTime:"30-60 min",complexity:2.5,bggRating:7.5,spineColor:"#1a237e",boxSize:"sm",mechanics:["Cooperative Game","Deck Building","Hand Management"],description:"A semi-cooperative deck-building game where players recruit Marvel heroes to battle iconic villains and masterminds. Build synergistic hero combos to defeat escalating threats."},
+  {id:"drunagor_os",name:"Chronicles of Drunagor: Age of Darkness",bggId:268012,year:2021,designer:"Eurico Cunha Neto",row:7,col:1,otherSide:true,categories:["Co-op","Adventure","Thematic"],players:"1-5",playTime:"120 min",complexity:3.36,bggRating:8.2,spineColor:"#1c1c3a",boxSize:"sm",mechanics:["Cooperative Game","Dice Rolling","Modular Board","Variable Player Powers"],description:"A cooperative dungeon-crawler with 3D terrain, detailed miniatures, and a deep campaign. Heroes battle through a dark fantasy world corrupted by an ancient evil."},
+  {id:"tanares_os",name:"Arena: The Contest – Tanares Adventures",bggId:298627,year:2023,designer:"Alexandre Aboud, Danilo de Alcantara, Michael Alves, Keli L. Cruz, Toi von Glehn, Clayton Machado, Guilherme Vasconcelos",row:7,col:1,otherSide:true,categories:["Co-op","Adventure","Thematic"],players:"1-8",playTime:"45-90 min",complexity:3.96,bggRating:8.2,spineColor:"#1a237e",boxSize:"sm",mechanics:["Cooperative Game","Dice Rolling","Variable Player Powers"],description:"A cooperative dungeon-crawl campaign expansion for Arena: The Contest. Players work together through a narrative campaign using the arena combat system."},
+  {id:"lobotomy_2_os",name:"Lobotomy 2: Manhunt",bggId:348877,year:2022,designer:"Judgement Dave, Sebastian Kozak",row:7,col:1,otherSide:true,categories:["Thematic","Co-op"],players:"1-5",playTime:"60-120 min",complexity:3.2,bggRating:8.0,spineColor:"#2c0b0b",boxSize:"sm",mechanics:["Cooperative Game","Dice Rolling","Modular Board","Variable Player Powers"],description:"A dungeon-crawler set in a nightmarish asylum overrun by monsters from patients' nightmares. Psychotic anti-heroes hunt creatures through tile-based corridors with campaign progression."},
+  {id:"witcher_monster_trail_os",name:"The Witcher: Old World – Monster Trail",bggId:341023,year:2023,designer:"Łukasz Woźniak",row:7,col:1,otherSide:true,categories:["Adventure","Thematic"],players:"1-5",playTime:"90-150 min",complexity:3.3,bggRating:8.7,spineColor:"#2e4a1e",boxSize:"sm",mechanics:["Deck Building","Modular Board","Variable Player Powers"],description:"Expansion adding new monster hunting mechanics, trail tokens, and additional monster cards. Deepens the competitive monster-hunting experience."},
+  {id:"witcher_mages_os",name:"The Witcher: Old World – Mages",bggId:340523,year:2023,designer:"Łukasz Woźniak",row:7,col:1,otherSide:true,categories:["Adventure","Thematic"],players:"1-5",playTime:"90-150 min",complexity:2.7,bggRating:8.1,spineColor:"#6a0dad",boxSize:"sm",mechanics:["Deck Building","Variable Player Powers"],description:"Expansion adding powerful mage characters with spell-based abilities and new location cards associated with magical factions."},
   // ── Row 7, Col 2 ──
-  {id:"witcher_legend_hunt_os",name:"The Witcher: Old World – Legendary Hunt",bggId:340526,year:2023,designer:"Łukasz Woźniak",row:7,col:2,otherSide:true,categories:["Adventure","Thematic"],players:"1-5",playTime:"90-150 min",complexity:3.2,bggRating:7.9,spineColor:"#7a4800",boxSize:"sm",mechanics:["Cooperative Game","Deck Building","Modular Board"],description:"Expansion introducing massive legendary monsters with detailed miniatures and cooperative boss-fight scenarios."},
-  {id:"etherfields_harpy_os",name:"Etherfields: Stretch Goals – Harpy & She-Wolf Campaigns",bggId:351544,year:2022,designer:"Michał Oracz",row:7,col:2,otherSide:true,categories:["Adventure","Co-op","Thematic"],players:"1-4",playTime:"60-120 min",complexity:3.4,bggRating:8.0,spineColor:"#9b2d77",boxSize:"sm",mechanics:["Cooperative Game","Deck, Bag, and Pool Building","Dice Rolling","Grid Movement","Hand Management","Narrative Choice / Paragraph","Solo / Solitaire Game"],description:"Expansion for Etherfields adding two full campaigns and stretch goal content. The Harpy campaign follows Dreamers pursuing a thief through the Dreamworld — visiting the Infinite Market, the Prison, and joining parades and carnivals. The She-Wolf campaign portrays a war between chaotic Parasites and the Endless Forest — exploring the frozen taiga, confronting a corrupted elven king, and preparing for a final battle."},  
-  {id:"earthborne_legacy_os",name:"Earthborne Rangers: Legacy of the Ancestors",bggId:354291,year:2025,designer:"Luke Eddy, Andrew Fischer, Brooks Flugaur-Leavitt, Andrew Navaro, Davi Paulino, Adam Sadler, Brady Sadler",row:7,col:2,otherSide:true,categories:["Adventure","Co-op"],players:"1-4",playTime:"60-240 min",complexity:3.5,bggRating:8.5,spineColor:"#4a7c59",boxSize:"sm",mechanics:["Card Play Conflict Resolution","Cooperative Game","Deck Construction","Hand Management","Move Through Deck","Narrative Choice / Paragraph","Role Playing","Scenario / Mission / Campaign Game","Solo / Solitaire Game","Variable Set-up"],description:"Campaign expansion for Earthborne Rangers featuring a new story arc that takes Rangers beyond, above, and below the Valley to explore strange new places. Includes 250+ new Ranger and Valley cards, new maps, and a campaign guide. Uncover the secrets of the Arcology left behind by the Estians, meet familiar faces, and encounter new people, creatures, and machines. Utilizes both cards and maps from the core set alongside the new content. Requires the Earthborne Rangers base game to play."},  {id:"on_mars_alien_os",name:"On Mars: Alien Invasion",bggId:278241,year:2022,designer:"Vital Lacerda",row:7,col:2,otherSide:true,categories:["Strategy","Euro"],players:"1-5",playTime:"80-150 min",complexity:4.5,bggRating:8.2,spineColor:"#8b2500",boxSize:"sm",mechanics:["Worker Placement","Cooperative Game","Area Control"],description:"Expansion changing On Mars into a semi-cooperative struggle for survival against an alien threat alongside competitive colony-building."},
-  {id:"alchemists_golem_os",name:"Alchemists: The King's Golem",bggId:204650,year:2016,designer:"Matúš Kotry",row:7,col:2,otherSide:true,categories:["Deduction","Strategy"],players:"2-4",playTime:"120 min",complexity:4.0,bggRating:8.1,spineColor:"#4a3728",boxSize:"sm",mechanics:["Deduction","Worker Placement","Variable Player Powers"],description:"Essential expansion for Alchemists adding a narrative campaign where players must collectively create a golem for the king. New ingredients, artifacts, and deeper deduction."},
+  {id:"witcher_legend_hunt_os",name:"The Witcher: Old World – Legendary Hunt",bggId:340526,year:2023,designer:"Łukasz Woźniak",row:7,col:2,otherSide:true,categories:["Adventure","Thematic"],players:"1-5",playTime:"90-150 min",complexity:2.85,bggRating:8.4,spineColor:"#7a4800",boxSize:"sm",mechanics:["Cooperative Game","Deck Building","Modular Board"],description:"Expansion introducing massive legendary monsters with detailed miniatures and cooperative boss-fight scenarios."},
+  {id:"etherfields_harpy_os",name:"Etherfields: Stretch Goals – Harpy & She-Wolf Campaigns",bggId:351544,year:2022,designer:"Michał Oracz",row:7,col:2,otherSide:true,categories:["Adventure","Co-op","Thematic"],players:"1-4",playTime:"90-180 min",complexity:4.0,bggRating:8.0,spineColor:"#9b2d77",boxSize:"sm",mechanics:["Cooperative Game","Deck, Bag, and Pool Building","Dice Rolling","Grid Movement","Hand Management","Narrative Choice / Paragraph","Solo / Solitaire Game"],description:"Expansion for Etherfields adding two full campaigns and stretch goal content. The Harpy campaign follows Dreamers pursuing a thief through the Dreamworld — visiting the Infinite Market, the Prison, and joining parades and carnivals. The She-Wolf campaign portrays a war between chaotic Parasites and the Endless Forest — exploring the frozen taiga, confronting a corrupted elven king, and preparing for a final battle."},  
+  {id:"earthborne_legacy_os",name:"Earthborne Rangers: Legacy of the Ancestors",bggId:354291,year:2025,designer:"Luke Eddy, Andrew Fischer, Brooks Flugaur-Leavitt, Andrew Navaro, Davi Paulino, Adam Sadler, Brady Sadler",row:7,col:2,otherSide:true,categories:["Adventure","Co-op"],players:"1-4",playTime:"60-240 min",complexity:3.5,bggRating:8.5,spineColor:"#4a7c59",boxSize:"sm",mechanics:["Card Play Conflict Resolution","Cooperative Game","Deck Construction","Hand Management","Move Through Deck","Narrative Choice / Paragraph","Role Playing","Scenario / Mission / Campaign Game","Solo / Solitaire Game","Variable Set-up"],description:"Campaign expansion for Earthborne Rangers featuring a new story arc that takes Rangers beyond, above, and below the Valley to explore strange new places. Includes 250+ new Ranger and Valley cards, new maps, and a campaign guide. Uncover the secrets of the Arcology left behind by the Estians, meet familiar faces, and encounter new people, creatures, and machines. Utilizes both cards and maps from the core set alongside the new content. Requires the Earthborne Rangers base game to play."},  {id:"on_mars_alien_os",name:"On Mars: Alien Invasion",bggId:278241,year:2022,designer:"Vital Lacerda",row:7,col:2,otherSide:true,categories:["Strategy","Euro"],players:"1-5",playTime:"80-150 min",complexity:4.0,bggRating:7.9,spineColor:"#8b2500",boxSize:"sm",mechanics:["Worker Placement","Cooperative Game","Area Control"],description:"Expansion changing On Mars into a semi-cooperative struggle for survival against an alien threat alongside competitive colony-building."},
+  {id:"alchemists_golem_os",name:"Alchemists: The King's Golem",bggId:204650,year:2016,designer:"Matúš Kotry",row:7,col:2,otherSide:true,categories:["Deduction","Strategy"],players:"2-4",playTime:"120 min",complexity:4.55,bggRating:8.4,spineColor:"#4a3728",boxSize:"sm",mechanics:["Deduction","Worker Placement","Variable Player Powers"],description:"Essential expansion for Alchemists adding a narrative campaign where players must collectively create a golem for the king. New ingredients, artifacts, and deeper deduction."},
   // ── Row 7, Col 3 ──
-  {id:"hegemony_crisis_os",name:"Hegemony: Crisis & Control",bggId:374250,year:2025,designer:"Vangelis Bagiartakis, Varnavas Timotheou",row:7,col:3,otherSide:true,categories:["Strategy","Euro"],players:"2-4",playTime:"90-180 min",complexity:4.2,bggRating:8.3,spineColor:"#8b1a1a",boxSize:"sm",mechanics:["Hand Management","Negotiation","Variable Player Powers"],description:"Major expansion for Hegemony adding crisis events, new policy mechanisms, and deeper class asymmetry. Intensifies the economic and political warfare."},
-  {id:"crimson_scales_os",name:"The Crimson Scales: Trail of Ashes",bggId:367751,year:2022,designer:"Motti Eisenbach",row:7,col:3,otherSide:true,categories:["Adventure","Co-op"],players:"1-4",playTime:"60-150 min",complexity:3.5,bggRating:9.0,spineColor:"#8b1a1a",boxSize:"sm",mechanics:["Cooperative Game","Hand Management","Modular Board","Solo / Solitaire Game","Variable Player Powers"],description:"Fan-made expansion for The Crimson Scales, itself a Gloomhaven-compatible campaign. Adds 16 new scenarios in a spiral-bound book, 5 new classes with 3D-printable miniatures, 20+ new items, 24 new events, 2+ new bosses, and a new Smoke Spirit monster type. Also includes metal token upgrades and an artbook featuring Alexandr Elichev's original artwork. Requires The Crimson Scales base game to play. Not an official Cephalofair Games product."},  {id:"dune_rise_ix_os",name:"Dune: Imperium – Rise of Ix",bggId:342031,year:2022,designer:"Paul Dennen",row:7,col:3,otherSide:true,categories:["Deck Building","Strategy"],players:"1-4",playTime:"60-120 min",complexity:3.0,bggRating:8.3,spineColor:"#c87941",boxSize:"sm",mechanics:["Deck Building","Worker Placement","Hand Management"],description:"First major expansion for Dune: Imperium adding the Ixian technology track, dreadnoughts, and new leaders. Significantly expands strategic options."},
-  {id:"kingdom_legacy_os",name:"Kingdom Legacy: Feudal Kingdom",bggId:415776,year:2024,designer:"Jonathan Fryxelius",row:7,col:3,otherSide:true,categories:["Strategy","Campaign"],players:"1-1",playTime:"360-480 min",complexity:3.0,bggRating:7.5,spineColor:"#6b3a00",boxSize:"sm",mechanics:["Engine Building","Campaign","Hand Management"],description:"A solo legacy game by the designer of Terraforming Mars. Build a medieval kingdom across a branching campaign with permanent choices shaping future sessions."},
-  {id:"auztralia_taz_os",name:"AuZtralia: TaZmania",bggId:320110,year:2022,designer:"Martin Wallace",row:7,col:3,otherSide:true,categories:["Adventure","Strategy"],players:"1-2",playTime:"30-90 min",complexity:3.0,bggRating:7.6,spineColor:"#5c8a00",boxSize:"sm",mechanics:["Area Movement","Network Building"],description:"Expansion for AuZtralia adding Tasmania as a new map designed for 1-2 players. Tightens the Ancient Ones fighting experience into a focused solo or duet game."},
-  {id:"thunder_road_cc_os",name:"Thunder Road: Vendetta – Carnival Chaos",bggId:393963,year:2024,designer:"Brett Myers, Dave Chalker",row:7,col:3,otherSide:true,categories:["Racing","Thematic"],players:"2-4",playTime:"45-75 min",complexity:2.2,bggRating:7.9,spineColor:"#cc3300",boxSize:"sm",mechanics:["Dice Rolling","Modular Board","Hand Management"],description:"Expansion adding a carnival-themed road section with new vehicles, terrain tiles, and hazards that make post-apocalyptic highway races even more chaotic."},
+  {id:"hegemony_crisis_os",name:"Hegemony: Crisis & Control",bggId:374250,year:2023,designer:"Vangelis Bagiartakis, Anastasios Grigoriadis, Varnavas Timotheou",row:7,col:3,otherSide:true,categories:["Strategy","Euro"],players:"1-4",playTime:"90-180 min",complexity:4.55,bggRating:8.3,spineColor:"#8b1a1a",boxSize:"sm",mechanics:["Hand Management","Negotiation","Variable Player Powers"],description:"Major expansion for Hegemony adding crisis events, new policy mechanisms, and deeper class asymmetry. Intensifies the economic and political warfare."},
+  {id:"crimson_scales_os",name:"The Crimson Scales: Trail of Ashes",bggId:367751,year:2023,designer:"Motti Eisenbach",row:7,col:3,otherSide:true,categories:["Adventure","Co-op"],players:"1-4",playTime:"60-150 min",complexity:3.5,bggRating:9.0,spineColor:"#8b1a1a",boxSize:"sm",mechanics:["Cooperative Game","Hand Management","Modular Board","Solo / Solitaire Game","Variable Player Powers"],description:"Fan-made expansion for The Crimson Scales, itself a Gloomhaven-compatible campaign. Adds 16 new scenarios in a spiral-bound book, 5 new classes with 3D-printable miniatures, 20+ new items, 24 new events, 2+ new bosses, and a new Smoke Spirit monster type. Also includes metal token upgrades and an artbook featuring Alexandr Elichev's original artwork. Requires The Crimson Scales base game to play. Not an official Cephalofair Games product."},  {id:"dune_rise_ix_os",name:"Dune: Imperium – Rise of Ix",bggId:342031,year:2022,designer:"Paul Dennen",row:7,col:3,otherSide:true,categories:["Deck Building","Strategy"],players:"1-4",playTime:"60-120 min",complexity:3.23,bggRating:8.8,spineColor:"#c87941",boxSize:"sm",mechanics:["Deck Building","Worker Placement","Hand Management"],description:"First major expansion for Dune: Imperium adding the Ixian technology track, dreadnoughts, and new leaders. Significantly expands strategic options."},
+  {id:"kingdom_legacy_os",name:"Kingdom Legacy: Feudal Kingdom",bggId:415776,year:2024,designer:"Jonathan Fryxelius",row:7,col:3,otherSide:true,categories:["Strategy","Campaign"],players:"1-1",playTime:"360-480 min",complexity:2.26,bggRating:8.0,spineColor:"#6b3a00",boxSize:"sm",mechanics:["Engine Building","Campaign","Hand Management"],description:"A solo legacy game by the designer of Terraforming Mars. Build a medieval kingdom across a branching campaign with permanent choices shaping future sessions."},
+  {id:"auztralia_taz_os",name:"AuZtralia: TaZmania",bggId:320110,year:2022,designer:"Martin Wallace",row:7,col:3,otherSide:true,categories:["Adventure","Strategy"],players:"1-2",playTime:"30-90 min",complexity:2.71,bggRating:8.0,spineColor:"#5c8a00",boxSize:"sm",mechanics:["Area Movement","Network Building"],description:"Expansion for AuZtralia adding Tasmania as a new map designed for 1-2 players. Tightens the Ancient Ones fighting experience into a focused solo or duet game."},
+  {id:"thunder_road_cc_os",name:"Thunder Road: Vendetta – Carnival of Chaos",bggId:415878,year:2024,designer:"Noah Cohen, Rob Daviau, Justin D. Jacobson, Brian Neff",row:7,col:3,otherSide:true,categories:["Racing","Thematic"],players:"2-5",playTime:"45-75 min",complexity:2.29,bggRating:8.1,spineColor:"#cc3300",boxSize:"sm",mechanics:["Dice Rolling","Modular Board","Hand Management"],description:"Carnival-themed expansion for Thunder Road: Vendetta: shoot and slam the other cars to win the crowd's favor and collect scrap. Requires Thunder Road: Vendetta."},
   // ── Row 7, Col 4 ──
-  {id:"marvel_dt_missions_os",name:"Marvel Dice Throne Missions",bggId:403495,year:2025,designer:"Gavan Brown, Nate Chatellier",row:8,col:1,otherSide:true,categories:["Dice","Co-op","Thematic"],players:"1-4",playTime:"30-90 min",complexity:2.5,bggRating:8.0,spineColor:"#8e1a1a",boxSize:"sm",mechanics:["Cooperative Game","Dice Rolling","Variable Player Powers"],description:"Cooperative expansion for Marvel Dice Throne introducing mission-based scenarios where heroes team up against escalating villain threats."},
-  {id:"chron_crime_1400_os",name:"Chronicles of Crime: 1400",bggId:300300,year:2021,designer:"David Cicurel",row:8,col:1,otherSide:true,categories:["Deduction","Co-op"],players:"1-4",playTime:"60-90 min",complexity:2.0,bggRating:7.7,spineColor:"#5c3317",boxSize:"sm",mechanics:["Cooperative Game","Deduction","Storytelling"],description:"A standalone Chronicles of Crime set in medieval Paris. Players investigate crimes using the app-driven scanning system in a historical mystery setting."},
-  {id:"midnight_crown_os",name:"Hidden Games Crime Scene: The Midnight Crown",bggId:309917,year:2020,designer:"",row:8,col:1,otherSide:true,categories:["Deduction","Co-op"],players:"1-4",playTime:"90-150 min",complexity:2.0,bggRating:7.9,spineColor:"#5c3317",boxSize:"sm",mechanics:["Cooperative Game","Deduction"],description:"A mystery case game where players investigate clues and piece together evidence to solve the case of the famous Midnight Crown."},
-  {id:"detective_bullets_os",name:"Detective: Bullets over Hollywood",bggId:265736,year:2019,designer:"Przemysław Rymer, Ignacy Trzewiczek",row:8,col:1,otherSide:true,categories:["Deduction","Co-op"],players:"1-5",playTime:"120-180 min",complexity:2.8,bggRating:7.7,spineColor:"#2e1b1b",boxSize:"sm",mechanics:["Cooperative Game","Deduction","Storytelling"],description:"A case expansion for Detective adding a Hollywood-themed murder investigation with the Antares online database integration."},
-  {id:"detective_saints_os",name:"Detective: City of Angels – Saints & Sinners",bggId:388374,year:2023,designer:"Alara Cameron, William Kenyon, Logan Giannini",row:8,col:1,otherSide:true,categories:["Deduction","Thematic"],players:"1-5",playTime:"120 min",complexity:2.8,bggRating:7.8,spineColor:"#1a2a4a",boxSize:"sm",mechanics:["Cooperative Game","Deduction","Narrative Choice / Paragraph","Semi-Cooperative Game","Solo / Solitaire Game"],description:"An expansion for Detective: City of Angels featuring three new cases set in the dark, violent world of 1940s Los Angeles. Most players step into the shoes of LAPD Homicide detectives, while one player takes on The Chisel — whose goal is to stall and misdirect at every turn. Cases include 'One Last Hit for the Hitman', 'Cloak & Daggered', and 'Blast from the Past'. Requires Detective: City of Angels to play."},  {id:"sherlock_thames_os",name:"Sherlock Holmes Consulting Detective: The Thames Murders & Other Cases",bggId:2511,year:1982,designer:"Raymond Edwards, Suzanne Goldberg, Gary Grady",row:8,col:1,otherSide:true,categories:["Deduction","Co-op"],players:"1-8",playTime:"60-120 min",complexity:2.3,bggRating:7.8,spineColor:"#2b4a6e",boxSize:"sm",mechanics:["Cooperative Game","Deduction","Storytelling"],description:"The classic detective game where players follow leads across Victorian London using a map, directory, and newspapers. Work as a team to solve ten cases and compare your efficiency against Sherlock Holmes himself."},
+  {id:"marvel_dt_missions_os",name:"Marvel Dice Throne Missions",bggId:403495,year:2025,designer:"Gavan Brown, Nate Chatellier",row:8,col:1,otherSide:true,categories:["Dice","Co-op","Thematic"],players:"1-4",playTime:"30-75 min",complexity:2.27,bggRating:8.3,spineColor:"#8e1a1a",boxSize:"sm",mechanics:["Cooperative Game","Dice Rolling","Variable Player Powers"],description:"Cooperative expansion for Marvel Dice Throne introducing mission-based scenarios where heroes team up against escalating villain threats."},
+  {id:"chron_crime_1400_os",name:"Chronicles of Crime: 1400",bggId:300300,year:2020,designer:"David Cicurel, Wojciech Grajkowski",row:8,col:1,otherSide:true,categories:["Deduction","Co-op"],players:"1-4",playTime:"60-90 min",complexity:2.0,bggRating:7.7,spineColor:"#5c3317",boxSize:"sm",mechanics:["Cooperative Game","Deduction","Storytelling"],description:"A standalone Chronicles of Crime set in medieval Paris. Players investigate crimes using the app-driven scanning system in a historical mystery setting."},
+  {id:"midnight_crown_os",name:"Hidden Games Crime Scene: The Midnight Crown",bggId:309917,year:2020,designer:"",row:8,col:1,otherSide:true,categories:["Deduction","Co-op"],players:"1-6",playTime:"90-150 min",complexity:2.0,bggRating:7.9,spineColor:"#5c3317",boxSize:"sm",mechanics:["Cooperative Game","Deduction"],description:"A mystery case game where players investigate clues and piece together evidence to solve the case of the famous Midnight Crown."},
+  {id:"detective_bullets_os",name:"Detective: Bullets over Hollywood",bggId:237900,year:2019,designer:"Evan Derrick",row:8,col:1,otherSide:true,categories:["Deduction","Co-op"],players:"1-5",playTime:"30-150 min",complexity:2.89,bggRating:8.4,spineColor:"#2e1b1b",boxSize:"sm",mechanics:["Cooperative Game","Deduction","Storytelling"],description:"Expansion for Detective: City of Angels with more cases set in the gritty Los Angeles of the 1940s, tougher to crack than the base game's. Requires Detective: City of Angels."},
+  {id:"detective_saints_os",name:"Detective: City of Angels – Saints & Sinners",bggId:388374,year:2023,designer:"Alara Cameron, Evan Derrick, Logan Giannini",row:8,col:1,otherSide:true,categories:["Deduction","Thematic"],players:"1-5",playTime:"120 min",complexity:2.8,bggRating:8.6,spineColor:"#1a2a4a",boxSize:"sm",mechanics:["Cooperative Game","Deduction","Narrative Choice / Paragraph","Semi-Cooperative Game","Solo / Solitaire Game"],description:"An expansion for Detective: City of Angels featuring three new cases set in the dark, violent world of 1940s Los Angeles. Most players step into the shoes of LAPD Homicide detectives, while one player takes on The Chisel — whose goal is to stall and misdirect at every turn. Cases include 'One Last Hit for the Hitman', 'Cloak & Daggered', and 'Blast from the Past'. Requires Detective: City of Angels to play."},  {id:"sherlock_thames_os",name:"Sherlock Holmes Consulting Detective: The Thames Murders & Other Cases",bggId:2511,year:1981,designer:"Raymond Edwards, Suzanne Goldberg, Gary Grady",row:8,col:1,otherSide:true,categories:["Deduction","Co-op"],players:"1-8",playTime:"60-120 min",complexity:2.66,bggRating:7.6,spineColor:"#2b4a6e",boxSize:"sm",mechanics:["Cooperative Game","Deduction","Storytelling"],description:"The classic detective game where players follow leads across Victorian London using a map, directory, and newspapers. Work as a team to solve ten cases and compare your efficiency against Sherlock Holmes himself."},
   // ── Row 7, Col 5 ──
-  {id:"gh_buttons_bugs_os",name:"Gloomhaven: Buttons & Bugs",bggId:372526,year:2023,designer:"Isaac Childres",row:8,col:2,otherSide:true,categories:["Adventure","Solo"],players:"1-1",playTime:"25-35 min",complexity:2.5,bggRating:7.6,spineColor:"#2c3e50",boxSize:"sm",mechanics:["Hand Management","Modular Board"],description:"A compact solo-only Gloomhaven experience in a tiny box. Players control a single character navigating hexagonal encounters using the familiar card-based combat system."},
+  {id:"gh_buttons_bugs_os",name:"Gloomhaven: Buttons & Bugs",bggId:393672,year:2024,designer:"Joe Klipfel, Nikki Valens",row:8,col:2,otherSide:true,categories:["Adventure","Solo"],players:"1",playTime:"20 min",complexity:3.32,bggRating:7.5,spineColor:"#2c3e50",boxSize:"sm",mechanics:["Hand Management","Modular Board"],description:"A compact solo-only Gloomhaven experience in a tiny box. Players control a single character navigating hexagonal encounters using the familiar card-based combat system."},
   {id:"smartphone_update_os",name:"Smartphone Inc.: Update 1.1",bggId:306864,year:2020,designer:"Ivan Lashin",row:8,col:2,otherSide:true,categories:["Strategy","Euro"],players:"1-5",playTime:"60-90 min",complexity:3.0,bggRating:7.9,spineColor:"#2c3e50",boxSize:"sm",mechanics:["Simultaneous Action Selection","Worker Placement"],description:"Comprehensive expansion for Smartphone Inc. adding asymmetric company powers, new product tiles, and additional market mechanisms."},
-  {id:"paleo_new_beg_os",name:"Paleo: A New Beginning",bggId:342501,year:2021,designer:"Peter Rustemeyer",row:8,col:2,otherSide:true,categories:["Co-op","Adventure"],players:"2-4",playTime:"45-60 min",complexity:2.8,bggRating:7.8,spineColor:"#8b5e3c",boxSize:"sm",mechanics:["Cooperative Game","Hand Management"],description:"First major expansion for Paleo adding new card packs, complex tribal narratives, and the cave painting mechanic. Deepens cooperative survival."},
-  {id:"final_girl_ht_os",name:"Final Girl: The Happy Trails Horror",bggId:307683,year:2021,designer:"Evan Derrick, A. J. Porfirio",row:8,col:2,otherSide:true,categories:["Solo","Thematic"],players:"1-1",playTime:"20-60 min",complexity:2.6,bggRating:7.8,spineColor:"#2d5a27",boxSize:"sm",mechanics:["Deck Building","Hand Management","Variable Player Powers"],description:"A Feature Film scenario for Final Girl set in a summer camp stalked by a masked killer — homage to Friday the 13th. Requires the Core Box."},
-  {id:"azul_crystal_os",name:"Azul: Crystal Mosaic",bggId:294345,year:2020,designer:"Michael Kiesling",row:8,col:2,otherSide:true,categories:["Abstract","Puzzle"],players:"2-4",playTime:"30-45 min",complexity:1.9,bggRating:7.25,spineColor:"#1e6b8c",boxSize:"sm",mechanics:["Open Drafting","Pattern Building","Tile Placement"],description:"Expansion for Azul adding four double-sided player boards with new tile layouts and fresh strategic opportunities. The crystal-clear plastic overlays provide recesses that keep tiles neatly in place during play. Each board side offers new mid- and end-game scoring challenges. Requires the base Azul game to play."},  {id:"magic_maze_ms_os",name:"Magic Maze: Maximum Security",bggId:230359,year:2017,designer:"Kasper Lapp",row:8,col:2,otherSide:true,categories:["Co-op","Puzzle"],players:"1-8",playTime:"1-24 min",complexity:2.3,bggRating:7.5,spineColor:"#cc5500",boxSize:"sm",mechanics:["Cooperative Game","Real-Time","Communication Limits"],description:"Expansion adding security systems, alarm triggers, and new movement restrictions to the cooperative real-time Magic Maze heist."},
+  {id:"paleo_new_beg_os",name:"Paleo: A New Beginning",bggId:342501,year:2021,designer:"Peter Rustemeyer",row:8,col:2,otherSide:true,categories:["Co-op","Adventure"],players:"2-4",playTime:"45-60 min",complexity:3.18,bggRating:8.2,spineColor:"#8b5e3c",boxSize:"sm",mechanics:["Cooperative Game","Hand Management"],description:"First major expansion for Paleo adding new card packs, complex tribal narratives, and the cave painting mechanic. Deepens cooperative survival."},
+  {id:"final_girl_ht_os",name:"Final Girl: The Happy Trails Horror",bggId:307683,year:2021,designer:"Evan Derrick, A. J. Porfirio",row:8,col:2,otherSide:true,categories:["Solo","Thematic"],players:"1-1",playTime:"20-60 min",complexity:2.6,bggRating:8.2,spineColor:"#2d5a27",boxSize:"sm",mechanics:["Deck Building","Hand Management","Variable Player Powers"],description:"A Feature Film scenario for Final Girl set in a summer camp stalked by a masked killer — homage to Friday the 13th. Requires the Core Box."},
+  {id:"azul_crystal_os",name:"Azul: Crystal Mosaic",bggId:294345,year:2020,designer:"Michael Kiesling",row:8,col:2,otherSide:true,categories:["Abstract","Puzzle"],players:"2-4",playTime:"30-45 min",complexity:1.67,bggRating:7.25,spineColor:"#1e6b8c",boxSize:"sm",mechanics:["Open Drafting","Pattern Building","Tile Placement"],description:"Expansion for Azul adding four double-sided player boards with new tile layouts and fresh strategic opportunities. The crystal-clear plastic overlays provide recesses that keep tiles neatly in place during play. Each board side offers new mid- and end-game scoring challenges. Requires the base Azul game to play."},  {id:"magic_maze_ms_os",name:"Magic Maze: Maximum Security",bggId:230359,year:2017,designer:"Kasper Lapp",row:8,col:2,otherSide:true,categories:["Co-op","Puzzle"],players:"1-8",playTime:"1-24 min",complexity:2.1,bggRating:7.5,spineColor:"#cc5500",boxSize:"sm",mechanics:["Cooperative Game","Real-Time","Communication Limits"],description:"Expansion adding security systems, alarm triggers, and new movement restrictions to the cooperative real-time Magic Maze heist."},
   // ── Row 7, Col 6 ──
-  {id:"case_gomersal_os",name:"The Case of Little Gomersal",bggId:304847,year:2019,designer:"",row:8,col:3,otherSide:true,categories:["Deduction","Co-op"],players:"1-6",playTime:"90-180 min",complexity:2.0,bggRating:7.0,spineColor:"#5c3317",boxSize:"sm",mechanics:["Cooperative Game","Deduction"],description:"A mystery case game where players investigate clues and piece together evidence to solve the case of Little Gomersal."},
+  {id:"case_gomersal_os",name:"The Case of Little Gomersal",bggId:304847,year:2019,designer:"",row:8,col:3,otherSide:true,categories:["Deduction","Co-op"],players:"1-6",playTime:"90-180 min",complexity:2.43,bggRating:8.0,spineColor:"#5c3317",boxSize:"sm",mechanics:["Cooperative Game","Deduction"],description:"A mystery case game where players investigate clues and piece together evidence to solve the case of Little Gomersal."},
   {id:"targi_exp_os",name:"Targi: The Expansion",bggId:202453,year:2016,designer:"Andreas Steiger",row:8,col:3,otherSide:true,categories:["Strategy","Euro"],players:"2-2",playTime:"60 min",complexity:2.5,bggRating:8.0,spineColor:"#c9a66b",boxSize:"sm",mechanics:["Worker Placement","Hand Management","Set Collection"],description:"Expansion for Targi adding water tokens, the Targia pawn, shifting sand cards, and a new tribe deck that deepens the desert trading duel."},
-  {id:"paint_roses_esc_os",name:"Paint the Roses: Escape the Castle",bggId:348997,year:2023,designer:"Daryl Andrews, Dominic Crapuchettes",row:8,col:3,otherSide:true,categories:["Co-op","Deduction"],players:"2-5",playTime:"60 min",complexity:3.0,bggRating:7.5,spineColor:"#8b1a52",boxSize:"sm",mechanics:["Cooperative Game","Deduction","Tile Placement"],description:"Escape the Castle is a collection of 6 modules. Each module features a unique challenge, along with a lovable Wonderland character to help you."},
-  {id:"abyss_leviathan_os",name:"Abyss: Leviathan",bggId:232197,year:2018,designer:"Bruno Cathala, Charles Chevallier",row:8,col:3,otherSide:true,categories:["Card Game","Strategy"],players:"2-5",playTime:"30-60 min",complexity:2.1,bggRating:7.2,spineColor:"#00688b",boxSize:"sm",mechanics:["Card Drafting","Set Collection"],description:"Expansion for Abyss adding the monstrous Leviathan faction that prowls the ocean depths as a new threat players must manage."},
+  {id:"paint_roses_esc_os",name:"Paint the Roses: Escape the Castle",bggId:348997,year:2022,designer:"Daryl Andrews, Dominic Crapuchettes, Ben Goldman, Steph Hodge, Matthew O'Malley",row:8,col:3,otherSide:true,categories:["Co-op","Deduction"],players:"2-5",playTime:"60 min",complexity:3.0,bggRating:7.5,spineColor:"#8b1a52",boxSize:"sm",mechanics:["Cooperative Game","Deduction","Tile Placement"],description:"Escape the Castle is a collection of 6 modules. Each module features a unique challenge, along with a lovable Wonderland character to help you."},
+  {id:"abyss_leviathan_os",name:"Abyss: Leviathan",bggId:232197,year:2018,designer:"Bruno Cathala, Charles Chevallier",row:8,col:3,otherSide:true,categories:["Card Game","Strategy"],players:"2-5",playTime:"30-60 min",complexity:2.41,bggRating:8.0,spineColor:"#00688b",boxSize:"sm",mechanics:["Card Drafting","Set Collection"],description:"Expansion for Abyss adding the monstrous Leviathan faction that prowls the ocean depths as a new threat players must manage."},
   {id:"take_time_os",name:"Take Time",bggId:440540,year:2025,designer:"Alexi Piovesan, Julien Prothière",row:8,col:3,otherSide:true,categories:["Co-op","Card Game","Campaign"],players:"2-4",playTime:"30 min",complexity:1.62,bggRating:7.7,spineColor:"#1e3a5f",boxSize:"sm",mechanics:["Cooperative Game","Communication Limits","Scenario / Mission / Campaign Game"],description:"A cooperative card game about time itself. Players place 12 cards face down around a clock while respecting each test's constraints, communicating only in limited ways. The campaign spans 40 tests across 10 chapters, each introducing new rules and subtleties — from Awakening to Rebirth."},
-  {id:"cozy_stickerville_os",name:"Cozy Stickerville",bggId:456440,year:2026,designer:"Corey Konieczka",row:8,col:3,otherSide:true,categories:["Co-op","Family","Campaign"],players:"1-6",playTime:"30 min",complexity:1.21,bggRating:8.4,spineColor:"#4a7a3b",boxSize:"sm",mechanics:["Cooperative Game","Legacy Game","Narrative Choice / Paragraph","Scenario / Mission / Campaign Game","Solo / Solitaire Game"],description:"A comfy cooperative village-building campaign with over 800 stickers. Across 10 games covering a decade of life in the country, players sticker their way through seasons, develop their town, and build relationships with its inhabitants — every choice permanently shaping the village."},
+  {id:"cozy_stickerville_os",name:"Cozy Stickerville",bggId:456440,year:2026,designer:"Corey Konieczka",row:8,col:3,otherSide:true,categories:["Co-op","Family","Campaign"],players:"1-6",playTime:"30 min",complexity:1.21,bggRating:8.2,spineColor:"#4a7a3b",boxSize:"sm",mechanics:["Cooperative Game","Legacy Game","Narrative Choice / Paragraph","Scenario / Mission / Campaign Game","Solo / Solitaire Game"],description:"A comfy cooperative village-building campaign with over 800 stickers. Across 10 games covering a decade of life in the country, players sticker their way through seasons, develop their town, and build relationships with its inhabitants — every choice permanently shaping the village."},
   {id:"world_order_os",name:"World Order",bggId:403150,year:2026,designer:"Vangelis Bagiartakis, Varnavas Timotheou",row:8,col:3,otherSide:true,categories:["Strategy","Area Control","Thematic"],players:"2-4",playTime:"120-180 min",complexity:3.75,bggRating:8.1,spineColor:"#7a1f1f",boxSize:"lg",mechanics:["Area Majority / Influence","Bag Building","Hand Management","Multi-Use Cards","Variable Player Powers","Solo / Solitaire Game"],description:"A heavy politico-economic area-control game of modern geopolitics. Players take command of one of four global powers — the USA, China, Russia, or the EU — wielding diplomatic, economic, and military might to expand influence across the world. Deck/bag/pool building and multi-use cards drive a tense race for global hegemony."},
   {id:"witness_chameleon_os",name:"Witness: On the Trail of the Chameleon",bggId:422120,year:2024,designer:"Dominique Bodin",row:8,col:3,otherSide:true,categories:["Co-op","Deduction","Party"],players:"4",playTime:"10-25 min",complexity:1.6,bggRating:6.9,spineColor:"#2e4a3a",boxSize:"sm",mechanics:["Communication Limits","Deduction","Storytelling","Cooperative Game"],description:"A cooperative, silent-deduction detective game for four. Each player reads a private clue, then passes information around the table by whispering only to a neighbor — reconstructing the case as the message mutates through transmission. Across a series of cases you piece together the truth from fragments, balancing hilarity and genuine detective work."},
   {id:"underwater_data_os",name:"Underwater Cities: Data Era",bggId:440715,year:2025,designer:"Vladimír Suchý",row:8,col:3,otherSide:true,categories:["Strategy","Euro"],players:"1-4",playTime:"80-150 min",complexity:3.2,bggRating:8.5,spineColor:"#006994",boxSize:"sm",mechanics:["Hand Management","Income","Network Building","Solo / Solitaire Game","Worker Placement"],description:"Second expansion for Underwater Cities, also compatible with the New Discoveries expansion. Introduces a new resource type — data discs — which unlock additional actions alongside new data center buildings and a new city type, information cities. Both new structures provide fresh scoring paths. Also includes upgraded components that can be used with the base game and New Discoveries expansion. Requires Underwater Cities to play."},
