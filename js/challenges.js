@@ -289,7 +289,7 @@ function showChallengesView(playerName) {
 
   container.innerHTML = `
     <div class="lb-header">
-      <div class="lb-title">${playerName}'s Challenges</div>
+      <div class="lb-title">Challenges</div>
       <div class="ch-year">${d.year} season &middot; ${d.yearPlayCount} plays &middot; yearly challenges reset January 1st</div>
     </div>
     <div class="ch-grid">

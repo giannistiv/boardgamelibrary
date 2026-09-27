@@ -2,18 +2,27 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=5.0, user-scalable=yes">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=0.5, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
 <script>
-  // Touch devices open on the Library (zoomed-out shelf view). Set the
-  // viewport synchronously before CSS renders so the mobile-library h1 size
-  // (which is tuned for a 1200-css-pixel viewport) doesn't flash huge under
-  // device-width for a split second. Keep in sync with VP_LIBRARY below.
+  // Touch devices showing the zoomed-out shelf need the 1200-px viewport; set
+  // it before CSS renders so the page doesn't flash at device width. Phones
+  // open the Library as a grid of covers instead (normal viewport), unless
+  // the shelf was picked. Keep in sync with VP_LIBRARY and _libZoomedShelf().
   (function(){
-    if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+    var touch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    var mode = null;
+    try { mode = localStorage.getItem('bgl-libmode'); } catch (_) {}
+    var phone = Math.min(screen.width, screen.height) < 700;
+    var html = document.documentElement;
+    if (touch && (mode ? mode === 'shelf' : !phone)) {
       var vp = document.querySelector('meta[name=viewport]');
-      if (vp) vp.setAttribute('content', 'width=1200, user-scalable=yes');
-      document.documentElement.classList.add('pre-mobile-library');
+      if (vp) vp.setAttribute('content', 'width=1200, user-scalable=yes, viewport-fit=cover');
+      html.classList.add('pre-mobile-library');
+      var land = screen.width > screen.height;
+      html.style.setProperty('--libzoom', String(1200 / (land ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height))));
     }
+    // Phone layout (bottom tab bar) from the first paint; nav.js keeps it current.
+    if (phone || window.innerWidth < 900 || html.classList.contains('pre-mobile-library')) html.classList.add('compact');
     // If there's already a saved player, the post-Firebase boot code will
     // jump to the Profile view. Tag <html> so CSS can hide the library
     // shell on the very first paint and avoid a library→profile flicker.
@@ -25,18 +34,19 @@
   })();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..800&family=Literata:opsz,wght@7..72,500..800&display=swap" rel="stylesheet">
 <title>Board Game Library</title>
 <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#1b1714">
+<meta name="theme-color" content="#14110e">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Board Games">
-<link rel="stylesheet" href="styles.css?v=f03a2c31">
+<link rel="stylesheet" href="styles.css?v=22f56859">
 </head>
 <body>
 <script>
@@ -65,12 +75,21 @@
     // before the JS-side switchTo runs.
     if (document.documentElement.classList.contains('pre-mobile-library')) {
       var vp2 = document.querySelector('meta[name=viewport]');
-      if (vp2) vp2.setAttribute('content', 'width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no');
+      if (vp2) vp2.setAttribute('content', 'width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
     }
   }
 </script>
 
-<h1>Board Game Library</h1>
+<header class="appbar" id="appbar">
+  <div class="appbar-inner">
+    <button type="button" class="appbar-brand" id="appbar-brand" aria-label="Board Game Library: go to the library">
+      <img src="icons/icon.svg" alt="" width="30" height="30"><span>Board Game Library</span>
+    </button>
+    <nav class="appnav" id="appnav" aria-label="Main"></nav>
+    <button type="button" class="appbar-me" id="appbar-me"></button>
+  </div>
+</header>
+<div class="subnav" id="subnav" hidden></div>
 
 <div class="player-bar" id="player-bar">
   <button class="player-bar-btn active" id="btn-library">Library</button>
@@ -84,10 +103,24 @@
 </div>
 
 <div id="library-view">
-<div class="search-wrap">
-  <span class="search-icon">&#128269;</span>
-  <input type="text" class="search-input" id="search-input" placeholder="Search games..." autocomplete="off">
-</div>
+<div class="lib-head">
+  <div class="lib-title-row">
+    <div class="page-head">
+      <h1 class="page-title">The shelf</h1>
+      <div class="page-sub" id="lib-sub"></div>
+    </div>
+    <div class="seg" id="lib-mode" role="tablist" aria-label="Library view">
+      <button type="button" class="seg-btn" data-mode="shelf" role="tab">Shelf</button>
+      <button type="button" class="seg-btn" data-mode="covers" role="tab">Covers</button>
+    </div>
+  </div>
+  <div class="lib-tools">
+    <div class="search-wrap">
+      <span class="search-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg></span>
+      <input type="text" class="search-input" id="search-input" placeholder="Search the shelf" autocomplete="off">
+    </div>
+    <button type="button" class="lib-filter-toggle" id="lib-filter-toggle" aria-expanded="false" aria-controls="filters">Filters</button>
+  </div>
 
 <div class="filters" id="filters">
   <div class="filter-group">
@@ -147,15 +180,17 @@
   <span id="f-count"></span>
 </div>
 
+</div><!-- /lib-head -->
 <div class="shelf-wrapper">
   <div class="shelf" id="shelf"></div>
 </div>
-<div style="text-align:center;margin:1rem 0 0.5rem">
-  <button id="btn-other-side" style="background:#2a2218;color:#4fc3f7;border:2px solid #4fc3f7;padding:0.5rem 1.5rem;border-radius:6px;cursor:pointer;font-size:0.85rem;font-weight:600;letter-spacing:0.03em;transition:all 0.2s" onmouseover="this.style.background='#4fc3f7';this.style.color='#1a1208'" onmouseout="this.style.background='#2a2218';this.style.color='#4fc3f7'">&#x21C4; Show Other Side</button>
+<div class="other-side-row">
+  <button type="button" id="btn-other-side" class="btn-ghost">&#x21C4; Show Other Side</button>
 </div>
+<div class="lib-covers" id="lib-covers"></div>
 </div><!-- /library-view -->
 
-<div class="stats-view" id="stats-view"></div>
+<div class="stats-view" id="stats-view"><div class="boot-loader"><img src="icons/icon-192.png" alt="">Setting up the table&hellip;</div></div>
 <div class="stats-view" id="games-view"></div>
 <div class="stats-view" id="leaderboard-view"></div>
 <div class="stats-view" id="achievements-view"></div>
@@ -204,22 +239,23 @@
 <script src="js/players.js?v=8b11dabd"></script>
 <script src="js/config.js?v=b9a59fb4"></script>
 <script src="js/trackers.js?v=85bb8721"></script>
-<script src="js/shell.js?v=8c962c15"></script>
+<script src="js/shell.js?v=5109c38c"></script>
 <script src="js/records.js?v=82c959ea"></script>
 <script src="js/player-count.js?v=59c2199d"></script>
-<script src="js/achievements.js?v=de3e2dfd"></script>
-<script src="js/challenges.js?v=d1a34d58"></script>
+<script src="js/achievements.js?v=b8b1668c"></script>
+<script src="js/challenges.js?v=c56f303d"></script>
 <script src="js/heatmap.js?v=77e1016e"></script>
 <script src="js/wrapped.js?v=635b8717"></script>
 <script src="js/ilioupoli.js?v=a2f84b0d"></script>
-<script src="js/profile.js?v=b2eb2240"></script>
+<script src="js/profile.js?v=038761f6"></script>
 <script src="js/firebase-data.js?v=8a5c906d"></script>
-<script src="js/explore.js?v=7e630a4a"></script>
+<script src="js/explore.js?v=195d9b3c"></script>
 <script src="js/game-browser.js?v=f3b225d5"></script>
-<script src="js/game-picker.js?v=afad0e08"></script>
+<script src="js/game-picker.js?v=45d74615"></script>
 <script src="js/leaderboard.js?v=3a4e034f"></script>
-<script src="js/board-south.js?v=3cca5425"></script>
-<script src="js/favorites.js?v=83bc406e"></script>
+<script src="js/board-south.js?v=1f5ae876"></script>
+<script src="js/favorites.js?v=45814cd6"></script>
+<script src="js/nav.js?v=1fb170ea"></script>
 <script src="js/boot.js?v=1208b5b3"></script>
 </body>
 </html>

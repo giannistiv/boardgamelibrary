@@ -484,7 +484,7 @@ function buildAchievementsHtml(playerName) {
   </div>` : '';
 
   const allHtml = `<div class="stats-section">
-    <div class="stats-section-title">Achievements (${earnedCount}/${ACHIEVEMENTS.length})</div>
+    <div class="stats-section-title">All achievements <span class="title-count">${earnedCount} of ${ACHIEVEMENTS.length}</span></div>
     <div class="ach-grid">${all.map(card).join('')}</div>
     <div class="ach-credit">Icons by <a href="https://game-icons.net" target="_blank" rel="noopener">game-icons.net</a> (CC BY 3.0)</div>
   </div>`;
@@ -663,7 +663,7 @@ function showAchievementsView(playerName) {
   const { recentHtml, allHtml } = buildAchievementsHtml(playerName);
   container.innerHTML = `
     <div class="lb-header">
-      <div class="lb-title">${playerName}'s Achievements</div>
+      <div class="lb-title">Achievements</div>
     </div>
     ${recentHtml}
     ${allHtml}`;

@@ -215,8 +215,10 @@ function showGamesView() {
 
   container.innerHTML = `
     <div class="stats-header">
-      <div class="stats-player-name">Explore</div>
-      <div class="stats-player-sub">${totalPlays} plays &middot; ${Object.keys(gamePlayCounts).length} games &middot; ${topPlayers.length} players</div>
+      <div class="stats-player-name">${_exploreTab === 'tonight' ? 'Tonight' : 'Explore'}</div>
+      <div class="stats-player-sub">${_exploreTab === 'tonight'
+        ? 'Pick who&rsquo;s playing and how long you have &mdash; here&rsquo;s what to play.'
+        : `${totalPlays.toLocaleString('en')} plays &middot; ${Object.keys(gamePlayCounts).length} games &middot; ${topPlayers.length} players`}</div>
     </div>
     <div class="explore-tabs">
       ${tabBtn('games', 'Games')}${tabBtn('tonight', 'Tonight')}${tabBtn('players', 'Players')}${tabBtn('stats', 'Stats')}

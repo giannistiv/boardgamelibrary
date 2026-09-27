@@ -593,10 +593,13 @@ function showStatsView(playerName, visiting) {
   const container = document.getElementById('stats-view');
   container.innerHTML = `
     ${backBtnHtml}
-    <div class="stats-header">
-      ${isOwnProfile ? `<button class="profile-cog" id="btn-edit-name" title="Profile settings" aria-label="Profile settings">&#9881;</button>` : ''}
-      <div class="stats-player-name">${playerName}</div>
-      <div class="stats-player-sub">${isOwnProfile ? 'Your Profile' : 'Player Profile'}</div>
+    <div class="stats-header profile-hero">
+      <div class="profile-avatar" aria-hidden="true">${_escapeHtml(playerName.charAt(0).toUpperCase())}</div>
+      <div class="profile-id">
+        <div class="stats-player-name">${_escapeHtml(playerName)}</div>
+        <div class="stats-player-sub">${totalPlays.toLocaleString('en')} play${totalPlays !== 1 ? 's' : ''}${recentPlays.length ? ` &middot; since ${recentPlays[recentPlays.length - 1].date.slice(0, 4)}` : ''}${isOwnProfile ? '' : ' &middot; visiting'}</div>
+      </div>
+      ${isOwnProfile ? `<button class="profile-cog" id="btn-edit-name" title="Profile settings" aria-label="Profile settings"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>` : ''}
       ${isOwnProfile ? `<div class="profile-edit-form" id="profile-edit-form">
         <div class="profile-edit-label">Display name</div>
         <input type="text" id="profile-name-input" class="profile-name-input" maxlength="40" autocomplete="off" value="${playerName.replace(/"/g, '&quot;')}">
@@ -612,14 +615,6 @@ function showStatsView(playerName, visiting) {
            </a>`
         : ''}
     </div>
-
-    ${buildWrappedBanner(playerName)}
-
-    ${buildRateLastGameBar(playerName, isOwnProfile, recentPlays)}
-
-    ${favoritesHtml}
-
-    ${h2hHtml}
 
     <div class="stats-grid">
       <div class="stats-card">
@@ -647,6 +642,14 @@ function showStatsView(playerName, visiting) {
         <div class="stats-card-label">Different Players</div>
       </div>
     </div>
+
+    ${buildRateLastGameBar(playerName, isOwnProfile, recentPlays)}
+
+    ${buildWrappedBanner(playerName)}
+
+    ${favoritesHtml}
+
+    ${h2hHtml}
 
     ${buildPlayHeatmapHtml(playerName)}
 
@@ -677,6 +680,8 @@ function showStatsView(playerName, visiting) {
         </div>`;
       }).join('')}
     </div>` : ''}
+
+    ${isOwnProfile && typeof buildInstallCardHtml === 'function' ? buildInstallCardHtml() : ''}
 
     ${_origCanon(playerName) === 'Στιβ' ? `<div class="qr-section">
       <div class="stats-section-title" style="border:none;text-align:center">Share This Library</div>
@@ -786,6 +791,7 @@ function showStatsView(playerName, visiting) {
 
   // "Rate your last game" nudge (own profile only).
   wireRateLastGame(container, playerName, isOwnProfile, recentPlays);
+  if (typeof wireInstallCard === 'function') wireInstallCard(container);
 
   // Play heatmap (year nav + tap-a-day).
   _wireHeatmap(playerName);

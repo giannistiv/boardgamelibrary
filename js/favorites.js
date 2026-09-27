@@ -592,8 +592,10 @@ function openFavPicker(playerName) {
 renderFilters();
 renderShelf();
 
-// On touch devices, set library viewport so full shelf fits on screen
-if (_isTouchDevice()) {
+_applyLibMode();
+
+// Touch screens showing the shelf: zoom out so the whole bookcase fits.
+if (_libZoomedShelf()) {
   document.body.classList.add('mobile-library');
   _setViewport(VP_LIBRARY);
   requestAnimationFrame(_scrollToShelfCenter);

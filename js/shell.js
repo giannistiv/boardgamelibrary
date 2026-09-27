@@ -133,35 +133,44 @@ function applyFilters() {
   const timeActive = maxTime < 240;
 
   const anyActive = searchTerm || selectedCats.length > 0 || coop || selectedPlayers.length > 0 || diff || expansion || !showCampaign || timeActive;
+  const passes = (game) => {
+    if (!anyActive) return true;
+    if (!game) return false;
+    if (searchTerm && !game.name.toLowerCase().includes(searchTerm)) return false;
+    if (selectedCats.length > 0 && !selectedCats.some(c => game.categories.includes(c))) return false;
+    if (coop === 'coop' && !isCoop(game)) return false;
+    if (coop === 'competitive' && isCoop(game)) return false;
+    if (selectedPlayers.length > 0) {
+      const supported = parsePlayers(game.players);
+      if (!selectedPlayers.some(p => supported.includes(p) || (p === 8 && Math.max(...supported) >= 8))) return false;
+    }
+    if (diff && difficultyBucket(game.complexity) !== diff) return false;
+    if (expansion === 'core' && isExpansion(game)) return false;
+    if (expansion === 'expansion' && !isExpansion(game)) return false;
+    if (!showCampaign && isCampaign(game)) return false;
+    if (timeActive && parseMinTime(game.playTime) > maxTime) return false;
+    return true;
+  };
+  const byId = id => GAMES.find(g => g.id === id);
+  const covers = _libMode() === 'covers';
   let matchCount = 0;
 
   document.querySelectorAll('.game-spine').forEach(el => {
-    if (!anyActive) { el.classList.remove('faded'); matchCount++; return; }
-    const game = GAMES.find(g => g.id === el.dataset.gameId);
-    if (!game) { el.classList.add('faded'); return; }
-
-    let pass = true;
-    if (searchTerm && !game.name.toLowerCase().includes(searchTerm)) pass = false;
-    if (pass && selectedCats.length > 0 && !selectedCats.some(c => game.categories.includes(c))) pass = false;
-    if (pass && coop) {
-      if (coop === 'coop' && !isCoop(game)) pass = false;
-      if (coop === 'competitive' && isCoop(game)) pass = false;
-    }
-    if (pass && selectedPlayers.length > 0) {
-      const supported = parsePlayers(game.players);
-      if (!selectedPlayers.some(p => supported.includes(p) || (p === 8 && Math.max(...supported) >= 8))) pass = false;
-    }
-    if (pass && diff && difficultyBucket(game.complexity) !== diff) pass = false;
-    if (pass && expansion) {
-      if (expansion === 'core' && isExpansion(game)) pass = false;
-      if (expansion === 'expansion' && !isExpansion(game)) pass = false;
-    }
-    if (pass && !showCampaign && isCampaign(game)) pass = false;
-    if (pass && timeActive && parseMinTime(game.playTime) > maxTime) pass = false;
-
+    const pass = passes(byId(el.dataset.gameId));
     el.classList.toggle('faded', !pass);
-    if (pass) matchCount++;
+    if (pass && !covers) matchCount++;
   });
+  document.querySelectorAll('.lib-cover').forEach(el => {
+    const pass = passes(byId(el.dataset.gameId));
+    el.hidden = !pass;
+    if (pass && covers) matchCount++;
+  });
+
+  const toggle = document.getElementById('lib-filter-toggle');
+  if (toggle) {
+    const n = selectedCats.length + (coop ? 1 : 0) + selectedPlayers.length + (diff ? 1 : 0) + (expansion ? 1 : 0) + (showCampaign ? 0 : 1) + (timeActive ? 1 : 0);
+    toggle.innerHTML = `Filters${n ? ` <span class="gb-badge">${n}</span>` : ''}`;
+  }
 
   // Show count badge
   const countEl = document.getElementById('f-count');
@@ -241,16 +250,73 @@ document.getElementById('btn-other-side').addEventListener('click', () => {
   _scrollToShelfCenter();
 });
 
+// ── Covers view: every game on the shelf (both sides) as a grid of boxes ──
+function renderCovers() {
+  const grid = document.getElementById('lib-covers');
+  if (!grid) return;
+  const games = GAMES.slice().sort((a, b) => a.name.localeCompare(b.name));
+  grid.innerHTML = games.map(g => `<button type="button" class="lib-cover" data-game-id="${_escapeHtml(g.id)}" title="${_escapeHtml(g.name)}">
+      <span class="lib-cover-art" style="--spine:${_escapeHtml(g.spineColor || '#555')}"><img src="images/${g.bggId}.jpg" alt="" loading="lazy" onerror="__imgFallback(this, ${g.bggId})"></span>
+      <span class="lib-cover-name">${_escapeHtml(g.name)}</span>
+    </button>`).join('');
+  grid.querySelectorAll('.lib-cover').forEach(el => {
+    el.addEventListener('click', () => { const g = GAMES.find(x => x.id === el.dataset.gameId); if (g) openModal(g); });
+  });
+}
+
+function _applyLibMode() {
+  const mode = _libMode();
+  const view = document.getElementById('library-view');
+  view.dataset.mode = mode;
+  document.querySelectorAll('#lib-mode .seg-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.mode === mode);
+    b.setAttribute('aria-selected', String(b.dataset.mode === mode));
+  });
+  if (mode === 'covers' && !document.getElementById('lib-covers').childElementCount) renderCovers();
+  const sub = document.getElementById('lib-sub');
+  if (sub) {
+    sub.textContent = `${GAMES.length} games · front and back`;
+  }
+  applyFilters();
+}
+
+document.getElementById('lib-mode').addEventListener('click', (e) => {
+  const b = e.target.closest('.seg-btn');
+  if (!b || b.dataset.mode === _libMode()) return;
+  try { localStorage.setItem('bgl-libmode', b.dataset.mode); } catch (_) {}
+  _applyLibMode();
+  switchToLibrary();
+});
+
+document.getElementById('lib-filter-toggle').addEventListener('click', (e) => {
+  const view = document.getElementById('library-view');
+  const open = view.classList.toggle('filters-open');
+  e.currentTarget.setAttribute('aria-expanded', String(open));
+});
+
 // ── Modal ──
-const VP_LIBRARY = 'width=1200, user-scalable=yes';
-const VP_LOCKED  = 'width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no';
+const VP_LIBRARY = 'width=1200, user-scalable=yes, viewport-fit=cover';
+const VP_LOCKED  = 'width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover';
 const _isTouchDevice = () => 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+// The Library shows either the shelf (cubbies of spines, as on the real
+// bookcase) or a grid of covers. Phones default to covers — the shelf is
+// unreadable at phone width; on touch screens it needs the zoomed-out 1200-px
+// viewport. Bigger screens default to the shelf. A pick is remembered.
+function _libMode() {
+  let m = null;
+  try { m = localStorage.getItem('bgl-libmode'); } catch (_) {}
+  if (m === 'shelf' || m === 'covers') return m;
+  return Math.min(screen.width, screen.height) < 700 ? 'covers' : 'shelf';
+}
+const _libZoomedShelf = () => _isTouchDevice() && _libMode() === 'shelf';
 let _modalOpenedFromStats = false;
 let _modalOpenedFromGames = false;
 let _modalOpenedFromLeaderboard = false;
 let _modalOpenedFromBoardSouth = false;
 let _modalOpenedFromIlioupoli = false;
 let _modalOpenedFromChallenges = false;
+let _modalTab = 'overview';   // the game page's last-used tab, kept across games
 
 function _setViewport(content) {
   const vp = document.querySelector('meta[name=viewport]');
@@ -268,10 +334,13 @@ function _restoreAfterModal() {
     document.body.style.minWidth = 'auto';
     _setViewport(VP_LOCKED);
     window.scrollTo(0, 0);
-  } else {
+  } else if (_libZoomedShelf()) {
     document.body.style.minWidth = '';
     _setViewport(VP_LIBRARY);
     requestAnimationFrame(_scrollToShelfCenter);
+  } else {
+    document.body.style.minWidth = 'auto';
+    _setViewport(VP_LOCKED);
   }
 }
 
@@ -358,32 +427,14 @@ function openModal(game) {
     coverHtml = `<div class="modal-cover"><div class="modal-cover-fallback" style="background:${fallbackBg}">${game.name}</div></div>`;
   }
 
-  // Rating section with dynamic color
-  let ratingHtml = '';
-  if (game.bggRating) {
-    const pct = ((game.bggRating / 10) * 100).toFixed(0);
-    const rColor = ratingColor(game.bggRating);
-    ratingHtml = `
-      <div class="modal-rating-row">
-        <span class="rating-badge" style="color:${rColor}">${game.bggRating}</span>
-        <div class="rating-bar-wrap"><div class="rating-bar" style="width:${pct}%;background:${rColor}"></div></div>
-        <span class="rating-label">BGG Rating</span>
-      </div>`;
-  }
-  // Community rating bar (only if at least one person has rated)
-  if (game.bggId > 0) {
-    const community = getCommunityRating(game.bggId);
-    if (community) {
-      const cPct = ((community.avg / 10) * 100).toFixed(0);
-      const cColor = ratingColor(community.avg);
-      ratingHtml += `
-      <div class="modal-rating-row">
-        <span class="rating-badge" style="color:${cColor}">${community.avg}</span>
-        <div class="rating-bar-wrap"><div class="rating-bar" style="width:${cPct}%;background:${cColor}"></div></div>
-        <span class="rating-label">User Rating <span style="opacity:0.5">(${community.count})</span></span>
-      </div>`;
-    }
-  }
+  // Rating tiles: BGG, the group's average, and how often it's been played.
+  const community = game.bggId > 0 ? getCommunityRating(game.bggId) : null;
+  const bggVal = Number(game.bggRating) || 0;
+  const ratingTiles = [
+    bggVal ? `<div class="gm-tile"><div class="gm-tile-val" style="color:${ratingColor(bggVal)}">${bggVal.toFixed(1)}</div><div class="gm-tile-label">BGG rating</div></div>` : '',
+    community ? `<div class="gm-tile"><div class="gm-tile-val" style="color:${ratingColor(community.avg)}">&#9733; ${community.avg}</div><div class="gm-tile-label">Group &middot; ${community.count}</div></div>` : '',
+    `<div class="gm-tile"><div class="gm-tile-val">${(PLAY_HISTORY[game.bggId] || []).length}</div><div class="gm-tile-label">Plays</div></div>`,
+  ].join('');
 
   // Mechanics
   let mechanicsHtml = '';
@@ -483,39 +534,54 @@ function openModal(game) {
   const eternalDecksHtml = (Number(game.bggId) === ED_BGGID) ? buildEternalDecksHtml(plays || []) : '';
   const aeonsEndHtml = buildAeonsEndHtml(game.bggId);
 
+  const fact = (icon, text) => `<span class="gm-fact"><svg viewBox="0 0 24 24" aria-hidden="true">${icon}</svg>${text}</span>`;
+  const facts = [
+    game.players ? fact('<circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0M16 11.5a3 3 0 1 0-1-5.8M17.5 20a5.5 5.5 0 0 0-2.3-4.5"/>', `${_escapeHtml(game.players)} players`) : '',
+    game.playTime ? fact('<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>', _escapeHtml(game.playTime)) : '',
+    game.complexity > 0 ? fact('<path d="M12 4v16M5 20h14M6 8h12M6 8l-3 6a3 3 0 0 0 6 0zM18 8l-3 6a3 3 0 0 0 6 0z"/>', `Weight ${Number(game.complexity).toFixed(1)}`) : '',
+  ].join('');
+  const playsPanel = [marvelUnitedHtml, marvelChampionsHtml, eternalDecksHtml, aeonsEndHtml, playHistoryHtml].join('');
+  const tabs = [['overview', 'Overview'], ['plays', `Plays${plays && plays.length ? ` <span class="gm-tab-n">${plays.length}</span>` : ''}`]]
+    .concat(game.bggId > 0 ? [['notes', 'Notes']] : []);
+  const tab = tabs.some(t => t[0] === _modalTab) ? _modalTab : 'overview';
+
   content.innerHTML = `
     ${coverHtml}
     <div class="modal-body">
       <div class="modal-header">
-        <span class="modal-title">${game.name}</span>
-        ${game.year ? `<span class="modal-year">(${game.year})</span>` : ''}
+        <span class="modal-title">${_escapeHtml(game.name)}</span>
+        ${game.year ? `<span class="modal-year">${game.year}</span>` : ''}
       </div>
-      ${game.designer ? `<div class="modal-designer">Designed by ${game.designer}</div>` : ''}
-      <div class="modal-stats">
-        <span class="modal-stat"><span class="icon">&#128101;</span> ${game.players} players</span>
-        <span class="modal-stat"><span class="icon">&#9201;</span> ${game.playTime}</span>
-        ${game.complexity > 0 ? `<span class="modal-stat"><span class="icon">&#9878;&#65039;</span> ${game.complexity}/5 weight</span>` : ''}
-      </div>
-      ${buildPlayerCountHtml(game, plays)}
-      ${ratingHtml}
-      <div class="modal-categories">
-        ${game.categories.map(c => `<span class="modal-cat">${c}</span>`).join('')}
-      </div>
-      ${mechanicsHtml}
-      <div class="modal-desc">${game.description}</div>
-      ${game.bggId > 0
-        ? `<a class="modal-bgg-link" href="https://boardgamegeek.com/boardgame/${game.bggId}" target="_blank" rel="noopener">View on BoardGameGeek &#8594;</a>`
-        : `<a class="modal-bgg-link" href="https://boardgamegeek.com/geeksearch.php?action=search&objecttype=boardgame&q=${encodeURIComponent(game.name)}" target="_blank" rel="noopener">Search on BoardGameGeek &#8594;</a>`
-      }
+      ${game.designer ? `<div class="modal-designer">by ${_escapeHtml(game.designer)}</div>` : ''}
+      <div class="gm-facts">${facts}</div>
+      <div class="gm-tiles">${ratingTiles}</div>
       ${game.bggId > 0 ? buildStarRatingHtml(game.bggId) : ''}
-      ${marvelUnitedHtml}
-      ${marvelChampionsHtml}
-      ${eternalDecksHtml}
-      ${aeonsEndHtml}
-      ${playHistoryHtml}
-      ${game.bggId > 0 ? buildNotesHtml(game.bggId) : ''}
+      <div class="gm-tabs" role="tablist">
+        ${tabs.map(([k, label]) => `<button type="button" role="tab" class="gm-tab${k === tab ? ' active' : ''}" aria-selected="${k === tab}" data-tab="${k}">${label}</button>`).join('')}
+      </div>
+      <div class="gm-panel" data-panel="overview"${tab === 'overview' ? '' : ' hidden'}>
+        ${buildPlayerCountHtml(game, plays)}
+        ${game.description ? `<div class="modal-desc">${game.description}</div>` : ''}
+        ${game.categories.length ? `<div class="modal-categories">${game.categories.map(c => `<span class="modal-cat">${c}</span>`).join('')}</div>` : ''}
+        ${mechanicsHtml}
+        ${game.bggId > 0
+          ? `<a class="modal-bgg-link" href="https://boardgamegeek.com/boardgame/${game.bggId}" target="_blank" rel="noopener">View on BoardGameGeek &#8599;</a>`
+          : `<a class="modal-bgg-link" href="https://boardgamegeek.com/geeksearch.php?action=search&objecttype=boardgame&q=${encodeURIComponent(game.name)}" target="_blank" rel="noopener">Search on BoardGameGeek &#8599;</a>`
+        }
+      </div>
+      <div class="gm-panel" data-panel="plays"${tab === 'plays' ? '' : ' hidden'}>
+        ${playsPanel || '<div class="gm-empty">No plays logged yet. They show up here after the next BGStats import.</div>'}
+      </div>
+      ${game.bggId > 0 ? `<div class="gm-panel" data-panel="notes"${tab === 'notes' ? '' : ' hidden'}>${buildNotesHtml(game.bggId)}</div>` : ''}
     </div>
   `;
+  content.querySelector('.gm-tabs').addEventListener('click', (e) => {
+    const t = e.target.closest('.gm-tab');
+    if (!t) return;
+    _modalTab = t.dataset.tab;
+    content.querySelectorAll('.gm-tab').forEach(x => { x.classList.toggle('active', x === t); x.setAttribute('aria-selected', String(x === t)); });
+    content.querySelectorAll('.gm-panel').forEach(pn => { pn.hidden = pn.dataset.panel !== _modalTab; });
+  });
   overlay.classList.add('open');
   document.body.classList.add('modal-open');
   content.scrollTop = 0;
@@ -600,9 +666,10 @@ function renderPickerList(filter) {
 
   list.innerHTML = filtered.map(p => {
     const wr = p.plays > 0 ? Math.round(p.wins / p.plays * 100) : 0;
-    return `<div class="picker-player" data-name="${p.name.replace(/"/g, '&quot;')}">
-      <span class="picker-player-name">${p.name}</span>
-      <span class="picker-player-meta">${p.plays} plays &middot; ${p.games} games &middot; ${wr}% WR</span>
+    return `<div class="picker-player" data-name="${_escapeHtml(p.name)}">
+      <span class="picker-avatar" aria-hidden="true">${_escapeHtml(p.name.charAt(0).toUpperCase())}</span>
+      <span class="picker-player-name">${_escapeHtml(p.name)}</span>
+      <span class="picker-player-meta">${p.plays} plays &middot; ${wr}% wins</span>
     </div>`;
   }).join('');
 
@@ -640,7 +707,7 @@ document.getElementById('picker-skip').addEventListener('click', () => {
 document.getElementById('picker-overlay').addEventListener('click', e => {
   if (e.target === e.currentTarget) {
     e.currentTarget.classList.remove('open');
-    if (_isTouchDevice()) {
+    if (_libZoomedShelf() && document.getElementById('library-view').style.display !== 'none') {
       document.body.style.minWidth = '';
       _setViewport(VP_LIBRARY);
     }
@@ -671,11 +738,16 @@ function switchToLibrary() {
   _deactivateAllTabs();
   document.getElementById('library-view').style.display = '';
   document.getElementById('btn-library').classList.add('active');
-  if (_isTouchDevice()) {
+  if (_libZoomedShelf()) {
     document.body.style.minWidth = '';
     document.body.classList.add('mobile-library');
     _setViewport(VP_LIBRARY);
     requestAnimationFrame(_scrollToShelfCenter);
+  } else if (_isTouchDevice()) {
+    document.body.style.minWidth = 'auto';
+    document.body.classList.remove('mobile-library');
+    _setViewport(VP_LOCKED);
+    window.scrollTo(0, 0);
   }
 }
 

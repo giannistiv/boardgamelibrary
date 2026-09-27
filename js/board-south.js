@@ -210,8 +210,8 @@ function _renderBoardSouthVoteView(container) {
   const libTabsHtml = `
     <div class="bsv-lib-tabs">
       ${BSV_LIBRARIES.map(L => `
-        <button class="bsv-lib-tab${L === lib ? ' active' : ''}" data-bsv-lib="${L}">
-          ${BSV_LIB_LABEL[L]}
+        <button class="bsv-lib-tab${L === lib ? ' active' : ''}" data-bsv-lib="${L}" title="${BSV_LIB_LABEL[L]}">
+          ${BSV_LIB_LABEL[L].replace(/\s*library$/i, '').replace(/'s$/, '')}
         </button>`).join('')}
     </div>`;
 

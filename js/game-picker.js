@@ -184,7 +184,6 @@ function buildTonightTabHtml() {
   _gpLoadGroup();
   return `
       <div class="stats-section gp">
-        <div class="stats-section-title">What should we play tonight?</div>
         <div class="gp-panel" id="gp-panel"></div>
         <div id="gp-results"></div>
       </div>`;
