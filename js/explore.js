@@ -207,6 +207,7 @@ function showGamesView() {
 
   const tabContent = _exploreTab === 'players' ? buildPlayersTab()
     : _exploreTab === 'stats' ? buildStatsTab()
+    : _exploreTab === 'tonight' ? buildTonightTabHtml()
     : buildGamesTab();
 
   const tabBtn = (key, label) =>
@@ -218,7 +219,7 @@ function showGamesView() {
       <div class="stats-player-sub">${totalPlays} plays &middot; ${Object.keys(gamePlayCounts).length} games &middot; ${topPlayers.length} players</div>
     </div>
     <div class="explore-tabs">
-      ${tabBtn('games', 'Games')}${tabBtn('players', 'Players')}${tabBtn('stats', 'Stats')}
+      ${tabBtn('games', 'Games')}${tabBtn('tonight', 'Tonight')}${tabBtn('players', 'Players')}${tabBtn('stats', 'Stats')}
     </div>
     ${tabContent}
   `;
@@ -242,6 +243,7 @@ function showGamesView() {
 
   // Games sub-tab: search + filters across every catalogue
   if (_exploreTab === 'games') wireGameBrowser(container);
+  if (_exploreTab === 'tonight') wireTonightTab(container);
 
   // Players sub-tab: player search
   const playerSearchEl = document.getElementById('insights-player-search');

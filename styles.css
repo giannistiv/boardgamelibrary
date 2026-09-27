@@ -1434,6 +1434,45 @@
   }
   .gb-more:hover{background:rgba(255,255,255,0.08)}
   .gb-empty{padding:0.8rem 0.2rem}
+  /* ── Explore → Tonight (game-night picker) ── */
+  .gp-panel{
+    padding:0.45rem 0.75rem;margin-bottom:0.8rem;border-radius:12px;
+    background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.07);
+  }
+  .gp-add{display:inline-flex}
+  .gp-search{
+    width:8.5rem;padding:0.28rem 0.6rem;border-radius:999px;font-family:inherit;font-size:0.76rem;
+    background:rgba(255,255,255,0.05);border:1px dashed rgba(255,255,255,0.2);color:var(--text);outline:none;
+  }
+  .gp-search:focus{border-color:var(--accent);border-style:solid}
+  .gp-stepper{display:inline-flex;align-items:center;gap:0.4rem}
+  .gp-guests{min-width:1.2rem;text-align:center;font-weight:700;font-size:0.85rem}
+  .gp-count{margin-left:0.6rem;align-self:center;font-size:0.76rem;font-weight:700;color:var(--accent)}
+  .gp-auto{
+    background:none;border:none;color:rgba(240,230,211,0.5);font-family:inherit;font-size:0.7rem;
+    text-decoration:underline;cursor:pointer;padding:0.28rem 0.2rem;
+  }
+  .gp-auto:hover{color:var(--accent)}
+  .gp-roll{
+    padding:0.38rem 0.85rem;border-radius:999px;border:1px solid rgba(226,176,74,0.55);
+    background:rgba(226,176,74,0.16);color:#f0c668;font-family:inherit;font-size:0.8rem;font-weight:700;cursor:pointer;
+  }
+  .gp-roll:hover:not(:disabled){background:rgba(226,176,74,0.3)}
+  .gp-roll:disabled{opacity:0.6;cursor:default}
+  .gp-row{align-items:flex-start;transition:background 0.12s,box-shadow 0.12s}
+  .gp-rank{flex:0 0 1.2rem;align-self:center;text-align:center;font-size:0.8rem;font-weight:800;opacity:0.4}
+  .gp-row .stats-game-img{align-self:center}
+  .gp-row.gp-spin{background:rgba(226,176,74,0.16)}
+  .gp-row.gp-picked{background:rgba(226,176,74,0.2);box-shadow:inset 0 0 0 2px var(--accent)}
+  .gp-why{display:flex;flex-wrap:wrap;gap:0.25rem;margin-top:0.3rem}
+  .gp-tag{
+    font-size:0.64rem;font-weight:600;padding:0.08rem 0.45rem;border-radius:999px;
+    background:rgba(255,255,255,0.06);color:rgba(240,230,211,0.75);
+  }
+  .gp-tag.good{background:rgba(34,197,94,0.16);color:#86efac}
+  .gp-tag.ok{background:rgba(34,197,94,0.08);color:#bbf7d0}
+  .gp-tag.new{background:rgba(79,195,247,0.13);color:#7dd3fc}
+  .gp-tag.warn{background:rgba(248,113,113,0.13);color:#fca5a5}
   @media (max-width:480px){
     .gb-row{flex-direction:column;gap:0.3rem}
     .gb-label{flex:none;padding-top:0}
