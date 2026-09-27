@@ -138,8 +138,18 @@ async function deleteNote(bggId, noteId) {
 // Merged into the in-memory PLAY_HISTORY on startup so new browsers see them.
 let importedPlaysCache = {}; // uuid -> play entry (includes bggId)
 
+// What a play says, ignoring bookkeeping (uuid, exact timestamp) and player
+// order: two plays with the same signature are the same record.
+function _playSignature(e) {
+  const sc = (e.sc || []).map(s => [s.n, String(s.s == null ? '' : s.s), !!s.w, s.r || '']).sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
+  return JSON.stringify([e.date, sc, e.b || '', e.l || '', e.d || 0]);
+}
+
+// Merges one imported play into PLAY_HISTORY and says what that did:
+// 'new' (not there before), 'same' (already there, unchanged) or 'changed'
+// (replaced an older version of it).
 function _mergePlayIntoHistory(uuid, p) {
-  if (!p || !p.bggId || !p.date || !Array.isArray(p.sc)) return;
+  if (!p || !p.bggId || !p.date || !Array.isArray(p.sc)) return null;
   const bggId = p.bggId;
   if (!PLAY_HISTORY[bggId]) PLAY_HISTORY[bggId] = [];
   for (const s of p.sc) {
@@ -165,10 +175,13 @@ function _mergePlayIntoHistory(uuid, p) {
 
   // 1. Prefer matching the existing entry by uuid across all bggIds
   let placed = false;
+  let status = 'new';
   for (const existingBggId in PLAY_HISTORY) {
     const arr = PLAY_HISTORY[existingBggId];
     const uuidIdx = arr.findIndex(e => e._uuid === uuid);
     if (uuidIdx !== -1) {
+      status = (existingBggId == bggId && _playSignature(arr[uuidIdx]) === _playSignature(entry)) ? 'same' : 'changed';
+      if (arr[uuidIdx]._paired) entry._paired = true;
       if (existingBggId == bggId) {
         arr[uuidIdx] = entry;
       } else {
@@ -182,25 +195,39 @@ function _mergePlayIntoHistory(uuid, p) {
   }
 
   // 2. Fall back to hardcoded dedup: same date + same player count + ≥ N-1
-  // players overlap (set-based, order-independent) → replace.
+  // players overlap (set-based, order-independent) → replace. Games played
+  // several times in a day have several candidates: take the identical one
+  // if there is one, so each play pairs with its own twin.
   if (!placed) {
-    const idx = PLAY_HISTORY[bggId].findIndex(isHardcodedDup);
+    const sig = _playSignature(entry);
+    const arr = PLAY_HISTORY[bggId];
+    let idx = arr.findIndex(e => isHardcodedDup(e) && _playSignature(e) === sig);
+    if (idx === -1) idx = arr.findIndex(isHardcodedDup);
     if (idx !== -1) {
+      status = _playSignature(PLAY_HISTORY[bggId][idx]) === _playSignature(entry) ? 'same' : 'changed';
+      entry._paired = true;   // this play has taken the place of its built-in copy
       PLAY_HISTORY[bggId][idx] = entry;
     } else {
       PLAY_HISTORY[bggId].push(entry);
       PLAY_HISTORY[bggId].sort((a,b) => b.date.localeCompare(a.date));
     }
-    return;
+    return status;
   }
 
-  // 3. After uuid match placed the entry, also clean up any leftover
-  // hardcoded duplicates of the same play (e.g. old PLAY_HISTORY entry
-  // that was imported separately before — now that it has a uuid, its
-  // hardcoded twin should go away).
-  PLAY_HISTORY[bggId] = PLAY_HISTORY[bggId].filter(e =>
-    e._uuid === uuid || !isHardcodedDup(e)
-  );
+  // 3. After uuid match placed the entry, also clean up a leftover
+  // hardcoded twin of the same play (e.g. old PLAY_HISTORY entry that was
+  // imported separately before — now that it has a uuid, its hardcoded twin
+  // should go away). A play replaces at most one built-in copy, ever: other
+  // plays of the same game that day can look identical (solo losses) and are
+  // real.
+  if (!entry._paired) {
+    const arr = PLAY_HISTORY[bggId];
+    const sig = _playSignature(entry);
+    let idx = arr.findIndex(e => isHardcodedDup(e) && _playSignature(e) === sig);
+    if (idx === -1) idx = arr.findIndex(isHardcodedDup);
+    if (idx !== -1) { arr.splice(idx, 1); entry._paired = true; }
+  }
+  return status;
 }
 
 async function loadImportedPlays() {

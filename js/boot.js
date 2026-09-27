@@ -217,21 +217,6 @@ window.initImporter = function(){
     if(ri) ri.innerHTML = '';
   }
 
-  async function fetchDescription(bggId){
-    try{
-      const res = await fetch(`https://boardgamegeek.com/xmlapi2/thing?id=${bggId}`);
-      const txt = await res.text();
-      const parser = new DOMParser();
-      const xml = parser.parseFromString(txt, 'text/xml');
-      const desc = xml.querySelector('description');
-      if(!desc) return '';
-      // decode HTML entities
-      const ta = document.createElement('textarea');
-      ta.innerHTML = desc.textContent;
-      return ta.value.replace(/&#10;/g,'').trim().slice(0,600) + '…';
-    } catch(e){ return ''; }
-  }
-
   async function processImport(file){
     if(!file || !(/\.(json|bgsplay)$/i).test(file.name)){
       showResult('error','Invalid file',['Please select a .json or .bgsplay file exported from BGStats.']);
@@ -282,13 +267,15 @@ window.initImporter = function(){
     });
 
     // ── 2. Merge games → EXTRA_GAMES + PLAY_HISTORY images ──
-    const existingBggIds = new Set(
-      (window.GAMES || []).map(g => g.bggId).concat(
-       Object.values(EXTRA_GAMES).map(g => g.bggId))
-    );
+    // Known = in any catalogue (the shelf, imported games, the friends'
+    // libraries); only games none of them has become new imported games.
+    // A full BGStats backup lists every game in its library, played or not;
+    // only games this file has plays of are worth adding.
+    const existingBggIds = new Set();
+    data.games.forEach(g => { if (findGameByBggId(g.bggId)) existingBggIds.add(g.bggId); });
+    const playedGameIds = new Set(data.plays.map(p => p.gameRefId));
 
     let newGames = 0;
-    const descFetches = [];
     const gamePersists = [];
 
     data.games.forEach(g => {
@@ -302,7 +289,7 @@ window.initImporter = function(){
           gamePersists.push(persistGameImage(g.bggId, incomingUrl));
         }
       }
-      if(existingBggIds.has(g.bggId)) return;
+      if(existingBggIds.has(g.bggId) || !playedGameIds.has(g.id)) return;
       existingBggIds.add(g.bggId);
       newGames++;
 
@@ -326,18 +313,16 @@ window.initImporter = function(){
         imported: true,
       };
 
-      // Queue description fetch
-      descFetches.push(
-        fetchDescription(g.bggId).then(desc => { entry.description = desc; })
-      );
-
       EXTRA_GAMES[entry.bggId] = entry;
       gamePersists.push(persistImportedGame(entry));
       if (entry.urlImage) gamePersists.push(persistGameImage(entry.bggId, entry.urlImage));
     });
 
     // ── 3. Merge plays → PLAY_HISTORY ──
-    let newPlays = 0, updatedPlays = 0, skipped = 0;
+    // Only new or changed plays are saved. A play whose saved copy was edited
+    // in BGStats more recently than the one in this file is left alone, so
+    // importing an old export can't undo newer edits.
+    let newPlays = 0, updatedPlays = 0, unchanged = 0, olderSkipped = 0;
     const playPersists = [];
 
     data.plays.forEach(play => {
@@ -370,30 +355,33 @@ window.initImporter = function(){
       const locObj = play.locationRefId ? importedLocationsById[play.locationRefId] : null;
       const locName = locObj && locObj.name ? locObj.name : '';
       if (locName) persistedEntry.l = LOCATION_MAP[locName] || locName;
+      if (play.modificationDate) persistedEntry.m = play.modificationDate;
 
-      const alreadyImported = !!importedPlaysCache[play.uuid];
-      _mergePlayIntoHistory(play.uuid, persistedEntry);
+      const saved = importedPlaysCache[play.uuid];
+      if (saved && saved.m && persistedEntry.m && saved.m > persistedEntry.m) { olderSkipped++; return; }
+      const status = _mergePlayIntoHistory(play.uuid, persistedEntry);
+      if (status === 'same') { unchanged++; return; }
       playPersists.push(persistImportedPlay(play.uuid, persistedEntry));
-      if(alreadyImported) updatedPlays++; else newPlays++;
+      if (status === 'new') newPlays++; else updatedPlays++;
     });
 
-    await Promise.all(descFetches);
     await Promise.all(gamePersists);
     await Promise.all(playPersists);
 
     // Build the result message.
     const nothingNew = (newPlays === 0 && updatedPlays === 0 && newGames === 0 && newPlayers === 0);
+    const plural = (n, w) => `${n} ${w}${n !== 1 ? 's' : ''}`;
     const resType  = nothingNew ? 'info' : 'success';
     const resTitle = nothingNew ? 'Nothing new' : 'Import successful ✓';
-    const resLines = nothingNew
-      ? ['All entries in this file already exist.', skipped ? `${skipped} duplicate(s) skipped.` : '']
-      : [
-          newPlays     ? `+${newPlays} new play${newPlays!==1?'s':''}` : '',
-          updatedPlays ? `✏️ ${updatedPlays} play${updatedPlays!==1?'s':''} updated` : '',
-          newGames     ? `+${newGames} new game${newGames!==1?'s':''}` : '',
-          newPlayers   ? `+${newPlayers} new player${newPlayers!==1?'s':''}` : '',
-          skipped      ? `${skipped} duplicate${skipped!==1?'s':''} skipped` : '',
-        ];
+    const resLines = [
+      newPlays     ? `+${plural(newPlays, 'new play')}` : '',
+      updatedPlays ? `✏️ ${plural(updatedPlays, 'play')} updated` : '',
+      newGames     ? `+${plural(newGames, 'new game')}` : '',
+      newPlayers   ? `+${plural(newPlayers, 'new player')}` : '',
+      unchanged    ? `${plural(unchanged, 'play')} already up to date` : '',
+      olderSkipped ? `${plural(olderSkipped, 'play')} skipped: the app has a newer version` : '',
+      nothingNew && !unchanged && !olderSkipped ? 'This file has no plays.' : '',
+    ];
 
     // Refresh every open view so updated plays — including changed locations —
     // appear immediately, instead of only after a reload/navigation. The
