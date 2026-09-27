@@ -418,3 +418,7 @@ window.initImporter = function(){
   });
 };
 
+// Installable app + offline support (sw.js).
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+}
