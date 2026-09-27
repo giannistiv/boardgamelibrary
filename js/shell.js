@@ -496,6 +496,7 @@ function openModal(game) {
         <span class="modal-stat"><span class="icon">&#9201;</span> ${game.playTime}</span>
         ${game.complexity > 0 ? `<span class="modal-stat"><span class="icon">&#9878;&#65039;</span> ${game.complexity}/5 weight</span>` : ''}
       </div>
+      ${buildPlayerCountHtml(game, plays)}
       ${ratingHtml}
       <div class="modal-categories">
         ${game.categories.map(c => `<span class="modal-cat">${c}</span>`).join('')}

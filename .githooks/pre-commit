@@ -9,6 +9,10 @@ python3 tools/sync-collections.py --auto || true
 #    app) that doesn't have one yet, and add it to this commit. Never blocks.
 python3 tools/fetch-covers.py --auto || true
 
-# 3) Keep index.html's ?v= asset stamps in sync with what's being committed.
+# 3) Fetch BGG's player-count votes and expansion flag for any game that
+#    doesn't have them yet (data/bgg-extras.js). Never blocks.
+python3 tools/fetch-bgg-extras.py --auto || true
+
+# 4) Keep index.html's ?v= asset stamps in sync with what's being committed.
 python3 tools/stamp-assets.py || exit 1
 git add index.html
