@@ -174,6 +174,21 @@ function _mergePlayIntoHistory(uuid, p) {
     return overlap >= Math.max(1, e.sc.length - 1);
   };
 
+  // The built-in copy of this play: the one entered in BGStats at the same
+  // moment on the same day (the same play, even if it was edited since — a
+  // play copied in BGStats keeps its entry time, hence the date check); else
+  // the identical one; else the one with the same players and scores (the
+  // file may add a location); else any close one. Games played several times
+  // in a day have several candidates, so each play pairs with its own twin.
+  const scoresOf = (e) => JSON.stringify([e.date, (e.sc || []).map(s => [s.n, String(s.s == null ? '' : s.s), !!s.w, s.r || '']).sort()]);
+  const findTwin = (arr) => {
+    let i = entry.e ? arr.findIndex(e => !e._uuid && e.e === entry.e && e.date === entry.date) : -1;
+    if (i === -1) i = arr.findIndex(e => isHardcodedDup(e) && _playSignature(e) === _playSignature(entry));
+    if (i === -1) i = arr.findIndex(e => isHardcodedDup(e) && scoresOf(e) === scoresOf(entry));
+    if (i === -1) i = arr.findIndex(isHardcodedDup);
+    return i;
+  };
+
   // 1. Prefer matching the existing entry by uuid across all bggIds
   let placed = false;
   let status = 'new';
@@ -195,15 +210,10 @@ function _mergePlayIntoHistory(uuid, p) {
     }
   }
 
-  // 2. Fall back to hardcoded dedup: same date + same player count + ≥ N-1
-  // players overlap (set-based, order-independent) → replace. Games played
-  // several times in a day have several candidates: take the identical one
-  // if there is one, so each play pairs with its own twin.
+  // 2. Fall back to the built-in copy (see findTwin) → replace.
   if (!placed) {
-    const sig = _playSignature(entry);
     const arr = PLAY_HISTORY[bggId];
-    let idx = arr.findIndex(e => isHardcodedDup(e) && _playSignature(e) === sig);
-    if (idx === -1) idx = arr.findIndex(isHardcodedDup);
+    const idx = findTwin(arr);
     if (idx !== -1) {
       status = _playSignature(PLAY_HISTORY[bggId][idx]) === _playSignature(entry) ? 'same' : 'changed';
       entry._paired = true;   // this play has taken the place of its built-in copy
@@ -223,9 +233,7 @@ function _mergePlayIntoHistory(uuid, p) {
   // real.
   if (!entry._paired) {
     const arr = PLAY_HISTORY[bggId];
-    const sig = _playSignature(entry);
-    let idx = arr.findIndex(e => isHardcodedDup(e) && _playSignature(e) === sig);
-    if (idx === -1) idx = arr.findIndex(isHardcodedDup);
+    const idx = findTwin(arr);
     if (idx !== -1) { arr.splice(idx, 1); entry._paired = true; }
   }
   return status;
