@@ -151,5 +151,5 @@ function playerPhoto(name) {
 // What goes inside an avatar circle: the photo, else the initial.
 function avatarInner(name) {
   const photo = playerPhoto(name);
-  return photo ? `<img class="avatar-photo" src="${photo}" alt="">` : _escapeHtml(String(name || '?').charAt(0).toUpperCase());
+  return photo ? `<img class="avatar-photo" src="${photo}" alt="">` : `<span class="avatar-letter">${_escapeHtml(String(name || '?').charAt(0).toUpperCase())}</span>`;
 }

@@ -11,7 +11,7 @@
 // asset versions it no longer uses.
 const SHELL = 'bgl-shell';
 const ASSETS = 'bgl-assets';
-const COVERS = 'bgl-covers';
+const COVERS = 'bgl-covers-2';   // a new name when a cover file changes: every phone fetches covers again
 const DATA = 'bgl-data';
 const MAX_COVERS = 600;
 const FIREBASE = 'firebasedatabase.app';
@@ -48,7 +48,12 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(self.clients.claim());
+  // drop caches this version no longer uses (an older covers cache)
+  event.waitUntil((async () => {
+    const keep = new Set([SHELL, ASSETS, COVERS, DATA]);
+    for (const name of await caches.keys()) if (name.startsWith('bgl-') && !keep.has(name)) await caches.delete(name);
+    await self.clients.claim();
+  })());
 });
 
 async function trimCovers() {

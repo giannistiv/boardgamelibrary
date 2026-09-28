@@ -21,6 +21,16 @@ function bggPlayerPoll(bggId) {
   return { best: _pcSet(e[0]), rec: _pcSet(e[1]), votes: e[2] || 0, expansion: !!e[3] };
 }
 
+// BGG's co-op flag and kinds (letters, see data/bgg-extras.js); null when unknown.
+function bggIsCoop(bggId) {
+  const e = (typeof BGG_EXTRAS !== 'undefined') ? BGG_EXTRAS[bggId] : null;
+  return e && e.length > 4 ? !!e[4] : null;
+}
+function bggKinds(bggId) {
+  const e = (typeof BGG_EXTRAS !== 'undefined') ? BGG_EXTRAS[bggId] : null;
+  return e && e.length > 5 ? e[5] : null;
+}
+
 function isBggExpansion(bggId) {
   const p = bggPlayerPoll(bggId);
   return !!(p && p.expansion);

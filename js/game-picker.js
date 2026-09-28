@@ -1,7 +1,10 @@
 // ── Explore → Tonight: "What should we play tonight?" ──
 // Say how many are playing, how long you have and whose shelves are within
 // reach; it ranks the games on those shelves that fit that many players and
-// the time. Each suggestion says why it's there:
+// the time. Filters narrow it down: co-op or competitive, weight, and under
+// "More filters" the kind of game, what you haven't played (at all or
+// lately), BGG's best player count and the group's favourites.
+// Each suggestion says why it's there:
 //   - BGG's player-count vote for exactly this many players
 //   - the group's ratings (BGG's if nobody has rated it)
 //   - freshness: never played or not played in months beats played last week
@@ -14,10 +17,19 @@ const _gp = {
   weights: new Set(),
   libs: null,        // Set of library keys; null = your own shelf (else every shelf)
   campaigns: true,   // include campaign / legacy games
+  style: '',         // '' | 'coop' | 'pvp'
+  kinds: new Set(),  // kind letters (any of them)
+  only: new Set(),   // 'best' | 'new' | 'stale' | 'fav', all must hold
+  more: false,       // "More filters" open
   shown: 8,
 };
 const GP_TIMES = [[45, '≤ 45 min'], [90, '≤ 1.5 h'], [120, '≤ 2 h'], [180, '≤ 3 h']];
 const GP_COUNTS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => [n, n === 10 ? '10+' : String(n)]);
+const GP_STYLES = [['coop', 'Co-op'], ['pvp', 'Competitive']];
+const GP_KINDS = [['P', 'Party'], ['F', 'Family'], ['S', 'Strategy'], ['T', 'Thematic'], ['C', 'Card game'],
+  ['D', 'Deduction'], ['A', 'Abstract'], ['Z', 'Puzzle'], ['W', 'Wargame']];
+// the shelves' own tags, for games BGG has no kinds for
+const GP_TAG_KIND = { Party: 'P', Family: 'F', Strategy: 'S', Thematic: 'T', 'Card Game': 'C', Deduction: 'D', Abstract: 'A', Puzzle: 'Z' };
 const GP_LIB_OWNER = { stiv: 'Στιβ', giannis: 'Γιαννης Φωτοπουλος', lgeorge: 'LGeorge', dimitris: 'Δημητρης' };
 
 function _gpLoad() {
@@ -72,6 +84,29 @@ function _gpActiveLibs(libs) {
   return own.length ? own : libs;
 }
 
+// Co-op or competitive: how the group actually plays it, else BGG, else the shelf's tags.
+function _gpIsCoop(g, id) {
+  const plays = PLAY_HISTORY[id];
+  if (plays && plays.length && !isNoResultGame(id)) return _recIsCoop(g, plays);
+  const bgg = bggIsCoop(id);
+  if (bgg !== null) return bgg;
+  return (g.categories || []).includes('Co-op') || (g.mechanics || []).includes('Cooperative Game');
+}
+
+function _gpKinds(g, id) {
+  const bgg = bggKinds(id);
+  if (bgg) return bgg;
+  return (g.categories || []).map(c => GP_TAG_KIND[c] || '').join('');
+}
+
+// How many filters are on (players and shelves aside), and clearing them.
+function _gpFilterCount() {
+  return (_gp.time ? 1 : 0) + _gp.weights.size + (_gp.style ? 1 : 0) + _gp.kinds.size + _gp.only.size + (_gp.campaigns ? 0 : 1);
+}
+function _gpClearFilters() {
+  _gp.time = 0; _gp.weights.clear(); _gp.style = ''; _gp.kinds.clear(); _gp.only.clear(); _gp.campaigns = true;
+}
+
 function _gpVotes() {
   const byGame = {};
   for (const lib of ['stiv', 'giannis', 'lgeorge']) {
@@ -105,11 +140,19 @@ function _gpSuggest(idx, libs) {
     if (_gp.time && !(g.playTime && parseMinTime(g.playTime) <= _gp.time)) continue;
     const weight = Number(g.complexity) || 0;
     if (_gp.weights.size && !(weight > 0 && _gp.weights.has(difficultyBucket(weight)))) continue;
+    const coop = _gpIsCoop(g, id);
+    if (_gp.style && (_gp.style === 'coop') !== coop) continue;
+    if (_gp.kinds.size && ![..._gpKinds(g, id)].some(k => _gp.kinds.has(k))) continue;
+    const poll = bggPlayerPoll(id);
+    const lastPlay = idx.lastPlayed[id];
+    if (_gp.only.has('best') && !(poll && poll.votes >= 5 && poll.best.has(n))) continue;
+    if (_gp.only.has('new') && lastPlay) continue;
+    if (_gp.only.has('stale') && lastPlay && _gpDaysSince(lastPlay) < 180) continue;
+    if (_gp.only.has('fav')) { const fav = getCommunityRating(id); if (!fav || fav.avg < 8) continue; }
 
     let score = 0;
     const why = [];
     // Player count fit
-    const poll = bggPlayerPoll(id);
     if (poll && poll.votes >= 5 && (poll.best.size || poll.rec.size)) {
       if (poll.best.has(n)) { score += 30; why.push({ t: `Best at ${n}`, k: 'good' }); }
       else if (poll.rec.has(n)) { score += 18; why.push({ t: `Good at ${n}`, k: 'ok' }); }
@@ -149,6 +192,7 @@ function _gpSuggest(idx, libs) {
       score += Math.min(12, 3 * votes[id]);
       why.push({ t: `${votes[id]} Board South vote${votes[id] !== 1 ? 's' : ''}`, k: 'ok' });
     }
+    if (coop && !_gp.style) why.push({ t: 'Co-op', k: '' });
     score += (bgg - 7) * 2;
     const owners = libs.filter(l => l.ids.has(Number(id))).map(l => l.label);
     out.push({ g, score, why, owners });
@@ -175,25 +219,40 @@ function wireTonightTab(container) {
   const renderPanel = () => {
     const active = new Set(_gpActiveLibs(libs).map(l => l.key));
     const row = (label, html) => `<div class="gb-row"><span class="gb-label">${label}</span><div class="gb-chips">${html}</div></div>`;
+    const n = _gp.count;
+    const moreOn = _gp.kinds.size + _gp.only.size + (_gp.campaigns ? 0 : 1) + (_gp.libs ? 1 : 0);
     panel.innerHTML = [
       row('Players', _gbChips('count', GP_COUNTS, v => _gp.count === Number(v))),
+      row('Style', _gbChips('style', GP_STYLES, v => _gp.style === v)),
       row('Time', _gbChips('time', GP_TIMES, v => _gp.time === Number(v))),
       row('Weight', _gbChips('weights', GB_WEIGHTS, v => _gp.weights.has(v))),
+      `<details class="gp-more-filters" id="gp-more-filters"${_gp.more ? ' open' : ''}>
+        <summary>More filters${moreOn ? ` <span class="gp-more-n">${moreOn} on</span>` : ''}</summary>`,
+      row('Only', _gbChips('only', [['best', `Best at ${n}`, `BGG voters say it's best with ${n}`], ['new', 'Never played'], ['stale', 'Not in 6 months', 'Not played in the last 6 months (or never)'], ['fav', '&#9733; 8+ from you', 'Rated 8 or more by the group']], v => _gp.only.has(v))),
+      row('Kind', _gbChips('kinds', GP_KINDS, v => _gp.kinds.has(v))),
       row('Shelves', _gbChips('libs', libs.map(l => [l.key, l.label, `Games in ${l.label}'s library`]), v => active.has(v))
         + (_gp.libs ? '<button type="button" class="gp-auto" id="gp-auto">reset</button>' : '')),
       row('Include', `<button type="button" class="gb-chip${_gp.campaigns ? ' on' : ''}" id="gp-campaigns" aria-pressed="${_gp.campaigns}" title="Campaign and legacy games">Campaign games</button>`),
+      `</details>`,
     ].join('');
+    panel.querySelector('#gp-more-filters').addEventListener('toggle', (e) => { _gp.more = e.target.open; });
   };
 
   const renderResults = (keepPage) => {
     if (!keepPage) _gp.shown = 8;
     const n = _gp.count;
     const list = _gpSuggest(idx, libs);
-    if (!list.length) { results.innerHTML = `<div class="stats-player-sub gb-empty">Nothing on these shelves fits ${n} players${_gp.time ? ' in that time' : ''}. Try more shelves or more time.</div>`; return; }
+    const clear = _gpFilterCount() ? '<button type="button" class="gp-auto" id="gp-clear">clear filters</button>' : '';
+    if (!list.length) {
+      results.innerHTML = `<div class="stats-player-sub gb-empty">Nothing on these shelves fits ${n} player${n !== 1 ? 's' : ''} with these filters. Try fewer filters or more shelves. ${clear}</div>`;
+      const c = results.querySelector('#gp-clear');
+      if (c) c.addEventListener('click', () => { _gpClearFilters(); refresh(); });
+      return;
+    }
     const page = list.slice(0, _gp.shown);
     results.innerHTML = `
       <div class="gb-head">
-        <span class="gb-count">${list.length} game${list.length !== 1 ? 's' : ''} fit</span>
+        <span class="gb-count">${list.length} game${list.length !== 1 ? 's' : ''} fit ${clear}</span>
         <button type="button" class="gp-roll" id="gp-roll">&#127922; Pick one for us</button>
       </div>
       ${page.map((s, i) => `<div class="stats-game-row gp-row" data-bgg-id="${s.g.bggId}">
@@ -212,6 +271,8 @@ function wireTonightTab(container) {
     const more = results.querySelector('#gp-more');
     if (more) more.addEventListener('click', () => { _gp.shown += 8; renderResults(true); });
     results.querySelector('#gp-roll').addEventListener('click', (e) => roll(e.currentTarget));
+    const clearBtn = results.querySelector('#gp-clear');
+    if (clearBtn) clearBtn.addEventListener('click', () => { _gpClearFilters(); refresh(); });
   };
 
   // Spin through the top few, weighted towards the best, and land on one.
@@ -252,6 +313,11 @@ function wireTonightTab(container) {
       const v = Number(t.dataset.v); _gp.time = _gp.time === v ? 0 : v;
     } else if (t.dataset.gb === 'weights') {
       if (_gp.weights.has(t.dataset.v)) _gp.weights.delete(t.dataset.v); else _gp.weights.add(t.dataset.v);
+    } else if (t.dataset.gb === 'style') {
+      _gp.style = _gp.style === t.dataset.v ? '' : t.dataset.v;
+    } else if (t.dataset.gb === 'kinds' || t.dataset.gb === 'only') {
+      const set = _gp[t.dataset.gb];
+      if (set.has(t.dataset.v)) set.delete(t.dataset.v); else set.add(t.dataset.v);
     } else if (t.dataset.gb === 'libs') {
       // First manual pick starts from what was shown, then toggles.
       if (!_gp.libs) _gp.libs = new Set(_gpActiveLibs(libs).map(l => l.key));
