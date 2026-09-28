@@ -346,7 +346,6 @@ window.initImporter = function(){
           s: ps.score !== null && ps.score !== undefined ? String(ps.score) : '',
           w: !!ps.winner,
           ...(ps.role ? {r: ps.role} : {}),
-          ...(ps.startPlayer ? {f: 1} : {}),   // marked as the start player in BGStats
         };
       });
 

@@ -6,6 +6,7 @@
 //   - the ratings of the people actually at the table (BGG's if none rated it)
 //   - freshness: never played or not played in months beats played last week
 //   - Board South votes, and whether it's new to someone playing
+// Competitive games also show each player's odds of winning (win-odds.js).
 // Expansions are never suggested on their own.
 
 const _gp = {
@@ -233,6 +234,7 @@ function wireTonightTab(container) {
           <div class="stats-game-name">${_escapeHtml(s.g.name)}</div>
           <div class="stats-game-detail">${[s.g.playTime && _escapeHtml(s.g.playTime), Number(s.g.complexity) > 0 && `weight ${Number(s.g.complexity).toFixed(1)}`, s.owners.length && _escapeHtml(s.owners.join(', '))].filter(Boolean).join(' &middot; ')}</div>
           <div class="gp-why">${s.why.map(w => `<span class="gp-tag${w.k ? ' ' + w.k : ''}">${w.t}</span>`).join('')}</div>
+          ${winOddsLine(s.g.bggId, [..._gp.players], _gp.guests)}
         </div>
       </div>`).join('')}
       ${list.length > page.length ? `<button type="button" class="gb-more" id="gp-more">Show more (${list.length - page.length} left)</button>` : ''}`;

@@ -141,7 +141,7 @@ let importedPlaysCache = {}; // uuid -> play entry (includes bggId)
 // What a play says, ignoring bookkeeping (uuid, exact timestamp) and player
 // order: two plays with the same signature are the same record.
 function _playSignature(e) {
-  const sc = (e.sc || []).map(s => [s.n, String(s.s == null ? '' : s.s), !!s.w, s.r || ''].concat(s.f ? [1] : [])).sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
+  const sc = (e.sc || []).map(s => [s.n, String(s.s == null ? '' : s.s), !!s.w, s.r || '']).sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
   return JSON.stringify([e.date, sc, e.b || '', e.l || '', e.d || 0]);
 }
 

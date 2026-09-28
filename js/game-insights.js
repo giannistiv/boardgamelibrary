@@ -1,9 +1,7 @@
 // ── Game page insights (Plays tab) ──
 // Characters: how each role logged in BGStats (a character, hero, spirit,
 // faction…) has done, and your favourite and best. Your scores: your score
-// in the game play by play, and whether you're getting better. Going first:
-// whether the start player wins more than a fair share — it appears once a
-// game has enough plays with the start player marked in BGStats.
+// in the game play by play, and whether you're getting better.
 
 // "Leadership／Hawkeye" (an aspect and a hero) counts for both.
 function _giRoleTags(r) { return String(r || '').split('／').map(x => x.trim()).filter(Boolean); }
@@ -126,31 +124,5 @@ function buildScoreTrendHtml(game, plays) {
             <span>Average <b>${num(all)}</b></span>
           </div>
           ${trend ? `<div class="gi-trend-line">${trend}</div>` : ''}
-        </div>`;
-}
-
-// Does going first win? Only plays where BGStats marks exactly one start
-// player and someone (not everyone) won.
-const GI_FIRST_MIN = 5;
-function buildFirstPlayerHtml(game, plays) {
-  let n = 0, wins = 0, fair = 0;
-  for (const p of plays || []) {
-    const first = p.sc.filter(s => s && s.f);
-    if (first.length !== 1 || p.sc.length < 2) continue;
-    const winners = p.sc.filter(s => s.w).length;
-    if (!winners || winners === p.sc.length) continue;
-    n++;
-    if (first[0].w) wins++;
-    fair += 1 / p.sc.length;
-  }
-  if (n < GI_FIRST_MIN) return '';
-  const got = Math.round((wins / n) * 100), share = Math.round((fair / n) * 100);
-  const verdict = got >= share + 10 ? 'Going first looks like an advantage.'
-    : got <= share - 10 ? 'Going first looks like a handicap.'
-    : 'Going first makes little difference.';
-  return `
-        <div class="gi-fact">
-          <span class="gi-fact-k">Fun fact</span>
-          The start player won <b>${wins} of ${n}</b> plays (${got}%), where a fair share would be ${share}%. ${verdict}
         </div>`;
 }
