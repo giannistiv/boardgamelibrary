@@ -1,6 +1,6 @@
 // Service worker: lets the site install as an app and keep working offline.
 //
-//   pages (index.html)       network first, the last copy when offline
+//   pages (index.html)       network first (always revalidated), the last copy when offline
 //   css / js / data (?v=…)   cache first: a stamped URL never changes
 //   covers (images/)         cache first, the most recent MAX_COVERS kept
 //   Firebase reads           network first, the last answer when offline
@@ -87,7 +87,10 @@ self.addEventListener('fetch', (event) => {
   if (req.mode === 'navigate' && url.origin === location.origin) {
     event.respondWith((async () => {
       try {
-        const res = await fetch(req);
+        // Ask the server every time (a quick "not modified" when nothing
+        // changed): GitHub lets browsers reuse a page for 10 minutes, which
+        // would hide an update that long.
+        const res = await fetch(req, { cache: 'no-cache' });
         if (res.ok) event.waitUntil(storeShell(res.clone()).catch(() => {}));
         return res;
       } catch (e) {
