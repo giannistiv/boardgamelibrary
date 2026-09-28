@@ -434,7 +434,8 @@ function openModal(game) {
     bggVal ? `<div class="gm-tile"><div class="gm-tile-val" style="color:${ratingColor(bggVal)}">${bggVal.toFixed(1)}</div><div class="gm-tile-label">BGG rating</div></div>` : '',
     community ? `<div class="gm-tile"><div class="gm-tile-val" style="color:${ratingColor(community.avg)}">&#9733; ${community.avg}</div><div class="gm-tile-label">Group &middot; ${community.count}</div></div>` : '',
     `<div class="gm-tile"><div class="gm-tile-val">${(PLAY_HISTORY[game.bggId] || []).length}</div><div class="gm-tile-label">Plays</div></div>`,
-  ].join('');
+    buildGameTimeTile(game.bggId),
+  ].filter(Boolean);
 
   // Mechanics
   let mechanicsHtml = '';
@@ -471,7 +472,7 @@ function openModal(game) {
       const scoreHtml = play.sc.map(_playScoreChipHtml).join('');
       const boardHtml = play.b ? `<div class="play-board">&#9876; ${play.b}</div>` : '';
       const noWinnerHtml = (!hasWinner && !noResultGame) ? '<div class="play-no-winner">&#9760;&#65038; The game won</div>' : '';
-      const durHtml = play.d ? `<span class="play-duration">${play.d} min</span>` : '';
+      const durHtml = playTimeBadge(play);
       return `<div class="play-entry">
         <div class="play-entry-top"><span class="play-date">${fmtDate(play.date)}</span>${durHtml}</div>
         <div class="play-scores">${scoreHtml}</div>
@@ -519,6 +520,7 @@ function openModal(game) {
           <div class="ph-stat"><span class="ph-stat-val">${fmtDate(lastPlayed)}</span><span class="ph-stat-label">Last Played</span></div>
         </div>
         ${buildGameRecordsHtml(game, plays)}
+        ${buildGameTimeHtml(game, plays)}
         ${campaignHtml}
         ${skyTeamHtml}
         ${slaySpireHtml}
@@ -554,7 +556,7 @@ function openModal(game) {
       </div>
       ${game.designer ? `<div class="modal-designer">by ${_escapeHtml(game.designer)}</div>` : ''}
       <div class="gm-facts">${facts}</div>
-      <div class="gm-tiles">${ratingTiles}</div>
+      <div class="gm-tiles n${ratingTiles.length}">${ratingTiles.join('')}</div>
       ${game.bggId > 0 ? buildStarRatingHtml(game.bggId) : ''}
       <div class="gm-tabs" role="tablist">
         ${tabs.map(([k, label]) => `<button type="button" role="tab" class="gm-tab${k === tab ? ' active' : ''}" aria-selected="${k === tab}" data-tab="${k}">${label}</button>`).join('')}

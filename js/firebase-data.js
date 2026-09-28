@@ -314,7 +314,7 @@ function buildStarRatingHtml(bggId) {
   // Player rating
   if (player) {
     html += `<div class="star-rating-label">${current ? 'Your Rating' : 'Rate this game'}</div>`;
-    html += `<div style="display:flex;align-items:center">`;
+    html += `<div class="star-rating-line">`;
     html += `<div class="star-rating-row" id="star-row" data-bgg="${bggId}" data-current="${current}">`;
     for (let i = 1; i <= 10; i++) {
       html += `<span class="star${i <= current ? ' filled' : ''}" data-val="${i}">&#9733;</span>`;

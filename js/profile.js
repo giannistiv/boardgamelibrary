@@ -656,8 +656,8 @@ function showStatsView(playerName, visiting) {
         ${_pcSec(1, buildRateLastGameBar(playerName, isOwnProfile, recentPlays))}
         ${_pcSec(2, buildWrappedBanner(playerName))}
         ${_pcSec(3, favoritesHtml)}
-        ${_pcSec(5, buildPlayHeatmapHtml(playerName))}
-        ${_pcSec(6, `<div class="stats-section">
+        ${_pcSec(6, buildPlayHeatmapHtml(playerName))}
+        ${_pcSec(7, `<div class="stats-section">
       <div class="stats-section-title">Latest Plays</div>
       ${latestPlays.length > 0
         ? latestPlays.map(latestPlayRowHtml).join('')
@@ -667,9 +667,10 @@ function showStatsView(playerName, visiting) {
       </div>
       <div class="profile-side">
         ${_pcSec(4, h2hHtml)}
-        ${_pcSec(7, buildRatingsGraphHtml(playerName))}
-        ${_pcSec(8, chartsHtml)}
-        ${_pcSec(9, isOwnProfile && recommendations.length > 0 ? `<div class="stats-section">
+        ${_pcSec(5, buildPlayTimeHtml(playerName))}
+        ${_pcSec(8, buildRatingsGraphHtml(playerName))}
+        ${_pcSec(9, chartsHtml)}
+        ${_pcSec(10, isOwnProfile && recommendations.length > 0 ? `<div class="stats-section">
       <div class="stats-section-title">Recommended for You</div>
       <div class="stats-player-sub" style="margin:-0.3rem 0 0.6rem">Top-rated games from the shelf you haven't tried yet</div>
       ${recommendations.map(g => {
@@ -801,6 +802,7 @@ function showStatsView(playerName, visiting) {
 
   // Play heatmap (year nav + tap-a-day).
   _wireHeatmap(playerName);
+  wirePlayTime(playerName);
 
   // Edit-name (own profile only): reveal an inline editor, save to Firebase,
   // then reload so the rename propagates through the startup machinery.

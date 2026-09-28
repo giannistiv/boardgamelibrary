@@ -1145,6 +1145,8 @@
     border:1px solid var(--line);
   }
 
+  /* stars, the score and "clear": the last two drop below on a narrow phone */
+  .star-rating-line{display:flex;align-items:center;flex-wrap:wrap;row-gap:0.2rem}
   .star-rating-row{display:flex;align-items:center;gap:0.15rem;cursor:pointer}
   .star-rating-row .star{
     
@@ -1834,6 +1836,50 @@
   .hm-detail b{color:var(--accent)}
   .hm-legend{display:flex;align-items:center;gap:3px;font-size:0.62rem;opacity:0.55}
   .hm-legend i{width:11px;height:11px;border-radius:3px}
+
+  /* ── Time at the table: profile card, game page ── */
+  .pt-card{padding:1rem 1.05rem;border-radius:var(--r-l);background:var(--card);border:1px solid var(--line)}
+  .pt-hero{display:flex;align-items:center;gap:0.8rem 1.2rem;flex-wrap:wrap;margin-bottom:1rem}
+  .pt-big{font-family:var(--font-display);font-weight:800;font-size:3rem;line-height:1;color:var(--accent);letter-spacing:-0.03em;font-variant-numeric:tabular-nums}
+  .pt-big span{font-family:var(--font);font-size:0.95rem;font-weight:600;color:var(--text-2);margin-left:0.35rem;letter-spacing:0}
+  .pt-hero-side{flex:1;min-width:12rem;display:flex;flex-direction:column;align-items:flex-start;gap:0.3rem}
+  .pt-sub{font-size:0.8rem;color:var(--text-2);line-height:1.4}
+  .pt-vs{font-size:0.72rem;font-weight:600;padding:0.18rem 0.55rem;border-radius:999px}
+  .pt-vs.up{color:var(--win);background:var(--win-soft)}
+  .pt-vs.down{color:var(--loss);background:var(--loss-soft)}
+  .pt-months{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:4px;margin-bottom:1rem}
+  .pt-m{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0}
+  .pt-m-bar{width:100%;height:52px;display:flex;align-items:flex-end;border-radius:4px;background:rgba(255,255,255,0.04)}
+  .pt-m-bar i{display:block;width:100%;border-radius:4px;background:rgba(232,176,75,0.55)}
+  .pt-m.now .pt-m-bar i{background:var(--accent)}
+  .pt-m.future{opacity:0.35}
+  .pt-m span{font-size:0.6rem;color:var(--text-3)}
+  .pt-games-title{font-size:0.66rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-3);margin-bottom:0.4rem}
+  .pt-games{display:flex;flex-direction:column;gap:0.2rem;margin:0 -0.45rem 0.8rem}
+  .pt-g{display:flex;align-items:center;gap:0.65rem;width:100%;padding:0.35rem 0.45rem;border-radius:var(--r-s);background:transparent;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
+  .pt-g:hover{background:var(--card-2)}
+  .pt-g img{width:34px;height:34px;border-radius:6px;object-fit:cover;flex-shrink:0;background:var(--card-3)}
+  .pt-g-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+  .pt-g-name{font-size:0.84rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pt-g-bar,.pt-p-bar{display:block;height:5px;border-radius:3px;background:rgba(255,255,255,0.06);overflow:hidden}
+  .pt-g-bar i,.pt-p-bar i{display:block;height:100%;border-radius:3px;background:var(--accent)}
+  .pt-g-val{display:flex;flex-direction:column;align-items:flex-end;font-size:0.84rem;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .pt-g-val small{font-size:0.66rem;font-weight:500;color:var(--text-3)}
+  .pt-facts{display:flex;flex-direction:column;gap:0.35rem;font-size:0.78rem;color:var(--text-2);padding-top:0.75rem;border-top:1px solid var(--line)}
+  .pt-facts span{display:inline-block;min-width:6.4rem;color:var(--text-3);font-size:0.68rem;text-transform:uppercase;letter-spacing:0.05em}
+  .pt-facts b{color:var(--text)}
+  .pt-how{margin-top:0.75rem;font-size:0.74rem;color:var(--text-3);line-height:1.5}
+  .pt-how summary{cursor:pointer;color:var(--text-2);font-weight:600}
+  .pt-how p,.pt-how ul{margin-top:0.4rem}
+  .pt-how ul{padding-left:1.1rem}
+  .pt-game{margin:0 0 1.2rem}
+  .pt-game-sub{font-size:0.74rem;color:var(--text-3);margin:-0.2rem 0 0.6rem;line-height:1.4}
+  .pt-p{display:grid;grid-template-columns:minmax(0,9rem) minmax(0,1fr) auto;align-items:center;gap:0.7rem;padding:0.25rem 0;font-size:0.8rem}
+  .pt-p-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text-2)}
+  .pt-p.me .pt-p-name{color:var(--accent);font-weight:700}
+  .pt-p-val{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .pt-game-more{font-size:0.7rem;color:var(--text-3);margin-top:0.3rem}
+  .play-duration.est{cursor:help}
 
   /* ── Year in Review ("Wrapped") ── */
   .wr-banner{
@@ -2652,12 +2698,15 @@
   }
   .gm-fact svg{width:16px;height:16px;fill:none;stroke:var(--text-3);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
   .gm-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:0.5rem;margin-bottom:0.8rem}
+  /* four tiles don't fit a phone's width: two rows of two rather than three and one */
+  @media(max-width:560px){.gm-tiles.n4{grid-template-columns:repeat(2,minmax(0,1fr))}}
   .gm-tile{padding:0.65rem 0.8rem;border-radius:var(--r);background:var(--card);border:1px solid var(--line)}
   .gm-tile-val{font-size:1.35rem;font-weight:800;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;color:var(--text)}
   .gm-tile-label{font-size:0.7rem;font-weight:600;color:var(--text-3);margin-top:0.12rem}
   
   .star-rating-label{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-3);margin-bottom:0.3rem}
   .star-rating-row .star{font-size:1.7rem;color:rgba(255,255,255,0.13)}
+  @media(max-width:420px){.star-rating-row .star{font-size:1.5rem}}
   .star-rating-row .star.filled{color:var(--accent)}
   .star-rating-row .star.hovered{color:var(--accent-2)}
   
