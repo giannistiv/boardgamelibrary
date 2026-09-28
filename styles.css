@@ -1610,15 +1610,6 @@
     padding:0.45rem 0.75rem;margin-bottom:0.8rem;border-radius:12px;
     background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.07);
   }
-  .gp-add{display:inline-flex}
-  .gp-search{
-    width:8.5rem;padding:0.28rem 0.6rem;border-radius:999px;font-family:inherit;font-size:0.76rem;
-    background:rgba(255,255,255,0.05);border:1px dashed rgba(255,255,255,0.2);color:var(--text);outline:none;
-  }
-  .gp-search:focus{border-color:var(--accent);border-style:solid}
-  .gp-stepper{display:inline-flex;align-items:center;gap:0.4rem}
-  .gp-guests{min-width:1.2rem;text-align:center;font-weight:700;font-size:0.85rem}
-  .gp-count{margin-left:0.6rem;align-self:center;font-size:0.76rem;font-weight:700;color:var(--accent)}
   .gp-auto{
     background:none;border:none;color:rgba(240,230,211,0.5);font-family:inherit;font-size:0.7rem;
     text-decoration:underline;cursor:pointer;padding:0.28rem 0.2rem;

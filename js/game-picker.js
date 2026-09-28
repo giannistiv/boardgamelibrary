@@ -1,67 +1,52 @@
 // ── Explore → Tonight: "What should we play tonight?" ──
-// Pick who's playing, how long you have and whose shelves are within reach;
-// it ranks the games in those libraries that fit the player count and time.
-// Each suggestion says why it's there:
+// Say how many are playing, how long you have and whose shelves are within
+// reach; it ranks the games on those shelves that fit that many players and
+// the time. Each suggestion says why it's there:
 //   - BGG's player-count vote for exactly this many players
-//   - the ratings of the people actually at the table (BGG's if none rated it)
+//   - the group's ratings (BGG's if nobody has rated it)
 //   - freshness: never played or not played in months beats played last week
-//   - Board South votes, and whether it's new to someone playing
+//   - Board South votes, and whether you've never played it
 // Expansions are never suggested on their own.
 
 const _gp = {
-  players: null,     // Set of names; filled from the last group used (or you)
-  guests: 0,         // people who aren't in the app
+  count: 0,          // how many are playing: the last number used, else 4
   time: 0,           // 0 = any, else minutes available
   weights: new Set(),
-  libs: null,        // Set of library keys; null = follow who's playing
+  libs: null,        // Set of library keys; null = your own shelf (else every shelf)
   campaigns: true,   // include campaign / legacy games
   shown: 8,
 };
 const GP_TIMES = [[45, '≤ 45 min'], [90, '≤ 1.5 h'], [120, '≤ 2 h'], [180, '≤ 3 h']];
+const GP_COUNTS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => [n, n === 10 ? '10+' : String(n)]);
 const GP_LIB_OWNER = { stiv: 'Στιβ', giannis: 'Γιαννης Φωτοπουλος', lgeorge: 'LGeorge', dimitris: 'Δημητρης' };
 
-function _gpLoadGroup() {
-  if (_gp.players) return;
-  _gp.players = new Set();
+function _gpLoad() {
+  if (_gp.count) return;
+  let n = 0;
   try {
-    const saved = JSON.parse(localStorage.getItem('bgl-tonight') || 'null');
-    if (saved && Array.isArray(saved.players)) {
-      saved.players.forEach(n => _gp.players.add(n));
-      _gp.guests = Number(saved.guests) || 0;
-    }
+    const saved = JSON.parse(localStorage.getItem('bgl-tonight') || 'null') || {};
+    // (it used to keep who was playing: count them)
+    n = Number(saved.count) || ((Array.isArray(saved.players) ? saved.players.length : 0) + (Number(saved.guests) || 0));
   } catch (_) {}
-  if (!_gp.players.size) {
-    const me = _gbPlayer();
-    if (me) _gp.players.add(me);
-  }
+  _gp.count = Math.min(10, Math.max(1, n || 4));
 }
 
-function _gpSaveGroup() {
-  try { localStorage.setItem('bgl-tonight', JSON.stringify({ players: [..._gp.players], guests: _gp.guests })); } catch (_) {}
+function _gpSave() {
+  try { localStorage.setItem('bgl-tonight', JSON.stringify({ count: _gp.count })); } catch (_) {}
 }
 
-// Who has played what, and when each game was last played.
+// When each game was last played, and which ones you have played.
 function _gpIndex() {
-  const playedBy = new Map();   // name -> Set(bggId)
   const lastPlayed = {};        // bggId -> 'YYYY-MM-DD'
-  const together = new Map();   // name -> plays shared with the viewer
-  const plays = new Map();      // name -> total plays
+  const mine = new Set();       // bggIds you've played
   const me = _gbPlayer();
   for (const id in PLAY_HISTORY) {
     for (const p of PLAY_HISTORY[id]) {
       if (!lastPlayed[id] || p.date > lastPlayed[id]) lastPlayed[id] = p.date;
-      const names = p.sc.map(s => s.n);
-      const withMe = me && names.includes(me);
-      for (const n of names) {
-        if (HIDDEN_PLAYERS.has(n) || /^anonymous/i.test(n)) continue;
-        if (!playedBy.has(n)) playedBy.set(n, new Set());
-        playedBy.get(n).add(Number(id));
-        plays.set(n, (plays.get(n) || 0) + 1);
-        if (withMe && n !== me) together.set(n, (together.get(n) || 0) + 1);
-      }
+      if (me && p.sc.some(s => s.n === me)) mine.add(Number(id));
     }
   }
-  return { playedBy, lastPlayed, together, plays };
+  return { lastPlayed, mine };
 }
 
 function _gpDaysSince(date) {
@@ -80,9 +65,10 @@ function _gpAgo(days) {
 
 function _gpActiveLibs(libs) {
   if (_gp.libs) return libs.filter(l => _gp.libs.has(l.key));
-  // Follow the table: the libraries of whoever's playing, else every library.
-  const present = new Set([..._gp.players].map(n => (typeof _origCanon === 'function' ? _origCanon(n) : n)));
-  const own = libs.filter(l => present.has(GP_LIB_OWNER[l.key]));
+  // By default your own shelf, if you have one; otherwise every shelf.
+  const me = _gbPlayer();
+  const canon = me && typeof _origCanon === 'function' ? _origCanon(me) : me;
+  const own = libs.filter(l => GP_LIB_OWNER[l.key] === canon);
   return own.length ? own : libs;
 }
 
@@ -100,13 +86,11 @@ function _gpVotes() {
 }
 
 function _gpSuggest(idx, libs) {
-  const n = _gp.players.size + _gp.guests;
-  if (!n) return [];
+  const n = _gp.count;
   const active = _gpActiveLibs(libs);
   const ids = new Set();
   active.forEach(l => l.ids.forEach(id => ids.add(id)));
   const votes = _gpVotes();
-  const present = [..._gp.players];
   const out = [];
   for (const id of ids) {
     const g = findGameByBggId(id);
@@ -133,13 +117,14 @@ function _gpSuggest(idx, libs) {
     } else {
       score += 8;
     }
-    // Ratings of the people playing
-    const ratings = present.map(p => getPlayerRating(p, id)).filter(v => v > 0);
+    // The group's ratings, pulled towards BGG's while only a few of you have
+    // rated it (one 10 shouldn't top the list)
+    const group = getCommunityRating(id);
     const bgg = Number(g.bggRating) || 0;
-    if (ratings.length) {
-      const avg = ratings.reduce((a, v) => a + v, 0) / ratings.length;
-      score += (avg - 5) * 6 * (0.5 + 0.5 * ratings.length / present.length);
-      why.push({ t: `&#9733; ${avg.toFixed(1)} from ${ratings.length === present.length && present.length > 1 ? 'all of you' : ratings.length + ' of you'}`, k: avg >= 7.5 ? 'good' : avg < 6 ? 'warn' : '' });
+    if (group) {
+      const blended = (group.avg * group.count + (bgg || 7) * 2) / (group.count + 2);
+      score += (blended - 5) * 6;
+      why.push({ t: `&#9733; ${group.avg.toFixed(1)} from ${group.count} of you`, k: group.avg >= 7.5 ? 'good' : group.avg < 6 ? 'warn' : '' });
     } else if (bgg) {
       score += (bgg - 6) * 5;
       why.push({ t: `BGG ${bgg.toFixed(1)}`, k: '' });
@@ -154,11 +139,10 @@ function _gpSuggest(idx, libs) {
       else if (days > 180) { score += 8; why.push({ t: `Not played in ${_gpAgo(days).replace(' ago', '')}`, k: 'new' }); }
       else if (days > 60) score += 4;
     }
-    // New to someone at the table
-    const fresh = present.filter(p => !(idx.playedBy.get(p) || new Set()).has(Number(id)));
-    if (last && fresh.length && fresh.length < present.length) {
-      score += Math.min(9, 3 * fresh.length);
-      why.push({ t: `New to ${fresh.slice(0, 2).map(_escapeHtml).join(', ')}${fresh.length > 2 ? ` +${fresh.length - 2}` : ''}`, k: 'new' });
+    // Others have played it, you haven't
+    if (last && _gbPlayer() && !idx.mine.has(Number(id))) {
+      score += 4;
+      why.push({ t: 'New to you', k: 'new' });
     }
     // Board South votes
     if (votes[id]) {
@@ -172,16 +156,8 @@ function _gpSuggest(idx, libs) {
   return out.sort((a, b) => b.score - a.score || (a.g.name || '').localeCompare(b.g.name || ''));
 }
 
-function _gpPlayerChips(idx) {
-  const me = _gbPlayer();
-  // Your usual co-players first; without a profile, the most active players.
-  const ranked = [...(me ? idx.together : idx.plays).entries()].sort((a, b) => b[1] - a[1]).map(([n]) => n);
-  const names = [...new Set([...(me ? [me] : []), ...ranked.slice(0, 10), ..._gp.players])];
-  return names.map(n => `<button type="button" class="gb-chip gp-player${_gp.players.has(n) ? ' on' : ''}" data-name="${_escapeHtml(n)}" aria-pressed="${_gp.players.has(n)}">${_escapeHtml(n)}</button>`).join('');
-}
-
 function buildTonightTabHtml() {
-  _gpLoadGroup();
+  _gpLoad();
   return `
       <div class="stats-section gp">
         <div class="gp-panel" id="gp-panel"></div>
@@ -195,29 +171,23 @@ function wireTonightTab(container) {
   if (!panel || !results) return;
   const idx = _gpIndex();
   const libs = _gbLibraries();
-  const allNames = [...idx.plays.keys()].sort((a, b) => a.localeCompare(b));
 
   const renderPanel = () => {
-    const n = _gp.players.size + _gp.guests;
     const active = new Set(_gpActiveLibs(libs).map(l => l.key));
     const row = (label, html) => `<div class="gb-row"><span class="gb-label">${label}</span><div class="gb-chips">${html}</div></div>`;
     panel.innerHTML = [
-      row('Who', `${_gpPlayerChips(idx)}
-        <span class="gp-add"><input type="text" class="gp-search" id="gp-search" list="gp-names" placeholder="Add someone…" autocomplete="off"><datalist id="gp-names">${allNames.map(x => `<option value="${_escapeHtml(x)}">`).join('')}</datalist></span>`),
-      row('Guests', `<span class="gp-stepper"><button type="button" class="gb-chip" data-guests="-1" aria-label="One guest fewer">&minus;</button><span class="gp-guests">${_gp.guests}</span><button type="button" class="gb-chip" data-guests="1" aria-label="One more guest">+</button></span>
-        <span class="gp-count">${n} player${n !== 1 ? 's' : ''}</span>`),
+      row('Players', _gbChips('count', GP_COUNTS, v => _gp.count === Number(v))),
       row('Time', _gbChips('time', GP_TIMES, v => _gp.time === Number(v))),
       row('Weight', _gbChips('weights', GB_WEIGHTS, v => _gp.weights.has(v))),
       row('Shelves', _gbChips('libs', libs.map(l => [l.key, l.label, `Games in ${l.label}'s library`]), v => active.has(v))
-        + (_gp.libs ? '<button type="button" class="gp-auto" id="gp-auto">follow who\'s playing</button>' : '')),
+        + (_gp.libs ? '<button type="button" class="gp-auto" id="gp-auto">reset</button>' : '')),
       row('Include', `<button type="button" class="gb-chip${_gp.campaigns ? ' on' : ''}" id="gp-campaigns" aria-pressed="${_gp.campaigns}" title="Campaign and legacy games">Campaign games</button>`),
     ].join('');
   };
 
   const renderResults = (keepPage) => {
     if (!keepPage) _gp.shown = 8;
-    const n = _gp.players.size + _gp.guests;
-    if (!n) { results.innerHTML = '<div class="stats-player-sub gb-empty">Pick who\'s playing to get suggestions.</div>'; return; }
+    const n = _gp.count;
     const list = _gpSuggest(idx, libs);
     if (!list.length) { results.innerHTML = `<div class="stats-player-sub gb-empty">Nothing on these shelves fits ${n} players${_gp.time ? ' in that time' : ''}. Try more shelves or more time.</div>`; return; }
     const page = list.slice(0, _gp.shown);
@@ -271,13 +241,9 @@ function wireTonightTab(container) {
   panel.addEventListener('click', (e) => {
     const t = e.target.closest('button');
     if (!t) return;
-    if (t.classList.contains('gp-player')) {
-      const name = t.dataset.name;
-      if (_gp.players.has(name)) _gp.players.delete(name); else _gp.players.add(name);
-      _gpSaveGroup();
-    } else if (t.dataset.guests) {
-      _gp.guests = Math.max(0, Math.min(20, _gp.guests + Number(t.dataset.guests)));
-      _gpSaveGroup();
+    if (t.dataset.gb === 'count') {
+      _gp.count = Number(t.dataset.v);
+      _gpSave();
     } else if (t.id === 'gp-auto') {
       _gp.libs = null;
     } else if (t.id === 'gp-campaigns') {
@@ -293,13 +259,6 @@ function wireTonightTab(container) {
     } else return;
     refresh();
   });
-  panel.addEventListener('change', (e) => {
-    if (e.target.id !== 'gp-search') return;
-    const name = e.target.value.trim();
-    const match = allNames.find(x => x.toLowerCase() === name.toLowerCase());
-    if (match) { _gp.players.add(match); _gpSaveGroup(); refresh(); }
-  });
-
   renderPanel();
   renderResults(true);
 }
