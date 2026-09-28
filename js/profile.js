@@ -316,6 +316,29 @@ function wireRateLastGame(container, playerName, isOwnProfile, recentPlays) {
 
 // Letterboxd-style ratings histogram: one bar per score 1-10, height by how
 // many games the player rated that score. Returns '' if they've rated nothing.
+// A chosen image as a small square photo: the middle square, 192 px, as a
+// JPEG data URL (about 15 KB), so profiles stay light to load.
+async function _photoFromFile(file) {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise((resolve, reject) => {
+      const i = new Image();
+      i.onload = () => resolve(i);
+      i.onerror = reject;
+      i.src = url;
+    });
+    const side = Math.min(img.naturalWidth, img.naturalHeight);
+    if (!side) throw new Error('empty image');
+    const S = 192;
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = S;
+    canvas.getContext('2d').drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2, side, side, 0, 0, S, S);
+    return canvas.toDataURL('image/jpeg', 0.82);
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
 // How many games a player has rated, how often each score, and the average.
 function _ratingStats(playerName) {
   const counts = new Array(11).fill(0); // counts[1..10]
@@ -337,7 +360,7 @@ function buildRatingsGraphHtml(playerName) {
   for (let v = 1; v <= 10; v++) {
     const c = counts[v];
     const pct = c && max ? Math.max(Math.round(c / max * 100), 5) : 0;
-    cols += `<div class="rg-col" title="${c} game${c === 1 ? '' : 's'} rated ${v}/10">
+    cols += `<div class="rg-col"${c ? ` data-rg="${v}" role="button" tabindex="0"` : ''} title="${c} game${c === 1 ? '' : 's'} rated ${v}/10">
       <div class="rg-cnt">${c || ''}</div>
       <div class="rg-track"><div class="rg-bar${c ? '' : ' rg-bar-empty'}"${c ? ` style="height:${pct}%"` : ''}></div></div>
       <div class="rg-num">${v}</div>
@@ -346,8 +369,44 @@ function buildRatingsGraphHtml(playerName) {
   return `<div class="stats-section">
     <div class="stats-section-title">Ratings</div>
     <div class="rg-graph">${cols}</div>
-    <div class="rg-summary"><span>${total} game${total === 1 ? '' : 's'} rated</span><span>avg ${avg}/10</span></div>
+    <div class="rg-summary"><span>${total} game${total === 1 ? '' : 's'} rated &middot; tap a bar for its games</span><span>avg ${avg}/10</span></div>
+    <div class="rg-games" hidden></div>
   </div>`;
+}
+
+// Tap a bar of the ratings graph: the games given that score (tap again to hide).
+function wireRatingsGraph(container, playerName) {
+  const graph = container.querySelector('.rg-graph');
+  const box = container.querySelector('.rg-games');
+  if (!graph || !box) return;
+  let shown = 0;
+  const show = (v) => {
+    graph.querySelectorAll('.rg-col').forEach(c => c.classList.toggle('sel', Number(c.dataset.rg) === v));
+    if (!v) { box.hidden = true; box.innerHTML = ''; shown = 0; return; }
+    const games = Object.keys(ratingsCache)
+      .filter(id => _ratingValue((ratingsCache[id] || {})[playerName]) === v)
+      .map(id => findGameByBggId(id) || { bggId: Number(id), name: 'Game #' + id })
+      .sort((a, b) => String(a.name).localeCompare(String(b.name)));
+    box.innerHTML = `<div class="rg-games-head">Rated ${v}/10 &middot; ${games.length} game${games.length === 1 ? '' : 's'}</div>
+      <div class="rg-games-list">${games.map(g => `<button type="button" class="rg-game" data-rg-game="${g.bggId}">
+        <img src="images/${g.bggId}.jpg" alt="" loading="lazy" onerror="__imgFallback(this, ${g.bggId})"><span>${_escapeHtml(g.name)}</span></button>`).join('')}</div>`;
+    box.hidden = false;
+    shown = v;
+  };
+  graph.addEventListener('click', (e) => {
+    const col = e.target.closest('[data-rg]');
+    if (col) show(Number(col.dataset.rg) === shown ? 0 : Number(col.dataset.rg));
+  });
+  graph.addEventListener('keydown', (e) => {
+    const col = e.target.closest('[data-rg]');
+    if (col && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); col.click(); }
+  });
+  box.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-rg-game]');
+    if (!b) return;
+    const game = findGameByBggId(b.dataset.rgGame);
+    if (game) openModal(game);
+  });
 }
 
 // Profile sections are split into a main and a side column on wide screens;
@@ -519,11 +578,23 @@ function showStatsView(playerName, visiting) {
     </div>`;
   };
 
-  // Recommendations: games they haven't played, sorted by rating
+  // Recommendations: shelf games they haven't played, never a legacy game
+  // (it can only be played through once), best-rated first but pulled towards
+  // the weight they usually play — a point of BGG rating per 0.8 of weight away.
   const playedBggIds = new Set(Object.keys(gameStats).map(Number));
+  const usualWeight = (() => {
+    let sum = 0, n = 0;
+    for (const p of recentPlays) { const w = Number(p.game.complexity); if (w > 0) { sum += w; n++; } }
+    return n ? sum / n : 0;
+  })();
+  const isLegacy = g => /\blegacy\b/i.test(g.name || '') || (g.mechanics || []).some(m => /legacy/i.test(m));
+  const recScore = g => {
+    const w = Number(g.complexity);
+    return (g.bggRating || 0) - (usualWeight && w > 0 ? Math.abs(w - usualWeight) / 0.8 : 1);
+  };
   const recommendations = GAMES
-    .filter(g => !playedBggIds.has(g.bggId) && g.bggRating && g.bggRating > 0 && !isExpansion(g))
-    .sort((a, b) => (b.bggRating || 0) - (a.bggRating || 0))
+    .filter(g => !playedBggIds.has(g.bggId) && g.bggRating && g.bggRating > 0 && !isExpansion(g) && !isLegacy(g))
+    .sort((a, b) => recScore(b) - recScore(a))
     .slice(0, 6);
 
   const wrColor = (wr) => {
@@ -631,7 +702,7 @@ function showStatsView(playerName, visiting) {
   container.innerHTML = `
     ${backBtnHtml}
     <div class="stats-header profile-hero">
-      <div class="profile-avatar" aria-hidden="true">${_escapeHtml(playerName.charAt(0).toUpperCase())}</div>
+      <div class="profile-avatar" aria-hidden="true">${avatarInner(playerName)}</div>
       <div class="profile-id">
         <div class="stats-player-name">${_escapeHtml(playerName)}</div>
         <div class="stats-player-sub">${totalPlays.toLocaleString('en')} play${totalPlays !== 1 ? 's' : ''}${recentPlays.length ? ` &middot; since ${recentPlays[recentPlays.length - 1].date.slice(0, 4)}` : ''}${isOwnProfile ? '' : ' &middot; visiting'}</div>
@@ -640,6 +711,13 @@ function showStatsView(playerName, visiting) {
       </div>
       ${isOwnProfile ? `<button class="profile-cog" id="btn-edit-name" title="Profile settings" aria-label="Profile settings"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>` : ''}
       ${isOwnProfile ? `<div class="profile-edit-form" id="profile-edit-form">
+        <div class="profile-edit-label">Photo</div>
+        <div class="profile-photo-row">
+          <span class="profile-photo-preview" aria-hidden="true">${avatarInner(playerName)}</span>
+          <label class="profile-edit-save profile-photo-pick">${playerPhoto(playerName) ? 'Change photo' : 'Choose a photo'}<input type="file" id="profile-photo-input" accept="image/*" hidden></label>
+          ${playerPhoto(playerName) ? '<button type="button" class="profile-edit-cancel" id="profile-photo-remove">Remove</button>' : ''}
+        </div>
+        <div class="profile-edit-err" id="profile-photo-err"></div>
         <div class="profile-edit-label">Display name</div>
         <input type="text" id="profile-name-input" class="profile-name-input" maxlength="40" autocomplete="off" value="${playerName.replace(/"/g, '&quot;')}">
         <div class="profile-edit-actions">
@@ -698,9 +776,9 @@ function showStatsView(playerName, visiting) {
         ${_pcSec(5, buildPlayTimeHtml(playerName))}
         ${_pcSec(8, _pcFold('ratings', 'Ratings', ratingStats.total ? `${ratingStats.total} rated &middot; avg ${ratingStats.avg}` : '', buildRatingsGraphHtml(playerName)))}
         ${_pcSec(9, _pcFold('when', 'When &amp; where', whenSummary, chartsHtml))}
-        ${_pcSec(10, _pcFold('recs', 'Recommended for you', `${recommendations.length} to try`, isOwnProfile && recommendations.length > 0 ? `<div class="stats-section">
+        ${_pcSec(10, _pcFold('recs', 'Recommended for you', `${recommendations.length} to try${usualWeight ? ` &middot; weight ~${usualWeight.toFixed(1)}` : ''}`, isOwnProfile && recommendations.length > 0 ? `<div class="stats-section">
       <div class="stats-section-title">Recommended for You</div>
-      <div class="stats-player-sub" style="margin:-0.3rem 0 0.6rem">Top-rated games from the shelf you haven't tried yet</div>
+      <div class="stats-player-sub" style="margin:-0.3rem 0 0.6rem">Top-rated games from the shelf you haven't tried yet${usualWeight ? `, around the weight you usually play (${usualWeight.toFixed(1)})` : ''}</div>
       ${recommendations.map(g => {
         const imgSrc = g.bggId >= 0 ? `images/${g.bggId}.jpg` : '';
         return `<div class="stats-rec-row" data-bgg-id="${g.bggId}">
@@ -764,6 +842,7 @@ function showStatsView(playerName, visiting) {
   }
 
   _wirePcFolds(container);
+  wireRatingsGraph(container, playerName);
 
   // Make game rows clickable
   container.querySelectorAll('[data-bgg-id]').forEach(el => {
@@ -849,6 +928,26 @@ function showStatsView(playerName, visiting) {
       if (opening) { input.focus(); input.select(); }
     });
     document.getElementById('profile-name-cancel').addEventListener('click', close);
+
+    // Photo: shrink it to a small square on the phone, save it with the profile.
+    const photoInput = document.getElementById('profile-photo-input');
+    const photoErr = document.getElementById('profile-photo-err');
+    const savePhoto = async (dataUrl) => {
+      photoErr.style.color = ''; photoErr.textContent = 'Saving…';
+      const r = await _saveProfilePhoto(dataUrl);
+      if (!r.ok) { photoErr.textContent = r.err; return; }
+      if (typeof _navRenderMe === 'function') _navRenderMe();
+      showStatsView(playerName);
+    };
+    photoInput.addEventListener('change', async () => {
+      const file = photoInput.files && photoInput.files[0];
+      if (!file) return;
+      let dataUrl;
+      try { dataUrl = await _photoFromFile(file); } catch (e) { photoErr.textContent = "That image couldn't be read."; return; }
+      await savePhoto(dataUrl);
+    });
+    const removeBtn = document.getElementById('profile-photo-remove');
+    if (removeBtn) removeBtn.addEventListener('click', () => savePhoto(null));
     const doSave = async () => {
       const saveBtn = document.getElementById('profile-name-save');
       saveBtn.disabled = true; errEl.style.color = ''; errEl.textContent = 'Saving…';

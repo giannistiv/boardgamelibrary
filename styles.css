@@ -1422,6 +1422,13 @@
   }
   .profile-name-input:focus{outline:none;border-color:var(--accent)}
   .profile-edit-actions{display:flex;gap:0.5rem;justify-content:center;margin-top:0.55rem}
+  /* profile photos: in every avatar circle, and the picker in the settings */
+  .avatar-photo{display:block;width:100%;height:100%;border-radius:50%;object-fit:cover}
+  .profile-photo-row{display:flex;align-items:center;gap:0.6rem;margin-bottom:0.3rem;flex-wrap:wrap}
+  .profile-photo-preview{width:44px;height:44px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;overflow:hidden;
+    background:var(--accent);color:var(--accent-ink);font-family:var(--font-display);font-weight:800;font-size:1.2rem}
+  .profile-photo-pick{display:inline-flex;align-items:center;cursor:pointer}
+  #profile-photo-err{margin-bottom:0.7rem}
   .profile-edit-save,.profile-edit-cancel{
     padding:0.42rem 1.1rem;border-radius:999px;font-family:inherit;
     font-size:0.82rem;font-weight:600;cursor:pointer;transition:opacity 0.15s;
@@ -1816,6 +1823,7 @@
   .hm-cell.hm-l3{background:rgba(226,176,74,0.78)}
   .hm-cell.hm-l4{background:#f0c668}
   .hm-cell.sel{outline:2px solid #fff;outline-offset:1px}
+  .hm-cell.hm-today{box-shadow:0 0 0 1.5px var(--accent)}
   .hm-foot{display:flex;align-items:center;justify-content:space-between;gap:0.7rem;margin-top:0.6rem;flex-wrap:wrap}
   .hm-detail{font-size:0.76rem;opacity:0.8;flex:1;min-width:60%}
   .hm-detail b{color:var(--accent)}
@@ -1974,6 +1982,16 @@
   .rg-col:hover .rg-bar{filter:brightness(1.18)}
   .rg-num{font-size:0.62rem;font-weight:700;color:#f0e6d3;opacity:0.5}
   .rg-summary{display:flex;justify-content:space-between;font-size:0.68rem;font-weight:600;color:#f0e6d3;opacity:0.6;padding:0 0.1rem}
+  .rg-col[data-rg]{cursor:pointer}
+  .rg-col.sel .rg-bar{filter:brightness(1.3);box-shadow:0 0 0 2px rgba(94,234,212,0.45)}
+  .rg-col.sel .rg-num{color:#5eead4;opacity:1;font-weight:800}
+  .rg-games{margin-top:0.8rem}
+  .rg-games-head{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-3);margin-bottom:0.45rem}
+  .rg-games-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:0.3rem 0.8rem}
+  .rg-game{display:flex;align-items:center;gap:0.6rem;min-width:0;padding:0.25rem;border:0;border-radius:var(--r-s);background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}
+  .rg-game:hover{background:var(--card-2)}
+  .rg-game img{width:34px;height:34px;border-radius:6px;object-fit:cover;flex-shrink:0;background:var(--card-3)}
+  .rg-game span{font-size:0.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   @media (max-width:600px){
     .rlg-star{font-size:1.5rem}
     .rlg-star + .rlg-star{margin-left:0.04rem}
@@ -2584,9 +2602,11 @@
     box-shadow:0 0 0 4px rgba(232,176,75,0.18);
   }
   .profile-id{flex:1;min-width:0}
+  /* a long name wraps rather than being cut, and the line leaves room for
+     letters that hang below it (β, γ, ρ, ς…) */
   .profile-hero .stats-player-name{
-    font-family:var(--font-display);font-weight:700;font-size:1.8rem;line-height:1.1;letter-spacing:-0.015em;
-    color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    font-family:var(--font-display);font-weight:700;font-size:1.8rem;line-height:1.2;letter-spacing:-0.015em;
+    color:var(--text);overflow-wrap:anywhere;
   }
   .profile-hero .stats-player-sub{font-size:0.88rem;margin-top:0.2rem}
   .profile-bgg{display:inline-block;margin-top:0.3rem;font-size:0.8rem;color:var(--text-2);text-decoration:none;border-bottom:1px solid var(--line-2);white-space:nowrap}
@@ -2731,6 +2751,24 @@
     letter-spacing:-0.015em;color:var(--text);
   }
   html.compact .lb-title{font-size:1.6rem}
+
+  /* ── Leaderboard: a player's games and what each did to their rating ── */
+  .lb-row,.lb-podium-card{cursor:pointer}
+  .lb-row.lb-open{border-color:var(--accent-line);background:var(--accent-soft)}
+  .lb-podium-card.lb-open{outline:2px solid var(--accent-line);outline-offset:2px}
+  .lb-break{margin:0.1rem 0 0.9rem;padding:0.75rem 0.85rem 0.5rem;border-radius:var(--r);background:var(--card);border:1px solid var(--line-2)}
+  .lb-break-head{display:flex;align-items:flex-start;justify-content:space-between;gap:0.7rem;font-size:0.8rem;color:var(--text-2);line-height:1.45;margin-bottom:0.45rem}
+  .lb-break-head b{color:var(--text)}
+  .lb-break-profile{flex-shrink:0;padding:0.2rem 0.7rem;border-radius:999px;border:1px solid var(--line-2);background:none;color:var(--text-2);font:inherit;font-size:0.76rem;font-weight:600;cursor:pointer}
+  .lb-break-profile:hover{border-color:var(--accent-line);color:var(--accent)}
+  .lb-break-row{display:flex;align-items:center;gap:0.7rem;padding:0.4rem 0;border-top:1px solid var(--line);cursor:pointer}
+  .lb-break-row img{width:36px;height:36px;border-radius:7px;object-fit:cover;flex-shrink:0;background:var(--card-3)}
+  .lb-break-name{flex:1;min-width:0;display:flex;flex-direction:column}
+  .lb-break-name span{font-size:0.86rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .lb-break-name small{font-size:0.7rem;color:var(--text-3)}
+  .lb-break-val{font-weight:800;font-variant-numeric:tabular-nums;font-size:0.9rem;color:var(--text-3)}
+  .lb-break .pos{color:var(--win)}
+  .lb-break .neg{color:var(--loss)}
 
   /* ── Ranks → Hours ── */
   .hr-header{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:0.5rem}

@@ -135,3 +135,21 @@ _applyAllPlayOverrides();
 
 
 // Cubby configuration
+
+// ── Profile photos ──
+// A player can add a photo in their profile settings: a small square JPEG
+// kept with their profile (_saveProfilePhoto in boot.js). Wherever a player's
+// initial sits in a circle, the photo shows instead. Only a plain base64
+// image data URL is accepted, so nothing else can reach the page this way.
+const _PHOTO_RE = /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/;
+function playerPhoto(name) {
+  if (!name || typeof PROFILE_DATA === 'undefined') return null;
+  const orig = typeof _origCanon === 'function' ? _origCanon(name) : name;
+  const e = PROFILE_DATA[orig] || PROFILE_DATA[name];
+  return e && typeof e.photo === 'string' && _PHOTO_RE.test(e.photo) ? e.photo : null;
+}
+// What goes inside an avatar circle: the photo, else the initial.
+function avatarInner(name) {
+  const photo = playerPhoto(name);
+  return photo ? `<img class="avatar-photo" src="${photo}" alt="">` : _escapeHtml(String(name || '?').charAt(0).toUpperCase());
+}

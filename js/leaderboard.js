@@ -494,7 +494,6 @@ function _renderEloLeaderboardInto(container, mode) {
     const p = podium[idx];
     if (!p) return '';
     const color = ratingColor(_eloToColorScore(p.elo));
-    const initial = p.name.charAt(0).toUpperCase();
     const prov = p.provisional ? '<span class="lb-prov-badge">PROV</span>' : '';
     const streakHtml = p.streak >= 2 ? `<span class="lb-streak" title="${p.streak}-win streak">🔥 ${p.streak}</span>` : '';
     // Show the most recent point delta on the podium too — same convention as
@@ -504,7 +503,7 @@ function _renderEloLeaderboardInto(container, mode) {
     const deltaTxt = `${deltaSign}${p.lastDelta.toFixed(1)}`;
     return `<div class="lb-podium-card rank-${idx + 1}" data-visit-player="${p.name.replace(/"/g, '&quot;')}">
       <div class="lb-podium-medal">${medals[idx]}</div>
-      <div class="lb-podium-avatar">${initial}</div>
+      <div class="lb-podium-avatar">${avatarInner(p.name)}</div>
       <div class="lb-podium-name">${p.name}${prov}${streakHtml}</div>
       <div class="lb-podium-elo" style="color:${color}">${p.elo}</div>
       <div class="lb-podium-delta ${deltaCls}">${deltaTxt}</div>
@@ -515,7 +514,6 @@ function _renderEloLeaderboardInto(container, mode) {
   const listHtml = rest.map((p, i) => {
     const rank = podium.length + i + 1;
     const color = ratingColor(_eloToColorScore(p.elo));
-    const initial = p.name.charAt(0).toUpperCase();
     const deltaCls = p.lastDelta > 0 ? 'pos' : (p.lastDelta < 0 ? 'neg' : '');
     const deltaSign = p.lastDelta > 0 ? '+' : '';
     const deltaTxt = `${deltaSign}${p.lastDelta.toFixed(1)}`;
@@ -523,7 +521,7 @@ function _renderEloLeaderboardInto(container, mode) {
     const streakHtml = p.streak >= 2 ? `<span class="lb-streak" title="${p.streak}-win streak">🔥 ${p.streak}</span>` : '';
     return `<div class="lb-row" data-visit-player="${p.name.replace(/"/g, '&quot;')}">
       <div class="lb-rank">${rank}</div>
-      <div class="lb-avatar">${initial}</div>
+      <div class="lb-avatar">${avatarInner(p.name)}</div>
       <div class="lb-name-block">
         <div class="lb-name">${p.name}${prov}</div>
         <div class="lb-sub"><span>${p.plays} play${p.plays !== 1 ? 's' : ''}</span>${streakHtml}</div>
@@ -548,12 +546,82 @@ function _renderEloLeaderboardInto(container, mode) {
     </div>
     ${isSouth ? _boardSouthPlaysSectionHtml() : ''}`;
 
+  _wireLeaderboardClicks(container, mode);
+}
+
+// Tapping a player on the leaderboard opens what's behind their rating: each
+// game they played this year and what it did to their rating (+/-), with a
+// way on to their profile. Tapping again (or another player) closes it. The
+// rival names still go straight to the profile.
+function _wireLeaderboardClicks(container, mode) {
   container.querySelectorAll('[data-visit-player]').forEach(el => {
     el.addEventListener('click', () => {
+      if (el.closest('.lb-row, .lb-podium-card')) { _lbToggleBreakdown(container, el, mode); return; }
       showStatsView(el.dataset.visitPlayer, 'visiting');
       window.scrollTo(0, 0);
     });
   });
+}
+
+function _lbToggleBreakdown(container, el, mode) {
+  const name = el.dataset.visitPlayer;
+  const open = container.querySelector('.lb-break');
+  const same = open && open.dataset.player === name;
+  if (open) open.remove();
+  container.querySelectorAll('.lb-open').forEach(x => x.classList.remove('lb-open'));
+  if (same) return;
+  const panel = document.createElement('div');
+  panel.className = 'lb-break';
+  panel.dataset.player = name;
+  panel.innerHTML = _lbBreakdownHtml(name, mode);
+  // under the row, or under the whole podium for the top three
+  (el.closest('.lb-podium') || el).insertAdjacentElement('afterend', panel);
+  el.classList.add('lb-open');
+  panel.querySelector('[data-lb-profile]').addEventListener('click', () => {
+    showStatsView(name, 'visiting');
+    window.scrollTo(0, 0);
+  });
+  panel.querySelectorAll('[data-lb-game]').forEach(r => r.addEventListener('click', () => {
+    const game = findGameByBggId(r.dataset.lbGame);
+    if (game) openModal(game);
+  }));
+  panel.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+}
+
+function _lbBreakdownHtml(name, mode) {
+  const deltas = _computePerPlayElo(mode);
+  const games = new Map();
+  let total = 0, plays = 0;
+  for (const id in PLAY_HISTORY) {
+    PLAY_HISTORY[id].forEach((p, idx) => {
+      const d = deltas.get(`${id}|${p.date}|${idx}`);
+      if (!d || !(name in d)) return;
+      const g = games.get(id) || { id, plays: 0, wins: 0, net: 0 };
+      g.plays++;
+      g.net += d[name];
+      if (p.sc.some(s => (NAME_MAP[s.n] || s.n) === name && s.w)) g.wins++;
+      games.set(id, g);
+      total += d[name];
+      plays++;
+    });
+  }
+  const list = [...games.values()].sort((a, b) => b.net - a.net);
+  const signed = v => `${v > 0 ? '+' : v < 0 ? '&minus;' : ''}${Math.abs(v).toFixed(1)}`;
+  const cls = v => (v > 0.05 ? 'pos' : v < -0.05 ? 'neg' : '');
+  const rows = list.map(g => {
+    const game = findGameByBggId(g.id);
+    return `<div class="lb-break-row" data-lb-game="${g.id}">
+        <img src="images/${g.id}.jpg" alt="" loading="lazy" onerror="__imgFallback(this, ${g.id})">
+        <div class="lb-break-name"><span>${_escapeHtml(game ? game.name : 'Game #' + g.id)}</span><small>${g.plays} play${g.plays !== 1 ? 's' : ''} &middot; ${g.wins} win${g.wins !== 1 ? 's' : ''}</small></div>
+        <span class="lb-break-val ${cls(g.net)}">${signed(g.net)}</span>
+      </div>`;
+  }).join('');
+  return `
+      <div class="lb-break-head">
+        <span><b>${_escapeHtml(name)}</b>: <span class="${cls(total)}">${signed(total)}</span> from ${plays} play${plays !== 1 ? 's' : ''} in ${new Date().getFullYear()}, on top of 1000</span>
+        <button type="button" class="lb-break-profile" data-lb-profile>Profile &rsaquo;</button>
+      </div>
+      ${rows || '<div class="lb-empty">No rated plays this year.</div>'}`;
 }
 
 let _ranksTab = 'elo';   // which ranking the Ranks tab shows: 'elo' | 'hours'

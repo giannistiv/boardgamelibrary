@@ -92,7 +92,7 @@ function _navRenderMe() {
   if (!btn) return;
   const me = _navPlayer();
   btn.innerHTML = me
-    ? `<span class="appbar-avatar">${_escapeHtml(me.charAt(0).toUpperCase())}</span><span class="appbar-me-name">${_escapeHtml(me)}</span>`
+    ? `<span class="appbar-avatar">${avatarInner(me)}</span><span class="appbar-me-name">${_escapeHtml(me)}</span>`
     : '<span class="appbar-avatar">?</span><span class="appbar-me-name">Who are you?</span>';
   btn.setAttribute('aria-label', me ? `Your profile (${me})` : 'Pick your player');
 }

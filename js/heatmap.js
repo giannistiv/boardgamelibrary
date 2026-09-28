@@ -64,11 +64,13 @@ function _heatmapInner(playerName, year) {
     }
     monthRow += `<span class="hm-mon">${label}</span>`;
   }
+  const now = new Date();
+  const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
   for (let dt = new Date(start); dt <= end; dt.setUTCDate(dt.getUTCDate() + 1)) {
     const inYear = dt.getUTCFullYear() === year;
     const key = dayKey(dt);
     const n = inYear ? (d.counts[key] || 0) : 0;
-    const cls = inYear ? `hm-cell hm-l${_heatmapLevel(n)}` : 'hm-cell hm-out';
+    const cls = inYear ? `hm-cell hm-l${_heatmapLevel(n)}${key === todayKey ? ' hm-today' : ''}` : 'hm-cell hm-out';
     const title = inYear ? `${n} play${n === 1 ? '' : 's'} · ${MON[dt.getUTCMonth()]} ${dt.getUTCDate()}` : '';
     cells += `<div class="${cls}"${inYear ? ` data-date="${key}" title="${title}"` : ''}></div>`;
   }
@@ -124,6 +126,13 @@ function _wireHeatmap(playerName) {
     section.innerHTML = _heatmapInner(playerName, year);
     _wireHeatmap(playerName);
   };
+  // Where the grid scrolls sideways (phones), start with today's week in the middle.
+  const scroller = section.querySelector('.hm-scroll');
+  const today = section.querySelector('.hm-cell.hm-today');
+  if (scroller && today && scroller.scrollWidth > scroller.clientWidth) {
+    const x = today.getBoundingClientRect().left - scroller.getBoundingClientRect().left + scroller.scrollLeft;
+    scroller.scrollLeft = Math.max(0, x - scroller.clientWidth / 2 + today.offsetWidth / 2);
+  }
   const prev = section.querySelector('[data-hm-prev]');
   const next = section.querySelector('[data-hm-next]');
   if (prev && !prev.disabled) prev.addEventListener('click', () => rerender(_heatmapYear - 1));

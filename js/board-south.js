@@ -149,13 +149,8 @@ function showBoardSouthView() {
   const host = document.createElement('div');
   _renderEloLeaderboardInto(host, 'south');
   container.innerHTML = subTabsHtml + host.innerHTML;
-  // Re-wire the visit-player handlers since we copied innerHTML.
-  container.querySelectorAll('[data-visit-player]').forEach(el => {
-    el.addEventListener('click', () => {
-      showStatsView(el.dataset.visitPlayer, 'visiting');
-      window.scrollTo(0, 0);
-    });
-  });
+  // Re-wire the player taps since we copied innerHTML.
+  _wireLeaderboardClicks(container, 'south');
   container.querySelectorAll('[data-bs-sub]').forEach(el => {
     el.addEventListener('click', () => {
       const s = el.dataset.bsSub;
@@ -768,9 +763,8 @@ function _openBoardSouthAddModal(skipFlagSet) {
 
 function _renderInsightsPlayers(players, wrColor) {
   return players.map(p => {
-    const initial = p.name.charAt(0).toUpperCase();
     return `<div class="stats-player-row" data-visit-player="${p.name.replace(/"/g, '&quot;')}">
-      <div class="stats-player-avatar">${initial}</div>
+      <div class="stats-player-avatar">${avatarInner(p.name)}</div>
       <div class="stats-player-info">
         <div class="stats-player-info-name">${p.name}</div>
         <div class="stats-player-info-detail">${p.plays} plays &middot; ${p.games} games &middot; ${p.wr}% WR</div>

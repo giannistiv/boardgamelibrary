@@ -673,7 +673,7 @@ function renderPickerList(filter) {
   list.innerHTML = filtered.map(p => {
     const wr = p.plays > 0 ? Math.round(p.wins / p.plays * 100) : 0;
     return `<div class="picker-player" data-name="${_escapeHtml(p.name)}">
-      <span class="picker-avatar" aria-hidden="true">${_escapeHtml(p.name.charAt(0).toUpperCase())}</span>
+      <span class="picker-avatar" aria-hidden="true">${avatarInner(p.name)}</span>
       <span class="picker-player-name">${_escapeHtml(p.name)}</span>
       <span class="picker-player-meta">${p.plays} plays &middot; ${wr}% wins</span>
     </div>`;

@@ -151,21 +151,36 @@ async function _saveProfileName(newName) {
   if (!FIREBASE_DB) return { ok: false, err: 'No connection.' };
   const orig = _origCanon(cur) || (NAME_MAP[cur] || cur);
   const existing = PROFILE_DATA[orig] || {};
-  const body = JSON.stringify({ ...existing, name: newName, updatedAt: Date.now() });
+  if (!(await _putProfile(orig, { ...existing, name: newName, updatedAt: Date.now() }))) return { ok: false, err: 'Save failed — try again.' };
+  PROFILE_DATA[orig] = { ...existing, name: newName };
+  localStorage.setItem('bgl-player', newName);
+  return { ok: true };
+}
+
+// Write a whole profile entry. Prefer the clean /profiles node; fall back to
+// the gameImages piggyback if its rule isn't in place yet. fetch resolves even
+// on HTTP errors, so we check ok.
+async function _putProfile(orig, entry) {
+  const body = JSON.stringify(entry);
   const put = async (path) => {
     try {
       const res = await fetch(`${FIREBASE_DB}/${path}/${encodeURIComponent(orig)}.json`, { method: 'PUT', body });
       return !!(res && res.ok);
     } catch (e) { return false; }
   };
-  // Prefer the clean /profiles node; fall back to the gameImages piggyback if
-  // its rule isn't in place yet. fetch resolves even on HTTP errors, so we
-  // check ok — otherwise we'd point this device at a name with no play data.
-  let ok = await put(PROFILE_STORE_PRIMARY);
-  if (!ok) ok = await put(PROFILE_STORE_FALLBACK);
-  if (!ok) return { ok: false, err: 'Save failed — try again.' };
-  PROFILE_DATA[orig] = { ...existing, name: newName };
-  localStorage.setItem('bgl-player', newName);
+  return (await put(PROFILE_STORE_PRIMARY)) || (await put(PROFILE_STORE_FALLBACK));
+}
+
+// Set (a data URL) or remove (null) the logged-in player's photo.
+async function _saveProfilePhoto(dataUrl) {
+  const cur = localStorage.getItem('bgl-player');
+  if (!cur) return { ok: false, err: 'Not logged in.' };
+  if (!FIREBASE_DB) return { ok: false, err: 'No connection.' };
+  const orig = _origCanon(cur) || (NAME_MAP[cur] || cur);
+  const next = { ...(PROFILE_DATA[orig] || {}), updatedAt: Date.now() };
+  if (dataUrl) next.photo = dataUrl; else delete next.photo;
+  if (!(await _putProfile(orig, next))) return { ok: false, err: 'Save failed — try again.' };
+  PROFILE_DATA[orig] = next;
   return { ok: true };
 }
 

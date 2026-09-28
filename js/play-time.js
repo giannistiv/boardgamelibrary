@@ -390,7 +390,7 @@ function _renderHoursRankingInto(container) {
     const p = podium[i];
     return `<div class="lb-podium-card rank-${i + 1}"${visit(p.name)}>
         <div class="lb-podium-medal">${medals[i]}</div>
-        <div class="lb-podium-avatar">${esc(p.name.charAt(0).toUpperCase())}</div>
+        <div class="lb-podium-avatar">${avatarInner(p.name)}</div>
         <div class="lb-podium-name">${esc(p.name)}</div>
         <div class="lb-podium-elo hr-val">${h(p.min)}</div>
         <div class="lb-podium-meta">${p.plays} play${p.plays !== 1 ? 's' : ''}</div>
@@ -404,7 +404,7 @@ function _renderHoursRankingInto(container) {
   const mineHidden = myIdx >= 3 && !shown.includes(d.players[myIdx]);
   const row = (p, rank) => `<div class="lb-row${p.name === me ? ' hr-me' : ''}"${visit(p.name)}>
         <div class="lb-rank">${rank}</div>
-        <div class="lb-avatar">${esc(p.name.charAt(0).toUpperCase())}</div>
+        <div class="lb-avatar">${avatarInner(p.name)}</div>
         <div class="lb-name-block"><div class="lb-name">${esc(p.name)}</div><div class="lb-sub"><span>${p.plays} play${p.plays !== 1 ? 's' : ''}</span></div></div>
         <div class="lb-elo-block"><div class="lb-elo hr-val">${h(p.min)}</div></div>
       </div>`;
