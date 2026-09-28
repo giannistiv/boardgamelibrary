@@ -1874,16 +1874,6 @@
   .pt-game-more{font-size:0.7rem;color:var(--text-3);margin-top:0.3rem}
   .play-duration.est{cursor:help}
 
-  /* ── Win odds: "Who'd win?" on the game page, a line on Tonight's suggestions ── */
-  .wo-chips{display:flex;flex-wrap:wrap;gap:0.35rem;margin:0.2rem 0 0.7rem}
-  .wo-row .pt-p-bar i{background:rgba(232,176,75,0.55)}
-  .wo-row.fav .pt-p-bar i{background:var(--accent)}
-  .wo-row.fav .pt-p-name{color:var(--text);font-weight:700}
-  .wo-rows .pc-note{margin-top:0.5rem}
-  .wo-line{font-size:0.74rem;color:var(--text-3);margin-top:0.35rem;line-height:1.45}
-  .wo-line span{font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-right:0.2rem}
-  .wo-line b{color:var(--text-2);font-weight:700}
-
   /* ── Game page insights: characters, your scores ── */
   .gi-block{margin:0 0 1.3rem}
   .gi-sub{font-size:0.74rem;color:var(--text-3);margin:-0.2rem 0 0.6rem;line-height:1.45}

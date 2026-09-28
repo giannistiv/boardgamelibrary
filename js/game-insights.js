@@ -66,7 +66,7 @@ function buildRolesHtml(game, plays) {
 // Your scores in this game, oldest to newest, and the trend.
 function buildScoreTrendHtml(game, plays) {
   const me = _ptViewer();
-  if (!me || !plays || plays.length < 4) return '';
+  if (!me || !plays || plays.length < 3) return '';
   const asc = plays.slice().reverse().sort(byPlayOrder);
   const pts = [];
   for (const p of asc) {
@@ -75,7 +75,7 @@ function buildScoreTrendHtml(game, plays) {
     const v = _recScore(s.s);
     if (v !== null) pts.push({ v, w: !!s.w, date: p.date });
   }
-  if (pts.length < 4 || pts.every(x => x.v === 0)) return '';   // all zeros: no score kept
+  if (pts.length < 3 || pts.every(x => x.v === 0)) return '';   // all zeros: no score kept
   const low = _recLowBest(asc, _recIsCoop(game, plays));
   const better = (a, b) => (low ? a < b : a > b);
   const avgOf = xs => xs.reduce((a, x) => a + x.v, 0) / xs.length;
@@ -121,6 +121,7 @@ function buildScoreTrendHtml(game, plays) {
           </svg>
           <div class="gi-stats">
             <span>Best <b>${num(best.v)}</b> <small>${_fmtDateShort(best.date)}</small></span>
+            ${pts.length >= 5 ? `<span>Last 5 <b>${num(avgOf(pts.slice(-5)))}</b></span>` : ''}
             <span>Average <b>${num(all)}</b></span>
           </div>
           ${trend ? `<div class="gi-trend-line">${trend}</div>` : ''}
