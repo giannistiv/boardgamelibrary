@@ -1874,6 +1874,29 @@
   .pt-game-more{font-size:0.7rem;color:var(--text-3);margin-top:0.3rem}
   .play-duration.est{cursor:help}
 
+  /* ── Game page insights: characters, your scores, going first ── */
+  .gi-block{margin:0 0 1.3rem}
+  .gi-sub{font-size:0.74rem;color:var(--text-3);margin:-0.2rem 0 0.6rem;line-height:1.45}
+  .gi-yours{font-size:0.8rem;color:var(--text-2);margin:0 0 0.55rem;line-height:1.45}
+  .gi-yours b{color:var(--accent)}
+  .gi-block .pt-p-val small{font-weight:500;color:var(--text-3)}
+  .gi-block .pt-p.mine .pt-p-name{color:var(--text)}
+  .gi-chart{display:block;width:100%;height:auto;margin:0.2rem 0 0.4rem;overflow:visible}
+  .gi-chart polyline{fill:none;stroke:var(--accent-line);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+  .gi-chart .avg{stroke:var(--line-3);stroke-width:1;stroke-dasharray:4 4}
+  .gi-chart circle.w{fill:var(--accent)}
+  .gi-chart circle.l{fill:var(--card);stroke:var(--text-3);stroke-width:1.4}
+  .gi-stats{display:flex;flex-wrap:wrap;gap:0.3rem 1.2rem;font-size:0.78rem;color:var(--text-3)}
+  .gi-stats b{color:var(--text);font-size:0.9rem}
+  .gi-stats small{margin-left:0.2rem}
+  .gi-trend-line{font-size:0.78rem;color:var(--text-2);margin-top:0.45rem;line-height:1.5}
+  .gi-trend{display:inline-block;font-weight:700;font-size:0.72rem;padding:0.05rem 0.5rem;border-radius:999px;margin-right:0.35rem;background:rgba(255,255,255,0.06);color:var(--text-2)}
+  .gi-trend.up{background:var(--win-soft);color:var(--win)}
+  .gi-trend.down{background:var(--loss-soft);color:var(--loss)}
+  .gi-fact{margin:-0.4rem 0 1.3rem;padding:0.7rem 0.85rem;border-radius:var(--r);background:var(--accent-soft);border:1px solid var(--accent-line);font-size:0.82rem;line-height:1.5;color:var(--text-2)}
+  .gi-fact b{color:var(--text)}
+  .gi-fact-k{display:block;font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--accent);margin-bottom:0.15rem}
+
   /* ── Year in Review ("Wrapped") ── */
   .wr-banner{
     display:flex;align-items:center;gap:0.9rem;cursor:pointer;

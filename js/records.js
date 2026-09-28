@@ -53,6 +53,23 @@ function _recIsCoop(game, plays) {
   return teamWins > 0 || (Array.isArray(game.categories) && game.categories.includes('Co-op'));
 }
 
+// Whether the lowest score wins (golf-style games): which end the winners'
+// scores sit at, over the competitive plays with different scores.
+function _recLowBest(plays, coop) {
+  if (coop) return false;
+  let hi = 0, lo = 0;
+  for (const p of plays) {
+    const all = p.sc.map(s => ({ s, v: _recScore(s.s) })).filter(x => x.v !== null);
+    const won = all.filter(x => x.s.w);
+    if (!won.length || all.length < 2) continue;
+    const vs = all.map(x => x.v), max = Math.max(...vs), min = Math.min(...vs);
+    if (max === min) continue;
+    if (won.some(x => x.v === max)) hi++;
+    else if (won.some(x => x.v === min)) lo++;
+  }
+  return lo > hi;
+}
+
 // Longest run of consecutive wins in `seq` (oldest first, true = win).
 function _recStreak(seq) {
   let cur = 0, max = 0;
@@ -82,24 +99,16 @@ function buildGameRecordsHtml(game, plays) {
   // Scores: which end wins (golf-style games are "lowest wins"), best, worst,
   // and the average winning score.
   const scored = [];
-  let hiWins = 0, loWins = 0;
   const winScores = [];
   for (const p of asc) {
     const all = p.sc.map(s => ({ s, v: _recScore(s.s) })).filter(x => x.v !== null);
     all.forEach(x => { if (!_recIsAnon(x.s.n)) scored.push({ name: x.s.n, v: x.v, date: p.date }); });
     const won = all.filter(x => x.s.w);
     if (won.length) winScores.push(won[0].v);  // one per play, however many tied
-    if (!coop && won.length && all.length > 1) {
-      const vs = all.map(x => x.v), max = Math.max(...vs), min = Math.min(...vs);
-      if (max !== min) {
-        if (won.some(x => x.v === max)) hiWins++;
-        else if (won.some(x => x.v === min)) loWins++;
-      }
-    }
   }
   // All zeros is BGStats' placeholder for "no score kept", not a record.
   if (scored.every(x => x.v === 0)) { scored.length = 0; winScores.length = 0; }
-  const lowBest = loWins > hiWins;
+  const lowBest = _recLowBest(asc, coop);
   const better = (a, b) => (lowBest ? a < b : a > b);
   let best = null, worst = null;
   for (const x of scored) {  // oldest first, so ties go to whoever got there first

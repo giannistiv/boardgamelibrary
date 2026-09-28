@@ -43,6 +43,13 @@ const ACHIEVEMENTS = [
   { id:'best-friend',     name:'Best Friend',     desc:'Reach 50 plays with the same opponent' },
   { id:'gateway-drug',    name:'Gateway Drug',    desc:"Win the first time someone else plays a new game" },
   { id:'renaissance',     name:'Renaissance Player',desc:'Play games from 5 different decades in a single year' },
+  // ── Time at the table (estimated hours, see play-time.js) ──
+  { id:'hours-100',       name:'Hundred Hours',   desc:'Spend 100 hours at the table' },
+  { id:'hours-1000',      name:'Thousand-Hour Club',desc:'Spend 1,000 hours at the table' },
+  { id:'deep-dive',       name:'Deep Dive',       desc:'Spend 24 hours on a single game' },
+  { id:'magnum-opus',     name:'Magnum Opus',     desc:'Spend 100 hours on a single game' },
+  { id:'long-haul',       name:'Long Haul',       desc:'Spend 10 hours at the table in one day' },
+  { id:'full-time',       name:'Full-Time Job',   desc:'Spend 40 hours at the table in one week' },
 ];
 
 // Achievements with custom SVG icons. Anything else falls back to default.svg
@@ -60,6 +67,8 @@ const _ACH_ICON_IDS = new Set([
   'true-believer','eurogamer','tactician','uwe-disciple',
   'year-of-champ','wooden-spoon','tiebreaker','speed-run','big-group',
   'decade-hopper','best-friend','gateway-drug','renaissance',
+  // Time at the table
+  'hours-100','hours-1000','deep-dive','magnum-opus','long-haul','full-time',
 ]);
 function _achievementIcon(id) {
   return _ACH_ICON_IDS.has(id) ? `images/achievements/${id}.svg` : `images/achievements/default.svg`;
@@ -93,7 +102,7 @@ function computeAchievements(playerName) {
     for (const p of PLAY_HISTORY[bggId]) {
       if (!p || !p.date || !Array.isArray(p.sc)) continue;
       const me = p.sc.find(s => s.n === playerName);
-      const entry = { date: p.date, t: p.t, e: p.e, bggId: Number(bggId), sc: p.sc, location: p.l };
+      const entry = { date: p.date, t: p.t, e: p.e, bggId: Number(bggId), sc: p.sc, location: p.l, orig: p };
       allPlays.push(entry);
       if (me) plays.push({ ...entry, me });
     }
@@ -122,6 +131,8 @@ function computeAchievements(playerName) {
   const decadeSet = new Set();       // distinct release decades played
   const decadeByYear = {};           // calendar year → Set of decades played that year
   const opponentPlayCounts = {};     // opponent name → count of plays together
+  let totalMin = 0;                  // estimated time at the table (minutes)
+  const minByGame = {}, minByDate = {}, minByWeek = {};
 
   // Pre-compute first-play date per (bggId, name) for 'gateway-drug'.
   const firstPlayOfGameByName = {}; // bggId → { name → 'YYYY-MM-DD' }
@@ -285,6 +296,23 @@ function computeAchievements(playerName) {
         playsByIsoWeek[wk] = (playsByIsoWeek[wk] || 0) + 1;
         if (playsByIsoWeek[wk] === 10) mark('speed-run', p.date);
       }
+    }
+
+    // ── Time at the table: hours overall, on one game, in a day, in a week. ──
+    {
+      const est = typeof playTimeEstimate === 'function' ? playTimeEstimate(p.orig) : null;
+      const min = est ? est.min : 0;
+      const wk = isoWeekKey(p.date) || p.date;
+      totalMin += min;
+      minByGame[p.bggId] = (minByGame[p.bggId] || 0) + min;
+      minByDate[p.date] = (minByDate[p.date] || 0) + min;
+      minByWeek[wk] = (minByWeek[wk] || 0) + min;
+      if (totalMin >= 100 * 60)             mark('hours-100',   p.date);
+      if (totalMin >= 1000 * 60)            mark('hours-1000',  p.date);
+      if (minByGame[p.bggId] >= 24 * 60)    mark('deep-dive',   p.date);
+      if (minByGame[p.bggId] >= 100 * 60)   mark('magnum-opus', p.date);
+      if (minByDate[p.date] >= 10 * 60)     mark('long-haul',   p.date);
+      if (minByWeek[wk] >= 40 * 60)         mark('full-time',   p.date);
     }
 
     // ── Decade tracking: lifetime + per-year. ──

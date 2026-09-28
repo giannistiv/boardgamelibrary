@@ -521,6 +521,9 @@ function openModal(game) {
           <div class="ph-stat"><span class="ph-stat-val">${fmtDate(lastPlayed)}</span><span class="ph-stat-label">Last Played</span></div>
         </div>
         ${buildGameRecordsHtml(game, plays)}
+        ${buildFirstPlayerHtml(game, plays)}
+        ${buildScoreTrendHtml(game, plays)}
+        ${buildRolesHtml(game, plays)}
         ${buildGameTimeHtml(game, plays)}
         ${campaignHtml}
         ${skyTeamHtml}
