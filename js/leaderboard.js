@@ -556,11 +556,14 @@ function _renderEloLeaderboardInto(container, mode) {
   });
 }
 
+let _ranksTab = 'elo';   // which ranking the Ranks tab shows: 'elo' | 'hours'
+
 function showLeaderboardView() {
-  // Top-level Leaderboard tab now shows only the Main Elo league.
+  // The Ranks tab: the main Elo league, or hours at the table (play-time.js).
   // Board South lives in its own tab (for BS regulars).
   const container = document.getElementById('leaderboard-view');
-  _renderEloLeaderboardInto(container, 'main');
+  if (_ranksTab === 'hours') _renderHoursRankingInto(container);
+  else _renderEloLeaderboardInto(container, 'main');
   window.scrollTo(0, 0);
 }
 

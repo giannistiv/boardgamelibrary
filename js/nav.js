@@ -5,7 +5,7 @@
 // together:
 //   Library  → our shelf · Ilioupoli (members)
 //   Explore  → Games · Tonight · Players · Stats
-//   Ranks    → Everyone · Board South (regulars)
+//   Ranks    → Leaderboard · Hours · Board South (regulars)
 //   You      → Profile · Achievements · Challenges
 // The views and their switchTo…() functions are unchanged; this module only
 // calls them and mirrors whichever view is open (a MutationObserver keeps it
@@ -35,7 +35,7 @@ function _navState() {
   if (lib && lib.style.display !== 'none' && !document.querySelector('.stats-view.open')) return { group: 'library', sub: 'shelf' };
   if (_navIsOpen('ilioupoli-view')) return { group: 'library', sub: 'ilioupoli' };
   if (_navIsOpen('games-view')) return { group: 'explore', sub: (typeof _exploreTab !== 'undefined' ? _exploreTab : 'games') };
-  if (_navIsOpen('leaderboard-view')) return { group: 'ranks', sub: 'everyone' };
+  if (_navIsOpen('leaderboard-view')) return { group: 'ranks', sub: _ranksTab === 'hours' ? 'hours' : 'everyone' };
   if (_navIsOpen('boardsouth-view')) return { group: 'ranks', sub: 'boardsouth' };
   if (_navIsOpen('stats-view')) {
     const visiting = typeof _viewingProfile !== 'undefined' && _viewingProfile;
@@ -59,7 +59,7 @@ function _navSubItems(group) {
   if (group === 'explore') return [['games', 'Games'], ['tonight', 'Tonight'], ['players', 'Players'], ['stats', 'Stats']];
   if (group === 'ranks') {
     const bs = typeof _activeBoardSouthVoter === 'function' ? _activeBoardSouthVoter() : null;
-    return bs ? [['everyone', 'Everyone'], ['boardsouth', 'Board South']] : [];
+    return [['everyone', 'Leaderboard'], ['hours', 'Hours']].concat(bs ? [['boardsouth', 'Board South']] : []);
   }
   if (group === 'you') return me ? [['profile', 'Profile'], ['achievements', 'Achievements'], ['challenges', 'Challenges']] : [];
   return [];
@@ -74,7 +74,11 @@ function _navGo(group, sub) {
     _exploreTab = tab;
     return alreadyThere ? showGamesView() : switchToGames();
   }
-  if (group === 'ranks') return sub === 'boardsouth' ? switchToBoardSouth() : switchToLeaderboard();
+  if (group === 'ranks') {
+    if (sub === 'boardsouth') return switchToBoardSouth();
+    if (sub) _ranksTab = sub === 'hours' ? 'hours' : 'elo';
+    return switchToLeaderboard();
+  }
   if (group === 'you') {
     if (sub === 'achievements') return switchToAchievements();
     if (sub === 'challenges') return switchToChallenges();
@@ -99,6 +103,8 @@ function _navCompact() {
   const html = document.documentElement;
   const zoomed = document.body.classList.contains('mobile-library');
   html.classList.toggle('compact', zoomed || window.innerWidth < 900);
+  // the profile's folded sections are only folded on a phone
+  if (!html.classList.contains('compact')) document.querySelectorAll('.pc-fold:not([open])').forEach(d => { d.open = true; });
   if (zoomed) {
     const landscape = window.matchMedia && window.matchMedia('(orientation: landscape)').matches;
     const device = landscape ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height);

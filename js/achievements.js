@@ -593,6 +593,7 @@ function _openLatestPlaysModal(playerName, plays) {
           <div class="lpm-row-info">
             <div class="lpm-row-name">${_escapeHtml(p.game.name)}</div>
             <div class="lpm-row-meta">${metaBits.join(' · ')}</div>
+            ${p.play && milestoneBadges(playerName, p.play) ? `<div class="ms-badges">${milestoneBadges(playerName, p.play)}</div>` : ''}
           </div>
           ${tagHtml}
           ${resultHtml}

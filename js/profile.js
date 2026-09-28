@@ -316,7 +316,8 @@ function wireRateLastGame(container, playerName, isOwnProfile, recentPlays) {
 
 // Letterboxd-style ratings histogram: one bar per score 1-10, height by how
 // many games the player rated that score. Returns '' if they've rated nothing.
-function buildRatingsGraphHtml(playerName) {
+// How many games a player has rated, how often each score, and the average.
+function _ratingStats(playerName) {
   const counts = new Array(11).fill(0); // counts[1..10]
   let total = 0, sum = 0;
   for (const bggId in ratingsCache) {
@@ -325,9 +326,13 @@ function buildRatingsGraphHtml(playerName) {
     const v = _ratingValue(entry[playerName]);
     if (v >= 1 && v <= 10) { counts[v]++; total++; sum += v; }
   }
+  return { counts, total, avg: total ? (sum / total).toFixed(1) : '' };
+}
+
+function buildRatingsGraphHtml(playerName) {
+  const { counts, total, avg } = _ratingStats(playerName);
   if (!total) return '';
   const max = Math.max.apply(null, counts.slice(1));
-  const avg = (sum / total).toFixed(1);
   let cols = '';
   for (let v = 1; v <= 10; v++) {
     const c = counts[v];
@@ -350,6 +355,24 @@ function buildRatingsGraphHtml(playerName) {
 // sequence (rating, Wrapped, favorites, head-to-head, activity, latest plays,
 // ratings, charts, recommendations).
 const _pcSec = (order, html) => (html && String(html).trim()) ? `<div class="pc-sec" style="order:${order}">${html}</div>` : '';
+
+// On a phone the less-used sections fold behind a one-line summary, so the
+// profile isn't one long wall; on wide screens they're open and the summary
+// row is hidden. What's been opened stays open while the page is in use.
+const _pcFoldOpen = {};
+function _pcFold(key, title, summary, html) {
+  if (!html || !String(html).trim()) return '';
+  const open = !document.documentElement.classList.contains('compact') || _pcFoldOpen[key];
+  return `<details class="pc-fold" data-fold="${key}"${open ? ' open' : ''}>
+      <summary><span class="pc-fold-title">${title}</span>${summary ? `<span class="pc-fold-sum">${summary}</span>` : ''}</summary>
+      <div class="pc-fold-body">${html}</div>
+    </details>`;
+}
+function _wirePcFolds(container) {
+  container.querySelectorAll('.pc-fold').forEach(d => d.addEventListener('toggle', () => {
+    if (document.documentElement.classList.contains('compact')) _pcFoldOpen[d.dataset.fold] = d.open;
+  }));
+}
 
 function showStatsView(playerName, visiting) {
   const loggedInPlayer = localStorage.getItem('bgl-player');
@@ -415,6 +438,7 @@ function showStatsView(playerName, visiting) {
       const hasWinner = play.sc.some(s => s.w);
       recentPlays.push({
         game,
+        play,
         bggId: Number(bggId),
         playIdx,
         date: play.date,
@@ -483,11 +507,13 @@ function showStatsView(playerName, visiting) {
           : '<span class="stats-game-wr" style="color:#f87171">LOSS</span>');
     const scoreTxt = p.score ? ` &middot; ${p.score} pts` : '';
     const roleTxt = p.role ? ` &middot; ${p.role}` : '';
+    const badges = milestoneBadges(playerName, p.play);
     return `<div class="stats-game-row" data-bgg-id="${p.game.bggId}">
       ${imgSrc ? `<img class="stats-game-img" src="${imgSrc}" alt="" onerror="__imgFallback(this, ${p.game.bggId})">` : ''}
       <div class="stats-game-info">
         <div class="stats-game-name">${p.game.name}</div>
         <div class="stats-game-detail">${fmtDate(p.date)}${scoreTxt}${roleTxt} &middot; ${p.players} player${p.players !== 1 ? 's' : ''}</div>
+        ${badges ? `<div class="ms-badges">${badges}</div>` : ''}
       </div>
       ${result}
     </div>`;
@@ -597,6 +623,9 @@ function showStatsView(playerName, visiting) {
     if (loc) playerLocs[loc] = (playerLocs[loc] || 0) + 1;
   }
   const chartsHtml = buildChartsHtml(playerDays, playerLocs, totalPlays);
+  const topOf = (o) => (Object.entries(o).sort((a, b) => b[1] - a[1])[0] || [])[0];
+  const whenSummary = [topOf(playerDays) ? `Mostly ${topOf(playerDays)}s` : '', _escapeHtml(topOf(playerLocs) || '')].filter(Boolean).join(' &middot; ');
+  const ratingStats = _ratingStats(playerName);
 
   const container = document.getElementById('stats-view');
   container.innerHTML = `
@@ -606,6 +635,8 @@ function showStatsView(playerName, visiting) {
       <div class="profile-id">
         <div class="stats-player-name">${_escapeHtml(playerName)}</div>
         <div class="stats-player-sub">${totalPlays.toLocaleString('en')} play${totalPlays !== 1 ? 's' : ''}${recentPlays.length ? ` &middot; since ${recentPlays[recentPlays.length - 1].date.slice(0, 4)}` : ''}${isOwnProfile ? '' : ' &middot; visiting'}</div>
+        ${_bggCollectionUrl(playerName)
+          ? `<a class="profile-bgg" href="${_bggCollectionUrl(playerName)}" target="_blank" rel="noopener">BGG collection&nbsp;&#8599;</a>` : ''}
       </div>
       ${isOwnProfile ? `<button class="profile-cog" id="btn-edit-name" title="Profile settings" aria-label="Profile settings"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>` : ''}
       ${isOwnProfile ? `<div class="profile-edit-form" id="profile-edit-form">
@@ -617,15 +648,10 @@ function showStatsView(playerName, visiting) {
         </div>
         <div class="profile-edit-err" id="profile-name-err"></div>
       </div>` : ''}
-      ${_bggCollectionUrl(playerName)
-        ? `<a class="stats-bgg-btn" href="${_bggCollectionUrl(playerName)}" target="_blank" rel="noopener">
-             View collection on BGG ↗
-           </a>`
-        : ''}
     </div>
 
     <div class="stats-grid">
-      <div class="stats-card">
+      <div class="stats-card key">
         <div class="stats-card-val">${totalPlays}</div>
         <div class="stats-card-label">Total Plays</div>
       </div>
@@ -633,7 +659,7 @@ function showStatsView(playerName, visiting) {
         <div class="stats-card-val">${totalWins}</div>
         <div class="stats-card-label">Total Wins</div>
       </div>
-      <div class="stats-card">
+      <div class="stats-card key">
         <div class="stats-card-val" style="color:${wrColor(winRate)}">${winRate}%</div>
         <div class="stats-card-label">Win Rate</div>
       </div>
@@ -641,7 +667,7 @@ function showStatsView(playerName, visiting) {
         <div class="stats-card-val">${coopWins}<span style="font-size:0.55em;opacity:0.55">/${coopPlays.length}</span></div>
         <div class="stats-card-label">Coop Wins</div>
       </div>
-      <div class="stats-card">
+      <div class="stats-card key">
         <div class="stats-card-val">${uniqueGames}</div>
         <div class="stats-card-label">Unique Games</div>
       </div>
@@ -650,27 +676,29 @@ function showStatsView(playerName, visiting) {
         <div class="stats-card-label">Different Players</div>
       </div>
     </div>
+    <div class="stats-more">${totalWins.toLocaleString('en')} wins &middot; ${coopWins}/${coopPlays.length} co-op won &middot; ${uniquePlayers} players</div>
 
     <div class="profile-cols">
       <div class="profile-main">
         ${_pcSec(1, buildRateLastGameBar(playerName, isOwnProfile, recentPlays))}
         ${_pcSec(2, buildWrappedBanner(playerName))}
+        ${_pcSec(2, buildOnThisDayHtml(playerName))}
         ${_pcSec(3, favoritesHtml)}
         ${_pcSec(6, buildPlayHeatmapHtml(playerName))}
         ${_pcSec(7, `<div class="stats-section">
       <div class="stats-section-title">Latest Plays</div>
-      ${latestPlays.length > 0
+      <div class="lp-list">${latestPlays.length > 0
         ? latestPlays.map(latestPlayRowHtml).join('')
-        : '<div class="stats-game-detail" style="opacity:0.55;padding:0.4rem 0">No plays recorded yet.</div>'}
+        : '<div class="stats-game-detail" style="opacity:0.55;padding:0.4rem 0">No plays recorded yet.</div>'}</div>
       ${recentPlays.length > 0 ? `<button class="lpm-view-all-btn" data-lpm-open="${playerName.replace(/"/g,'&quot;')}">View all ${recentPlays.length} plays →</button>` : ''}
     </div>`)}
       </div>
       <div class="profile-side">
         ${_pcSec(4, h2hHtml)}
         ${_pcSec(5, buildPlayTimeHtml(playerName))}
-        ${_pcSec(8, buildRatingsGraphHtml(playerName))}
-        ${_pcSec(9, chartsHtml)}
-        ${_pcSec(10, isOwnProfile && recommendations.length > 0 ? `<div class="stats-section">
+        ${_pcSec(8, _pcFold('ratings', 'Ratings', ratingStats.total ? `${ratingStats.total} rated &middot; avg ${ratingStats.avg}` : '', buildRatingsGraphHtml(playerName)))}
+        ${_pcSec(9, _pcFold('when', 'When &amp; where', whenSummary, chartsHtml))}
+        ${_pcSec(10, _pcFold('recs', 'Recommended for you', `${recommendations.length} to try`, isOwnProfile && recommendations.length > 0 ? `<div class="stats-section">
       <div class="stats-section-title">Recommended for You</div>
       <div class="stats-player-sub" style="margin:-0.3rem 0 0.6rem">Top-rated games from the shelf you haven't tried yet</div>
       ${recommendations.map(g => {
@@ -684,10 +712,11 @@ function showStatsView(playerName, visiting) {
           <div class="stats-game-wr" style="color:${wrColor(Math.round((g.bggRating/10)*100))}">${g.bggRating}</div>
         </div>`;
       }).join('')}
-    </div>` : '')}
+    </div>` : ''))}
       </div>
     </div>
 
+    ${_pcFold('tools', _origCanon(playerName) === 'Στιβ' ? 'Import, share &amp; install' : 'Install the app', '', `
     ${isOwnProfile && typeof buildInstallCardHtml === 'function' ? buildInstallCardHtml() : ''}
 
     ${_origCanon(playerName) === 'Στιβ' ? `<div class="qr-section">
@@ -724,7 +753,7 @@ function showStatsView(playerName, visiting) {
         <div class="import-result-lines" id="importResultLines"></div>
       </div>
     </div>`;
-  })() : ''}
+  })() : ''}`)}
 
     ${isOwnProfile ? '<button class="change-profile-btn" id="btn-change-profile">Change Profile</button>' : ''}
   `;
@@ -733,6 +762,8 @@ function showStatsView(playerName, visiting) {
   if (_origCanon(playerName) === 'Στιβ' && typeof window.initImporter === 'function') {
     window.initImporter();
   }
+
+  _wirePcFolds(container);
 
   // Make game rows clickable
   container.querySelectorAll('[data-bgg-id]').forEach(el => {

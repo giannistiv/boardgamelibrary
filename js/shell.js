@@ -473,8 +473,9 @@ function openModal(game) {
       const boardHtml = play.b ? `<div class="play-board">&#9876; ${play.b}</div>` : '';
       const noWinnerHtml = (!hasWinner && !noResultGame) ? '<div class="play-no-winner">&#9760;&#65038; The game won</div>' : '';
       const durHtml = playTimeBadge(play);
+      const msHtml = milestoneBadges(_ptViewer(), play, true);
       return `<div class="play-entry">
-        <div class="play-entry-top"><span class="play-date">${fmtDate(play.date)}</span>${durHtml}</div>
+        <div class="play-entry-top"><span class="play-date">${fmtDate(play.date)}</span>${msHtml ? `<span class="ms-badges">${msHtml}</span>` : ''}${durHtml}</div>
         <div class="play-scores">${scoreHtml}</div>
         ${boardHtml}${noWinnerHtml}
       </div>`;

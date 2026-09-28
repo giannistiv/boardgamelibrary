@@ -33,22 +33,25 @@ function computeWrapped(playerName, year) {
       if (!p || !p.date || p.date.slice(0, 4) !== year || !Array.isArray(p.sc)) continue;
       const me = p.sc.find(s => s && s.n === playerName);
       if (!me) continue;
-      plays.push({ bggId: Number(bggId), date: p.date, t: p.t, e: p.e, sc: p.sc, me, b: p.b, l: p.l });
+      plays.push({ bggId: Number(bggId), date: p.date, t: p.t, e: p.e, sc: p.sc, me, b: p.b, l: p.l, orig: p });
     }
   }
   const totalPlays = plays.length;
   let wins = 0, minutes = 0, coop = 0, pvp = 0, solo = 0, coopWins = 0, maxTable = 0;
   let biggestTablePlay = null;
   const gameCount = {}, gameWins = {}, comp = {}, mech = {}, cat = {}, byDate = {}, byDow = {}, byMonth = {}, byLoc = {}, byDateMin = {}, designer = {};
+  const gameMin = {}, compMin = {};   // time per game, time with each companion
   let wSum = 0, wN = 0, heaviest = null, lightest = null;
   let oldest = null, newest = null;
   const rivalStats = {}; // opponent → {games, myWins, theirWins}
 
   for (const p of plays) {
     const g = findGameByBggId(p.bggId);
-    const mins = _estPlayMinutes(g);
+    const est = playTimeEstimate(p.orig);   // the same estimate as the profile's Time at the table
+    const mins = est ? est.min : _estPlayMinutes(g);
     if (p.me.w) wins++;
     minutes += mins;
+    gameMin[p.bggId] = (gameMin[p.bggId] || 0) + mins;
     gameCount[p.bggId] = (gameCount[p.bggId] || 0) + 1;
     gameWins[p.bggId] = (gameWins[p.bggId] || 0) + (p.me.w ? 1 : 0);
     if (g && g.complexity) { wSum += g.complexity; wN++;
@@ -85,6 +88,7 @@ function computeWrapped(playerName, year) {
       const isOwnerCo = _origCanon(s.n) === WRAPPED_OWNER || s.n === WRAPPED_OWNER;
       if (!isOwner && isOwnerCo) continue; // exclude the owner from others' crew
       comp[s.n] = (comp[s.n] || 0) + 1;
+      compMin[s.n] = (compMin[s.n] || 0) + mins;
       if (isPvP) {
         const r = rivalStats[s.n] || (rivalStats[s.n] = { games: 0, myWins: 0, theirWins: 0 });
         r.games++; if (p.me.w) r.myWins++; if (s.w) r.theirWins++;
@@ -93,8 +97,9 @@ function computeWrapped(playerName, year) {
   }
 
   const sortEnt = (o) => Object.entries(o).sort((a, b) => b[1] - a[1]);
-  const topGames = Object.keys(gameCount).map(b => ({ bggId: Number(b), count: gameCount[b], game: findGameByBggId(b) })).sort((a, b) => b.count - a.count);
-  const companions = sortEnt(comp).map(([name, count]) => ({ name, count }));
+  const topGames = Object.keys(gameCount).map(b => ({ bggId: Number(b), count: gameCount[b], min: gameMin[b] || 0, game: findGameByBggId(b) })).sort((a, b) => b.count - a.count);
+  const topByTime = topGames.slice().sort((a, b) => b.min - a.min);
+  const companions = sortEnt(comp).map(([name, count]) => ({ name, count, min: compMin[name] || 0 }));
   const rivals = Object.keys(rivalStats).map(n => ({ name: n, ...rivalStats[n] })).sort((a, b) => b.games - a.games);
 
   // first-ever play per game (all history) → which were new this year
@@ -149,12 +154,15 @@ function computeWrapped(playerName, year) {
 
   // Plays last year (for year-over-year) and rank among players this year.
   const ly = String(Number(year) - 1);
-  let lastYearPlays = 0;
+  let lastYearPlays = 0, lastYearMin = 0;
   const yearCounts = {}; // every non-hidden player's plays this year (for ranking)
   for (const bggId in PLAY_HISTORY) for (const p of PLAY_HISTORY[bggId]) {
     if (!p || !p.date || !Array.isArray(p.sc)) continue;
     const yr = p.date.slice(0, 4);
-    if (yr === ly && p.sc.some(s => s && s.n === playerName)) lastYearPlays++;
+    if (yr === ly && p.sc.some(s => s && s.n === playerName)) {
+      lastYearPlays++;
+      lastYearMin += (playTimeEstimate(p) || { min: 0 }).min;
+    }
     if (yr === year) for (const s of p.sc) {
       if (!s || !s.n || HIDDEN_PLAYERS.has(s.n)) continue;
       yearCounts[s.n] = (yearCounts[s.n] || 0) + 1;
@@ -167,6 +175,12 @@ function computeWrapped(playerName, year) {
   const rank = rankPos > 0 ? { pos: rankPos, of: field.length } : null;
 
   const firstPlay = chrono[0] ? { game: findGameByBggId(chrono[0].bggId), bggId: chrono[0].bggId, date: chrono[0].date } : null;
+
+  // Milestones reached this year: 10th+ plays of a game and overall play counts,
+  // biggest first.
+  const milestones = playerMilestones(playerName).list
+    .filter(h => h.date.slice(0, 4) === year && h.kind !== 'first')
+    .sort((a, b) => (b.kind === 'all') - (a.kind === 'all') || b.n - a.n);
 
   let ch = null; try { ch = computeChallenges(playerName); } catch (_) {}
 
@@ -198,7 +212,9 @@ function computeWrapped(playerName, year) {
     firstPlay, loveAtFirst, winStreak, bogey, specialty,
     biggestTable: biggestTablePlay,
     marathonHours: marathon ? Math.round(marathon[1] / 60) : 0, marathonDate: marathon ? marathon[0] : null,
-    lastYearPlays, rank, topDesigner, mechCount, oldest, newest
+    marathonPlays: marathon ? byDate[marathon[0]] : 0,
+    lastYearPlays, lastYearHours: Math.round(lastYearMin / 60), rank, topDesigner, mechCount, oldest, newest,
+    topByTime, milestones
   };
 }
 
@@ -260,7 +276,10 @@ function openWrappedModal(playerName, isOwnProfile) {
     <div class="wr-label">plays logged in ${_escapeHtml(d.year)}</div>
     <div class="wr-lead">${d.totalPlays >= 200 ? "That's borderline professional." : d.totalPlays >= 80 ? "A seriously well-played year." : d.totalPlays >= 30 ? "A great year of gaming." : "Every session counts."}</div>`);
 
-  const daysFlavor = `That's about ${Math.max(1, Math.round(d.hours / 24))} full day${Math.round(d.hours / 24) === 1 ? '' : 's'} of pure gaming${d.hours >= 100 ? " — no regrets." : "."}`;
+  const lastY = Number(d.year) - 1;
+  const hoursVs = d.lastYearHours >= 10 && d.hours !== d.lastYearHours
+    ? ` ${Math.abs(d.hours - d.lastYearHours)} hours ${d.hours > d.lastYearHours ? 'more' : 'fewer'} than in ${lastY}.` : '';
+  const daysFlavor = `That's about ${Math.max(1, Math.round(d.hours / 24))} full day${Math.round(d.hours / 24) === 1 ? '' : 's'} of pure gaming${d.hours >= 100 ? " — no regrets." : "."}${hoursVs}`;
   if (isOwnProfile && d.hours >= 20) {
     // Guess your hours
     const H = d.hours;
@@ -336,6 +355,27 @@ function openWrappedModal(playerName, isOwnProfile) {
           <span class="wr-topcount">${t.count}&times;</span>
         </div>`).join('')}
       </div>`);
+  }
+
+  // Where the hours went: the same games ranked by time instead of plays
+  if (d.topByTime.length >= 3 && d.hours >= 10) {
+    const top5 = d.topByTime.slice(0, 5);
+    const byPlays = d.topGames[0], byTime = d.topByTime[0];
+    const nm = t => _escapeHtml((t.game && t.game.name) || ('Game #' + t.bggId));
+    const lead = byPlays.bggId === byTime.bggId
+      ? `<b>${nm(byTime)}</b> won on plays <i>and</i> on hours.`
+      : `<b>${nm(byPlays)}</b> got the most plays, but <b>${nm(byTime)}</b> got the most hours.`;
+    slide(G.teal, `
+      <div class="wr-kicker">WHERE THE HOURS WENT</div>
+      <div class="wr-toplist">
+        ${top5.map((t, i) => `<div class="wr-toprow">
+          <span class="wr-toprank">${i + 1}</span>
+          <img class="wr-topcover" src="${cover(t.bggId)}" onerror="__imgFallback(this, ${t.bggId})">
+          <span class="wr-topname">${nm(t)}</span>
+          <span class="wr-topcount">${Math.round(t.min / 60)}h</span>
+        </div>`).join('')}
+      </div>
+      <div class="wr-lead">${lead}</div>`);
   }
 
   // Love at first play — a game discovered this year and then played a lot
@@ -520,6 +560,23 @@ function openWrappedModal(playerName, isOwnProfile) {
       <div class="wr-lead">${d.ch.tenComplete ? '10&times;10 complete — legendary.' : d.ch.alphaCount === 26 ? 'Full alphabet cleared!' : 'Plenty of quests still calling your name.'}</div>`);
   }
 
+  // Milestones reached this year
+  if (d.milestones.length) {
+    const ms = d.milestones.slice(0, 5);
+    const nm = id => { const g = findGameByBggId(id); return _escapeHtml(g ? g.name : 'Game #' + id); };
+    slide(G.gold, `
+      <div class="wr-kicker">MILESTONES</div>
+      <div class="wr-big" style="font-size:1.5rem">Round numbers, reached</div>
+      <div class="wr-toplist">
+        ${ms.map(h => `<div class="wr-toprow">
+          <img class="wr-topcover" src="${cover(h.bggId)}" onerror="__imgFallback(this, ${h.bggId})">
+          <span class="wr-topname">${h.kind === 'all' ? `Your <b>${_ordinal(h.n)}</b> play ever` : `<b>${_ordinal(h.n)}</b> ${nm(h.bggId)}`}</span>
+          <span class="wr-topcount">${_escapeHtml(_fmtDateShort(h.date).replace(/, \d{4}$/, ''))}</span>
+        </div>`).join('')}
+      </div>
+      ${d.milestones.length > ms.length ? `<div class="wr-lead">…and ${d.milestones.length - ms.length} more.</div>` : ''}`);
+  }
+
   // Busiest day
   if (d.busiestDay) {
     slide(G.blue, `
@@ -535,7 +592,7 @@ function openWrappedModal(playerName, isOwnProfile) {
       <div class="wr-kicker">MARATHON MODE</div>
       <div class="wr-num">${cnum(d.marathonHours)}</div>
       <div class="wr-label">hours of gaming in one day</div>
-      <div class="wr-lead">On ${_escapeHtml(_fmtDateShort(d.marathonDate))} you went the distance. Iron stamina.</div>`);
+      <div class="wr-lead">On ${_escapeHtml(_fmtDateShort(d.marathonDate))} you played ${d.marathonPlays} game${d.marathonPlays === 1 ? '' : 's'} and went the distance. Iron stamina.</div>`);
   }
 
   // Where you rank among the crew
@@ -571,7 +628,7 @@ function openWrappedModal(playerName, isOwnProfile) {
       <div class="wr-badge">&#129309;</div>
       <div class="wr-kicker">DYNAMIC DUO</div>
       <div class="wr-big" style="font-size:1.6rem">You &amp; ${_escapeHtml(duo.name)}</div>
-      <div class="wr-label">${duo.count} games together this year</div>
+      <div class="wr-label">${duo.count} games together this year${duo.min >= 120 ? ` &middot; about ${Math.round(duo.min / 60)} hours` : ''}</div>
       <div class="wr-lead">Some partnerships are just meant to be.</div>`);
   }
 

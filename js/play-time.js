@@ -335,6 +335,126 @@ function wirePlayTime(playerName) {
   });
 }
 
+// ── Ranks → Hours ──
+// Everyone's time at the table in a year, and who spends it together.
+let _hrYear = null;
+let _hrAll = false;   // the whole list, not just the top
+
+function playTimeRanking(year) {
+  const c = _ptAll();
+  const players = new Map(), pairs = new Map(), years = new Set();
+  const hidden = typeof HIDDEN_PLAYERS !== 'undefined' ? HIDDEN_PLAYERS : new Set();
+  for (const id in PLAY_HISTORY) {
+    for (const p of PLAY_HISTORY[id]) {
+      if (!p || !p.date || !Array.isArray(p.sc)) continue;
+      const y = Number(p.date.slice(0, 4));
+      years.add(y);
+      if (y !== year) continue;
+      const e = c.byPlay.get(p);
+      if (!e) continue;
+      const names = [...new Set(p.sc.map(s => s && s.n).filter(n => n && !_ptIsAnon(n) && !hidden.has(n)))];
+      for (const n of names) {
+        const r = players.get(n) || { name: n, min: 0, plays: 0 };
+        r.min += e.min; r.plays++; players.set(n, r);
+      }
+      for (let i = 0; i < names.length; i++) {
+        for (let j = i + 1; j < names.length; j++) {
+          const [a, b] = [names[i], names[j]].sort();
+          const k = a + '\u0000' + b;
+          const r = pairs.get(k) || { a, b, min: 0, plays: 0 };
+          r.min += e.min; r.plays++; pairs.set(k, r);
+        }
+      }
+    }
+  }
+  const byTime = (x, y) => y.min - x.min || y.plays - x.plays;
+  return { years: [...years].sort((a, b) => a - b), players: [...players.values()].sort(byTime), pairs: [...pairs.values()].sort(byTime) };
+}
+
+function _renderHoursRankingInto(container) {
+  const cy = new Date().getFullYear();
+  let year = _hrYear || cy;
+  let d = playTimeRanking(year);
+  if (!d.players.length && d.years.length) { year = d.years[d.years.length - 1]; d = playTimeRanking(year); }
+  _hrYear = year;
+  const me = _ptViewer();
+  const esc = s => _escapeHtml(s);
+  const visit = n => ` data-visit-player="${esc(n)}"`;
+  const h = min => `${Math.round(min / 60).toLocaleString('en')}<small>h</small>`;
+  const minY = d.years[0], maxY = d.years[d.years.length - 1];
+
+  const podium = d.players.slice(0, 3);
+  const medals = ['🥇', '🥈', '🥉'];
+  const slots = podium.length === 3 ? [1, 0, 2] : podium.length === 2 ? [1, 0] : [0];
+  const podiumHtml = slots.map(i => {
+    const p = podium[i];
+    return `<div class="lb-podium-card rank-${i + 1}"${visit(p.name)}>
+        <div class="lb-podium-medal">${medals[i]}</div>
+        <div class="lb-podium-avatar">${esc(p.name.charAt(0).toUpperCase())}</div>
+        <div class="lb-podium-name">${esc(p.name)}</div>
+        <div class="lb-podium-elo hr-val">${h(p.min)}</div>
+        <div class="lb-podium-meta">${p.plays} play${p.plays !== 1 ? 's' : ''}</div>
+      </div>`;
+  }).join('');
+
+  const TOP = 12;
+  const rest = d.players.slice(3);
+  let shown = _hrAll ? rest : rest.slice(0, TOP - 3);
+  const myIdx = d.players.findIndex(p => p.name === me);
+  const mineHidden = myIdx >= 3 && !shown.includes(d.players[myIdx]);
+  const row = (p, rank) => `<div class="lb-row${p.name === me ? ' hr-me' : ''}"${visit(p.name)}>
+        <div class="lb-rank">${rank}</div>
+        <div class="lb-avatar">${esc(p.name.charAt(0).toUpperCase())}</div>
+        <div class="lb-name-block"><div class="lb-name">${esc(p.name)}</div><div class="lb-sub"><span>${p.plays} play${p.plays !== 1 ? 's' : ''}</span></div></div>
+        <div class="lb-elo-block"><div class="lb-elo hr-val">${h(p.min)}</div></div>
+      </div>`;
+  let listHtml = shown.map((p, i) => row(p, i + 4)).join('');
+  if (mineHidden) listHtml += `<div class="hr-gap">&middot;&middot;&middot;</div>` + row(d.players[myIdx], myIdx + 1);
+  const moreBtn = rest.length > shown.length || _hrAll
+    ? `<button type="button" class="lpm-view-all-btn" data-hr-all>${_hrAll ? 'Show fewer' : `Show all ${d.players.length} players`}</button>` : '';
+
+  // who spends their time together: the viewer's companions, else the closest pairs
+  const mine = me ? d.pairs.filter(p => p.a === me || p.b === me).slice(0, 5) : [];
+  const together = mine.length
+    ? { title: 'Who you spend it with', rows: mine.map(p => ({ names: [p.a === me ? p.b : p.a], min: p.min, plays: p.plays })) }
+    : { title: 'Most time together', rows: d.pairs.slice(0, 5).map(p => ({ names: [p.a, p.b], min: p.min, plays: p.plays })) };
+  const topTogether = together.rows.length ? together.rows[0].min : 1;
+  const togetherHtml = together.rows.length ? `
+      <div class="hr-together">
+        <div class="stats-section-title">${together.title}</div>
+        ${together.rows.map(r => `<div class="pt-p"${r.names.length === 1 ? visit(r.names[0]) : ''}>
+            <span class="pt-p-name">${r.names.map(esc).join(' &amp; ')}</span>
+            <span class="pt-p-bar"><i style="width:${Math.max(3, Math.round((r.min / topTogether) * 100))}%"></i></span>
+            <span class="pt-p-val">${fmtPlayTime(r.min)}</span>
+          </div>`).join('')}
+      </div>` : '';
+
+  container.innerHTML = `
+    <div class="lb-header hr-header">
+      <div class="lb-title">Hours ${year}</div>
+      <div class="hm-nav">
+        <button class="hm-arrow" data-hr-step="-1"${year <= minY ? ' disabled' : ''} aria-label="Previous year">&lsaquo;</button>
+        <span class="hm-year">${year}</span>
+        <button class="hm-arrow" data-hr-step="1"${year >= maxY ? ' disabled' : ''} aria-label="Next year">&rsaquo;</button>
+      </div>
+    </div>
+    <div class="hr-intro">Time at the table, estimated for every play from BGG's playing time, the player count, first plays and replays. Everyone at the table gets the play's time.</div>
+    ${d.players.length ? `<div class="lb-podium">${podiumHtml}</div><div class="lb-list">${listHtml}</div>${moreBtn}${togetherHtml}`
+      : `<div class="lb-empty">No plays logged in ${year}.</div>`}`;
+
+  container.querySelectorAll('[data-visit-player]').forEach(el => el.addEventListener('click', () => {
+    showStatsView(el.dataset.visitPlayer, 'visiting');
+    window.scrollTo(0, 0);
+  }));
+  container.querySelectorAll('[data-hr-step]').forEach(b => b.addEventListener('click', () => {
+    if (b.disabled) return;
+    const ys = d.years, i = ys.indexOf(year) + Number(b.dataset.hrStep);
+    if (ys[i] != null) { _hrYear = ys[i]; _hrAll = false; _renderHoursRankingInto(container); }
+  }));
+  const all = container.querySelector('[data-hr-all]');
+  if (all) all.addEventListener('click', () => { _hrAll = !_hrAll; _renderHoursRankingInto(container); });
+}
+
 // ── Game page ──
 // A tile with the viewer's own time on this game.
 function buildGameTimeTile(bggId) {
