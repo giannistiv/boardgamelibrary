@@ -70,8 +70,11 @@ const _ACH_ICON_IDS = new Set([
   // Time at the table
   'hours-100','hours-1000','deep-dive','magnum-opus','long-haul','full-time',
 ]);
+// Bump when icon files change: the app keeps images it has seen for good (sw.js),
+// so a changed icon needs a new address to be fetched again.
+const ACH_ICON_REV = 2;
 function _achievementIcon(id) {
-  return _ACH_ICON_IDS.has(id) ? `images/achievements/${id}.svg` : `images/achievements/default.svg`;
+  return `images/achievements/${_ACH_ICON_IDS.has(id) ? id : 'default'}.svg?r=${ACH_ICON_REV}`;
 }
 
 // Heuristics for thematic-family achievements.
