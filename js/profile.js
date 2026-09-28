@@ -345,6 +345,12 @@ function buildRatingsGraphHtml(playerName) {
   </div>`;
 }
 
+// Profile sections are split into a main and a side column on wide screens;
+// on narrower ones the columns dissolve and `order` restores the one-column
+// sequence (rating, Wrapped, favorites, head-to-head, activity, latest plays,
+// ratings, charts, recommendations).
+const _pcSec = (order, html) => (html && String(html).trim()) ? `<div class="pc-sec" style="order:${order}">${html}</div>` : '';
+
 function showStatsView(playerName, visiting) {
   const loggedInPlayer = localStorage.getItem('bgl-player');
   const isOwnProfile = !visiting || visiting === loggedInPlayer;
@@ -643,29 +649,25 @@ function showStatsView(playerName, visiting) {
       </div>
     </div>
 
-    ${buildRateLastGameBar(playerName, isOwnProfile, recentPlays)}
-
-    ${buildWrappedBanner(playerName)}
-
-    ${favoritesHtml}
-
-    ${h2hHtml}
-
-    ${buildPlayHeatmapHtml(playerName)}
-
-    <div class="stats-section">
+    <div class="profile-cols">
+      <div class="profile-main">
+        ${_pcSec(1, buildRateLastGameBar(playerName, isOwnProfile, recentPlays))}
+        ${_pcSec(2, buildWrappedBanner(playerName))}
+        ${_pcSec(3, favoritesHtml)}
+        ${_pcSec(5, buildPlayHeatmapHtml(playerName))}
+        ${_pcSec(6, `<div class="stats-section">
       <div class="stats-section-title">Latest Plays</div>
       ${latestPlays.length > 0
         ? latestPlays.map(latestPlayRowHtml).join('')
         : '<div class="stats-game-detail" style="opacity:0.55;padding:0.4rem 0">No plays recorded yet.</div>'}
       ${recentPlays.length > 0 ? `<button class="lpm-view-all-btn" data-lpm-open="${playerName.replace(/"/g,'&quot;')}">View all ${recentPlays.length} plays →</button>` : ''}
-    </div>
-
-    ${buildRatingsGraphHtml(playerName)}
-
-    ${chartsHtml}
-
-    ${isOwnProfile && recommendations.length > 0 ? `<div class="stats-section">
+    </div>`)}
+      </div>
+      <div class="profile-side">
+        ${_pcSec(4, h2hHtml)}
+        ${_pcSec(7, buildRatingsGraphHtml(playerName))}
+        ${_pcSec(8, chartsHtml)}
+        ${_pcSec(9, isOwnProfile && recommendations.length > 0 ? `<div class="stats-section">
       <div class="stats-section-title">Recommended for You</div>
       <div class="stats-player-sub" style="margin:-0.3rem 0 0.6rem">Top-rated games from the shelf you haven't tried yet</div>
       ${recommendations.map(g => {
@@ -679,7 +681,9 @@ function showStatsView(playerName, visiting) {
           <div class="stats-game-wr" style="color:${wrColor(Math.round((g.bggRating/10)*100))}">${g.bggRating}</div>
         </div>`;
       }).join('')}
-    </div>` : ''}
+    </div>` : '')}
+      </div>
+    </div>
 
     ${isOwnProfile && typeof buildInstallCardHtml === 'function' ? buildInstallCardHtml() : ''}
 

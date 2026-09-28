@@ -1,10 +1,10 @@
 // ── App shell navigation ──
-// Five destinations — Library, Explore, Tonight, Ranks, You — in the top bar on
-// wide screens and a bottom tab bar on phones (same buttons; CSS moves them).
+// Four destinations — Library, Explore, Ranks, You — in the top bar on wide
+// screens and a bottom tab bar on phones (same buttons; CSS moves them).
 // A row of sub-tabs under the bar switches between the views that belong
 // together:
 //   Library  → our shelf · Ilioupoli (members)
-//   Explore  → Games · Players · Stats
+//   Explore  → Games · Tonight · Players · Stats
 //   Ranks    → Everyone · Board South (regulars)
 //   You      → Profile · Achievements · Challenges
 // The views and their switchTo…() functions are unchanged; this module only
@@ -14,12 +14,11 @@
 const NAV_ICONS = {
   library: '<svg viewBox="0 0 24 24"><path d="M4 19V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v14M8 19V7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v12M13.4 6.6l1.9-.5a1 1 0 0 1 1.2.7l3 11.3M3 20h18"/></svg>',
   explore: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg>',
-  tonight: '<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3.5"/><circle cx="9" cy="9" r=".9" class="dot"/><circle cx="15" cy="15" r=".9" class="dot"/><circle cx="15" cy="9" r=".9" class="dot"/><circle cx="9" cy="15" r=".9" class="dot"/><circle cx="12" cy="12" r=".9" class="dot"/></svg>',
   ranks: '<svg viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20h7M10 17h4v3h-4z"/></svg>',
   you: '<svg viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg>',
 };
 const NAV_ITEMS = [
-  ['library', 'Library'], ['explore', 'Explore'], ['tonight', 'Tonight'], ['ranks', 'Ranks'], ['you', 'You'],
+  ['library', 'Library'], ['explore', 'Explore'], ['ranks', 'Ranks'], ['you', 'You'],
 ];
 let _navLastExploreTab = 'games';
 
@@ -35,10 +34,7 @@ function _navState() {
   const lib = document.getElementById('library-view');
   if (lib && lib.style.display !== 'none' && !document.querySelector('.stats-view.open')) return { group: 'library', sub: 'shelf' };
   if (_navIsOpen('ilioupoli-view')) return { group: 'library', sub: 'ilioupoli' };
-  if (_navIsOpen('games-view')) {
-    if (typeof _exploreTab !== 'undefined' && _exploreTab === 'tonight') return { group: 'tonight', sub: '' };
-    return { group: 'explore', sub: (typeof _exploreTab !== 'undefined' ? _exploreTab : 'games') };
-  }
+  if (_navIsOpen('games-view')) return { group: 'explore', sub: (typeof _exploreTab !== 'undefined' ? _exploreTab : 'games') };
   if (_navIsOpen('leaderboard-view')) return { group: 'ranks', sub: 'everyone' };
   if (_navIsOpen('boardsouth-view')) return { group: 'ranks', sub: 'boardsouth' };
   if (_navIsOpen('stats-view')) {
@@ -60,7 +56,7 @@ function _navSubItems(group) {
     return (me && typeof ILIOUPOLI_MEMBERS !== 'undefined' && ILIOUPOLI_MEMBERS.has(me))
       ? [['shelf', 'Our shelf'], ['ilioupoli', 'Ilioupoli']] : [];
   }
-  if (group === 'explore') return [['games', 'Games'], ['players', 'Players'], ['stats', 'Stats']];
+  if (group === 'explore') return [['games', 'Games'], ['tonight', 'Tonight'], ['players', 'Players'], ['stats', 'Stats']];
   if (group === 'ranks') {
     const bs = typeof _activeBoardSouthVoter === 'function' ? _activeBoardSouthVoter() : null;
     return bs ? [['everyone', 'Everyone'], ['boardsouth', 'Board South']] : [];
@@ -71,7 +67,7 @@ function _navSubItems(group) {
 
 function _navGo(group, sub) {
   if (group === 'library') return sub === 'ilioupoli' ? switchToIlioupoli() : switchToLibrary();
-  if (group === 'tonight') { _exploreTab = 'tonight'; return switchToGames(); }
+  if (group === 'tonight') return _navGo('explore', 'tonight');
   if (group === 'explore') {
     const tab = sub || _navLastExploreTab || 'games';
     const alreadyThere = _navIsOpen('games-view');
@@ -113,7 +109,7 @@ function _navCompact() {
 function _navSync() {
   _navCompact();
   const st = _navState();
-  if (st.group === 'explore' && st.sub && st.sub !== 'tonight') _navLastExploreTab = st.sub;
+  if (st.group === 'explore' && st.sub) _navLastExploreTab = st.sub;
   document.querySelectorAll('#appnav [data-nav]').forEach(b => {
     const on = b.dataset.nav === st.group;
     b.classList.toggle('active', on);
