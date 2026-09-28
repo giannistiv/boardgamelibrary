@@ -645,6 +645,7 @@ function _openLatestPlaysModal(playerName, plays) {
   overlay.classList.add('open');
   overlay.setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
+  navOverlayOpened('lpm');   // back closes it (nav.js)
 }
 
 // Image-fallback helper for the Latest Plays modal covers — local image →
@@ -667,6 +668,7 @@ function _closeLatestPlaysModal() {
   overlay.classList.remove('open');
   overlay.setAttribute('aria-hidden', 'true');
   document.body.style.overflow = '';
+  navOverlayClosed('lpm');
 }
 
 // Wire global modal-close handlers once.

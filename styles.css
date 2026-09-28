@@ -450,7 +450,8 @@
   /* ── Modal ── */
   .modal-overlay{
     display:none;position:fixed;inset:0;
-    z-index:100;justify-content:center;align-items:center;padding:1rem;
+    /* above the full play log (200), so a game opened from it shows on top */
+    z-index:300;justify-content:center;align-items:center;padding:1rem;
     -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
     background:rgba(8,6,4,0.72);
   }
@@ -954,7 +955,7 @@
   /* ── Player Picker Overlay ── */
   .picker-overlay{
     display:none;position:fixed;inset:0;
-    z-index:200;justify-content:center;align-items:center;padding:1rem;
+    z-index:400;justify-content:center;align-items:center;padding:1rem;   /* over a game page too */
     -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
     background:rgba(8,6,4,0.8);
   }

@@ -366,7 +366,7 @@ function closeModal() {
       const player = localStorage.getItem('bgl-player');
       if (player) showChallengesView(player);
     }
-    if (history.state && history.state.modal) history.back();
+    if (history.state && history.state.bgl === 'modal') history.back();   // drop its back-button entry (nav.js)
   }
 }
 window.addEventListener('popstate', e => {
@@ -599,7 +599,8 @@ function openModal(game) {
     window.scrollTo(0, 0);
   }
 
-  history.pushState({modal: true}, '');
+  // a back-button entry (nav.js): back closes the game page
+  if (!(history.state && history.state.bgl === 'modal')) history.pushState(navEntry('modal'), '');
   wireStarRating();
   wireNotes();
   wireMarvelChampions();

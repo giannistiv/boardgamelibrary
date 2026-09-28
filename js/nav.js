@@ -112,6 +112,90 @@ function _navCompact() {
   }
 }
 
+// ── Back button ──
+// Every screen gets a history entry, and so does each overlay on top of it
+// (the game page, the full play log, Wrapped), so the phone's back button (or
+// a swipe back) closes what's on top and then walks back through the
+// screens, each at the scroll position it was left at. An entry records the
+// screen and which overlays were open: {bgl, view, stack, id}.
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+let _navRestoring = false;
+let _navSeq = 0;
+const _navScroll = new Map();   // entry id → scrollY on that screen
+const NAV_OVERLAYS = { lpm: 'lpm-overlay', wrapped: 'wrapped-overlay' };
+
+function _navKey(st) {
+  return st.visiting ? 'visit:' + _viewingProfile : st.group + '/' + (st.sub || '');
+}
+function _navOpenOverlays() {
+  return Object.keys(NAV_OVERLAYS).filter(k => _navIsOpen(NAV_OVERLAYS[k]));
+}
+function _navModalOpen() { return _navIsOpen('modal-overlay'); }
+// The history entry for something opening now: 'view', 'modal' or an overlay name.
+function navEntry(kind) {
+  return { bgl: kind, view: _navKey(_navState()), stack: _navOpenOverlays(), id: ++_navSeq + '-' + Date.now() };
+}
+// An overlay opened: give it an entry, so back closes it.
+function navOverlayOpened(kind) {
+  if (!(history.state && history.state.bgl === kind)) history.pushState(navEntry(kind), '');
+}
+// An overlay closed from inside it (✕, Escape…): drop its entry too.
+function navOverlayClosed(kind) {
+  if (history.state && history.state.bgl === kind) history.back();
+}
+
+// A new screen: a new entry. Until the app has finished starting (it may
+// show the library, then your profile), the screen replaces the entry.
+let _navReady = false;
+function navBooted() { _navReady = true; _navRecord(); }
+setTimeout(() => { if (!_navReady) navBooted(); }, 10000);   // if loading never finishes
+
+function _navRecord() {
+  if (_navRestoring || _navModalOpen() || _navOpenOverlays().length) return;
+  const key = _navKey(_navState());
+  const cur = history.state;
+  if (cur && cur.bgl && cur.view === key) return;
+  const entry = navEntry('view');
+  if (_navReady && cur && cur.bgl) history.pushState(entry, ''); else history.replaceState(entry, '');
+}
+
+// Open a screen by its key ('ranks/hours', 'visit:Δημητρης'…).
+function _navOpenKey(key) {
+  if (key.startsWith('visit:')) return showStatsView(key.slice(6), 'visiting');
+  const [group, sub] = key.split('/');
+  _navGo(group, sub || undefined);
+}
+
+window.addEventListener('popstate', (e) => {
+  const s = e.state;
+  if (!s || !s.bgl) return;
+  // close the overlays this entry didn't have open (the game page closes itself: shell.js)
+  const keep = new Set(s.stack || []);
+  if (s.bgl in NAV_OVERLAYS) keep.add(s.bgl);
+  if (!keep.has('lpm') && _navIsOpen('lpm-overlay')) _closeLatestPlaysModal();
+  if (!keep.has('wrapped') && _navIsOpen('wrapped-overlay')) {
+    const w = document.getElementById('wrapped-overlay');
+    if (w && w._wrClose) w._wrClose();
+  }
+  // and go back to its screen, where it was scrolled to
+  if (s.view && s.view !== _navKey(_navState())) {
+    _navRestoring = true;
+    try { _navOpenKey(s.view); } finally { _navRestoring = false; }
+    const y = _navScroll.get(s.id) || 0;
+    window.scrollTo(0, y);
+    setTimeout(() => window.scrollTo(0, y), 60);   // after late layout (covers, fonts)
+  }
+});
+
+let _navScrollTimer = null;
+window.addEventListener('scroll', () => {
+  clearTimeout(_navScrollTimer);
+  _navScrollTimer = setTimeout(() => {
+    const s = history.state;
+    if (s && s.bgl === 'view' && !_navModalOpen() && !_navOpenOverlays().length) _navScroll.set(s.id, window.scrollY);
+  }, 120);
+}, { passive: true });
+
 function _navSync() {
   _navCompact();
   const st = _navState();
@@ -133,6 +217,7 @@ function _navSync() {
   }
   document.body.dataset.nav = st.group;
   _navRenderMe();
+  _navRecord();
 }
 
 function initNav() {

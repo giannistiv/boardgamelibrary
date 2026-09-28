@@ -190,6 +190,7 @@ Promise.all([loadAllRatings(), loadAllFavorites(), loadImportedGames(), loadImpo
     document.documentElement.classList.remove('boot-to-profile');
     openPicker();
   }
+  navBooted();   // from here on, each new screen is a step back can return to
 });
 
 // ── JSON Import ──

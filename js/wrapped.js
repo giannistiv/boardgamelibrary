@@ -679,7 +679,11 @@ function openWrappedModal(playerName, isOwnProfile) {
     document.body.classList.remove('modal-open');
     overlay.innerHTML = '';
     if (overlay._wrKey) { document.removeEventListener('keydown', overlay._wrKey); overlay._wrKey = null; }
+    overlay._wrClose = null;
+    navOverlayClosed('wrapped');
   };
+  overlay._wrClose = close;
+  navOverlayOpened('wrapped');   // back closes it (nav.js)
   const next = () => { if (idx >= slides.length - 1) { close(); } else { show(idx + 1); } };
   const prev = () => show(idx - 1);
 
