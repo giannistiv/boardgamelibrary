@@ -159,6 +159,7 @@ function _mergePlayIntoHistory(uuid, p) {
   if (p.l && LOCATION_MAP[p.l]) p.l = LOCATION_MAP[p.l];
   const entry = { date: p.date, sc: p.sc, _uuid: uuid };
   if (p.t) entry.t = p.t;
+  if (p.e) entry.e = p.e;
   if (p.d) entry.d = p.d;
   if (p.b) entry.b = p.b;
   if (p.l) entry.l = p.l;
@@ -187,7 +188,7 @@ function _mergePlayIntoHistory(uuid, p) {
       } else {
         arr.splice(uuidIdx, 1);
         PLAY_HISTORY[bggId].push(entry);
-        PLAY_HISTORY[bggId].sort((a,b) => b.date.localeCompare(a.date));
+        PLAY_HISTORY[bggId].sort((a, b) => byPlayOrder(b, a));
       }
       placed = true;
       break;
@@ -209,7 +210,7 @@ function _mergePlayIntoHistory(uuid, p) {
       PLAY_HISTORY[bggId][idx] = entry;
     } else {
       PLAY_HISTORY[bggId].push(entry);
-      PLAY_HISTORY[bggId].sort((a,b) => b.date.localeCompare(a.date));
+      PLAY_HISTORY[bggId].sort((a, b) => byPlayOrder(b, a));
     }
     return status;
   }

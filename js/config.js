@@ -151,3 +151,23 @@ function campaignProgress(bggId, plays) {
 // official flight log, tinted by difficulty, with a tick on the ones landed
 // (a play that was *won*). Difficulty colours: Easy/green, Medium/yellow,
 // Hard/red, Extreme/(black→violet so it stays visible on the dark UI).
+
+// ── Play order ──
+// When a play happened, as a sortable string: the date, then BGStats' play
+// time, then the moment it was entered in BGStats. The play time is often one
+// default shared by a whole evening, so the entry time is what puts the
+// games of one night in the order they were played.
+function playOrderKey(p) {
+  return `${p.date || ''}|${p.t || ''}|${p.e || ''}`;
+}
+// oldest first (swap the arguments for newest first)
+function byPlayOrder(a, b) {
+  const x = playOrderKey(a), y = playOrderKey(b);
+  return x < y ? -1 : x > y ? 1 : 0;
+}
+
+// Keep every game's plays newest first, in true play order within a day.
+function _sortPlayHistory() {
+  for (const id in PLAY_HISTORY) PLAY_HISTORY[id].sort((a, b) => byPlayOrder(b, a));
+}
+_sortPlayHistory();

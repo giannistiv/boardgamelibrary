@@ -38,7 +38,7 @@ function _boardSouthPlaysSectionHtml() {
   // (ascending) rather than reversed — this matches the profile "latest plays"
   // list and keeps a day's later-played games sitting above the earlier ones.
   plays.sort((a, b) => {
-    const at = a.p.t || a.p.date, bt = b.p.t || b.p.date;
+    const at = playOrderKey(a.p), bt = playOrderKey(b.p);
     if (at !== bt) return bt.localeCompare(at);
     if (a.bggId !== b.bggId) return a.bggId - b.bggId;
     return a.idx - b.idx;

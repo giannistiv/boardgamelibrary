@@ -172,6 +172,7 @@ async function _saveProfileName(newName) {
 Promise.all([loadAllRatings(), loadAllFavorites(), loadImportedGames(), loadImportedPlays(), loadGameImages(), loadBoardSouthVotes(), loadOathswornRanks(), loadAllNotes(), loadProfiles()]).then(() => {
   _applyProfileOverrides();
   _applyAllPlayOverrides();
+  _sortPlayHistory();
   if (typeof _updateBoardSouthBtnVisibility === 'function') _updateBoardSouthBtnVisibility();
   const savedPlayer = localStorage.getItem('bgl-player');
   // Self-heal: a login can only ever be a player who exists in the play
@@ -356,11 +357,16 @@ window.initImporter = function(){
       const locName = locObj && locObj.name ? locObj.name : '';
       if (locName) persistedEntry.l = LOCATION_MAP[locName] || locName;
       if (play.modificationDate) persistedEntry.m = play.modificationDate;
+      if (play.entryDate) persistedEntry.e = play.entryDate;
 
       const saved = importedPlaysCache[play.uuid];
       if (saved && saved.m && persistedEntry.m && saved.m > persistedEntry.m) { olderSkipped++; return; }
       const status = _mergePlayIntoHistory(play.uuid, persistedEntry);
-      if (status === 'same') { unchanged++; return; }
+      // Unchanged plays aren't saved again — unless the saved copy predates
+      // entry times (needed to keep one night's plays in order).
+      const needsOrder = saved && persistedEntry.e && saved.e !== persistedEntry.e;
+      if (status === 'same' && !needsOrder) { unchanged++; return; }
+      if (status === 'same') { unchanged++; playPersists.push(persistImportedPlay(play.uuid, persistedEntry)); return; }
       playPersists.push(persistImportedPlay(play.uuid, persistedEntry));
       if (status === 'new') newPlays++; else updatedPlays++;
     });

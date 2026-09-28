@@ -62,9 +62,9 @@ function _recStreak(seq) {
 
 function buildGameRecordsHtml(game, plays) {
   if (!plays || plays.length < REC_MIN_PLAYS) return '';
-  // Oldest first; plays on the same day are stored newest first, so reverse
-  // before the (stable) date sort.
-  const asc = plays.slice().reverse().sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+  // Oldest first (plays are stored newest first; reversing first keeps any
+  // remaining ties in their stored order).
+  const asc = plays.slice().reverse().sort(byPlayOrder);
   const named = p => p.sc.filter(s => !_recIsAnon(s.n));
   const noResult = isNoResultGame(game.bggId);
   const coop = !noResult && _recIsCoop(game, plays);

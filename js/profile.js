@@ -418,6 +418,8 @@ function showStatsView(playerName, visiting) {
         bggId: Number(bggId),
         playIdx,
         date: play.date,
+        t: play.t,
+        e: play.e,
         won: playerEntry.w,
         noWinner: !hasWinner,
         score: playerEntry.s,
@@ -432,7 +434,7 @@ function showStatsView(playerName, visiting) {
     });
   }
 
-  recentPlays.sort((a, b) => b.date.localeCompare(a.date));
+  recentPlays.sort((a, b) => byPlayOrder(b, a));
 
   const totalPlays = recentPlays.length;
   const totalWins = recentPlays.filter(p => p.won).length;
@@ -519,10 +521,10 @@ function showStatsView(playerName, visiting) {
         const me = play.sc.find(s => s.n === loggedInPlayer);
         const them = play.sc.find(s => s.n === playerName);
         if (!me || !them) continue;
-        h2hPlays.push({ date: play.date, sc: play.sc });
+        h2hPlays.push({ date: play.date, t: play.t, e: play.e, sc: play.sc });
       }
     }
-    h2hPlays.sort((a, b) => a.date.localeCompare(b.date));
+    h2hPlays.sort(byPlayOrder);
 
     let myWins = 0, theirWins = 0, ties = 0;
     let curMyStreak = 0, longestMyStreak = 0;

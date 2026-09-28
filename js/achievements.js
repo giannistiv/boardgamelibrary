@@ -93,13 +93,13 @@ function computeAchievements(playerName) {
     for (const p of PLAY_HISTORY[bggId]) {
       if (!p || !p.date || !Array.isArray(p.sc)) continue;
       const me = p.sc.find(s => s.n === playerName);
-      const entry = { date: p.date, bggId: Number(bggId), sc: p.sc, location: p.l };
+      const entry = { date: p.date, t: p.t, e: p.e, bggId: Number(bggId), sc: p.sc, location: p.l };
       allPlays.push(entry);
       if (me) plays.push({ ...entry, me });
     }
   }
-  plays.sort((a, b) => a.date.localeCompare(b.date));
-  allPlays.sort((a, b) => a.date.localeCompare(b.date));
+  plays.sort(byPlayOrder);
+  allPlays.sort(byPlayOrder);
 
   const earned = {};
   const mark = (id, date) => { if (!earned[id]) earned[id] = date; };

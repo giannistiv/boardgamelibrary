@@ -75,7 +75,7 @@ function _computeMainEloForYear(year) {
     for (const p of PLAY_HISTORY[bggId]) {
       if (!p || !p.date || !Array.isArray(p.sc)) continue;
       if (p.date < start || p.date > end) continue;
-      flat.push({ bggId: Number(bggId), date: p.date, t: p.t || p.date, sc: p.sc });
+      flat.push({ bggId: Number(bggId), date: p.date, t: playOrderKey(p), sc: p.sc });
     }
   }
   flat.sort((a, b) => a.t.localeCompare(b.t));
@@ -151,8 +151,8 @@ function _computePerPlayElo(mode) {
   // be separated by time, so we mirror the display tie-break in reverse:
   // descending bggId, then descending array index.
   flat.sort((a, b) => {
-    const at = a.p.t || a.p.date;
-    const bt = b.p.t || b.p.date;
+    const at = playOrderKey(a.p);
+    const bt = playOrderKey(b.p);
     if (at !== bt) return at.localeCompare(bt);
     if (a.bggId !== b.bggId) return b.bggId - a.bggId;
     return b.idx - a.idx;
@@ -244,7 +244,7 @@ function _computeEloLeaderboard(mode) {
       if (!p || !p.date || !Array.isArray(p.sc)) return;
       if (p.date < yearStart) return;
       if (mode === 'south' && !_isBoardSouthPlay(p)) return;
-      flat.push({ bggId: Number(bggId), idx, date: p.date, t: p.t || p.date, sc: p.sc });
+      flat.push({ bggId: Number(bggId), idx, date: p.date, t: playOrderKey(p), sc: p.sc });
     });
   }
   // Replay oldest→newest. Full timestamp first (from the BGStats import) so

@@ -64,7 +64,7 @@ function showGamesView() {
       || { id: 'bgg_' + bggId, name: 'Game #' + bggId, bggId: Number(bggId), spineColor: '#555', categories: [] };
     for (const play of PLAY_HISTORY[bggId]) {
       totalPlays++;
-      allPlays.push({ game, date: play.date, sc: play.sc, b: play.b || '' });
+      allPlays.push({ game, date: play.date, t: play.t, e: play.e, sc: play.sc, b: play.b || '' });
       if (!gamePlayCounts[bggId]) gamePlayCounts[bggId] = { game, count: 0 };
       gamePlayCounts[bggId].count++;
 
@@ -85,7 +85,7 @@ function showGamesView() {
       }
     }
   }
-  allPlays.sort((a, b) => b.date.localeCompare(a.date));
+  allPlays.sort((a, b) => byPlayOrder(b, a));
 
   const gameRowHtml = (game, detail) => {
     const imgSrc = game.bggId >= 0 ? `images/${game.bggId}.jpg` : '';

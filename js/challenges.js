@@ -8,10 +8,10 @@ function computeChallenges(playerName) {
   for (const bggId in PLAY_HISTORY) {
     for (const p of PLAY_HISTORY[bggId]) {
       if (!p || !p.date || !Array.isArray(p.sc)) continue;
-      if (p.sc.some(s => s && s.n === playerName)) plays.push({ bggId: Number(bggId), date: p.date });
+      if (p.sc.some(s => s && s.n === playerName)) plays.push({ bggId: Number(bggId), date: p.date, t: p.t, e: p.e });
     }
   }
-  plays.sort((a, b) => a.date.localeCompare(b.date));
+  plays.sort(byPlayOrder);
 
   // New to me: games whose first-EVER play (all history) falls in this year.
   const firstPlay = {};

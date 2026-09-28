@@ -33,7 +33,7 @@ function computeWrapped(playerName, year) {
       if (!p || !p.date || p.date.slice(0, 4) !== year || !Array.isArray(p.sc)) continue;
       const me = p.sc.find(s => s && s.n === playerName);
       if (!me) continue;
-      plays.push({ bggId: Number(bggId), date: p.date, sc: p.sc, me, b: p.b, l: p.l });
+      plays.push({ bggId: Number(bggId), date: p.date, t: p.t, e: p.e, sc: p.sc, me, b: p.b, l: p.l });
     }
   }
   const totalPlays = plays.length;
@@ -121,7 +121,7 @@ function computeWrapped(playerName, year) {
   const marathon = sortEnt(byDateMin)[0] || null; // [date, minutes]
 
   // Longest consecutive-win run (over plays that had a winner), chronological.
-  const chrono = plays.slice().sort((a, b) => a.date.localeCompare(b.date));
+  const chrono = plays.slice().sort(byPlayOrder);
   let winStreak = 0, curStreak = 0;
   for (const p of chrono) {
     const someoneWon = p.sc.some(s => s && s.w);
