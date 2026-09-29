@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Keep data/bgg-hot.js in step with BGG's hot list ("The Hotness"): the 50
 games trending on BGG right now, with a few facts, whether each is still to
-come out, and pictures from its gallery. A game that drops off the list drops
+come out, pictures from its gallery, and for its detail sheet BGG's
+description, mechanics, categories and designers. A game that drops off the list drops
 off here too.
 
     python3 tools/fetch-hot.py
@@ -10,6 +11,7 @@ Run every few hours by .github/workflows/bgg-sync.yml. Public BGG data, so no
 token is needed. Facts and pictures are fetched once per game and kept while
 it stays on the list; the order and the ups and downs are fresh every run.
 """
+import html
 import importlib.util
 import json
 import os
@@ -22,6 +24,7 @@ OUT = os.path.join(ROOT, 'data', 'bgg-hot.js')
 API = 'https://api.geekdo.com/api'
 PICTURES = 8          # gallery pictures per game
 UPCOMING_OWNERS = 150  # fewer BGG owners than this and it's not out yet
+ABOUT_MAX = 2500      # characters of BGG's description kept per game
 
 _spec = importlib.util.spec_from_file_location('fetch_covers', os.path.join(ROOT, 'tools', 'fetch-covers.py'))
 covers = importlib.util.module_from_spec(_spec)
@@ -62,6 +65,41 @@ def pictures(gid):
     return []
 
 
+def about(html_text):
+    """BGG's description (HTML) as plain paragraphs, cut at ABOUT_MAX characters."""
+    text = re.sub(r'<br\s*/?>|</p>|</li>|</h\d>', '\n', html_text or '', flags=re.I)
+    text = re.sub(r'<li[^>]*>', '\n\u2022 ', text, flags=re.I)
+    text = html.unescape(re.sub(r'<[^>]+>', '', text))
+    paras, total = [], 0
+    for line in text.split('\n'):
+        line = re.sub(r'\s+', ' ', line).strip()
+        if not line:
+            continue
+        if total + len(line) > ABOUT_MAX:
+            cut = line[:max(0, ABOUT_MAX - total)]
+            cut = cut[:cut.rfind('. ') + 1] if '. ' in cut else ''
+            if cut:
+                paras.append(cut)
+            paras.append('\u2026')
+            break
+        paras.append(line)
+        total += len(line)
+    return paras
+
+
+def item_fields(item):
+    """What the detail sheet shows, from BGG's page for the game."""
+    links = item.get('links') or {}
+    names = lambda kind, n=12: [l.get('name') for l in (links.get(kind) or [])[:n] if l.get('name')]
+    return {
+        'cover': item.get('imageurl@2x') or item.get('imageurl') or '',
+        'about': about(item.get('description')),
+        'mechs': names('boardgamemechanic'),
+        'cats': names('boardgamecategory'),
+        'by': names('boardgamedesigner', 3),
+    }
+
+
 def details(gid):
     item = get(f'{API}/geekitems?objectid={gid}&objecttype=thing').get('item') or {}
     dyn = get(f'{API}/dynamicinfo?objectid={gid}&objecttype=thing').get('item') or {}
@@ -75,6 +113,7 @@ def details(gid):
         'owned': _int(st.get('numowned')),
         'img': img.get('previewthumb') or img.get('thumb') or img.get('square200') or '',
         'desc': re.sub(r'\s+', ' ', item.get('short_description') or '').strip()[:300],
+        **item_fields(item),
         'pics': pictures(gid),
     }
 
@@ -95,6 +134,11 @@ def main():
             except Exception as e:   # one game failing shouldn't sink the list
                 print(f'fetch-hot: {gid}: {type(e).__name__}: {e}')
                 g = {'id': int(gid), 'pics': []}
+        elif 'mechs' not in g:       # kept from before the detail sheet: add what it shows
+            try:
+                g.update(item_fields(get(f'{API}/geekitems?objectid={gid}&objecttype=thing').get('item') or {}))
+            except Exception as e:
+                print(f'fetch-hot: {gid}: {type(e).__name__}: {e}')
         year = _int(it.get('yearpublished'))
         g.update({
             'name': it.get('name') or g.get('name') or f'Game #{gid}',

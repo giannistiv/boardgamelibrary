@@ -1,7 +1,8 @@
 // ── Explore → Trending: BGG's hot list ──
 // The 50 games trending on BGG right now, the ones still to come out first,
 // each with a few facts, whose library has it, and pictures from its gallery
-// (tap one to see it large). Only for Στιβ and the Board South players.
+// (tap one to see it large). Tap a game for its page: BGG's description,
+// mechanics and categories. Only for Στιβ and the Board South players.
 // data/bgg-hot.js is refreshed every few hours by a scheduled job
 // (tools/fetch-hot.py) and fetched when the tab opens, so it's the latest.
 
@@ -40,7 +41,7 @@ function _hotCardHtml(g, libs) {
   const move = g.delta > 0 ? `<span class="hot-up">&#9650;${g.delta}</span>` : g.delta < 0 ? `<span class="hot-down">&#9660;${-g.delta}</span>` : '';
   const owners = libs.filter(l => l.ids.has(g.id)).map(l => `<span class="gb-owner">${esc(l.label)}</span>`).join('');
   const pics = (g.pics || []).map((p, i) => `<button type="button" class="hot-pic" data-hot-pic="${g.id}:${i}" aria-label="Picture ${i + 1}"><img src="${esc(p.s)}" alt="" loading="lazy"></button>`).join('');
-  return `<article class="hot-card">
+  return `<article class="hot-card" data-hot-id="${g.id}">
       <div class="hot-top">
         <span class="hot-pos">#${g.pos}${move}</span>
         <img class="hot-box" src="${esc(g.img || '')}" alt="" loading="lazy">
@@ -81,12 +82,67 @@ function wireTrendingTab(container) {
   box.addEventListener('click', (e) => {
     const chip = e.target.closest('[data-gb="hot"]');
     if (chip) { _hotFilter = chip.dataset.v; _renderHot(box); return; }
-    const pic = e.target.closest('[data-hot-pic]');
-    if (pic) {
-      const [id, i] = pic.dataset.hotPic.split(':').map(Number);
-      const g = (_hot.games || []).find(x => x.id === id);
-      if (g) _openPics(g, i);
+    if (_hotPicClick(e)) return;
+    const card = e.target.closest('.hot-card');
+    if (card && !e.target.closest('a')) {
+      const g = (_hot.games || []).find(x => x.id === Number(card.dataset.hotId));
+      if (g) _openHotGame(g);
     }
+  });
+}
+
+function _hotPicClick(e) {
+  const pic = e.target.closest('[data-hot-pic]');
+  if (!pic) return false;
+  const [id, i] = pic.dataset.hotPic.split(':').map(Number);
+  const g = (_hot.games || []).find(x => x.id === id);
+  if (g) _openPics(g, i);
+  return true;
+}
+
+// ── A trending game's page, in the game-page sheet ──
+function _openHotGame(g) {
+  const esc = _escapeHtml;
+  const libs = _gbLibraries().filter(l => l.ids.has(g.id));
+  const ours = findGameByBggId(g.id);
+  const facts = [
+    g.minp ? gmFact('players', g.minp === g.maxp || !g.maxp ? `${g.minp} players` : `${g.minp}&ndash;${g.maxp} players`) : '',
+    g.tmin ? gmFact('time', g.tmin === g.tmax || !g.tmax ? `${g.tmin} min` : `${g.tmin}&ndash;${g.tmax} min`) : '',
+    g.weight > 0 ? gmFact('weight', `Weight ${g.weight.toFixed(1)}`) : '',
+  ].join('');
+  const move = g.delta > 0 ? ` <span class="hot-up">&#9650;${g.delta}</span>` : g.delta < 0 ? ` <span class="hot-down">&#9660;${-g.delta}</span>` : '';
+  const tiles = [
+    `<div class="gm-tile"><div class="gm-tile-val">#${g.pos}${move}</div><div class="gm-tile-label">Hot on BGG</div></div>`,
+    g.rank > 0 ? `<div class="gm-tile"><div class="gm-tile-val">#${g.rank.toLocaleString('en')}</div><div class="gm-tile-label">BGG rank</div></div>` : '',
+    g.rating > 0 && g.owned >= 150 ? `<div class="gm-tile"><div class="gm-tile-val" style="color:${ratingColor(g.rating)}">${g.rating.toFixed(1)}</div><div class="gm-tile-label">BGG rating</div></div>` : '',
+  ].filter(Boolean);
+  const tags = (g.upcoming ? `<span class="hot-tag up">Upcoming${g.year ? ' &middot; ' + g.year : ''}</span>` : '')
+    + libs.map(l => `<span class="gb-owner">${esc(l.label)}</span>`).join('');
+  const about = (g.about && g.about.length ? g.about : g.desc ? [g.desc] : []).map(p => `<p>${esc(p)}</p>`).join('');
+  const chips = (list, cls) => list.map(x => `<span class="${cls}">${esc(x)}</span>`).join('');
+  const pics = (g.pics || []).map((p, i) => `<button type="button" class="hot-pic" data-hot-pic="${g.id}:${i}" aria-label="Picture ${i + 1}"><img src="${esc(p.s)}" alt="" loading="lazy"></button>`).join('');
+  openInfoModal(`
+    <div class="modal-cover"><img class="modal-cover-img" src="${esc(g.cover || g.img || '')}" alt="${esc(g.name)}"></div>
+    <div class="modal-body">
+      <div class="modal-header">
+        <span class="modal-title">${esc(g.name)}</span>
+        ${g.year ? `<span class="modal-year">${g.year}</span>` : ''}
+      </div>
+      ${g.by && g.by.length ? `<div class="modal-designer">by ${esc(g.by.join(', '))}</div>` : ''}
+      ${tags ? `<div class="hot-tags hot-sheet-tags">${tags}</div>` : ''}
+      ${facts ? `<div class="gm-facts">${facts}</div>` : ''}
+      <div class="gm-tiles hot-tiles">${tiles.join('')}</div>
+      ${about ? `<div class="modal-desc hot-about">${about}</div>` : ''}
+      ${g.mechs && g.mechs.length ? `<div class="hot-sec">Mechanics</div><div class="modal-mechanics">${chips(g.mechs, 'modal-mech')}</div>` : ''}
+      ${g.cats && g.cats.length ? `<div class="hot-sec">Categories</div><div class="modal-categories">${chips(g.cats, 'modal-cat')}</div>` : ''}
+      ${pics ? `<div class="hot-sec">Pictures</div><div class="hot-pics hot-sheet-pics">${pics}</div>` : ''}
+      <div class="hot-sheet-links">
+        ${ours ? `<button type="button" class="modal-bgg-link" data-hot-ours="${g.id}">Our game page &rsaquo;</button>` : ''}
+        <a class="modal-bgg-link" href="https://boardgamegeek.com/boardgame/${g.id}" target="_blank" rel="noopener">View on BoardGameGeek &#8599;</a>
+      </div>
+    </div>`, (e) => {
+    if (_hotPicClick(e)) return;
+    if (e.target.closest('[data-hot-ours]')) openModal(ours);
   });
 }
 

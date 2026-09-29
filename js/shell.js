@@ -399,7 +399,8 @@ function closeModal() {
 }
 window.addEventListener('popstate', e => {
   const overlay = document.getElementById('modal-overlay');
-  if (overlay.classList.contains('open')) {
+  // back to the game page's own entry (from pictures opened on it): it stays
+  if (overlay.classList.contains('open') && !(e.state && e.state.bgl === 'modal')) {
     overlay.classList.remove('open');
     document.body.classList.remove('modal-open');
     _restoreAfterModal();
@@ -422,6 +423,33 @@ window.addEventListener('popstate', e => {
   }
 });
 
+// The facts under a game page's title: players, time, weight.
+const GM_FACT_ICONS = {
+  players: '<circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0M16 11.5a3 3 0 1 0-1-5.8M17.5 20a5.5 5.5 0 0 0-2.3-4.5"/>',
+  time: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+  weight: '<path d="M12 4v16M5 20h14M6 8h12M6 8l-3 6a3 3 0 0 0 6 0zM18 8l-3 6a3 3 0 0 0 6 0z"/>',
+};
+function gmFact(icon, text) {
+  return `<span class="gm-fact"><svg viewBox="0 0 24 24" aria-hidden="true">${GM_FACT_ICONS[icon]}</svg>${text}</span>`;
+}
+
+// The game-page sheet with other content (a trending game's page). Closing it
+// leaves the screen underneath as it was, scrolled where it was.
+function openInfoModal(html, onClick) {
+  _modalOpenedFromStats = _modalOpenedFromGames = _modalOpenedFromLeaderboard = false;
+  _modalOpenedFromBoardSouth = _modalOpenedFromIlioupoli = _modalOpenedFromChallenges = false;
+  const content = document.getElementById('modal-content');
+  content.innerHTML = html;
+  content.onclick = onClick || null;
+  document.getElementById('modal-fav').style.display = 'none';
+  document.getElementById('modal-overlay').classList.add('open');
+  document.body.classList.add('modal-open');
+  content.scrollTop = 0;
+  document.querySelector('.modal').scrollTop = 0;
+  if (!(history.state && history.state.bgl === 'modal')) history.pushState(navEntry('modal'), '');
+  return content;
+}
+
 function openModal(game) {
   _modalOpenedFromStats = document.getElementById('stats-view').classList.contains('open');
   _modalOpenedFromGames = document.getElementById('games-view').classList.contains('open');
@@ -431,6 +459,7 @@ function openModal(game) {
   _modalOpenedFromChallenges = document.getElementById('challenges-view').classList.contains('open');
   const overlay = document.getElementById('modal-overlay');
   const content = document.getElementById('modal-content');
+  content.onclick = null;   // a trending game's page may have left its handler
 
   const c = game.spineColor || '#555';
   const fallbackBg = `linear-gradient(135deg, ${c}, ${adjustColor(c, -30)})`;
@@ -567,11 +596,10 @@ function openModal(game) {
   const eternalDecksHtml = (Number(game.bggId) === ED_BGGID) ? buildEternalDecksHtml(plays || []) : '';
   const aeonsEndHtml = buildAeonsEndHtml(game.bggId);
 
-  const fact = (icon, text) => `<span class="gm-fact"><svg viewBox="0 0 24 24" aria-hidden="true">${icon}</svg>${text}</span>`;
   const facts = [
-    game.players ? fact('<circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0M16 11.5a3 3 0 1 0-1-5.8M17.5 20a5.5 5.5 0 0 0-2.3-4.5"/>', `${_escapeHtml(game.players)} players`) : '',
-    gameTimeText(game) ? fact('<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>', _escapeHtml(gameTimeText(game))) : '',
-    game.complexity > 0 ? fact('<path d="M12 4v16M5 20h14M6 8h12M6 8l-3 6a3 3 0 0 0 6 0zM18 8l-3 6a3 3 0 0 0 6 0z"/>', `Weight ${Number(game.complexity).toFixed(1)}`) : '',
+    game.players ? gmFact('players', `${_escapeHtml(game.players)} players`) : '',
+    gameTimeText(game) ? gmFact('time', _escapeHtml(gameTimeText(game))) : '',
+    game.complexity > 0 ? gmFact('weight', `Weight ${Number(game.complexity).toFixed(1)}`) : '',
   ].join('');
   const playsPanel = [marvelUnitedHtml, marvelChampionsHtml, eternalDecksHtml, aeonsEndHtml, playHistoryHtml].join('');
   const tabs = [['overview', 'Overview'], ['plays', `Plays${plays && plays.length ? ` <span class="gm-tab-n">${plays.length}</span>` : ''}`]]
@@ -660,6 +688,7 @@ document.getElementById('modal-overlay').addEventListener('click', e => {
 });
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
+    if (document.querySelector('#pics-overlay.open')) return;   // Escape closes the pictures first
     closeModal();
     document.getElementById('picker-overlay').classList.remove('open');
   }

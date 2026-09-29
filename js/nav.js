@@ -203,6 +203,17 @@ window.addEventListener('scroll', () => {
   }, 120);
 }, { passive: true });
 
+// On a phone the tabs don't all fit: bring the picked one to the middle of
+// the strip (gliding there when you tapped it, straight away when the strip
+// was just drawn).
+function _navCenterTab(subnav, smooth) {
+  const inner = subnav.querySelector('.subnav-inner');
+  const b = inner && inner.querySelector('.subnav-btn.active');
+  if (!b || inner.scrollWidth <= inner.clientWidth) return;
+  const x = b.getBoundingClientRect().left - inner.getBoundingClientRect().left + inner.scrollLeft;
+  inner.scrollTo({ left: x - (inner.clientWidth - b.offsetWidth) / 2, behavior: smooth ? 'smooth' : 'auto' });
+}
+
 function _navSync() {
   _navCompact();
   const st = _navState();
@@ -215,12 +226,28 @@ function _navSync() {
   const subnav = document.getElementById('subnav');
   if (subnav) {
     const items = st.visiting ? [] : _navSubItems(st.group);
-    const html = items.length > 1
-      ? `<div class="subnav-inner" role="tablist">${items.map(([k, label]) =>
-          `<button type="button" role="tab" class="subnav-btn${k === st.sub ? ' active' : ''}" aria-selected="${k === st.sub}" data-group="${st.group}" data-sub="${k}">${label}</button>`).join('')}</div>`
-      : '';
-    if (subnav.innerHTML !== html) subnav.innerHTML = html;
-    subnav.hidden = !html;
+    const tabsKey = `${st.group}:${items.map(i => i[0]).join(',')}`;
+    const inner = subnav.querySelector('.subnav-inner');
+    if (items.length > 1 && inner && inner.dataset.tabs === tabsKey) {
+      // the same tabs, another one picked: move the highlight and leave the
+      // strip where it is (rebuilding it would scroll it back to the start)
+      inner.querySelectorAll('.subnav-btn').forEach(b => {
+        const on = b.dataset.sub === st.sub;
+        b.classList.toggle('active', on);
+        b.setAttribute('aria-selected', String(on));
+      });
+    } else {
+      const html = items.length > 1
+        ? `<div class="subnav-inner" role="tablist" data-tabs="${tabsKey}">${items.map(([k, label]) =>
+            `<button type="button" role="tab" class="subnav-btn${k === st.sub ? ' active' : ''}" aria-selected="${k === st.sub}" data-group="${st.group}" data-sub="${k}">${label}</button>`).join('')}</div>`
+        : '';
+      if (subnav.innerHTML !== html) subnav.innerHTML = html;
+      subnav.hidden = !html;
+    }
+    if (subnav._active !== `${tabsKey}:${st.sub}`) {
+      _navCenterTab(subnav, !!inner && inner.isConnected);
+      subnav._active = `${tabsKey}:${st.sub}`;
+    }
   }
   document.body.dataset.nav = st.group;
   _navRenderMe();
