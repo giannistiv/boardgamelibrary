@@ -205,7 +205,9 @@ function showGamesView() {
       </div>`;
   };
 
+  if (_exploreTab === 'trending' && !(typeof trendingAllowed === 'function' && trendingAllowed())) _exploreTab = 'games';
   const tabContent = _exploreTab === 'players' ? buildPlayersTab()
+    : _exploreTab === 'trending' ? buildTrendingTabHtml()
     : _exploreTab === 'stats' ? buildStatsTab()
     : _exploreTab === 'tonight' ? buildTonightTabHtml()
     : buildGamesTab();
@@ -218,6 +220,7 @@ function showGamesView() {
       <div class="stats-player-name">Explore</div>
       <div class="stats-player-sub">${_exploreTab === 'tonight'
         ? 'What should we play tonight? Pick how many of you are playing and how long you have.'
+        : _exploreTab === 'trending' ? 'What&rsquo;s trending on BGG right now, the games still to come out first.'
         : `${totalPlays.toLocaleString('en')} plays &middot; ${Object.keys(gamePlayCounts).length} games &middot; ${topPlayers.length} players`}</div>
     </div>
     <div class="explore-tabs">
@@ -246,6 +249,7 @@ function showGamesView() {
   // Games sub-tab: search + filters across every catalogue
   if (_exploreTab === 'games') wireGameBrowser(container);
   if (_exploreTab === 'tonight') wireTonightTab(container);
+  if (_exploreTab === 'trending') wireTrendingTab(container);
 
   // Players sub-tab: player search
   const playerSearchEl = document.getElementById('insights-player-search');

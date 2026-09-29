@@ -19,6 +19,7 @@ const _gp = {
   campaigns: true,   // include campaign / legacy games
   style: '',         // '' | 'coop' | 'pvp'
   kinds: new Set(),  // kind letters (any of them)
+  mechs: new Set(),  // mechanics (any of them), see MECH_GROUPS
   only: new Set(),   // 'best' | 'new' | 'stale' | 'fav', all must hold
   more: false,       // "More filters" open
   shown: 8,
@@ -101,10 +102,10 @@ function _gpKinds(g, id) {
 
 // How many filters are on (players and shelves aside), and clearing them.
 function _gpFilterCount() {
-  return (_gp.time ? 1 : 0) + _gp.weights.size + (_gp.style ? 1 : 0) + _gp.kinds.size + _gp.only.size + (_gp.campaigns ? 0 : 1);
+  return (_gp.time ? 1 : 0) + _gp.weights.size + (_gp.style ? 1 : 0) + _gp.kinds.size + _gp.mechs.size + _gp.only.size + (_gp.campaigns ? 0 : 1);
 }
 function _gpClearFilters() {
-  _gp.time = 0; _gp.weights.clear(); _gp.style = ''; _gp.kinds.clear(); _gp.only.clear(); _gp.campaigns = true;
+  _gp.time = 0; _gp.weights.clear(); _gp.style = ''; _gp.kinds.clear(); _gp.mechs.clear(); _gp.only.clear(); _gp.campaigns = true;
 }
 
 function _gpVotes() {
@@ -137,12 +138,14 @@ function _gpSuggest(idx, libs) {
     if (legacy && (!idx.lastPlayed[id] || _gpDaysSince(idx.lastPlayed[id]) > 365)) continue;
     const range = _gbPlayerRange(g.players);
     if (!range || n < range[0] || n > range[1]) continue;
-    if (_gp.time && !(g.playTime && parseMinTime(g.playTime) <= _gp.time)) continue;
+    // BGG's play time at this many players (a campaign game: one sitting)
+    if (_gp.time && !(_ptBoxMinutes(g, n) <= _gp.time)) continue;
     const weight = Number(g.complexity) || 0;
     if (_gp.weights.size && !(weight > 0 && _gp.weights.has(difficultyBucket(weight)))) continue;
     const coop = _gpIsCoop(g, id);
     if (_gp.style && (_gp.style === 'coop') !== coop) continue;
     if (_gp.kinds.size && ![..._gpKinds(g, id)].some(k => _gp.kinds.has(k))) continue;
+    if (!gameHasMechanic(id, _gp.mechs)) continue;
     const poll = bggPlayerPoll(id);
     const lastPlay = idx.lastPlayed[id];
     if (_gp.only.has('best') && !(poll && poll.votes >= 5 && poll.best.has(n))) continue;
@@ -220,7 +223,7 @@ function wireTonightTab(container) {
     const active = new Set(_gpActiveLibs(libs).map(l => l.key));
     const row = (label, html) => `<div class="gb-row"><span class="gb-label">${label}</span><div class="gb-chips">${html}</div></div>`;
     const n = _gp.count;
-    const moreOn = _gp.kinds.size + _gp.only.size + (_gp.campaigns ? 0 : 1) + (_gp.libs ? 1 : 0);
+    const moreOn = _gp.kinds.size + _gp.mechs.size + _gp.only.size + (_gp.campaigns ? 0 : 1) + (_gp.libs ? 1 : 0);
     panel.innerHTML = [
       row('Players', _gbChips('count', GP_COUNTS, v => _gp.count === Number(v))),
       row('Style', _gbChips('style', GP_STYLES, v => _gp.style === v)),
@@ -230,6 +233,7 @@ function wireTonightTab(container) {
         <summary>More filters${moreOn ? ` <span class="gp-more-n">${moreOn} on</span>` : ''}</summary>`,
       row('Only', _gbChips('only', [['best', `Best at ${n}`, `BGG voters say it's best with ${n}`], ['new', 'Never played'], ['stale', 'Not in 6 months', 'Not played in the last 6 months (or never)'], ['fav', '&#9733; 8+ from you', 'Rated 8 or more by the group']], v => _gp.only.has(v))),
       row('Kind', _gbChips('kinds', GP_KINDS, v => _gp.kinds.has(v))),
+      row('Mechanic', mechanicChipsHtml('mechs', _gp.mechs)),
       row('Shelves', _gbChips('libs', libs.map(l => [l.key, l.label, `Games in ${l.label}'s library`]), v => active.has(v))
         + (_gp.libs ? '<button type="button" class="gp-auto" id="gp-auto">reset</button>' : '')),
       row('Include', `<button type="button" class="gb-chip${_gp.campaigns ? ' on' : ''}" id="gp-campaigns" aria-pressed="${_gp.campaigns}" title="Campaign and legacy games">Campaign games</button>`),
@@ -260,7 +264,7 @@ function wireTonightTab(container) {
         <img class="stats-game-img" src="images/${s.g.bggId}.jpg" alt="" loading="lazy" onerror="__imgFallback(this, ${s.g.bggId})">
         <div class="stats-game-info">
           <div class="stats-game-name">${_escapeHtml(s.g.name)}</div>
-          <div class="stats-game-detail">${[s.g.playTime && _escapeHtml(s.g.playTime), Number(s.g.complexity) > 0 && `weight ${Number(s.g.complexity).toFixed(1)}`, s.owners.length && _escapeHtml(s.owners.join(', '))].filter(Boolean).join(' &middot; ')}</div>
+          <div class="stats-game-detail">${[gameTimeText(s.g) && _escapeHtml(gameTimeText(s.g)), Number(s.g.complexity) > 0 && `weight ${Number(s.g.complexity).toFixed(1)}`, s.owners.length && _escapeHtml(s.owners.join(', '))].filter(Boolean).join(' &middot; ')}</div>
           <div class="gp-why">${s.why.map(w => `<span class="gp-tag${w.k ? ' ' + w.k : ''}">${w.t}</span>`).join('')}</div>
         </div>
       </div>`).join('')}
@@ -315,7 +319,7 @@ function wireTonightTab(container) {
       if (_gp.weights.has(t.dataset.v)) _gp.weights.delete(t.dataset.v); else _gp.weights.add(t.dataset.v);
     } else if (t.dataset.gb === 'style') {
       _gp.style = _gp.style === t.dataset.v ? '' : t.dataset.v;
-    } else if (t.dataset.gb === 'kinds' || t.dataset.gb === 'only') {
+    } else if (t.dataset.gb === 'kinds' || t.dataset.gb === 'only' || t.dataset.gb === 'mechs') {
       const set = _gp[t.dataset.gb];
       if (set.has(t.dataset.v)) set.delete(t.dataset.v); else set.add(t.dataset.v);
     } else if (t.dataset.gb === 'libs') {
@@ -325,6 +329,13 @@ function wireTonightTab(container) {
     } else return;
     refresh();
   });
+  panel.addEventListener('change', (e) => {
+    const sel = e.target.closest('[data-mech-more="mechs"]');
+    if (!sel || !sel.value) return;
+    _gp.mechs.add(sel.value);
+    refresh();
+  });
+
   renderPanel();
   renderResults(true);
 }

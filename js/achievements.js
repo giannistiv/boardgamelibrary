@@ -50,6 +50,10 @@ const ACHIEVEMENTS = [
   { id:'magnum-opus',     name:'Magnum Opus',     desc:'Spend 100 hours on a single game' },
   { id:'long-haul',       name:'Long Haul',       desc:'Spend 10 hours at the table in one day' },
   { id:'full-time',       name:'Full-Time Job',   desc:'Spend 40 hours at the table in one week' },
+  // ── BGG's ranking (the current overall rank, data/bgg-extras.js) ──
+  { id:'top-shelf',       name:'Top Shelf',       desc:"Play 10 different games from BGG's top 100" },
+  { id:'top-100-club',    name:'Top 100 Club',    desc:"Play 25 different games from BGG's top 100" },
+  { id:'summit',          name:'Summit',          desc:"Play 3 different games from BGG's top 10" },
 ];
 
 // Achievements with custom SVG icons. Anything else falls back to default.svg
@@ -69,10 +73,12 @@ const _ACH_ICON_IDS = new Set([
   'decade-hopper','best-friend','gateway-drug','renaissance',
   // Time at the table
   'hours-100','hours-1000','deep-dive','magnum-opus','long-haul','full-time',
+  // BGG ranking
+  'top-shelf','top-100-club','summit',
 ]);
 // Bump when icon files change: the app keeps images it has seen for good (sw.js),
 // so a changed icon needs a new address to be fetched again.
-const ACH_ICON_REV = 2;
+const ACH_ICON_REV = 3;
 function _achievementIcon(id) {
   return `images/achievements/${_ACH_ICON_IDS.has(id) ? id : 'default'}.svg?r=${ACH_ICON_REV}`;
 }
@@ -134,6 +140,7 @@ function computeAchievements(playerName) {
   const decadeSet = new Set();       // distinct release decades played
   const decadeByYear = {};           // calendar year → Set of decades played that year
   const opponentPlayCounts = {};     // opponent name → count of plays together
+  const top100 = new Set(), top10 = new Set();   // games played from BGG's top 100 / top 10
   let totalMin = 0;                  // estimated time at the table (minutes)
   const minByGame = {}, minByDate = {}, minByWeek = {};
 
@@ -298,6 +305,17 @@ function computeAchievements(playerName) {
       if (wk) {
         playsByIsoWeek[wk] = (playsByIsoWeek[wk] || 0) + 1;
         if (playsByIsoWeek[wk] === 10) mark('speed-run', p.date);
+      }
+    }
+
+    // ── BGG's top 100 / top 10 (today's ranking). ──
+    {
+      const rank = typeof bggRank === 'function' ? bggRank(p.bggId) : 0;
+      if (rank && rank <= 100) {
+        top100.add(p.bggId);
+        if (top100.size === 10) mark('top-shelf', p.date);
+        if (top100.size === 25) mark('top-100-club', p.date);
+        if (rank <= 10) { top10.add(p.bggId); if (top10.size === 3) mark('summit', p.date); }
       }
     }
 

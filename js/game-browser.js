@@ -1,8 +1,9 @@
 // ── Explore → Games: search + filters ──
 // Every game the site knows (the shelf, BGStats imports and the friends'
-// libraries), narrowed by name, player count, play time, weight, whose library
-// it's in, BGG rating, the group's rating, your own rating and whether it's
-// been played, then sorted. While nothing is set the tab shows its usual
+// libraries), narrowed by name, player count, play time (BGG's, at the chosen
+// player count when there is one), weight, mechanics, whose library it's in,
+// BGG rating, the group's rating, your own rating and whether it's been
+// played, then sorted. While nothing is set the tab shows its usual
 // lists; as soon as something is, the matching games replace them.
 //
 // The state lives here, outside the view, so it survives re-renders and a
@@ -12,6 +13,7 @@ const _gb = {
   players: 0,        // 0 = any; 6 means 6+
   time: 0,           // 0 = any; else fits in this many minutes
   weights: new Set(),
+  mechs: new Set(),  // mechanics (any of them), see MECH_GROUPS
   libs: new Set(),
   bgg: 0,            // minimum BGG rating
   group: 0,          // minimum average rating from the app's players
@@ -58,7 +60,7 @@ function _gbPlayerRange(players) {
 }
 
 function _gbActiveCount() {
-  return (_gb.players ? 1 : 0) + (_gb.time ? 1 : 0) + (_gb.weights.size ? 1 : 0) + (_gb.libs.size ? 1 : 0)
+  return (_gb.players ? 1 : 0) + (_gb.time ? 1 : 0) + (_gb.weights.size ? 1 : 0) + (_gb.mechs.size ? 1 : 0) + (_gb.libs.size ? 1 : 0)
     + (_gb.bgg ? 1 : 0) + (_gb.group ? 1 : 0) + (_gb.mine ? 1 : 0) + (_gb.played ? 1 : 0);
 }
 
@@ -77,6 +79,7 @@ function _gbPanelHtml(libs) {
     row('Players', _gbChips('players', [1, 2, 3, 4, 5, 6].map(n => [n, n === 6 ? '6+' : String(n), `Plays with ${n}${n === 6 ? ' or more' : ''}`]), v => _gb.players === Number(v))),
     row('Time', _gbChips('time', [[30, '≤ 30 min'], [60, '≤ 1 h'], [90, '≤ 1.5 h'], [120, '≤ 2 h']], v => _gb.time === Number(v))),
     row('Weight', _gbChips('weights', GB_WEIGHTS, v => _gb.weights.has(v))),
+    row('Mechanic', mechanicChipsHtml('mechs', _gb.mechs)),
     row('Library', _gbChips('libs', libs.map(l => [l.key, l.label, `In ${l.label}'s library`]), v => _gb.libs.has(v))),
     row('BGG', _gbChips('bgg', [[6.5, '6.5+'], [7, '7+'], [7.5, '7.5+'], [8, '8+']], v => _gb.bgg === Number(v))),
     row('Group', _gbChips('group', [[6, '6+'], [7, '7+'], [8, '8+'], [9, '9+']].map(([v, l]) => [v, '&#9733; ' + l, 'Average rating from the app\'s players']), v => _gb.group === Number(v))),
@@ -115,10 +118,13 @@ function _gbMatches(libs) {
       if (!r || (_gb.players === 6 ? r[1] < 6 : (_gb.players < r[0] || _gb.players > r[1]))) continue;
     }
     if (_gb.time) {
-      if (!g.playTime || !(parseMinTime(g.playTime) <= _gb.time)) continue;
+      // at the chosen player count when there is one, else the game's shortest
+      const t = _gb.players ? _ptBoxMinutes(g, _gb.players) : gameMinTime(g);
+      if (!t || t > _gb.time) continue;
     }
     const weight = Number(g.complexity) || 0;
     if (_gb.weights.size && !(weight > 0 && _gb.weights.has(difficultyBucket(weight)))) continue;
+    if (!gameHasMechanic(g.bggId, _gb.mechs)) continue;
     if (selLibs.length && !selLibs.some(l => l.ids.has(Number(g.bggId)))) continue;
     const bgg = Number(g.bggRating) || 0;
     if (_gb.bgg && bgg < _gb.bgg) continue;
@@ -150,7 +156,7 @@ function _gbRowHtml(m, libs) {
   const bits = [];
   if (g.year) bits.push(String(g.year));
   if (g.players) bits.push(`${_escapeHtml(g.players)} players`);
-  if (g.playTime) bits.push(_escapeHtml(g.playTime));
+  if (gameTimeText(g)) bits.push(_escapeHtml(gameTimeText(g)));
   if (m.weight) bits.push(`weight ${m.weight.toFixed(1)}`);
   if (m.bgg) bits.push(`BGG ${m.bgg.toFixed(1)}`);
   if (m.plays) bits.push(`${m.plays} play${m.plays !== 1 ? 's' : ''}`);
@@ -206,7 +212,7 @@ function wireGameBrowser(container) {
     results.querySelector('#gb-sort').addEventListener('change', (e) => { _gb.sort = e.target.value; render(true); });
     results.querySelector('#gb-clear').addEventListener('click', () => {
       Object.assign(_gb, { q: '', players: 0, time: 0, bgg: 0, group: 0, mine: '', played: '' });
-      _gb.weights.clear(); _gb.libs.clear();
+      _gb.weights.clear(); _gb.mechs.clear(); _gb.libs.clear();
       search.value = '';
       panel.innerHTML = _gbPanelHtml(libs);
       refreshToggle();
@@ -227,13 +233,21 @@ function wireGameBrowser(container) {
     const chip = e.target.closest('.gb-chip');
     if (!chip) return;
     const group = chip.dataset.gb, v = chip.dataset.v;
-    if (group === 'weights' || group === 'libs') {
+    if (group === 'weights' || group === 'libs' || group === 'mechs') {
       const set = _gb[group];
       if (set.has(v)) set.delete(v); else set.add(v);
     } else {
       const val = (group === 'mine' || group === 'played') ? v : Number(v);
       _gb[group] = _gb[group] === val ? (typeof val === 'number' ? 0 : '') : val;  // tap again to clear
     }
+    panel.innerHTML = _gbPanelHtml(libs);
+    refreshToggle();
+    render(true);
+  });
+  panel.addEventListener('change', (e) => {
+    const sel = e.target.closest('[data-mech-more="mechs"]');
+    if (!sel || !sel.value) return;
+    _gb.mechs.add(sel.value);
     panel.innerHTML = _gbPanelHtml(libs);
     refreshToggle();
     render(true);

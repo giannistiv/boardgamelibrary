@@ -4,7 +4,7 @@
 // A row of sub-tabs under the bar switches between the views that belong
 // together:
 //   Library  → our shelf · Ilioupoli (members)
-//   Explore  → Games · Tonight · Players · Stats
+//   Explore  → Games · Tonight · Players · Stats · Trending (Board South)
 //   Ranks    → Leaderboard · Hours · Board South (regulars)
 //   You      → Profile · Achievements · Challenges
 // The views and their switchTo…() functions are unchanged; this module only
@@ -56,7 +56,10 @@ function _navSubItems(group) {
     return (me && typeof ILIOUPOLI_MEMBERS !== 'undefined' && ILIOUPOLI_MEMBERS.has(me))
       ? [['shelf', 'Our shelf'], ['ilioupoli', 'Ilioupoli']] : [];
   }
-  if (group === 'explore') return [['games', 'Games'], ['tonight', 'Tonight'], ['players', 'Players'], ['stats', 'Stats']];
+  if (group === 'explore') {
+    const items = [['games', 'Games'], ['tonight', 'Tonight'], ['players', 'Players'], ['stats', 'Stats']];
+    return typeof trendingAllowed === 'function' && trendingAllowed() ? items.concat([['trending', 'Trending']]) : items;
+  }
   if (group === 'ranks') {
     const bs = typeof _activeBoardSouthVoter === 'function' ? _activeBoardSouthVoter() : null;
     return [['everyone', 'Leaderboard'], ['hours', 'Hours']].concat(bs ? [['boardsouth', 'Board South']] : []);
@@ -122,7 +125,7 @@ if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 let _navRestoring = false;
 let _navSeq = 0;
 const _navScroll = new Map();   // entry id → scrollY on that screen
-const NAV_OVERLAYS = { lpm: 'lpm-overlay', wrapped: 'wrapped-overlay' };
+const NAV_OVERLAYS = { lpm: 'lpm-overlay', wrapped: 'wrapped-overlay', pics: 'pics-overlay' };
 
 function _navKey(st) {
   return st.visiting ? 'visit:' + _viewingProfile : st.group + '/' + (st.sub || '');
@@ -176,6 +179,10 @@ window.addEventListener('popstate', (e) => {
   if (!keep.has('wrapped') && _navIsOpen('wrapped-overlay')) {
     const w = document.getElementById('wrapped-overlay');
     if (w && w._wrClose) w._wrClose();
+  }
+  if (!keep.has('pics') && _navIsOpen('pics-overlay')) {
+    const p = document.getElementById('pics-overlay');
+    if (p && p._navClose) p._navClose();
   }
   // and go back to its screen, where it was scrolled to
   if (s.view && s.view !== _navKey(_navState())) {

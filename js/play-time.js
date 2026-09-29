@@ -1,7 +1,8 @@
 // ── Time at the table ──
 // How long each play took, estimated from BGG's playing time and adjusted for
 // the table:
-//   • Player count. BGG gives a time range over the game's player range, so
+//   • Player count. BGG gives a time range over the game's player range (its
+//     own figures, from data/bgg-extras.js, else the list's), so
 //     the time is read off that range at the number who played. A single time
 //     is taken to be at BGG's best player count, and each player more or fewer
 //     adds or takes off a share of it (less for simultaneous and real-time
@@ -63,7 +64,7 @@ function _ptBoxMinutes(game, n) {
   return _ptIsCampaign(game) ? Math.min(box, PT_SESSION) : box;
 }
 function _ptBoxRaw(game, n) {
-  const time = _ptRange(game.playTime) || [Math.round(15 + 20 * _ptWeight(game))];
+  const time = (typeof bggTimes === 'function' && bggTimes(game.bggId)) || _ptRange(game.playTime) || [Math.round(15 + 20 * _ptWeight(game))];
   const t = time.length === 1 ? [time[0], time[0]] : time;
   const p = _ptRange(game.players) || [n, n];
   const share = _ptPerPlayer(game);

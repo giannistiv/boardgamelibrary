@@ -1,0 +1,61 @@
+# Keeps the site in step with BGG without anyone committing:
+#   - BGG's hot list for Explore → Trending (tools/fetch-hot.py, no token needed)
+#   - the friends' libraries, and new games on Στιβ's BGG collection as
+#     "new arrivals" (tools/sync-collections.py, needs the BGG_TOKEN secret)
+#   - covers and BGG data for any game that's new, and once a week BGG's
+#     ranks, play times and mechanics for every game
+# then commits what changed and asks GitHub Pages to publish it.
+name: BGG sync
+
+on:
+  schedule:
+    - cron: '17 */6 * * *'   # every 6 hours
+  workflow_dispatch:         # and by hand, from the Actions tab
+
+permissions:
+  contents: write
+  pages: write
+
+concurrency:
+  group: bgg-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Hot list
+        run: python3 tools/fetch-hot.py || echo "hot list skipped this time"
+
+      - name: Libraries and new arrivals
+        env:
+          BGG_TOKEN: ${{ secrets.BGG_TOKEN }}
+        run: |
+          if [ -n "$BGG_TOKEN" ]; then python3 tools/sync-collections.py || echo "collections skipped this time"
+          else echo "No BGG_TOKEN secret yet: collections not synced"; fi
+
+      - name: Covers and BGG data for new games
+        run: |
+          python3 tools/fetch-covers.py --auto || true
+          python3 tools/fetch-bgg-extras.py --auto || true
+
+      - name: Weekly BGG ranks, play times and mechanics (Mondays)
+        run: |
+          if [ "$(date -u +%u)" = 1 ] && [ "$(date -u +%H)" -lt 6 ]; then python3 tools/fetch-bgg-extras.py --ranks || true; fi
+
+      - name: Commit and publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 tools/stamp-assets.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A data images index.html tools/owned-baseline.json
+          if git diff --cached --quiet; then echo "Nothing changed"; exit 0; fi
+          git commit -m "BGG sync: hot list, libraries and new games" -m "Automatic, from .github/workflows/bgg-sync.yml"
+          git pull --rebase origin main
+          git push origin HEAD:main
+          gh api -X POST "repos/${{ github.repository }}/pages/builds" >/dev/null || echo "Pages will pick it up on its own"

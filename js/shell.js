@@ -239,6 +239,33 @@ function renderShelf() {
       shelfEl.appendChild(cubby);
     }
   }
+  _renderNewArrivals();
+}
+
+// Games new on BGG (tools/sync-collections.py adds them with row 0) aren't in
+// a cubby yet: they wait in a strip above the shelf until they're placed.
+function _isNewArrival(g) {
+  return !!g.newArrival && !(g.row >= 1);
+}
+function _renderNewArrivals() {
+  const wrap = document.querySelector('.shelf-wrapper');
+  if (!wrap) return;
+  let strip = document.getElementById('lib-new');
+  const games = GAMES.filter(_isNewArrival);
+  if (!games.length) { if (strip) strip.remove(); return; }
+  if (!strip) {
+    strip = document.createElement('div');
+    strip.id = 'lib-new';
+    strip.className = 'lib-new';
+    wrap.insertAdjacentElement('beforebegin', strip);
+  }
+  strip.innerHTML = `<div class="lib-new-head">New arrivals <span>not on a shelf yet</span></div>
+    <div class="lib-new-row">${games.map(g => `<button type="button" class="lib-new-game" data-game-id="${_escapeHtml(g.id)}">
+      <img src="images/${g.bggId}.jpg" alt="" loading="lazy" onerror="__imgFallback(this, ${g.bggId})"><span>${_escapeHtml(g.name)}</span></button>`).join('')}</div>`;
+  strip.querySelectorAll('.lib-new-game').forEach(el => el.addEventListener('click', () => {
+    const g = GAMES.find(x => x.id === el.dataset.gameId);
+    if (g) openModal(g);
+  }));
 }
 
 document.getElementById('btn-other-side').addEventListener('click', () => {
@@ -254,9 +281,10 @@ document.getElementById('btn-other-side').addEventListener('click', () => {
 function renderCovers() {
   const grid = document.getElementById('lib-covers');
   if (!grid) return;
-  const games = GAMES.slice().sort((a, b) => a.name.localeCompare(b.name));
+  // new arrivals first (with a badge), then everything by name
+  const games = GAMES.slice().sort((a, b) => (_isNewArrival(b) - _isNewArrival(a)) || a.name.localeCompare(b.name));
   grid.innerHTML = games.map(g => `<button type="button" class="lib-cover" data-game-id="${_escapeHtml(g.id)}" title="${_escapeHtml(g.name)}">
-      <span class="lib-cover-art" style="--spine:${_escapeHtml(g.spineColor || '#555')}"><img src="images/${g.bggId}.jpg" alt="" loading="lazy" onerror="__imgFallback(this, ${g.bggId})"></span>
+      <span class="lib-cover-art" style="--spine:${_escapeHtml(g.spineColor || '#555')}"><img src="images/${g.bggId}.jpg" alt="" loading="lazy" onerror="__imgFallback(this, ${g.bggId})">${_isNewArrival(g) ? '<span class="lib-new-badge">New</span>' : ''}</span>
       <span class="lib-cover-name">${_escapeHtml(g.name)}</span>
     </button>`).join('');
   grid.querySelectorAll('.lib-cover').forEach(el => {
@@ -542,7 +570,7 @@ function openModal(game) {
   const fact = (icon, text) => `<span class="gm-fact"><svg viewBox="0 0 24 24" aria-hidden="true">${icon}</svg>${text}</span>`;
   const facts = [
     game.players ? fact('<circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0M16 11.5a3 3 0 1 0-1-5.8M17.5 20a5.5 5.5 0 0 0-2.3-4.5"/>', `${_escapeHtml(game.players)} players`) : '',
-    game.playTime ? fact('<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>', _escapeHtml(game.playTime)) : '',
+    gameTimeText(game) ? fact('<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>', _escapeHtml(gameTimeText(game))) : '',
     game.complexity > 0 ? fact('<path d="M12 4v16M5 20h14M6 8h12M6 8l-3 6a3 3 0 0 0 6 0zM18 8l-3 6a3 3 0 0 0 6 0z"/>', `Weight ${Number(game.complexity).toFixed(1)}`) : '',
   ].join('');
   const playsPanel = [marvelUnitedHtml, marvelChampionsHtml, eternalDecksHtml, aeonsEndHtml, playHistoryHtml].join('');

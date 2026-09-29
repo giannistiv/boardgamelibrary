@@ -9,7 +9,12 @@ The lists and the BGG collections that feed them:
     GIANNIS_GAMES   JohnnyDgame   Board South votes
     LGEORGE_GAMES   kukugames     Board South votes
     DIMITRIS_GAMES  Rhogarj       Ilioupoli Bros shelf
-Στιβ's GAMES isn't synced: it's the physical shelf, with hand-placed cubbies.
+Στιβ's GAMES isn't synced like those: it's the physical shelf, with
+hand-placed cubbies, and his BGG collection doesn't match it. Instead, a game
+that newly appears among his owned games on BGG (johnstiv) is added as a "new
+arrival": on no shelf yet (row 0), shown first in the library, waiting to be
+placed. What BGG listed last time is kept in tools/owned-baseline.json; the
+first run only records it.
 
 A game the collection marks as owned but the list lacks is added (name, year,
 players, play time and rating from the collection, weight from the game's BGG
@@ -53,6 +58,11 @@ LISTS = [  # (const in data/games.js, BGG username, Firebase votes path or None)
 SHELF_LISTS = {'DIMITRIS_GAMES'}  # drawn as spines, so entries need spineColor + boxSize
 SPINE_COLORS = ['#2e3a6e', '#2e5a7a', '#2e7a73', '#3a6e3a', '#3b7a4f', '#444b6e',
                 '#5a2e7a', '#6e2e2e', '#6e4a2e', '#7a2e52', '#7a3b2e', '#7a6b2e']
+SHELF_OWNER = 'johnstiv'   # Στιβ's BGG account, for new arrivals on GAMES
+BASELINE_FILE = os.path.join(ROOT, 'tools', 'owned-baseline.json')
+# BGG categories the shelf's own tags use (plus Co-op from the mechanic)
+SHELF_TAGS = {'Card Game': 'Card Game', 'Party Game': 'Party', 'Deduction': 'Deduction', 'Puzzle': 'Puzzle',
+              'Abstract Strategy': 'Abstract', 'Dice': 'Dice', 'Adventure': 'Adventure', 'Fantasy': 'Fantasy'}
 MIN_INTERVAL = 3600   # --auto: seconds between syncs
 QUEUE_WAIT = 45       # seconds to wait for BGG to build a collection (it answers 202 meanwhile)
 DELAY = 1.0           # seconds between BGG requests
@@ -162,6 +172,83 @@ def weights(ids, token):
             w = item.find('statistics/ratings/averageweight')
             out[_int(item.get('id'))] = (name, _float(w.get('value')) if w is not None else 0.0)
     return out
+
+
+def thing_details(ids, token):
+    """{bggId: details} for a shelf entry, from BGG's /thing (20 ids a call)."""
+    out = {}
+    ids = sorted(ids)
+    for i in range(0, len(ids), THING_BATCH):
+        root = bgg('thing?stats=1&id=' + ','.join(map(str, ids[i:i + THING_BATCH])), token)
+        for item in root.findall('item'):
+            name = item.find("name[@type='primary']")
+            links = lambda t: [l.get('value') for l in item.findall(f"link[@type='{t}']")]
+            val = lambda tag: (item.find(tag).get('value') if item.find(tag) is not None else '')
+            w = item.find('statistics/ratings/averageweight')
+            r = item.find('statistics/ratings/average')
+            desc = re.sub(r'\s+', ' ', (item.findtext('description') or '')).strip()
+            out[_int(item.get('id'))] = {
+                'name': name.get('value') if name is not None else '', 'year': _int(val('yearpublished')),
+                'minp': _int(val('minplayers')), 'maxp': _int(val('maxplayers')),
+                'tmin': _int(val('minplaytime')), 'tmax': _int(val('maxplaytime')),
+                'weight': _float(w.get('value')) if w is not None else 0.0,
+                'rating': _float(r.get('value')) if r is not None else 0.0,
+                'designers': links('boardgamedesigner'), 'mechanics': links('boardgamemechanic'),
+                'categories': links('boardgamecategory'), 'description': desc,
+            }
+    return out
+
+
+def _short(text, limit=320):
+    """The first sentences of a description, within `limit` characters."""
+    out = ''
+    for sentence in re.split(r'(?<=[.!?])\s+', text):
+        if out and len(out) + len(sentence) > limit:
+            break
+        out = (out + ' ' + sentence).strip()
+    return out[:limit]
+
+
+def shelf_line(gid, d, taken):
+    """A GAMES entry for a new arrival: on no shelf yet (row 0), dated today."""
+    slug = re.sub(r'[^a-z0-9]+', '_', d['name'].lower()).strip('_')[:40] or 'game'
+    ident = slug if slug not in taken else f'{slug}_{gid}'
+    taken.add(ident)
+    tags = (['Co-op'] if 'Cooperative Game' in d['mechanics'] else []) + \
+           [SHELF_TAGS[c] for c in d['categories'] if c in SHELF_TAGS]
+    lo, hi = d['minp'] or d['maxp'], d['maxp'] or d['minp']
+    t = f"{d['tmin']} min" if d['tmin'] == d['tmax'] or not d['tmax'] else f"{d['tmin']}-{d['tmax']} min"
+    j = lambda v: json.dumps(v, ensure_ascii=False)
+    parts = [f'id:{j(ident)}', f'name:{j(d["name"])}', f'bggId:{gid}', f'year:{d["year"]}',
+             f'designer:{j(", ".join(d["designers"][:3]))}', 'row:0', 'col:0',
+             f'newArrival:{j(time.strftime("%Y-%m-%d"))}', f'categories:{j(tags)}',
+             f'players:{j(str(lo) if lo == hi else f"{lo}-{hi}")}', f'playTime:{j(t if d["tmin"] else "")}',
+             f'complexity:{round(d["weight"], 2)}', f'bggRating:{round(d["rating"], 1)}',
+             f'spineColor:{j(spine_color(gid))}', f'boxSize:{j(box_size(d["weight"]))}',
+             f'mechanics:{j(d["mechanics"][:6])}', f'description:{j(_short(d["description"]))}']
+    return '  {' + ','.join(parts) + '},'
+
+
+NEW_ARRIVALS_HEAD = '  // ── New arrivals: owned on BGG, not on a shelf yet (row 0) ──'
+
+
+def new_arrivals(token, src):
+    """(games now owned on BGG, True on the first run, new GAMES lines)."""
+    owned = owned_games(SHELF_OWNER, token)
+    if not owned:
+        raise RuntimeError('the collection came back empty (private, or a BGG hiccup)')
+    try:
+        with open(BASELINE_FILE, encoding='utf-8') as f:
+            before = set(json.load(f).get(SHELF_OWNER, []))
+    except FileNotFoundError:
+        before = None
+    block = re.search(r'const GAMES = \[\n(.*?)\n\];', src, re.S).group(1)
+    on_shelf = {int(x) for x in re.findall(r'bggId:(\d+)', block)}
+    taken = set(re.findall(r'\bid:"([^"]+)"', block))
+    fresh = [] if before is None else sorted(set(owned) - before - on_shelf)
+    details = thing_details(fresh, token) if fresh else {}
+    lines = [shelf_line(gid, details[gid], taken) for gid in fresh if gid in details and details[gid]['name']]
+    return set(owned), before is None, lines
 
 
 def read_votes(path):
@@ -340,6 +427,37 @@ def main():
         m = list_block(src, const)
         src = src[:m.start(1)] + body + src[m.end(1):]
         changed = True
+
+    # Στιβ's new arrivals
+    label = f'GAMES ({SHELF_OWNER})'
+    try:
+        owned_now, first, lines = new_arrivals(token, src)
+        if first:
+            say(f'{label}: noted what BGG lists as owned ({len(owned_now)} games); games added from now on become new arrivals')
+        elif lines:
+            say(f'{label}: +{len(lines)} new arrival{"s" if len(lines) != 1 else ""}')
+            for l in lines:
+                say(f'    + {_line_name(l)}')
+            m = re.search(r'const GAMES = \[\n(.*?)\n\];', src, re.S)
+            body = m.group(1)
+            if NEW_ARRIVALS_HEAD not in body:
+                body += '\n' + NEW_ARRIVALS_HEAD
+            src = src[:m.start(1)] + body + '\n' + '\n'.join(lines) + src[m.end(1):]
+            changed = True
+        elif not auto:
+            print(f'{label}: no new games')
+        if not dry:
+            with open(BASELINE_FILE, 'w', encoding='utf-8') as f:
+                json.dump({SHELF_OWNER: sorted(owned_now)}, f)
+                f.write('\n')
+            if auto:
+                git('add', BASELINE_FILE)
+    except (Pending, AuthError) as e:
+        say(f'{label}: {e}; will try again next time')
+        all_ok = False
+    except Exception as e:
+        say(f'{label}: skipped ({type(e).__name__}: {e})')
+        all_ok = False
 
     if changed and not dry:
         with open(GAMES_JS, 'w', encoding='utf-8') as f:
