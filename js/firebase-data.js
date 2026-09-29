@@ -66,6 +66,7 @@ async function saveRating(playerName, bggId, rating) {
     if (Object.keys(ratingsCache[bggId]).length === 0) delete ratingsCache[bggId];
   } else {
     ratingsCache[bggId][playerName] = { value: rating, updatedAt: Date.now() };
+    bggRateNudge(playerName, bggId, rating);
   }
 
   if (!FIREBASE_DB) return;
@@ -87,6 +88,32 @@ async function saveRating(playerName, bggId, rating) {
 }
 
 function _ratingValue(r){ return typeof r === 'number' ? r : (r && r.value) || 0; }
+
+// ── "Also rate it on BGG" ──
+// BGG gives other apps no way to set a rating (its API only reads), so after
+// a rating here a small bar offers the game's BGG page, where the player is
+// logged in and gives it the same score with one tap. Only for players with
+// a BGG account on file (BGG_USERS).
+let _bggNudgeTimer = null;
+function bggRateNudge(playerName, bggId, rating) {
+  if (!(Number(bggId) > 0) || !(BGG_USERS[playerName] || BGG_USERS[_origCanon(playerName)])) return;
+  let bar = document.getElementById('bgg-nudge');
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = 'bgg-nudge';
+    bar.className = 'bgg-nudge';
+    bar.setAttribute('role', 'status');
+    document.body.appendChild(bar);
+    bar.addEventListener('click', (e) => { if (e.target.closest('a, .bgg-nudge-x')) bar.classList.remove('show'); });
+  }
+  const game = findGameByBggId(bggId);
+  bar.innerHTML = `<span class="bgg-nudge-text">You gave ${game ? `<b>${_escapeHtml(game.name)}</b>` : 'it'} a ${rating}.</span>
+    <a href="https://boardgamegeek.com/boardgame/${Number(bggId)}" target="_blank" rel="noopener">Give it ${rating} on BGG &#8599;</a>
+    <button type="button" class="bgg-nudge-x" aria-label="Close">&times;</button>`;
+  bar.classList.add('show');
+  clearTimeout(_bggNudgeTimer);
+  _bggNudgeTimer = setTimeout(() => bar.classList.remove('show'), 9000);
+}
 
 // ── Per-game shared notes ──
 // Stored in Firebase at /gameNotes/{bggId}/{noteId} = {text, author, createdAt, updatedAt}.
