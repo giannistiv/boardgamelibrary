@@ -1907,11 +1907,11 @@
   .lib-new-badge{position:absolute;top:6px;left:6px;padding:0.08rem 0.45rem;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-size:0.62rem;font-weight:800;letter-spacing:0.03em}
 
   /* ── Explore → Trending (BGG's hot list) ── */
-  .hot-head{display:flex;align-items:center;justify-content:space-between;gap:0.6rem;flex-wrap:wrap;margin-bottom:0.9rem}
+  .hot-head{display:flex;flex-direction:column;align-items:flex-start;gap:0.55rem;margin-bottom:0.9rem}
+  .hot-sorts .gb-chip{font-size:0.74rem}
   .hot-updated{font-size:0.72rem;color:var(--text-3)}
   .hot-card{padding:0.85rem 0.9rem 0.7rem;margin-bottom:0.8rem;border-radius:var(--r-l);background:var(--card);border:1px solid var(--line)}
   .hot-top{display:flex;align-items:flex-start;gap:0.75rem}
-  .hot-pos{flex-shrink:0;min-width:2.2rem;display:flex;flex-direction:column;align-items:center;font-family:var(--font-display);font-weight:800;font-size:1.05rem;color:var(--accent);padding-top:0.2rem}
   .hot-up,.hot-down{font-family:var(--font);font-size:0.62rem;font-weight:700}
   .hot-up{color:var(--win)}
   .hot-down{color:var(--loss)}
@@ -1920,15 +1920,36 @@
   .hot-name{font-weight:700;font-size:0.98rem;color:var(--text);line-height:1.25}
   .hot-tags{display:flex;flex-wrap:wrap;gap:0.3rem;margin:0.3rem 0 0.25rem}
   .hot-tag{font-size:0.64rem;font-weight:700;padding:0.08rem 0.5rem;border-radius:999px;background:rgba(255,255,255,0.06);color:var(--text-2)}
-  .hot-tag.up{background:var(--info-soft);color:var(--info)}
   .hot-desc{font-size:0.8rem;line-height:1.5;color:var(--text-2);margin:0.6rem 0 0.2rem}
   .hot-pics{display:flex;gap:0.45rem;overflow-x:auto;margin:0.6rem -0.1rem 0.2rem;padding:0 0.1rem 4px;scroll-snap-type:x proximity}
   .hot-pic{flex:0 0 auto;width:96px;height:96px;padding:0;border:0;border-radius:10px;overflow:hidden;background:var(--card-3);cursor:zoom-in;scroll-snap-align:start}
   .hot-pic img{width:100%;height:100%;object-fit:cover;display:block}
-  .hot-link{display:inline-block;margin-top:0.35rem;font-size:0.76rem;font-weight:600;color:var(--text-2);text-decoration:none;border-bottom:1px solid var(--line-2)}
-  .hot-link:hover{color:var(--accent);border-color:var(--accent-line)}
   .hot-card{cursor:pointer;transition:border-color 0.15s}
   .hot-card:hover{border-color:var(--line-2)}
+  .hot-match{font-size:0.64rem;font-weight:700;padding:0.08rem 0.5rem;border-radius:999px}
+  .hot-match.great{background:var(--win-soft, rgba(91,196,107,0.16));color:var(--win)}
+  .hot-match.good{background:var(--accent-soft);color:var(--accent)}
+  .hot-why{font-size:0.78rem;line-height:1.45;color:var(--text-2);margin:0.55rem 0 0}
+  .hot-why b{color:var(--text);font-weight:700}
+  /* a live campaign: platform, time left, how far it's funded */
+  .hot-camp{margin:0.65rem 0 0.1rem;padding:0.6rem 0.7rem;border-radius:var(--r);background:var(--card-2, rgba(255,255,255,0.03));border:1px solid var(--line)}
+  .hot-camp-top{display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap}
+  .hot-plat{font-size:0.68rem;font-weight:800;letter-spacing:0.02em;padding:0.12rem 0.5rem;border-radius:6px;background:rgba(255,255,255,0.08);color:var(--text)}
+  .hot-plat.kickstarter{background:rgba(5,206,120,0.16);color:#3ddc97}
+  .hot-plat.gamefound{background:rgba(255,106,61,0.16);color:#ff8a65}
+  .hot-plat.backerkit{background:rgba(64,156,255,0.16);color:#7ab8ff}
+  .hot-ends{font-size:0.74rem;font-weight:600;color:var(--text-2)}
+  .hot-back{margin-left:auto;font-size:0.76rem;font-weight:700;color:var(--accent);text-decoration:none;white-space:nowrap}
+  .hot-back:hover{text-decoration:underline}
+  .hot-camp-bar{height:6px;border-radius:3px;background:rgba(255,255,255,0.07);overflow:hidden;margin:0.5rem 0 0.4rem}
+  .hot-camp-bar div{height:100%;border-radius:3px;background:var(--win)}
+  .hot-camp-nums{font-size:0.74rem;color:var(--text-3)}
+  .hot-camp-nums b{color:var(--text);font-weight:700}
+  .hot-sheet-why{margin:0 0 0.8rem;font-size:0.88rem}
+  .hot-sheet-camp{margin:0 0 1.2rem}
+  .hot-sheet-camp .hot-camp{margin:0 0 0.6rem}
+  .hot-more{font-size:0.8rem;color:var(--text-2);margin:0 0 0.7rem}
+  .hot-back-big{border-color:var(--accent-line);color:var(--accent)}
   /* a trending game's page (the game-page sheet) */
   .hot-sheet-tags{margin:0 0 0.8rem}
   .gm-tiles.hot-tiles{grid-template-columns:repeat(3,minmax(0,1fr))}

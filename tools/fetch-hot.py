@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
-"""Keep data/bgg-hot.js in step with BGG's hot list ("The Hotness"): the 50
-games trending on BGG right now, with a few facts, whether each is still to
-come out, pictures from its gallery, and for its detail sheet BGG's
-description, mechanics, categories and designers. A game that drops off the list drops
-off here too.
+"""Keep data/bgg-hot.js in step with the games still to come out, for
+Explore → Trending: every live crowdfunding campaign on BGG's crowdfunding
+countdown (Kickstarter, Gamefound, BackerKit: how far it's funded, backers,
+when it ends, its link) and the games on BGG's hot list ("The Hotness") that
+aren't out yet. Each comes with a few facts, pictures from its gallery, and
+for its detail sheet BGG's description, mechanics, categories and designers.
+A game whose campaign ends and that isn't on the hot list drops off.
 
     python3 tools/fetch-hot.py
 
 Run every few hours by .github/workflows/bgg-sync.yml. Public BGG data, so no
 token is needed. Facts and pictures are fetched once per game and kept while
-it stays on the list; the order and the ups and downs are fresh every run.
+it stays; the campaigns' numbers and the hot list's order are fresh every run.
 """
 import html
 import importlib.util
@@ -22,9 +24,10 @@ import time
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, 'data', 'bgg-hot.js')
 API = 'https://api.geekdo.com/api'
-PICTURES = 8          # gallery pictures per game
+PICTURES = 6          # gallery pictures per game
 UPCOMING_OWNERS = 150  # fewer BGG owners than this and it's not out yet
 ABOUT_MAX = 2500      # characters of BGG's description kept per game
+CAMPAIGN_LINK = 'https://boardgamegeek.com/project/link/version/{}'
 
 _spec = importlib.util.spec_from_file_location('fetch_covers', os.path.join(ROOT, 'tools', 'fetch-covers.py'))
 covers = importlib.util.module_from_spec(_spec)
@@ -38,12 +41,14 @@ def get(url):
 
 
 def load():
+    """The last run's games by id, and the hot games it found already out."""
     try:
         with open(OUT, encoding='utf-8') as f:
             src = f.read()
-        return {str(g['id']): g for g in json.loads(src[src.index('{'):src.rindex('}') + 1])['games']}
+        data = json.loads(src[src.index('{'):src.rindex('}') + 1])
+        return {str(g['id']): g for g in data['games']}, set(map(str, data.get('released', [])))
     except (FileNotFoundError, ValueError, KeyError):
-        return {}
+        return {}, set()
 
 
 def _int(v):
@@ -118,44 +123,103 @@ def details(gid):
     }
 
 
+def campaign(c):
+    """A live crowdfunding campaign, as the tab shows it."""
+    url = c.get('orderUrl') or ''
+    if not url.startswith('https://') or '%' in url:   # Kickstarter links come without the creator:
+        url = CAMPAIGN_LINK.format(c.get('versionid'))  # BGG's own link takes you there
+    return {
+        'on': c.get('orderType') or '', 'url': url, 'ends': c.get('endDate') or '',
+        'pct': _int(c.get('progress')), 'backers': _int(c.get('backersCount')),
+        'pledged': _int(c.get('pledged')), 'cur': c.get('currency') or '',
+        'more': [a.get('name') for a in c.get('additionalItems') or [] if a.get('name')][:6],
+    }
+
+
+def with_details(gid, before):
+    """The game from the last run, or fetched from BGG when it's new."""
+    g = before.get(gid)
+    if not g or 'pics' not in g:
+        try:
+            g = {'id': int(gid), **details(gid)}
+        except Exception as e:   # one game failing shouldn't sink the list
+            print(f'fetch-hot: {gid}: {type(e).__name__}: {e}')
+            g = {'id': int(gid), 'pics': []}
+    elif 'mechs' not in g:       # kept from before the detail sheet: add what it shows
+        try:
+            g.update(item_fields(get(f'{API}/geekitems?objectid={gid}&objecttype=thing').get('item') or {}))
+        except Exception as e:
+            print(f'fetch-hot: {gid}: {type(e).__name__}: {e}')
+    for k in ('pos', 'delta', 'rank', 'camp', 'upcoming'):   # set afresh every run
+        g.pop(k, None)
+    g['pics'] = g.get('pics', [])[:PICTURES]
+    return g
+
+
 def main():
-    before = load()
+    before, released_before = load()
     hot = get(f'{API}/hotness?geeksite=boardgame&objecttype=thing&showcount=50').get('items') or []
     if len(hot) < 10:
         raise RuntimeError(f'the hot list came back with {len(hot)} games; keeping the old one')
+    try:
+        camps = get(f'{API}/ending_preorder')
+        if not isinstance(camps, list) or not camps:
+            raise ValueError('no campaigns')
+    except Exception as e:           # keep last run's campaigns that haven't ended
+        print(f'fetch-hot: crowdfunding: {type(e).__name__}: {e}; keeping the last list')
+        camps = None
     this_year = int(time.strftime('%Y'))
-    games = []
+    now = time.strftime('%Y-%m-%dT%H:%M:%S', time.gmtime())
+    games, released = {}, set()
+
+    # every live campaign (BGG's crowdfunding countdown, ending soonest first)
+    if camps is None:
+        for gid, g in before.items():
+            if (g.get('camp') or {}).get('ends', '')[:19] > now:
+                games[gid] = dict(g)
+                games[gid].pop('pos', None), games[gid].pop('delta', None)
+    for c in camps or []:
+        item = c.get('item') or {}
+        gid = str(item.get('id') or '')
+        if not gid.isdigit() or gid in games:
+            continue
+        g = with_details(gid, before)
+        year = next((_int(d.get('displayValue')) for d in item.get('descriptors') or [] if d.get('name') == 'yearpublished'), 0)
+        g.update({'name': item.get('name') or c.get('name') or g.get('name') or f'Game #{gid}',
+                  'year': year or g.get('year', 0), 'camp': campaign(c)})
+        g['img'] = g.get('img') or ((item.get('imageSets') or {}).get('square100') or {}).get('src@2x', '')
+        g['desc'] = g.get('desc') or re.sub(r'\s+', ' ', c.get('description') or '').strip()[:300]
+        games[gid] = g
+
+    # and the games on BGG's hot list that are still to come out
     for pos, it in enumerate(hot, 1):
         gid = str(it.get('objectid'))
-        g = before.get(gid)
-        if not g or 'pics' not in g:
-            try:
-                g = {'id': int(gid), **details(gid)}
-            except Exception as e:   # one game failing shouldn't sink the list
-                print(f'fetch-hot: {gid}: {type(e).__name__}: {e}')
-                g = {'id': int(gid), 'pics': []}
-        elif 'mechs' not in g:       # kept from before the detail sheet: add what it shows
-            try:
-                g.update(item_fields(get(f'{API}/geekitems?objectid={gid}&objecttype=thing').get('item') or {}))
-            except Exception as e:
-                print(f'fetch-hot: {gid}: {type(e).__name__}: {e}')
         year = _int(it.get('yearpublished'))
-        g.update({
-            'name': it.get('name') or g.get('name') or f'Game #{gid}',
-            'year': year, 'pos': pos, 'delta': _int(it.get('delta')), 'rank': _int(it.get('rank')),
-            'img': g.get('img') or ((it.get('images') or {}).get('square100') or {}).get('src@2x', ''),
-            'desc': g.get('desc') or re.sub(r'\s+', ' ', it.get('description') or '').strip()[:300],
-        })
-        g['upcoming'] = 1 if year > this_year or (year >= this_year - 1 and g.get('owned', 0) < UPCOMING_OWNERS) else 0
-        games.append(g)
-    payload = {'updated': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), 'games': games}
+        if gid not in games:
+            if (year and year < this_year - 1) or (year <= this_year and gid in released_before):
+                released.add(gid)
+                continue
+            g = with_details(gid, before)
+            if year <= this_year and g.get('owned', 0) >= UPCOMING_OWNERS:   # out already
+                released.add(gid)
+                continue
+            g.update({'name': it.get('name') or g.get('name') or f'Game #{gid}', 'year': year})
+            g['img'] = g.get('img') or ((it.get('images') or {}).get('square100') or {}).get('src@2x', '')
+            g['desc'] = g.get('desc') or re.sub(r'\s+', ' ', it.get('description') or '').strip()[:300]
+            games[gid] = g
+        games[gid].update({'pos': pos, 'delta': _int(it.get('delta')), 'rank': _int(it.get('rank'))})
+
+    payload = {'updated': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
+               'games': list(games.values()), 'released': sorted(released, key=int)}
     with open(OUT, 'w', encoding='utf-8') as f:
-        f.write("// BGG's hot list, written by tools/fetch-hot.py (every few hours); don't edit by hand.\n")
+        f.write("// Upcoming games: BGG's live crowdfunding campaigns and the hot list's games still to come\n"
+                "// out. Written by tools/fetch-hot.py (every few hours); don't edit by hand.\n")
         f.write('const BGG_HOT = ' + json.dumps(payload, ensure_ascii=False, separators=(',', ':')) + ';\n')
-    new = [g['name'] for g in games if str(g['id']) not in before]
-    gone = [g['name'] for gid, g in before.items() if gid not in {str(x['id']) for x in games}]
-    print(f'fetch-hot: {len(games)} games ({sum(g["upcoming"] for g in games)} upcoming); '
-          f'{len(new)} new on the list, {len(gone)} dropped off')
+    new = [g['name'] for gid, g in games.items() if gid not in before]
+    gone = [g['name'] for gid, g in before.items() if gid not in games]
+    print(f'fetch-hot: {sum(1 for g in games.values() if g.get("camp"))} live campaigns, '
+          f'{sum(1 for g in games.values() if "pos" in g)} upcoming on the hot list; '
+          f'{len(new)} new, {len(gone)} gone')
 
 
 if __name__ == '__main__':

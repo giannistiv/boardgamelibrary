@@ -1,5 +1,6 @@
 # Keeps the site in step with BGG without anyone committing:
-#   - BGG's hot list for Explore → Trending (tools/fetch-hot.py, no token needed)
+#   - the games still to come out for Explore → Trending: BGG's live crowdfunding
+#     campaigns and the hot list's unreleased games (tools/fetch-hot.py, no token needed)
 #   - the friends' libraries, and new games on Στιβ's BGG collection as
 #     "new arrivals" (tools/sync-collections.py, needs the BGG_TOKEN secret)
 #   - once a week, BGG's top 100 for the Top 100 challenge (tools/fetch-top100.py)
@@ -28,8 +29,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Hot list
-        run: python3 tools/fetch-hot.py || echo "hot list skipped this time"
+      - name: Crowdfunding campaigns and the hot list
+        run: python3 tools/fetch-hot.py || echo "upcoming games skipped this time"
 
       - name: Libraries and new arrivals
         env:
