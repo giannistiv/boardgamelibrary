@@ -1524,7 +1524,6 @@ const GIANNIS_GAMES = {
   299659:{name:"Clash of Cultures: Monumental Edition",bggId:299659,year:2021,complexity:3.74,players:"2-4",playTime:"240 min",bggRating:8.3},
   265784:{name:"Cleopatra and the Society of Architects: Deluxe Edition",bggId:265784,year:2020,complexity:2.21,players:"2-4",playTime:"60 min",bggRating:7.3},
   31506:{name:"Cliffhanger",bggId:31506,year:2007,complexity:1.21,players:"3-6",playTime:"15 min",bggRating:6.2},
-  262211:{name:"Cloudspire",bggId:262211,year:2019,complexity:4.4,players:"1-4",playTime:"180 min",bggRating:8.2},
   178900:{name:"Codenames",bggId:178900,year:2015,complexity:1.26,players:"2-8",playTime:"15 min",bggRating:7.5},
   220774:{name:"Codenames: Marvel",bggId:220774,year:2017,complexity:1.21,players:"2-8",playTime:"15 min",bggRating:6.1},
   341504:{name:"Colt Express: Big Box",bggId:341504,year:2022,complexity:2.18,players:"2-9",playTime:"40 min",bggRating:7.8},
@@ -1535,7 +1534,6 @@ const GIANNIS_GAMES = {
   173101:{name:"Council of 4",bggId:173101,year:2015,complexity:2.69,players:"2-4",playTime:"75 min",bggRating:7.1},
   181372:{name:"Coup: Rebellion G54 – Anarchy",bggId:181372,year:2015,complexity:1.75,players:"3-6",playTime:"15 min",bggRating:7.3},
   13284:{name:"Cowpoker",bggId:13284,year:2006,complexity:1.52,players:"2-4",playTime:"30 min",bggRating:5.5},
-  266937:{name:"Cradle of Civilization",bggId:266937,year:2021,complexity:2.67,players:"1-6",playTime:"240 min",bggRating:7.0},
   147:{name:"Crude: The Oil Game",bggId:147,year:1974,complexity:2.73,players:"2-4",playTime:"90 min",bggRating:6.7},
   253574:{name:"Crusader Kings",bggId:253574,year:2019,complexity:3.35,players:"1-5",playTime:"180 min",bggRating:6.8},
   282579:{name:"Crusader Kings: Councilors & Inventions Expansion",bggId:282579,year:2019,complexity:3.5,players:"1-5",playTime:"180 min",bggRating:6.6},
@@ -2033,7 +2031,6 @@ const GIANNIS_GAMES = {
 
 const LGEORGE_GAMES = {
   210625:{name:"Agricola: Expansion for 5 and 6 Players",bggId:210625,year:2016,complexity:3.5,players:"1-6",playTime:"120 min",bggRating:7.8},
-  380681:{name:"Apex Legends: The Board Game",bggId:380681,year:2025,complexity:3.33,players:"2-6",playTime:"90 min",bggRating:7.9},
   359871:{name:"Arcs",bggId:359871,year:2024,complexity:3.44,players:"2-4",playTime:"120 min",bggRating:8.0},
   176544:{name:"Automania",bggId:176544,year:2015,complexity:2.76,players:"2-4",playTime:"90 min",bggRating:7.3},
   172308:{name:"Broom Service",bggId:172308,year:2015,complexity:2.39,players:"2-5",playTime:"75 min",bggRating:7.2},
@@ -2047,6 +2044,7 @@ const LGEORGE_GAMES = {
   411894:{name:"Kinfire Council",bggId:411894,year:2025,complexity:3.25,players:"2-6",playTime:"120 min",bggRating:7.8},
   238799:{name:"Messina 1347",bggId:238799,year:2021,complexity:3.61,players:"1-4",playTime:"140 min",bggRating:7.5},
   363622:{name:"The Castles of Burgundy: Special Edition",bggId:363622,year:2023,complexity:2.85,players:"1-4",playTime:"120 min",bggRating:9.1},
+  380442:{name:"The Last Kingdom Board Game",bggId:380442,year:2023,complexity:3.0,players:"2-5",playTime:"150 min",bggRating:7.4},
   42:{name:"Tigris & Euphrates",bggId:42,year:1997,complexity:3.48,players:"2-4",playTime:"120 min",bggRating:7.7},
   227935:{name:"Wonderland's War",bggId:227935,year:2022,complexity:3.04,players:"2-5",playTime:"125 min",bggRating:8.0},
 };

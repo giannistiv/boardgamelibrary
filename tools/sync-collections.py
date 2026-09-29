@@ -14,9 +14,10 @@ The lists and the BGG collections that feed them:
 A game the collection marks as owned but the list lacks is added (name, year,
 players, play time and rating from the collection, weight from the game's BGG
 entry; Δημητρης's also get a spine colour and a box size from the weight). A
-listed game no longer marked owned is removed, unless someone still has it in
-their Board South votes: then it stays and a warning says so. Entries already
-in a list are never rewritten, so hand edits survive.
+listed game no longer marked owned is removed, and so are any Board South votes
+for it in that library (everyone else's ranking keeps its order). If the votes
+can't be updated, the game stays until next time. Entries already in a list
+are never rewritten, so hand edits survive.
 
 BGG's XML API needs a token since July 2025. Register an app at
 https://boardgamegeek.com/applications, create a token for it and save it in
@@ -33,6 +34,7 @@ import re
 import subprocess
 import sys
 import time
+import urllib.parse
 import xml.etree.ElementTree as ET
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -162,18 +164,33 @@ def weights(ids, token):
     return out
 
 
-def voted_ids(path):
-    """Every bggId in someone's Board South list for that library. None when
-    Firebase can't be read, so nothing gets removed on a guess."""
+def read_votes(path):
+    """Board South votes for a library: {voter key: [bggId, ...] in ranked
+    order}. None when Firebase can't be read, so nothing gets removed on a guess."""
     status, body = curl(f'{FIREBASE}/{path}.json', timeout=8)
     if status != 200:
         return None
-    ids = set()
-    for picks in (json.loads(body) or {}).values():
-        for v in (picks.values() if isinstance(picks, dict) else picks or []):
-            if str(v).isdigit():
-                ids.add(int(v))
-    return ids
+    out = {}
+    for voter, picks in (json.loads(body) or {}).items():
+        if isinstance(picks, dict):   # an array Firebase stored as {"0": id, …}
+            picks = [picks[k] for k in sorted(picks, key=lambda k: int(k) if str(k).isdigit() else 0)]
+        out[voter] = [int(v) for v in picks or [] if str(v).isdigit()]
+    return out
+
+
+def drop_votes(path, votes, ids):
+    """Take `ids` out of every voter's list (keeping the rest in order).
+    True when every changed list was saved."""
+    ok = True
+    for voter, picks in votes.items():
+        keep = [v for v in picks if v not in ids]
+        if len(keep) == len(picks):
+            continue
+        url = f'{FIREBASE}/{path}/{urllib.parse.quote(voter, safe="")}.json'
+        r = subprocess.run(['curl', '-sS', '--max-time', '10', '-X', 'PUT', '-d', json.dumps(keep),
+                            '-o', '/dev/null', '-w', '%{http_code}', url], capture_output=True)
+        ok = ok and r.returncode == 0 and r.stdout.decode().strip() == '200'
+    return ok
 
 
 def box_size(weight):
@@ -220,7 +237,9 @@ def _line_name(line):
 
 
 def plan(const, username, votes_path, token, src):
-    """Work out one list's changes. Returns (new_body or None, adds, removes, kept, notes)."""
+    """Work out one list's changes. Returns (new_body or None, adds, removes,
+    unvote, votes, notes): `unvote` are the removed games that have Board South
+    votes, which main() takes out of `votes` before writing the list."""
     lines = list_block(src, const).group(1).split('\n')
     current = {_line_id(l): l for l in lines}
     owned = owned_games(username, token)
@@ -228,18 +247,17 @@ def plan(const, username, votes_path, token, src):
         raise RuntimeError('the collection came back empty (private, or a BGG hiccup)')
     add_ids = set(owned) - set(current)
     gone = set(current) - set(owned)
-    notes, kept = [], []
-    if gone and votes_path:
-        voted = voted_ids(votes_path)
-        if voted is None:
-            notes.append('could not read Board South votes, so nothing was removed')
-            gone = set()
-        else:
-            kept = sorted(gone & voted)
-            gone -= voted
+    notes, unvote, votes = [], [], {}
     if len(gone) > max(5, len(current) // 4):
         notes.append(f'{len(gone)} games would go, which looks like a bad read, so nothing was removed')
         gone = set()
+    if gone and votes_path:
+        votes = read_votes(votes_path)
+        if votes is None:
+            notes.append('could not read Board South votes, so nothing was removed')
+            gone, votes = set(), {}
+        else:
+            unvote = sorted(gone & {v for picks in votes.values() for v in picks})
     extra = weights(add_ids, token) if add_ids else {}
     adds = []
     for gid in add_ids:
@@ -248,11 +266,11 @@ def plan(const, username, votes_path, token, src):
         g['name'] = g['name'] or name or f'Game #{gid}'
         adds.append(entry_line(gid, g, weight, const in SHELF_LISTS))
     if not adds and not gone:
-        return None, [], [], kept, notes
+        return None, [], [], unvote, votes, notes
     body = [l for gid, l in current.items() if gid not in gone] + adds
     body.sort(key=lambda l: _line_name(l).lower())  # the lists are kept sorted by name
     removes = [current[gid] for gid in gone]
-    return '\n'.join(body), adds, removes, kept, notes
+    return '\n'.join(body), adds, removes, unvote, votes, notes
 
 
 def git(*args):
@@ -285,7 +303,7 @@ def main():
     for const, username, votes_path in LISTS:
         label = f'{const} ({username})'
         try:
-            body, adds, removes, kept, notes = plan(const, username, votes_path, token, src)
+            body, adds, removes, unvote, votes, notes = plan(const, username, votes_path, token, src)
         except AuthError as e:
             say(str(e))
             return
@@ -299,8 +317,17 @@ def main():
             continue
         for n in notes:
             say(f'{label}: warning: {n}')
-        for gid in kept:
-            say(f'{label}: kept {gid}: no longer owned on BGG but still has Board South votes')
+        if unvote:
+            voters = sorted(v for v, picks in votes.items() if set(picks) & set(unvote))
+            names = ', '.join(_line_name(l) for l in removes if _line_id(l) in unvote)
+            if dry:
+                say(f'{label}: would remove the Board South votes for {names} ({len(voters)} voter(s))')
+            elif drop_votes(votes_path, votes, set(unvote)):
+                say(f'{label}: removed the Board South votes for {names} ({len(voters)} voter(s))')
+            else:
+                say(f'{label}: warning: could not update the Board South votes; the list is left as it was')
+                all_ok = False
+                continue
         if body is None:
             if not auto:
                 print(f'{label}: up to date')
