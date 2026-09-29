@@ -1676,6 +1676,7 @@
   .ch-card[data-ch="bingo"]{--ch-a:#e8995d; --ch-soft:rgba(232,153,93,0.15); --ch-bord:rgba(232,153,93,0.42)}
   .ch-card[data-ch="eras"]{--ch-a:#62c4dd; --ch-soft:rgba(98,196,221,0.15); --ch-bord:rgba(98,196,221,0.42)}
   .ch-card[data-ch="weight"]{--ch-a:#e07a93; --ch-soft:rgba(224,122,147,0.15); --ch-bord:rgba(224,122,147,0.42)}
+  .ch-card[data-ch="top"]{--ch-a:#ff7043; --ch-soft:rgba(255,112,67,0.15); --ch-bord:rgba(255,112,67,0.45)}
   .ch-card:hover{border-color:var(--ch-bord)}
   .ch-card.done{
     background:linear-gradient(150deg, var(--ch-soft), rgba(255,255,255,0.015));
@@ -1754,6 +1755,18 @@
   .ch-era-lbl{font-size:0.55rem;font-weight:600;opacity:0.45;white-space:nowrap}
   .ch-era.on .ch-era-lbl{color:var(--ch-a);opacity:1}
   .ch-letter.ch-era-chip{width:auto;min-width:44px;padding:0 0.4rem;font-size:0.72rem}
+  /* BGG Top 100: a 10×10 wall of covers, the played ones lit */
+  .ch-top{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;margin-top:0.8rem}
+  .ch-top-cell{
+    width:100%;aspect-ratio:1;object-fit:cover;border-radius:4px;display:block;min-width:0;
+    background:rgba(255,255,255,0.05);cursor:pointer;
+    filter:grayscale(1);opacity:0.2;transition:opacity 0.12s, transform 0.12s;
+  }
+  .ch-top-cell:hover{opacity:0.6;transform:scale(1.15);position:relative;z-index:1}
+  .ch-top-cell.on{filter:none;opacity:1;box-shadow:0 0 0 1px var(--ch-bord)}
+  .ch-top-head{font-size:0.7rem;font-weight:700;letter-spacing:0.04em;color:var(--ch-a);margin:0.2rem 0 0.3rem}
+  .ch-top-head ~ .ch-top-head{margin-top:0.8rem}
+  .ch-top-owners{display:flex;flex-wrap:wrap;gap:0.25rem;margin-top:0.2rem}
   /* Weight Ladder rungs */
   .ch-rungs{margin-top:0.8rem}
   .ch-rung{

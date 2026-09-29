@@ -132,6 +132,15 @@ def known_games():
     return games
 
 
+def top100_games():
+    """The ids in data/bgg-top100.js (tools/fetch-top100.py), if it exists."""
+    try:
+        with open(os.path.join(ROOT, 'data', 'bgg-top100.js'), encoding='utf-8') as f:
+            return re.findall(r'"id":(\d+)', f.read())
+    except FileNotFoundError:
+        return []
+
+
 def fetch(todo, auto=False):
     """todo: {bggId: urlImage-or-None}. Returns (downloaded, failed) where each
     failure is (bggId, name, reason, permanent)."""
@@ -177,7 +186,10 @@ def main():
     auto, dry = '--auto' in args, '--dry-run' in args
     if auto:
         skip = load_none()
-        todo = {i: u for i, u in known_games().items()
+        wanted = known_games()
+        for i in top100_games():   # the "BGG Top 100" challenge shows every one's cover
+            wanted.setdefault(i, None)
+        todo = {i: u for i, u in wanted.items()
                 if not os.path.exists(cover_path(i)) and i not in skip}
     else:
         ids = open(args[1]).read().split() if args[:1] == ['-f'] else args

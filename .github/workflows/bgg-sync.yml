@@ -2,6 +2,7 @@
 #   - BGG's hot list for Explore → Trending (tools/fetch-hot.py, no token needed)
 #   - the friends' libraries, and new games on Στιβ's BGG collection as
 #     "new arrivals" (tools/sync-collections.py, needs the BGG_TOKEN secret)
+#   - once a week, BGG's top 100 for the Top 100 challenge (tools/fetch-top100.py)
 #   - covers and BGG data for any game that's new, and once a week BGG's
 #     ranks, play times and mechanics for every game
 # then commits what changed and asks GitHub Pages to publish it.
@@ -36,6 +37,10 @@ jobs:
         run: |
           if [ -n "$BGG_TOKEN" ]; then python3 tools/sync-collections.py || echo "collections skipped this time"
           else echo "No BGG_TOKEN secret yet: collections not synced"; fi
+
+      - name: Weekly BGG top 100 (Mondays)
+        run: |
+          if [ "$(date -u +%u)" = 1 ] && [ "$(date -u +%H)" -lt 6 ]; then python3 tools/fetch-top100.py || true; fi
 
       - name: Covers and BGG data for new games
         run: |

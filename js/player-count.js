@@ -41,7 +41,14 @@ function bggMechanics(bggId) {
   const e = (typeof BGG_EXTRAS !== 'undefined') ? BGG_EXTRAS[bggId] : null;
   return new Set(e && e.length > 8 && e[8] ? e[8].split(' ').map(Number) : []);
 }
+// BGG's overall rank (0 = unranked). The top 100 list (data/bgg-top100.js)
+// wins for its games, so the achievements and the Top 100 challenge agree.
+let _top100Ranks = null;
 function bggRank(bggId) {
+  if (!_top100Ranks) {
+    _top100Ranks = new Map((typeof BGG_TOP100 !== 'undefined' ? BGG_TOP100.games : []).map(g => [g.id, g.rank]));
+  }
+  if (_top100Ranks.has(Number(bggId))) return _top100Ranks.get(Number(bggId));
   const e = (typeof BGG_EXTRAS !== 'undefined') ? BGG_EXTRAS[bggId] : null;
   return e && e.length > 9 ? Number(e[9]) || 0 : 0;
 }

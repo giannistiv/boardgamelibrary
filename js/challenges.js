@@ -96,6 +96,14 @@ function computeChallenges(playerName) {
   }
   const bingoLines = CH_BINGO_LINES.filter(L => L.every(i => bingoCovered[i])).length;
 
+  // BGG Top 100 (all-time): which of BGG's current top 100 you've ever played.
+  // The list is refreshed weekly (tools/fetch-top100.py), so games come and go.
+  const everPlayed = new Set(plays.map(p => p.bggId));
+  const top100 = (typeof BGG_TOP100 !== 'undefined' ? BGG_TOP100.games : []).map(g => {
+    const own = findGameByBggId(g.id);
+    return { bggId: g.id, rank: g.rank, name: (own && own.name) || g.name, known: !!own, played: everPlayed.has(g.id) };
+  });
+
   return {
     year, yearPlayCount: yearPlays.length, newToMe,
     tenTop, tenFilled, tenComplete,
@@ -103,6 +111,7 @@ function computeChallenges(playerName) {
     eras, eraCount: Object.keys(eras).length,
     weights, weightCount: Object.keys(weights).length,
     bingoCard, bingoCovered, bingoCount: Object.keys(bingoCovered).length, bingoLines,
+    top100, topCount: top100.filter(g => g.played).length,
     hi: _computeHIndex(playerName)
   };
 }
@@ -287,6 +296,30 @@ function showChallengesView(playerName) {
   }
   const hiDetail = hiCore.map(it => gameRow({ bggId: it.bggId, name: hiName(it.bggId) }, `${it.count}&times;`)).join('') + hiNext;
 
+  // ── BGG Top 100 (all-time) ──
+  // A 10×10 wall of covers in rank order, the played ones lit. The detail
+  // lists what's left: first the games someone in the group owns, then the
+  // rest (those open on BGG, as the site doesn't know them).
+  const topCells = d.top100.map(g =>
+    `<img class="ch-top-cell${g.played ? ' on' : ''}" data-bgg-id="${g.bggId}"${g.known ? '' : ' data-bgg-only="1"'} src="images/${g.bggId}.jpg" alt="" loading="lazy" title="#${g.rank} ${_escapeHtml(g.name)}${g.played ? ' — played' : ''}" onerror="__imgFallback(this, ${g.bggId})">`).join('');
+  const libs = _gbLibraries();
+  const left = d.top100.filter(g => !g.played);
+  const ownersOf = (id) => libs.filter(l => l.ids.has(id)).map(l => `<span class="gb-owner">${_escapeHtml(l.label)}</span>`).join('');
+  const topRow = (g) => `
+    <div class="ch-row" data-bgg-id="${g.bggId}"${g.known ? '' : ' data-bgg-only="1"'}>
+      <img class="ch-row-img" src="images/${g.bggId}.jpg" alt="" loading="lazy" onerror="__imgFallback(this, ${g.bggId})">
+      <span class="ch-row-name">${_escapeHtml(g.name)}${ownersOf(g.bggId) ? `<span class="ch-top-owners">${ownersOf(g.bggId)}</span>` : ''}</span>
+      <span class="ch-row-extra">#${g.rank}</span>
+    </div>`;
+  const onShelf = left.filter(g => ownersOf(g.bggId));
+  const elsewhere = left.filter(g => !ownersOf(g.bggId));
+  const topUpdated = typeof BGG_TOP100 !== 'undefined' ? _fmtDateShort(BGG_TOP100.updated) : '';
+  const topDetail = !d.top100.length ? `<div class="ch-empty">BGG's top 100 isn't loaded.</div>`
+    : !left.length ? `<div class="ch-missing ch-done-txt">Every game in BGG's top 100 played &mdash; legend!</div>`
+    : (onShelf.length ? `<div class="ch-top-head">On a shelf in the group &middot; ${onShelf.length}</div>${onShelf.map(topRow).join('')}` : '')
+      + (elsewhere.length ? `<div class="ch-top-head">Nobody has these yet &middot; ${elsewhere.length}</div>${elsewhere.map(topRow).join('')}` : '')
+      + (topUpdated ? `<div class="ch-missing">BGG ranks as of ${topUpdated}, refreshed every week.</div>` : '');
+
   container.innerHTML = `
     <div class="lb-header">
       <div class="lb-title">Challenges</div>
@@ -392,6 +425,23 @@ function showChallengesView(playerName) {
         <div class="ch-expand"><span class="ch-x-show">&#9662; show games</span><span class="ch-x-hide">&#9652; hide</span></div>
       </div>
 
+      <div class="ch-card${d.top100.length && d.topCount === d.top100.length ? ' done' : ''}${open('top')}" data-ch="top">
+        <div class="ch-head">
+          <div>
+            <div class="ch-name">BGG Top 100 <span class="ch-tag ch-tag-alltime">all-time</span></div>
+            <div class="ch-sub">Play every game in BoardGameGeek&rsquo;s top 100</div>
+          </div>
+          <div class="ch-score">${d.topCount}<span class="ch-score-sub">/${d.top100.length || 100}</span></div>
+        </div>
+        <div class="ch-top">${topCells}</div>
+        <div class="ch-barrow">
+          <div class="ch-bar"><div class="ch-bar-fill" style="width:${d.topCount}%"></div></div>
+          <span class="ch-pct">${d.topCount}%</span>
+        </div>
+        <div class="ch-detail">${topDetail}</div>
+        <div class="ch-expand"><span class="ch-x-show">&#9662; what&rsquo;s left</span><span class="ch-x-hide">&#9652; hide</span></div>
+      </div>
+
     </div>`;
   window.scrollTo(0, 0);
   wireChallenges();
@@ -430,10 +480,11 @@ function wireChallenges() {
   if (!container) return;
   container.querySelectorAll('.ch-card').forEach(card => {
     card.addEventListener('click', (e) => {
-      const clickable = e.target.closest('.ch-row, .ch-dot-img, .ch-bingo-cell, .ch-rung');
+      const clickable = e.target.closest('.ch-row, .ch-dot-img, .ch-bingo-cell, .ch-rung, .ch-top-cell');
       if (clickable && clickable.dataset.bggId) {
         const g = findGameByBggId(clickable.dataset.bggId);
         if (g) openModal(g);
+        else if (clickable.dataset.bggOnly) window.open(`https://boardgamegeek.com/boardgame/${clickable.dataset.bggId}`, '_blank', 'noopener');
         return;
       }
       if (!card.querySelector('.ch-detail')) return; // 10×10 has no drill-down
