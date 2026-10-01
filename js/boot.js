@@ -234,13 +234,15 @@ async function _takeSharedFile() {
     await cache.delete('./shared-note');
   } catch (e) { note = 'the app could not read what was shared'; }
   if (!file) {
-    // Chrome 153 on Android has a bug that strips shared files before they
-    // reach a web app: the form arrives with no parts at all.
+    // Chrome 153 to 155 on Android drop shared files before they reach an
+    // installed web app (titles and text still arrive); fixed in Chrome 156
+    // (chromium 0fbfe9f, "Fix Web Share Target dropping shared files in WebAPKs").
     const chrome = Number((/Chrome\/(\d+)/.exec(navigator.userAgent) || [])[1]) || 0;
-    const stripped = / 0 parts/.test(note) && chrome >= 153;
+    const hadFile = /, \d+ bytes/.test(note.replace(/body \d+ bytes/, ''));
+    const stripped = !hadFile && chrome >= 153 && chrome < 156;
     _shareNotice('error', 'Nothing arrived from BGStats', [
       stripped
-        ? `Chrome ${chrome} dropped the file before it reached the app: a known bug in Chrome on Android since version 153. Until Chrome fixes it, upload the file from your profile.`
+        ? `Chrome ${chrome} dropped the file before it reached the app: a known Chrome bug in versions 153 to 155, fixed in Chrome 156. Update Chrome when 156 reaches your phone (or use Chrome Beta); until then, upload the file from your profile.`
         : 'The app opened, but the share didn\'t bring a file with it. Try sharing it again. If it keeps happening, this is what arrived:',
       `<small>${_escapeHtml(note || 'no share was kept')} · Chrome ${chrome || '?'}</small>`,
     ]);
