@@ -1123,6 +1123,14 @@
   .import-result.info{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:rgba(240,230,211,0.7)}
   .import-result-title{font-weight:700;margin-bottom:0.3rem}
   .import-result-lines{opacity:0.8;line-height:1.7}
+  /* a friend's upload: who are the new people and places? */
+  .imp-new-help{font-size:0.8rem;line-height:1.5;color:var(--text-2);margin-bottom:0.6rem}
+  .imp-new-sec{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-3);margin:0.7rem 0 0.3rem}
+  .imp-new-row{display:flex;align-items:center;gap:0.6rem;margin-bottom:0.35rem;flex-wrap:wrap}
+  .imp-new-his{flex:1 1 9rem;min-width:0;font-size:0.82rem;color:var(--text)}
+  .imp-new-his small{color:var(--text-3);margin-left:0.25rem}
+  .imp-new-row input{flex:1 1 12rem;min-width:0;height:34px;padding:0 0.6rem;border-radius:8px;border:1px solid var(--line-2);background:var(--card);color:var(--text);font:inherit;font-size:0.85rem}
+  .imp-new-actions{display:flex;gap:0.5rem;margin-top:0.8rem}
   .import-img-downloads{margin-top:0.6rem;display:flex;flex-direction:column;gap:0.3rem}
   .import-img-dl{font-size:0.7rem;opacity:0.7;display:flex;align-items:center;justify-content:space-between;gap:0.5rem}
   .import-img-dl a{color:var(--accent);text-decoration:none;font-weight:600;white-space:nowrap}

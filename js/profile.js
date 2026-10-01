@@ -437,6 +437,10 @@ function showStatsView(playerName, visiting) {
   const loggedInPlayer = localStorage.getItem('bgl-player');
   const isOwnProfile = !visiting || visiting === loggedInPlayer;
   _viewingProfile = isOwnProfile ? null : playerName;
+  // Whose BGStats export this profile imports: '' for Στιβ's, a friend's name
+  // (IMPORT_SOURCES) on their own profile, null for none.
+  const importSource = _origCanon(playerName) === 'Στιβ' ? ''
+    : (isOwnProfile && typeof IMPORT_SOURCES !== 'undefined' && IMPORT_SOURCES[_origCanon(playerName)] ? _origCanon(playerName) : null);
 
   if (visiting && !isOwnProfile) {
     if (!_statsViewSource) {
@@ -803,23 +807,25 @@ function showStatsView(playerName, visiting) {
       <div class="qr-label">Scan to open on your phone</div>
     </div>` : ''}
 
-    <!-- ── JSON Import (Στιβ only) ── -->
-  ${_origCanon(playerName) === 'Στιβ' ? (() => {
-    // Find the most recent play date across PLAY_HISTORY so the user can
-    // tell from which day onwards they still need to upload.
+    <!-- ── JSON Import: Στιβ's, or a friend's own (IMPORT_SOURCES) on their own profile ── -->
+  ${importSource !== null ? (() => {
+    // Find the most recent play date across PLAY_HISTORY (a friend: across
+    // their own uploads) so they can tell from which day on to upload.
     let latest = '';
     for (const bggId in PLAY_HISTORY) {
       for (const p of PLAY_HISTORY[bggId]) {
-        if (p && p.date && p.date > latest) latest = p.date;
+        if (p && p.date && p.date > latest && (!importSource || p.src === importSource)) latest = p.date;
       }
     }
     const latestLabel = latest ? fmtDate(latest) : null;
     const sinceLine = latestLabel
       ? `<div class="import-last-play">Latest uploaded play: <b>${latestLabel}</b></div>`
       : '';
+    const skipWith = importSource ? (IMPORT_SOURCES[importSource].skipWith || []).join(', ') : '';
     return `<div class="import-section" id="importSection">
-      <div class="import-section-title">📥 Import BGStats Play File</div>
+      <div class="import-section-title">📥 ${importSource ? 'Import your BGStats export' : 'Import BGStats Play File'}</div>
       ${sinceLine}
+      ${importSource ? `<div class="import-last-play">Your people and places are matched to the names here${skipWith ? `, and plays with ${_escapeHtml(skipWith)} are skipped (${_escapeHtml(skipWith)}'s own copy is kept)` : ''}.</div>` : ''}
       <div class="import-drop-zone" id="importDropZone">
         <input type="file" id="importFileInput" accept=".json,.bgsplay">
         <div class="import-drop-icon">📂</div>
@@ -836,9 +842,9 @@ function showStatsView(playerName, visiting) {
     ${isOwnProfile ? '<button class="change-profile-btn" id="btn-change-profile">Change Profile</button>' : ''}
   `;
 
-  // Wire up importer for Στιβ
-  if (_origCanon(playerName) === 'Στιβ' && typeof window.initImporter === 'function') {
-    window.initImporter();
+  // Wire up the importer (Στιβ's, or a friend's own)
+  if (importSource !== null && typeof window.initImporter === 'function') {
+    window.initImporter(importSource || undefined);
   }
 
   _wirePcFolds(container);

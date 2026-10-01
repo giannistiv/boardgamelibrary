@@ -156,13 +156,14 @@ function _mergePlayIntoHistory(uuid, p) {
     if (s && s.n && NAME_MAP[s.n]) s.n = NAME_MAP[s.n];
   }
   _applyPlayOverrides(p.bggId, p);
-  if (p.l && LOCATION_MAP[p.l]) p.l = LOCATION_MAP[p.l];
+  if (p.l) p.l = canonLocation(p.l, p.date);
   const entry = { date: p.date, sc: p.sc, _uuid: uuid };
   if (p.t) entry.t = p.t;
   if (p.e) entry.e = p.e;
   if (p.d) entry.d = p.d;
   if (p.b) entry.b = p.b;
   if (p.l) entry.l = p.l;
+  if (p.src) entry.src = p.src;   // a friend's own upload (IMPORT_SOURCES)
 
   const newNames = new Set(p.sc.map(s => s.n));
   const isHardcodedDup = (e) => {
@@ -210,10 +211,11 @@ function _mergePlayIntoHistory(uuid, p) {
     }
   }
 
-  // 2. Fall back to the built-in copy (see findTwin) → replace.
+  // 2. Fall back to the built-in copy (see findTwin) → replace. A friend's
+  // own upload is never a copy of a built-in play: those are skipped on import.
   if (!placed) {
     const arr = PLAY_HISTORY[bggId];
-    const idx = findTwin(arr);
+    const idx = p.src ? -1 : findTwin(arr);
     if (idx !== -1) {
       status = _playSignature(PLAY_HISTORY[bggId][idx]) === _playSignature(entry) ? 'same' : 'changed';
       entry._paired = true;   // this play has taken the place of its built-in copy
@@ -231,7 +233,7 @@ function _mergePlayIntoHistory(uuid, p) {
   // should go away). A play replaces at most one built-in copy, ever: other
   // plays of the same game that day can look identical (solo losses) and are
   // real.
-  if (!entry._paired) {
+  if (!entry._paired && !p.src) {
     const arr = PLAY_HISTORY[bggId];
     const idx = findTwin(arr);
     if (idx !== -1) { arr.splice(idx, 1); entry._paired = true; }

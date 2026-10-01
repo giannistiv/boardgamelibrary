@@ -13,7 +13,7 @@ const BGG_USERS = {
   'Στιβ':                  'johnstiv',
   'Γιαννης Φωτοπουλος':    'JohnnyDgame',
   'LGeorge':               'kukugames',
-  'Βασιλης - Argo':        'airmil',
+  'Bill':                  'airmil',
   'Γιαννης Αγγουριδακης':  'petinis',
   'Δημητρης':              'Rhogarj',
   'Δημητρης Σελιτσιανος':  'aristomenes',
@@ -70,11 +70,29 @@ const NAME_MAP = {
   'Xristos Madrileñas':'Χρηστος Ρετσος','Anastasiia Deel':'Anastasia Deel',
   'Χρηστος Καραφουλιδης':'Χρηστος Ρετσος',
   'Leonidas Marias':'Λεωνιδας',
-  'Γιώργος':'George-Alex'
+  'Γιώργος':'George-Alex',
+  // Renamed 1 Oct 2026, when Δημητρης's own uploads were matched to these people.
+  'Βασιλης - Argo':'Bill','Στεφανος':'Στεφανος Σαριδακης',
+  'Vaggelis - filos Dimitri':'Βαγγελης Καραφανταλος',
+  'Smirliadis Giannis - BS':'Γιαννης Σμυρλιαδης - BS',
+  'Aleksandros - Argo':'Αλεξανδρος - Argo','Νικολετα':'Νικολεττα',
+  'Παυλος - φιλος Δημητρη':'Παυλος Σακελλαριδης','Αντωνης':'Αντωνης Τσαγκαρακης'
 };
 const LOCATION_MAP = {
   'South Board': 'Board South',
+  'Home': "Stiv's Home",
+  'Spiti': 'Σπιτι φιλου',
 };
+// Δημητρης moved out of his parents' house on 28 Oct 2024: earlier plays at
+// "Dimitri's Home" were at what is now "Dimitri's Old Home".
+const DIMITRI_MOVED = '2024-10-28';
+
+// A play's place under its current name.
+function canonLocation(l, date) {
+  if (!l) return l;
+  l = LOCATION_MAP[l] || l;
+  return l === "Dimitri's Home" && date && date < DIMITRI_MOVED ? "Dimitri's Old Home" : l;
+}
 
 // Resolve remap chains once (a→b, b→c ⇒ a→c) so a single application always
 // gives the final name, no matter how many times NAME_MAP is applied later.
@@ -95,7 +113,7 @@ for (const bggId in PLAY_HISTORY) {
     for (const s of play.sc) {
       if (NAME_MAP[s.n]) s.n = NAME_MAP[s.n];
     }
-    if (play.l && LOCATION_MAP[play.l]) play.l = LOCATION_MAP[play.l];
+    if (play.l) play.l = canonLocation(play.l, play.date);
   }
 }
 

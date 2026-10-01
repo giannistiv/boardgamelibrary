@@ -210,7 +210,11 @@ Promise.all([loadAllRatings(), loadAllFavorites(), loadImportedGames(), loadImpo
 
 // ── JSON Import ──
 // ── BGStats Play File Importer ──
-window.initImporter = function(){
+// Στιβ's exports go through NAME_MAP and LOCATION_MAP. A friend listed in
+// IMPORT_SOURCES (data/import-sources.js) imports their own export from their
+// own profile (`source` is their name): see _importFromSource below.
+window.initImporter = function(source){
+  const src = source && typeof IMPORT_SOURCES !== 'undefined' ? IMPORT_SOURCES[source] : null;
   const dropZone  = document.getElementById('importDropZone');
   const fileInput = document.getElementById('importFileInput');
   const result    = document.getElementById('importResult');
@@ -256,6 +260,20 @@ window.initImporter = function(){
       showResult('error','Wrong format',['This doesn\'t look like a BGStats Play export. Make sure you export using Share → Play File from BGStats.']);
       return;
     }
+
+    // Each profile takes only its own export (the file says whose BGG account made it).
+    const owner = String((data.userInfo && data.userInfo.bggUsername) || '').toLowerCase();
+    const ownerOf = typeof IMPORT_SOURCES !== 'undefined'
+      ? Object.keys(IMPORT_SOURCES).find(k => IMPORT_SOURCES[k].bgg === owner) : null;
+    if (src && owner !== src.bgg) {
+      showResult('error', 'Not your export', [`This file was exported from ${owner ? `the BGG account <b>${_escapeHtml(owner)}</b>` : 'another account'}. Only ${_escapeHtml(source)}'s own BGStats export can be imported here.`]);
+      return;
+    }
+    if (!src && ownerOf) {
+      showResult('error', 'Not your export', [`This is ${_escapeHtml(ownerOf)}'s export: it's imported from ${_escapeHtml(ownerOf)}'s own profile, where his people and places are matched to ours.`]);
+      return;
+    }
+    if (src) return _importFromSource(source, src, data, showResult, finish);
 
     // Build lookup maps from the imported file
     const importedGamesById  = {};  // id → game object
@@ -405,10 +423,14 @@ window.initImporter = function(){
       nothingNew && !unchanged && !olderSkipped ? 'This file has no plays.' : '',
     ];
 
-    // Refresh every open view so updated plays — including changed locations —
-    // appear immediately, instead of only after a reload/navigation. The
-    // profile (where the importer lives) is re-rendered too; the result panel
-    // is re-shown afterwards (showResult re-queries by id) and scrolled to.
+    finish(resType, resTitle, resLines);
+  }
+
+  // Refresh every open view so updated plays — including changed locations —
+  // appear immediately, instead of only after a reload/navigation. The
+  // profile (where the importer lives) is re-rendered too; the result panel
+  // is re-shown afterwards (showResult re-queries by id) and scrolled to.
+  function finish(resType, resTitle, resLines){
     const isOpen = (id) => { const el = document.getElementById(id); return el && el.classList.contains('open'); };
     const player = (typeof localStorage !== 'undefined') ? localStorage.getItem('bgl-player') : null;
     try {
@@ -439,6 +461,218 @@ window.initImporter = function(){
     processImport(e.dataTransfer.files[0]);
   });
 };
+
+// ── A friend's own export (IMPORT_SOURCES, data/import-sources.js) ──
+// Their people and places are matched by their app's ids: the agreed lists
+// first, then anyone they've been asked about since (saved in Firebase), and
+// anyone still unknown is asked about before anything is saved. Plays someone
+// in `skipWith` is in are skipped (Στιβ's own copy is kept), and so are plays
+// already logged here by someone else. Saved plays remember whose upload they
+// came from (`src`), so a later upload updates them instead of adding copies.
+const IMPORT_MAPS_PRIMARY = 'importMaps';
+const IMPORT_MAPS_FALLBACK = 'gameImages/_bglImportMaps';   // loadGameImages skips entries without a url
+
+async function _loadSourceMaps(source) {
+  const out = { players: {}, places: {} };
+  for (const base of [IMPORT_MAPS_FALLBACK, IMPORT_MAPS_PRIMARY]) {   // the primary store wins
+    const data = await _fetchProfileStore(`${base}/${encodeURIComponent(source)}`);
+    if (data) { Object.assign(out.players, data.players || {}); Object.assign(out.places, data.places || {}); }
+  }
+  return out;
+}
+
+async function _saveSourceMap(source, kind, uuid, name) {
+  const path = `${encodeURIComponent(source)}/${kind}/${encodeURIComponent(uuid)}.json`;
+  for (const base of [IMPORT_MAPS_PRIMARY, IMPORT_MAPS_FALLBACK]) {
+    try {
+      const res = await fetch(`${FIREBASE_DB}/${base}/${path}`, { method: 'PUT', body: JSON.stringify(name) });
+      if (res.ok) return true;
+    } catch (e) { /* try the next store */ }
+  }
+  return false;
+}
+
+// A play someone else already logged here: same game and day, the same
+// people (one may be missing from either copy) with the same scores.
+function _alreadyHere(bggId, p, source) {
+  return (PLAY_HISTORY[bggId] || []).some(e => {
+    if (e.src === source || e.date !== p.date) return false;
+    const mine = new Map(p.sc.map(s => [s.n, s.s]));
+    let both = 0;
+    for (const s of e.sc) {
+      if (!mine.has(s.n)) continue;
+      if (String(s.s == null ? '' : s.s) !== mine.get(s.n)) return false;
+      both++;
+    }
+    return both >= Math.max(1, Math.max(e.sc.length, p.sc.length) - 1);
+  });
+}
+
+// Asks who the people and places new in an upload are. Resolves to
+// {players: {uuid: name}, places: {uuid: name}}, or null when cancelled.
+function _askNewPeople(source, newPlayers, newPlaces) {
+  const esc = _escapeHtml;
+  const r = document.getElementById('importResult');
+  const rt = document.getElementById('importResultTitle');
+  const rl = document.getElementById('importResultLines');
+  if (!r || !rt || !rl) return Promise.resolve(null);
+  const placesHere = new Set();
+  for (const id in PLAY_HISTORY) for (const p of PLAY_HISTORY[id]) if (p.l) placesHere.add(p.l);
+  const known = _knownPlayerNames();
+  const suggestPlayer = (name) => known.has(name) ? name : (known.has(NAME_MAP[name]) ? NAME_MAP[name] : name);
+  const suggestPlace = (name) => placesHere.has(name) ? name : (LOCATION_MAP[name] || name.trim());
+  const row = (kind, it, value) => `
+    <label class="imp-new-row">
+      <span class="imp-new-his">${esc(it.name)} <small>${it.plays} play${it.plays !== 1 ? 's' : ''}</small></span>
+      <input type="text" list="imp-${kind}-list" data-kind="${kind}" data-uuid="${esc(it.uuid)}" value="${esc(value)}" autocomplete="off">
+    </label>`;
+  r.className = 'import-result info';
+  r.style.display = 'block';
+  rt.textContent = 'New in this upload';
+  rl.innerHTML = `
+    <div class="imp-new-help">Who are they here? Pick someone who is already in the app, or keep or type a new name. ${esc(source)}'s next uploads will remember the answer.</div>
+    ${newPlayers.length ? `<div class="imp-new-sec">People</div>${newPlayers.map(it => row('players', it, suggestPlayer(it.name))).join('')}` : ''}
+    ${newPlaces.length ? `<div class="imp-new-sec">Places</div>${newPlaces.map(it => row('places', it, suggestPlace(it.name))).join('')}` : ''}
+    <datalist id="imp-players-list">${[...known].sort().map(n => `<option value="${esc(n)}">`).join('')}</datalist>
+    <datalist id="imp-places-list">${[...placesHere].sort().map(n => `<option value="${esc(n)}">`).join('')}</datalist>
+    <div class="imp-new-actions">
+      <button type="button" class="btn-primary" data-imp="go">Import</button>
+      <button type="button" class="btn-ghost" data-imp="cancel">Cancel</button>
+    </div>`;
+  r.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  return new Promise((resolve) => {
+    rl.onclick = (e) => {
+      const b = e.target.closest('[data-imp]');
+      if (!b) return;
+      if (b.dataset.imp === 'cancel') { rl.onclick = null; resolve(null); return; }
+      const out = { players: {}, places: {} };
+      let missing = null;
+      rl.querySelectorAll('input[data-kind]').forEach(inp => {
+        const v = inp.value.trim();
+        if (!v) missing = missing || inp;
+        out[inp.dataset.kind][inp.dataset.uuid] = v;
+      });
+      if (missing) { missing.focus(); return; }
+      rl.onclick = null;
+      resolve(out);
+    };
+  });
+}
+
+async function _importFromSource(source, src, data, showResult, finish) {
+  const games = {}, players = {}, places = {};
+  data.games.forEach(g => games[g.id] = g);
+  data.players.forEach(p => players[p.id] = p);
+  (data.locations || []).forEach(l => places[l.id] = l);
+  const learned = await _loadSourceMaps(source);
+  const nameOf = (p) => p ? (src.players[p.uuid] || learned.players[p.uuid] || null) : null;
+  const placeOf = (l) => l ? (src.places[l.uuid] || learned.places[l.uuid] || null) : null;
+  const skipWith = new Set(src.skipWith || []);
+
+  // The game behind a play: its BGG id, else a game here with the same name.
+  const byName = {};
+  for (const g of _allGames()) if (g && g.bggId > 0 && g.name) byName[String(g.name).trim().toLowerCase()] = g.bggId;
+  const bggIdOf = (g) => g ? (g.bggId || byName[String(g.bggName || g.name || '').trim().toLowerCase()] || 0) : 0;
+
+  // 1. The plays to bring in.
+  let withSkipped = 0, noGame = 0;
+  const todo = [];
+  for (const play of data.plays) {
+    const people = (play.playerScores || []).map(ps => players[ps.playerRefId]);
+    if (people.some(p => skipWith.has(nameOf(p)))) { withSkipped++; continue; }
+    const bggId = bggIdOf(games[play.gameRefId]);
+    if (!bggId) { noGame++; continue; }
+    todo.push({ play, people, bggId });
+  }
+
+  // 2. Anyone or anywhere not known yet: ask before saving anything.
+  const newPeople = new Map(), newPlaces = new Map();
+  const count = (map, x) => { const it = map.get(x.uuid) || { uuid: x.uuid, name: x.name || '?', plays: 0 }; it.plays++; map.set(x.uuid, it); };
+  for (const { play, people } of todo) {
+    for (const p of people) if (p && !nameOf(p)) count(newPeople, p);
+    const l = places[play.locationRefId];
+    if (l && !placeOf(l)) count(newPlaces, l);
+  }
+  if (newPeople.size || newPlaces.size) {
+    const answers = await _askNewPeople(source, [...newPeople.values()], [...newPlaces.values()]);
+    if (!answers) { showResult('info', 'Import cancelled', ['Nothing was saved.']); return; }
+    showResult('info', 'Importing…', ['Please wait…']);
+    const saves = [];
+    for (const kind of ['players', 'places']) {
+      for (const uuid in answers[kind]) {
+        learned[kind][uuid] = answers[kind][uuid];
+        saves.push(_saveSourceMap(source, kind, uuid, answers[kind][uuid]));
+      }
+    }
+    await Promise.all(saves);
+  }
+
+  // 3. Merge the plays, and any game the site doesn't know yet.
+  const known = _knownPlayerNames();
+  const newNames = new Set();
+  let newPlays = 0, updatedPlays = 0, unchanged = 0, olderSkipped = 0, alreadyHere = 0, newGames = 0;
+  const persists = [];
+  for (const { play, people, bggId } of todo) {
+    const g = games[play.gameRefId];
+    if (!findGameByBggId(bggId)) {
+      const entry = {
+        id: 'imported_' + bggId, name: g.bggName || g.name, bggId, year: g.bggYear || null,
+        designer: g.designers || '',
+        players: (g.minPlayerCount && g.maxPlayerCount)
+          ? (g.minPlayerCount === g.maxPlayerCount ? String(g.minPlayerCount) : `${g.minPlayerCount}-${g.maxPlayerCount}`) : '',
+        playTime: (g.minPlayTime && g.maxPlayTime)
+          ? (g.minPlayTime === g.maxPlayTime ? `${g.minPlayTime} min` : `${g.minPlayTime}-${g.maxPlayTime} min`) : '',
+        categories: [], mechanics: [], description: '',
+        bggRating: g.rating ? (g.rating / 10).toFixed(1) : null,
+        urlImage: g.urlImage || g.urlThumb || null,
+        imported: true,
+      };
+      EXTRA_GAMES[bggId] = entry;
+      newGames++;
+      persists.push(persistImportedGame(entry));
+      if (entry.urlImage) persists.push(persistGameImage(bggId, entry.urlImage));
+    }
+    const stamp = play.playDate || play.entryDate || '';
+    const date = stamp.slice(0, 10);
+    const sc = (play.playerScores || []).map((ps, i) => {
+      const n = nameOf(people[i]) || 'Anonymous player';
+      if (!known.has(n)) newNames.add(n);
+      return { n, s: ps.score !== null && ps.score !== undefined ? String(ps.score) : '', w: !!ps.winner, ...(ps.role ? { r: ps.role } : {}) };
+    });
+    const entry = { bggId, date, sc, src: source };
+    if (stamp.length > 10 && stamp !== date) entry.t = stamp;
+    if (play.durationMin) entry.d = play.durationMin;
+    if (play.board) entry.b = play.board;
+    const where = placeOf(places[play.locationRefId]);
+    if (where) entry.l = where;
+    if (play.modificationDate) entry.m = play.modificationDate;
+    if (play.entryDate) entry.e = play.entryDate;
+
+    const saved = importedPlaysCache[play.uuid];
+    if (saved && saved.m && entry.m && saved.m > entry.m) { olderSkipped++; continue; }
+    if (!saved && _alreadyHere(bggId, entry, source)) { alreadyHere++; continue; }
+    const status = _mergePlayIntoHistory(play.uuid, entry);
+    if (status === 'same') { unchanged++; continue; }
+    persists.push(persistImportedPlay(play.uuid, entry));
+    if (status === 'new') newPlays++; else updatedPlays++;
+  }
+  await Promise.all(persists);
+
+  const plural = (n, w) => `${n} ${w}${n !== 1 ? 's' : ''}`;
+  const nothingNew = !newPlays && !updatedPlays && !newGames;
+  const skipNames = [...skipWith].join(', ');
+  finish(nothingNew ? 'info' : 'success', nothingNew ? 'Nothing new' : 'Import successful ✓', [
+    newPlays ? `+${plural(newPlays, 'new play')}` : '',
+    updatedPlays ? `✏️ ${plural(updatedPlays, 'play')} updated` : '',
+    newGames ? `+${plural(newGames, 'new game')}` : '',
+    newNames.size ? `+${plural(newNames.size, 'new player')}` : '',
+    unchanged ? `${plural(unchanged, 'play')} already up to date` : '',
+    withSkipped ? `${plural(withSkipped, 'play')} with ${_escapeHtml(skipNames)} skipped: ${_escapeHtml(skipNames)}'s own copy is kept` : '',
+    alreadyHere ? `${plural(alreadyHere, 'play')} skipped: already logged by someone else` : '',
+    olderSkipped ? `${plural(olderSkipped, 'play')} skipped: the app has a newer version` : '',
+    noGame ? `${plural(noGame, 'play')} skipped: the game isn't linked to BGG in BGStats` : '',
+  ]);
+}
 
 // Installable app + offline support (sw.js).
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
