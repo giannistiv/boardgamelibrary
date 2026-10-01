@@ -19,8 +19,11 @@
     "method": "POST",
     "enctype": "multipart/form-data",
     "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
       "files": [
-        { "name": "file", "accept": ["*/*", "application/json", "application/octet-stream", "application/*", "text/plain", ".json", ".bgsplay"] }
+        { "name": "file", "accept": ["application/*", "text/*", "image/*", ".json", ".bgsplay"] }
       ]
     }
   }

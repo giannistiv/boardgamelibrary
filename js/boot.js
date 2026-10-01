@@ -225,6 +225,7 @@ async function _takeSharedFile() {
     const empty = await cache.match('./shared-note');
     if (res) {
       const name = decodeURIComponent(res.headers.get('X-File-Name') || 'shared.json');
+      note = decodeURIComponent(res.headers.get('X-Share-Note') || '');
       file = new File([await res.blob()], /\.(json|bgsplay)$/i.test(name) ? name : name + '.json', { type: 'application/json' });
     } else if (empty) {
       note = decodeURIComponent(empty.headers.get('X-Share-Note') || '');
@@ -240,6 +241,7 @@ async function _takeSharedFile() {
     return;
   }
   window._bglSharedFile = file;
+  window._bglShareNote = note;
   _shareNotice('info', 'Importing the shared file…', [_escapeHtml(file.name)]);
   if (localStorage.getItem('bgl-player')) _navGo('you', 'profile');   // else the picker is open
   else _shareNotice('info', 'Who are you?', ['Pick your profile and the shared file is imported there.']);
@@ -291,7 +293,7 @@ window.initImporter = function(source){
     rt.textContent = title;
     rl.innerHTML = lines.filter(Boolean).join('<br>');
     if(ri) ri.innerHTML = '';
-    if (window._bglShareImport) _shareNotice(type, title, lines);
+    if (window._bglShareImport) _shareNotice(type, title, type === 'error' && window._bglShareNote ? lines.concat(`<small>Shared: ${_escapeHtml(window._bglShareNote)}</small>`) : lines);
   }
 
   async function processImport(file){

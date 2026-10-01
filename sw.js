@@ -98,8 +98,14 @@ async function receiveShare(req) {
   try {
     const form = await req.formData();
     const entries = [...form.entries()];
-    note = entries.map(([k, v]) => typeof v === 'string' ? `${k}: text` : `${k}: ${v.type || 'no type'}, ${v.name || 'no name'}, ${v.size} bytes`).join('; ') || `empty form (${(req.headers.get('content-type') || 'no content type').split(';')[0]})`;
-    const file = entries.map(e => e[1]).find(v => v && typeof v !== 'string' && v.size > 0);
+    note = entries.map(([k, v]) => typeof v === 'string' ? `${k}: ${v.length} characters` : `${k}: ${v.type || 'no type'}, ${v.name || 'no name'}, ${v.size} bytes`).join('; ')
+      || `empty form (${(req.headers.get('content-type') || 'no content type').split(';')[0]})`;
+    let file = entries.map(e => e[1]).find(v => v && typeof v !== 'string' && v.size > 0);
+    // Some apps share a file's contents as text: a BGStats file is JSON with plays in it.
+    if (!file) {
+      const text = entries.map(e => e[1]).find(v => typeof v === 'string' && /^\s*\{[\s\S]*"plays"/.test(v));
+      if (text) file = new File([text], 'shared.bgsplay', { type: 'application/json' });
+    }
     if (file) {
       await cache.put('./shared-file', new Response(file, { headers: {
         'Content-Type': file.type || 'application/json',
