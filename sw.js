@@ -4,6 +4,7 @@
 //   css / js / data (?v=…)   cache first: a stamped URL never changes
 //   covers (images/)         cache first, the most recent MAX_COVERS kept
 //   Firebase reads           network first, the last answer when offline
+//   a shared BGStats export  kept for the page, which imports it (boot.js)
 //   everything else          straight to the network
 //
 // Installing precaches index.html and every stamped asset it references, so
@@ -13,6 +14,7 @@ const SHELL = 'bgl-shell';
 const ASSETS = 'bgl-assets';
 const COVERS = 'bgl-covers-2';   // a new name when a cover file changes: every phone fetches covers again
 const DATA = 'bgl-data';
+const SHARED = 'bgl-shared';     // a file shared to the app from BGStats, until the page takes it
 const MAX_COVERS = 600;
 const FIREBASE = 'firebasedatabase.app';
 
@@ -50,7 +52,7 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   // drop caches this version no longer uses (an older covers cache)
   event.waitUntil((async () => {
-    const keep = new Set([SHELL, ASSETS, COVERS, DATA]);
+    const keep = new Set([SHELL, ASSETS, COVERS, DATA, SHARED]);
     for (const name of await caches.keys()) if (name.startsWith('bgl-') && !keep.has(name)) await caches.delete(name);
     await self.clients.claim();
   })());
@@ -84,10 +86,31 @@ async function networkFirst(cacheName, req, key) {
   }
 }
 
+// Sharing a file to the installed app (manifest share_target) arrives as a
+// form POST: keep the file, then open the app, which imports it.
+async function receiveShare(req) {
+  try {
+    const form = await req.formData();
+    const file = form.getAll('file').find(f => f && typeof f !== 'string');
+    if (file) {
+      const cache = await caches.open(SHARED);
+      await cache.put('./shared-file', new Response(file, { headers: {
+        'Content-Type': file.type || 'application/json',
+        'X-File-Name': encodeURIComponent(file.name || 'shared.json'),
+      } }));
+    }
+  } catch (e) { /* the app opens anyway */ }
+  return Response.redirect(new URL('./?shared=1', self.registration.scope).href, 303);
+}
+
 self.addEventListener('fetch', (event) => {
   const req = event.request;
-  if (req.method !== 'GET') return;
   const url = new URL(req.url);
+  if (req.method === 'POST' && url.origin === location.origin && url.pathname.endsWith('/share-target')) {
+    event.respondWith(receiveShare(req));
+    return;
+  }
+  if (req.method !== 'GET') return;
 
   if (req.mode === 'navigate' && url.origin === location.origin) {
     event.respondWith((async () => {

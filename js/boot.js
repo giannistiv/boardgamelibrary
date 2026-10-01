@@ -206,7 +206,30 @@ Promise.all([loadAllRatings(), loadAllFavorites(), loadImportedGames(), loadImpo
     openPicker();
   }
   navBooted();   // from here on, each new screen is a step back can return to
+  _takeSharedFile();
 });
+
+// ── A BGStats export shared to the app (Android share sheet → "Board Games") ──
+// sw.js keeps the file; here it goes to the logged-in player's importer
+// (initImporter picks it up), on their profile, with the same checks as a
+// file picked by hand. Nobody logged in: it waits for them to choose.
+async function _takeSharedFile() {
+  if (!new URLSearchParams(location.search).has('shared')) return;
+  history.replaceState(history.state, '', location.pathname);   // a reload mustn't import it again
+  let file = null;
+  try {
+    const cache = await caches.open('bgl-shared');
+    const res = await cache.match('./shared-file');
+    if (res) {
+      const name = decodeURIComponent(res.headers.get('X-File-Name') || 'shared.json');
+      file = new File([await res.blob()], /\.(json|bgsplay)$/i.test(name) ? name : name + '.json', { type: 'application/json' });
+      await cache.delete('./shared-file');
+    }
+  } catch (e) { /* no file kept */ }
+  if (!file) return;
+  window._bglSharedFile = file;
+  if (localStorage.getItem('bgl-player')) _navGo('you', 'profile');   // else the picker is open
+}
 
 // ── JSON Import ──
 // ── BGStats Play File Importer ──
@@ -453,6 +476,13 @@ window.initImporter = function(source){
   }
 
   fileInput.addEventListener('change', e => processImport(e.target.files[0]));
+  // a file shared to the app (_takeSharedFile): show the importer and import it
+  if (window._bglSharedFile) {
+    const shared = window._bglSharedFile;
+    window._bglSharedFile = null;
+    for (let el = dropZone; el; el = el.parentElement) if (el.tagName === 'DETAILS') el.open = true;
+    setTimeout(() => processImport(shared), 0);
+  }
   dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
   dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
   dropZone.addEventListener('drop', e => {
