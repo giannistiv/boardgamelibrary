@@ -510,22 +510,75 @@ function _alreadyHere(bggId, p, source) {
 
 // Asks who the people and places new in an upload are. Resolves to
 // {players: {uuid: name}, places: {uuid: name}}, or null when cancelled.
+// A name that's already taken here (ignoring accents and capitals) is never
+// merged by accident: the row says who that player is and asks "same
+// person?", and "someone else" means giving the new one a name of their own.
 function _askNewPeople(source, newPlayers, newPlaces) {
   const esc = _escapeHtml;
   const r = document.getElementById('importResult');
   const rt = document.getElementById('importResultTitle');
   const rl = document.getElementById('importResultLines');
   if (!r || !rt || !rl) return Promise.resolve(null);
-  const placesHere = new Set();
-  for (const id in PLAY_HISTORY) for (const p of PLAY_HISTORY[id]) if (p.l) placesHere.add(p.l);
+  const fold = (x) => String(x || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+  const placeCount = {};
+  for (const id in PLAY_HISTORY) for (const p of PLAY_HISTORY[id]) if (p.l) placeCount[p.l] = (placeCount[p.l] || 0) + 1;
   const known = _knownPlayerNames();
-  const suggestPlayer = (name) => known.has(name) ? name : (known.has(NAME_MAP[name]) ? NAME_MAP[name] : name);
-  const suggestPlace = (name) => placesHere.has(name) ? name : (LOCATION_MAP[name] || name.trim());
+  const playerByFold = new Map([...known].map(n => [fold(n), n]));
+  const placeByFold = new Map(Object.keys(placeCount).map(n => [fold(n), n]));
+  const suggestPlayer = (name) => known.has(NAME_MAP[name]) ? NAME_MAP[name] : name;
+  const suggestPlace = (name) => LOCATION_MAP[name] || name.trim();
+
+  // Who an existing player is, to tell whether it's the same person.
+  const about = (name) => {
+    let plays = 0, last = '', withSrc = 0;
+    const co = {};
+    for (const id in PLAY_HISTORY) for (const p of PLAY_HISTORY[id]) {
+      if (!p.sc.some(x => x.n === name)) continue;
+      plays++;
+      if (p.date > last) last = p.date;
+      if (p.sc.some(x => x.n === source)) withSrc++;
+      for (const x of p.sc) if (x.n !== name && x.n !== source) co[x.n] = (co[x.n] || 0) + 1;
+    }
+    const top = Object.entries(co).sort((x, y) => y[1] - x[1]).slice(0, 2).map(e => esc(e[0]));
+    return `${plays} play${plays !== 1 ? 's' : ''}${last ? `, last on ${_fmtDateShort(last)}` : ''}${top.length ? `, mostly with ${top.join(' and ')}` : ''}; ${withSrc ? `${withSrc} with ${esc(source)}` : `never with ${esc(source)}`}`;
+  };
+
   const row = (kind, it, value) => `
-    <label class="imp-new-row">
+    <div class="imp-new-row" data-kind="${kind}" data-uuid="${esc(it.uuid)}">
       <span class="imp-new-his">${esc(it.name)} <small>${it.plays} play${it.plays !== 1 ? 's' : ''}</small></span>
-      <input type="text" list="imp-${kind}-list" data-kind="${kind}" data-uuid="${esc(it.uuid)}" value="${esc(value)}" autocomplete="off">
-    </label>`;
+      <input type="text" list="imp-${kind}-list" value="${esc(value)}" autocomplete="off" aria-label="${esc(it.name)} here">
+      <div class="imp-new-hint"></div>
+    </div>`;
+
+  // The line under each answer: links to someone here, a new one, or a name
+  // that's taken and needs "same person?" answered.
+  const update = (rowEl) => {
+    const inp = rowEl.querySelector('input');
+    const hint = rowEl.querySelector('.imp-new-hint');
+    const v = inp.value.trim();
+    rowEl.classList.remove('imp-need');
+    if (!v) { hint.className = 'imp-new-hint'; hint.innerHTML = ''; return; }
+    if (rowEl.dataset.kind === 'places') {
+      const here = placeByFold.get(fold(v));
+      hint.className = 'imp-new-hint ' + (here ? 'ok' : 'new');
+      hint.innerHTML = here ? `The place here called <b>${esc(here)}</b> (${placeCount[here]} plays).` : 'A new place.';
+      return;
+    }
+    const here = playerByFold.get(fold(v));
+    if (!here) {
+      const twin = [...rl.querySelectorAll('.imp-new-row[data-kind="players"] input')].some(o => o !== inp && fold(o.value) === fold(v));
+      hint.className = 'imp-new-hint new';
+      hint.innerHTML = twin ? 'A new player, and the same name as another row above: they’ll be one person.' : 'A new player.';
+    } else if (rowEl.dataset.same === here) {
+      hint.className = 'imp-new-hint ok';
+      hint.innerHTML = `Same person as <b>${esc(here)}</b> here.`;
+    } else {
+      hint.className = 'imp-new-hint warn';
+      hint.innerHTML = `There's already a <b>${esc(here)}</b> here: ${about(here)}. Same person?
+        <span class="imp-new-ask"><button type="button" class="btn-ghost" data-imp="same">Yes, same person</button><button type="button" class="btn-ghost" data-imp="other">No, someone else</button></span>`;
+    }
+  };
+
   r.className = 'import-result info';
   r.style.display = 'block';
   rt.textContent = 'New in this upload';
@@ -534,26 +587,60 @@ function _askNewPeople(source, newPlayers, newPlaces) {
     ${newPlayers.length ? `<div class="imp-new-sec">People</div>${newPlayers.map(it => row('players', it, suggestPlayer(it.name))).join('')}` : ''}
     ${newPlaces.length ? `<div class="imp-new-sec">Places</div>${newPlaces.map(it => row('places', it, suggestPlace(it.name))).join('')}` : ''}
     <datalist id="imp-players-list">${[...known].sort().map(n => `<option value="${esc(n)}">`).join('')}</datalist>
-    <datalist id="imp-places-list">${[...placesHere].sort().map(n => `<option value="${esc(n)}">`).join('')}</datalist>
+    <datalist id="imp-places-list">${Object.keys(placeCount).sort().map(n => `<option value="${esc(n)}">`).join('')}</datalist>
     <div class="imp-new-actions">
       <button type="button" class="btn-primary" data-imp="go">Import</button>
       <button type="button" class="btn-ghost" data-imp="cancel">Cancel</button>
     </div>`;
+  const rows = () => [...rl.querySelectorAll('.imp-new-row')];
+  rows().forEach(update);
   r.scrollIntoView({ block: 'center', behavior: 'smooth' });
+
   return new Promise((resolve) => {
+    rl.oninput = (e) => {
+      const rowEl = e.target.closest('.imp-new-row');
+      if (!rowEl) return;
+      delete rowEl.dataset.same;
+      rows().forEach(update);   // a name typed here can make another row a twin
+    };
     rl.onclick = (e) => {
       const b = e.target.closest('[data-imp]');
       if (!b) return;
-      if (b.dataset.imp === 'cancel') { rl.onclick = null; resolve(null); return; }
+      const rowEl = b.closest('.imp-new-row');
+      if (b.dataset.imp === 'same' && rowEl) {
+        const inp = rowEl.querySelector('input');
+        const here = playerByFold.get(fold(inp.value));
+        inp.value = here;
+        rowEl.dataset.same = here;
+        update(rowEl);
+        return;
+      }
+      if (b.dataset.imp === 'other' && rowEl) {
+        const inp = rowEl.querySelector('input');
+        const hint = rowEl.querySelector('.imp-new-hint');
+        hint.className = 'imp-new-hint warn';
+        hint.innerHTML = 'Then give them a name of their own, for example with a surname.';
+        inp.focus();
+        inp.select();
+        return;
+      }
+      if (b.dataset.imp === 'cancel') { rl.onclick = rl.oninput = null; resolve(null); return; }
+      // Import: every answer filled in, and every taken name confirmed as the same person.
       const out = { players: {}, places: {} };
-      let missing = null;
-      rl.querySelectorAll('input[data-kind]').forEach(inp => {
-        const v = inp.value.trim();
-        if (!v) missing = missing || inp;
-        out[inp.dataset.kind][inp.dataset.uuid] = v;
-      });
-      if (missing) { missing.focus(); return; }
-      rl.onclick = null;
+      let stop = null;
+      for (const rowEl of rows()) {
+        const v = rowEl.querySelector('input').value.trim();
+        const kind = rowEl.dataset.kind;
+        const here = kind === 'players' ? playerByFold.get(fold(v)) : null;
+        if (!v || (here && rowEl.dataset.same !== here)) {
+          rowEl.classList.add('imp-need');
+          stop = stop || rowEl;
+          continue;
+        }
+        out[kind][rowEl.dataset.uuid] = here || (kind === 'places' && placeByFold.get(fold(v))) || v;
+      }
+      if (stop) { stop.scrollIntoView({ block: 'center', behavior: 'smooth' }); stop.querySelector('input').focus(); return; }
+      rl.onclick = rl.oninput = null;
       resolve(out);
     };
   });

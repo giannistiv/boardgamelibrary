@@ -1126,7 +1126,16 @@
   /* a friend's upload: who are the new people and places? */
   .imp-new-help{font-size:0.8rem;line-height:1.5;color:var(--text-2);margin-bottom:0.6rem}
   .imp-new-sec{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-3);margin:0.7rem 0 0.3rem}
-  .imp-new-row{display:flex;align-items:center;gap:0.6rem;margin-bottom:0.35rem;flex-wrap:wrap}
+  .imp-new-row{display:flex;align-items:center;gap:0.3rem 0.6rem;margin-bottom:0.6rem;flex-wrap:wrap;border-radius:8px}
+  .imp-new-row.imp-need{outline:2px solid #e8995d;outline-offset:4px}
+  .imp-new-hint{flex-basis:100%;font-size:0.76rem;line-height:1.45;color:var(--text-3)}
+  .imp-new-hint:empty{display:none}
+  .imp-new-hint b{color:var(--text);font-weight:600}
+  .imp-new-hint.ok{color:var(--win)}
+  .imp-new-hint.new{color:var(--info, #7ab8ff)}
+  .imp-new-hint.warn{color:#e8995d}
+  .imp-new-ask{display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.35rem}
+  .imp-new-ask .btn-ghost{height:30px;padding:0 0.7rem;font-size:0.78rem}
   .imp-new-his{flex:1 1 9rem;min-width:0;font-size:0.82rem;color:var(--text)}
   .imp-new-his small{color:var(--text-3);margin-left:0.25rem}
   .imp-new-row input{flex:1 1 12rem;min-width:0;height:34px;padding:0 0.6rem;border-radius:8px;border:1px solid var(--line-2);background:var(--card);color:var(--text);font:inherit;font-size:0.85rem}
