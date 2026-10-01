@@ -3,22 +3,16 @@
 // and the games on BGG's hot list that aren't out yet, the best fit for you
 // first: games with the mechanics you rate highly and play most, near the
 // weight you usually play. Each shows how its campaign is going, whose
-// library has it and pictures from its gallery; tap one for its page. For
-// Στιβ, the Board South players and Δημητρης. data/bgg-hot.js is refreshed
-// every few hours by a scheduled job (tools/fetch-hot.py) and fetched when
-// the tab opens, so it's the latest.
+// library has it and pictures from its gallery; tap one for its page. Open
+// to everyone. data/bgg-hot.js is refreshed every few hours by a scheduled
+// job (tools/fetch-hot.py) and fetched when the tab opens, so it's the latest.
 
 let _hot = null;            // BGG_HOT once loaded
 let _hotFilter = 'live';    // 'live' (campaigns running now) | 'soon' (hot on BGG, no campaign running)
 let _hotSort = 'you';       // 'you' | 'ending' | 'backers' | 'hot'
 let _hotTasteFor = null, _hotTasteCache;   // whose taste, and it (null: too few games to tell)
 
-const TRENDING_ALSO = new Set(['Δημητρης']);   // besides Στιβ and the Board South players
-
-function trendingAllowed() {
-  if (typeof _activeBoardSouthVoter === 'function' && _activeBoardSouthVoter()) return true;
-  return TRENDING_ALSO.has(_navPlayer());
-}
+function trendingAllowed() { return true; }   // open to everyone
 
 async function _loadHot() {
   if (_hot) return _hot;

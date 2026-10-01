@@ -1,5 +1,5 @@
 const ILIOUPOLI_MEMBERS = new Set(['Στιβ', 'Δημητρης', 'Μαντσος']);
-let _ilioSubTab = 'library'; // 'library' | 'oathsworn'
+let _ilioSubTab = 'library'; // 'library' | 'oathsworn' | 'gauntlet'
 
 // ── Oathsworn boss ranking ──
 // Each Oathsworn play stores its boss in the play's "board" field as
@@ -181,12 +181,17 @@ function showIlioupoliView() {
   games.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
   const subTabsHtml = `
-    <div class="bs-subtabs">
+    <div class="bs-subtabs ilio-subtabs">
       <button class="bs-subtab${_ilioSubTab === 'library' ? ' active' : ''}" data-ilio-sub="library">📚 Dimitris Library</button>
       <button class="bs-subtab${_ilioSubTab === 'oathsworn' ? ' active' : ''}" data-ilio-sub="oathsworn">⚔️ Oathsworn</button>
+      <button class="bs-subtab${_ilioSubTab === 'gauntlet' ? ' active' : ''}" data-ilio-sub="gauntlet">🦸 Marvel</button>
     </div>`;
 
   const wireSubTabs = () => {
+    // the strip scrolls sideways on a phone: keep the open tab in view
+    const strip = container.querySelector('.ilio-subtabs');
+    const act = strip && strip.querySelector('.active');
+    if (act) strip.scrollLeft = act.offsetLeft - (strip.clientWidth - act.offsetWidth) / 2;
     container.querySelectorAll('[data-ilio-sub]').forEach(el => {
       el.addEventListener('click', () => {
         const s = el.dataset.ilioSub;
@@ -194,6 +199,21 @@ function showIlioupoliView() {
       });
     });
   };
+
+  // ── Marvel Champions sub-tab: the Gauntlet (js/mc-gauntlet.js) ──
+  if (_ilioSubTab === 'gauntlet') {
+    container.innerHTML = `
+      <div class="lb-header">
+        <div class="lb-title">Ilioupoli Bros</div>
+        <div class="lb-count">Marvel Champions Gauntlet</div>
+      </div>
+      ${subTabsHtml}
+      ${buildGauntletHtml()}`;
+    wireSubTabs();
+    wireGauntlet(container, showIlioupoliView);
+    window.scrollTo(0, 0);
+    return;
+  }
 
   // ── Oathsworn sub-tab — boss ranking ──
   if (_ilioSubTab === 'oathsworn') {
