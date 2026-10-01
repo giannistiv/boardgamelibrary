@@ -8,7 +8,7 @@
 // job (tools/fetch-hot.py) and fetched when the tab opens, so it's the latest.
 
 let _hot = null;            // BGG_HOT once loaded
-let _hotFilter = 'live';    // 'live' (campaigns running now) | 'soon' (hot on BGG, no campaign running)
+let _hotFilter = null;      // 'yours' (news for the games you play, js/game-news.js) | 'live' (campaigns running now) | 'soon' (hot on BGG, no campaign running)
 let _hotSort = 'you';       // 'you' | 'ending' | 'backers' | 'hot'
 let _hotTasteFor = null, _hotTasteCache;   // whose taste, and it (null: too few games to tell)
 
@@ -200,7 +200,19 @@ function _renderHot(box) {
   const taste = _hotTaste();
   const all = (_hot.games || []).filter(g => _hotLive(g) || g.pos);
   const live = all.filter(_hotLive), soon = all.filter(g => !_hotLive(g));
+  const yours = _gnForYou();
+  if (!_hotFilter) _hotFilter = yours.length ? 'yours' : 'live';
   if (_hotFilter === 'soon' && !soon.length) _hotFilter = 'live';
+  const chips = _gbChips('hot', [['yours', `For your games ${yours.length}`], ['live', `Live campaigns ${live.length}`], ['soon', `Coming soon ${soon.length}`]], v => _hotFilter === v);
+  if (_hotFilter === 'yours') {
+    box.innerHTML = `
+      <div class="hot-head">
+        <div class="gb-chips">${chips}</div>
+        <span class="hot-updated">New expansions, editions and printings of the games you play, and campaigns for them, from BGG${_news && _news.updated ? ` &middot; updated ${_hotAgo(_news.updated)}` : ''}</span>
+      </div>
+      ${_gnForYouHtml()}`;
+    return;
+  }
   const sorts = _hotFilter === 'live'
     ? [['you', 'Best for you'], ['ending', 'Ending soon'], ['backers', 'Most backed']]
     : [['you', 'Best for you'], ['hot', 'Hottest']];
@@ -214,7 +226,7 @@ function _renderHot(box) {
     : (a, b) => fits.get(b.id).score - fits.get(a.id).score);
   box.innerHTML = `
       <div class="hot-head">
-        <div class="gb-chips">${_gbChips('hot', [['live', `Live campaigns ${live.length}`], ['soon', `Coming soon ${soon.length}`]], v => _hotFilter === v)}</div>
+        <div class="gb-chips">${chips}</div>
         <div class="gb-chips hot-sorts">${_gbChips('hotsort', sorts.filter(s => taste || s[0] !== 'you'), v => _hotSort === v)}</div>
         <span class="hot-updated">${_hotFilter === 'live' ? 'Crowdfunding campaigns running now, from BGG' : 'On BGG&rsquo;s hot list, not out yet'} &middot; updated ${_hotAgo(_hot.updated)}</span>
       </div>
@@ -224,7 +236,7 @@ function _renderHot(box) {
 function wireTrendingTab(container) {
   const box = container.querySelector('#hot');
   if (!box) return;
-  _loadHot().then(() => _renderHot(box)).catch(() => {
+  Promise.all([_loadHot(), _loadNews().catch(() => null)]).then(() => _renderHot(box)).catch(() => {
     box.innerHTML = '<div class="stats-player-sub gb-empty">The list couldn&rsquo;t be loaded. Try again in a moment.</div>';
   });
   box.addEventListener('click', (e) => {
@@ -234,6 +246,7 @@ function wireTrendingTab(container) {
       _renderHot(box);
       return;
     }
+    if (e.target.closest('[data-gn-all]')) { _gnShowAll = true; _renderHot(box); return; }
     if (_hotPicClick(e)) return;
     const card = e.target.closest('.hot-card');
     if (card && !e.target.closest('a')) {
@@ -302,6 +315,7 @@ function _openHotGame(g) {
         <a class="modal-bgg-link" href="https://boardgamegeek.com/boardgame/${g.id}" target="_blank" rel="noopener">View on BoardGameGeek &#8599;</a>
       </div>
     </div>`, (e) => {
+    if (e.target.closest('[data-gn-all]')) { _gnShowAll = true; _renderHot(box); return; }
     if (_hotPicClick(e)) return;
     if (e.target.closest('[data-hot-ours]')) openModal(ours);
   });

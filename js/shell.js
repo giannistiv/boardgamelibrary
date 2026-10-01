@@ -623,6 +623,7 @@ function openModal(game) {
       </div>
       <div class="gm-panel" data-panel="overview"${tab === 'overview' ? '' : ' hidden'}>
         ${buildPlayerCountHtml(game, plays)}
+        ${buildGameNewsHtml(game.bggId)}
         ${game.description ? `<div class="modal-desc">${game.description}</div>` : ''}
         ${game.categories.length ? `<div class="modal-categories">${game.categories.map(c => `<span class="modal-cat">${c}</span>`).join('')}</div>` : ''}
         ${mechanicsHtml}
@@ -661,6 +662,7 @@ function openModal(game) {
   wireStarRating();
   wireNotes();
   wireMarvelChampions();
+  wireGameNews(content);
   updateFavButton(game.bggId);
   wireFavButton();
 }

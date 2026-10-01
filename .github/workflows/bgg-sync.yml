@@ -3,6 +3,8 @@
 #     campaigns and the hot list's unreleased games (tools/fetch-hot.py, no token needed)
 #   - the friends' libraries, and new games on Στιβ's BGG collection as
 #     "new arrivals" (tools/sync-collections.py, needs the BGG_TOKEN secret)
+#   - what's new for the games we play: new expansions, editions and printings
+#     (tools/fetch-game-news.py, no token needed; a share of the games each run)
 #   - the notes on our BGG plays of a few games, e.g. Spirit Island's adversary
 #     levels (tools/fetch-play-notes.py, needs the BGG_TOKEN secret)
 #   - once a week, BGG's top 100 for the Top 100 challenge (tools/fetch-top100.py)
@@ -46,6 +48,9 @@ jobs:
           BGG_TOKEN: ${{ secrets.BGG_TOKEN }}
         run: |
           if [ -n "$BGG_TOKEN" ]; then python3 tools/fetch-play-notes.py || echo "play notes skipped this time"; fi
+
+      - name: What's new for the games we play (a share of them each run)
+        run: python3 tools/fetch-game-news.py || echo "game news skipped this time"
 
       - name: Weekly BGG top 100 (Mondays)
         run: |

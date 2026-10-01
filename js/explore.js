@@ -220,7 +220,7 @@ function showGamesView() {
       <div class="stats-player-name">Explore</div>
       <div class="stats-player-sub">${_exploreTab === 'tonight'
         ? 'What should we play tonight? Pick how many of you are playing and how long you have.'
-        : _exploreTab === 'trending' ? 'Games still to come out: the crowdfunding campaigns running now and BGG&rsquo;s most talked-about, the best fit for you first.'
+        : _exploreTab === 'trending' ? 'What&rsquo;s new for the games you play, the crowdfunding campaigns running now and BGG&rsquo;s most talked-about games still to come out.'
         : `${totalPlays.toLocaleString('en')} plays &middot; ${Object.keys(gamePlayCounts).length} games &middot; ${topPlayers.length} players`}</div>
     </div>
     <div class="explore-tabs">
