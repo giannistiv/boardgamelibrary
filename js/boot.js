@@ -545,9 +545,10 @@ window.initImporter = function(source){
 // Their people and places are matched by their app's ids: the agreed lists
 // first, then anyone they've been asked about since (saved in Firebase), and
 // anyone still unknown is asked about before anything is saved. Plays someone
-// in `skipWith` is in are skipped (Στιβ's own copy is kept), and so are plays
-// already logged here by someone else. Saved plays remember whose upload they
-// came from (`src`), so a later upload updates them instead of adding copies.
+// in `skipWith` is in are skipped (Στιβ's own copy is kept), unless listed in
+// `importAnyway`, and so are plays already logged here by someone else. Saved
+// plays remember whose upload they came from (`src`), so a later upload
+// updates them instead of adding copies.
 const IMPORT_MAPS_PRIMARY = 'importMaps';
 const IMPORT_MAPS_FALLBACK = 'gameImages/_bglImportMaps';   // loadGameImages skips entries without a url
 
@@ -738,6 +739,7 @@ async function _importFromSource(source, src, data, showResult, finish) {
   const nameOf = (p) => p ? (src.players[p.uuid] || learned.players[p.uuid] || null) : null;
   const placeOf = (l) => l ? (src.places[l.uuid] || learned.places[l.uuid] || null) : null;
   const skipWith = new Set(src.skipWith || []);
+  const importAnyway = new Set(src.importAnyway || []);   // plays with them that they never logged
 
   // The game behind a play: its BGG id, else a game here with the same name.
   const byName = {};
@@ -749,7 +751,7 @@ async function _importFromSource(source, src, data, showResult, finish) {
   const todo = [];
   for (const play of data.plays) {
     const people = (play.playerScores || []).map(ps => players[ps.playerRefId]);
-    if (people.some(p => skipWith.has(nameOf(p)))) { withSkipped++; continue; }
+    if (people.some(p => skipWith.has(nameOf(p))) && !importAnyway.has(play.uuid)) { withSkipped++; continue; }
     const bggId = bggIdOf(games[play.gameRefId]);
     if (!bggId) { noGame++; continue; }
     todo.push({ play, people, bggId });

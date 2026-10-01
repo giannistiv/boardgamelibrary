@@ -7,6 +7,37 @@ const IMPORT_SOURCES = {
   'Δημητρης': {
     bgg: 'rhogarj',          // the export's BGG username: only his files are accepted
     skipWith: ['Στιβ'],      // plays Στιβ is in are skipped: his own copy is kept
+    // ...except these: plays with Στιβ that Στιβ never logged (not even as another
+    // edition, within two days). Found and brought in on 2 Oct 2026.
+    importAnyway: [
+      '24067c67-e617-470b-be2b-3ce9a20e299c',   // 2023-04-11 Frosthaven
+      'a94b662c-d9ce-4e69-8e56-cef9628adbcc',   // 2023-07-14 Imperial Settlers: Empires of the North
+      '1fc577c9-bb61-4633-9ebb-3b50981d8e91',   // 2023-10-14 So Clover!
+      'ebbf06d1-66bb-4f1f-9092-6097fd3e1556',   // 2023-10-14 So Clover!
+      '62ce7cd0-94f5-4fbd-9338-b79755428856',   // 2023-10-14 Horrified: American Monsters
+      '460fe555-2d78-485f-9042-a63921c1f15c',   // 2024-02-12 Horrified: American Monsters
+      '2faaaae9-e906-439b-9eec-8759753494fb',   // 2024-02-13 Azul
+      'fead94c1-98f4-4050-ba53-06c2222886ba',   // 2024-02-13 Azul
+      '5ab9e1ea-b7bc-4365-8944-ab3a3059f35a',   // 2024-02-18 Paleo
+      '31726638-de12-4ad8-875a-776bba1a50eb',   // 2024-03-03 Clank!: Catacombs
+      '137898b4-dc4c-4115-963a-ac0539790fd1',   // 2024-04-04 Paint the Roses
+      'c5835c08-d833-4b1f-a031-0193c49fd2ec',   // 2024-06-27 Detective: City of Angels
+      'd3047421-0352-4622-9fd6-43be2c20f237',   // 2024-06-27 Detective: City of Angels
+      '573d6dee-dc56-44ec-b51f-8a0db06ce544',   // 2024-06-29 Etherfields
+      '71aa4565-59df-4eda-ab52-5dd9bbcadcfa',   // 2024-06-29 Etherfields
+      'ccacbac2-8e1e-405b-87c7-c009e97d55d1',   // 2024-06-29 Etherfields
+      'e633945a-0de6-4c5a-aafc-df437ac046d9',   // 2024-06-29 Etherfields
+      'ed1d2c4e-45d4-4054-a9ce-1c1376e3e754',   // 2024-07-09 Etherfields
+      '1e05cf36-ec83-408c-bf05-4e21fa3d2a17',   // 2024-07-23 Spirit Island
+      'ee1c13a7-fdb5-4044-bc70-88770c615ada',   // 2024-09-12 The 7th Citadel
+      'a4ae140d-79ae-4cab-b4ef-627f7cb29d7c',   // 2024-09-13 The 7th Citadel
+      '34d014c8-35a4-40c9-8cd9-052862d54340',   // 2025-02-25 Paint the Roses
+      '81afa740-e19a-442f-93c6-942bf251222e',   // 2025-03-18 Too Many Bones
+      '1441d43e-0bf3-460d-9eeb-296db35cced2',   // 2025-03-27 Sleeping Gods: Distant Skies
+      '939cd3d4-0fff-4c0d-b17e-dbf0d111b72d',   // 2025-06-04 Thunder Road: Vendetta
+      'b13c8d62-ea1d-4ed7-a14e-ea1d7b2cc154',   // 2025-06-04 Thunder Road: Vendetta
+      '5669ece4-49fd-4ed0-a40a-1c7063ebe909',   // 2025-11-11 Oathsworn: Into the Deepwood
+    ],
     players: {
       "6d27defa-7ca2-4b43-a523-20559caed87e": "Αγγελος - BS",   // Aggelos Bgg Hardcore
       "b6e0b7e7-6ede-4429-8af0-26447466c844": "Αγγελος NL",   // Aggelos NL
