@@ -25,7 +25,7 @@ import time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 INDEX = os.path.join(ROOT, 'index.html')
-ASSET_RE = re.compile(r'(src|href)="((?:js|data)/[^"?]+\.js|styles\.css)(?:\?v=[0-9a-f]*)?"')
+ASSET_RE = re.compile(r'(src|href)="((?:js|data)/[^"?]+\.js|styles\.css|manifest\.webmanifest)(?:\?v=[0-9a-f]*)?"')
 
 
 def content(path, worktree=False):

@@ -836,5 +836,7 @@ async function _importFromSource(source, src, data, showResult, finish) {
 
 // Installable app + offline support (sw.js).
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').then(reg => reg.update()).catch(() => {});   // pick up a new version now
+  });
 }

@@ -46,7 +46,9 @@ async function refreshShell() {
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
-  event.waitUntil(refreshShell().catch(() => {}));
+  // take over within seconds (a shared file must reach the newest version);
+  // whatever isn't precached by then is cached as it's used
+  event.waitUntil(Promise.race([refreshShell().catch(() => {}), new Promise(r => setTimeout(r, 4000))]));
 });
 
 self.addEventListener('activate', (event) => {
@@ -92,11 +94,11 @@ async function networkFirst(cacheName, req, key) {
 // wrong when there's no file.
 async function receiveShare(req) {
   const cache = await caches.open(SHARED);
-  let note = 'no form';
+  let note = `no form (${req.headers.get('content-type') || 'no content type'})`;
   try {
     const form = await req.formData();
     const entries = [...form.entries()];
-    note = entries.map(([k, v]) => typeof v === 'string' ? `${k}: text` : `${k}: ${v.type || 'no type'}, ${v.name || 'no name'}, ${v.size} bytes`).join('; ') || 'empty form';
+    note = entries.map(([k, v]) => typeof v === 'string' ? `${k}: text` : `${k}: ${v.type || 'no type'}, ${v.name || 'no name'}, ${v.size} bytes`).join('; ') || `empty form (${(req.headers.get('content-type') || 'no content type').split(';')[0]})`;
     const file = entries.map(e => e[1]).find(v => v && typeof v !== 'string' && v.size > 0);
     if (file) {
       await cache.put('./shared-file', new Response(file, { headers: {

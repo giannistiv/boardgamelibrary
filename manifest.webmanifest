@@ -20,7 +20,7 @@
     "enctype": "multipart/form-data",
     "params": {
       "files": [
-        { "name": "file", "accept": ["application/json", "application/octet-stream", "application/*", "text/plain", ".json", ".bgsplay"] }
+        { "name": "file", "accept": ["*/*", "application/json", "application/octet-stream", "application/*", "text/plain", ".json", ".bgsplay"] }
       ]
     }
   }
