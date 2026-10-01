@@ -284,12 +284,17 @@ window.initImporter = function(source){
       return;
     }
 
-    // Each profile takes only its own export (the file says whose BGG account made it).
+    // Each profile takes only its own export. A full export says whose BGG
+    // account made it; a play file (.bgsplay) only says which player is "me",
+    // and a friend's own player is in their list (data/import-sources.js).
     const owner = String((data.userInfo && data.userInfo.bggUsername) || '').toLowerCase();
-    const ownerOf = typeof IMPORT_SOURCES !== 'undefined'
-      ? Object.keys(IMPORT_SOURCES).find(k => IMPORT_SOURCES[k].bgg === owner) : null;
-    if (src && owner !== src.bgg) {
-      showResult('error', 'Not your export', [`This file was exported from ${owner ? `the BGG account <b>${_escapeHtml(owner)}</b>` : 'another account'}. Only ${_escapeHtml(source)}'s own BGStats export can be imported here.`]);
+    const meRef = data.userInfo && data.userInfo.meRefId;
+    const me = data.players.find(p => p.id === meRef);
+    const sources = typeof IMPORT_SOURCES !== 'undefined' ? IMPORT_SOURCES : {};
+    const isFrom = (name) => owner ? owner === sources[name].bgg : !!(me && sources[name].players[me.uuid] === name);
+    const ownerOf = Object.keys(sources).find(isFrom) || null;
+    if (src && !isFrom(source)) {
+      showResult('error', 'Not your export', [`This file comes from ${owner ? `the BGG account <b>${_escapeHtml(owner)}</b>` : 'someone else\'s BGStats'}. Only ${_escapeHtml(source)}'s own BGStats files can be imported here.`]);
       return;
     }
     if (!src && ownerOf) {
