@@ -212,23 +212,55 @@ Promise.all([loadAllRatings(), loadAllFavorites(), loadImportedGames(), loadImpo
 // ── A BGStats export shared to the app (Android share sheet → "Board Games") ──
 // sw.js keeps the file; here it goes to the logged-in player's importer
 // (initImporter picks it up), on their profile, with the same checks as a
-// file picked by hand. Nobody logged in: it waits for them to choose.
+// file picked by hand. Nobody logged in: it waits for them to choose. How it
+// went shows in a notice at the top (the importer sits low on the profile,
+// often folded away on a phone), and so does a share that brought no file.
 async function _takeSharedFile() {
   if (!new URLSearchParams(location.search).has('shared')) return;
   history.replaceState(history.state, '', location.pathname);   // a reload mustn't import it again
-  let file = null;
+  let file = null, note = '';
   try {
     const cache = await caches.open('bgl-shared');
     const res = await cache.match('./shared-file');
+    const empty = await cache.match('./shared-note');
     if (res) {
       const name = decodeURIComponent(res.headers.get('X-File-Name') || 'shared.json');
       file = new File([await res.blob()], /\.(json|bgsplay)$/i.test(name) ? name : name + '.json', { type: 'application/json' });
-      await cache.delete('./shared-file');
+    } else if (empty) {
+      note = decodeURIComponent(empty.headers.get('X-Share-Note') || '');
     }
-  } catch (e) { /* no file kept */ }
-  if (!file) return;
+    await cache.delete('./shared-file');
+    await cache.delete('./shared-note');
+  } catch (e) { note = 'the app could not read what was shared'; }
+  if (!file) {
+    _shareNotice('error', 'Nothing arrived from BGStats', [
+      'The app opened, but the share didn\'t bring a file with it. Try sharing it again. If it keeps happening, this is what arrived:',
+      `<small>${_escapeHtml(note || 'no share was kept')}</small>`,
+    ]);
+    return;
+  }
   window._bglSharedFile = file;
+  _shareNotice('info', 'Importing the shared file…', [_escapeHtml(file.name)]);
   if (localStorage.getItem('bgl-player')) _navGo('you', 'profile');   // else the picker is open
+  else _shareNotice('info', 'Who are you?', ['Pick your profile and the shared file is imported there.']);
+}
+
+// The notice at the top for a shared file: its import's progress and result.
+function _shareNotice(type, title, lines) {
+  let el = document.getElementById('share-notice');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'share-notice';
+    el.setAttribute('role', 'status');
+    document.body.appendChild(el);
+    el.addEventListener('click', (e) => {
+      if (e.target.closest('[data-share-ok]')) { el.remove(); window._bglShareImport = false; }
+    });
+  }
+  el.className = 'share-notice ' + type;
+  el.innerHTML = `<div class="share-notice-title">${_escapeHtml(title)}</div>
+    <div class="share-notice-lines">${lines.filter(Boolean).join('<br>')}</div>
+    <button type="button" class="btn-ghost" data-share-ok>OK</button>`;
 }
 
 // ── JSON Import ──
@@ -259,6 +291,7 @@ window.initImporter = function(source){
     rt.textContent = title;
     rl.innerHTML = lines.filter(Boolean).join('<br>');
     if(ri) ri.innerHTML = '';
+    if (window._bglShareImport) _shareNotice(type, title, lines);
   }
 
   async function processImport(file){
@@ -485,6 +518,7 @@ window.initImporter = function(source){
   if (window._bglSharedFile) {
     const shared = window._bglSharedFile;
     window._bglSharedFile = null;
+    window._bglShareImport = true;
     for (let el = dropZone; el; el = el.parentElement) if (el.tagName === 'DETAILS') el.open = true;
     setTimeout(() => processImport(shared), 0);
   }
@@ -617,6 +651,10 @@ function _askNewPeople(source, newPlayers, newPlaces) {
   r.className = 'import-result info';
   r.style.display = 'block';
   rt.textContent = 'New in this upload';
+  if (window._bglShareImport) {
+    for (let el = r; el; el = el.parentElement) if (el.tagName === 'DETAILS') el.open = true;
+    _shareNotice('info', 'New people in this file', ['Say who they are just below, then tap Import.']);
+  }
   rl.innerHTML = `
     <div class="imp-new-help">Who are they here? Pick someone who is already in the app, or keep or type a new name. ${esc(source)}'s next uploads will remember the answer.</div>
     ${newPlayers.length ? `<div class="imp-new-sec">People</div>${newPlayers.map(it => row('players', it, suggestPlayer(it.name))).join('')}` : ''}

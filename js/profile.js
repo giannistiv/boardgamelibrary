@@ -847,7 +847,7 @@ function showStatsView(playerName, visiting) {
     window.initImporter(importSource || undefined);
   } else if (window._bglSharedFile && isOwnProfile) {
     window._bglSharedFile = null;
-    alert('BGStats exports are imported by Στιβ and Δημητρης, each from their own profile.');
+    if (typeof _shareNotice === 'function') _shareNotice('error', 'Not imported', ['BGStats files are imported by Στιβ and Δημητρης, each from their own profile.']);
   }
 
   _wirePcFolds(container);

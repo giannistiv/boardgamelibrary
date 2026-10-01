@@ -1123,6 +1123,20 @@
   .import-result.info{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:rgba(240,230,211,0.7)}
   .import-result-title{font-weight:700;margin-bottom:0.3rem}
   .import-result-lines{opacity:0.8;line-height:1.7}
+  /* a file shared to the app: progress and result, on top of everything */
+  .share-notice{
+    position:fixed;left:50%;transform:translateX(-50%);top:calc(12px + var(--safe-t, 0px));z-index:700;
+    width:min(460px, calc(100vw - 32px));padding:0.85rem 1rem 0.8rem;border-radius:var(--r-l);
+    background:var(--bg-2);border:1px solid var(--line-2);box-shadow:0 20px 50px -12px rgba(0,0,0,0.8);
+  }
+  .share-notice.success{border-color:rgba(90,214,138,0.45)}
+  .share-notice.error{border-color:rgba(248,113,113,0.5)}
+  .share-notice-title{font-weight:700;font-size:0.95rem;color:var(--text);margin-bottom:0.25rem}
+  .share-notice.success .share-notice-title{color:var(--win)}
+  .share-notice.error .share-notice-title{color:#f87171}
+  .share-notice-lines{font-size:0.82rem;line-height:1.55;color:var(--text-2)}
+  .share-notice-lines small{color:var(--text-3);word-break:break-word}
+  .share-notice .btn-ghost{height:32px;padding:0 0.9rem;font-size:0.8rem;margin-top:0.6rem}
   /* a friend's upload: who are the new people and places? */
   .imp-new-help{font-size:0.8rem;line-height:1.5;color:var(--text-2);margin-bottom:0.6rem}
   .imp-new-sec{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-3);margin:0.7rem 0 0.3rem}

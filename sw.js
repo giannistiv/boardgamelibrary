@@ -87,19 +87,29 @@ async function networkFirst(cacheName, req, key) {
 }
 
 // Sharing a file to the installed app (manifest share_target) arrives as a
-// form POST: keep the file, then open the app, which imports it.
+// form POST: keep the file (whatever field it came in), then open the app,
+// which imports it. What arrived is noted too, so the app can say what went
+// wrong when there's no file.
 async function receiveShare(req) {
+  const cache = await caches.open(SHARED);
+  let note = 'no form';
   try {
     const form = await req.formData();
-    const file = form.getAll('file').find(f => f && typeof f !== 'string');
+    const entries = [...form.entries()];
+    note = entries.map(([k, v]) => typeof v === 'string' ? `${k}: text` : `${k}: ${v.type || 'no type'}, ${v.name || 'no name'}, ${v.size} bytes`).join('; ') || 'empty form';
+    const file = entries.map(e => e[1]).find(v => v && typeof v !== 'string' && v.size > 0);
     if (file) {
-      const cache = await caches.open(SHARED);
       await cache.put('./shared-file', new Response(file, { headers: {
         'Content-Type': file.type || 'application/json',
         'X-File-Name': encodeURIComponent(file.name || 'shared.json'),
+        'X-Share-Note': encodeURIComponent(note),
       } }));
+    } else {
+      await cache.put('./shared-note', new Response('', { headers: { 'X-Share-Note': encodeURIComponent(note) } }));
     }
-  } catch (e) { /* the app opens anyway */ }
+  } catch (e) {
+    await cache.put('./shared-note', new Response('', { headers: { 'X-Share-Note': encodeURIComponent(`${note} (${e && e.message})`) } })).catch(() => {});
+  }
   return Response.redirect(new URL('./?shared=1', self.registration.scope).href, 303);
 }
 
