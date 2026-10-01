@@ -15,7 +15,8 @@ function _goBackFromProfile() {
 window._goBackFromProfile = _goBackFromProfile;
 
 // ── "Rate your games" carousel ──
-// A banner near the top of your OWN profile. It opens on the most recently
+// A banner on your OWN profile, just above your latest plays (out of the way
+// of scrolling past the top). It opens on the most recently
 // played game you haven't rated. One way lie your other unrated games (newest
 // play first); the other way the games you've rated, most recently rated
 // first, so going back always shows what you rated last, refresh or not. Each
@@ -212,19 +213,37 @@ function wireRateLastGame(container, playerName, isOwnProfile, recentPlays) {
     render(saved);
     refreshSubmit();
 
-    let dragging = false;
+    // A mouse rates on press and drag. A finger rates only on a tap or a
+    // sideways slide: a swipe that starts on the stars scrolls the page
+    // (touch-action: pan-y) and picks nothing.
+    let dragging = false, touch = null;
     starsEl.addEventListener('pointerdown', (e) => {
       e.stopPropagation();                 // don't let the carousel swipe start
+      if (e.pointerType !== 'mouse') { touch = { x: e.clientX, y: e.clientY, t: Date.now(), id: e.pointerId }; return; }
       dragging = true;
       try { starsEl.setPointerCapture(e.pointerId); } catch (_) {}
       setPending(valueFromX(e.clientX));
       e.preventDefault();
     });
     starsEl.addEventListener('pointermove', (e) => {
+      if (touch && !dragging) {
+        const dx = Math.abs(e.clientX - touch.x), dy = Math.abs(e.clientY - touch.y);
+        if (dy > 8 && dy >= dx) { touch = null; return; }          // scrolling
+        if (dx > 8 && dx > dy) {                                    // a sideways slide: rate
+          dragging = true;
+          try { starsEl.setPointerCapture(e.pointerId); } catch (_) {}
+        }
+      }
       if (dragging) setPending(valueFromX(e.clientX));
-      else render(valueFromX(e.clientX));   // hover preview (no commit)
+      else if (e.pointerType === 'mouse') render(valueFromX(e.clientX));   // hover preview (no commit)
     });
-    const endDrag = (e) => { if (!dragging) return; dragging = false; try { starsEl.releasePointerCapture(e.pointerId); } catch (_) {} };
+    const endDrag = (e) => {
+      if (touch && !dragging && e.type === 'pointerup' && Date.now() - touch.t < 600) setPending(valueFromX(e.clientX));   // a tap
+      touch = null;
+      if (!dragging) return;
+      dragging = false;
+      try { starsEl.releasePointerCapture(e.pointerId); } catch (_) {}
+    };
     starsEl.addEventListener('pointerup', endDrag);
     starsEl.addEventListener('pointercancel', endDrag);
     starsEl.addEventListener('pointerleave', () => { if (!dragging) render(pending); });
@@ -411,8 +430,8 @@ function wireRatingsGraph(container, playerName) {
 
 // Profile sections are split into a main and a side column on wide screens;
 // on narrower ones the columns dissolve and `order` restores the one-column
-// sequence (rating, Wrapped, favorites, head-to-head, activity, latest plays,
-// ratings, charts, recommendations).
+// sequence (Wrapped, favorites, head-to-head, activity, rate your games,
+// latest plays, ratings, charts, recommendations).
 const _pcSec = (order, html) => (html && String(html).trim()) ? `<div class="pc-sec" style="order:${order}">${html}</div>` : '';
 
 // On a phone the less-used sections fold behind a one-line summary, so the
@@ -762,12 +781,12 @@ function showStatsView(playerName, visiting) {
 
     <div class="profile-cols">
       <div class="profile-main">
-        ${_pcSec(1, buildRateLastGameBar(playerName, isOwnProfile, recentPlays))}
         ${_pcSec(2, buildWrappedBanner(playerName))}
         ${_pcSec(2, buildOnThisDayHtml(playerName))}
         ${_pcSec(3, favoritesHtml)}
         ${_pcSec(6, buildPlayHeatmapHtml(playerName))}
-        ${_pcSec(7, `<div class="stats-section">
+        ${_pcSec(7, buildRateLastGameBar(playerName, isOwnProfile, recentPlays))}
+        ${_pcSec(8, `<div class="stats-section">
       <div class="stats-section-title">Latest Plays</div>
       <div class="lp-list">${latestPlays.length > 0
         ? latestPlays.map(latestPlayRowHtml).join('')
@@ -778,9 +797,9 @@ function showStatsView(playerName, visiting) {
       <div class="profile-side">
         ${_pcSec(4, h2hHtml)}
         ${_pcSec(5, buildPlayTimeHtml(playerName))}
-        ${_pcSec(8, _pcFold('ratings', 'Ratings', ratingStats.total ? `${ratingStats.total} rated &middot; avg ${ratingStats.avg}` : '', buildRatingsGraphHtml(playerName)))}
-        ${_pcSec(9, _pcFold('when', 'When &amp; where', whenSummary, chartsHtml))}
-        ${_pcSec(10, _pcFold('recs', 'Recommended for you', `${recommendations.length} to try${usualWeight ? ` &middot; weight ~${usualWeight.toFixed(1)}` : ''}`, isOwnProfile && recommendations.length > 0 ? `<div class="stats-section">
+        ${_pcSec(9, _pcFold('ratings', 'Ratings', ratingStats.total ? `${ratingStats.total} rated &middot; avg ${ratingStats.avg}` : '', buildRatingsGraphHtml(playerName)))}
+        ${_pcSec(10, _pcFold('when', 'When &amp; where', whenSummary, chartsHtml))}
+        ${_pcSec(11, _pcFold('recs', 'Recommended for you', `${recommendations.length} to try${usualWeight ? ` &middot; weight ~${usualWeight.toFixed(1)}` : ''}`, isOwnProfile && recommendations.length > 0 ? `<div class="stats-section">
       <div class="stats-section-title">Recommended for You</div>
       <div class="stats-player-sub" style="margin:-0.3rem 0 0.6rem">Top-rated games from the shelf you haven't tried yet${usualWeight ? `, around the weight you usually play (${usualWeight.toFixed(1)})` : ''}</div>
       ${recommendations.map(g => {

@@ -2088,7 +2088,7 @@
   .rate-last-prompt{font-size:0.68rem;text-transform:uppercase;color:var(--accent);font-weight:700;letter-spacing:0.05em}
   .rate-last-game{margin:0.05rem 0 0.35rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--font-display);font-size:1.12rem;font-weight:700;color:var(--text)}
   .rate-last-rate{display:flex;align-items:center;gap:0.55rem;flex-wrap:wrap;margin-top:0.05rem}
-  .rlg-stars{display:inline-flex;flex-wrap:nowrap;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none;line-height:1;padding:0.1rem 0}
+  .rlg-stars{display:inline-flex;flex-wrap:nowrap;cursor:pointer;touch-action:pan-y;user-select:none;-webkit-user-select:none;line-height:1;padding:0.1rem 0}
   .rlg-star{font-size:1.3rem;line-height:1;transition:color 0.08s;color:rgba(255,255,255,0.14)}
   .rlg-star + .rlg-star{margin-left:0.07rem}
 
