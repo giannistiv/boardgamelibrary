@@ -595,13 +595,14 @@ function openModal(game) {
   const marvelChampionsHtml = buildMarvelChampionsHtml(game.bggId, plays);
   const eternalDecksHtml = (Number(game.bggId) === ED_BGGID) ? buildEternalDecksHtml(plays || []) : '';
   const aeonsEndHtml = buildAeonsEndHtml(game.bggId);
+  const spiritIslandHtml = buildSpiritIslandHtml(game.bggId, plays);
 
   const facts = [
     game.players ? gmFact('players', `${_escapeHtml(game.players)} players`) : '',
     gameTimeText(game) ? gmFact('time', _escapeHtml(gameTimeText(game))) : '',
     game.complexity > 0 ? gmFact('weight', `Weight ${Number(game.complexity).toFixed(1)}`) : '',
   ].join('');
-  const playsPanel = [marvelUnitedHtml, marvelChampionsHtml, eternalDecksHtml, aeonsEndHtml, playHistoryHtml].join('');
+  const playsPanel = [marvelUnitedHtml, marvelChampionsHtml, spiritIslandHtml, eternalDecksHtml, aeonsEndHtml, playHistoryHtml].join('');
   const tabs = [['overview', 'Overview'], ['plays', `Plays${plays && plays.length ? ` <span class="gm-tab-n">${plays.length}</span>` : ''}`]]
     .concat(game.bggId > 0 ? [['notes', 'Notes']] : []);
   const tab = tabs.some(t => t[0] === _modalTab) ? _modalTab : 'overview';

@@ -924,6 +924,61 @@
   }
   .mu-divider{height:1px;background:rgba(255,255,255,0.08);margin:0.9rem 0 0.8rem}
   .st-count.mu-count-red{background:rgba(224,97,58,0.16);color:#e0613a}
+  /* ── Spirit Island conquest board (js/spirit-island.js) ── */
+  .si-board{margin-bottom:1.1rem;padding:0.8rem 0.9rem;border-radius:12px;background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.07)}
+  .si-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0.4rem}
+  .si-tile{display:flex;flex-direction:column;align-items:center;text-align:center;padding:0.5rem 0.2rem;border-radius:9px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06)}
+  .si-tile b{font-size:1.15rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+  .si-tile b small{font-size:0.62rem;opacity:0.5;font-weight:700}
+  .si-tile span{font-size:0.58rem;font-weight:600;opacity:0.6;margin-top:0.3rem}
+  .si-sec{font-size:0.78rem;font-weight:800;color:var(--accent);margin:1.1rem 0 0.5rem;display:flex;align-items:center;gap:0.4rem}
+  .si-hint{font-size:0.6rem;font-weight:600;color:var(--text-3);background:rgba(255,255,255,0.06);padding:0.1rem 0.45rem;border-radius:10px}
+  .si-note{font-size:0.74rem;line-height:1.5;color:var(--text-2);margin-top:0.7rem}
+  .si-note b{color:var(--text)}
+  .si-dim{color:var(--text-3)}
+  .si-rungs{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:0.4rem}
+  .si-rung{padding:0.5rem 0.6rem;border-radius:9px;background:rgba(111,211,224,0.08);border:1px solid rgba(111,211,224,0.3);font-size:0.78rem;display:flex;flex-direction:column;gap:0.1rem}
+  .si-rung span{font-size:0.66rem;color:var(--text-3)}
+  .si-ladders{display:flex;flex-direction:column;gap:0.45rem}
+  .si-ladder{display:flex;align-items:center;gap:0.6rem}
+  .si-lname{width:7.4rem;flex:0 0 auto;font-size:0.76rem;font-weight:700;line-height:1.2;min-width:0}
+  .si-lname small{display:block;font-size:0.6rem;font-weight:600;color:var(--text-3)}
+  .si-lvls{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;flex:1;min-width:0}
+  .si-lvl{display:flex;flex-direction:column;align-items:center;justify-content:center;height:34px;border-radius:6px;background:rgba(255,255,255,0.05);border:1px solid transparent;line-height:1.05}
+  .si-lvl b{font-size:0.74rem;font-weight:800}
+  .si-lvl i{font-style:normal;font-size:0.56rem;color:var(--text-3)}
+  .si-won{background:#f2c14e;color:#1b1406}
+  .si-won i{color:rgba(27,20,6,0.65)}
+  .si-implied{background:rgba(242,193,78,0.22)}
+  .si-lost{border-color:#f47c7c;background:rgba(244,124,124,0.12)}
+  .si-next{border:1px dashed var(--info)}
+  .si-legend{display:flex;flex-wrap:wrap;gap:0.3rem 0.8rem;margin-top:0.55rem;font-size:0.64rem;color:var(--text-3)}
+  .si-legend span{display:inline-flex;align-items:center;gap:0.3rem}
+  .si-legend .si-lvl{width:12px;height:12px;border-radius:3px;display:inline-block}
+  .si-box{margin-top:0.55rem}
+  .si-boxname{font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-4);margin-bottom:0.3rem}
+  .si-spirits{display:flex;flex-wrap:wrap;gap:0.3rem}
+  .si-spirit{display:inline-flex;align-items:center;gap:0.3rem;padding:0.2rem 0.5rem 0.2rem 0.22rem;border-radius:999px;font-size:0.7rem;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:var(--text-3)}
+  .si-spirit b{font-size:0.62rem;background:rgba(0,0,0,0.25);border-radius:999px;padding:0 0.35rem;color:var(--text)}
+  .si-spirit.won{color:var(--text);border-color:rgba(242,193,78,0.55);background:rgba(242,193,78,0.1)}
+  .si-spirit.lost{color:var(--text);border-color:rgba(244,124,124,0.5)}
+  .si-cx{display:inline-flex;align-items:center;justify-content:center;width:1.1rem;height:1.1rem;border-radius:50%;font-style:normal;font-size:0.55rem;font-weight:800;color:#0b0b0d;flex:0 0 auto}
+  .si-cx-L{background:#5bc46a} .si-cx-M{background:#e8c547} .si-cx-H{background:#f0964d} .si-cx-V{background:#e2574c;color:#fff}
+  .si-scens{display:flex;flex-wrap:wrap;gap:0.3rem}
+  .si-scen{font-size:0.7rem;padding:0.22rem 0.55rem;border-radius:999px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);color:var(--text-3)}
+  .si-scen i{font-style:normal;font-weight:800;margin-left:0.15rem;color:var(--text-2)}
+  .si-scen.si-won{background:rgba(242,193,78,0.14);border-color:rgba(242,193,78,0.55);color:var(--text)}
+  .si-scen.si-lost{border-color:rgba(244,124,124,0.5);color:var(--text)}
+  .si-chart{width:100%;height:90px;display:block;margin-bottom:0.4rem;overflow:visible}
+  .si-chart polyline{fill:none;stroke:rgba(255,255,255,0.18);stroke-width:1.5}
+  .si-chart circle.w{fill:#f2c14e} .si-chart circle.l{fill:#f47c7c}
+  .si-games{display:flex;flex-direction:column}
+  .si-game{display:flex;align-items:flex-start;gap:0.5rem;padding:0.45rem 0;border-top:1px solid rgba(255,255,255,0.06);font-size:0.76rem;line-height:1.4}
+  .si-gdate{width:5.4rem;flex:0 0 auto;font-size:0.68rem;color:var(--text-3);padding-top:0.1rem}
+  .si-gres{display:inline-flex;align-items:center;justify-content:center;width:1.3rem;height:1.3rem;border-radius:5px;font-size:0.66rem;font-weight:800;flex:0 0 auto}
+  .si-gres.w{background:var(--win-soft);color:var(--win)} .si-gres.l{background:var(--loss-soft);color:var(--loss)}
+  .si-gwhat{flex:1;min-width:0}
+  .si-gdiff{flex:0 0 auto;min-width:1.6rem;text-align:center;font-weight:800;font-size:0.78rem;padding:0.1rem 0.3rem;border-radius:6px;background:rgba(255,255,255,0.06)}
   /* ── Marvel Champions: hero×aspect matrix + villain checklist ── */
   .mc-board{
     margin-bottom:1.1rem;padding:0.8rem 0.9rem;border-radius:12px;
