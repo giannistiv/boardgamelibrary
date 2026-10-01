@@ -168,7 +168,7 @@ function _gtCanAct() {
 // Each player's hero and aspect in the box you're playing, replayed from the
 // draws, picks and spins and the games logged since: a loss (from
 // strikesFrom on) burns both aspects; a second loss in a row burns both
-// heroes. A win clears the strikes.
+// heroes, and the new heroes start the wheel fresh. A win clears the strikes.
 function _gtDraft(st) {
   const u = st.current;
   if (!u) return null;
@@ -223,6 +223,8 @@ function _gtDraft(st) {
         setHero(sl, null);
         sl.round++;
         sl.offer = null;
+        sl.burnedAspects = [];                         // a new hero starts the wheel fresh
+        sl.spun = [];
       } else if (sl.hero && !GT_WILDCARDS.has(sl.hero.id)) {   // first strike: the aspects burn
         sl.burnedAspects.push(...sl.aspects);
         sl.aspects = [];
@@ -596,7 +598,7 @@ function _gtDraftHtml(st, d) {
     return `<div class="gt-draft-col">
       <div class="gt-draft-head">${_gtWho(p)} ${esc(p)}</div>
       ${body}
-      ${burned ? `<div class="gt-burned">Burned in this box: ${burned}</div>` : ''}
+      ${burned ? `<div class="gt-burned">Burned: ${burned}</div>` : ''}
     </div>`;
   };
   const ready = GAUNTLET.players.every(p => !d.slots[p].need);
@@ -820,7 +822,7 @@ function _gtRulesHtml(st) {
       <li><b>Draw three, pick one.</b> Before a box, each of you draws three heroes from the pool and picks one to play the whole box.</li>
       <li><b>Spin for your aspect.</b> Then each of you spins the aspect wheel. You get every aspect before any repeats, never the one you had in the box before, and never the same as the other. 'Pool joins the wheel from wave 7, when Deadpool came out. Adam Warlock and Deadpool skip the wheel; Spider-Woman spins one aspect and picks her second.</li>
       <li><b>Spent on play.</b> A hero is spent the moment they're played, win or lose, and never comes back.</li>
-      <li><b>Two strikes.</b> Lose a scenario and both your aspects burn: spin again (a burned aspect can't come back in that box) and replay it. Lose it again and both heroes burn: draw three each, pick, spin, and replay. A win clears the strikes.</li>
+      <li><b>Two strikes.</b> Lose a scenario and both your aspects burn: spin again (a burned aspect can't come back for that hero) and replay it. Lose it again and both heroes burn: draw three each, pick, spin a fresh wheel, and replay. A win clears the strikes.</li>
       <li><b>Time travel.</b> If the pool can't give you three heroes to draw from, the next wave lends some. A borrowed hero is spent when that wave arrives.</li>
       <li><b>Legend score.</b> A scenario won on the first try is worth 3, on the second 2, after that 1.</li>
     </ol>
