@@ -88,24 +88,76 @@ async function networkFirst(cacheName, req, key) {
   }
 }
 
+// Chrome on Android can hand the worker an empty FormData although the body
+// holds the file: take the parts out of the body itself.
+function multipartParts(buf, contentType) {
+  const m = /boundary=(?:"([^"]+)"|([^;]+))/i.exec(contentType || '');
+  if (!m) return [];
+  const bnd = new TextEncoder().encode('--' + (m[1] || m[2]).trim());
+  const bytes = new Uint8Array(buf);
+  const at = [];
+  for (let i = 0; i <= bytes.length - bnd.length; i++) {
+    let j = 0;
+    while (j < bnd.length && bytes[i + j] === bnd[j]) j++;
+    if (j === bnd.length) { at.push(i); i += bnd.length - 1; }
+  }
+  const parts = [];
+  for (let k = 0; k < at.length - 1; k++) {
+    let start = at[k] + bnd.length;
+    if (bytes[start] === 13 && bytes[start + 1] === 10) start += 2;
+    const end = at[k + 1] - 2;   // the CRLF before the next boundary
+    let h = -1;
+    for (let i = start; i + 3 < end; i++) {
+      if (bytes[i] === 13 && bytes[i + 1] === 10 && bytes[i + 2] === 13 && bytes[i + 3] === 10) { h = i; break; }
+    }
+    if (h < 0) continue;
+    const head = new TextDecoder().decode(bytes.subarray(start, h));
+    parts.push({
+      name: (/name="([^"]*)"/i.exec(head) || [])[1] || '',
+      filename: (/filename="([^"]*)"/i.exec(head) || [])[1],
+      type: ((/content-type:\s*([^\r\n]+)/i.exec(head) || [])[1] || '').trim(),
+      body: bytes.slice(h + 4, Math.max(h + 4, end)),
+    });
+  }
+  return parts;
+}
+
 // Sharing a file to the installed app (manifest share_target) arrives as a
 // form POST: keep the file (whatever field it came in), then open the app,
 // which imports it. What arrived is noted too, so the app can say what went
 // wrong when there's no file.
 async function receiveShare(req) {
   const cache = await caches.open(SHARED);
-  let note = `no form (${req.headers.get('content-type') || 'no content type'})`;
+  const type = req.headers.get('content-type') || '';
+  const raw = req.clone();
+  const isPlayFile = (t) => /^\s*\{[\s\S]*"plays"/.test(t);
+  let note = '', file = null;
   try {
-    const form = await req.formData();
-    const entries = [...form.entries()];
+    const entries = [...(await req.formData()).entries()];
     note = entries.map(([k, v]) => typeof v === 'string' ? `${k}: ${v.length} characters` : `${k}: ${v.type || 'no type'}, ${v.name || 'no name'}, ${v.size} bytes`).join('; ')
-      || `empty form (${(req.headers.get('content-type') || 'no content type').split(';')[0]})`;
-    let file = entries.map(e => e[1]).find(v => v && typeof v !== 'string' && v.size > 0);
-    // Some apps share a file's contents as text: a BGStats file is JSON with plays in it.
-    if (!file) {
-      const text = entries.map(e => e[1]).find(v => typeof v === 'string' && /^\s*\{[\s\S]*"plays"/.test(v));
-      if (text) file = new File([text], 'shared.bgsplay', { type: 'application/json' });
+      || `empty form (${type.split(';')[0] || 'no content type'})`;
+    file = entries.map(e => e[1]).find(v => v && typeof v !== 'string' && v.size > 0) || null;
+    // some apps share a file's contents as text: a BGStats file is JSON with plays in it
+    const text = file ? null : entries.map(e => e[1]).find(v => typeof v === 'string' && isPlayFile(v));
+    if (text) file = new File([text], 'shared.bgsplay', { type: 'application/json' });
+  } catch (e) {
+    note = `the form couldn't be read (${e && e.message})`;
+  }
+  if (!file) {
+    try {
+      const buf = await raw.arrayBuffer();
+      const parts = multipartParts(buf, type);
+      note += `; body ${buf.byteLength} bytes, ${parts.length} part${parts.length !== 1 ? 's' : ''}`;
+      const filePart = parts.find(p => p.filename !== undefined && p.body.length);
+      const textPart = parts.find(p => p.filename === undefined && isPlayFile(new TextDecoder().decode(p.body)));
+      if (filePart) file = new File([filePart.body], filePart.filename || 'shared.bgsplay', { type: filePart.type || 'application/octet-stream' });
+      else if (textPart) file = new File([textPart.body], 'shared.bgsplay', { type: 'application/json' });
+      if (file) note += ' (read from the body)';
+    } catch (e) {
+      note += `; the body couldn't be read (${e && e.message})`;
     }
+  }
+  try {
     if (file) {
       await cache.put('./shared-file', new Response(file, { headers: {
         'Content-Type': file.type || 'application/json',
@@ -115,9 +167,7 @@ async function receiveShare(req) {
     } else {
       await cache.put('./shared-note', new Response('', { headers: { 'X-Share-Note': encodeURIComponent(note) } }));
     }
-  } catch (e) {
-    await cache.put('./shared-note', new Response('', { headers: { 'X-Share-Note': encodeURIComponent(`${note} (${e && e.message})`) } })).catch(() => {});
-  }
+  } catch (e) { /* the app opens anyway */ }
   return Response.redirect(new URL('./?shared=1', self.registration.scope).href, 303);
 }
 
