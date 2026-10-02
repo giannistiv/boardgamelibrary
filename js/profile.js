@@ -491,8 +491,8 @@ function showStatsView(playerName, visiting) {
   const recentPlays = [];
 
   for (const bggId in PLAY_HISTORY) {
-    const game = GAMES.find(g => g.bggId === Number(bggId))
-      || EXTRA_GAMES[bggId]
+    // every catalogue, friends' included: a game played from a friend's copy has its name there
+    const game = findGameByBggId(bggId)
       || {id:'bgg_'+bggId, name:'Game #'+bggId, bggId:Number(bggId), spineColor:'#555', categories:[], players:'', playTime:'', complexity:0};
 
     PLAY_HISTORY[bggId].forEach((play, playIdx) => {
