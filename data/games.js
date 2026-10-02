@@ -2046,6 +2046,7 @@ const LGEORGE_GAMES = {
   363622:{name:"The Castles of Burgundy: Special Edition",bggId:363622,year:2023,complexity:2.85,players:"1-4",playTime:"120 min",bggRating:9.1},
   380442:{name:"The Last Kingdom Board Game",bggId:380442,year:2023,complexity:3.0,players:"2-5",playTime:"150 min",bggRating:7.4},
   42:{name:"Tigris & Euphrates",bggId:42,year:1997,complexity:3.48,players:"2-4",playTime:"120 min",bggRating:7.7},
+  393307:{name:"Tower Up",bggId:393307,year:2024,complexity:1.83,players:"2-4",playTime:"45 min",bggRating:7.3},
   227935:{name:"Wonderland's War",bggId:227935,year:2022,complexity:3.04,players:"2-5",playTime:"125 min",bggRating:8.0},
 };
 
