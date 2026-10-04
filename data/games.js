@@ -1573,6 +1573,7 @@ const GIANNIS_GAMES = {
   367150:{name:"Dune: War for Arrakis",bggId:367150,year:2024,complexity:3.65,players:"1-4",playTime:"120 min",bggRating:8.5},
   370796:{name:"Dune: War for Arrakis –  The Spacing Guild",bggId:370796,year:2024,complexity:3.0,players:"2-4",playTime:"120 min",bggRating:8.2},
   472:{name:"DungeonQuest",bggId:472,year:1985,complexity:1.92,players:"1-4",playTime:"60 min",bggRating:6.8},
+  71061:{name:"DungeonQuest (Third Edition)",bggId:71061,year:2010,complexity:2.17,players:"1-4",playTime:"90 min",bggRating:6.6},
   246900:{name:"Eclipse: Second Dawn for the Galaxy",bggId:246900,year:2020,complexity:3.67,players:"2-6",playTime:"200 min",bggRating:8.4},
   375216:{name:"Eclipse: Second Dawn for the Galaxy – Gamemat",bggId:375216,year:2020,complexity:1.0,players:"2-9",playTime:"240 min",bggRating:8.9},
   368378:{name:"Eclipse: Second Dawn for the Galaxy – Outcasts",bggId:368378,year:2024,complexity:3.5,bggRating:8.6},
