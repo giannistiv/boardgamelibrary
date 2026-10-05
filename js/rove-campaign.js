@@ -359,16 +359,18 @@ function _rvRoversHtml(c, edit) {
       ${cur.summons.length ? `<div class="rv-line"><span class="rv-dim">Summons:</span> ${cur.summons.map(esc).join(', ')}</div>` : ''}
       ${base && base.start.length ? `<div class="rv-line"><span class="rv-dim">Starts with:</span> ${base.start.map(esc).join(', ')}</div>` : ''}
       ${base && base.style ? `<div class="rv-style">${['melee', 'range', 'defense', 'support'].map(k => `<span class="rv-style-row"><span>${k[0].toUpperCase() + k.slice(1)}</span><span class="rv-bar"><i style="width:${(base.style[k] || 0) / 6 * 100}%"></i></span></span>`).join('')}<span class="rv-style-row"><span>Complexity</span><span class="rv-bar rv-bar-cx"><i style="width:${(base.style.complexity || 0) / 5 * 100}%"></i></span></span></div>` : ''}` : '';
+    // what comes next stays hidden until the party reaches its level (or it's already chosen)
+    const showPrime = level >= 4 || !!r.prime, showApex = level >= 7 || !!r.apex;
     const traitSel = (field, cls, label) => cls ? `<label class="rv-field"><span>${label}</span>${sel(field, cls.traits.map(t => ({ v: t, l: t })), r[field] || '', `Choose (${cls.name})`)}</label>` : '';
     const inf = ((c.xulc || {}).inf || {})[slot] || {};
     return `<div class="rv-rover" style="--rv-c:${esc((cur && cur.color) || '#888')}">
       <div class="rv-rover-top">${sel('player', names.map(n => ({ v: n, l: n })), r.player || '', 'Who')}<span class="rv-rover-cls">${esc(cur ? cur.name : 'No class yet')}</span></div>
       <div class="rv-evo">
         <label class="rv-field"><span>Base</span>${sel('base', bases.map(x => ({ v: x.name, l: x.name })), r.base || '', 'Base class')}</label>
-        <label class="rv-field"><span>Prime${level < 4 ? ' · level 4' : ''}</span>${sel('prime', primes.map(x => ({ v: x.name, l: x.name + (x.x ? ' (Xulc)' : '') })), r.prime || '', 'Prime class', !base)}</label>
-        <label class="rv-field"><span>Apex${level < 7 ? ' · level 7' : ''}</span>${sel('apex', apexes.map(x => ({ v: x.name, l: x.name })), r.apex || '', 'Apex class', !prime)}</label>
+        ${showPrime ? `<label class="rv-field"><span>Prime</span>${sel('prime', primes.map(x => ({ v: x.name, l: x.name + (x.x ? ' (Xulc)' : '') })), r.prime || '', 'Prime class', !base)}</label>` : ''}
+        ${showApex ? `<label class="rv-field"><span>Apex</span>${sel('apex', apexes.map(x => ({ v: x.name, l: x.name })), r.apex || '', 'Apex class', !prime)}</label>` : ''}
       </div>
-      <div class="rv-evo">${traitSel('trait1', prime, 'Trait 1')}${traitSel('trait2', apex, 'Trait 2')}</div>
+      ${prime || apex ? `<div class="rv-evo">${traitSel('trait1', prime, 'Trait 1')}${traitSel('trait2', apex, 'Trait 2')}</div>` : ''}
       ${stats}
       <div class="rv-sub">Equipment${own.length ? ` · ${own.length}` : ''}</div>
       ${own.length ? `<div class="rv-own">${own.map(i => `<span class="rv-item-chip">${esc(i.name)}<small>${esc(RV_SLOT_NAMES[i.slot] || i.slot)}</small></span>`).join('')}</div>` : `<div class="rv-hint">Give items from the Shop tab.</div>`}
@@ -378,7 +380,7 @@ function _rvRoversHtml(c, edit) {
   };
   const used = RV_SLOTS.filter(s => rovers[s] && (rovers[s].player || rovers[s].base));
   const shown = used.length < 4 ? [...used, RV_SLOTS.find(s => !used.includes(s))] : used;
-  return `<div class="rv-hint rv-hint-top">Level ${level}: ${level < 4 ? 'base classes. At level 4 each Rover takes a Prime class and a trait.' : level < 7 ? 'prime classes. At level 7, the Apex class and a second trait.' : 'apex classes.'}</div>
+  return `<div class="rv-hint rv-hint-top">Level ${level}: ${level < 4 ? 'base classes. The next choices show up here at level 4.' : level < 7 ? 'prime classes. The next choices show up here at level 7.' : 'apex classes.'}</div>
     <div class="rv-rovers">${shown.map(card).join('')}</div>`;
 }
 
