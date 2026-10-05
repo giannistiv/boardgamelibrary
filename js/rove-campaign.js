@@ -348,33 +348,50 @@ function _rvRoversHtml(c, edit) {
       <option value="">${placeholder}</option>${opts.map(o => `<option value="${esc(o.v)}"${o.v === value ? ' selected' : ''}>${esc(o.l)}</option>`).join('')}</select>`;
     const own = D.items.filter(i => items[_rvKey(i.id)] === slot);
     if (!r.player && !r.base) {
-      return `<div class="rv-rover rv-empty"><div class="rv-rover-top">${sel('player', names.map(n => ({ v: n, l: n })), '', 'Add a Rover…')}</div></div>`;
+      return edit ? `<div class="rv-addrover"><span>Another Rover?</span>${sel('player', names.map(n => ({ v: n, l: n })), '', 'Add a Rover…')}</div>` : '';
     }
-    const stats = cur ? `<div class="rv-stats">
-        <div class="rv-stat"><b>${cur.hp}</b><span>Health</span></div>
-        <div class="rv-stat"><b>${cur.ether}</b><span>Ether limit</span></div>
-        ${cur.def ? `<div class="rv-stat"><b>${cur.def}</b><span>Defense</span></div>` : ''}
-      </div>
-      <div class="rv-affs">${Object.entries(cur.aff || {}).map(([k, v]) => `<span class="rv-aff rv-aff-${k}${v > 0 ? ' up' : v < 0 ? ' down' : ''}">${RV_AFF[k] || k} ${v > 0 ? '+' + v : v < 0 ? '−' + Math.abs(v) : '0'}</span>`).join('')}</div>
-      ${cur.summons.length ? `<div class="rv-line"><span class="rv-dim">Summons:</span> ${cur.summons.map(esc).join(', ')}</div>` : ''}
-      ${base && base.start.length ? `<div class="rv-line"><span class="rv-dim">Starts with:</span> ${base.start.map(esc).join(', ')}</div>` : ''}
-      ${base && base.style ? `<div class="rv-style">${['melee', 'range', 'defense', 'support'].map(k => `<span class="rv-style-row"><span>${k[0].toUpperCase() + k.slice(1)}</span><span class="rv-bar"><i style="width:${(base.style[k] || 0) / 6 * 100}%"></i></span></span>`).join('')}<span class="rv-style-row"><span>Complexity</span><span class="rv-bar rv-bar-cx"><i style="width:${(base.style.complexity || 0) / 5 * 100}%"></i></span></span></div>` : ''}` : '';
     // what comes next stays hidden until the party reaches its level (or it's already chosen)
     const showPrime = level >= 4 || !!r.prime, showApex = level >= 7 || !!r.apex;
-    const traitSel = (field, cls, label) => cls ? `<label class="rv-field"><span>${label}</span>${sel(field, cls.traits.map(t => ({ v: t, l: t })), r[field] || '', `Choose (${cls.name})`)}</label>` : '';
+    const field = (label, html) => `<label class="rv-field"><span>${label}</span>${html}</label>`;
+    const traitSel = (f, cls, label) => cls ? field(label, sel(f, cls.traits.map(t => ({ v: t, l: t })), r[f] || '', `Choose a ${cls.name} trait`)) : '';
     const inf = ((c.xulc || {}).inf || {})[slot] || {};
+    const tier = apex ? 'Apex class' : prime ? 'Prime class' : base ? 'Base class' : '';
+
+    const classCol = `<div class="rv-col">
+        <div class="rv-sub">Class</div>
+        <div class="rv-fields">
+          ${field('Base', sel('base', bases.map(x => ({ v: x.name, l: x.name })), r.base || '', 'Base class'))}
+          ${showPrime ? field('Prime', sel('prime', primes.map(x => ({ v: x.name, l: x.name + (x.x ? ' (Xulc)' : '') })), r.prime || '', 'Prime class', !base)) : ''}
+          ${showApex ? field('Apex', sel('apex', apexes.map(x => ({ v: x.name, l: x.name })), r.apex || '', 'Apex class', !prime)) : ''}
+          ${traitSel('trait1', prime, 'Trait 1')}
+          ${traitSel('trait2', apex, 'Trait 2')}
+        </div>
+        <div class="rv-sub">Equipment${own.length ? ` · ${own.length}` : ''}</div>
+        ${own.length ? `<div class="rv-own">${own.map(i => `<span class="rv-item-chip">${esc(i.name)}<small>${esc(RV_SLOT_NAMES[i.slot] || i.slot)}</small></span>`).join('')}</div>` : `<div class="rv-hint">Nothing yet: give items from the Shop tab.</div>`}
+        ${base && base.start.length ? `<div class="rv-line"><span class="rv-dim">Starting gear:</span> ${base.start.map(esc).join(', ')}</div>` : ''}
+        ${inf.stage ? `<div class="rv-line"><span class="rv-dim">Xulc infestation:</span> stage ${inf.stage}</div>` : ''}
+      </div>`;
+    const statsCol = cur ? `<div class="rv-col">
+        <div class="rv-sub">Stats</div>
+        <div class="rv-stats">
+          <div class="rv-stat"><b>${cur.hp}</b><span>Health</span></div>
+          <div class="rv-stat"><b>${cur.ether}</b><span>Ether limit</span></div>
+          ${cur.def ? `<div class="rv-stat"><b>${cur.def}</b><span>Defense</span></div>` : ''}
+        </div>
+        <div class="rv-sub">Affinities</div>
+        <div class="rv-affs">${Object.entries(cur.aff || {}).map(([k, v]) => `<span class="rv-aff${v > 0 ? ' up' : v < 0 ? ' down' : ''}"><span>${RV_AFF[k] || k}</span><b>${v > 0 ? '+' + v : v < 0 ? '−' + Math.abs(v) : '0'}</b></span>`).join('')}</div>
+        ${cur.summons.length ? `<div class="rv-sub">Summons</div><div class="rv-line">${cur.summons.map(esc).join(' · ')}</div>` : ''}
+        ${base && base.style ? `<div class="rv-sub">Play style</div><div class="rv-style">${['melee', 'range', 'defense', 'support'].map(k => `<span class="rv-style-row"><span>${k[0].toUpperCase() + k.slice(1)}</span><span class="rv-bar"><i style="width:${(base.style[k] || 0) / 6 * 100}%"></i></span></span>`).join('')}<span class="rv-style-row"><span>Complexity</span><span class="rv-bar rv-bar-cx"><i style="width:${(base.style.complexity || 0) / 5 * 100}%"></i></span></span></div>` : ''}
+      </div>` : '';
     return `<div class="rv-rover" style="--rv-c:${esc((cur && cur.color) || '#888')}">
-      <div class="rv-rover-top">${sel('player', names.map(n => ({ v: n, l: n })), r.player || '', 'Who')}<span class="rv-rover-cls">${esc(cur ? cur.name : 'No class yet')}</span></div>
-      <div class="rv-evo">
-        <label class="rv-field"><span>Base</span>${sel('base', bases.map(x => ({ v: x.name, l: x.name })), r.base || '', 'Base class')}</label>
-        ${showPrime ? `<label class="rv-field"><span>Prime</span>${sel('prime', primes.map(x => ({ v: x.name, l: x.name + (x.x ? ' (Xulc)' : '') })), r.prime || '', 'Prime class', !base)}</label>` : ''}
-        ${showApex ? `<label class="rv-field"><span>Apex</span>${sel('apex', apexes.map(x => ({ v: x.name, l: x.name })), r.apex || '', 'Apex class', !prime)}</label>` : ''}
+      <div class="rv-rover-head">
+        <div class="rv-rover-id">
+          <span class="rv-rover-cls">${esc(cur ? cur.name : 'No class yet')}</span>
+          ${tier ? `<span class="rv-rover-tier">${tier}${base && cur !== base ? ` · from ${esc(base.name)}` : ''}</span>` : ''}
+        </div>
+        <div class="rv-rover-who">${sel('player', names.map(n => ({ v: n, l: n })), r.player || '', 'Who')}</div>
       </div>
-      ${prime || apex ? `<div class="rv-evo">${traitSel('trait1', prime, 'Trait 1')}${traitSel('trait2', apex, 'Trait 2')}</div>` : ''}
-      ${stats}
-      <div class="rv-sub">Equipment${own.length ? ` · ${own.length}` : ''}</div>
-      ${own.length ? `<div class="rv-own">${own.map(i => `<span class="rv-item-chip">${esc(i.name)}<small>${esc(RV_SLOT_NAMES[i.slot] || i.slot)}</small></span>`).join('')}</div>` : `<div class="rv-hint">Give items from the Shop tab.</div>`}
-      ${inf.stage ? `<div class="rv-line"><span class="rv-dim">Xulc infestation:</span> stage ${inf.stage}</div>` : ''}
+      <div class="rv-rover-body">${classCol}${statsCol}</div>
       ${edit ? `<button type="button" class="rv-link" data-rv-remove="${slot}">Remove this Rover</button>` : ''}
     </div>`;
   };
