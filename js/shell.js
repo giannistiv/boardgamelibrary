@@ -603,7 +603,9 @@ function openModal(game) {
     game.complexity > 0 ? gmFact('weight', `Weight ${Number(game.complexity).toFixed(1)}`) : '',
   ].join('');
   const playsPanel = [marvelUnitedHtml, marvelChampionsHtml, spiritIslandHtml, eternalDecksHtml, aeonsEndHtml, playHistoryHtml].join('');
+  const roveHtml = typeof buildRoveCampaignHtml === 'function' ? buildRoveCampaignHtml(game) : '';
   const tabs = [['overview', 'Overview'], ['plays', `Plays${plays && plays.length ? ` <span class="gm-tab-n">${plays.length}</span>` : ''}`]]
+    .concat(roveHtml ? [['campaign', 'Campaign']] : [])
     .concat(game.bggId > 0 ? [['notes', 'Notes']] : []);
   const tab = tabs.some(t => t[0] === _modalTab) ? _modalTab : 'overview';
 
@@ -635,6 +637,7 @@ function openModal(game) {
       <div class="gm-panel" data-panel="plays"${tab === 'plays' ? '' : ' hidden'}>
         ${playsPanel || '<div class="gm-empty">No plays logged yet. They show up here after the next BGStats import.</div>'}
       </div>
+      ${roveHtml ? `<div class="gm-panel" data-panel="campaign"${tab === 'campaign' ? '' : ' hidden'}>${roveHtml}</div>` : ''}
       ${game.bggId > 0 ? `<div class="gm-panel" data-panel="notes"${tab === 'notes' ? '' : ' hidden'}>${buildNotesHtml(game.bggId)}</div>` : ''}
     </div>
   `;
@@ -663,6 +666,7 @@ function openModal(game) {
   wireNotes();
   wireMarvelChampions();
   wireGameNews(content);
+  if (roveHtml) wireRoveCampaign(content);
   updateFavButton(game.bggId);
   wireFavButton();
 }
