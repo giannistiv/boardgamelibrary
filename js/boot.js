@@ -184,7 +184,7 @@ async function _saveProfilePhoto(dataUrl) {
   return { ok: true };
 }
 
-Promise.all([loadAllRatings(), loadAllFavorites(), loadImportedGames(), loadImportedPlays(), loadGameImages(), loadBoardSouthVotes(), loadOathswornRanks(), loadAllNotes(), loadProfiles()]).then(() => {
+Promise.all([loadAllRatings(), loadRateSkips(), loadAllFavorites(), loadImportedGames(), loadImportedPlays(), loadGameImages(), loadBoardSouthVotes(), loadOathswornRanks(), loadAllNotes(), loadProfiles()]).then(() => {
   _applyProfileOverrides();
   _applyAllPlayOverrides();
   _sortPlayHistory();

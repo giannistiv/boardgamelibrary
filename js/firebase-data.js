@@ -35,6 +35,34 @@ async function loadAllRatings() {
   }
 }
 
+// Games skipped in the "rate your games" banner: { player: { bggId: {n, at} } },
+// n = how many plays of the game the player had when they skipped it. The
+// game comes back once they've played it again (more plays than n).
+let rateSkipsCache = {};
+
+async function loadRateSkips() {
+  if (!FIREBASE_DB) return;
+  try {
+    const res = await fetch(`${FIREBASE_DB}/rateSkips.json`);
+    const data = (await res.json()) || {};
+    rateSkipsCache = {};
+    for (const enc in data) rateSkipsCache[decodeURIComponent(enc)] = data[enc] || {};
+  } catch (e) {
+    console.warn('Failed to load rating skips from Firebase:', e);
+  }
+}
+
+async function saveRateSkip(player, bggId, plays) {
+  const v = { n: plays, at: Date.now() };
+  (rateSkipsCache[player] = rateSkipsCache[player] || {})[bggId] = v;
+  if (!FIREBASE_DB) return;
+  try {
+    await fetch(`${FIREBASE_DB}/rateSkips/${_bsVoteEncodeName(player)}/${bggId}.json`, { method: 'PUT', body: JSON.stringify(v) });
+  } catch (e) {
+    console.warn('Failed to save a rating skip to Firebase:', e);
+  }
+}
+
 // Re-fetch all ratings from Firebase. Returns true when the fresh data
 // differs from the in-memory cache (caller decides whether to re-render).
 // Unlike loadAllRatings this never writes migrations back — by now every

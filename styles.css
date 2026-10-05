@@ -2425,6 +2425,10 @@
     transition:background 0.15s,opacity 0.15s}
   .rlg-submit:disabled{cursor:default}
   .rlg-submit:not(:disabled):hover{background:rgba(226,176,74,0.32)}
+  .rlg-skip{font:inherit;font-size:0.72rem;font-weight:600;padding:0.3rem 0.75rem;border-radius:999px;border:1px solid var(--line-2);background:transparent;color:var(--text-3);cursor:pointer;transition:color 0.15s,border-color 0.15s}
+  .rlg-skip:hover:not(:disabled){color:var(--text);border-color:var(--line-3)}
+  .rlg-skip:disabled{opacity:0.5;cursor:default}
+  .rlg-skipped .rate-last-game,.rlg-skipped .rlg-stars{opacity:0.4}
   .rate-last-done{font-size:0.76rem;font-weight:700;color:#5bc46b;margin-top:0.3rem}
 
   /* Ratings histogram (Letterboxd-style) */
@@ -2452,6 +2456,7 @@
     .rlg-star + .rlg-star{margin-left:0.04rem}
     .rlg-value{font-size:0.95rem}
     .rlg-submit{font-size:0.82rem;padding:0.38rem 0.95rem}
+    .rlg-skip{font-size:0.82rem;padding:0.38rem 0.85rem}
     .rate-last-body{padding-right:0.9rem}
     .rate-last-close{font-size:1.4rem;padding:2px 8px}
   }

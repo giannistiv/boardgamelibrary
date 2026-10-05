@@ -41,14 +41,19 @@ function buildRateLastGameBar(playerName, isOwnProfile, recentPlays) {
   if (_rlgDismissed) return '';
   if (!isOwnProfile || !recentPlays || !recentPlays.length) return '';
 
-  // Still to rate: distinct games, most recently played first.
+  // Still to rate: distinct games, most recently played first, less the ones
+  // skipped (until they've been played again since).
+  const plays = {};
+  for (const p of recentPlays) plays[p.bggId] = (plays[p.bggId] || 0) + 1;
+  const skips = (typeof rateSkipsCache !== 'undefined' && rateSkipsCache[playerName]) || {};
   const seen = new Set();
   const unrated = [];
   for (const p of recentPlays) {
     if (!p.game || !(p.bggId >= 0) || seen.has(p.bggId)) continue;
     seen.add(p.bggId);
     if (getPlayerRating(playerName, p.bggId) !== 0) continue;
-    unrated.push({ bggId: p.bggId, name: p.game.name, date: p.date, latest: seen.size === 1 });
+    if (skips[p.bggId] && plays[p.bggId] <= skips[p.bggId].n) continue;
+    unrated.push({ bggId: p.bggId, name: p.game.name, date: p.date, latest: seen.size === 1, plays: plays[p.bggId] });
     if (unrated.length >= RLG_MAX_UNRATED) break;
   }
   // Every game in reach is rated: no reason to show the banner.
@@ -82,7 +87,7 @@ function buildRateLastGameBar(playerName, isOwnProfile, recentPlays) {
     const prompt = rating > 0
       ? (g.ratedAt ? `Your rating &middot; ${_timeAgo(g.ratedAt)}` : 'Your rating')
       : g.latest ? 'Rate your last game' : `Not rated yet &middot; played ${_fmtDateShort(g.date)}`;
-    return `<div class="rlg-card" data-bgg="${g.bggId}" data-saved="${rating}">
+    return `<div class="rlg-card" data-bgg="${g.bggId}" data-saved="${rating}" data-plays="${g.plays || 0}">
       <div class="rate-last-cover" role="button" tabindex="0" title="Open ${_escapeHtml(g.name)}"><img class="rate-last-cover-img" src="images/${g.bggId}.jpg" alt="" loading="lazy" onerror="__imgFallback(this, ${g.bggId})"></div>
       <div class="rate-last-body">
         <div class="rate-last-prompt">${prompt}</div>
@@ -91,6 +96,7 @@ function buildRateLastGameBar(playerName, isOwnProfile, recentPlays) {
           <div class="rlg-stars" role="slider" tabindex="0" aria-label="Rate ${_escapeHtml(g.name)} from 1 to 10" aria-valuemin="1" aria-valuemax="10" aria-valuenow="${rating}">${star.repeat(10)}</div>
           <span class="rlg-value"></span>
           <button class="rlg-submit" type="button" disabled>${rating > 0 ? 'Update' : 'Rate'}</button>
+          ${rating > 0 ? '' : '<button class="rlg-skip" type="button" title="Hide it here until you play it again">Skip</button>'}
         </div>
       </div>
     </div>`;
@@ -171,7 +177,7 @@ function wireRateLastGame(container, playerName, isOwnProfile, recentPlays) {
   // After a new rating, move on: the nearest unrated card in the "next"
   // direction, else the nearest one the other way.
   const nextUnrated = (from) => {
-    const open = cards.map((c, i) => (Number(c.dataset.saved) > 0 ? -1 : i)).filter(i => i >= 0);
+    const open = cards.map((c, i) => (Number(c.dataset.saved) > 0 || c.dataset.skipped ? -1 : i)).filter(i => i >= 0);
     const byDistance = (a, b) => Math.abs(a - from) - Math.abs(b - from);
     const ahead = open.filter(i => (i - from) * next > 0).sort(byDistance);
     return ahead.length ? ahead[0] : open.sort(byDistance)[0];
@@ -270,7 +276,7 @@ function wireRateLastGame(container, playerName, isOwnProfile, recentPlays) {
       setTimeout(() => {
         if (done) done.remove();
         // Nothing left unrated → no reason to keep the banner; fade it out.
-        if (!cards.some(c => !(Number(c.dataset.saved) > 0))) {
+        if (!cards.some(c => !(Number(c.dataset.saved) > 0) && !c.dataset.skipped)) {
           bar.classList.add('rate-last-hide');
           setTimeout(() => bar.remove(), 320);
           return;
@@ -281,6 +287,25 @@ function wireRateLastGame(container, playerName, isOwnProfile, recentPlays) {
       }, 900);
     }
     submitBtn.addEventListener('click', submit);
+
+    // Skip: gone from the banner until the next play of it.
+    const skipBtn = card.querySelector('.rlg-skip');
+    if (skipBtn) skipBtn.addEventListener('click', () => {
+      if (card.dataset.skipped) return;
+      card.dataset.skipped = '1';
+      card.classList.add('rlg-skipped');
+      skipBtn.disabled = submitBtn.disabled = true;
+      card.querySelector('.rate-last-prompt').textContent = 'Skipped until you play it again';
+      saveRateSkip(playerName, bggId, Number(card.dataset.plays) || 0);
+      setTimeout(() => {
+        if (!cards.some(c => !(Number(c.dataset.saved) > 0) && !c.dataset.skipped)) {
+          bar.classList.add('rate-last-hide');
+          setTimeout(() => bar.remove(), 320);
+          return;
+        }
+        if (current === cardIdx) goTo(nextUnrated(cardIdx));
+      }, 700);
+    });
   });
 
   if (leftBtn) leftBtn.addEventListener('click', () => goTo(current - 1));
