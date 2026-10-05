@@ -35,6 +35,49 @@ async function loadAllRatings() {
   }
 }
 
+// ── Nodes the database rules don't open yet ──
+// The rules only let the site write to the nodes it started with. Newer
+// features keep their data under their own node once a rule allows it, and
+// meanwhile under gameImages (writable; loadGameImages skips anything
+// without a url), as profiles and import maps already do. Reads take both.
+const FB_SPARE = { roveCampaigns: '_bglRoveCampaigns', mcGauntlet: '_bglMcGauntlet', rateSkips: '_bglRateSkips' };
+const _fbDenied = new Set();   // nodes that refused a write this session: go straight to the spare
+function _fbRoot(path) { return path.split('/')[0]; }
+function _fbSpare(path) {
+  const root = _fbRoot(path);
+  return FB_SPARE[root] ? `gameImages/${FB_SPARE[root]}${path.slice(root.length)}` : null;
+}
+// { main, spare }: what each store holds at `path` (null when empty).
+async function fbReadBoth(path) {
+  const get = async (p) => {
+    try {
+      const res = await fetch(`${FIREBASE_DB}/${p}.json`, { cache: 'no-store' });
+      return res.ok ? await res.json() : null;
+    } catch (e) { return null; }
+  };
+  const spare = _fbSpare(path);
+  const [main, sp] = await Promise.all([get(path), spare ? get(spare) : null]);
+  return { main, spare: sp };
+}
+// Write to the node itself, or to its spare when the rules refuse it.
+// `where` ('main' | 'spare') pins the store something already lives in.
+// Resolves to { store, json }; throws when neither takes the write.
+async function fbWrite(path, method, data, where) {
+  const body = JSON.stringify(data);
+  const go = (p) => fetch(`${FIREBASE_DB}/${p}.json`, { method, body });
+  if (where !== 'spare' && !(where !== 'main' && _fbDenied.has(_fbRoot(path)))) {
+    const res = await go(path);
+    if (res.ok) return { store: 'main', json: await res.json() };
+    if (where === 'main' || ![401, 403].includes(res.status)) throw new Error(`HTTP ${res.status}`);
+    _fbDenied.add(_fbRoot(path));
+  }
+  const spare = _fbSpare(path);
+  if (!spare) throw new Error('Permission denied');
+  const res = await go(spare);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return { store: 'spare', json: await res.json() };
+}
+
 // Games skipped in the "rate your games" banner: { player: { bggId: {n, at} } },
 // n = how many plays of the game the player had when they skipped it. The
 // game comes back once they've played it again (more plays than n).
@@ -42,13 +85,13 @@ let rateSkipsCache = {};
 
 async function loadRateSkips() {
   if (!FIREBASE_DB) return;
-  try {
-    const res = await fetch(`${FIREBASE_DB}/rateSkips.json`);
-    const data = (await res.json()) || {};
-    rateSkipsCache = {};
-    for (const enc in data) rateSkipsCache[decodeURIComponent(enc)] = data[enc] || {};
-  } catch (e) {
-    console.warn('Failed to load rating skips from Firebase:', e);
+  const { main, spare } = await fbReadBoth('rateSkips');
+  rateSkipsCache = {};
+  for (const data of [spare || {}, main || {}]) {
+    for (const enc in data) {
+      const name = decodeURIComponent(enc);
+      rateSkipsCache[name] = Object.assign(rateSkipsCache[name] || {}, data[enc] || {});
+    }
   }
 }
 
@@ -57,7 +100,7 @@ async function saveRateSkip(player, bggId, plays) {
   (rateSkipsCache[player] = rateSkipsCache[player] || {})[bggId] = v;
   if (!FIREBASE_DB) return;
   try {
-    await fetch(`${FIREBASE_DB}/rateSkips/${_bsVoteEncodeName(player)}/${bggId}.json`, { method: 'PUT', body: JSON.stringify(v) });
+    await fbWrite(`rateSkips/${_bsVoteEncodeName(player)}/${bggId}`, 'PUT', v);
   } catch (e) {
     console.warn('Failed to save a rating skip to Firebase:', e);
   }

@@ -1,5 +1,5 @@
 const ILIOUPOLI_MEMBERS = new Set(['Στιβ', 'Δημητρης', 'Μαντσος']);
-let _ilioSubTab = 'library'; // 'library' | 'oathsworn' | 'gauntlet'
+let _ilioSubTab = 'library'; // 'library' | 'oathsworn' | 'gauntlet' | 'rove'
 
 // ── Oathsworn boss ranking ──
 // Each Oathsworn play stores its boss in the play's "board" field as
@@ -185,6 +185,7 @@ function showIlioupoliView() {
       <button class="bs-subtab${_ilioSubTab === 'library' ? ' active' : ''}" data-ilio-sub="library">📚 Dimitris Library</button>
       <button class="bs-subtab${_ilioSubTab === 'oathsworn' ? ' active' : ''}" data-ilio-sub="oathsworn">⚔️ Oathsworn</button>
       <button class="bs-subtab${_ilioSubTab === 'gauntlet' ? ' active' : ''}" data-ilio-sub="gauntlet">🦸 Marvel Champions</button>
+      <button class="bs-subtab${_ilioSubTab === 'rove' ? ' active' : ''}" data-ilio-sub="rove">🧭 Rove</button>
     </div>`;
 
   const wireSubTabs = () => {
@@ -211,6 +212,22 @@ function showIlioupoliView() {
       ${buildGauntletHtml()}`;
     wireSubTabs();
     wireGauntlet(container, showIlioupoliView);
+    window.scrollTo(0, 0);
+    return;
+  }
+
+  // ── Rove sub-tab: the campaign sheet (js/rove-campaign.js), as on Rove's game page ──
+  if (_ilioSubTab === 'rove') {
+    const rove = findGameByBggId(ROVE_BGGID);
+    container.innerHTML = `
+      <div class="lb-header">
+        <div class="lb-title">Ilioupoli Bros</div>
+        <div class="lb-count">Rove campaign</div>
+      </div>
+      ${subTabsHtml}
+      <div class="ilio-rove">${buildRoveCampaignHtml(rove || { bggId: ROVE_BGGID })}</div>`;
+    wireSubTabs();
+    wireRoveCampaign(container);
     window.scrollTo(0, 0);
     return;
   }

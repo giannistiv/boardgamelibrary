@@ -18,6 +18,7 @@ const RV_AFF = { fire: 'Fire', water: 'Water', ice: 'Ice', earth: 'Earth', wind:
 
 let _rvData = null;          // data/rove.js
 let _rvCamps = null;         // roveCampaigns from Firebase: {id: campaign}
+let _rvSrc = {};             // id → the store it lives in ('main' | 'spare', see fbWrite)
 let _rvCampsAt = 0;
 let _rvId = null;            // the campaign on screen
 let _rvTab = 'sheet';        // 'sheet' | 'rovers' | 'shop' | 'xulc' | 'notes'
@@ -35,11 +36,11 @@ async function _rvLoad(force) {
     _rvData.itemByName = Object.fromEntries(_rvData.items.map(i => [i.name, i]));
   }
   if (force || !_rvCamps || Date.now() - _rvCampsAt > 15000) {
-    try {
-      const res = await fetch(`${FIREBASE_DB}/roveCampaigns.json`, { cache: 'no-store' });
-      _rvCamps = (res.ok ? await res.json() : null) || {};
-    } catch (e) {
-      _rvCamps = _rvCamps || {};
+    const { main, spare } = await fbReadBoth('roveCampaigns');
+    _rvCamps = {};
+    _rvSrc = {};
+    for (const [store, data] of [['spare', spare], ['main', main]]) {
+      for (const id in (data || {})) { _rvCamps[id] = data[id]; _rvSrc[id] = store; }
     }
     _rvCampsAt = Date.now();
   }
@@ -65,19 +66,17 @@ async function _rvPatch(updates) {
   }
   c.updated = Date.now();
   try {
-    const res = await fetch(`${FIREBASE_DB}/roveCampaigns/${_rvId}.json`, { method: 'PATCH', body: JSON.stringify({ ...updates, updated: c.updated }) });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    await fbWrite(`roveCampaigns/${_rvId}`, 'PATCH', { ...updates, updated: c.updated }, _rvSrc[_rvId]);
   } catch (e) {
     console.warn('Rove campaign: not saved', e);
     _rvToast('Not saved. Check the connection and try again.');
   }
 }
 async function _rvCreate(c) {
-  const res = await fetch(`${FIREBASE_DB}/roveCampaigns.json`, { method: 'POST', body: JSON.stringify(c) });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const { name } = await res.json();
-  _rvCamps[name] = c;
-  _rvId = name;
+  const { store, json } = await fbWrite('roveCampaigns', 'POST', c);
+  _rvCamps[json.name] = c;
+  _rvSrc[json.name] = store;
+  _rvId = json.name;
 }
 function _rvToast(msg) {
   const el = document.querySelector('.rv-toast');
@@ -489,7 +488,12 @@ async function _rvClick(panel, ev) {
     _rvPlays().forEach(p => { if (p.enc && p.won && !p.xulc) enc[_rvKey(p.enc)] = p.date; });
     try {
       await _rvCreate({ name: '', level: 1, rovers: _rvGuessRovers(), enc, created: Date.now(), updated: Date.now(), by: _rvMe() });
-    } catch (e) { t.disabled = false; return; }
+    } catch (e) {
+      console.warn('Rove campaign: not started', e);
+      t.disabled = false;
+      t.textContent = 'Couldn\'t start it. Try again';
+      return;
+    }
     _rvRender(panel);
     return;
   }

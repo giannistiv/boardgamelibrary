@@ -6,7 +6,7 @@
 // scenarios in data/marvel-champions.js (MarvelCDB, with community win rates
 // from Marvel Champions Tracker). Before a box each of them draws three heroes
 // and picks one, then spins the aspect wheel: those draws, picks and spins are
-// kept in Firebase (mcGauntlet/events), so both phones see the same result
+// kept in Firebase (mcGauntlet/events, see fbWrite), so both phones see the same result
 // and a reload can't draw again.
 
 const GAUNTLET = {
@@ -127,28 +127,21 @@ function _gtParseRole(r, cat) {
 }
 
 // ── The draw and the wheel, kept in Firebase ──
-// mcGauntlet/events/{push id} = {unit, player, kind: 'offer'|'pick'|'spin',
+// mcGauntlet/events/{push id} (or its spare store, see fbWrite) = {unit, player, kind: 'offer'|'pick'|'spin',
 // heroes (offer), hero (pick), aspect (spin), round, at, by}. Push ids sort by
 // time; when both phones save the same step, the first one counts.
 let _gtEvents = null, _gtEventsAt = 0;
 let _gtSel = {};              // player → hero id tapped in their offer, not saved yet
 async function _gtLoadEvents(force) {
   if (!force && _gtEvents && Date.now() - _gtEventsAt < 20000) return _gtEvents;
-  try {
-    const res = await fetch(`${FIREBASE_DB}/mcGauntlet/events.json`, { cache: 'no-store' });
-    const data = res.ok ? await res.json() : null;
-    _gtEvents = Object.entries(data || {}).map(([key, v]) => ({ ...v, key })).sort((x, y) => x.key.localeCompare(y.key));
-  } catch (e) {
-    _gtEvents = _gtEvents || [];
-  }
+  const { main, spare } = await fbReadBoth('mcGauntlet/events');
+  _gtEvents = Object.entries({ ...(spare || {}), ...(main || {}) }).map(([key, v]) => ({ ...v, key })).sort((x, y) => x.key.localeCompare(y.key));
   _gtEventsAt = Date.now();
   return _gtEvents;
 }
 async function _gtSaveEvent(ev) {
-  const res = await fetch(`${FIREBASE_DB}/mcGauntlet/events.json`, { method: 'POST', body: JSON.stringify(ev) });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const { name } = await res.json();
-  (_gtEvents = _gtEvents || []).push({ ...ev, key: name });
+  const { json } = await fbWrite('mcGauntlet/events', 'POST', ev);
+  (_gtEvents = _gtEvents || []).push({ ...ev, key: json.name });
 }
 // The same "YYYY-MM-DD HH:MM:SS" local time the logged plays carry.
 function _gtNow() {
