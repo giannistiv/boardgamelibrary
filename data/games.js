@@ -2034,6 +2034,7 @@ const LGEORGE_GAMES = {
   210625:{name:"Agricola: Expansion for 5 and 6 Players",bggId:210625,year:2016,complexity:3.5,players:"1-6",playTime:"120 min",bggRating:7.8},
   359871:{name:"Arcs",bggId:359871,year:2024,complexity:3.44,players:"2-4",playTime:"120 min",bggRating:8.0},
   176544:{name:"Automania",bggId:176544,year:2015,complexity:2.76,players:"2-4",playTime:"90 min",bggRating:7.3},
+  402276:{name:"Avalon: The Riven Veil",bggId:402276,year:2026,complexity:3.65,players:"2-4",playTime:"120 min",bggRating:8.6},
   172308:{name:"Broom Service",bggId:172308,year:2015,complexity:2.39,players:"2-5",playTime:"75 min",bggRating:7.2},
   262211:{name:"Cloudspire",bggId:262211,year:2019,complexity:4.4,players:"1-4",playTime:"180 min",bggRating:8.2},
   397598:{name:"Dune: Imperium – Uprising",bggId:397598,year:2023,complexity:3.52,players:"1-6",playTime:"120 min",bggRating:8.7},
