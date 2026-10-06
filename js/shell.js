@@ -186,46 +186,55 @@ function renderFilters() {
   document.getElementById('search-input').addEventListener('input', applyFilters);
 }
 
-function applyFilters() {
-  const searchTerm = document.getElementById('search-input').value.trim().toLowerCase();
-  const selectedCats = Array.from(document.querySelectorAll('#f-category-dd input:checked')).map(cb => cb.value);
-  const coop = document.getElementById('f-coop').value;
-  const selectedPlayers = Array.from(document.querySelectorAll('#f-players-dd input:checked')).map(cb => Number(cb.value));
-  const diff = document.getElementById('f-difficulty').value;
-  const expansion = document.getElementById('f-expansion').value;
-  const showCampaign = document.getElementById('f-campaign').checked;
-  const maxTime = Number(document.getElementById('f-time').value);
-  const timeActive = maxTime < 240;
+// The filters as values, and whether a game passes them. The Library and
+// the library on the Ilioupoli Bros page both use these.
+// f = {q, cats, coop, players, diff, expansion, campaign, maxTime}
+function libFilterCount(f) {
+  return f.cats.length + (f.coop ? 1 : 0) + f.players.length + (f.diff ? 1 : 0) + (f.expansion ? 1 : 0) + (f.campaign ? 0 : 1) + (f.maxTime < 240 ? 1 : 0);
+}
+function libFilterActive(f) { return !!f.q || libFilterCount(f) > 0; }
+function libPasses(game, f) {
+  if (!libFilterActive(f)) return true;
+  if (!game) return false;
+  if (f.q && !game.name.toLowerCase().includes(f.q)) return false;
+  if (f.cats.length > 0 && !f.cats.some(c => (game.categories || []).includes(c))) return false;
+  if (f.coop === 'coop' && !isCoop(game)) return false;
+  if (f.coop === 'competitive' && isCoop(game)) return false;
+  if (f.players.length > 0) {
+    const supported = parsePlayers(game.players || '');
+    if (!f.players.some(p => supported.includes(p) || (p === 8 && Math.max(...supported) >= 8))) return false;
+  }
+  if (f.diff && (!game.complexity || difficultyBucket(game.complexity) !== f.diff)) return false;
+  if (f.expansion === 'core' && isExpansion(game)) return false;
+  if (f.expansion === 'expansion' && !isExpansion(game)) return false;
+  if (!f.campaign && isCampaign(game)) return false;
+  if (f.maxTime < 240 && (!game.playTime || parseMinTime(game.playTime) > f.maxTime)) return false;
+  return true;
+}
 
-  const anyActive = searchTerm || selectedCats.length > 0 || coop || selectedPlayers.length > 0 || diff || expansion || !showCampaign || timeActive;
-  const passes = (game) => {
-    if (!anyActive) return true;
-    if (!game) return false;
-    if (searchTerm && !game.name.toLowerCase().includes(searchTerm)) return false;
-    if (selectedCats.length > 0 && !selectedCats.some(c => (game.categories || []).includes(c))) return false;
-    if (coop === 'coop' && !isCoop(game)) return false;
-    if (coop === 'competitive' && isCoop(game)) return false;
-    if (selectedPlayers.length > 0) {
-      const supported = parsePlayers(game.players);
-      if (!selectedPlayers.some(p => supported.includes(p) || (p === 8 && Math.max(...supported) >= 8))) return false;
-    }
-    if (diff && difficultyBucket(game.complexity) !== diff) return false;
-    if (expansion === 'core' && isExpansion(game)) return false;
-    if (expansion === 'expansion' && !isExpansion(game)) return false;
-    if (!showCampaign && isCampaign(game)) return false;
-    if (timeActive && parseMinTime(game.playTime) > maxTime) return false;
-    return true;
+function applyFilters() {
+  const f = {
+    q: document.getElementById('search-input').value.trim().toLowerCase(),
+    cats: Array.from(document.querySelectorAll('#f-category-dd input:checked')).map(cb => cb.value),
+    coop: document.getElementById('f-coop').value,
+    players: Array.from(document.querySelectorAll('#f-players-dd input:checked')).map(cb => Number(cb.value)),
+    diff: document.getElementById('f-difficulty').value,
+    expansion: document.getElementById('f-expansion').value,
+    campaign: document.getElementById('f-campaign').checked,
+    maxTime: Number(document.getElementById('f-time').value),
   };
+  const anyActive = libFilterActive(f);
+  const passes = (game) => libPasses(game, f);
   const byId = id => _libGames().find(g => g.id === id);
   const covers = _libMode() === 'covers';
   let matchCount = 0;
 
-  document.querySelectorAll('.game-spine').forEach(el => {
+  document.querySelectorAll('#library-view .game-spine').forEach(el => {
     const pass = passes(byId(el.dataset.gameId));
     el.classList.toggle('faded', !pass);
     if (pass && !covers) matchCount++;
   });
-  document.querySelectorAll('.lib-cover').forEach(el => {
+  document.querySelectorAll('#library-view .lib-cover').forEach(el => {
     const pass = passes(byId(el.dataset.gameId));
     el.hidden = !pass;
     if (pass && covers) matchCount++;
@@ -233,7 +242,7 @@ function applyFilters() {
 
   const toggle = document.getElementById('lib-filter-toggle');
   if (toggle) {
-    const n = selectedCats.length + (coop ? 1 : 0) + selectedPlayers.length + (diff ? 1 : 0) + (expansion ? 1 : 0) + (showCampaign ? 0 : 1) + (timeActive ? 1 : 0);
+    const n = libFilterCount(f);
     toggle.innerHTML = `Filters${n ? ` <span class="gb-badge">${n}</span>` : ''}`;
   }
 
@@ -424,14 +433,12 @@ const VP_LOCKED  = 'width=device-width, initial-scale=1.0, minimum-scale=1.0, ma
 const _isTouchDevice = () => 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
 // The Library shows either the shelf (cubbies of spines, as on the real
-// bookcase) or a grid of covers. Phones default to covers — the shelf is
-// unreadable at phone width; on touch screens it needs the zoomed-out 1200-px
-// viewport. Bigger screens default to the shelf. A pick is remembered.
+// bookcase) or a grid of covers. Covers by default; a pick of the shelf is
+// remembered. On touch screens the shelf needs the zoomed-out 1200-px viewport.
 function _libMode() {
   let m = null;
   try { m = localStorage.getItem('bgl-libmode'); } catch (_) {}
-  if (m === 'shelf' || m === 'covers') return m;
-  return Math.min(screen.width, screen.height) < 700 ? 'covers' : 'shelf';
+  return m === 'shelf' ? 'shelf' : 'covers';
 }
 const _libZoomedShelf = () => _isTouchDevice() && _libMode() === 'shelf';
 let _modalOpenedFromStats = false;

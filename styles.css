@@ -340,7 +340,15 @@
   /* Fixed height (not just min-height) so a very long game name's vertical
      spine text can't blow the cubby up — it clips with an ellipsis instead. */
   .ilio-shelf .cubby{height:150px;min-height:150px;padding:4px 3px 3px}
-  .ilio-f-count{font-size:0.72rem;opacity:0.6;text-align:right;margin-top:0.3rem}
+  /* Ilioupoli's library: the Library's filters, and shelf or covers */
+  .ilio-lib-top{display:flex;justify-content:flex-end;margin:0 0 0.8rem}
+  .ilio-lib[data-mode="covers"] .ilio-shelf-wrap{display:none}
+  .ilio-lib[data-mode="shelf"] .ilio-covers{display:none}
+  .ilio-lib .lib-covers.ilio-covers{max-width:none;padding:0.2rem 0 1.5rem}
+  .ilio-lib.filters-open .lib-filter-toggle{border-color:var(--accent-line);color:var(--accent)}
+  html.compact .ilio-lib .lib-filter-toggle{display:inline-flex}
+  html.compact .ilio-lib:not(.filters-open) .filters{display:none}
+  .ilio-lib .search-wrap{max-width:none}
   /* The Ilioupoli view gets extra width over the standard 700-px stats-view
      so Δημητρης's shelf reads a little bigger. */
   #ilioupoli-view{max-width:900px}
