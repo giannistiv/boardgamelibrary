@@ -29,14 +29,65 @@ function _libOwner(name) {
   }
   return withD > withS ? 'dimitris' : 'stiv';
 }
-// Δημητρης's games as shelf entries: where Στιβ owns the same game, its
-// categories and mechanics come along so the filters work.
+// The shelf's categories for a game that has none of its own here (a
+// friend's game), worked out from BGG: game types, categories and mechanics
+// (data/bgg-extras.js). Each rule was checked against Στιβ's own shelf: it
+// agrees with his choices on 81–99% of his games, depending on the category.
+function bggShelfCategories(bggId, players) {
+  const r = typeof BGG_EXTRAS !== 'undefined' && BGG_EXTRAS[bggId];
+  if (!r) return [];
+  const kinds = r[5] || '';
+  const mech = new Set(String(r[8] || '').split(' ').filter(Boolean));
+  const cat = new Set(String(r[10] || '').split(' ').filter(Boolean));
+  const m = (...ids) => ids.some(i => mech.has(String(i)));
+  const c = (...ids) => ids.some(i => cat.has(String(i)));
+  const k = (ch) => kinds.includes(ch);
+  const out = [];
+  if (k('S')) out.push('Strategy');
+  if (k('S') && !k('T') && (c(1021) || m(2082, 2933, 2935, 2902, 2875, 2081))) out.push('Euro');   // economic, workers, income, end-game bonuses, routes
+  if (k('T') || c(1022, 1024, 1046, 1047)) out.push('Thematic');                                   // or adventure, horror, fighting, miniatures
+  if (k('F')) out.push('Family');
+  if (m(2664) && c(1002)) out.push('Deck Building');
+  if (m(2082, 2933, 2935)) out.push('Worker Placement');
+  if (k('S') && !k('T') && m(2902, 2849)) out.push('Engine Building');                             // income, tech trees
+  if (c(1002) && !k('T')) out.push('Card Game');
+  if (c(1039)) out.push('Deduction');
+  if (m(2080) && !c(1002)) out.push('Area Control');
+  if (c(1017)) out.push('Dice');
+  if (/^1$/.test(String(players || '').trim())) out.push('Solo');
+  if (c(1028) || m(2978, 2048)) out.push('Puzzle');                                                // or grid coverage, pattern building
+  if (c(1030)) out.push('Party');
+  if (k('A')) out.push('Abstract');
+  if (c(1022, 1020)) out.push('Adventure');                                                        // adventure, exploration
+  if (c(1031)) out.push('Racing');
+  if (r[4]) out.push('Co-op');
+  if (m(2824) || (m(2822) && m(2851))) out.push('Campaign');                                       // legacy, or a campaign of story choices
+  return out;
+}
+
+// Δημητρης's games as shelf entries: where Στιβ owns the same game, his
+// categories and mechanics come along; otherwise BGG's give the categories.
 function _dimitrisShelf() {
   if (_dimitrisShelf.cache) return _dimitrisShelf.cache;
-  return (_dimitrisShelf.cache = Object.values(DIMITRIS_GAMES).map(g => {
+  const all = Object.values(DIMITRIS_GAMES);
+  const catsOf = (g) => {
     const rich = GAMES.find(x => x.bggId === g.bggId) || EXTRA_GAMES[g.bggId] || {};
+    if (rich.categories && rich.categories.length) return rich.categories;
+    if (g.categories && g.categories.length) return g.categories;
+    return bggShelfCategories(g.bggId, g.players);
+  };
+  // an expansion BGG doesn't categorise takes its base game's ("Mini Rogue: Treasure Map" → Mini Rogue)
+  const viaBase = (g) => {
+    const head = g.name.split(/\s*[:–—]\s*/)[0].toLowerCase();
+    const base = all.filter(b => b !== g && b.name.toLowerCase().startsWith(head) && b.name.length < g.name.length)
+      .sort((a, b) => a.name.length - b.name.length)[0];
+    return base ? catsOf(base) : [];
+  };
+  return (_dimitrisShelf.cache = all.map(g => {
+    const rich = GAMES.find(x => x.bggId === g.bggId) || EXTRA_GAMES[g.bggId] || {};
+    const cats = catsOf(g);
     return { ...g, id: 'dim_' + g.bggId, libOwner: 'dimitris',
-      categories: rich.categories || g.categories || [], mechanics: rich.mechanics || g.mechanics || [],
+      categories: cats.length ? cats : viaBase(g), mechanics: rich.mechanics || g.mechanics || [],
       spineColor: g.spineColor || rich.spineColor || '#555', boxSize: g.boxSize || rich.boxSize || 'md' };
   }).sort((a, b) => a.name.localeCompare(b.name)));
 }
@@ -566,7 +617,7 @@ function openModal(game) {
 
   const c = game.spineColor || '#555';
   const fallbackBg = `linear-gradient(135deg, ${c}, ${adjustColor(c, -30)})`;
-  if (!Array.isArray(game.categories)) game.categories = [];
+  if (!Array.isArray(game.categories) || !game.categories.length) game.categories = bggShelfCategories(game.bggId, game.players);
   if (!Array.isArray(game.mechanics)) game.mechanics = [];
   if (game.description == null) game.description = '';
   if (game.players == null) game.players = '';

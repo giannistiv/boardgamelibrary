@@ -11,7 +11,9 @@ expansion, whether it's co-operative, and what kind of game it is (BGG's
 game types and a few categories). The game page shows the poll; the
 game-night picker uses all of it, for its suggestions and its filters. It
 also keeps BGG's play time (min and max), the game's mechanics (their names
-go in BGG_MECHANICS) and its overall BGG rank (for the Top 100 achievements).
+go in BGG_MECHANICS), its overall BGG rank (for the Top 100 achievements) and
+its BGG categories (names in BGG_CATEGORIES; they give a friend's games the
+shelf's categories, js/shell.js bggShelfCategories).
 
     python3 tools/fetch-bgg-extras.py --ranks  # refresh play times, mechanics
                                                # and ranks of every game (weekly)
@@ -34,14 +36,16 @@ OUT = os.path.join(ROOT, 'data', 'bgg-extras.js')
 API = 'https://api.geekdo.com/api'
 HEADER = '''// BGG community data per game. Written by tools/fetch-bgg-extras.py; don't edit by hand.
 //   bggId: [player counts voted best, voted recommended, number of votes, 1 if an expansion,
-//           1 if co-operative, kinds, min play time, max play time, mechanics, BGG rank]
+//           1 if co-operative, kinds, min play time, max play time, mechanics, BGG rank,
+//           categories]
 // Player counts read like "4", "3-5" or "2,4" ("" when nobody has voted).
 // Kinds, one letter each: F family, S strategy, T thematic, P party, A abstract,
 // W wargame, K children's, C card game, D deduction, Z puzzle.
 // Play times are minutes (0 = unknown); mechanics are BGG ids (names in
-// BGG_MECHANICS), space-separated; the rank is BGG's overall board game rank (0 = none).
+// BGG_MECHANICS), space-separated; the rank is BGG's overall board game rank (0 = none);
+// categories are BGG ids (names in BGG_CATEGORIES), space-separated.
 '''
-ROW_LEN = 10
+ROW_LEN = 11
 
 # BGG ids behind the kinds: game types (boardgamesubdomain) and categories
 KINDS = {'5499': 'F', '5497': 'S', '5496': 'T', '5498': 'P', '4666': 'A', '4664': 'W', '4665': 'K',
@@ -54,6 +58,7 @@ _spec.loader.exec_module(covers)
 
 
 MECHANICS = {}   # BGG mechanic id -> name, kept across runs
+CATEGORIES = {}  # BGG category id -> name, kept across runs
 
 
 def load():
@@ -63,9 +68,10 @@ def load():
             src = f.read()
     except FileNotFoundError:
         return {}
-    if 'const BGG_MECHANICS' in src:
-        start = src.index('{', src.index('const BGG_MECHANICS'))
-        MECHANICS.update(json.loads(src[start:src.index('};', start) + 1]))
+    for const, names in (('BGG_MECHANICS', MECHANICS), ('BGG_CATEGORIES', CATEGORIES)):
+        if f'const {const}' in src:
+            start = src.index('{', src.index(f'const {const}'))
+            names.update(json.loads(src[start:src.index('};', start) + 1]))
     body = src[src.index('{', src.index('const BGG_EXTRAS')) + 1:src.rindex('}')]
     out = {}
     for line in body.splitlines():
@@ -78,9 +84,10 @@ def load():
 
 def save(data):
     rows = [f'  {k}:{json.dumps(v, ensure_ascii=False, separators=(",", ":"))}' for k, v in sorted(data.items(), key=lambda kv: int(kv[0]))]
-    names = json.dumps(dict(sorted(MECHANICS.items(), key=lambda kv: int(kv[0]))), ensure_ascii=False, separators=(',', ':'))
+    names = lambda d: json.dumps(dict(sorted(d.items(), key=lambda kv: int(kv[0]))), ensure_ascii=False, separators=(',', ':'))
     with open(OUT, 'w', encoding='utf-8') as f:
-        f.write(HEADER + f'const BGG_MECHANICS = {names};\n' + 'const BGG_EXTRAS = {\n' + ',\n'.join(rows) + '\n};\n')
+        f.write(HEADER + f'const BGG_MECHANICS = {names(MECHANICS)};\n' + f'const BGG_CATEGORIES = {names(CATEGORIES)};\n'
+                + 'const BGG_EXTRAS = {\n' + ',\n'.join(rows) + '\n};\n')
 
 
 def ranges(poll):
@@ -102,7 +109,7 @@ def _minutes(v):
 
 def item_fields(item):
     """[1 if an expansion, 1 if co-operative, kinds, min time, max time, mechanics]
-    from a geekitems answer."""
+    from a geekitems answer (its categories: item_categories)."""
     links = item.get('links') or {}
     ids = lambda kind: {str(x.get('objectid')) for x in links.get(kind) or []}
     tags = ids('boardgamesubdomain') | ids('boardgamecategory')
@@ -115,6 +122,15 @@ def item_fields(item):
     return [1 if item.get('subtype') == 'boardgameexpansion' else 0,
             1 if COOP_MECHANIC in ids('boardgamemechanic') else 0, kinds,
             tmin, max(tmin, tmax), mechs]
+
+
+def item_categories(item):
+    """BGG's categories for the game, ids space-separated (names into CATEGORIES)."""
+    cats = (item.get('links') or {}).get('boardgamecategory') or []
+    for x in cats:
+        if x.get('objectid') and x.get('name'):
+            CATEGORIES[str(x['objectid'])] = x['name']
+    return ' '.join(sorted({str(x.get('objectid')) for x in cats if x.get('objectid')}, key=int))
 
 
 def overall_rank(dyn):
@@ -133,7 +149,7 @@ def fetch_one(bgg_id):
     time.sleep(covers.DELAY)
     poll = (dyn.get('polls') or {}).get('userplayers') or {}
     return ([ranges(poll.get('best')), ranges(poll.get('recommended')), int(poll.get('totalvotes') or 0)]
-            + item_fields(item) + [overall_rank(dyn)])
+            + item_fields(item) + [overall_rank(dyn), item_categories(item)])
 
 
 def main():
@@ -153,7 +169,7 @@ def main():
         try:
             data[i] = fetch_one(i)
         except covers.NotFound:
-            data[i] = ['', '', 0, 0, 0, '', 0, 0, '', 0]   # BGG has no such game: remember that, don't ask again
+            data[i] = ['', '', 0, 0, 0, '', 0, 0, '', 0, '']   # BGG has no such game: remember that, don't ask again
         except Exception as e:          # offline, timeout…: try again next time
             failed.append((i, f'{type(e).__name__}: {e}'))
 
