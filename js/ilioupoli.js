@@ -174,15 +174,28 @@ function _wireOathswornDrag(container, voter) {
   });
 }
 
+// The library this page shows: the other one from your own Library tab, so
+// Στιβ sees Δημητρης's and Δημητρης (and his circle) sees Στιβ's.
+function _ilioLib() {
+  const owner = typeof _libOwner === 'function' && _libOwner() === 'dimitris' ? 'stiv' : 'dimitris';
+  const byId = {};
+  if (owner === 'stiv') GAMES.forEach(g => { if (g.bggId > 0) byId[g.bggId] = g; });
+  else if (typeof DIMITRIS_GAMES !== 'undefined') Object.assign(byId, DIMITRIS_GAMES);
+  return owner === 'stiv'
+    ? { owner, who: 'Στιβ', label: "Stiv's Library", byId }
+    : { owner, who: 'Δημητρης', label: 'Dimitris Library', byId };
+}
+
 function showIlioupoliView() {
   const container = document.getElementById('ilioupoli-view');
   if (!container) return;
-  const games = (typeof DIMITRIS_GAMES !== 'undefined') ? Object.values(DIMITRIS_GAMES) : [];
+  const lib = _ilioLib();
+  const games = Object.values(lib.byId);
   games.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
   const subTabsHtml = `
     <div class="bs-subtabs ilio-subtabs">
-      <button class="bs-subtab${_ilioSubTab === 'library' ? ' active' : ''}" data-ilio-sub="library">📚 Dimitris Library</button>
+      <button class="bs-subtab${_ilioSubTab === 'library' ? ' active' : ''}" data-ilio-sub="library">📚 ${lib.label}</button>
       <button class="bs-subtab${_ilioSubTab === 'oathsworn' ? ' active' : ''}" data-ilio-sub="oathsworn">⚔️ Oathsworn</button>
       <button class="bs-subtab${_ilioSubTab === 'gauntlet' ? ' active' : ''}" data-ilio-sub="gauntlet">🦸 Marvel Champions</button>
       <button class="bs-subtab${_ilioSubTab === 'rove' ? ' active' : ''}" data-ilio-sub="rove">🧭 Rove</button>
@@ -331,7 +344,7 @@ function showIlioupoliView() {
   container.innerHTML = `
     <div class="lb-header">
       <div class="lb-title">Ilioupoli Bros</div>
-      <div class="lb-count">Δημητρης's library · ${games.length} game${games.length !== 1 ? 's' : ''}</div>
+      <div class="lb-count">${lib.who}'s library · ${games.length} game${games.length !== 1 ? 's' : ''}</div>
     </div>
     ${subTabsHtml}
     <input type="text" class="bsv-search-bar" id="ilio-search" placeholder="Search games…" autocomplete="off">
@@ -378,7 +391,7 @@ function showIlioupoliView() {
       // Prefer findGameByBggId so a game that also lives in the curated
       // GAMES shelf opens with its full description / categories, rather
       // than the metadata-thin CSV entry.
-      const g = findGameByBggId(id) || DIMITRIS_GAMES[id];
+      const g = findGameByBggId(id) || lib.byId[id];
       if (g && typeof openModal === 'function') {
         try { openModal(g); } catch (_) {}
       }
@@ -408,9 +421,10 @@ function _applyIlioFilters() {
   const anyActive = !!(q || fp || fd || ft);
 
   let matchCount = 0;
+  const lib = _ilioLib();
   view.querySelectorAll('.game-spine[data-ilio-bgg]').forEach(el => {
     if (!anyActive) { el.classList.remove('faded'); matchCount++; return; }
-    const g = DIMITRIS_GAMES[Number(el.dataset.ilioBgg)];
+    const g = lib.byId[Number(el.dataset.ilioBgg)];
     let pass = !!g;
 
     if (pass && q && !(g.name || '').toLowerCase().includes(q)) pass = false;

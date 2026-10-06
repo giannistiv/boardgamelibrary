@@ -1,8 +1,63 @@
 function isCoop(game) {
-  return game.categories.includes('Co-op');
+  return (game.categories || []).includes('Co-op');
 }
 function isExpansion(game) {
-  return EXPANSION_IDS.has(game.id);
+  return EXPANSION_IDS.has(game.id) || (!!game.libOwner && typeof isBggExpansion === 'function' && isBggExpansion(game.bggId));
+}
+
+// ── Whose shelf the Library shows ──
+// Στιβ's, except for Δημητρης and the people who play more with him than
+// with Στιβ: they see Δημητρης's games (DIMITRIS_GAMES, his BGG collection),
+// and Ilioupoli Bros shows them Στιβ's library instead (js/ilioupoli.js).
+const LIB_OWNER_NAMES = { stiv: 'Στιβ', dimitris: 'Δημητρης' };
+let _libOwnerNow = 'stiv';
+// the logged-in player (nav.js's _navPlayer loads after the first paint)
+function _libViewer() {
+  let raw = null;
+  try { raw = localStorage.getItem('bgl-player'); } catch (_) {}
+  return raw ? (NAME_MAP[raw] || raw) : null;
+}
+function _libOwner(name) {
+  const me = name !== undefined ? name : _libViewer();
+  if (!me || me === LIB_OWNER_NAMES.stiv || typeof DIMITRIS_GAMES === 'undefined') return 'stiv';
+  if (me === LIB_OWNER_NAMES.dimitris) return 'dimitris';
+  let withD = 0, withS = 0;
+  for (const id in PLAY_HISTORY) for (const p of PLAY_HISTORY[id]) {
+    if (!p || !Array.isArray(p.sc) || !p.sc.some(s => s && s.n === me)) continue;
+    if (p.sc.some(s => s && s.n === LIB_OWNER_NAMES.dimitris)) withD++;
+    if (p.sc.some(s => s && s.n === LIB_OWNER_NAMES.stiv)) withS++;
+  }
+  return withD > withS ? 'dimitris' : 'stiv';
+}
+// Δημητρης's games as shelf entries: where Στιβ owns the same game, its
+// categories and mechanics come along so the filters work.
+function _dimitrisShelf() {
+  if (_dimitrisShelf.cache) return _dimitrisShelf.cache;
+  return (_dimitrisShelf.cache = Object.values(DIMITRIS_GAMES).map(g => {
+    const rich = GAMES.find(x => x.bggId === g.bggId) || EXTRA_GAMES[g.bggId] || {};
+    return { ...g, id: 'dim_' + g.bggId, libOwner: 'dimitris',
+      categories: rich.categories || g.categories || [], mechanics: rich.mechanics || g.mechanics || [],
+      spineColor: g.spineColor || rich.spineColor || '#555', boxSize: g.boxSize || rich.boxSize || 'md' };
+  }).sort((a, b) => a.name.localeCompare(b.name)));
+}
+function _libGames() { return _libOwnerNow === 'dimitris' ? _dimitrisShelf() : GAMES; }
+// The game page for a shelf entry: the fullest record the site has of it.
+function _libGameById(id) {
+  const g = _libGames().find(x => x.id === id);
+  return g && g.libOwner ? (findGameByBggId(g.bggId) || g) : g;
+}
+// Redraw the Library when whose shelf it is changes (a login, or once the
+// imported plays have loaded and say who plays with whom).
+function _libRefresh() {
+  const owner = _libOwner();
+  const key = `${owner}|${_libViewer()}`;   // the heading says "Your shelf" to Δημητρης himself
+  if (key === _libRefresh.key) return;
+  _libRefresh.key = key;
+  _libOwnerNow = owner;
+  _renderCategoryFilter();
+  renderShelf();
+  document.getElementById('lib-covers').innerHTML = '';
+  _applyLibMode();
 }
 function isCampaign(game) {
   if (!game) return false;
@@ -12,21 +67,40 @@ function isCampaign(game) {
 }
 
 // ── Render filters ──
-function renderFilters() {
-  // Populate category multi-select checkboxes
+// The categories the shelf on show has, as checkboxes.
+function _renderCategoryFilter() {
   const catDD = document.getElementById('f-category-dd');
-  const catBtn = document.getElementById('f-category-btn');
+  catDD.innerHTML = '';
   const usedCats = new Set();
-  GAMES.forEach(g => g.categories.forEach(c => usedCats.add(c)));
+  _libGames().forEach(g => (g.categories || []).forEach(c => usedCats.add(c)));
   CATEGORIES.filter(c => usedCats.has(c)).forEach(cat => {
     const label = document.createElement('label');
     const cb = document.createElement('input');
     cb.type = 'checkbox'; cb.value = cat;
-    cb.addEventListener('change', () => { updateCatBtn(); applyFilters(); });
+    cb.addEventListener('change', () => { _updateCatBtn(); applyFilters(); });
     label.appendChild(cb);
     label.appendChild(document.createTextNode(cat));
     catDD.appendChild(label);
   });
+  _updateCatBtn();
+}
+function _updateCatBtn() {
+  const catBtn = document.getElementById('f-category-btn');
+  const checked = document.querySelectorAll('#f-category-dd input:checked');
+  if (checked.length === 0) {
+    catBtn.innerHTML = 'All <span class="filter-arrow">&#9662;</span>';
+  } else if (checked.length === 1) {
+    catBtn.innerHTML = checked[0].value + ' <span class="filter-arrow">&#9662;</span>';
+  } else {
+    catBtn.innerHTML = checked.length + ' selected <span class="filter-arrow">&#9662;</span>';
+  }
+}
+
+function renderFilters() {
+  // Populate category multi-select checkboxes
+  const catDD = document.getElementById('f-category-dd');
+  const catBtn = document.getElementById('f-category-btn');
+  _renderCategoryFilter();
 
   // Populate player count multi-select checkboxes
   const pDD = document.getElementById('f-players-dd');
@@ -60,16 +134,7 @@ function renderFilters() {
     });
   });
 
-  function updateCatBtn() {
-    const checked = catDD.querySelectorAll('input:checked');
-    if (checked.length === 0) {
-      catBtn.innerHTML = 'All <span class="filter-arrow">&#9662;</span>';
-    } else if (checked.length === 1) {
-      catBtn.innerHTML = checked[0].value + ' <span class="filter-arrow">&#9662;</span>';
-    } else {
-      catBtn.innerHTML = checked.length + ' selected <span class="filter-arrow">&#9662;</span>';
-    }
-  }
+  const updateCatBtn = _updateCatBtn;
 
   function updatePBtn() {
     const checked = pDD.querySelectorAll('input:checked');
@@ -137,7 +202,7 @@ function applyFilters() {
     if (!anyActive) return true;
     if (!game) return false;
     if (searchTerm && !game.name.toLowerCase().includes(searchTerm)) return false;
-    if (selectedCats.length > 0 && !selectedCats.some(c => game.categories.includes(c))) return false;
+    if (selectedCats.length > 0 && !selectedCats.some(c => (game.categories || []).includes(c))) return false;
     if (coop === 'coop' && !isCoop(game)) return false;
     if (coop === 'competitive' && isCoop(game)) return false;
     if (selectedPlayers.length > 0) {
@@ -151,7 +216,7 @@ function applyFilters() {
     if (timeActive && parseMinTime(game.playTime) > maxTime) return false;
     return true;
   };
-  const byId = id => GAMES.find(g => g.id === id);
+  const byId = id => _libGames().find(g => g.id === id);
   const covers = _libMode() === 'covers';
   let matchCount = 0;
 
@@ -187,6 +252,9 @@ let _showingOtherSide = false;
 function renderShelf() {
   const shelfEl = document.getElementById('shelf');
   shelfEl.innerHTML = '';
+  const otherBtn = document.getElementById('btn-other-side');
+  if (otherBtn) otherBtn.style.display = _libOwnerNow === 'dimitris' ? 'none' : '';
+  if (_libOwnerNow === 'dimitris') { _renderListShelf(shelfEl, _libGames()); _renderNewArrivals(); return; }
   shelfEl.style.gridTemplateColumns = _showingOtherSide ? 'repeat(3,1fr)' : 'repeat(6,1fr)';
 
   const rowRange = _showingOtherSide ? [7, 8] : [1, 6];
@@ -242,6 +310,31 @@ function renderShelf() {
   _renderNewArrivals();
 }
 
+// A shelf with no bookcase layout (Δημητρης's): its games by name, five to a
+// cubby, six cubbies to a row, like the real shelf.
+function _renderListShelf(shelfEl, games) {
+  shelfEl.style.gridTemplateColumns = 'repeat(6,1fr)';
+  for (let i = 0; i < games.length; i += 5) {
+    const chunk = games.slice(i, i + 5);
+    const cubby = document.createElement('div');
+    cubby.className = 'cubby' + (chunk.length <= 2 ? ' horizontal-layout' : '');
+    chunk.forEach(game => {
+      const spine = document.createElement('div');
+      spine.className = `game-spine box-${game.boxSize}`;
+      spine.style.background = game.spineColor;
+      spine.dataset.gameId = game.id;
+      spine.title = game.name;
+      const text = document.createElement('span');
+      text.className = 'spine-text';
+      text.textContent = game.name;
+      spine.appendChild(text);
+      spine.addEventListener('click', () => openModal(_libGameById(game.id)));
+      cubby.appendChild(spine);
+    });
+    shelfEl.appendChild(cubby);
+  }
+}
+
 // Games new on BGG (tools/sync-collections.py adds them with row 0) aren't in
 // a cubby yet: they wait in a strip above the shelf until they're placed.
 function _isNewArrival(g) {
@@ -251,7 +344,7 @@ function _renderNewArrivals() {
   const wrap = document.querySelector('.shelf-wrapper');
   if (!wrap) return;
   let strip = document.getElementById('lib-new');
-  const games = GAMES.filter(_isNewArrival);
+  const games = _libOwnerNow === 'stiv' ? GAMES.filter(_isNewArrival) : [];
   if (!games.length) { if (strip) strip.remove(); return; }
   if (!strip) {
     strip = document.createElement('div');
@@ -282,13 +375,13 @@ function renderCovers() {
   const grid = document.getElementById('lib-covers');
   if (!grid) return;
   // new arrivals first (with a badge), then everything by name
-  const games = GAMES.slice().sort((a, b) => (_isNewArrival(b) - _isNewArrival(a)) || a.name.localeCompare(b.name));
+  const games = _libGames().slice().sort((a, b) => (_isNewArrival(b) - _isNewArrival(a)) || a.name.localeCompare(b.name));
   grid.innerHTML = games.map(g => `<button type="button" class="lib-cover" data-game-id="${_escapeHtml(g.id)}" title="${_escapeHtml(g.name)}">
       <span class="lib-cover-art" style="--spine:${_escapeHtml(g.spineColor || '#555')}"><img src="images/${g.bggId}.jpg" alt="" loading="lazy" onerror="__imgFallback(this, ${g.bggId})">${_isNewArrival(g) ? '<span class="lib-new-badge">New</span>' : ''}</span>
       <span class="lib-cover-name">${_escapeHtml(g.name)}</span>
     </button>`).join('');
   grid.querySelectorAll('.lib-cover').forEach(el => {
-    el.addEventListener('click', () => { const g = GAMES.find(x => x.id === el.dataset.gameId); if (g) openModal(g); });
+    el.addEventListener('click', () => { const g = _libGameById(el.dataset.gameId); if (g) openModal(g); });
   });
 }
 
@@ -302,9 +395,12 @@ function _applyLibMode() {
   });
   if (mode === 'covers' && !document.getElementById('lib-covers').childElementCount) renderCovers();
   const sub = document.getElementById('lib-sub');
+  const dim = _libOwnerNow === 'dimitris';
   if (sub) {
-    sub.textContent = `${GAMES.length} games · front and back`;
+    sub.textContent = dim ? `${_libGames().length} games · ${LIB_OWNER_NAMES.dimitris}'s library` : `${GAMES.length} games · front and back`;
   }
+  const title = document.querySelector('#library-view .page-title');
+  if (title) title.textContent = dim ? `${_libViewer() === LIB_OWNER_NAMES.dimitris ? 'Your' : LIB_OWNER_NAMES.dimitris + '\'s'} shelf` : 'The shelf';
   applyFilters();
 }
 
@@ -935,6 +1031,7 @@ function _updateBoardSouthBtnVisibility() {
     const active = (typeof _activeBoardSouthVoter === 'function') ? _activeBoardSouthVoter() : null;
     btn.style.display = active ? '' : 'none';
   }
+  if (typeof _libRefresh === 'function') _libRefresh();
   // The "Ilioupoli Bros" tab is private to Στιβ and Δημητρης.
   const ilioBtn = document.getElementById('btn-ilioupoli');
   if (ilioBtn) {

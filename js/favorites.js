@@ -589,6 +589,7 @@ function openFavPicker(playerName) {
 }
 
 // ── Init ──
+_libOwnerNow = _libOwner();
 renderFilters();
 renderShelf();
 
