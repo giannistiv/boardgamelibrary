@@ -10,7 +10,6 @@
 let _hot = null;            // BGG_HOT once loaded
 let _hotFilter = null;      // 'yours' (news for the games you play, js/game-news.js) | 'live' (campaigns running now) | 'soon' (hot on BGG, no campaign running)
 let _hotSort = 'you';       // 'you' | 'ending' | 'backers' | 'hot'
-let _hotTasteFor = null, _hotTasteCache;   // whose taste, and it (null: too few games to tell)
 
 function trendingAllowed() { return true; }   // open to everyone
 
@@ -73,15 +72,22 @@ function _hotMechanicIdf() {
   return _hotIdf;
 }
 
-function _hotTaste() {
-  const viewer = _navPlayer();
-  if (_hotTasteFor === viewer && _hotTasteCache !== undefined) return _hotTasteCache;
-  const counts = {};
+// What a player likes, from what they play most, rate above their own
+// average and keep as favourites: the mechanics of those games (the telling
+// ones count more), the weight they usually play, and per game how much they
+// play it, when they last did and how they rate it. Used by Trending (the
+// viewer) and Tonight (everyone who's coming).
+const _tasteCache = new Map();
+function playerTaste(name) {
+  if (!name) return null;
+  if (_tasteCache.has(name)) return _tasteCache.get(name);
+  const counts = {}, last = {};
   let wSum = 0, wN = 0;
   for (const id in PLAY_HISTORY) {
     for (const p of PLAY_HISTORY[id]) {
-      if (!p || !Array.isArray(p.sc) || !p.sc.some(s => s && s.n === viewer)) continue;
+      if (!p || !Array.isArray(p.sc) || !p.sc.some(s => s && s.n === name)) continue;
       counts[id] = (counts[id] || 0) + 1;
+      if (!last[id] || p.date > last[id]) last[id] = p.date;
       const g = findGameByBggId(id);
       const w = g && Number(g.complexity);
       if (w > 0) { wSum += w; wN++; }
@@ -89,12 +95,12 @@ function _hotTaste() {
   }
   const ratings = {};
   for (const id in ratingsCache || {}) {
-    const r = _ratingValue((ratingsCache[id] || {})[viewer]);
+    const r = _ratingValue((ratingsCache[id] || {})[name]);
     if (r) ratings[id] = r;
   }
   const rs = Object.values(ratings);
   const mean = rs.length ? rs.reduce((a, b) => a + b, 0) / rs.length : 7;
-  const favs = new Set((typeof getPlayerFavorites === 'function' ? getPlayerFavorites(viewer) : []).map(String));
+  const favs = new Set((typeof getPlayerFavorites === 'function' ? getPlayerFavorites(name) || [] : []).map(String));
   const maxPlays = Math.max(1, ...Object.values(counts));
   const liking = {};
   for (const id of new Set([...Object.keys(counts), ...Object.keys(ratings), ...favs])) {
@@ -109,18 +115,26 @@ function _hotTaste() {
     const g = findGameByBggId(id);
     if (g && isExpansion(g)) continue;
     for (const m of bggMechanics(id)) {
-      const name = BGG_MECHANICS[m];
-      if (!name || HOT_NOT_TASTE.has(name)) continue;
-      sum[name] = (sum[name] || 0) + liking[id] * (idf[name] || 0);
+      const mname = BGG_MECHANICS[m];
+      if (!mname || HOT_NOT_TASTE.has(mname)) continue;
+      sum[mname] = (sum[mname] || 0) + liking[id] * (idf[mname] || 0);
     }
   }
   const top = Object.entries(sum).sort((x, y) => y[1] - x[1]).slice(0, HOT_TASTE_SIZE);
   const best = top.length ? top[0][1] : 1;
-  _hotTasteFor = viewer;
-  _hotTasteCache = Object.keys(liking).length >= 5 && top.length
-    ? { mech: new Map(top.map(([m, v]) => [m, v / best])), weight: wN ? wSum / wN : 0 }
-    : null;
-  return _hotTasteCache;
+  const t = {
+    // null: too few games to tell
+    mech: Object.keys(liking).length >= 5 && top.length ? new Map(top.map(([m, v]) => [m, v / best])) : null,
+    weight: wN ? wSum / wN : 0,
+    counts, last, ratings, mean, favs,
+  };
+  _tasteCache.set(name, t);
+  return t;
+}
+
+function _hotTaste() {
+  const t = playerTaste(_navPlayer());
+  return t && t.mech ? { mech: t.mech, weight: t.weight } : null;
 }
 
 // How well a game fits you: your taste (the best two of your mechanics it

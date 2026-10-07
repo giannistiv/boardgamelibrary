@@ -2196,6 +2196,11 @@
   .gp-more-filters > summary::after{content:'';width:6px;height:6px;border-right:1.5px solid var(--text-3);border-bottom:1.5px solid var(--text-3);transform:rotate(45deg);margin:0 0 2px 0.1rem;transition:transform 0.2s}
   .gp-more-filters[open] > summary::after{transform:rotate(-135deg);margin:3px 0 0 0.1rem}
   .gp-more-n{font-size:0.66rem;font-weight:700;padding:0.05rem 0.45rem;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
+  #gp-who-more{flex:0 0 auto;width:auto;max-width:11rem}
+  .gp-n{align-self:center;font-size:0.8rem;font-weight:800;color:var(--accent);margin-right:0.35rem}
+  .gp-guests{display:inline-flex;align-items:center;gap:0.35rem;font-size:0.74rem;color:var(--text-2)}
+  .gp-guests .gb-chip{min-width:2rem;justify-content:center;padding-left:0.5rem;padding-right:0.5rem}
+  .gp-guests .gb-chip:disabled{opacity:0.4;cursor:default}
   .gp-roll{
     padding:0.38rem 0.85rem;border-radius:999px;border:1px solid rgba(226,176,74,0.55);
     background:rgba(226,176,74,0.16);color:#f0c668;font-family:inherit;font-size:0.8rem;font-weight:700;cursor:pointer;

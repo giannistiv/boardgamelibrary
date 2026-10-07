@@ -1,7 +1,9 @@
 // ── Explore → Tonight: "What should we play tonight?" ──
-// Say how many are playing, how long you have and whose shelves are within
-// reach; it ranks the games on those shelves that fit that many players and
-// the time. Filters narrow it down: co-op or competitive, weight, and under
+// Say who's coming (or just how many), whose place it is and how long you
+// have; it ranks the games on that shelf that fit that many players and the
+// time, for the people at the table: each one's ratings and taste (the
+// mechanics of what they play and love, js/trending.js) and the games none
+// of them has played in a while. Filters narrow it down: co-op or competitive, weight, and under
 // "More filters" the kind of game, what you haven't played (at all or
 // lately), BGG's best player count and the group's favourites.
 // Each suggestion says why it's there:
@@ -15,7 +17,9 @@ const _gp = {
   count: 0,          // how many are playing: the last number used, else 4
   time: 0,           // 0 = any, else minutes available
   weights: new Set(),
-  libs: null,        // Set of library keys; null = your own shelf (else every shelf)
+  who: new Set(),    // who's coming (empty: just a number of players)
+  guests: 0,         // others coming who aren't in the app
+  at: '',            // whose place: a library key, 'all' = every shelf, '' = worked out from who's coming
   campaigns: true,   // include campaign / legacy games
   style: '',         // '' | 'coop' | 'pvp'
   kinds: new Set(),  // kind letters (any of them)
@@ -39,13 +43,43 @@ function _gpLoad() {
   try {
     const saved = JSON.parse(localStorage.getItem('bgl-tonight') || 'null') || {};
     // (it used to keep who was playing: count them)
-    n = Number(saved.count) || ((Array.isArray(saved.players) ? saved.players.length : 0) + (Number(saved.guests) || 0));
+    n = Number(saved.count) || 0;
+    if (Array.isArray(saved.who)) _gp.who = new Set(saved.who.map(x => NAME_MAP[x] || x));
+    _gp.guests = Math.max(0, Number(saved.guests) || 0);
+    _gp.at = typeof saved.at === 'string' ? saved.at : '';
   } catch (_) {}
   _gp.count = Math.min(10, Math.max(1, n || 4));
 }
 
 function _gpSave() {
-  try { localStorage.setItem('bgl-tonight', JSON.stringify({ count: _gp.count })); } catch (_) {}
+  try { localStorage.setItem('bgl-tonight', JSON.stringify({ count: _gp.count, who: [..._gp.who], guests: _gp.guests, at: _gp.at })); } catch (_) {}
+}
+
+// How many are playing: who's coming and their guests, else the number picked.
+function _gpN() {
+  return _gp.who.size ? Math.max(1, _gp.who.size + _gp.guests) : _gp.count;
+}
+
+// The people to offer under "Who's coming": you, then who you play with most
+// (the last two years count most); everyone else is in the "More…" list.
+function _gpPeople() {
+  const me = _gbPlayer();
+  const since = new Date(Date.now() - 730 * 86400000).toISOString().slice(0, 10);
+  const total = {}, withMe = {};
+  for (const id in PLAY_HISTORY) {
+    for (const p of PLAY_HISTORY[id]) {
+      const names = (p.sc || []).map(s => s && s.n).filter(Boolean);
+      const w = p.date >= since ? 1 : 0.25;
+      for (const n of names) total[n] = (total[n] || 0) + w;
+      if (me && names.includes(me)) for (const n of names) if (n !== me) withMe[n] = (withMe[n] || 0) + w;
+    }
+  }
+  const rank = me && Object.keys(withMe).length ? withMe : total;
+  const top = Object.keys(rank).filter(n => n !== me).sort((a, b) => rank[b] - rank[a]).slice(0, 7);
+  return {
+    top: (me ? [me] : []).concat(top),
+    all: Object.keys(total).filter(n => total[n] >= 1.5 && n !== me).sort((a, b) => a.localeCompare(b)),
+  };
 }
 
 // When each game was last played, and which ones you have played.
@@ -76,13 +110,50 @@ function _gpAgo(days) {
   return `${y} year${y !== 1 ? 's' : ''} ago`;
 }
 
-function _gpActiveLibs(libs) {
-  if (_gp.libs) return libs.filter(l => _gp.libs.has(l.key));
-  // By default your own shelf, if you have one; otherwise every shelf.
+// Whose place it is, unless picked: yours when you're coming (or nobody's
+// been picked), else the first one coming who has a shelf here.
+function _gpHost(libs) {
+  const shelfOf = (name) => {
+    const canon = typeof _origCanon === 'function' ? _origCanon(name) : name;
+    return libs.find(l => GP_LIB_OWNER[l.key] === canon);
+  };
   const me = _gbPlayer();
-  const canon = me && typeof _origCanon === 'function' ? _origCanon(me) : me;
-  const own = libs.filter(l => GP_LIB_OWNER[l.key] === canon);
-  return own.length ? own : libs;
+  if (me && (!_gp.who.size || _gp.who.has(me)) && shelfOf(me)) return shelfOf(me).key;
+  for (const n of _gp.who) if (shelfOf(n)) return shelfOf(n).key;
+  return me && shelfOf(me) ? shelfOf(me).key : 'all';
+}
+
+function _gpActiveLibs(libs) {
+  const at = _gp.at && (_gp.at === 'all' || libs.some(l => l.key === _gp.at)) ? _gp.at : _gpHost(libs);
+  return at === 'all' ? libs : libs.filter(l => l.key === at);
+}
+
+// How much one player would enjoy a game, -1..1: their rating when they've
+// rated it, else how well it matches their taste (the best two of their
+// mechanics it has, less a little for a weight far from what they play), up
+// a little when they keep playing it or it's a favourite.
+function _gpPersonFit(t, id, g) {
+  if (!t) return { f: 0, m: 0, n: 0 };
+  const n = t.counts[id] || 0;
+  const r = t.ratings[id];
+  if (r) return { f: Math.max(-1, Math.min(1, (r - 6.5) / 2.5)), r, m: 0, n };
+  let f = 0, m = 0;
+  if (t.mech) {
+    const ms = [...bggMechanics(id)].map(x => BGG_MECHANICS[x]).filter(x => t.mech.has(x)).map(x => t.mech.get(x)).sort((a, b) => b - a);
+    m = ((ms[0] || 0) + (ms[1] || 0)) / 2;
+    f = 0.9 * m - 0.25;
+    const w = Number(g.complexity) || 0;
+    if (w && t.weight) f -= Math.min(Math.abs(w - t.weight), 2) / 2 * 0.25;
+  }
+  if (n) f += Math.min(0.3, 0.1 * Math.log2(1 + n));
+  if (t.favs.has(String(id))) f += 0.5;
+  return { f: Math.max(-1, Math.min(1, f)), m, n };
+}
+
+const _gpFirst = (name) => String(name).split(/\s+/)[0];
+function _gpNames(list) {
+  const names = list.map(_gpFirst);
+  return names.length <= 2 ? names.join(' & ') : `${names.slice(0, 2).join(', ')} +${names.length - 2}`;
 }
 
 // Co-op or competitive: how the group actually plays it, else BGG, else the shelf's tags.
@@ -122,7 +193,9 @@ function _gpVotes() {
 }
 
 function _gpSuggest(idx, libs) {
-  const n = _gp.count;
+  const n = _gpN();
+  const who = [..._gp.who];
+  const tastes = who.map(name => [name, typeof playerTaste === 'function' ? playerTaste(name) : null]);
   const active = _gpActiveLibs(libs);
   const ids = new Set();
   active.forEach(l => l.ids.forEach(id => ids.add(id)));
@@ -163,11 +236,42 @@ function _gpSuggest(idx, libs) {
     } else {
       score += 8;
     }
+    const bgg = Number(g.bggRating) || 0;
+    if (who.length) {
+      // Everyone at the table: how much each would enjoy it (the least happy
+      // one counts extra), and how long since any of them played it.
+      const fits = tastes.map(([name, t]) => ({ name, ..._gpPersonFit(t, id, g) }));
+      const mean = fits.reduce((a, x) => a + x.f, 0) / fits.length;
+      const low = Math.min(...fits.map(x => x.f));
+      score += 30 * mean + 12 * low + (bgg ? (bgg - 7) * 3 : 0);
+      const loves = fits.filter(x => x.r >= 8).sort((a, b) => b.r - a.r);
+      const dislikes = fits.filter(x => x.r && x.r <= 5.5);
+      // their kind of game, for those who haven't played it; what they play a lot, for the rest
+      const suits = fits.filter(x => !x.r && !x.n && x.m >= 0.7);
+      const regulars = fits.filter(x => !x.r && x.n >= 5).sort((a, b) => b.n - a.n);
+      if (loves.length) why.push({ t: `&#9733; ${loves.slice(0, 3).map(x => `${_escapeHtml(_gpFirst(x.name))} ${x.r}`).join(' · ')}`, k: 'good' });
+      if (dislikes.length) why.push({ t: `${dislikes.map(x => `${_escapeHtml(_gpFirst(x.name))} &#9733; ${x.r}`).join(' · ')}`, k: 'warn' });
+      if (suits.length) why.push({ t: suits.length === fits.length && fits.length > 1 ? 'Everyone\'s kind of game' : `${_escapeHtml(_gpNames(suits.map(x => x.name)))}'s kind of game`, k: 'ok' });
+      if (regulars.length) why.push({ t: regulars.slice(0, 2).map(x => `${_escapeHtml(_gpFirst(x.name))}: ${x.n} plays`).join(' · '), k: 'ok' });
+      const lastAny = tastes.map(([, t]) => t && t.last[id]).filter(Boolean).sort().pop();
+      const newTo = fits.filter(x => !x.n).map(x => x.name);
+      if (!lastAny) {
+        score += 8;
+        why.push({ t: who.length > 1 ? 'New to all of you' : 'New to you', k: 'new' });
+      } else {
+        const days = _gpDaysSince(lastAny);
+        if (days < 14) { score -= 12; why.push({ t: `Played ${_gpAgo(days)}`, k: 'warn' }); }
+        else if (days < 30) score -= 5;
+        else if (days > 365) { score += 12; why.push({ t: `Not played in ${_gpAgo(days).replace(' ago', '')}`, k: 'new' }); }
+        else if (days > 180) { score += 9; why.push({ t: `Not played in ${_gpAgo(days).replace(' ago', '')}`, k: 'new' }); }
+        else if (days > 90) score += 5;
+        if (newTo.length) { score += 3; why.push({ t: `New to ${_escapeHtml(_gpNames(newTo))}`, k: 'new' }); }
+      }
+    }
     // The group's ratings, pulled towards BGG's while only a few of you have
     // rated it (one 10 shouldn't top the list)
-    const group = getCommunityRating(id);
-    const bgg = Number(g.bggRating) || 0;
-    if (group) {
+    const group = who.length ? null : getCommunityRating(id);
+    if (who.length) { /* scored above */ } else if (group) {
       const blended = (group.avg * group.count + (bgg || 7) * 2) / (group.count + 2);
       score += (blended - 5) * 6;
       why.push({ t: `&#9733; ${group.avg.toFixed(1)} from ${group.count} of you`, k: group.avg >= 7.5 ? 'good' : group.avg < 6 ? 'warn' : '' });
@@ -177,7 +281,8 @@ function _gpSuggest(idx, libs) {
     }
     // Freshness
     const last = idx.lastPlayed[id];
-    if (!last) { score += 6; why.push({ t: 'Never played', k: 'new' }); }
+    if (who.length) { /* scored above, for the people coming */ }
+    else if (!last) { score += 6; why.push({ t: 'Never played', k: 'new' }); }
     else {
       const days = _gpDaysSince(last);
       if (days < 14) { score -= 10; why.push({ t: `Played ${_gpAgo(days)}`, k: 'warn' }); }
@@ -186,7 +291,7 @@ function _gpSuggest(idx, libs) {
       else if (days > 60) score += 4;
     }
     // Others have played it, you haven't
-    if (last && _gbPlayer() && !idx.mine.has(Number(id))) {
+    if (!who.length && last && _gbPlayer() && !idx.mine.has(Number(id))) {
       score += 4;
       why.push({ t: 'New to you', k: 'new' });
     }
@@ -196,7 +301,7 @@ function _gpSuggest(idx, libs) {
       why.push({ t: `${votes[id]} Board South vote${votes[id] !== 1 ? 's' : ''}`, k: 'ok' });
     }
     if (coop && !_gp.style) why.push({ t: 'Co-op', k: '' });
-    score += (bgg - 7) * 2;
+    if (!who.length) score += (bgg - 7) * 2;
     const owners = libs.filter(l => l.ids.has(Number(id))).map(l => l.label);
     out.push({ g, score, why, owners });
   }
@@ -218,14 +323,27 @@ function wireTonightTab(container) {
   if (!panel || !results) return;
   const idx = _gpIndex();
   const libs = _gbLibraries();
+  const people = _gpPeople();
 
   const renderPanel = () => {
-    const active = new Set(_gpActiveLibs(libs).map(l => l.key));
+    const active = _gpActiveLibs(libs).map(l => l.key);
+    const atNow = active.length > 1 ? 'all' : active[0];
     const row = (label, html) => `<div class="gb-row"><span class="gb-label">${label}</span><div class="gb-chips">${html}</div></div>`;
-    const n = _gp.count;
-    const moreOn = _gp.kinds.size + _gp.mechs.size + _gp.only.size + (_gp.campaigns ? 0 : 1) + (_gp.libs ? 1 : 0);
+    const n = _gpN();
+    const moreOn = _gp.kinds.size + _gp.mechs.size + _gp.only.size + (_gp.campaigns ? 0 : 1);
+    const esc = _escapeHtml;
+    const whoChips = [...new Set([...people.top, ..._gp.who])].map(name =>
+      `<button type="button" class="gb-chip${_gp.who.has(name) ? ' on' : ''}" data-gb="who" data-v="${esc(name)}" aria-pressed="${_gp.who.has(name)}">${esc(name)}</button>`).join('');
+    const others = people.all.filter(x => !people.top.includes(x) && !_gp.who.has(x));
+    const whoMore = others.length ? `<select class="gb-sort" id="gp-who-more" aria-label="Someone else"><option value="">More&hellip;</option>${others.map(x => `<option value="${esc(x)}">${esc(x)}</option>`).join('')}</select>` : '';
+    const countRow = _gp.who.size
+      ? row('Players', `<span class="gp-n">${n} player${n !== 1 ? 's' : ''}</span>
+          <span class="gp-guests"><button type="button" class="gb-chip" data-gb="guests" data-v="-1"${_gp.guests ? '' : ' disabled'} aria-label="One guest fewer">&minus;</button><span>${_gp.guests} guest${_gp.guests !== 1 ? 's' : ''}</span><button type="button" class="gb-chip" data-gb="guests" data-v="1" aria-label="One more guest">+</button></span>`)
+      : row('Players', _gbChips('count', GP_COUNTS, v => _gp.count === Number(v)));
     panel.innerHTML = [
-      row('Players', _gbChips('count', GP_COUNTS, v => _gp.count === Number(v))),
+      row('Coming', whoChips + whoMore + (_gp.who.size ? '<button type="button" class="gp-auto" id="gp-who-clear">clear</button>' : '')),
+      countRow,
+      row('At', _gbChips('at', libs.map(l => [l.key, `${esc(l.label)}&rsquo;s`, `Games in ${esc(l.label)}'s library`]).concat(libs.length > 1 ? [['all', 'Any shelf', 'Every shelf here']] : []), v => v === atNow)),
       row('Style', _gbChips('style', GP_STYLES, v => _gp.style === v)),
       row('Time', _gbChips('time', GP_TIMES, v => _gp.time === Number(v))),
       row('Weight', _gbChips('weights', GB_WEIGHTS, v => _gp.weights.has(v))),
@@ -234,8 +352,6 @@ function wireTonightTab(container) {
       row('Only', _gbChips('only', [['best', `Best at ${n}`, `BGG voters say it's best with ${n}`], ['new', 'Never played'], ['stale', 'Not in 6 months', 'Not played in the last 6 months (or never)'], ['fav', '&#9733; 8+ from you', 'Rated 8 or more by the group']], v => _gp.only.has(v))),
       row('Kind', _gbChips('kinds', GP_KINDS, v => _gp.kinds.has(v))),
       row('Mechanic', mechanicChipsHtml('mechs', _gp.mechs)),
-      row('Shelves', _gbChips('libs', libs.map(l => [l.key, l.label, `Games in ${l.label}'s library`]), v => active.has(v))
-        + (_gp.libs ? '<button type="button" class="gp-auto" id="gp-auto">reset</button>' : '')),
       row('Include', `<button type="button" class="gb-chip${_gp.campaigns ? ' on' : ''}" id="gp-campaigns" aria-pressed="${_gp.campaigns}" title="Campaign and legacy games">Campaign games</button>`),
       `</details>`,
     ].join('');
@@ -244,7 +360,7 @@ function wireTonightTab(container) {
 
   const renderResults = (keepPage) => {
     if (!keepPage) _gp.shown = 8;
-    const n = _gp.count;
+    const n = _gpN();
     const list = _gpSuggest(idx, libs);
     const clear = _gpFilterCount() ? '<button type="button" class="gp-auto" id="gp-clear">clear filters</button>' : '';
     if (!list.length) {
@@ -265,7 +381,7 @@ function wireTonightTab(container) {
         <div class="stats-game-info">
           <div class="stats-game-name">${_escapeHtml(s.g.name)}</div>
           <div class="stats-game-detail">${[gameTimeText(s.g) && _escapeHtml(gameTimeText(s.g)), Number(s.g.complexity) > 0 && `weight ${Number(s.g.complexity).toFixed(1)}`, s.owners.length && _escapeHtml(s.owners.join(', '))].filter(Boolean).join(' &middot; ')}</div>
-          <div class="gp-why">${s.why.map(w => `<span class="gp-tag${w.k ? ' ' + w.k : ''}">${w.t}</span>`).join('')}</div>
+          <div class="gp-why">${s.why.slice(0, 6).map(w => `<span class="gp-tag${w.k ? ' ' + w.k : ''}">${w.t}</span>`).join('')}</div>
         </div>
       </div>`).join('')}
       ${list.length > page.length ? `<button type="button" class="gb-more" id="gp-more">Show more (${list.length - page.length} left)</button>` : ''}`;
@@ -309,8 +425,19 @@ function wireTonightTab(container) {
     if (t.dataset.gb === 'count') {
       _gp.count = Number(t.dataset.v);
       _gpSave();
-    } else if (t.id === 'gp-auto') {
-      _gp.libs = null;
+    } else if (t.dataset.gb === 'who') {
+      if (_gp.who.has(t.dataset.v)) _gp.who.delete(t.dataset.v); else _gp.who.add(t.dataset.v);
+      if (!_gp.who.size) _gp.guests = 0;
+      _gpSave();
+    } else if (t.id === 'gp-who-clear') {
+      _gp.who.clear(); _gp.guests = 0;
+      _gpSave();
+    } else if (t.dataset.gb === 'guests') {
+      _gp.guests = Math.max(0, Math.min(9, _gp.guests + Number(t.dataset.v)));
+      _gpSave();
+    } else if (t.dataset.gb === 'at') {
+      _gp.at = t.dataset.v;
+      _gpSave();
     } else if (t.id === 'gp-campaigns') {
       _gp.campaigns = !_gp.campaigns;
     } else if (t.dataset.gb === 'time') {
@@ -322,14 +449,14 @@ function wireTonightTab(container) {
     } else if (t.dataset.gb === 'kinds' || t.dataset.gb === 'only' || t.dataset.gb === 'mechs') {
       const set = _gp[t.dataset.gb];
       if (set.has(t.dataset.v)) set.delete(t.dataset.v); else set.add(t.dataset.v);
-    } else if (t.dataset.gb === 'libs') {
-      // First manual pick starts from what was shown, then toggles.
-      if (!_gp.libs) _gp.libs = new Set(_gpActiveLibs(libs).map(l => l.key));
-      if (_gp.libs.has(t.dataset.v)) _gp.libs.delete(t.dataset.v); else _gp.libs.add(t.dataset.v);
     } else return;
     refresh();
   });
   panel.addEventListener('change', (e) => {
+    if (e.target.id === 'gp-who-more') {
+      if (e.target.value) { _gp.who.add(e.target.value); _gpSave(); refresh(); }
+      return;
+    }
     const sel = e.target.closest('[data-mech-more="mechs"]');
     if (!sel || !sel.value) return;
     _gp.mechs.add(sel.value);
