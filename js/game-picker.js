@@ -209,12 +209,15 @@ function buildTonightTabHtml() {
   _gpLoad();
   return `
       <div class="stats-section gp">
+        <button type="button" class="gp-first" id="gp-first"><span aria-hidden="true">&#9757;&#65039;</span> Who goes first?</button>
         <div class="gp-panel" id="gp-panel"></div>
         <div id="gp-results"></div>
       </div>`;
 }
 
 function wireTonightTab(container) {
+  const first = container.querySelector('#gp-first');
+  if (first && typeof openFingerChooser === 'function') first.addEventListener('click', openFingerChooser);
   const panel = container.querySelector('#gp-panel');
   const results = container.querySelector('#gp-results');
   if (!panel || !results) return;
