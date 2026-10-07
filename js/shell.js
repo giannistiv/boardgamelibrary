@@ -832,6 +832,7 @@ function openModal(game) {
   wireGameNews(content);
   if (roveHtml) wireRoveCampaign(content);
   if (leviathanHtml) wireLeviathanWilds(content);
+  if (Number(game.bggId) === SKY_TEAM_BGGID) wireSkyTeam(content);
   updateFavButton(game.bggId);
   wireFavButton();
 }

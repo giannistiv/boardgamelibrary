@@ -80,25 +80,67 @@ function _skyTeamCompleted(plays) {
   }
   return done;
 }
+// Where each airport's label sits on the map, so neighbours don't collide.
+const SKY_TEAM_LABEL = { YUL: 'top', LGA: 'bottom', ATL: 'left', TGU: 'left', GIG: 'right', KEF: 'right', TER: 'right',
+  HND: 'left', KUL: 'left', PBH: 'top', LHR: 'left', CDG: 'bottom', DUS: 'top', PRG: 'right', OSL: 'right' };
+
+// The flight log on a world map (data/sky-team-map.js, Europe magnified in
+// the corner): each airport lit in the colour of the hardest landing there,
+// with a tick per flight at that airport. Tap one to see its flights, which
+// light up in the log below, numbered in the logbook's order.
+function _skyTeamMapHtml(flights) {
+  if (typeof SKY_TEAM_MAP === 'undefined') return '';
+  const M = SKY_TEAM_MAP;
+  const byCode = {};
+  flights.forEach(f => { (byCode[f.code] = byCode[f.code] || []).push(f); });
+  const pct = (v, of) => Math.round(v / of * 10000) / 100;
+  const ins = M.inset;
+  const markers = Object.entries(byCode).map(([code, list]) => {
+    const p = M.pos[code];
+    if (!p) return '';
+    const landed = list.filter(f => f.done);
+    const top = landed.length ? landed[landed.length - 1] : null;
+    const onlyExp = list.every(f => f.exp);
+    const ticks = list.map(f => `<i class="${f.done ? 'on' : ''}" style="--d:${SKY_TEAM_DIFFS[f.diff].color}"></i>`).join('');
+    const title = `${code} · ${list[0].name}: ${list.map(f => `#${f.n} ${SKY_TEAM_DIFFS[f.diff].label}${f.done ? ' ✓' : ''}`).join(', ')}`;
+    return `<button type="button" class="sky-ap lab-${SKY_TEAM_LABEL[code] || 'right'}${landed.length ? ' landed' : ''}${onlyExp ? ' exp' : ''}" data-ap="${code}"
+        style="left:${pct(p[0], M.w)}%;top:${pct(p[1], M.h)}%${top ? `;--c:${SKY_TEAM_DIFFS[top.diff].color}` : ''}" title="${_escapeHtml(title)}" aria-label="${_escapeHtml(title)}">
+        <span class="sky-dot"></span><span class="sky-lab">${code}<span class="sky-ticks">${ticks}</span></span>
+      </button>`;
+  }).join('');
+  const f = ins.from;
+  return `<div class="sky-map">
+      <svg viewBox="0 0 ${M.w} ${M.h}" preserveAspectRatio="none" aria-hidden="true">
+        <path class="sky-land" d="${M.land}"/>
+        <rect class="sky-from" x="${f.x}" y="${f.y}" width="${f.w}" height="${f.h}" rx="3"/>
+        <path class="sky-link" d="M${f.x} ${f.y + f.h} L${ins.x + ins.w} ${ins.y} M${f.x} ${f.y} L${ins.x + ins.w} ${ins.y + ins.h}"/>
+        <rect class="sky-inset" x="${ins.x}" y="${ins.y}" width="${ins.w}" height="${ins.h}" rx="10"/>
+        <path class="sky-land" d="${ins.land}"/>
+        <text class="sky-inset-lab" x="${ins.x + 12}" y="${ins.y + 26}">Europe</text>
+      </svg>
+      ${markers}
+    </div>
+    <div class="sky-cap" aria-live="polite">Tap an airport to see its flights.</div>`;
+}
+
 function buildSkyTeamHtml(plays) {
   const done = _skyTeamCompleted(plays);
   const total = SKY_TEAM_AIRPORTS.length;
-  let doneCount = 0;
+  // every flight in the logbook's order, numbered
+  const flights = SKY_TEAM_AIRPORTS.map((a, i) => ({ ...a, code: a.code.toUpperCase(), n: i + 1, done: done.has(a.diff + '|' + a.code.toUpperCase()) }));
+  const doneCount = flights.filter(f => f.done).length;
+  const next = flights.find(f => !f.done && !f.exp) || flights.find(f => !f.done);
   const groups = { easy: [], medium: [], hard: [], extreme: [] };
-  for (const a of SKY_TEAM_AIRPORTS) {
-    const isDone = done.has(a.diff + '|' + a.code.toUpperCase());
-    if (isDone) doneCount++;
-    groups[a.diff].push({ ...a, done: isDone });
-  }
+  for (const f of flights) groups[f.diff].push(f);
   const rows = ['easy', 'medium', 'hard', 'extreme'].map(diff => {
     const list = groups[diff];
     if (!list.length) return '';
     const meta = SKY_TEAM_DIFFS[diff];
     const pills = list.map(a => {
-      const cls = 'st-pill' + (a.done ? ' done' : '') + (a.exp ? ' exp' : '');
+      const cls = 'st-pill' + (a.done ? ' done' : '') + (a.exp ? ' exp' : '') + (a === next ? ' next' : '');
       const tick = a.done ? '<span class="st-tick">&#10003;</span>' : '';
-      const title = `${a.code} · ${a.name}${a.exp ? ' (expansion)' : ''}${a.done ? ' — landed' : ''}`;
-      return `<span class="${cls}" style="--d:${meta.color}" title="${title}">${tick}${a.code}</span>`;
+      const title = `#${a.n} ${a.code} · ${a.name}${a.exp ? ' (expansion)' : ''}${a.done ? ' — landed' : a === next ? ' — next in the log' : ''}`;
+      return `<span class="${cls}" style="--d:${meta.color}" data-ap="${a.code}" title="${title}"><span class="st-num">${a.n}</span>${tick}${a.code}</span>`;
     }).join('');
     return `<div class="st-row">
         <span class="st-difflabel" style="--d:${meta.color}">${meta.label}</span>
@@ -111,9 +153,35 @@ function buildSkyTeamHtml(plays) {
           <span class="st-title">&#9992;&#65039; Airports Landed</span>
           <span class="st-count">${doneCount} / ${total}</span>
         </div>
+        ${_skyTeamMapHtml(flights)}
+        ${next ? `<div class="sky-next">Next in the log: <b>#${next.n} ${next.code}</b> ${_escapeHtml(next.name)}, ${SKY_TEAM_DIFFS[next.diff].label.toLowerCase()}</div>` : ''}
         ${rows}
-        <div class="st-legend"><span class="st-exp-dash"></span> dashed = expansion &middot; hover for full name</div>
+        <div class="st-legend"><span class="st-exp-dash"></span> dashed = expansion &middot; numbers follow the logbook</div>
       </div>`;
+}
+
+// Tapping an airport (on the map or in the log) shows its flights and lights them up in both.
+function wireSkyTeam(root) {
+  const box = root && root.querySelector('.sky-airports');
+  if (!box || box.dataset.wired) return;
+  box.dataset.wired = '1';
+  const cap = box.querySelector('.sky-cap');
+  box.addEventListener('click', (e) => {
+    const el = e.target.closest('[data-ap]');
+    if (!el) return;
+    const code = el.dataset.ap;
+    const again = el.classList.contains('sel') || el.classList.contains('hl');
+    box.querySelectorAll('.sel, .hl').forEach(x => x.classList.remove('sel', 'hl'));
+    if (again) { if (cap) cap.textContent = 'Tap an airport to see its flights.'; return; }
+    box.querySelectorAll(`.sky-ap[data-ap="${code}"]`).forEach(x => x.classList.add('sel'));
+    box.querySelectorAll(`.st-pill[data-ap="${code}"]`).forEach(x => x.classList.add('hl'));
+    const list = SKY_TEAM_AIRPORTS.map((a, i) => ({ ...a, n: i + 1 })).filter(a => a.code.toUpperCase() === code);
+    const landed = new Set([...box.querySelectorAll(`.st-pill.done[data-ap="${code}"]`)].map(x => x.querySelector('.st-num').textContent));
+    if (cap && list.length) {
+      cap.innerHTML = `<b>${code}</b> ${_escapeHtml(list[0].name)}: ` + list.map(a =>
+        `<span class="sky-f${landed.has(String(a.n)) ? ' on' : ''}" style="--d:${SKY_TEAM_DIFFS[a.diff].color}">#${a.n} ${SKY_TEAM_DIFFS[a.diff].label}${landed.has(String(a.n)) ? ' &#10003;' : ''}</span>`).join(' ');
+    }
+  });
 }
 // ── Slay the Spire: ascension ladder + the Heart ──
 // Not a linear campaign — instead you climb 10 ascension levels. An ascension

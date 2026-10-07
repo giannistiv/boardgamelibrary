@@ -913,6 +913,38 @@
   }
   .st-pill.exp{border-style:dashed}
   .st-pill:hover{transform:translateY(-1px)}
+  .st-num{font-size:0.56rem;font-weight:800;opacity:0.6;margin-right:0.1rem}
+  .st-pill.next{opacity:0.95;border-style:solid;border-width:1.5px;box-shadow:0 0 0 1px color-mix(in srgb, var(--d) 40%, transparent)}
+  .st-pill.hl{opacity:1;outline:2px solid #f0e6d3;outline-offset:1px}
+  /* the flight map */
+  .sky-map{position:relative;aspect-ratio:1000/594;margin:0 0 0.55rem;border-radius:10px;overflow:hidden;background:#0e1519;border:1px solid rgba(255,255,255,0.06)}
+  .sky-map svg{position:absolute;inset:0;width:100%;height:100%}
+  .sky-land{fill:#2a2b26;stroke:#3a3a33;stroke-width:0.8}
+  .sky-inset{fill:#0e1519;stroke:rgba(226,176,74,0.45);stroke-width:1.5}
+  .sky-from{fill:none;stroke:rgba(226,176,74,0.45);stroke-width:1.5}
+  .sky-link{stroke:rgba(226,176,74,0.3);stroke-width:1.2;stroke-dasharray:4 4;fill:none}
+  .sky-inset-lab{fill:rgba(240,230,211,0.45);font-size:17px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase}
+  .sky-ap{position:absolute;width:0;height:0;padding:0;border:0;background:none;cursor:pointer;color:#f0e6d3}
+  .sky-ap::before{content:'';position:absolute;left:-12px;top:-12px;width:24px;height:24px}
+  .sky-dot{position:absolute;left:-5px;top:-5px;width:10px;height:10px;border-radius:50%;box-sizing:border-box;border:1.5px solid rgba(240,230,211,0.45);background:#0e1519}
+  .sky-ap.exp .sky-dot{border-style:dashed}
+  .sky-ap.landed .sky-dot{background:var(--c);border-color:var(--c);box-shadow:0 0 0 3px color-mix(in srgb, var(--c) 30%, transparent),0 0 10px var(--c)}
+  .sky-ap.sel .sky-dot{outline:2px solid #fff;outline-offset:2px}
+  .sky-lab{position:absolute;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:0.6rem;font-weight:800;letter-spacing:0.03em;line-height:1;white-space:nowrap;text-shadow:0 1px 2px #000,0 0 4px #000;opacity:0.8}
+  .sky-ap.landed .sky-lab,.sky-ap.sel .sky-lab{opacity:1}
+  .lab-right .sky-lab{left:8px;top:-5px;align-items:flex-start}
+  .lab-left .sky-lab{right:8px;top:-5px;align-items:flex-end}
+  .lab-top .sky-lab{bottom:8px;left:50%;transform:translateX(-50%)}
+  .lab-bottom .sky-lab{top:8px;left:50%;transform:translateX(-50%);flex-direction:column-reverse}
+  .sky-ticks{display:flex;gap:2px}
+  .sky-ticks i{width:5px;height:5px;border-radius:50%;border:1px solid var(--d);box-sizing:border-box}
+  .sky-ticks i.on{background:var(--d)}
+  .sky-cap{font-size:0.72rem;color:var(--text-3);min-height:1.2em;margin-bottom:0.5rem;line-height:1.5}
+  .sky-cap b{color:var(--text)}
+  .sky-f{color:color-mix(in srgb, var(--d) 70%, #f0e6d3);opacity:0.6;margin-left:0.35rem;font-weight:700;white-space:nowrap}
+  .sky-f.on{opacity:1;color:var(--d)}
+  .sky-next{font-size:0.74rem;color:var(--text-2);margin-bottom:0.65rem}
+  .sky-next b{color:var(--accent)}
   .st-tick{font-size:0.74rem;font-weight:900;line-height:1}
   .st-legend{font-size:0.6rem;opacity:0.45;margin-top:0.55rem}
   .st-exp-dash{
