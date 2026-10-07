@@ -14,6 +14,8 @@ const LW_BGGID = 358737;
 const LW_LEVIATHANS = ['Sage', 'Sentinel', 'Storm', 'Watcher', 'Weaver', 'Avalanche', 'Hive', 'Collector', 'Fury',
   'Bloom', 'Forsaken', 'Tunneler', 'Twins', 'Vortex', 'Hunger', 'Deep', 'Tyrant'];
 const LW_NO_ART = new Set(['Tyrant']);
+// silhouettes redone since they first went out: a new ?v= so phones fetch them again
+const LW_SHADOW_REV = { Watcher: 2, Hive: 2 };
 
 // A player's journey: each won play heals the next leviathan.
 function _lwJourney(plays, name) {
@@ -48,7 +50,7 @@ function buildLeviathanWildsHtml(game, plays) {
     const slug = name.toLowerCase();
     const art = LW_NO_ART.has(name)
       ? `<div class="lw-mystery">?</div>`
-      : `<img src="images/leviathans/${slug}${h ? '' : '-shadow'}.jpg" alt="${h ? esc(name) : ''}" loading="lazy" decoding="async">`;
+      : `<img src="images/leviathans/${slug}${h ? '.jpg' : `-shadow.jpg${LW_SHADOW_REV[name] ? `?v=${LW_SHADOW_REV[name]}` : ''}`}" alt="${h ? esc(name) : ''}" loading="lazy" decoding="async">`;
     const sub = h
       ? `<div class="lw-sub healed">Healed ${fmt(h.date)} &middot; ${nth(h.tries)}${h.with.length ? ` &middot; with ${h.with.map(esc).join(', ')}` : ''}</div>`
       : next
