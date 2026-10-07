@@ -44,20 +44,25 @@ function buildLeviathanWildsHtml(game, plays) {
     return `${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][m - 1]} ${day}, ${y}`;
   };
   const nth = (t) => (t === 1 ? 'first try' : t === 2 ? 'second try' : t === 3 ? 'third try' : `try ${t}`);
+  // healed since this device last showed it: the silhouette fades into colour, once
+  const fresh = typeof pbFresh === 'function' ? pbFresh(`lw${LW_BGGID}`, LW_LEVIATHANS.slice(0, done)) : new Set();
+  const shadowSrc = (name) => `images/leviathans/${name.toLowerCase()}-shadow.jpg${LW_SHADOW_REV[name] ? `?v=${LW_SHADOW_REV[name]}` : ''}`;
   const slides = LW_LEVIATHANS.map((name, i) => {
     const h = j.healed[i];
     const next = i === done;
+    const isNew = fresh.has(name);
     const slug = name.toLowerCase();
     const art = LW_NO_ART.has(name)
       ? `<div class="lw-mystery">?</div>`
-      : `<img src="images/leviathans/${slug}${h ? '.jpg' : `-shadow.jpg${LW_SHADOW_REV[name] ? `?v=${LW_SHADOW_REV[name]}` : ''}`}" alt="${h ? esc(name) : ''}" loading="lazy" decoding="async">`;
+      : `<img src="${h ? `images/leviathans/${slug}.jpg` : shadowSrc(name)}" alt="${h ? esc(name) : ''}" loading="lazy" decoding="async">`
+        + (isNew ? `<img class="lw-unveil" src="${shadowSrc(name)}" alt="" decoding="async">` : '');
     const sub = h
       ? `<div class="lw-sub healed">Healed ${fmt(h.date)} &middot; ${nth(h.tries)}${h.with.length ? ` &middot; with ${h.with.map(esc).join(', ')}` : ''}</div>`
       : next
         ? `<div class="lw-sub next">Next up${j.tries ? ` &middot; ${j.tries} tr${j.tries === 1 ? 'y' : 'ies'} so far` : ''}</div>`
         : `<div class="lw-sub">${i === LW_LEVIATHANS.length - 1 ? 'The last leviathan' : 'Still ahead'}</div>`;
-    return `<div class="lw-slide${h ? ' healed' : ''}" data-lw="${i}">
-        <div class="lw-art">${art}${next ? '<span class="lw-flag">Next up</span>' : ''}</div>
+    return `<div class="lw-slide${h ? ' healed' : ''}${isNew ? ' lw-new' : ''}" data-lw="${i}">
+        <div class="lw-art">${art}${next ? '<span class="lw-flag">Next up</span>' : isNew ? '<span class="lw-flag lw-flag-new">Healed!</span>' : ''}</div>
         <div class="lw-cap"><div class="lw-name"><small>#${i + 1}</small>${esc(name)}</div>${sub}</div>
       </div>`;
   }).join('');

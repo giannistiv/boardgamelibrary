@@ -593,6 +593,7 @@ function gmFact(icon, text) {
 function openInfoModal(html, onClick) {
   _modalOpenedFromStats = _modalOpenedFromGames = _modalOpenedFromLeaderboard = false;
   _modalOpenedFromBoardSouth = _modalOpenedFromIlioupoli = _modalOpenedFromChallenges = false;
+  _applyGameAccent(null);   // the house gold, not the last game's colour
   const content = document.getElementById('modal-content');
   content.innerHTML = html;
   content.onclick = onClick || null;
@@ -603,6 +604,29 @@ function openInfoModal(html, onClick) {
   document.querySelector('.modal').scrollTop = 0;
   if (!(history.state && history.state.bgl === 'modal')) history.pushState(navEntry('modal'), '');
   return content;
+}
+
+// A game page in the game's own colour: its spine colour, as the shelf shows
+// it, made light enough to read on the dark page. Grey spines keep the gold.
+function gameAccent(hex) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || '').trim());
+  if (!m) return null;
+  const v = parseInt(m[1], 16);
+  const r = (v >> 16 & 255) / 255, g = (v >> 8 & 255) / 255, b = (v & 255) / 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+  if (d < 0.1) return null;
+  const l = (max + min) / 2, s = d / (1 - Math.abs(2 * l - 1));
+  const h = Math.round(((max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4) * 60 + 360) % 360);
+  const sat = Math.round(Math.min(0.8, Math.max(0.5, s)) * 100);
+  return { main: `hsl(${h} ${sat}% 64%)`, light: `hsl(${h} ${sat}% 76%)`, ink: `hsl(${h} 60% 10%)` };
+}
+function _applyGameAccent(game) {
+  const modal = document.getElementById('modal');
+  if (!modal) return;
+  const a = gameAccent(game && game.spineColor);
+  for (const [k, v] of [['--accent', a && a.main], ['--accent-2', a && a.light], ['--accent-ink', a && a.ink]]) {
+    if (v) modal.style.setProperty(k, v); else modal.style.removeProperty(k);
+  }
 }
 
 function openModal(game) {
@@ -616,6 +640,7 @@ function openModal(game) {
   const content = document.getElementById('modal-content');
   content.onclick = null;   // a trending game's page may have left its handler
 
+  _applyGameAccent(game);
   const c = game.spineColor || '#555';
   const fallbackBg = `linear-gradient(135deg, ${c}, ${adjustColor(c, -30)})`;
   if (!Array.isArray(game.categories) || !game.categories.length) game.categories = bggShelfCategories(game.bggId, game.players);

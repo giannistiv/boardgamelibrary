@@ -662,7 +662,7 @@
   .game-spine.box-xl .spine-text{font-size:0.7rem}
   .game-spine:hover{
     transform:translateY(-4px) scale(1.04);
-    box-shadow:0 4px 15px rgba(226,176,74,0.4),1px 0 3px rgba(0,0,0,0.4);
+    box-shadow:0 4px 15px color-mix(in srgb, var(--accent) 40%, transparent),1px 0 3px rgba(0,0,0,0.4);
     z-index:5;
   }
   .game-spine.other-side{
@@ -873,7 +873,7 @@
   .cp-title{font-weight:700;letter-spacing:0.02em;color:var(--text);font-size:0.88rem}
   .cp-stage{font-size:0.72rem;opacity:0.7;font-weight:600}
   .cp-bar-wrap{height:10px;background:rgba(255,255,255,0.08);border-radius:5px;overflow:hidden}
-  .cp-bar{height:100%;border-radius:5px;background:linear-gradient(90deg,#e2b04a,#f0c668);transition:width 0.5s ease}
+  .cp-bar{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--accent),var(--accent-2));transition:width 0.5s ease}
   .cp-bar.complete{background:linear-gradient(90deg,#3fa34d,#5bc46b)}
   .cp-foot{display:flex;align-items:center;justify-content:space-between;gap:0.6rem;margin-top:0.4rem}
   .cp-reached{font-size:0.72rem;font-weight:600;color:var(--accent)}
@@ -888,7 +888,7 @@
   .st-title{font-size:0.85rem;font-weight:700;color:var(--accent);letter-spacing:0.02em}
   .st-count{
     font-size:0.72rem;font-weight:700;padding:0.15rem 0.55rem;border-radius:20px;
-    background:rgba(226,176,74,0.15);color:var(--accent);flex-shrink:0;
+    background:color-mix(in srgb, var(--accent) 15%, transparent);color:var(--accent);flex-shrink:0;
   }
   .st-row{display:flex;align-items:flex-start;gap:0.55rem;margin-bottom:0.5rem}
   .st-row:last-of-type{margin-bottom:0}
@@ -920,9 +920,9 @@
   .sky-map{position:relative;aspect-ratio:1000/594;margin:0 0 0.55rem;border-radius:10px;overflow:hidden;background:#0e1519;border:1px solid rgba(255,255,255,0.06)}
   .sky-map svg{position:absolute;inset:0;width:100%;height:100%}
   .sky-land{fill:#2a2b26;stroke:#3a3a33;stroke-width:0.8}
-  .sky-inset{fill:#0e1519;stroke:rgba(226,176,74,0.45);stroke-width:1.5}
-  .sky-from{fill:none;stroke:rgba(226,176,74,0.45);stroke-width:1.5}
-  .sky-link{stroke:rgba(226,176,74,0.3);stroke-width:1.2;stroke-dasharray:4 4;fill:none}
+  .sky-inset{fill:#0e1519;stroke:color-mix(in srgb, var(--accent) 45%, transparent);stroke-width:1.5}
+  .sky-from{fill:none;stroke:color-mix(in srgb, var(--accent) 45%, transparent);stroke-width:1.5}
+  .sky-link{stroke:color-mix(in srgb, var(--accent) 30%, transparent);stroke-width:1.2;stroke-dasharray:4 4;fill:none}
   .sky-inset-lab{fill:rgba(240,230,211,0.45);font-size:17px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase}
   .sky-ap{position:absolute;width:0;height:0;padding:0;border:0;background:none;cursor:pointer;color:#f0e6d3}
   .sky-ap::before{content:'';position:absolute;left:-12px;top:-12px;width:24px;height:24px}
@@ -956,9 +956,9 @@
     margin-bottom:1.1rem;padding:0.8rem 0.9rem;border-radius:12px;
     background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.07);min-width:0;
   }
-  .pb-count{font-size:0.72rem;font-weight:700;padding:0.15rem 0.55rem;border-radius:20px;background:rgba(226,176,74,0.15);color:var(--accent);flex-shrink:0}
+  .pb-count{font-size:0.72rem;font-weight:700;padding:0.15rem 0.55rem;border-radius:20px;background:color-mix(in srgb, var(--accent) 15%, transparent);color:var(--accent);flex-shrink:0}
   .pb-bar{height:8px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden;margin:-0.2rem 0 0.75rem}
-  .pb-bar span{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,#e2b04a,#f0c668)}
+  .pb-bar span{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent),var(--accent-2))}
   .pb-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:0.4rem;margin-bottom:0.8rem}
   .pb-stat{display:flex;flex-direction:column;gap:0.1rem;padding:0.45rem 0.55rem;border-radius:9px;background:rgba(255,255,255,0.04);min-width:0}
   .pb-stat b{font-size:1.05rem;font-weight:800;line-height:1.15}
@@ -977,7 +977,8 @@
   .pb-won1{background:rgba(91,196,107,0.32);border-color:rgba(91,196,107,0.65);color:#d9f5dd}
   .pb-won{background:rgba(91,196,107,0.16);border-color:rgba(91,196,107,0.4);color:#a9e2b1}
   .pb-lost{background:rgba(192,80,77,0.18);border-color:rgba(192,80,77,0.5);color:#f0b3b1}
-  .pb-next{border:1.5px dashed var(--accent);color:var(--accent);background:rgba(226,176,74,0.1)}
+  /* next: a light dashed outline, whatever the game's colour (a red game's red would read as a loss) */
+  .pb-next{border:1.5px dashed #f0e6d3;color:#f0e6d3;background:rgba(240,230,211,0.08)}
   .pb-legend{display:flex;flex-wrap:wrap;gap:0.35rem 0.8rem;margin-top:0.65rem;font-size:0.64rem;opacity:0.7}
   .pb-legend span{display:inline-flex;align-items:center;gap:0.3rem}
   .pb-legend .pb-cell{width:12px;height:12px;border-radius:3px;display:inline-block}
@@ -1016,13 +1017,13 @@
     display:inline-flex;align-items:center;justify-content:center;gap:0.1rem;
     min-width:2.1rem;font-size:0.72rem;font-weight:800;letter-spacing:0.01em;
     padding:0.3rem 0.45rem;border-radius:8px;cursor:default;
-    border:1px solid rgba(226,176,74,0.4);color:rgba(240,230,211,0.55);
-    background:rgba(226,176,74,0.06);opacity:0.6;transition:transform 0.12s ease;
+    border:1px solid color-mix(in srgb, var(--accent) 40%, transparent);color:rgba(240,230,211,0.55);
+    background:color-mix(in srgb, var(--accent) 6%, transparent);opacity:0.6;transition:transform 0.12s ease;
   }
   .sts-rung.done{
     opacity:1;color:#15151f;border-color:#e2b04a;
     background:linear-gradient(135deg,#e2b04a,#f0c668);
-    box-shadow:0 1px 6px rgba(226,176,74,0.35);
+    box-shadow:0 1px 6px color-mix(in srgb, var(--accent) 35%, transparent);
   }
   .sts-rung.peak{outline:2px solid #f0c668;outline-offset:1px}
   .sts-rung:hover{transform:translateY(-1px)}
@@ -1098,7 +1099,7 @@
   .rv-or-sm{font-size:0.6rem;color:var(--text-4);margin:0 0.15rem}
   .rv-quest{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:0.55rem 0.6rem;min-width:0}
   .rv-q-taken,.rv-q-done{border-color:var(--accent-line)}
-  .rv-q-done{background:linear-gradient(135deg,rgba(226,176,74,0.1),transparent 70%),var(--card)}
+  .rv-q-done{background:linear-gradient(135deg,color-mix(in srgb, var(--accent) 10%, transparent),transparent 70%),var(--card)}
   .rv-q-closed{opacity:0.45}
   .rv-q-waits,.rv-q-later{border-style:dashed}
   .rv-q-later .rv-qtitle{color:var(--text-2)}
@@ -1289,7 +1290,7 @@
   /* detail panel */
   .mc-detail{
     margin-bottom:0.7rem;padding:0.7rem 0.75rem;border-radius:10px;min-height:2.4rem;
-    background:rgba(226,176,74,0.05);border:1px solid rgba(226,176,74,0.16);
+    background:color-mix(in srgb, var(--accent) 5%, transparent);border:1px solid color-mix(in srgb, var(--accent) 16%, transparent);
   }
   .mc-detail-empty,.mc-vhint,.mc-vempty{font-size:0.68rem;opacity:0.55;font-style:italic}
   .mc-vhint{margin-top:0.5rem}
@@ -1324,7 +1325,7 @@
     background:transparent;border:1px solid transparent;transition:background 0.1s;
   }
   .mc-hrow:hover{background:rgba(255,255,255,0.05)}
-  .mc-hrow.sel{background:rgba(226,176,74,0.12);border-color:rgba(226,176,74,0.4)}
+  .mc-hrow.sel{background:color-mix(in srgb, var(--accent) 12%, transparent);border-color:color-mix(in srgb, var(--accent) 40%, transparent)}
   .mc-hname{font-size:0.74rem;font-weight:700;color:#f0e6d3;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .mc-cells{display:flex;gap:0.22rem;flex-shrink:0}
   .mc-cell{
@@ -1678,7 +1679,7 @@
   .import-last-play{font-size:0.8rem;opacity:0.7;margin-bottom:0.8rem}
   .import-last-play b{color:var(--accent);font-weight:600}
   .import-drop-zone{padding:1.2rem 1rem;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;}
-  .import-drop-zone:hover,.import-drop-zone.drag-over{border-color:var(--accent);background:rgba(226,176,74,0.06)}
+  .import-drop-zone:hover,.import-drop-zone.drag-over{border-color:var(--accent);background:color-mix(in srgb, var(--accent) 6%, transparent)}
   .import-drop-zone input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
   .import-drop-icon{font-size:1.6rem;margin-bottom:0.4rem;opacity:0.4}
 
@@ -1847,7 +1848,7 @@
   }
   .fav-picker-panel{
     background:var(--modal-bg, #1a1a1a);color:var(--text);
-    border:1px solid rgba(226,176,74,0.25);border-radius:14px;
+    border:1px solid color-mix(in srgb, var(--accent) 25%, transparent);border-radius:14px;
     width:min(560px, 100%);
     /* Lock the panel to a single height so the search bar always sits where
        the user first opened the modal, regardless of how many results
@@ -1912,7 +1913,7 @@
   .stats-player-row:hover{background:rgba(255,255,255,0.06)}
   .stats-player-avatar{
     width:36px;height:36px;border-radius:50%;
-    background:rgba(226,176,74,0.15);color:var(--accent);
+    background:color-mix(in srgb, var(--accent) 15%, transparent);color:var(--accent);
     display:flex;align-items:center;justify-content:center;
     font-size:0.9rem;font-weight:700;flex-shrink:0;
   }
@@ -1936,7 +1937,7 @@
   }
   .lb-tab:hover{opacity:0.95}
   .lb-tab.active{
-    background:rgba(226,176,74,0.18);color:var(--accent);opacity:1;
+    background:color-mix(in srgb, var(--accent) 18%, transparent);color:var(--accent);opacity:1;
     box-shadow:0 1px 6px rgba(0,0,0,0.25);
   }
 
@@ -1953,9 +1954,9 @@
   }
   .lb-podium-card:hover{background:rgba(255,255,255,0.08);transform:translateY(-2px)}
   .lb-podium-card.rank-1{
-    border:2px solid #e2b04a;background:rgba(226,176,74,0.10);
+    border:2px solid #e2b04a;background:color-mix(in srgb, var(--accent) 10%, transparent);
     padding:1.2rem 0.6rem 2.1rem;
-    box-shadow:0 0 20px rgba(226,176,74,0.18);
+    box-shadow:0 0 20px color-mix(in srgb, var(--accent) 18%, transparent);
   }
   .lb-podium-card.rank-2{border:1px solid #c0c0c0;padding-bottom:1.5rem}
   .lb-podium-card.rank-3{border:1px solid #cd7f32;padding-bottom:1rem}
@@ -1963,13 +1964,13 @@
   .lb-podium-card.rank-1 .lb-podium-medal{font-size:2.6rem}
   .lb-podium-avatar{
     width:46px;height:46px;border-radius:50%;margin:0 auto 0.5rem;
-    background:rgba(226,176,74,0.18);color:var(--accent);
+    background:color-mix(in srgb, var(--accent) 18%, transparent);color:var(--accent);
     display:flex;align-items:center;justify-content:center;
     font-size:1.2rem;font-weight:700;
   }
   .lb-podium-card.rank-1 .lb-podium-avatar{
     width:60px;height:60px;font-size:1.55rem;
-    background:rgba(226,176,74,0.28);
+    background:color-mix(in srgb, var(--accent) 28%, transparent);
   }
   .lb-podium-name{
     font-size:0.88rem;font-weight:600;margin-bottom:0.3rem;
@@ -1992,14 +1993,14 @@
   }
   .profile-back-btn{
     display:inline-flex;align-items:center;gap:0.4rem;
-    background:rgba(226,176,74,0.12);color:var(--accent);
-    border:1px solid rgba(226,176,74,0.35);
+    background:color-mix(in srgb, var(--accent) 12%, transparent);color:var(--accent);
+    border:1px solid color-mix(in srgb, var(--accent) 35%, transparent);
     padding:0.55rem 1rem;border-radius:8px;
     font-family:inherit;font-size:0.85rem;font-weight:600;
     cursor:pointer;margin-bottom:1rem;
     transition:background 0.15s;
   }
-  .profile-back-btn:hover{background:rgba(226,176,74,0.22)}
+  .profile-back-btn:hover{background:color-mix(in srgb, var(--accent) 22%, transparent)}
 
   /* Profile name editing (own profile) — tucked behind a corner settings cog */
   .profile-cog{
@@ -2014,7 +2015,7 @@
   .profile-edit-form.open{display:block}
   .profile-name-input{
     width:100%;box-sizing:border-box;padding:0.55rem 0.8rem;border-radius:10px;
-    background:rgba(255,255,255,0.06);border:1px solid rgba(226,176,74,0.45);
+    background:rgba(255,255,255,0.06);border:1px solid color-mix(in srgb, var(--accent) 45%, transparent);
     color:var(--text);font-family:inherit;font-size:1.05rem;text-align:center;
   }
   .profile-name-input:focus{outline:none;border-color:var(--accent)}
@@ -2041,7 +2042,7 @@
   /* ── Head-to-Head ── */
   .h2h-section{
     background:rgba(255,255,255,0.03);
-    border:1px solid rgba(226,176,74,0.18);
+    border:1px solid color-mix(in srgb, var(--accent) 18%, transparent);
     border-radius:12px;padding:1rem 1.1rem;margin-bottom:1.5rem;
   }
   .h2h-grid{
@@ -2147,9 +2148,9 @@
     background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
     color:rgba(240,230,211,0.6);cursor:pointer;transition:all 0.15s;
   }
-  .explore-tab:hover{border-color:rgba(226,176,74,0.4);color:rgba(240,230,211,0.85)}
+  .explore-tab:hover{border-color:color-mix(in srgb, var(--accent) 40%, transparent);color:rgba(240,230,211,0.85)}
   .explore-tab.active{
-    background:rgba(226,176,74,0.16);border-color:rgba(226,176,74,0.5);color:#f0c668;
+    background:color-mix(in srgb, var(--accent) 16%, transparent);border-color:color-mix(in srgb, var(--accent) 50%, transparent);color:#f0c668;
   }
 
   /* ── Explore → Games: search + filters ── */
@@ -2161,7 +2162,7 @@
     background:rgba(255,255,255,0.07);color:var(--text);
     font-family:inherit;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.15s;
   }
-  .gb-toggle:hover,.gb-toggle.open{border-color:rgba(226,176,74,0.5);color:#f0c668}
+  .gb-toggle:hover,.gb-toggle.open{border-color:color-mix(in srgb, var(--accent) 50%, transparent);color:#f0c668}
   .gb-badge{
     min-width:1.15rem;height:1.15rem;padding:0 0.3rem;border-radius:999px;
     display:inline-flex;align-items:center;justify-content:center;
@@ -2184,8 +2185,8 @@
     background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
     color:rgba(240,230,211,0.7);cursor:pointer;transition:all 0.12s;
   }
-  .gb-chip:hover{border-color:rgba(226,176,74,0.45);color:rgba(240,230,211,0.95)}
-  .gb-chip.on{background:rgba(226,176,74,0.18);border-color:rgba(226,176,74,0.6);color:#f0c668}
+  .gb-chip:hover{border-color:color-mix(in srgb, var(--accent) 45%, transparent);color:rgba(240,230,211,0.95)}
+  .gb-chip.on{background:color-mix(in srgb, var(--accent) 18%, transparent);border-color:color-mix(in srgb, var(--accent) 60%, transparent);color:var(--accent-2)}
   .gb-head{display:flex;align-items:center;justify-content:space-between;gap:0.5rem;margin:0.1rem 0 0.5rem}
   .gb-count{font-size:0.82rem;font-weight:700;color:var(--accent)}
   .gb-head-right{display:flex;align-items:center;gap:0.4rem}
@@ -2229,16 +2230,16 @@
   .gp-more-filters[open] > summary::after{transform:rotate(-135deg);margin:3px 0 0 0.1rem}
   .gp-more-n{font-size:0.66rem;font-weight:700;padding:0.05rem 0.45rem;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
   .gp-roll{
-    padding:0.38rem 0.85rem;border-radius:999px;border:1px solid rgba(226,176,74,0.55);
-    background:rgba(226,176,74,0.16);color:#f0c668;font-family:inherit;font-size:0.8rem;font-weight:700;cursor:pointer;
+    padding:0.38rem 0.85rem;border-radius:999px;border:1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+    background:color-mix(in srgb, var(--accent) 16%, transparent);color:#f0c668;font-family:inherit;font-size:0.8rem;font-weight:700;cursor:pointer;
   }
-  .gp-roll:hover:not(:disabled){background:rgba(226,176,74,0.3)}
+  .gp-roll:hover:not(:disabled){background:color-mix(in srgb, var(--accent) 30%, transparent)}
   .gp-roll:disabled{opacity:0.6;cursor:default}
   .gp-row{align-items:flex-start;transition:background 0.12s,box-shadow 0.12s}
   .gp-rank{flex:0 0 1.2rem;align-self:center;text-align:center;font-size:0.8rem;font-weight:800;opacity:0.4}
   .gp-row .stats-game-img{align-self:center}
-  .gp-row.gp-spin{background:rgba(226,176,74,0.16)}
-  .gp-row.gp-picked{background:rgba(226,176,74,0.2);box-shadow:inset 0 0 0 2px var(--accent)}
+  .gp-row.gp-spin{background:color-mix(in srgb, var(--accent) 16%, transparent)}
+  .gp-row.gp-picked{background:color-mix(in srgb, var(--accent) 20%, transparent);box-shadow:inset 0 0 0 2px var(--accent)}
   .gp-why{display:flex;flex-wrap:wrap;gap:0.25rem;margin-top:0.3rem}
   .gp-tag{
     font-size:0.64rem;font-weight:600;padding:0.08rem 0.45rem;border-radius:999px;
@@ -2260,7 +2261,7 @@
   .ch-year{opacity:0.55;color:var(--text-3);font-size:0.85rem;margin-top:0.3rem}
   .ch-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:0.9rem;margin-top:1rem}
   .ch-card{
-    --ch-a:#e2b04a; --ch-soft:rgba(226,176,74,0.16); --ch-bord:rgba(226,176,74,0.42);
+    --ch-a:#e2b04a; --ch-soft:color-mix(in srgb, var(--accent) 16%, transparent); --ch-bord:color-mix(in srgb, var(--accent) 42%, transparent);
     border-radius:14px;padding:1rem 1.05rem 0.7rem;cursor:pointer;
     background:linear-gradient(150deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015));
     border:1px solid rgba(255,255,255,0.09);
@@ -2413,7 +2414,7 @@
     color:var(--text);width:26px;height:26px;border-radius:7px;cursor:pointer;
     font-size:1rem;line-height:1;display:flex;align-items:center;justify-content:center;
   }
-  .hm-arrow:hover:not(:disabled){background:rgba(226,176,74,0.2);border-color:rgba(226,176,74,0.4)}
+  .hm-arrow:hover:not(:disabled){background:color-mix(in srgb, var(--accent) 20%, transparent);border-color:color-mix(in srgb, var(--accent) 40%, transparent)}
   .hm-arrow:disabled{opacity:0.3;cursor:default}
   .hm-year{font-weight:700;color:var(--accent);font-size:0.92rem;min-width:2.6em;text-align:center}
   .hm-stats{display:flex;flex-wrap:wrap;gap:0.4rem 1rem;font-size:0.78rem;opacity:0.75;margin-bottom:0.7rem}
@@ -2437,9 +2438,9 @@
   .hm-cell.hm-out{background:transparent}
   .hm-cell[data-date]{cursor:pointer}
   .hm-cell.hm-l0{background:rgba(255,255,255,0.05)}
-  .hm-cell.hm-l1{background:rgba(226,176,74,0.32)}
-  .hm-cell.hm-l2{background:rgba(226,176,74,0.55)}
-  .hm-cell.hm-l3{background:rgba(226,176,74,0.78)}
+  .hm-cell.hm-l1{background:color-mix(in srgb, var(--accent) 32%, transparent)}
+  .hm-cell.hm-l2{background:color-mix(in srgb, var(--accent) 55%, transparent)}
+  .hm-cell.hm-l3{background:color-mix(in srgb, var(--accent) 78%, transparent)}
   .hm-cell.hm-l4{background:#f0c668}
   .hm-cell.sel{outline:2px solid #fff;outline-offset:1px}
   .hm-cell.hm-today{box-shadow:0 0 0 1.5px var(--accent)}
@@ -2659,7 +2660,7 @@
   .rlg-arrow{
     position:absolute;top:50%;transform:translateY(-50%);z-index:3;
     width:28px;height:28px;border-radius:50%;
-    border:1px solid rgba(226,176,74,0.55);
+    border:1px solid color-mix(in srgb, var(--accent) 55%, transparent);
     font-size:1.15rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;
     opacity:0;pointer-events:none;transition:opacity 0.15s ease,background 0.15s ease;
   }
@@ -2669,10 +2670,10 @@
      :hover sticks after a tap, so gate it to fine/hover pointers; touch = swipe. */
   @media (hover: hover) and (pointer: fine){
     .rate-last-bar:hover .rlg-arrow:not(:disabled){opacity:0.95;pointer-events:auto}
-    .rlg-arrow:not(:disabled):hover{background:rgba(226,176,74,0.9);color:#1a1208}
+    .rlg-arrow:not(:disabled):hover{background:color-mix(in srgb, var(--accent) 90%, transparent);color:#1a1208}
   }
   .rate-last-cover{flex-shrink:0;width:46px;height:46px;overflow:hidden;background:rgba(0,0,0,0.25);cursor:pointer;transition:transform 0.12s ease,box-shadow 0.12s ease;border-radius:12px}
-  .rate-last-cover:hover,.rate-last-cover:focus-visible{transform:scale(1.06);box-shadow:0 0 0 2px rgba(226,176,74,0.6);outline:none}
+  .rate-last-cover:hover,.rate-last-cover:focus-visible{transform:scale(1.06);box-shadow:0 0 0 2px color-mix(in srgb, var(--accent) 60%, transparent);outline:none}
   .rate-last-cover-img{width:100%;height:100%;object-fit:cover;display:block}
   .rate-last-body{flex:1;min-width:0;padding-right:1.1rem}
   .rate-last-prompt{font-size:0.68rem;text-transform:uppercase;color:var(--accent);font-weight:700;letter-spacing:0.05em}
@@ -2687,7 +2688,7 @@
     cursor:pointer;
     transition:background 0.15s,opacity 0.15s}
   .rlg-submit:disabled{cursor:default}
-  .rlg-submit:not(:disabled):hover{background:rgba(226,176,74,0.32)}
+  .rlg-submit:not(:disabled):hover{background:color-mix(in srgb, var(--accent) 32%, transparent)}
   .rlg-skip{font:inherit;font-size:0.72rem;font-weight:600;padding:0.3rem 0.75rem;border-radius:999px;border:1px solid var(--line-2);background:transparent;color:var(--text-3);cursor:pointer;transition:color 0.15s,border-color 0.15s}
   .rlg-skip:hover:not(:disabled){color:var(--text);border-color:var(--line-3)}
   .rlg-skip:disabled{opacity:0.5;cursor:default}
@@ -2823,7 +2824,7 @@
   .ach-card{
     background:rgba(255,255,255,0.04);border-radius:10px;
     padding:0.85rem 0.5rem 0.6rem;text-align:center;
-    border:1px solid rgba(226,176,74,0.18);
+    border:1px solid color-mix(in srgb, var(--accent) 18%, transparent);
     transition:transform 0.15s, background 0.15s;
     display:flex;flex-direction:column;align-items:center;
   }
@@ -2836,7 +2837,7 @@
     -webkit-mask-size:contain;mask-size:contain;
     -webkit-mask-position:center;mask-position:center;
     -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
-    filter:drop-shadow(0 1px 4px rgba(226,176,74,0.25));
+    filter:drop-shadow(0 1px 4px color-mix(in srgb, var(--accent) 25%, transparent));
   }
   .ach-card.locked .ach-icon{background-color:rgba(240,230,211,0.28);filter:none;opacity:0.85}
   .ach-name{font-size:0.78rem;font-weight:600;color:var(--text);line-height:1.2;min-height:2.4em;display:flex;align-items:center;justify-content:center;text-align:center}
@@ -2845,9 +2846,9 @@
   .ach-desc{font-size:0.63rem;line-height:1.35;margin-top:0.3rem;opacity:0.7;text-align:center;color:var(--text)}
   .ach-card.locked .ach-desc{opacity:0.5}
   .ach-recent .ach-card{
-    border-color:rgba(226,176,74,0.45);
-    background:linear-gradient(135deg, rgba(226,176,74,0.10), rgba(255,255,255,0.04));
-    box-shadow:0 0 14px rgba(226,176,74,0.12);
+    border-color:color-mix(in srgb, var(--accent) 45%, transparent);
+    background:linear-gradient(135deg, color-mix(in srgb, var(--accent) 10%, transparent), rgba(255,255,255,0.04));
+    box-shadow:0 0 14px color-mix(in srgb, var(--accent) 12%, transparent);
   }
   .ach-credit{font-size:0.6rem;opacity:0.4;margin-top:0.7rem;text-align:center}
   .ach-credit a{color:inherit}
@@ -2864,7 +2865,7 @@
   .lb-rank{font-size:0.85rem;font-weight:700;min-width:1.8rem;text-align:center;opacity:0.7;font-variant-numeric:tabular-nums}
   .lb-avatar{
     width:32px;height:32px;border-radius:50%;
-    background:rgba(226,176,74,0.15);color:var(--accent);
+    background:color-mix(in srgb, var(--accent) 15%, transparent);color:var(--accent);
     display:flex;align-items:center;justify-content:center;
     font-size:0.85rem;font-weight:700;flex-shrink:0;
   }
@@ -2875,7 +2876,7 @@
   .lb-elo-block{display:flex;flex-direction:column;align-items:flex-end;gap:0.15rem;flex-shrink:0}
   .lb-prov-badge{
     display:inline-block;font-size:0.55rem;font-weight:700;
-    background:rgba(226,176,74,0.18);color:var(--accent);
+    background:color-mix(in srgb, var(--accent) 18%, transparent);color:var(--accent);
     padding:1px 5px;border-radius:4px;margin-left:0.4rem;letter-spacing:0.05em;
     vertical-align:middle;
   }
@@ -2888,7 +2889,7 @@
   .lb-rivalry{
     margin:0 auto 1.4rem;max-width:560px;
     padding:0.85rem 1rem;border-radius:12px;
-    background:linear-gradient(135deg, rgba(239,68,68,0.10), rgba(226,176,74,0.08));
+    background:linear-gradient(135deg, rgba(239,68,68,0.10), color-mix(in srgb, var(--accent) 8%, transparent));
     border:1px solid rgba(239,68,68,0.25);text-align:center;
   }
   .lb-rivalry-head{
@@ -2899,7 +2900,7 @@
     display:flex;align-items:center;justify-content:center;gap:0.7rem;
     font-size:1rem;font-weight:600;flex-wrap:wrap;
   }
-  .lb-rivalry-name{color:var(--accent);cursor:pointer;text-decoration:underline;text-decoration-color:rgba(226,176,74,0.3);text-underline-offset:3px}
+  .lb-rivalry-name{color:var(--accent);cursor:pointer;text-decoration:underline;text-decoration-color:color-mix(in srgb, var(--accent) 30%, transparent);text-underline-offset:3px}
   .lb-rivalry-name:hover{text-decoration-color:var(--accent)}
   .lb-rivalry-score{
     font-variant-numeric:tabular-nums;
@@ -2976,12 +2977,12 @@
     display:flex;gap:0.4rem;margin:0 0 1rem;justify-content:center;flex-wrap:wrap;
   }
   .bsv-lib-tab{
-    padding:0.32rem 0.85rem;border-radius:8px;border:1px solid rgba(226,176,74,0.35);
-    background:rgba(226,176,74,0.08);color:var(--accent);font-size:0.74rem;font-weight:600;
+    padding:0.32rem 0.85rem;border-radius:8px;border:1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+    background:color-mix(in srgb, var(--accent) 8%, transparent);color:var(--accent);font-size:0.74rem;font-weight:600;
     cursor:pointer;font-family:inherit;letter-spacing:0.02em;
     transition:background .15s,border-color .15s,color .15s;
   }
-  .bsv-lib-tab:hover{background:rgba(226,176,74,0.18)}
+  .bsv-lib-tab:hover{background:color-mix(in srgb, var(--accent) 18%, transparent)}
   .bsv-lib-tab.active{background:var(--accent);color:#1a1a2e;border-color:var(--accent)}
 
   /* ── Voting view ── */
@@ -3507,7 +3508,7 @@
   .lw-art{position:relative;height:clamp(230px,58vw,340px);border-radius:10px;background:#0b0907;display:flex;align-items:center;justify-content:center;overflow:hidden}
   .lw-art img{max-width:100%;max-height:100%;display:block}
   .lw-mystery{font:700 5rem/1 Georgia,serif;color:rgba(255,255,255,0.14)}
-  .lw-flag{position:absolute;top:0.55rem;left:0.55rem;font-size:0.66rem;font-weight:800;letter-spacing:0.04em;text-transform:uppercase;padding:0.2rem 0.55rem;border-radius:999px;background:rgba(226,176,74,0.22);color:var(--accent);border:1px solid rgba(226,176,74,0.5)}
+  .lw-flag{position:absolute;top:0.55rem;left:0.55rem;font-size:0.66rem;font-weight:800;letter-spacing:0.04em;text-transform:uppercase;padding:0.2rem 0.55rem;border-radius:999px;background:color-mix(in srgb, var(--accent) 22%, transparent);color:var(--accent);border:1px solid color-mix(in srgb, var(--accent) 50%, transparent)}
   .lw-cap{padding:0.6rem 0.15rem 0}
   .lw-name{font-size:1.05rem;font-weight:700}
   .lw-name small{font-size:0.72rem;font-weight:800;color:var(--text-3);margin-right:0.4rem}
@@ -3535,7 +3536,7 @@
   .pbq-won{fill:rgba(91,196,107,0.5)}
   .pbq-lost{fill:rgba(192,80,77,0.55)}
   .pbq-todo{fill:rgba(255,255,255,0.05)}
-  .pbq-next{fill:rgba(226,176,74,0.28)}
+  .pbq-next{fill:rgba(240,230,211,0.2)}
   .pbq.pb-sel{stroke:#f0e6d3;stroke-width:2.5}
   .pbq-ticks line{stroke:rgba(255,255,255,0.35);stroke-width:2}
   .pbq-hand{stroke:var(--accent);stroke-width:4;stroke-linecap:round}
@@ -3553,13 +3554,51 @@
   .pbm-stop{cursor:pointer}
   .pbm-stop circle{fill:#0b0d16;stroke:rgba(255,255,255,0.3);stroke-width:2}
   .pbm-won circle,.pbm-won1 circle{fill:var(--accent);stroke:var(--accent)}
-  .pbm-next circle{stroke:var(--accent);stroke-dasharray:4 3;stroke-width:2.5}
+  .pbm-next circle{stroke:#f0e6d3;stroke-dasharray:4 3;stroke-width:2.5}
   .pbm-stop.pb-sel circle{stroke:#fff;stroke-width:3}
   .pbm-n{font-size:15px;font-weight:800;text-anchor:middle;fill:#f0e6d3;pointer-events:none}
   .pbm-won .pbm-n,.pbm-won1 .pbm-n{fill:#1a1408}
   .pbm-name{font-size:17px;font-weight:700;text-anchor:middle;fill:rgba(240,230,211,0.55);pointer-events:none;paint-order:stroke;stroke:#0b0d16;stroke-width:4px}
   .pbm-won .pbm-name,.pbm-won1 .pbm-name,.pbm-next .pbm-name{fill:#f0e6d3}
   .pbm-rocket{font-size:30px;text-anchor:middle;pointer-events:none}
+  /* A game page in the game's own colour: shell.js sets --accent on #modal from
+     its spine colour; the tones that come from it are worked out here, at the modal */
+  #modal{--accent-soft:color-mix(in srgb, var(--accent) 13%, transparent);--accent-line:color-mix(in srgb, var(--accent) 42%, transparent)}
+  /* The Crew's voyage (progress-boards.js) */
+  .pb-crewmap .pbm-n{font-size:10.5px}
+  .pb-crewmap .pbm-stop circle{stroke-width:1.6}
+  .pb-crewmap .pbm-won circle{fill:rgba(91,196,107,0.55);stroke:rgba(91,196,107,0.85)}
+  .pb-crewmap .pbm-won1 circle{fill:rgba(91,196,107,0.9);stroke:rgba(91,196,107,0.9)}
+  .pb-crewmap .pbm-won .pbm-n,.pb-crewmap .pbm-won1 .pbm-n{fill:#0d1a10}
+  .pb-crewmap .pbm-lost circle{fill:rgba(192,80,77,0.5);stroke:rgba(192,80,77,0.85)}
+  .pb-crewmap .pbm-rocket{font-size:19px}
+  .pbc-earth circle{fill:#27618f}.pbc-earth path{fill:#4f9a5a}
+  .pbc-mars circle{fill:#c1532f}.pbc-mars .pbc-spot{fill:#8f3a20}
+  .pbc-jupiter circle{fill:#c99a6b}.pbc-jupiter path{stroke:#9c6b44;stroke-width:3;fill:none}.pbc-jupiter .pbc-spot{fill:#a8553a}
+  .pbc-saturn circle{fill:#d8bf86}.pbc-saturn .pbc-ring{fill:none;stroke:#b9a06a;stroke-width:3}
+  .pbc-neptune circle{fill:#3d67c9}.pbc-neptune path{stroke:#6f93e6;stroke-width:2.5;fill:none}
+  .pbc-nine circle{fill:#2b1f45}.pbc-nine .pbc-glow{fill:rgba(155,107,255,0.22)}
+  .pbc-lab{font-size:12px;font-weight:700;text-anchor:middle;fill:rgba(240,230,211,0.6)}
+  .pbc-lab.pbc-end{text-anchor:end}
+  /* What's new since this device last looked, animated once (pbFresh) */
+  @keyframes pbPop{0%{transform:scale(0.4);opacity:0}60%{transform:scale(1.18);opacity:1}100%{transform:scale(1)}}
+  @keyframes pbFill{0%{transform:scale(0.2);opacity:0}70%{transform:scale(1.06);opacity:1}100%{transform:scale(1)}}
+  @keyframes pbDraw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+  @keyframes pbFly{from{transform:translate(var(--dx),var(--dy))}to{transform:none}}
+  @keyframes pbFade{0%,30%{opacity:1}100%{opacity:0}}
+  @keyframes pbRing{0%{box-shadow:0 0 0 0 var(--c)}100%{box-shadow:0 0 0 14px transparent}}
+  .pb-cell.pb-new{animation:pbPop .8s .5s both}
+  .pbq.pb-new{animation:pbFill 1s .5s both;transform-box:view-box;transform-origin:50% 50%}
+  .pbm-stop.pb-new circle{animation:pbPop .8s 1.6s both;transform-box:fill-box;transform-origin:50% 50%}
+  .pbm-grow{stroke-dasharray:1;stroke-dashoffset:1;animation:pbDraw 1.4s .3s ease-in-out forwards}
+  .pbm-fly{animation:pbFly 1.5s .3s ease-in-out both}
+  .lw-unveil{position:absolute;inset:0;margin:auto;animation:pbFade 2.6s .4s ease-in forwards;pointer-events:none}
+  .lw-new .lw-art{animation:lwGlow 2.4s 1.2s ease-out both}
+  @keyframes lwGlow{0%{box-shadow:inset 0 0 0 0 transparent}40%{box-shadow:inset 0 0 0 3px #86d993}100%{box-shadow:inset 0 0 0 0 transparent}}
+  .lw-flag-new{background:rgba(91,196,107,0.25);color:#a8e8b2;border-color:rgba(91,196,107,0.6)}
+  .sky-ap.sky-new .sky-dot{animation:pbPop .8s .5s both,pbRing 1.2s 1.2s 3}
+  .st-pill.st-new{animation:pbPop .8s .8s both}
+  @media (prefers-reduced-motion:reduce){.pb-new,.pb-new circle,.pbm-grow,.pbm-fly,.lw-unveil,.lw-new .lw-art,.sky-new .sky-dot,.st-new{animation:none!important;stroke-dashoffset:0}.lw-unveil{display:none}}
   /* Best duo / team on a co-op game's page (duos.js) */
   .bt-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:baseline;column-gap:0.7rem;row-gap:0.3rem;padding:0.35rem 0;font-size:0.8rem}
   .bt-names{color:var(--text-2);min-width:0;overflow-wrap:anywhere}

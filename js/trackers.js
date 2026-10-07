@@ -103,7 +103,7 @@ function _skyTeamMapHtml(flights) {
     const onlyExp = list.every(f => f.exp);
     const ticks = list.map(f => `<i class="${f.done ? 'on' : ''}" style="--d:${SKY_TEAM_DIFFS[f.diff].color}"></i>`).join('');
     const title = `${code} · ${list[0].name}: ${list.map(f => `#${f.n} ${SKY_TEAM_DIFFS[f.diff].label}${f.done ? ' ✓' : ''}`).join(', ')}`;
-    return `<button type="button" class="sky-ap lab-${SKY_TEAM_LABEL[code] || 'right'}${landed.length ? ' landed' : ''}${onlyExp ? ' exp' : ''}" data-ap="${code}"
+    return `<button type="button" class="sky-ap lab-${SKY_TEAM_LABEL[code] || 'right'}${landed.length ? ' landed' : ''}${onlyExp ? ' exp' : ''}${list.some(f => f.fresh) ? ' sky-new' : ''}" data-ap="${code}"
         style="left:${pct(p[0], M.w)}%;top:${pct(p[1], M.h)}%${top ? `;--c:${SKY_TEAM_DIFFS[top.diff].color}` : ''}" title="${_escapeHtml(title)}" aria-label="${_escapeHtml(title)}">
         <span class="sky-dot"></span><span class="sky-lab">${code}<span class="sky-ticks">${ticks}</span></span>
       </button>`;
@@ -128,6 +128,9 @@ function buildSkyTeamHtml(plays) {
   const total = SKY_TEAM_AIRPORTS.length;
   // every flight in the logbook's order, numbered
   const flights = SKY_TEAM_AIRPORTS.map((a, i) => ({ ...a, code: a.code.toUpperCase(), n: i + 1, done: done.has(a.diff + '|' + a.code.toUpperCase()) }));
+  // landed since this device last showed the log: they light up, once
+  const fresh = typeof pbFresh === 'function' ? pbFresh(`sky${SKY_TEAM_BGGID}`, flights.filter(f => f.done).map(f => `${f.n}`)) : new Set();
+  flights.forEach(f => { f.fresh = fresh.has(`${f.n}`); });
   const doneCount = flights.filter(f => f.done).length;
   const next = flights.find(f => !f.done && !f.exp) || flights.find(f => !f.done);
   const groups = { easy: [], medium: [], hard: [], extreme: [] };
@@ -137,7 +140,7 @@ function buildSkyTeamHtml(plays) {
     if (!list.length) return '';
     const meta = SKY_TEAM_DIFFS[diff];
     const pills = list.map(a => {
-      const cls = 'st-pill' + (a.done ? ' done' : '') + (a.exp ? ' exp' : '') + (a === next ? ' next' : '');
+      const cls = 'st-pill' + (a.done ? ' done' : '') + (a.exp ? ' exp' : '') + (a === next ? ' next' : '') + (a.fresh ? ' st-new' : '');
       const tick = a.done ? '<span class="st-tick">&#10003;</span>' : '';
       const title = `#${a.n} ${a.code} · ${a.name}${a.exp ? ' (expansion)' : ''}${a.done ? ' — landed' : a === next ? ' — next in the log' : ''}`;
       return `<span class="${cls}" style="--d:${meta.color}" data-ap="${a.code}" title="${title}"><span class="st-num">${a.n}</span>${tick}${a.code}</span>`;
