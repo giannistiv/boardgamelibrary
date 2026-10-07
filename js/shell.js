@@ -692,8 +692,13 @@ function openModal(game) {
       </div>`;
     };
 
+    // A mission map or a hero × boss board, when the plays carry one
+    // (progress-boards.js). A mission map has its own bar, so it takes the
+    // campaign bar's place.
+    const progressHtml = typeof buildProgressBoardHtml === 'function' ? buildProgressBoardHtml(game, plays) : '';
+
     // Campaign progress bar (e.g. Cozy Stickerville's 10 in-game years).
-    const cp = campaignProgress(game.bggId, plays);
+    const cp = progressHtml.includes('pb-missions') ? null : campaignProgress(game.bggId, plays);
     const campaignHtml = cp ? `
         <div class="campaign-progress">
           <div class="cp-top">
@@ -736,6 +741,7 @@ function openModal(game) {
         ${buildRolesHtml(game, plays)}
         ${buildGameTimeHtml(game, plays)}
         ${campaignHtml}
+        ${progressHtml}
         ${skyTeamHtml}
         ${slaySpireHtml}
         ${visibleHtml}
