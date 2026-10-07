@@ -624,14 +624,13 @@ function _lbBreakdownHtml(name, mode) {
       ${rows || '<div class="lb-empty">No rated plays this year.</div>'}`;
 }
 
-let _ranksTab = 'elo';   // which ranking the Ranks tab shows: 'elo' | 'hours' | 'duos'
+let _ranksTab = 'elo';   // which ranking the Ranks tab shows: 'elo' | 'hours'
 
 function showLeaderboardView() {
   // The Ranks tab: the main Elo league, or hours at the table (play-time.js).
   // Board South lives in its own tab (for BS regulars).
   const container = document.getElementById('leaderboard-view');
   if (_ranksTab === 'hours') _renderHoursRankingInto(container);
-  else if (_ranksTab === 'duos') _renderDuosInto(container);
   else _renderEloLeaderboardInto(container, 'main');
   window.scrollTo(0, 0);
 }

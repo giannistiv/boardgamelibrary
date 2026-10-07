@@ -498,7 +498,8 @@ let _modalOpenedFromLeaderboard = false;
 let _modalOpenedFromBoardSouth = false;
 let _modalOpenedFromIlioupoli = false;
 let _modalOpenedFromChallenges = false;
-let _modalTab = 'overview';   // the game page's last-used tab, kept across games
+let _modalTab = '';          // the open game page's tab ('' = the default: Plays, or Overview with no plays)
+let _modalTabFor = null;     // …for this game: another game opens on the default
 
 function _setViewport(content) {
   const vp = document.querySelector('meta[name=viewport]');
@@ -739,6 +740,7 @@ function openModal(game) {
         ${buildScoreTrendHtml(game, plays)}
         ${buildGameRecordsHtml(game, plays)}
         ${buildRolesHtml(game, plays)}
+        ${typeof buildBestTeamsHtml === 'function' ? buildBestTeamsHtml(game, plays) : ''}
         ${buildGameTimeHtml(game, plays)}
         ${campaignHtml}
         ${progressHtml}
@@ -767,7 +769,8 @@ function openModal(game) {
   const tabs = [['overview', 'Overview'], ['plays', `Plays${plays && plays.length ? ` <span class="gm-tab-n">${plays.length}</span>` : ''}`]]
     .concat(roveHtml ? [['campaign', 'Campaign']] : [])
     .concat(game.bggId > 0 ? [['notes', 'Notes']] : []);
-  const tab = tabs.some(t => t[0] === _modalTab) ? _modalTab : 'overview';
+  if (_modalTabFor !== game.bggId) { _modalTab = ''; _modalTabFor = game.bggId; }
+  const tab = tabs.some(t => t[0] === _modalTab) ? _modalTab : (plays && plays.length ? 'plays' : 'overview');
 
   content.innerHTML = `
     ${coverHtml}

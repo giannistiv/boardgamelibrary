@@ -35,7 +35,7 @@ function _navState() {
   if (lib && lib.style.display !== 'none' && !document.querySelector('.stats-view.open')) return { group: 'library', sub: 'shelf' };
   if (_navIsOpen('ilioupoli-view')) return { group: 'library', sub: 'ilioupoli' };
   if (_navIsOpen('games-view')) return { group: 'explore', sub: (typeof _exploreTab !== 'undefined' ? _exploreTab : 'games') };
-  if (_navIsOpen('leaderboard-view')) return { group: 'ranks', sub: _ranksTab === 'hours' || _ranksTab === 'duos' ? _ranksTab : 'everyone' };
+  if (_navIsOpen('leaderboard-view')) return { group: 'ranks', sub: _ranksTab === 'hours' ? 'hours' : 'everyone' };
   if (_navIsOpen('boardsouth-view')) return { group: 'ranks', sub: 'boardsouth' };
   if (_navIsOpen('stats-view')) {
     const visiting = typeof _viewingProfile !== 'undefined' && _viewingProfile;
@@ -62,7 +62,7 @@ function _navSubItems(group) {
   }
   if (group === 'ranks') {
     const bs = typeof _activeBoardSouthVoter === 'function' ? _activeBoardSouthVoter() : null;
-    return [['everyone', 'Leaderboard'], ['hours', 'Hours'], ['duos', 'Duos']].concat(bs ? [['boardsouth', 'Board South']] : []);
+    return [['everyone', 'Leaderboard'], ['hours', 'Hours']].concat(bs ? [['boardsouth', 'Board South']] : []);
   }
   if (group === 'you') return me ? [['profile', 'Profile'], ['achievements', 'Achievements'], ['challenges', 'Challenges']] : [];
   return [];
@@ -79,7 +79,7 @@ function _navGo(group, sub) {
   }
   if (group === 'ranks') {
     if (sub === 'boardsouth') return switchToBoardSouth();
-    if (sub) _ranksTab = sub === 'hours' || sub === 'duos' ? sub : 'elo';
+    if (sub) _ranksTab = sub === 'hours' ? 'hours' : 'elo';
     return switchToLeaderboard();
   }
   if (group === 'you') {

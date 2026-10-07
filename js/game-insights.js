@@ -11,9 +11,11 @@ function buildRolesHtml(game, plays) {
   const noResult = isNoResultGame(game.bggId);
   const me = _ptViewer();
   const tags = new Map();   // role → {name, plays, wins, mine, myWins}
+  const sets = new Set();   // which roles were at the table, play by play
   let withRoles = 0;
   for (const p of plays) {
     let any = false;
+    sets.add(p.sc.flatMap(s => s ? _giRoleTags(s.r) : []).sort().join('\u0000'));
     for (const s of p.sc) {
       if (!s) continue;
       for (const t of _giRoleTags(s.r)) {
@@ -28,15 +30,40 @@ function buildRolesHtml(game, plays) {
     if (any) withRoles++;
   }
   if (withRoles < 3 || tags.size < 2) return '';
+  sets.delete('');
   const list = [...tags.values()].sort((a, b) => b.plays - a.plays || b.wins - a.wins);
   const pct = (w, n) => Math.round((w / n) * 100);
   const esc = _escapeHtml;
+  const logged = `${withRoles}${withRoles < plays.length ? ` of ${plays.length}` : ''} play${plays.length !== 1 ? 's' : ''}`;
+
+  // Seats, not characters: a co-op game where every play has the same roles
+  // (Sky Team's pilot and co-pilot) wins or loses together, so every seat has
+  // the same record. Only how you did in each seat says anything.
+  if (!noResult && sets.size === 1 && _recIsCoop(game, plays)) {
+    const mine = list.filter(r => r.mine > 0).sort((a, b) => b.mine - a.mine);
+    if (!mine.length) return '';
+    const most = mine[0].mine;
+    return `
+        <div class="gi-block">
+          <div class="gr-title">Your seat</div>
+          <div class="gi-sub">Logged in ${logged}. Everyone at the table wins or loses together, so here's how you did in each seat.</div>
+          ${mine.map(r => `
+          <div class="pt-p mine" title="${esc(r.name)}: you ${r.mine} play${r.mine !== 1 ? 's' : ''}, ${r.myWins} won">
+            <span class="pt-p-name">${esc(r.name)}</span>
+            <span class="pt-p-bar"><i style="width:${Math.max(3, Math.round((r.mine / most) * 100))}%"></i></span>
+            <span class="pt-p-val">${r.mine}<small> &middot; ${pct(r.myWins, r.mine)}% won</small></span>
+          </div>`).join('')}
+        </div>`;
+  }
 
   // your favourite (most played) and your best (highest win rate, 3+ plays)
   const mine = list.filter(r => r.mine > 0);
   const fav = mine.slice().sort((a, b) => b.mine - a.mine)[0];
-  const best = noResult ? null : mine.filter(r => r.mine >= 3 && r.myWins > 0)
-    .sort((a, b) => b.myWins / b.mine - a.myWins / a.mine || b.mine - a.mine)[0];
+  // (a best only when it beats your other characters by a clear margin, not on a tie)
+  const tried = noResult ? [] : mine.filter(r => r.mine >= 3)
+    .sort((a, b) => b.myWins / b.mine - a.myWins / a.mine || b.mine - a.mine);
+  const best = tried.length >= 2 && tried[0].myWins > 0
+    && tried[0].myWins / tried[0].mine - tried[1].myWins / tried[1].mine >= 0.1 ? tried[0] : null;
   let yours = '';
   if (fav && fav.mine >= 2) {
     yours = best && best !== fav
@@ -56,7 +83,7 @@ function buildRolesHtml(game, plays) {
   return `
         <div class="gi-block">
           <div class="gr-title">Characters</div>
-          <div class="gi-sub">${list.length} logged over ${withRoles} play${withRoles !== 1 ? 's' : ''}${noResult ? '' : ', with how often each won'}.</div>
+          <div class="gi-sub">${list.length} logged over ${logged}${noResult ? '' : ', with how often each won'}.</div>
           ${yours ? `<div class="gi-yours">${yours}</div>` : ''}
           ${rows}
           ${more > 0 ? `<div class="pt-game-more">+${more} more</div>` : ''}
