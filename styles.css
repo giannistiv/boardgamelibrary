@@ -2459,10 +2459,12 @@
   .pt-how ul{padding-left:1.1rem}
   .pt-game{margin:0 0 1.2rem}
   .pt-game-sub{font-size:0.74rem;color:var(--text-3);margin:-0.2rem 0 0.6rem;line-height:1.4}
-  .pt-p{display:grid;grid-template-columns:minmax(0,9rem) minmax(0,1fr) auto;align-items:center;gap:0.7rem;padding:0.25rem 0;font-size:0.8rem}
+  /* the value column is a fixed width so every row's bar track is the same length (each row is its own grid) */
+  .pt-p{display:grid;grid-template-columns:minmax(0,9rem) minmax(0,1fr) 6.2rem;align-items:center;gap:0.7rem;padding:0.25rem 0;font-size:0.8rem}
+  html.compact .pt-p{grid-template-columns:minmax(0,7.5rem) minmax(0,1fr) 5.9rem;gap:0.6rem}
   .pt-p-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text-2)}
   .pt-p.me .pt-p-name{color:var(--accent);font-weight:700}
-  .pt-p-val{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .pt-p-val{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
   .pt-game-more{font-size:0.7rem;color:var(--text-3);margin-top:0.3rem}
   .play-duration.est{cursor:help}
 
@@ -3482,7 +3484,6 @@
   .duo-row .lb-sub{flex-wrap:nowrap;min-width:0}
   .duo-row .lb-sub span{flex-shrink:0}
   .duo-row .lb-sub .duo-best{flex-shrink:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .duo-mine .pt-p{grid-template-columns:minmax(0,8rem) minmax(0,1fr) auto}
   .hr-gap{text-align:center;color:var(--text-4);letter-spacing:0.3em;padding:0.1rem 0 0.4rem}
   .hr-together{margin-top:2.2rem}
   .hr-together .pt-p{cursor:pointer}
