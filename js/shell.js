@@ -758,13 +758,14 @@ function openModal(game) {
   const eternalDecksHtml = (Number(game.bggId) === ED_BGGID) ? buildEternalDecksHtml(plays || []) : '';
   const aeonsEndHtml = buildAeonsEndHtml(game.bggId);
   const spiritIslandHtml = buildSpiritIslandHtml(game.bggId, plays);
+  const leviathanHtml = typeof buildLeviathanWildsHtml === 'function' ? buildLeviathanWildsHtml(game, plays) : '';
 
   const facts = [
     game.players ? gmFact('players', `${_escapeHtml(game.players)} players`) : '',
     gameTimeText(game) ? gmFact('time', _escapeHtml(gameTimeText(game))) : '',
     game.complexity > 0 ? gmFact('weight', `Weight ${Number(game.complexity).toFixed(1)}`) : '',
   ].join('');
-  const playsPanel = [marvelUnitedHtml, marvelChampionsHtml, spiritIslandHtml, eternalDecksHtml, aeonsEndHtml, playHistoryHtml].join('');
+  const playsPanel = [marvelUnitedHtml, marvelChampionsHtml, spiritIslandHtml, eternalDecksHtml, aeonsEndHtml, leviathanHtml, playHistoryHtml].join('');
   const roveHtml = typeof buildRoveCampaignHtml === 'function' ? buildRoveCampaignHtml(game) : '';
   const tabs = [['overview', 'Overview'], ['plays', `Plays${plays && plays.length ? ` <span class="gm-tab-n">${plays.length}</span>` : ''}`]]
     .concat(roveHtml ? [['campaign', 'Campaign']] : [])
@@ -830,6 +831,7 @@ function openModal(game) {
   wireMarvelChampions();
   wireGameNews(content);
   if (roveHtml) wireRoveCampaign(content);
+  if (leviathanHtml) wireLeviathanWilds(content);
   updateFavButton(game.bggId);
   wireFavButton();
 }

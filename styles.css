@@ -3466,6 +3466,30 @@
   .hr-intro{font-size:0.8rem;line-height:1.5;color:var(--text-3);margin-bottom:1.4rem;max-width:40rem}
   .hr-val small{font-size:0.6em;font-weight:700;margin-left:1px;color:var(--text-3)}
   .lb-row.hr-me{border-color:var(--accent-line);background:var(--accent-soft)}
+  /* Leviathan Wilds: the leviathans healed (leviathan-wilds.js) */
+  .lw-board{margin-bottom:1.1rem;padding:0.8rem 0.9rem;border-radius:12px;background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.07);min-width:0}
+  .lw-stage{position:relative}
+  .lw-track{position:relative;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;border-radius:10px;overscroll-behavior-x:contain}
+  .lw-track::-webkit-scrollbar{display:none}
+  .lw-slide{flex:0 0 100%;min-width:0;scroll-snap-align:start;scroll-snap-stop:always}
+  .lw-art{position:relative;height:clamp(230px,58vw,340px);border-radius:10px;background:#0b0907;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .lw-art img{max-width:100%;max-height:100%;display:block}
+  .lw-mystery{font:700 5rem/1 Georgia,serif;color:rgba(255,255,255,0.14)}
+  .lw-flag{position:absolute;top:0.55rem;left:0.55rem;font-size:0.66rem;font-weight:800;letter-spacing:0.04em;text-transform:uppercase;padding:0.2rem 0.55rem;border-radius:999px;background:rgba(226,176,74,0.22);color:var(--accent);border:1px solid rgba(226,176,74,0.5)}
+  .lw-cap{padding:0.6rem 0.15rem 0}
+  .lw-name{font-size:1.05rem;font-weight:700}
+  .lw-name small{font-size:0.72rem;font-weight:800;color:var(--text-3);margin-right:0.4rem}
+  .lw-sub{font-size:0.76rem;color:var(--text-3);margin-top:0.1rem}
+  .lw-sub.healed{color:#86d993}
+  .lw-sub.next{color:var(--accent)}
+  .lw-arrow{position:absolute;top:calc(clamp(230px,58vw,340px) / 2 - 18px);width:36px;height:36px;border-radius:50%;border:0;background:rgba(0,0,0,0.55);color:#fff;font-size:1.3rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .lw-arrow.prev{left:0.4rem}.lw-arrow.next{right:0.4rem}
+  .lw-arrow:disabled{opacity:0;pointer-events:none}
+  .lw-pips{display:flex;flex-wrap:wrap;gap:0.3rem;margin-top:0.75rem}
+  .lw-pip{width:1.6rem;height:1.6rem;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:var(--text-3);font-size:0.66rem;font-weight:800;cursor:pointer;padding:0}
+  .lw-pip.healed{background:rgba(91,196,107,0.2);border-color:rgba(91,196,107,0.55);color:#cdeed2}
+  .lw-pip.next{border:1.5px dashed var(--accent);color:var(--accent)}
+  .lw-pip.cur{outline:2px solid var(--text);outline-offset:1px}
   /* Best duo / team on a co-op game's page (duos.js) */
   .bt-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:baseline;column-gap:0.7rem;row-gap:0.3rem;padding:0.35rem 0;font-size:0.8rem}
   .bt-names{color:var(--text-2);min-width:0;overflow-wrap:anywhere}
