@@ -98,10 +98,17 @@ function computeChallenges(playerName) {
 
   // BGG Top 100 (all-time): which of BGG's current top 100 you've ever played.
   // The list is refreshed weekly (tools/fetch-top100.py), so games come and go.
+  // (another edition of the same game counts: SAME_GAME_EDITIONS, config.js)
   const everPlayed = new Set(plays.map(p => p.bggId));
+  const playedAs = (id) => sameGameIds(id).find(x => everPlayed.has(x));
   const top100 = (typeof BGG_TOP100 !== 'undefined' ? BGG_TOP100.games : []).map(g => {
     const own = findGameByBggId(g.id);
-    return { bggId: g.id, rank: g.rank, name: (own && own.name) || g.name, known: !!own, played: everPlayed.has(g.id) };
+    const as = playedAs(g.id);
+    const other = as && as !== g.id ? findGameByBggId(as) : null;
+    const name = (own && own.name) || g.name;
+    // the edition played, by name, or by year when it has the same name
+    const asName = !other ? '' : other.name !== name ? other.name : other.year ? `the ${other.year} edition` : 'another edition';
+    return { bggId: g.id, rank: g.rank, name, known: !!own, played: !!as, as: asName };
   });
 
   return {
@@ -301,7 +308,7 @@ function showChallengesView(playerName) {
   // lists what's left: first the games someone in the group owns, then the
   // rest (those open on BGG, as the site doesn't know them).
   const topCells = d.top100.map(g =>
-    `<img class="ch-top-cell${g.played ? ' on' : ''}" data-bgg-id="${g.bggId}"${g.known ? '' : ' data-bgg-only="1"'} src="images/${g.bggId}.jpg" alt="" loading="lazy" title="#${g.rank} ${_escapeHtml(g.name)}${g.played ? ' — played' : ''}" onerror="__imgFallback(this, ${g.bggId})">`).join('');
+    `<img class="ch-top-cell${g.played ? ' on' : ''}" data-bgg-id="${g.bggId}"${g.known ? '' : ' data-bgg-only="1"'} src="images/${g.bggId}.jpg" alt="" loading="lazy" title="#${g.rank} ${_escapeHtml(g.name)}${g.played ? ` — played${g.as ? ` (as ${_escapeHtml(g.as)})` : ''}` : ''}" onerror="__imgFallback(this, ${g.bggId})">`).join('');
   const libs = _gbLibraries();
   const left = d.top100.filter(g => !g.played);
   const ownersOf = (id) => libs.filter(l => l.ids.has(id)).map(l => `<span class="gb-owner">${_escapeHtml(l.label)}</span>`).join('');

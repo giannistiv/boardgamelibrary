@@ -310,12 +310,17 @@ function computeAchievements(playerName) {
 
     // ── BGG's top 100 / top 10 (today's ranking). ──
     {
-      const rank = typeof bggRank === 'function' ? bggRank(p.bggId) : 0;
+      // another edition of a ranked game counts as that game, once (SAME_GAME_EDITIONS)
+      let rank = 0, game = p.bggId;
+      for (const id of (typeof sameGameIds === 'function' ? sameGameIds(p.bggId) : [p.bggId])) {
+        const r = typeof bggRank === 'function' ? bggRank(id) : 0;
+        if (r && (!rank || r < rank)) { rank = r; game = id; }
+      }
       if (rank && rank <= 100) {
-        top100.add(p.bggId);
+        top100.add(game);
         if (top100.size === 10) mark('top-shelf', p.date);
         if (top100.size === 25) mark('top-100-club', p.date);
-        if (rank <= 10) { top10.add(p.bggId); if (top10.size === 3) mark('summit', p.date); }
+        if (rank <= 10) { top10.add(game); if (top10.size === 3) mark('summit', p.date); }
       }
     }
 

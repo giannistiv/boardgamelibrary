@@ -67,6 +67,26 @@ function difficultyBucket(complexity) {
 // auto-detected — list these explicitly so plays aren't scored as losses.
 //   456440 = Cozy Stickerville
 const NO_RESULT_GAMES = new Set([456440]);
+// One game, several BGG entries: a new edition or a big box of the same game
+// counts as that game for BGG's Top 100 (the challenge and the achievements).
+// Editions that changed the game, like Great Western Trail's second, stay apart.
+const SAME_GAME_EDITIONS = [
+  [84876, 271320],    // The Castles of Burgundy · its 2019 edition
+  [205637, 359609],   // Arkham Horror: The Card Game · Revised Edition
+  [120677, 181289],   // Terra Mystica · Big Box
+  [31260, 200680],    // Agricola · Revised Edition
+];
+let _sameGame = null;
+// Every BGG entry of the same game as bggId, itself included.
+function sameGameIds(bggId) {
+  if (!_sameGame) {
+    _sameGame = new Map();
+    for (const group of SAME_GAME_EDITIONS) for (const id of group) _sameGame.set(id, group);
+  }
+  const id = Number(bggId);
+  return _sameGame.get(id) || [id];
+}
+
 function isNoResultGame(bggId) {
   return NO_RESULT_GAMES.has(Number(bggId));
 }
