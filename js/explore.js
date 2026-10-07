@@ -46,7 +46,7 @@ function buildChartsHtml(days, locations, total) {
 
 // ── Insights View ──
 // ── Explore (merged Games + Players + Stats) ──
-let _exploreTab = 'games'; // active sub-tab; survives re-renders and modal round-trips
+let _exploreTab = 'trending'; // active sub-tab (Trending first); survives re-renders and modal round-trips
 
 function showGamesView() {
   const container = document.getElementById('games-view');

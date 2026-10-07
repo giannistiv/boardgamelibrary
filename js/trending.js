@@ -1,8 +1,8 @@
 // ── Explore → Trending: the games still to come out ──
 // Every live crowdfunding campaign on BGG (Kickstarter, Gamefound, BackerKit)
 // and the games on BGG's hot list that aren't out yet, the best fit for you
-// first: games with the mechanics you rate highly and play most, near the
-// weight you usually play. Each shows how its campaign is going, whose
+// first: the main mechanics of the games you play most and love, and how hot
+// the game is on BGG. Each shows how its campaign is going, whose
 // library has it and pictures from its gallery; tap one for its page. Open
 // to everyone. data/bgg-hot.js is refreshed every few hours by a scheduled
 // job (tools/fetch-hot.py) and fetched when the tab opens, so it's the latest.
@@ -47,14 +47,31 @@ function _hotMoney(n, cur) {
   catch (e) { return `${n.toLocaleString('en')} ${cur}`; }
 }
 
-// ── What you like, from your plays and ratings ──
-// How much you like each game: your rating against your own average (what
-// counts is liking a game more than you usually do), else how often you play
-// it. From that, each BGG mechanic, shrunk towards nothing when you've met it
-// in only a few games. Mechanics in more than a quarter of your games (and
-// solo modes) say little about taste, so they don't count as a reason. Also
-// the weight you usually play, and your favourites to compare new games with.
+// ── What you like: the main mechanics of the games you play most and love ──
+// Each game you've played gets a liking: how much you play it (against your
+// most played), your rating against your own average, and a boost when it's
+// one of your favourites. Each BGG mechanic adds up the liking of your games
+// that have it, discounted by how common it is across all games (Hand
+// Management or Dice Rolling say little about anyone's taste). Your top
+// mechanics are your taste; also the weight you usually play.
 const HOT_NOT_TASTE = new Set(['Solo / Solitaire Game']);
+const HOT_TASTE_SIZE = 8;   // how many mechanics make up a taste
+
+let _hotIdf = null;   // mechanic name → how telling it is (rarer across all games = more)
+function _hotMechanicIdf() {
+  if (_hotIdf) return _hotIdf;
+  const df = {};
+  let n = 0;
+  for (const id in (typeof BGG_EXTRAS !== 'undefined' ? BGG_EXTRAS : {})) {
+    const row = BGG_EXTRAS[id];
+    if (!row || row[3]) continue;   // expansions repeat their base game
+    n++;
+    for (const m of bggMechanics(id)) df[m] = (df[m] || 0) + 1;
+  }
+  _hotIdf = {};
+  for (const m in df) if (BGG_MECHANICS[m]) _hotIdf[BGG_MECHANICS[m]] = Math.log((n + 1) / (df[m] + 1));
+  return _hotIdf;
+}
 
 function _hotTaste() {
   const viewer = _navPlayer();
@@ -77,51 +94,53 @@ function _hotTaste() {
   }
   const rs = Object.values(ratings);
   const mean = rs.length ? rs.reduce((a, b) => a + b, 0) / rs.length : 7;
+  const favs = new Set((typeof getPlayerFavorites === 'function' ? getPlayerFavorites(viewer) : []).map(String));
+  const maxPlays = Math.max(1, ...Object.values(counts));
   const liking = {};
-  for (const id of new Set([...Object.keys(counts), ...Object.keys(ratings)])) {
-    const n = counts[id] || 0;
-    liking[id] = ratings[id] ? ratings[id] - mean : n >= 8 ? 1 : n >= 3 ? 0.4 : 0.1;
+  for (const id of new Set([...Object.keys(counts), ...Object.keys(ratings), ...favs])) {
+    const played = Math.log(1 + (counts[id] || 0)) / Math.log(1 + maxPlays);
+    const rated = ratings[id] ? Math.max(-1, Math.min(1, (ratings[id] - mean) / 2)) : 0;
+    liking[id] = 0.6 * played + 0.8 * rated + (favs.has(id) ? 0.8 : 0);
   }
-  const names = (id) => [...bggMechanics(id)].map(m => BGG_MECHANICS[m]).filter(Boolean);
-  const sum = {}, seen = {};
-  for (const id in liking) for (const m of names(id)) { sum[m] = (sum[m] || 0) + liking[id]; seen[m] = (seen[m] || 0) + 1; }
-  const total = Object.keys(liking).length;
-  const mech = {}, telling = new Set();
-  for (const m in sum) {
-    mech[m] = sum[m] / (seen[m] + 4);
-    if (!HOT_NOT_TASTE.has(m) && seen[m] <= total / 4) telling.add(m);
+  const idf = _hotMechanicIdf();
+  const sum = {};
+  for (const id in liking) {
+    if (liking[id] <= 0.15) continue;
+    const g = findGameByBggId(id);
+    if (g && isExpansion(g)) continue;
+    for (const m of bggMechanics(id)) {
+      const name = BGG_MECHANICS[m];
+      if (!name || HOT_NOT_TASTE.has(name)) continue;
+      sum[name] = (sum[name] || 0) + liking[id] * (idf[name] || 0);
+    }
   }
-  const favs = Object.keys(liking).filter(id => liking[id] >= 1)
-    .map(id => ({ id: Number(id), like: liking[id], mechs: new Set(names(id).filter(m => telling.has(m))), game: findGameByBggId(id) }))
-    .filter(f => f.mechs.size >= 2 && f.game && !isExpansion(f.game));
+  const top = Object.entries(sum).sort((x, y) => y[1] - x[1]).slice(0, HOT_TASTE_SIZE);
+  const best = top.length ? top[0][1] : 1;
   _hotTasteFor = viewer;
-  _hotTasteCache = total >= 5 ? { mech, telling, favs, weight: wN ? wSum / wN : 0 } : null;
+  _hotTasteCache = Object.keys(liking).length >= 5 && top.length
+    ? { mech: new Map(top.map(([m, v]) => [m, v / best])), weight: wN ? wSum / wN : 0 }
+    : null;
   return _hotTasteCache;
 }
 
-// How well a game fits you, and why: its three mechanics you like best, less a
-// little for a weight far from yours; the favourite of yours it shares the
-// most telling mechanics with. A touch of buzz (backers, the hot list) breaks ties.
+// How well a game fits you: your taste (the best two of your mechanics it
+// has) and how hot it is on BGG count most, then how many back it, less a
+// little for a weight far from what you play.
 function _hotFit(g, t) {
-  const buzz = (g.camp ? Math.log10(g.camp.backers + 1) * 0.03 : 0) + (g.pos ? (51 - g.pos) / 50 * 0.08 : 0);
-  if (!t) return { score: buzz };
-  const mechs = (g.mechs || []).filter(m => !HOT_NOT_TASTE.has(m));
-  const top = mechs.map(m => t.mech[m] || 0).sort((a, b) => b - a).slice(0, 3);
-  let score = top.reduce((a, b) => a + b, 0) / 3 + buzz;
-  if (g.weight > 0 && t.weight) score -= Math.min(Math.abs(g.weight - t.weight), 2) * 0.15;
-  let like = null;
-  for (const f of t.favs) {
-    const shared = mechs.filter(m => f.mechs.has(m));
-    if (shared.length >= 2 && (!like || shared.length > like.shared.length || (shared.length === like.shared.length && f.like > like.f.like))) like = { f, shared };
-  }
-  const loved = mechs.filter(m => t.telling.has(m) && (t.mech[m] || 0) >= 0.25).sort((a, b) => t.mech[b] - t.mech[a]);
-  return { score, like, loved };
+  const hot = g.pos ? (51 - g.pos) / 50 : 0;                                   // #1 on the hot list → 1
+  const crowd = g.camp ? Math.min(1, Math.log10(g.camp.backers + 1) / 4) : 0;  // 10,000 backers → 1
+  if (!t) return { score: 0.75 * hot + 0.25 * crowd, mine: [] };
+  const mine = (g.mechs || []).filter(m => t.mech.has(m)).sort((a, b) => t.mech.get(b) - t.mech.get(a));
+  const taste = mine.slice(0, 2).reduce((s, m) => s + t.mech.get(m), 0) / 2;
+  let score = 0.45 * taste + 0.4 * hot + 0.15 * crowd;
+  if (g.weight > 0 && t.weight) score -= Math.min(Math.abs(g.weight - t.weight), 2) / 2 * 0.1;
+  return { score, mine, taste };
 }
 
 // Everyone's scores run on their own scale (someone who rates nothing has
 // only how often they play to go on), so the labels are relative to your own
 // list: the games that stand out from the rest of it, about the top tenth
-// great matches and the next fifth good ones.
+// great matches and the next fifth good ones, and only games of your kind.
 let _hotFitsFor = null, _hotFitsCache = null;
 function _hotFits() {
   const key = _navPlayer() + '|' + (_hot && _hot.updated);
@@ -135,6 +154,7 @@ function _hotFits() {
     const sd = Math.sqrt(order.reduce((a, f) => a + (f.score - mean) ** 2, 0) / (order.length || 1));
     if (sd > 0.02) order.forEach((f, i) => {
       const z = (f.score - mean) / sd;
+      if (f.taste < 0.4) return;   // hot alone isn't a match: it has to be your kind of game
       if (i < Math.ceil(order.length * 0.1) && z >= 1.2) f.match = ['great', 'Great match'];
       else if (i < Math.ceil(order.length * 0.3) && z >= 0.5) f.match = ['good', 'Good match'];
     });
@@ -145,9 +165,7 @@ function _hotFits() {
 }
 
 function _hotWhy(fit) {
-  if (fit.like) return `Like <b>${_escapeHtml(fit.like.f.game.name)}</b>: ${fit.like.shared.slice(0, 2).map(_escapeHtml).join(', ')}`;
-  if (fit.loved && fit.loved.length) return `Mechanics you enjoy: ${fit.loved.slice(0, 2).map(_escapeHtml).join(', ')}`;
-  return '';
+  return fit.mine && fit.mine.length && fit.taste >= 0.4 ? `Your kind of game: ${fit.mine.slice(0, 3).map(m => `<b>${_escapeHtml(m)}</b>`).join(', ')}` : '';
 }
 
 function _hotCampHtml(c, withLink) {
