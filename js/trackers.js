@@ -157,10 +157,49 @@ function buildSkyTeamHtml(plays) {
           <span class="st-count">${doneCount} / ${total}</span>
         </div>
         ${_skyTeamMapHtml(flights)}
-        ${next ? `<div class="sky-next">Next in the log: <b>#${next.n} ${next.code}</b> ${_escapeHtml(next.name)}, ${SKY_TEAM_DIFFS[next.diff].label.toLowerCase()}</div>` : ''}
+        ${next ? _skyTeamPassHtml(plays, next) : ''}
         ${rows}
         <div class="st-legend"><span class="st-exp-dash"></span> dashed = expansion &middot; numbers follow the logbook</div>
       </div>`;
+}
+
+// The next flight in the log as a boarding pass: from the last airport you
+// landed at, the difficulty as the class, the tries so far and the crew of
+// your last flight.
+function _skyTeamPassHtml(plays, next) {
+  const esc = _escapeHtml;
+  const asc = (plays || []).slice().sort(byPlayOrder);
+  const lastWin = [...asc].reverse().find(p => (p.sc || []).some(s => s.w) && _skyTeamParse(p.b));
+  const from = lastWin ? _skyTeamParse(lastWin.b).code : null;
+  const fromName = from ? ((SKY_TEAM_AIRPORTS.find(a => a.code.toUpperCase() === from) || {}).name || '') : '';
+  const tries = asc.filter(p => {
+    const t = _skyTeamParse(p.b);
+    return t && t.code === next.code && (t.diff || _skyTeamEasiestDiff(t.code)) === next.diff && !(p.sc || []).some(s => s.w);
+  }).length;
+  const last = asc[asc.length - 1];
+  const crew = last ? (last.sc || []).map(s => s.n).filter(Boolean) : [];
+  const diff = SKY_TEAM_DIFFS[next.diff];
+  const flight = `ST ${String(next.n).padStart(3, '0')}`;
+  return `<div class="sky-pass" title="The next flight in the logbook">
+      <div class="sky-pass-main">
+        <div class="sky-pass-top"><span>&#9992;&#65039; Boarding pass</span><b>${flight}</b></div>
+        <div class="sky-pass-route">
+          <div><small>From</small><b>${from || '&mdash;'}</b><span>${esc(fromName) || 'Your first landing'}</span></div>
+          <div class="sky-pass-plane" aria-hidden="true">&#9992;&#65038;</div>
+          <div><small>To</small><b>${next.code}</b><span>${esc(next.name)}</span></div>
+        </div>
+        <div class="sky-pass-info">
+          <div><small>Class</small><b style="color:${diff.color}">${diff.label}</b></div>
+          <div><small>Attempts</small><b>${tries || 'First try'}</b></div>
+          <div class="sky-pass-crew"><small>Crew</small><b>${crew.map(esc).join(' &amp; ') || '&mdash;'}</b></div>
+        </div>
+      </div>
+      <div class="sky-pass-stub">
+        <small>Flight</small><b>${flight}</b>
+        <span class="sky-pass-code">${next.code}</span>
+        <i class="sky-pass-bars" aria-hidden="true"></i>
+      </div>
+    </div>`;
 }
 
 // Tapping an airport (on the map or in the log) shows its flights and lights them up in both.

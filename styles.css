@@ -3602,6 +3602,59 @@
   .pbc-nine circle{fill:#2b1f45}.pbc-nine .pbc-glow{fill:rgba(155,107,255,0.22)}
   .pbc-lab{font-size:12px;font-weight:700;text-anchor:middle;fill:rgba(240,230,211,0.6)}
   .pbc-lab.pbc-end{text-anchor:end}
+  /* Bomb Busters: the bomb (progress-boards.js) */
+  .pb-bomb svg{display:block;width:100%;height:auto}
+  .pbb-panel{fill:#1d2024;stroke:#3a3f45;stroke-width:3}
+  .pbb-screw circle{fill:#4a4f56;stroke:#2a2d31;stroke-width:1.5}
+  .pbb-screw path{stroke:#2a2d31;stroke-width:1.5}
+  .pbb-timer{fill:#0a0606;stroke:#3a2222;stroke-width:2}
+  .pbb-label{font:800 11px/1 ui-monospace,Menlo,monospace;letter-spacing:0.12em;fill:#c9483f}
+  .pbb-digits{font:800 30px/1 ui-monospace,Menlo,monospace;text-anchor:end;fill:#ff4a3d;filter:drop-shadow(0 0 5px rgba(255,74,61,0.85))}
+  .pbb{cursor:pointer}
+  .pbb-hit{fill:transparent}
+  .pbb-n{font-size:10.5px;font-weight:800;text-anchor:middle;fill:rgba(240,230,211,0.55)}
+  .pbb-cut .pbb-n{fill:#86d993}
+  .pbb-next .pbb-n,.pbb-lost .pbb-n{fill:#f0e6d3}
+  .pbb-term{fill:#8d939b;stroke:#2a2d31;stroke-width:1}
+  .pbb-wire,.pbb-half path{fill:none;stroke-width:5;stroke-linecap:round}
+  .pbb-todo .pbb-wire{opacity:0.35}
+  .pbb-lost .pbb-wire{opacity:0.85}
+  .pbb-next .pbb-wire{filter:drop-shadow(0 0 4px rgba(255,255,255,0.7))}
+  .pbb-cut .pbb-half{opacity:0.8}
+  .pbb-copper{fill:#d98a4a}
+  .pbb-scorch{fill:rgba(20,10,6,0.85);stroke:rgba(140,60,30,0.5);stroke-width:2;stroke-dasharray:2 3}
+  .pbb-loss{font-size:9px;font-weight:800;fill:#ff7a6e}
+  .pbb-snip{font-size:17px;text-anchor:middle;pointer-events:none}
+  .pbb.pb-sel .pbb-n{fill:#fff;text-decoration:underline}
+  .pbb-spark{fill:rgba(255,214,120,0.9);opacity:0}
+  .pbb-key{display:inline-block;width:14px;height:10px;border-radius:2px;vertical-align:middle}
+  .pbb-key.cut{background:linear-gradient(90deg,#3d7be0 40%,transparent 40% 60%,#3d7be0 60%)}
+  .pbb-key.burnt{background:radial-gradient(circle,#140a06 45%,rgba(140,60,30,0.6) 70%,transparent 72%)}
+  .pbb.pb-new .pbb-top{animation:pbbSnapUp .7s 1s both;transform-box:fill-box;transform-origin:50% 0}
+  .pbb.pb-new .pbb-bot{animation:pbbSnapDown .7s 1s both;transform-box:fill-box;transform-origin:50% 100%}
+  .pbb.pb-new .pbb-spark{animation:pbbSpark .9s .9s ease-out both;transform-box:fill-box;transform-origin:50% 50%}
+  @keyframes pbbSnapUp{from{transform:translateY(9px) rotate(-8deg)}to{transform:none}}
+  @keyframes pbbSnapDown{from{transform:translateY(-9px) rotate(8deg)}to{transform:none}}
+  @keyframes pbbSpark{0%{opacity:0;transform:scale(0.3)}30%{opacity:1;transform:scale(1.2)}100%{opacity:0;transform:scale(1.8)}}
+  /* Sky Team: the next flight as a boarding pass (trackers.js) */
+  .sky-pass{display:flex;margin:0 0 0.8rem;border-radius:12px;overflow:hidden;background:#f3ead8;color:#1d1a14;box-shadow:0 4px 16px rgba(0,0,0,0.35)}
+  .sky-pass small{display:block;font-size:0.56rem;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:#8a7f6c}
+  .sky-pass b{display:block;font-weight:800}
+  .sky-pass-main{flex:1;min-width:0;padding:0.7rem 0.85rem}
+  .sky-pass-top{display:flex;justify-content:space-between;align-items:center;margin:-0.7rem -0.85rem 0.6rem;padding:0.45rem 0.85rem;background:var(--accent);color:#0d1420;font-size:0.68rem;font-weight:800;letter-spacing:0.08em;text-transform:uppercase}
+  .sky-pass-top b{font-size:0.78rem;letter-spacing:0.06em}
+  .sky-pass-route{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:0.4rem}
+  .sky-pass-route > div:last-child{text-align:right}
+  .sky-pass-route b{font-size:1.65rem;line-height:1.05;letter-spacing:0.02em}
+  .sky-pass-route span{display:block;font-size:0.66rem;color:#5d5546;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sky-pass-plane{font-size:1.2rem;color:#8a7f6c}
+  .sky-pass-info{display:grid;grid-template-columns:auto auto minmax(0,1fr);gap:0.85rem;margin-top:0.65rem;padding-top:0.55rem;border-top:1.5px dashed #cdbf9f}
+  .sky-pass-info b{font-size:0.8rem}
+  .sky-pass-crew b{overflow-wrap:anywhere;line-height:1.25}
+  .sky-pass-stub{flex:0 0 5.6rem;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.2rem;padding:0.6rem 0.4rem;border-left:2px dashed #cdbf9f;background:#ece1ca;text-align:center;position:relative}
+  .sky-pass-stub b{font-size:0.72rem}
+  .sky-pass-code{font-size:1.4rem;font-weight:900;letter-spacing:0.04em}
+  .sky-pass-bars{display:block;width:4.2rem;height:1.6rem;margin-top:0.2rem;background:repeating-linear-gradient(90deg,#1d1a14 0 2px,transparent 2px 3px,#1d1a14 3px 4px,transparent 4px 7px,#1d1a14 7px 10px,transparent 10px 11px)}
   /* What's new since this device last looked, animated once (pbFresh) */
   @keyframes pbPop{0%{transform:scale(0.4);opacity:0}60%{transform:scale(1.18);opacity:1}100%{transform:scale(1)}}
   @keyframes pbFill{0%{transform:scale(0.2);opacity:0}70%{transform:scale(1.06);opacity:1}100%{transform:scale(1)}}

@@ -29,6 +29,7 @@ const PB_NAMES = {
 };
 const PB_MOON = 339789;   // drawn as the trip from the Earth to the Moon
 const PB_CREW = 284083;   // The Crew: the voyage out to Planet Nine
+const PB_BOMB = 413246;   // Bomb Busters: a bomb, a wire per mission
 
 // What's new since this device last showed a game's progress (to animate
 // once): the keys it hasn't seen before. The first visit shows nothing new,
@@ -165,10 +166,11 @@ function buildMissionMapHtml(game, plays) {
     else say += ` · ${e.losses} loss${e.losses > 1 ? 'es' : ''} so far`;
     return say;
   };
-  const drawn = clocks || id === PB_MOON || id === PB_CREW;
+  const drawn = clocks || id === PB_MOON || id === PB_CREW || id === PB_BOMB;
   const rows = clocks ? _pbClocksHtml(cells, byKey, nextCell, last, per, coop, capOf, fresh)
     : id === PB_MOON ? _pbMoonHtml(cells, byKey, nextCell, capOf, fresh)
     : id === PB_CREW ? _pbCrewHtml(cells, byKey, nextCell, capOf, fresh, coop)
+    : id === PB_BOMB ? _pbBombHtml(cells, byKey, nextCell, capOf, fresh, won, total)
     : `<div class="pb-grid">${cells.map(cellHtml).join('')}</div>`;
   const firstCap = (() => {
     const lastPlayed = [...cells].reverse().find(c => byKey.has(c.key));
@@ -187,7 +189,7 @@ function buildMissionMapHtml(game, plays) {
     </div>
     ${rows}
     ${firstCap ? `<div class="pb-cap" aria-live="polite">${firstCap}</div>` : ''}
-    <div class="pb-legend">${coop ? '<span><i class="pb-cell pb-won1"></i>First try</span><span><i class="pb-cell pb-won"></i>Won</span><span><i class="pb-cell pb-lost"></i>Not yet beaten</span>' : '<span><i class="pb-cell pb-won"></i>Played</span>'}<span><i class="pb-cell pb-todo"></i>${done ? 'Not logged' : 'Ahead'}</span></div>
+    ${id === PB_BOMB ? '<div class="pb-legend"><span><i class="pbb-key cut"></i>Cut: defused</span><span><i class="pbb-key burnt"></i>Scorched: lost tries</span><span>&#9986;&#65039; Next</span></div>' : `<div class="pb-legend">${coop ? '<span><i class="pb-cell pb-won1"></i>First try</span><span><i class="pb-cell pb-won"></i>Won</span><span><i class="pb-cell pb-lost"></i>Not yet beaten</span>' : '<span><i class="pb-cell pb-won"></i>Played</span>'}<span><i class="pb-cell pb-todo"></i>${done ? 'Not logged' : 'Ahead'}</span></div>`}
     ${hardest.length ? `<div class="pb-note">Hardest: ${hardest.map(e => `<b>${esc(unit)} ${esc(e.key)}</b> (${e.losses} loss${e.losses > 1 ? 'es' : ''}${e.won ? `, beaten on try ${e.tries}` : ''})`).join(' · ')}</div>` : ''}
   </div>`;
 }
@@ -276,6 +278,53 @@ function _pbVoyageHtml(o) {
         <g class="${flew ? 'pbm-fly' : ''}" style="--dx:${(was[0] - at[0]).toFixed(1)}px;--dy:${(was[1] - at[1]).toFixed(1)}px">
           <g transform="translate(${at[0].toFixed(1)} ${at[1].toFixed(1)}) rotate(${(heading(rocketK(furthest)) + 45).toFixed(0)})"><text class="pbm-rocket" y="10">&#128640;</text></g>
         </g>
+      </svg>
+    </div>`;
+}
+
+// Bomb Busters: the missions as the wires of a bomb, eleven to a row. A
+// beaten mission's wire is cut, lost tries leave scorch marks, the cutters
+// wait on the next one; a timer counts the wires defused.
+function _pbBombHtml(cells, byKey, nextCell, capOf, fresh, won, total) {
+  const per = 11, W = 440, X0 = 30, DX = (W - 2 * X0) / (per - 1), HEAD = 70, ROW = 86;
+  const rows = Math.ceil(cells.length / per);
+  const H = HEAD + rows * ROW + 12;
+  const COLOURS = ['#3d7be0', '#e8c23a', '#d9483b', '#46a35a', '#d8d3c8', '#9a6bdc'];
+  const f = (v) => v.toFixed(1);
+  const wires = cells.map((c, i) => {
+    const e = byKey.get(c.key);
+    const x = X0 + (i % per) * DX, y = HEAD + Math.floor(i / per) * ROW;
+    const top = y + 14, bot = y + 70, col = COLOURS[i % COLOURS.length];
+    const cut = !!(e && e.won), isNext = c === nextCell, losses = e ? e.losses : 0;
+    const st = cut ? 'cut' : isNext ? 'next' : e ? 'lost' : 'todo';
+    const wire = cut
+      ? `<g class="pbb-half pbb-top"><path d="M${f(x)} ${top} C${f(x + 9)} ${top + 10} ${f(x + 7)} ${top + 18} ${f(x + 3)} ${top + 22}" stroke="${col}"/><circle class="pbb-copper" cx="${f(x + 3)}" cy="${top + 22}" r="2.2"/></g>
+         <g class="pbb-half pbb-bot"><path d="M${f(x - 3)} ${bot - 22} C${f(x - 7)} ${bot - 18} ${f(x - 9)} ${bot - 10} ${f(x)} ${bot}" stroke="${col}"/><circle class="pbb-copper" cx="${f(x - 3)}" cy="${bot - 22}" r="2.2"/></g>
+         ${fresh.has(c.key) ? `<circle class="pbb-spark" cx="${f(x)}" cy="${(top + bot) / 2}" r="9"/>` : ''}`
+      : `<path class="pbb-wire" d="M${f(x)} ${top} C${f(x + 11)} ${top + 18} ${f(x - 11)} ${bot - 18} ${f(x)} ${bot}" stroke="${col}"/>`;
+    const scorch = losses ? `<circle class="pbb-scorch" cx="${f(x)}" cy="${(top + bot) / 2}" r="${Math.min(15, 8 + losses * 1.5)}"/>` : '';
+    return `<g class="pbb pbb-${st}${fresh.has(c.key) ? ' pb-new' : ''}" data-pb-cap="${_escapeHtml(capOf(c))}" tabindex="0">
+        <title>${_escapeHtml(capOf(c).replace(/<[^>]+>/g, ''))}</title>
+        <rect class="pbb-hit" x="${f(x - DX / 2)}" y="${y}" width="${f(DX)}" height="${ROW - 6}"/>
+        ${scorch}
+        <text class="pbb-n" x="${f(x)}" y="${y + 8}">${c.n}</text>
+        <rect class="pbb-term" x="${f(x - 4)}" y="${top - 4}" width="8" height="6" rx="1.5"/>
+        <rect class="pbb-term" x="${f(x - 4)}" y="${bot - 2}" width="8" height="6" rx="1.5"/>
+        ${wire}
+        ${losses && !cut ? `<text class="pbb-loss" x="${f(x + 9)}" y="${top + 6}">${losses}</text>` : ''}
+        ${isNext ? `<text class="pbb-snip" x="${f(x + 13)}" y="${(top + bot) / 2 + 6}">&#9986;&#65039;</text>` : ''}
+      </g>`;
+  }).join('');
+  const screws = [[12, 12], [W - 12, 12], [12, H - 12], [W - 12, H - 12]].map(([x, y]) => `<g class="pbb-screw"><circle cx="${x}" cy="${y}" r="5"/><path d="M${x - 3} ${y} h6"/></g>`).join('');
+  const shown = `${String(won).padStart(2, '0')}/${total || cells.length}`;
+  return `<div class="pb-bomb">
+      <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${won} of ${total || cells.length} wires cut">
+        <rect class="pbb-panel" x="2" y="2" width="${W - 4}" height="${H - 4}" rx="14"/>
+        ${screws}
+        <rect class="pbb-timer" x="${W / 2 - 92}" y="14" width="184" height="42" rx="7"/>
+        <text class="pbb-label" x="${W / 2 - 80}" y="40">DEFUSED</text>
+        <text class="pbb-digits" x="${W / 2 + 80}" y="46">${shown}</text>
+        ${wires}
       </svg>
     </div>`;
 }
