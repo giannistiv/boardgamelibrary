@@ -3522,6 +3522,44 @@
   .lw-pip.healed{background:rgba(91,196,107,0.2);border-color:rgba(91,196,107,0.55);color:#cdeed2}
   .lw-pip.next{border:1.5px dashed var(--accent);color:var(--accent)}
   .lw-pip.cur{outline:2px solid var(--text);outline-offset:1px}
+  /* Take Time's clocks and the trip to the Moon (progress-boards.js) */
+  .pb-cap{font-size:0.74rem;color:var(--text-3);margin-top:0.55rem;line-height:1.45;min-height:1.1em}
+  .pb-cap b{color:var(--text)}
+  .pb-clocks{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0.45rem 0.55rem}
+  .pb-clock svg{display:block;width:100%;height:auto;overflow:visible}
+  .pbq-rim{fill:#15120f;stroke:rgba(255,255,255,0.14);stroke-width:2}
+  .pb-clock.full .pbq-rim{stroke:rgba(91,196,107,0.6)}
+  .pb-clock.now .pbq-rim{stroke:var(--accent);stroke-width:2.5}
+  .pbq{stroke:#15120f;stroke-width:3;cursor:pointer;transition:opacity .15s}
+  .pbq-won1{fill:rgba(91,196,107,0.85)}
+  .pbq-won{fill:rgba(91,196,107,0.5)}
+  .pbq-lost{fill:rgba(192,80,77,0.55)}
+  .pbq-todo{fill:rgba(255,255,255,0.05)}
+  .pbq-next{fill:rgba(226,176,74,0.28)}
+  .pbq.pb-sel{stroke:#f0e6d3;stroke-width:2.5}
+  .pbq-ticks line{stroke:rgba(255,255,255,0.35);stroke-width:2}
+  .pbq-hand{stroke:var(--accent);stroke-width:4;stroke-linecap:round}
+  .pbq-hub{fill:#15120f;stroke:rgba(255,255,255,0.2);stroke-width:1.5}
+  .pbq-num{fill:#f0e6d3;font-size:15px;font-weight:800;text-anchor:middle;pointer-events:none}
+  .pb-moon{border-radius:10px;overflow:hidden;background:#0b0d16;border:1px solid rgba(255,255,255,0.06)}
+  .pb-moon svg{display:block;width:100%;height:auto}
+  .pbm-star{fill:rgba(255,255,255,0.55)}
+  .pbm-earth circle{fill:#27618f}
+  .pbm-earth path{fill:#4f9a5a}
+  .pbm-moon circle{fill:#d8d2c4}
+  .pbm-moon .pbm-crater{fill:#b9b2a2}
+  .pbm-path{fill:none;stroke:rgba(255,255,255,0.28);stroke-width:2;stroke-dasharray:3 6;stroke-linecap:round}
+  .pbm-done{fill:none;stroke:var(--accent);stroke-width:3;stroke-linecap:round}
+  .pbm-stop{cursor:pointer}
+  .pbm-stop circle{fill:#0b0d16;stroke:rgba(255,255,255,0.3);stroke-width:2}
+  .pbm-won circle,.pbm-won1 circle{fill:var(--accent);stroke:var(--accent)}
+  .pbm-next circle{stroke:var(--accent);stroke-dasharray:4 3;stroke-width:2.5}
+  .pbm-stop.pb-sel circle{stroke:#fff;stroke-width:3}
+  .pbm-n{font-size:15px;font-weight:800;text-anchor:middle;fill:#f0e6d3;pointer-events:none}
+  .pbm-won .pbm-n,.pbm-won1 .pbm-n{fill:#1a1408}
+  .pbm-name{font-size:17px;font-weight:700;text-anchor:middle;fill:rgba(240,230,211,0.55);pointer-events:none;paint-order:stroke;stroke:#0b0d16;stroke-width:4px}
+  .pbm-won .pbm-name,.pbm-won1 .pbm-name,.pbm-next .pbm-name{fill:#f0e6d3}
+  .pbm-rocket{font-size:30px;text-anchor:middle;pointer-events:none}
   /* Best duo / team on a co-op game's page (duos.js) */
   .bt-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:baseline;column-gap:0.7rem;row-gap:0.3rem;padding:0.35rem 0;font-size:0.8rem}
   .bt-names{color:var(--text-2);min-width:0;overflow-wrap:anywhere}

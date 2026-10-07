@@ -1,13 +1,13 @@
 // ── Best duo / best team, on a co-op game's page (Plays tab) ──
 // Each exact line-up that has played the game together, with how often it
 // won: the best one on top, then everyone else's percentages. "Duo" when the
-// game is only ever played by two, "team" otherwise. Ranked by win rate,
-// steadied towards the game's usual rate while a team has only a few games,
-// so 2 out of 2 doesn't beat 10 out of 13. Shown only when at least two
-// teams have played it more than once. Leviathan Wilds is left out.
+// game is only ever played by two, "team" otherwise. Ranked by the win rate
+// shown (more games first on a tie), counting teams with 3+ games together so
+// one lucky night doesn't top the list. Shown only when at least two teams
+// qualify. Leviathan Wilds is left out.
 
 const DUO_SKIP = new Set([358737]);
-const DUO_PRIOR = 4;   // how many games' worth the game's usual win rate weighs
+const DUO_MIN_GAMES = 3;   // games together before a team is ranked
 
 function buildBestTeamsHtml(game, plays) {
   const id = Number(game && game.bggId);
@@ -30,12 +30,12 @@ function buildBestTeamsHtml(game, plays) {
     teams.set(key, t);
     n++; if (w) won++;
   }
-  const ranked = [...teams.values()].filter(t => t.n >= 2);
+  const ranked = [...teams.values()].filter(t => t.n >= DUO_MIN_GAMES);
   if (ranked.length < 2) return '';
   big = ranked.some(t => t.names.length > 2);
   const base = won / n;
-  ranked.forEach(t => { t.rate = t.w / t.n; t.score = (t.w + DUO_PRIOR * base) / (t.n + DUO_PRIOR); });
-  ranked.sort((a, b) => b.score - a.score || b.n - a.n);
+  ranked.forEach(t => { t.rate = t.w / t.n; });
+  ranked.sort((a, b) => b.rate - a.rate || b.n - a.n);
   const once = teams.size - ranked.length;
   const word = big ? 'team' : 'duo';
   const me = typeof _ptViewer === 'function' ? _ptViewer() : null;
@@ -51,7 +51,7 @@ function buildBestTeamsHtml(game, plays) {
   return `
         <div class="gi-block bt-block">
           <div class="gr-title">Best ${word}</div>
-          <div class="gi-sub" title="Ranked by win rate, pulled towards the usual ${Math.round(base * 100)}% while a ${word} has only a few games">How often each ${word} won, for the ${ranked.length} with 2+ games together${once ? ` (${once} more played it once)` : ''}. Usually ${Math.round(base * 100)}% here.</div>
+          <div class="gi-sub">How often each ${word} won, for the ${ranked.length} with ${DUO_MIN_GAMES}+ games together${once ? ` (${once} more with fewer)` : ''}. Usually ${Math.round(base * 100)}% here.</div>
           ${ranked.map(row).join('')}
         </div>`;
 }

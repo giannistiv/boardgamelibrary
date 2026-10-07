@@ -23,6 +23,11 @@ const PB_TOTALS = {
 };
 // Words on the board that are a difficulty or a variant, not the boss or the mission.
 const PB_DIFFICULTY = /^(easy|normal|medium|moderate|hard|very hard|expert|heroic|heroic adventurer|adventurer|legendary|impossible|nightmare|standard|beginner|increased difficulty|roguelike difficulty|true solo|solo|ascension\s*\d+|stage\s*[a-z]|level\s*\d+)$/i;
+// Games with names for their missions, in order.
+const PB_NAMES = {
+  339789: ['The Launch', 'The Journey', 'The Colony', 'The Mine', 'The Dome', 'The Virus', 'The Escape', 'The Battle'],   // Welcome to the Moon
+};
+const PB_MOON = 339789;   // drawn as the trip from the Earth to the Moon
 const PB_SPLIT = /\s*[／｜|]\s*|\s*\/\s*(?!\/)/;
 const PB_MISSION = /^(?:mission|scenario|campaign|chapter|adventure|case|map|year|episode|level|quest|game)\s*0*(\d{1,3})(?:\.(\d+))?(?:\s*[-–:]\s*(.+))?$/i;
 const PB_CLOCK = /^(\d{1,2})\s*-\s*(\d{1,2})$/;
@@ -128,9 +133,28 @@ function buildMissionMapHtml(game, plays) {
     const tip = `${unit} ${c.label}${e && e.title ? ` · ${e.title}` : ''}${e ? (e.won ? (coop ? ` · won${e.tries > 1 ? ` on try ${e.tries}` : ' first try'}` : ` · played ${e.plays.length}×`) : ` · ${e.losses} loss${e.losses > 1 ? 'es' : ''}`) : ''}`;
     return `<span class="pb-cell pb-${cls}${c === nextCell ? ' pb-next' : ''}" title="${esc(tip)}">${esc(c.label)}${e && e.losses ? `<i>${e.losses}</i>` : ''}</span>`;
   };
-  const rows = clocks
-    ? Array.from({ length: last }, (_, i) => `<div class="pb-row"><span class="pb-rowlbl">${i + 1}</span>${cells.filter(c => c.n === i + 1).map(cellHtml).join('')}</div>`).join('')
+  // what a mission says when tapped
+  const capOf = (c) => {
+    const e = byKey.get(c.key);
+    const name = (PB_NAMES[id] || [])[c.n - 1] || (e && e.title) || '';
+    let say = `<b>${esc(unit)} ${esc(c.label)}</b>${name ? ` ${esc(name)}` : ''}`;
+    if (!e) say += c === nextCell ? ' · next' : done ? ' · not logged' : ' · ahead';
+    else if (!coop) {
+      const wins = {};
+      for (const p of e.plays) for (const sc of p.sc || []) if (sc && sc.w) wins[sc.n] = (wins[sc.n] || 0) + 1;
+      const w = Object.entries(wins).sort((a, b) => b[1] - a[1]).map(([n, k]) => `${esc(n)}${k > 1 ? ` (${k})` : ''}`);
+      say += ` · played ${e.plays.length === 1 ? 'once' : `${e.plays.length}×`}${w.length ? ` · won by ${w.join(', ')}` : ''}`;
+    } else if (e.won) say += ` · ${e.tries === 1 ? 'won first try' : `won on try ${e.tries}`} · ${fmtPlayDate(e.when.date)}`;
+    else say += ` · ${e.losses} loss${e.losses > 1 ? 'es' : ''} so far`;
+    return say;
+  };
+  const rows = clocks ? _pbClocksHtml(cells, byKey, nextCell, last, per, coop, capOf)
+    : id === PB_MOON ? _pbMoonHtml(cells, byKey, nextCell, capOf)
     : `<div class="pb-grid">${cells.map(cellHtml).join('')}</div>`;
+  const firstCap = (() => {
+    const lastPlayed = [...cells].reverse().find(c => byKey.has(c.key));
+    return clocks || id === PB_MOON ? capOf(nextCell || lastPlayed || cells[0]) : '';
+  })();
   const pct = total ? Math.round(won / total * 100) : null;
 
   return `<div class="pb-board pb-missions">
@@ -143,9 +167,112 @@ function buildMissionMapHtml(game, plays) {
       <div class="pb-stat"><b>${streak}</b><span>Win streak${best > streak ? ` · best ${best}` : ''}</span></div>` : ''}
     </div>
     ${rows}
+    ${firstCap ? `<div class="pb-cap" aria-live="polite">${firstCap}</div>` : ''}
     <div class="pb-legend">${coop ? '<span><i class="pb-cell pb-won1"></i>First try</span><span><i class="pb-cell pb-won"></i>Won</span><span><i class="pb-cell pb-lost"></i>Not yet beaten</span>' : '<span><i class="pb-cell pb-won"></i>Played</span>'}<span><i class="pb-cell pb-todo"></i>${done ? 'Not logged' : 'Ahead'}</span></div>
     ${hardest.length ? `<div class="pb-note">Hardest: ${hardest.map(e => `<b>${esc(unit)} ${esc(e.key)}</b> (${e.losses} loss${e.losses > 1 ? 'es' : ''}${e.won ? `, beaten on try ${e.tries}` : ''})`).join(' · ')}</div>` : ''}
   </div>`;
+}
+
+const fmtPlayDate = (d) => {
+  const [y, m, day] = String(d || '').split('-').map(Number);
+  return y ? `${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][m - 1]} ${day}, ${y}` : '';
+};
+const _pbState = (e, coop, isNext) => (isNext ? 'next' : !e ? 'todo' : e.won ? (coop && e.tries === 1 ? 'won1' : 'won') : 'lost');
+
+// Take Time: each chapter a clock whose four quarters fill as its missions are
+// beaten; the hand points at the one that's next.
+function _pbClocksHtml(cells, byKey, nextCell, last, per, coop, capOf) {
+  const R = 41, rad = (deg) => deg * Math.PI / 180;
+  const pt = (deg, r) => `${(r * Math.cos(rad(deg))).toFixed(1)} ${(r * Math.sin(rad(deg))).toFixed(1)}`;
+  const span = 360 / per;
+  const clocks = [];
+  for (let n = 1; n <= last; n++) {
+    const mine = cells.filter(c => c.n === n);
+    const quarters = mine.map((c, k) => {
+      const e = byKey.get(c.key);
+      const a0 = -90 + span * k, a1 = a0 + span;
+      return `<path class="pbq pbq-${_pbState(e, coop, c === nextCell)}" d="M0 0 L${pt(a0, R)} A${R} ${R} 0 0 1 ${pt(a1, R)}Z" data-pb-cap="${_escapeHtml(capOf(c))}"><title>${_escapeHtml(capOf(c).replace(/<[^>]+>/g, ''))}</title></path>`;
+    }).join('');
+    const k = mine.indexOf(nextCell);
+    const hand = k >= 0 ? `<line class="pbq-hand" x1="0" y1="0" x2="${pt(-90 + span * (k + 0.5), 33).replace(' ', '" y2="')}"/>` : '';
+    const full = mine.every(c => (byKey.get(c.key) || {}).won);
+    clocks.push(`<div class="pb-clock${full ? ' full' : ''}${k >= 0 ? ' now' : ''}">
+        <svg viewBox="-50 -50 100 100" role="img" aria-label="Chapter ${n}">
+          <circle class="pbq-rim" r="46"/>${quarters}
+          <g class="pbq-ticks"><line x1="0" y1="-46" x2="0" y2="-40"/><line x1="46" y1="0" x2="40" y2="0"/><line x1="0" y1="46" x2="0" y2="40"/><line x1="-46" y1="0" x2="-40" y2="0"/></g>
+          ${hand}<circle class="pbq-hub" r="13"/><text class="pbq-num" y="5">${n}</text>
+        </svg>
+      </div>`);
+  }
+  return `<div class="pb-clocks">${clocks.join('')}</div>`;
+}
+
+// Welcome to the Moon: the adventures as stops on the way from the Earth to
+// the Moon, the rocket at the furthest one played.
+function _pbMoonHtml(cells, byKey, nextCell, capOf) {
+  const W = 520, H = 300;
+  const P = [[94, 226], [250, 262], [300, 120], [424, 102]];   // the trajectory (a cubic curve)
+  const at = (t) => [0, 1].map(i => (1 - t) ** 3 * P[0][i] + 3 * (1 - t) ** 2 * t * P[1][i] + 3 * (1 - t) * t ** 2 * P[2][i] + t ** 3 * P[3][i]);
+  const pts = Array.from({ length: 241 }, (_, i) => at(i / 240));
+  const len = [0];
+  for (let i = 1; i < pts.length; i++) len.push(len[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
+  const total = len[len.length - 1];
+  const n = cells.length;
+  const idxAt = (frac) => { const want = frac * total; let i = 0; while (i < len.length - 1 && len[i] < want) i++; return i; };
+  const stopIdx = cells.map((_, i) => idxAt((i + 0.5) / n));
+  const furthest = cells.reduce((f, c, i) => (byKey.has(c.key) ? i : f), -1);
+  const line = (a, b) => pts.slice(a, b + 1).map(p => p.map(v => v.toFixed(1)).join(',')).join(' ');
+  const stars = [[40, 40], [150, 110], [240, 50], [300, 110], [370, 30], [505, 170], [440, 250], [290, 280], [500, 285], [90, 140], [200, 170], [360, 205], [130, 30]]
+    .map(([x, y], i) => `<circle class="pbm-star" cx="${x}" cy="${y}" r="${i % 3 ? 1.2 : 1.8}"/>`).join('');
+  // a point off the curve, at a right angle to it (+ above / to the left, - below / to the right)
+  const off = (k, d) => {
+    const a = pts[Math.max(0, k - 3)], b = pts[Math.min(pts.length - 1, k + 3)];
+    const dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1;
+    return [pts[k][0] + dy / l * d, pts[k][1] - dx / l * d];
+  };
+  const stops = cells.map((c, i) => {
+    const [x, y] = pts[stopIdx[i]];
+    const e = byKey.get(c.key);
+    const st = _pbState(e, false, c === nextCell);
+    const name = (PB_NAMES[PB_MOON] || [])[i] || '';
+    const up = i % 2 === 0;
+    return `<g class="pbm-stop pbm-${st}" data-pb-cap="${_escapeHtml(capOf(c))}" tabindex="0">
+        <title>${_escapeHtml(capOf(c).replace(/<[^>]+>/g, ''))}</title>
+        <circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="15"/>
+        <text class="pbm-n" x="${x.toFixed(1)}" y="${(y + 5.5).toFixed(1)}">${c.n}</text>
+        <text class="pbm-name" x="${off(stopIdx[i], up ? 30 : -30)[0].toFixed(1)}" y="${(off(stopIdx[i], up ? 30 : -30)[1] + 6).toFixed(1)}">${_escapeHtml(name.replace(/^The /, ''))}</text>
+      </g>`;
+  }).join('');
+  // the rocket: on its way from the furthest one played to the next
+  const gap = stopIdx.length > 1 ? stopIdx[1] - stopIdx[0] : 30;
+  const rocketAt = furthest >= 0 ? off(Math.min(pts.length - 1, stopIdx[furthest] + Math.round(gap / 2)), 4) : [P[0][0] + 6, P[0][1] - 18];
+  return `<div class="pb-moon">
+      <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="The trip to the Moon">
+        ${stars}
+        <g class="pbm-earth"><circle cx="40" cy="262" r="64"/><path d="M2 228 q18 -16 40 -6 q10 14 -6 26 q-22 6 -34 -20Z M56 286 q16 -18 34 -4 q-4 18 -24 22Z"/></g>
+        <g class="pbm-moon"><circle cx="472" cy="58" r="42"/><circle class="pbm-crater" cx="456" cy="46" r="9"/><circle class="pbm-crater" cx="488" cy="74" r="6"/><circle class="pbm-crater" cx="480" cy="36" r="4"/><circle class="pbm-crater" cx="454" cy="78" r="5"/></g>
+        <polyline class="pbm-path" points="${line(0, pts.length - 1)}"/>
+        ${furthest >= 0 ? `<polyline class="pbm-done" points="${line(0, stopIdx[furthest])}"/>` : ''}
+        ${stops}
+        <text class="pbm-rocket" x="${rocketAt[0].toFixed(1)}" y="${(rocketAt[1] + 10).toFixed(1)}">&#128640;</text>
+      </svg>
+    </div>`;
+}
+
+// Tap a clock quarter or a stop on the way to the Moon to read about it.
+function wireProgressBoards(root) {
+  (root || document).querySelectorAll('.pb-board').forEach(board => {
+    const cap = board.querySelector('.pb-cap');
+    if (!cap || board.dataset.wired) return;
+    board.dataset.wired = '1';
+    board.addEventListener('click', (e) => {
+      const el = e.target.closest('[data-pb-cap]');
+      if (!el) return;
+      board.querySelectorAll('.pb-sel').forEach(x => x.classList.remove('pb-sel'));
+      el.classList.add('pb-sel');
+      cap.innerHTML = el.dataset.pbCap;
+    });
+  });
 }
 
 // ── Hero × boss boards ──
