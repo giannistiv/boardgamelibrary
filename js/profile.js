@@ -842,7 +842,7 @@ function showStatsView(playerName, visiting) {
       </div>
     </div>
 
-    ${_pcFold('tools', _origCanon(playerName) === 'Στιβ' ? 'Import, share &amp; install' : 'Install the app', '', `
+    ${isOwnProfile ? _pcFold('tools', _origCanon(playerName) === 'Στιβ' ? 'Import, share &amp; install' : 'Install the app', '', `
     ${isOwnProfile && typeof buildInstallCardHtml === 'function' ? buildInstallCardHtml() : ''}
 
     ${_origCanon(playerName) === 'Στιβ' ? `<div class="qr-section">
@@ -881,7 +881,7 @@ function showStatsView(playerName, visiting) {
         <div class="import-result-lines" id="importResultLines"></div>
       </div>
     </div>`;
-  })() : ''}`)}
+  })() : ''}`) : ''}
 
     ${isOwnProfile ? '<button class="change-profile-btn" id="btn-change-profile">Change Profile</button>' : ''}
   `;
