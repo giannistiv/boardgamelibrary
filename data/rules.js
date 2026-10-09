@@ -4958,5 +4958,271 @@ const RULES = {
    "Enemies can't open doors.",
    "Running out of an enemy type gives that type an extra activation."
   ]
+ },
+ "239188": {
+  "src": "the Chronicles of Crime rulebook (Lucky Duck Games)",
+  "goal": "**Co-op** investigation with the free app: solve the case quickly. Scan locations, characters and evidence, then answer the app's questions at the end.",
+  "turnTitle": "Investigating",
+  "turn": [
+   "Agree as a group what to scan next.",
+   "Scan a location to travel there; a character to question them (then scan other cards to ask about them); evidence to pick up a clue; a forensic contact to call them.",
+   "Search crime scenes: one player looks at the 360° scene for 40 seconds and describes it; the others pick matching evidence cards, which are then scanned."
+  ],
+  "actions": [
+   [
+    "Time",
+    "Each scan, question or search costs 5 minutes; travelling 20. Faster solves score better, and some events happen at set times."
+   ],
+   [
+    "Cards",
+    "Locations, characters and special items stay face down until the app names them; useful clues go on the evidence board."
+   ],
+   [
+    "Experts",
+    "Forensic contacts examine evidence and people for you."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "Characters can be asked about other characters and evidence.",
+   "Use History in the app to reread anything you missed.",
+   "Bad light and sleeved cards can stop scans working."
+  ],
+  "end": [
+   "Go back to the home location and press Solve the Case: answer by scanning the cards that prove it.",
+   "Your score depends on your answers and the time taken."
+  ],
+  "forget": [
+   "Place newly found characters at their location (or 'unlocated' if unsure).",
+   "Every scan costs time: don't scan everything."
+  ]
+ },
+ "300300": {
+  "src": "the Chronicles of Crime: 1400 rulebook (Lucky Duck Games)",
+  "goal": "**Co-op** investigation in medieval Paris with the free app. Each case opens with a prophetic dream: vision cards show scenes from its past or future.",
+  "turnTitle": "Investigating",
+  "turn": [
+   "Agree as a group what to scan next.",
+   "Scan a location to travel there; a character to question them (then scan other cards to ask about them); evidence to pick up a clue; a forensic contact to call them.",
+   "Search crime scenes: one player looks at the 360° scene for 40 seconds and describes it; the others pick matching evidence cards, which are then scanned."
+  ],
+  "actions": [
+   [
+    "Time",
+    "Each scan, question or search costs 5 minutes; travelling 20."
+   ],
+   [
+    "Family",
+    "At home: your uncle the monk (writings, religion), your sister the merchant (items), your brother the king's spy (people)."
+   ],
+   [
+    "Perceval the dog",
+    "Show him evidence in your possession (red area) to track its scent."
+   ],
+   [
+    "Visions",
+    "Vision cards stay face up; match them to what you find."
+   ],
+   [
+    "Evidence board",
+    "Red area: things you have; blue area: things you've only heard about."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "Characters can be asked about other characters and evidence.",
+   "Use History in the app to reread anything you missed.",
+   "Bad light and sleeved cards can stop scans working."
+  ],
+  "end": [
+   "Go to the location the scenario names and press Solve the Case; answer by scanning cards. Score by answers and time."
+  ],
+  "forget": [
+   "Characters can't be asked about locations: scanning a location ends the questioning and takes you there.",
+   "Every scan costs time: don't scan everything."
+  ]
+ },
+ "302098": {
+  "src": "the Chronicles of Crime: 1900 rulebook (Lucky Duck Games)",
+  "goal": "**Co-op** investigation in 1900 Paris as journalists, with the free app and escape-room style puzzles.",
+  "turnTitle": "Investigating",
+  "turn": [
+   "Agree as a group what to scan next.",
+   "Scan a location to travel there; a character to question them (then scan other cards to ask about them); evidence to pick up a clue; a forensic contact to call them.",
+   "Search crime scenes: one player looks at the 360° scene for 40 seconds and describes it; the others pick matching evidence cards, which are then scanned."
+  ],
+  "actions": [
+   [
+    "Time",
+    "Each scan, question or search costs 5 minutes; travelling 20."
+   ],
+   [
+    "Puzzles",
+    "Find the clues on puzzle cards, items, dialogue or scenes, then enter the answer in the app."
+   ],
+   [
+    "Charlotte",
+    "In the Newspaper Office: tells you if you have everything for a puzzle, and can give hints."
+   ],
+   [
+    "Evidence board",
+    "Red area: things you have; blue area: things you've only heard about."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "Characters can be asked about other characters and evidence.",
+   "Use History in the app to reread anything you missed.",
+   "Bad light and sleeved cards can stop scans working."
+  ],
+  "end": [
+   "Go to the Newspaper Office and press Solve the Case (you write an article, you don't arrest anyone). Score by answers and time.",
+   "Some scenarios form mini-campaigns: play them with the same group."
+  ],
+  "forget": [
+   "Place newly found characters at their location (or 'unlocated' if unsure).",
+   "Every scan costs time: don't scan everything."
+  ]
+ },
+ "343562": {
+  "src": "the Horrified: American Monsters rulebook (Ravensburger)",
+  "goal": "**Co-op**: defeat every monster in play (each has its own challenge to complete first). Lose if terror reaches the skull or the monster deck runs out.",
+  "turn": [
+   "**Investigator phase**: take up to your ID's number of actions; anyone may play perk cards.",
+   "**Monster phase**: draw a monster card — place its items, resolve its event, then each monster shown (and the frenzied one) moves toward the nearest character and attacks."
+  ],
+  "actions": [
+   [
+    "Move",
+    "To an adjacent location; citizens there may come with you."
+   ],
+   [
+    "Guide",
+    "Move one citizen into or out of your location."
+   ],
+   [
+    "Pick up / share",
+    "Take items here; swap items freely with investigators on your space."
+   ],
+   [
+    "Advance / defeat",
+    "Use items (colour and strength as the monster mat says) to advance its challenge, then defeat it."
+   ],
+   [
+    "Citizens",
+    "Bring each to their safe location for a perk card."
+   ]
+  ],
+  "roundTitle": "Monster attacks",
+  "round": [
+   "Roll the dice shown: a hit defeats an investigator unless they discard an item per hit; power symbols trigger the monster's power.",
+   "Monsters attack investigators before citizens; a hit citizen is lost.",
+   "Each defeated investigator or citizen raises terror; defeated investigators return at the hospital next turn."
+  ],
+  "end": [
+   "Win: all monsters defeated.",
+   "Lose: terror at the skull, or a monster card is needed and none is left (after the last card you get one final investigator phase)."
+  ],
+  "forget": [
+   "One monster is always frenzied and can act twice.",
+   "Ignore events and strikes for monsters not in play.",
+   "Items used go to the discard pile, not back to the bag."
+  ]
+ },
+ "377470": {
+  "src": "the Sail rulebook",
+  "goal": "**Co-op** for two: sail past both storms to the end token in 5 rounds, without the Kraken sinking you. No talking from the deal until the round's last trick.",
+  "turnTitle": "Each round",
+  "turn": [
+   "Deal 9 each; each passes one card to the other.",
+   "Play tricks: follow the lead colour if you can; the highest card of the lead colour wins and leads next.",
+   "The pair of symbols in each trick decides what happens; the round ends when someone wins their 4th trick."
+  ],
+  "actions": [
+   [
+    "Helm + helm",
+    "The ship moves forward, toward the trick winner."
+   ],
+   [
+    "Helm + helm-and-wave",
+    "Same move, and the Kraken damages you once (twice with two helm-and-waves)."
+   ],
+   [
+    "Helm-and-wave + cannon",
+    "Hit the Kraken: that card goes under the Kraken deck."
+   ],
+   [
+    "Fish tail + fish tail",
+    "Straight forward one space."
+   ],
+   [
+    "Cannon + cannon",
+    "Flip the top player card and do its cannon action."
+   ]
+  ],
+  "roundTitle": "End of a round",
+  "round": [
+   "The Kraken damages the ship as many times as the number under its tracker.",
+   "Damage = discard the top Kraken card; reaching the Kraken card moves the Kraken one space.",
+   "The ship can't enter islands or leave the board."
+  ],
+  "end": [
+   "Win: reach the end token (a win beats a simultaneous loss).",
+   "Lose: round 5 ends, you're not past the first storm after round 2 or the second after round 4, only the Kraken card is left, or the Kraken reaches 'Dead'."
+  ],
+  "forget": [
+   "Any other symbol pair does nothing.",
+   "Entering a Kraken space damages the ship."
+  ]
+ },
+ "287938": {
+  "src": "the Kitchen Rush (Revised Edition) rulebook",
+  "goal": "**Co-op, real time**: cook and serve patrons' meals before the shift's time runs out. Each scenario adds rules and sets a goal (meals or coins).",
+  "turnTitle": "During a shift",
+  "turn": [
+   "Everyone plays at once: put your sand timer on a free action space and do that action.",
+   "You can move a timer only once its sand has run out (from scenario 2 you have two timers).",
+   "When the shift's time is up, finish current actions, then check every meal."
+  ],
+  "actions": [
+   [
+    "Seat patrons",
+    "Reveal up to 2 and seat them (each pays 1 coin for a drink from scenario 3)."
+   ],
+   [
+    "Take an order",
+    "Take a patron and a clean plate of their size (one size bigger is allowed from scenario 2)."
+   ],
+   [
+    "Ingredients",
+    "From one storage room, only for orders you hold; they can't be moved once placed."
+   ],
+   [
+    "Spices",
+    "From the greenhouse bag; can be added even after cooking starts."
+   ],
+   [
+    "Cook",
+    "Move one meal down one row; its cooking time is the row it must end in."
+   ],
+   [
+    "Wash / shop",
+    "Clean up to 3 plates; pay 1 coin at the van for 5 of one ingredient, 3 cheap or 2 expensive spices."
+   ]
+  ],
+  "roundTitle": "End of shift",
+  "round": [
+   "A meal is served only with the right plate, ingredients, spices and cooking time; the patron pays their coins.",
+   "Orders taken but not served cost a free drink (1 coin).",
+   "A mistake found while cooking: throw the meal out, the plate goes dirty, restart the order."
+  ],
+  "end": [
+   "Reach the scenario's goal (challenge mode: a higher one); then on to the next scenario."
+  ],
+  "forget": [
+   "No taking ingredients for orders you haven't taken, or for other players.",
+   "Starting a new action with your other timer ends the previous one.",
+   "Appoint a timekeeper."
+  ]
  }
 };
