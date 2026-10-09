@@ -1982,7 +1982,6 @@ const GIANNIS_GAMES = {
   233078:{name:"Twilight Imperium: Fourth Edition",bggId:233078,year:2017,complexity:4.35,players:"3-6",playTime:"480 min",bggRating:8.6},
   126163:{name:"Tzolk'in: The Mayan Calendar",bggId:126163,year:2012,complexity:3.66,players:"2-4",playTime:"90 min",bggRating:7.8},
   143065:{name:"Tzolk'in: The Mayan Calendar – Tribes & Prophecies",bggId:143065,year:2013,complexity:3.61,players:"2-5",playTime:"90 min",bggRating:8.1},
-  249410:{name:"U.S. Telegraph",bggId:249410,year:2018,complexity:1.73,players:"2-4",playTime:"60 min",bggRating:6.9},
   46396:{name:"Ubongo 3D",bggId:46396,year:2009,complexity:1.91,players:"2-4",playTime:"30 min",bggRating:7.1},
   340466:{name:"Unfathomable",bggId:340466,year:2021,complexity:3.12,players:"3-6",playTime:"240 min",bggRating:7.5},
   429397:{name:"Unmatched Adventures: Teenage Mutant Ninja Turtles – Shredder and Krang",bggId:429397,year:2025,players:"1-4",playTime:"40 min",bggRating:8.5},

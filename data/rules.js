@@ -3622,5 +3622,262 @@ const RULES = {
    "A mindbugged card can't be mindbugged back.",
    "Resolve as much of an effect as you can and ignore the rest."
   ]
+ },
+ "263918": {
+  "src": "the Cartographers rulebook (Thunderworks Games)",
+  "goal": "Most reputation stars after 4 seasons: draw terrain on your map to meet the queen's four edicts.",
+  "turnTitle": "Each turn",
+  "turn": [
+   "Reveal an explore card (a ruins card brings the next one with it).",
+   "Everyone at once draws one of its shapes, filled with one of its terrains, anywhere it fits (rotate or flip freely).",
+   "Add up the time on the revealed cards: at the season's threshold, the season ends."
+  ],
+  "actions": [
+   [
+    "Can't fit any shape",
+    "Draw a 1×1 square of that terrain anywhere instead."
+   ],
+   [
+    "Coins",
+    "Some shapes have a coin; surrounding a mountain on all 4 sides also gives one."
+   ],
+   [
+    "Rift lands",
+    "A 1×1 square of any terrain shown."
+   ],
+   [
+    "Ruins",
+    "The next shape must cover a ruins space if it can (else a 1×1 anywhere)."
+   ],
+   [
+    "Ambush",
+    "Pass maps as the arrow shows; draw the monster shape on your neighbour's map."
+   ]
+  ],
+  "roundTitle": "End of a season",
+  "round": [
+   "Score the season's two edicts (A+B, B+C, C+D, D+A).",
+   "+1 star per coin you have.",
+   "−1 per empty space next to a monster.",
+   "Reshuffle the explore deck and add a new ambush."
+  ],
+  "end": [
+   "After winter, most stars wins.",
+   "Ties: fewest stars lost to monsters."
+  ],
+  "forget": [
+   "Mountains, wastelands and monsters count as filled; ruins only once drawn over.",
+   "Coins score again every season.",
+   "An unrevealed ambush stays in the deck, and another joins it."
+  ]
+ },
+ "225694": {
+  "src": "the Decrypto rulebook (Le Scorpion Masqué)",
+  "goal": "Two teams. Win with **2 interceptions**; lose with **2 miscommunications**.",
+  "turnTitle": "Each round",
+  "turn": [
+   "Each team's encryptor (a new one each round) draws a code (like 3.4.2) and writes three clues, one per keyword number.",
+   "White's encryptor reads their clues; both teams guess the code (Black tries to intercept, except in round 1).",
+   "Reveal: Black guessed right = an interception; White guessed wrong = a miscommunication. Then the same for Black's clues."
+  ],
+  "actions": [
+   [
+    "Clues",
+    "About the keywords' meaning — never spelling, letters, position, sound, or private knowledge."
+   ],
+   [
+    "No repeats",
+    "Never the same clue twice, and never the keywords themselves."
+   ],
+   [
+    "Silent encryptor",
+    "No reactions while your team discusses."
+   ],
+   [
+    "Notes",
+    "Write every clue under its number: the other team is doing the same."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "Codes go back into the deck each round; the same code can come up again.",
+   "A team can intercept and miscommunicate in the same round."
+  ],
+  "end": [
+   "End of a round with a team on 2 interceptions (win) or 2 miscommunications (loss).",
+   "Both or neither after round 8: interceptions +1, miscommunications −1; still tied, guess the other team's keywords."
+  ],
+  "forget": [
+   "Anything you tell your team, the other team hears too.",
+   "You must spell a clue if asked.",
+   "3 players: a lone interceptor needs 2 interceptions within 5 rounds."
+  ]
+ },
+ "377420": {
+  "src": "the Mind Space rulebook",
+  "goal": "Most points after 12 turns: draw coloured shapes in your brain to fill sections, meet goals and satisfy each colour's scoring.",
+  "turnTitle": "Each turn",
+  "turn": [
+   "Roll the dice once for everyone; each die gives its colour to the pursuit card in its slot (6 = the face-down card).",
+   "Everyone draws one shown shape in a colour assigned to it: touching an earlier shape, never touching the same colour.",
+   "Shift the cards along and add a new one."
+  ],
+  "actions": [
+   [
+    "Always allowed",
+    "A 2×1 shape in any colour instead."
+   ],
+   [
+    "Coins",
+    "Start with 1 (max 9 earned): +1 per green shape, +1 per brain section filled."
+   ],
+   [
+    "Spend coins",
+    "1: fill a space next to a filled one with black. 2: any shape on cards 1–6 in any colour. 3: an extra shape in another colour."
+   ],
+   [
+    "Goals",
+    "First to meet a goal scores the high value; later players the low one."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "Shapes may be rotated, mirrored and cross section lines, but not cover grey matter.",
+   "Each colour scores its own way at the end (see the scoreboard's back)."
+  ],
+  "end": [
+   "After turn 12: goals, colour scoring and filled sections; the section with most empty spaces costs points.",
+   "Ties share the win."
+  ],
+  "forget": [
+   "Your first shape can go anywhere.",
+   "Diagonals don't count as touching."
+  ]
+ },
+ "230802": {
+  "src": "the Azul rulebook (Plan B Games)",
+  "goal": "Most points when someone completes a horizontal row of 5 on their wall (the game ends after that round's tiling).",
+  "turnTitle": "Each round",
+  "turn": [
+   "**Factory offer**: on your turn take **all** tiles of one colour from a factory (the rest go to the centre) or from the centre.",
+   "The first to take from the centre also takes the start marker (onto their floor line).",
+   "Place the tiles on one pattern line (right to left); extras fall to the floor line.",
+   "When all tiles are gone, everyone tiles their wall."
+  ],
+  "actions": [
+   [
+    "Pattern lines",
+    "One colour per line; never a colour already on that wall row."
+   ],
+   [
+    "Wall tiling",
+    "From each full line, move one tile to its wall space and score; the rest of that line is discarded. Unfinished lines stay."
+   ],
+   [
+    "Scoring a tile",
+    "Alone: 1. Otherwise count its connected row and its connected column (each including itself)."
+   ],
+   [
+    "Floor line",
+    "Each tile there costs the points shown above it (never below 0)."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "The start-marker holder starts the next round and refills the factories.",
+   "Tiles you can't or don't want to place go to the floor."
+  ],
+  "end": [
+   "+2 per full row, +7 per full column, +10 per colour with all 5 placed.",
+   "Ties: most full rows."
+  ],
+  "forget": [
+   "You must take every tile of the colour you chose.",
+   "The start marker counts as a floor tile."
+  ]
+ },
+ "6931": {
+  "src": "the Katamino rulebook (Gigamic)",
+  "goal": "A pentomino puzzle: fill the area marked off by the slider exactly with the chosen pieces (a Penta).",
+  "turnTitle": "Solo challenges",
+  "turn": [
+   "Set the slider (e.g. between 3 and 4 for a Penta 3) and take the pieces the challenge table lists.",
+   "Fill the area completely, then move the slider one notch and add the next piece listed."
+  ],
+  "actions": [
+   [
+    "Small Slam",
+    "42 Pentas, rows A–G, columns 3 to 8 (easy)."
+   ],
+   [
+    "Slam",
+    "118 Pentas (hard)."
+   ],
+   [
+    "Ultimate",
+    "Grand Slam, Super Slam and the Challenge."
+   ],
+   [
+    "Free mode",
+    "Find your own sets of pieces for Penta 4, then 5, 6…"
+   ]
+  ],
+  "roundTitle": "2 players",
+  "round": [
+   "Use the grid on the back of the booklet with all 12 pieces beside it.",
+   "Take turns placing any piece anywhere on the grid lines.",
+   "The last player able to place a piece wins."
+  ],
+  "end": [
+   "Solo: finish the row's Pentas. Duel: the last to place wins."
+  ],
+  "forget": [
+   "Each pentomino covers 5 squares, so Penta N needs exactly N pieces."
+  ]
+ },
+ "293296": {
+  "src": "the Marvel Splendor rulebook (Space Cowboys)",
+  "goal": "Assemble the **Infinity Gauntlet**: at least 16 Infinity Points, a bonus of every colour and the green Time stone.",
+  "turn": [
+   "Do one: take 3 different tokens, take 2 of one colour (only if 4+ are there), reserve a character (+1 grey S.H.I.E.L.D. token), or recruit a character.",
+   "End of turn: max 10 tokens; take a location if your bonuses match it."
+  ],
+  "actions": [
+   [
+    "Recruit",
+    "Pay the card's cost; each bonus you have of a colour pays one token of it. Grey tokens are wild."
+   ],
+   [
+    "Reserve",
+    "A face-up card or the top of a deck; max 3 in hand; recruit it later."
+   ],
+   [
+    "Time stone",
+    "Recruiting your first level 3 character gives the green token (keep it; max 1)."
+   ],
+   [
+    "Locations",
+    "Bonuses (not tokens) matching one: take it, 3 points (one per turn)."
+   ],
+   [
+    "Avengers tile",
+    "First to 3 Avengers tags takes it (3 points); anyone with more takes it away."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "Grey and green tokens can't be taken with the token actions.",
+   "There are no green bonuses; green is never spent.",
+   "Replace taken cards from the same level's deck."
+  ],
+  "end": [
+   "Meeting the Gauntlet conditions ends the game after the round; if you play last in the round, you win at once.",
+   "Several qualify: most points, then the Avengers tile, then fewest characters.",
+   "Lose the Avengers tile and drop below 16, and the game goes on."
+  ],
+  "forget": [
+   "Points alone don't win: you need every colour bonus and the Time stone.",
+   "Reserved cards in hand cost nothing at the end."
+  ]
  }
 };
