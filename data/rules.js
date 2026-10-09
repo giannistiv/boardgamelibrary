@@ -3955,6 +3955,21 @@ const RULES = {
   "forget": [
    "You must take every tile of the colour you chose.",
    "The start marker counts as a floor tile."
+  ],
+  "exp": [
+   {
+    "id": 294345,
+    "name": "Crystal Mosaic",
+    "src": "the Crystal Mosaic rulebook (Next Move Games)",
+    "lines": [
+     "Swap in the new double-sided boards (everyone uses the same side) with an overlay on each.",
+     "Play the free-wall variant: a tile from a pattern line goes on any free space of that wall row; each colour once per row and column.",
+     "The floor line values change (see the board).",
+     "**Side 1**: some spaces are pre-printed with a colour and ×2: only that colour goes there; score the tile normally, then double it.",
+     "**Side 2**: some spaces are pre-printed (that colour only); end bonuses become 3 per row, 10 per column, 12 per complete colour.",
+     "Ties: most complete rows, otherwise shared."
+    ]
+   }
   ]
  },
  "6931": {
@@ -5825,6 +5840,23 @@ const RULES = {
    "Two heroes never share a space, and you can't stop someone else's move.",
    "Explored passages are open to every hero, both ways.",
    "Learn it with scenarios 1–7: each adds a rule (exits by colour, dwarf, elf, mage, barbarian)."
+  ],
+  "exp": [
+   {
+    "id": 230359,
+    "name": "Maximum Security",
+    "src": "the Maximum Security rulebook (Sit Down!)",
+    "lines": [
+     "**13 modules**, helpers (easier) and challenges (harder). Add them in the book's order and learn each with its tutorial; don't mix in the base game's special tiles 13–24.",
+     "**Guard** (1): use this box's tile 9; the guard waits on the Theft tile and goes onto tile 9's guard space when it's revealed. No hero may enter the guard's tile, and the guard can't enter a tile with a hero. Anyone moves it with their own actions (no vortex); it never triggers special spaces.",
+     "**Anti-stress tokens** (2), any time, by anyone: Sand Timer (flip it now), Swap (swap action tiles with someone, no refusing), Loudspeaker (talk, as after a flip).",
+     "**Ventilation shafts** (3, dwarf): put a pair down, one under the dwarf and one on any empty space; any hero hops between them. A guard can use them once, then they're gone.",
+     "**Wall breaches** (4, barbarian): one half under the barbarian, the other on the empty space beyond the wall; any pawn passes through. A guard using one removes it. Steel doors can't be breached.",
+     "**Guard room** (5): a hero and a guard on the same tile both go to the guard room; free the hero with a code, a shaft or a breach. Two captives at once: you lose.",
+     "**Codes and steel doors** (6): a hero on a code space (it then goes out of order) lets another hero through a steel door in the red arrow's direction.",
+     "Later modules: map and auto-explore spaces (7), the Beholder blocks a whole tile (8), elf telekinesis moves explored tiles (9), mage spells (10), reinforcement guards after the theft (11), the control room teleports guards (12), the sensor (13)."
+    ]
+   }
   ]
  },
  "422120": {
