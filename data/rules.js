@@ -440,6 +440,26 @@ const RULES = {
    "Reputation never drops below 1; in the blue zone (18+) every loss costs 2 more.",
    "Ingredients left in hand are worth nothing at the end.",
    "A negative potion can't hit you twice in the same round."
+  ],
+  "exp": [
+   {
+    "id": 204650,
+    "name": "The King's Golem",
+    "src": "The King's Golem rulebook (Czech Games Edition)",
+    "lines": [
+     "**4 modules**, mix them freely (The Golem Project needs The Royal Encyclopedia). Use the app's expansion option (5-letter code) and the new deduction grid.",
+     "**Book tokens**: use one at once: the app shows 4 ingredients, pick one and learn whether it's solar (0 or 2 negative aspects) or lunar (1 or 3).",
+     "**Startup Funding**: instead of 2 gold, 1 favor and 2 ingredients, choose 2 of 4 startup cards and take what they show (favors: draw theirs + 1, keep all but one). Some move reputation, some only after round 1.",
+     "**Busy Days**: a new order-space board each round (2 from each group, stacked lowest first). Spaces can cost reputation, an action cube or an approval token, and give gold, reputation or a book.",
+     "**Royal Encyclopedia**: Publish Theory may instead write or endorse an article on one aspect colour: 2 signs with 2 ingredients under each (4 different). Usual costs, +1 reputation for a new one.",
+     "Article seals hedge against an **ingredient** (the seal colour of its slot; the white seal only works here). Debunk by proving one ingredient's sign wrong: unhedged seals −5. Articles count as theories for awards, conferences and scoring; at the end 2+ wrong ingredients cost every seal 4.",
+     "**Encyclopedia grant**: seals on 2 articles if it's your first grant, otherwise all 3.",
+     "**Golem Project**: Research Golem tests an ingredient (does the chest glow, do the ears steam?); after 2 tests you may try to animate it with 2 ingredients (fail: −2 reputation). Visit Library: 1 approval token for a book.",
+     "**Approval tokens**: the king's mood tile sets how many sit on Research Golem each round (2 players: 1). They buy the under-the-counter artifact (1 gold cheaper) and pay for encyclopedia articles; leftovers are worth 2 gold at the end.",
+     "**Progress reports** (after 2 tests), end of round, one each for chest and ears: 1 token (sure) or 2 (one of these). End: right single +4, pair with the right one +2, wrong pair −6, wrong single −8. Animating the golem: +5 VP, +3 reputation at the 2nd conference.",
+     "Golem Project action cubes (rounds 1 / 2–3 / 4–6): 2p 3/6/6, 3p 3/5/6, 4p 3/5/5."
+    ]
+   }
   ]
  },
  "177736": {
@@ -1018,6 +1038,22 @@ const RULES = {
    "Disconnected cities and buildings don't produce, don't eat and don't score.",
    "A tunnel only produces next to a city.",
    "Moving up the Federation track is how you go first next round."
+  ],
+  "exp": [
+   {
+    "id": 440715,
+    "name": "Data Era",
+    "src": "the Data Era rulebook (Delicious Games)",
+    "lines": [
+     "**Data discs**: a new resource, used whole or split into halves at any time. Everyone also gets a Data Era assistant: 1 disc at the start, ½ each production.",
+     "**Setup**: cover action slots with the new board tiles for your player count; new cards into each era deck; the 7 new metropolises join the rest (remove the original brown 'upgraded structures' one and card 189). Blue domes: 5 / 8 / 11 for 2 / 3 / 4 players (the same number of purple).",
+     "**Data centres**: 1 disc each, from board slots or cards; upgrade them like other buildings. Production: 1 disc each (if connected); upgraded: 1 disc + 1 credit.",
+     "**Data cities** (blue domes): 1 kelp + 2 steelplast + 1 disc + 1 credit. Each production: VP = your blue domes × your sets of all 4 connected building types.",
+     "**One extra action per turn**, paid in discs: ½ draw 2 more cards at the end of your turn; ½ swap a resource; ½ build on an expansion site during an action; or play an extra card (green 1½, red 1, yellow ½) and draw one more at the end.",
+     "Cards showing white or purple domes count for blue domes too; card icons for all structures include data centres.",
+     "**End**: a city with all 4 building types (lab, farm, desalination, data centre) scores 8."
+    ]
+   }
   ]
  },
  "216132": {
@@ -3243,6 +3279,22 @@ const RULES = {
    "You can't discard stress or heat cards.",
    "Discard piles are private except the top card.",
    "Too few playable cards for your gear: you don't move, and drop to 1st."
+  ],
+  "exp": [
+   {
+    "id": 410291,
+    "name": "Heavy Rain",
+    "src": "the Heavy Rain rulebook (Days of Wonder)",
+    "lines": [
+     "Adds the Japan and Mexico tracks, a 7th car, and new upgrade, sponsorship and event cards.",
+     "**Flooded spaces** (Japan): if you start the round on one, shifting down costs 1 extra heat (1 gear down = 1 heat, 2 gears = 2).",
+     "**Chicanes**: two corner lines with the same speed limit close together (blue curbs). Without the weather module they're just corners; with it, draw one road-condition token per chicane: a sector symbol affects the sector after it, anything else both corner lines.",
+     "In Championship, a chicane's press corner is always its exit corner line.",
+     "**Aggressive Legends**: a Legend starting on a space with a chevron above the diamond may cross one extra corner line this round. (You can draw chevrons on Great Britain's 0 spaces before the 6, 5 and 4 corners.)",
+     "**Super Cool** (garage and championship cards): optional in step 5: move up to that many heat cards from your discard pile back to your engine.",
+     "4 new events: play them as the 1964 season, or mix them into your own."
+    ]
+   }
   ]
  },
  "196526": {
@@ -4546,6 +4598,41 @@ const RULES = {
    "Unspent energy carries over; card plays don't.",
    "Destroyed presence leaves the game; it doesn't return to your tracks.",
    "Stage II cards with a flag trigger the adversary's escalation."
+  ],
+  "exp": [
+   {
+    "id": 193065,
+    "name": "Branch & Claw",
+    "src": "the Branch & Claw rulebook (Greater Than Games)",
+    "lines": [
+     "**Setup**: the invader board extension with the token supply and the Event deck; a Blight Card is now required. Each island board gets 1 Beasts (lowest-numbered land without setup icons) and 1 Disease (land 2); thematic boards follow their icons.",
+     "**Invader phase**: Blighted Island effect → **Event** → Fear → Ravage → Build → Explore → advance cards.",
+     "**Events**: the main event is picked by island health, terror level or invader stage (as the card says); then its Token event and Dahan event, top to bottom.",
+     "**Choice events**: agree, or the first option happens. Costs 'aided by' an element: +1 per element in play, +2 per card with it discarded from hand, +4 per card with it forgotten.",
+     "**Beasts**: nothing on their own; powers and events use them.",
+     "**Wilds**: the next Explore into that land removes one Wilds instead. **Disease**: the next Build there removes one Disease instead.",
+     "**Strife** (under one invader): the next time it damages Dahan or the land it deals 0, and one Strife comes off. It moves with the invader.",
+     "Several cards on an invader space: do that action once per card, oldest first; they advance together.",
+     "Events and invaders kill Dahan as efficiently as possible. Health changes never go below 1.",
+     "Thematic boards with B&C add 1 difficulty (not 3). New adversary: France."
+    ]
+   },
+   {
+    "id": 262722,
+    "name": "Jagged Earth",
+    "src": "the Jagged Earth rulebook (Greater Than Games)",
+    "lines": [
+     "Contains all the Branch & Claw rules and tokens. Island boards E and F allow up to 6 players.",
+     "**Events**: on the very first turn, draw one but don't resolve it. If you own B&C, take out 'A Strange Madness Among the Beasts' (you may keep it unless playing Russia or Many Minds Move as One).",
+     "**Badlands**: the first time each action damages invaders in that land, +1 damage per Badlands; the same for Dahan. They stay until removed.",
+     "**Ravage order**: add up each invader's damage (Strife zeroes theirs) → per-land boosts if at least 1 → Defend → damage the land and the Dahan (+Badlands) → surviving Dahan hit back (+Badlands).",
+     "**Isolate**: invaders don't explore into or out of that land, and treat it as adjacent to nothing (this turn).",
+     "**Aspects**: optional, one per Spirit at most; they swap a special rule or innate as shown.",
+     "**'Still Healthy' blight cards**: when their pool runs out you don't lose: draw the next blight card and go straight to its back.",
+     "**Growth (pick #)**: different options, each finished before the next; growth that costs energy needs the energy.",
+     "New adversaries: Russia and the Habsburg Monarchy."
+    ]
+   }
   ]
  },
  "367498": {
