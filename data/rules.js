@@ -1339,5 +1339,351 @@ const RULES = {
    "Unspent persuasion is lost after your reveal.",
    "Sietch Tabr needs 2 Fremen influence."
   ]
+ },
+ "227935": {
+  "src": "the Wonderland's War rulebook (Druid City Games)",
+  "goal": "Most points after 3 rounds (castles, quests and VP). Each round is a **Tea Party** to gather allies and supporters, then a **War** fought region by region with chips drawn from your bag.",
+  "turnTitle": "Tea Party",
+  "turn": [
+   "Move your leader clockwise to any free chair with a card and take its rewards; its supporters go into one region.",
+   "Reaching the Head of the Table: stop, roll the shard die and take the shards, refill the empty chairs, then move on (once per turn).",
+   "With 4 cards (5 with 2 players), put your leader into a region instead. When all leaders are out, the tea party ends.",
+   "Then everyone adds 1 Madness to their bag; whoever has the most shards adds another and discards half their shards."
+  ],
+  "actions": [
+   [
+    "Card rewards",
+    "Units into one region, ally chips into your bag, Wonderlandians, faction abilities, castles, leader strength, quests, discarding madness or shards."
+   ],
+   [
+    "Split cards",
+    "Take the top or the bottom half (the supporters and the shard die always count)."
+   ],
+   [
+    "Battle draw",
+    "In each region where you have units, everyone draws a chip at once and adds its strength. Start with your leader, Wonderlandian figures and +2 for a castle."
+   ],
+   [
+    "Madness",
+    "No strength, and you lose the units shown (a shield can block it). No units left = bust: strength 0, active chips exhausted."
+   ],
+   [
+    "Halt",
+    "After the first draw you may stop at any time; stopping on a Forge symbol lets you forge."
+   ],
+   [
+    "Forge",
+    "Put an active chip on a forge track for its reward; a finished track gives your artifact chip."
+   ],
+   [
+    "Wager",
+    "Not in a battle? Bet on the winner: right = a weak ally chip, wrong = a shard."
+   ]
+  ],
+  "roundTitle": "End of a battle",
+  "round": [
+   "A battle ends when everyone has halted or bust, someone reaches 25, or the only one still drawing is in the lead.",
+   "Highest strength takes the region's award for this round and builds a castle; second gets half. Tied for first: each picks the award or a castle.",
+   "Then quests (one feat per battle), abilities, forging and wagers; active chips go to your exhausted area.",
+   "When your 4th madness space fills, your madness and exhausted chips go back into the bag."
+  ],
+  "end": [
+   "After round 3's war: your VP, plus 3–6 per castle (by your forge track).",
+   "Quests: the feat 3, the objective 3, both 9.",
+   "−1 per shard. Ties: fewest shards, then most units on the board."
+  ],
+  "forget": [
+   "No peeking into your bag during the war.",
+   "Supporters add no strength: they're your lives in battle.",
+   "Shields only flip back when you bust (or a card says so), not at the end of a round.",
+   "An uncontested region: take its award or a castle, no drawing (except with 2 players)."
+  ]
+ },
+ "256916": {
+  "src": "the Concordia Venus rulebook (PD-Verlag)",
+  "goal": "Most VP at the end, scored by the gods on your personality cards: build houses across the empire, produce and trade goods, buy more cards.",
+  "turn": [
+   "Play one personality card from your hand and do its action.",
+   "The Tribune brings your played cards back to your hand.",
+   "Team play: you play a card, then your partner does its action as well."
+  ],
+  "actions": [
+   [
+    "Tribune",
+    "Take back your played cards (+1 sestertius per card beyond 3); you may buy a colonist for 1 food + 1 tool."
+   ],
+   [
+    "Architect",
+    "Move colonists (steps = your colonists on the board), then build next to them: goods (1 food in a brick city, else 1 brick + that city's good) and 1–5 coins by city type × the houses there after building."
+   ],
+   [
+    "Prefect",
+    "A province showing its good produces: you take the bonus good and every house there produces for its owner. Or take 1 sestertius per coin showing and flip them all back."
+   ],
+   [
+    "Mercator",
+    "3 sestertii (5 if bought), then trade up to two types of goods at the storehouse prices."
+   ],
+   [
+    "Diplomat",
+    "Copy the top card of an opponent's discard pile."
+   ],
+   [
+    "Magister",
+    "Repeat your previous card (not a Senator)."
+   ],
+   [
+    "Colonist",
+    "New colonists (1 food + 1 tool each) in Rome or a city with your house; or 5 sestertii + 1 per colonist on the board."
+   ],
+   [
+    "Specialists",
+    "Each of your houses of that good produces 1."
+   ],
+   [
+    "Senator / Consul",
+    "Buy up to 2 cards (card cost + display cost), or 1 card for its card cost only."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "Your storehouse has 12 spaces for colonists and goods; you can't throw goods away to make room.",
+   "The Praefectus Magnus doubles a Prefect's province bonus, then passes to the right.",
+   "One house of yours per city at most, never in Rome."
+  ],
+  "end": [
+   "Buying the last card or building your 15th house: the Concordia card (+7 VP); everyone else takes one last turn.",
+   "Each card scores for its god: Vesta 1 per 10 sestertii (goods at their price), Jupiter 1 per house outside brick cities, Saturnus 1 per province, Venus 2 per province with 2+ houses, Mercurius 2 per good you produce, Mars 2 per colonist, Minerva per its card.",
+   "Ties: whoever holds (or gets next) the Praefectus Magnus."
+  ],
+  "forget": [
+   "A house's coins multiply by the houses in that city after you build.",
+   "A Prefect's province must show its goods side to produce.",
+   "Team play Venus: 1 per province where both partners have a house."
+  ]
+ },
+ "286749": {
+  "src": "the Hansa Teutonica rulebook (Argentum Verlag)",
+  "goal": "Most prestige points: claim trade routes, open offices in cities and improve your skills.",
+  "turn": [
+   "Take as many actions as your Actions skill (2–5), in any order, repeats allowed."
+  ],
+  "actions": [
+   [
+    "Take pieces",
+    "Move traders or merchants from stock to your supply, up to your Money skill (3, 5, 7, all)."
+   ],
+   [
+    "Place",
+    "Put one from your supply on any free space on a route."
+   ],
+   [
+    "Displace",
+    "Replace an opponent's piece, paying 1 extra to stock (2 for a merchant). They re-place it plus 1 (2) more from stock on an adjacent route."
+   ],
+   [
+    "Move",
+    "Rearrange up to your Book of Lore number of your pieces on the routes."
+   ],
+   [
+    "Claim a route",
+    "All its spaces are yours: offices next to it give their controller 1 prestige; take its bonus marker; then open an office in an adjacent city, raise a skill (in its city), or put a merchant in Coellen."
+   ]
+  ],
+  "roundTitle": "Claiming",
+  "round": [
+   "Offices: leftmost free space only; square spaces need a trader, round ones a merchant; the colour needs your Privilege level.",
+   "Controlling a city = most offices there (tie: the rightmost).",
+   "First to link Arnheim and Stendal with offices: 7 prestige (then 4, 2).",
+   "Each bonus marker taken puts a new one out at the end of the turn; use yours later as free actions."
+  ],
+  "end": [
+   "Ends at once when someone reaches 20 prestige, a bonus marker can't be replaced, or 10 cities are completed.",
+   "+4 per maxed skill (not keys); bonus markers 1 / 3 / 6 / 10 / 15 / 21; Coellen merchants; 2 per controlled city.",
+   "Town Keys level × the offices in your largest connected network. Ties share."
+  ],
+  "forget": [
+   "Claiming is an action: a full route isn't claimed automatically.",
+   "A displaced player places extra pieces for free.",
+   "A new skill level counts immediately."
+  ]
+ },
+ "312484": {
+  "src": "the Lost Ruins of Arnak rulebook (Czech Games Edition)",
+  "goal": "Most points after 5 rounds: dig at sites, discover new ones, overcome guardians, buy items and artifacts, and research toward the Lost Temple.",
+  "turnTitle": "Each round",
+  "turn": [
+   "Everyone draws up to 5 cards.",
+   "In turn order, take **one main action** a turn, plus any number of free actions (⚡).",
+   "Pass when you're done; the others carry on until all have passed.",
+   "Archaeologists come home (a guardian on their site = a Fear card); your play area goes to the bottom of your deck; the start player passes left; the moon staff moves."
+  ],
+  "actions": [
+   [
+    "Dig",
+    "Send an archaeologist to a free site, paying its travel cost with cards' travel icons; take its reward."
+   ],
+   [
+    "Discover",
+    "Pay compasses and travel to a new I or II site: take the idol, reveal the site and its reward, and wake a guardian there."
+   ],
+   [
+    "Overcome a guardian",
+    "With your archaeologist there, pay its cost: 5 points and a one-time boon."
+   ],
+   [
+    "Buy",
+    "Items for coins (to the bottom of your deck); artifacts for compasses (to your play area, used free right away)."
+   ],
+   [
+    "Play a card",
+    "For its effect; artifacts played from hand cost their tablet."
+   ],
+   [
+    "Research",
+    "Move your magnifying glass or notebook up a row, paying the bridge; the notebook never goes above the glass."
+   ],
+   [
+    "Travel",
+    "A plane pays anything (2 coins buys one); car and boat don't swap; anything pays a boot."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "A card is played for its travel icon or its effect, never both.",
+   "Idol slots: put an idol in for a one-time bonus (free action); empty slots score at the end.",
+   "Assistants come from notebook rows: once per round each, upgraded to gold later.",
+   "Lost Temple: the earlier your glass arrives the more it scores; later research there buys temple tiles."
+  ],
+  "end": [
+   "Research tokens by row, temple tiles, idols 3 each plus empty-slot points, guardians 5, cards' points.",
+   "Fear cards −1 each (fear tiles −2).",
+   "Ties: first to the Lost Temple, then research score."
+  ],
+  "forget": [
+   "Guardians don't stop digging, but coming home from their site costs a Fear card.",
+   "Items go to the bottom of your deck: you'll see them next round.",
+   "Exiling (trash icon) thins your deck."
+  ]
+ },
+ "284653": {
+  "src": "the Mind MGMT rulebook (Off the Page Games)",
+  "goal": "One player is the **Recruiter**, moving secretly across the city; everyone else plays the **Rogue Agents**. The Recruiter wins with 12 recruits (9 in the training mission) or by reaching 16:00 (14:00); the agents win by capturing them.",
+  "turnTitle": "Each round",
+  "turn": [
+   "Recruiter: 1 action, then advance the time token.",
+   "Agents: activate any 2 agents.",
+   "Recruiter: 1 action, advance time, and at the alert reveal how many recruits this round.",
+   "Agents: activate the other 2, then stand them all up."
+  ],
+  "actions": [
+   [
+    "Recruiter: Step",
+    "Move orthogonally to a never-visited location and write the next number on your secret map. Temples allow diagonals."
+   ],
+   [
+    "Recruiter: Mind Slip",
+    "Your card's special jump; jumped-over spaces don't count. Its token goes on the time track."
+   ],
+   [
+    "Recruiting",
+    "Each circled feature you visit that matches one of your 3 secret feature cards is a recruit, revealed only at the alert."
+   ],
+   [
+    "Immortals (full game)",
+    "Move one a turn, any direction. Two on features of their open card = a recruit. Agents can't Ask, Reveal or Capture with one there."
+   ],
+   [
+    "Agent: Ask",
+    "Name a feature here: if visited, the Recruiter puts a step token on one such location."
+   ],
+   [
+    "Agent: Reveal",
+    "On a step token: the Recruiter says when they were there (a confirmed note)."
+   ],
+   [
+    "Agent: Shakedown (full game)",
+    "With an Immortal: guess one of the Recruiter's features, and push the Immortal."
+   ],
+   [
+    "Agent: Capture",
+    "If the Recruiter is here right now, the agents win."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "Each agent moves up to 2 orthogonal steps and takes 1 action (not mid-move).",
+   "The agents may only keep notes with mental note tokens (max 15).",
+   "Asked about a feature, the Recruiter reveals only one location."
+  ],
+  "end": [
+   "Agents win on a capture, or if the Recruiter has no legal move.",
+   "The Recruiter wins at 12 recruits (training: 9) or when time reaches 16:00 (training: 14:00); agents get no turn at the final time."
+  ],
+  "forget": [
+   "The Recruiter can never revisit a location.",
+   "Mayhem blocks orthogonal moves (Mind Slips jump over it).",
+   "Recruits are only announced at the alert, as one total for the round."
+  ]
+ },
+ "231581": {
+  "src": "the AuZtralia rulebook (SchilMil Games)",
+  "goal": "Most VP: build railways, mine, farm and fight the Old Ones waking in the outback. The Old Ones score too, and can win.",
+  "turn": [
+   "Whoever is furthest back on the time track acts (tie: the top disc).",
+   "Put a cube from your HQ in an action box, do it, and move your disc forward by its time cost. A box you've used costs 1 gold per cube already in it.",
+   "When every player is past the Old Ones' purple disc, it moves 1: a revelation on an illuminated space, then 2 Old One cards for movement."
+  ],
+  "actions": [
+   [
+    "Build railway",
+    "1 coal + 1 iron: 2 tracks joined to your network (2 time; 3 if any go into hills)."
+   ],
+   [
+    "Mine",
+    "Take all of one resource from a hex on your clear rail line; phosphate also gives 1 gold."
+   ],
+   [
+    "Farm",
+    "Up to 3 different farms on matching empty hexes by your rail: 1 gold and 1 time each."
+   ],
+   [
+    "Buy military",
+    "One unit for gold (or 1–2 infantry at 1 gold each)."
+   ],
+   [
+    "Recruit help",
+    "Take a personality card (or pay 1 gold to choose from the top 2 of the deck)."
+   ],
+   [
+    "Import / export",
+    "Two of: take a coal or iron; sell a coal or iron for 1 gold."
+   ],
+   [
+    "Attack",
+    "Send units against an Old One hex in range of your rail. Time = the number of different ground unit types (min 1)."
+   ],
+   [
+    "Retrieve cubes",
+    "All your cubes back (2 time if none were left)."
+   ]
+  ],
+  "roundTitle": "Combat",
+  "round": [
+   "Draw Old One cards: your unit types shown on the left deal damage; take the damage, airship damage and sanity loss on the right.",
+   "3 sanity per combat: losing one with none left, or losing all your units, is defeat.",
+   "Before each card you may withdraw your airships, your ground units, or both.",
+   "Kill it alone and keep the tile; shared kills split its VP. Defending your port: everything fights, no withdrawing, and losing the port ends the game."
+  ],
+  "end": [
+   "Ends when all discs (the Old Ones' too) reach 53, or someone loses their port.",
+   "Players: unblighted farms 2, phosphate 3, personalities, Old One tiles and VP tokens.",
+   "Old Ones: revealed tiles still on the board their value, hidden ones double, blighted farms 1. A tie with the Old Ones goes to them."
+  ],
+  "forget": [
+   "Rail through an Old One's hex is cut until it's gone.",
+   "Old Ones head for the nearest port or farm; a farm they reach is blighted.",
+   "Leftover gold and resources score nothing."
+  ]
  }
 };
