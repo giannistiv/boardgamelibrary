@@ -4142,5 +4142,293 @@ const RULES = {
    "Tied top bids rebid (three ties: the highest untied bid wins).",
    "With 5 players each may peek at one winning bid per game."
   ]
+ },
+ "163412": {
+  "src": "the Patchwork rulebook (Lookout Games)",
+  "goal": "Two players. Most **buttons** at the end, minus 2 for each empty square on your quilt.",
+  "turn": [
+   "Whoever is further back on the time board plays (on the same space, the token on top).",
+   "Either **advance**: move just past your opponent and take 1 button per space moved.",
+   "Or **buy a patch**: one of the 3 in front of the neutral token; move the token there, pay its buttons, place it on your quilt (turn or flip freely), move your time token by its time cost."
+  ],
+  "actions": [
+   [
+    "Button income",
+    "Passing a button space on the time board: buttons equal to the buttons printed on your quilt's patches."
+   ],
+   [
+    "Special patches",
+    "Passing one: take the 1×1 patch and fill a single square at once."
+   ],
+   [
+    "7×7 bonus",
+    "First to fill a full 7×7 square takes the 7-point tile."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "Patches can't overlap and can't be moved later.",
+   "Landing on your opponent's space puts your token on top: you go first."
+  ],
+  "end": [
+   "Both tokens at the end of the time board (moves stop there).",
+   "Buttons + 7×7 tile − 2 per empty square. Ties: first to reach the end."
+  ],
+  "forget": [
+   "Advancing gives buttons only for the spaces you actually moved.",
+   "Cheap fast patches can give you several turns in a row."
+  ]
+ },
+ "260180": {
+  "src": "the Project L rulebook (Boardcubator)",
+  "goal": "Most points from completed puzzles: fill them with your pieces, earning better pieces as you go.",
+  "turn": [
+   "Take **3 actions** (repeats allowed): take, recycle, upgrade, place, or master (once a turn)."
+  ],
+  "actions": [
+   [
+    "Take",
+    "A puzzle from a row (or the top of a deck); max 4 unfinished."
+   ],
+   [
+    "Recycle",
+    "Send a whole row to the bottom of its deck and reveal 4 new."
+   ],
+   [
+    "Upgrade",
+    "Take a new level-1 piece, or swap a piece for one of the same level, any lower level, or one level higher."
+   ],
+   [
+    "Place",
+    "Put one piece into one of your puzzles (rotate or flip; it can't be moved after)."
+   ],
+   [
+    "Master",
+    "Once a turn: place up to one piece in each of your puzzles."
+   ]
+  ],
+  "roundTitle": "Completing a puzzle",
+  "round": [
+   "Your pieces come back to your supply.",
+   "Take the reward piece shown on the puzzle.",
+   "The puzzle goes face down to your points pile; you can carry on with any actions left."
+  ],
+  "end": [
+   "When the black deck empties: finish the round, then one more; only 1 black puzzle per turn from then.",
+   "Finishing touches: place pieces for −1 point each. Completed puzzles score; unfinished ones subtract their value.",
+   "Ties: most puzzles, then most leftover pieces."
+  ],
+  "forget": [
+   "No reward pieces for puzzles finished during finishing touches.",
+   "If a reward piece has run out, take another of that level (or one higher, or lower)."
+  ]
+ },
+ "346703": {
+  "src": "the 7 Wonders: Architects rulebook (Repos Production)",
+  "goal": "Highest score when someone finishes their Wonder (at the end of that turn).",
+  "turn": [
+   "Take one card: the top of the deck on your left, on your right, or the central deck (the cat lets you peek at the central card first).",
+   "Then do every action your cards now allow."
+  ],
+  "actions": [
+   [
+    "Grey / yellow",
+    "Resources and coins (wild). If you can build your next Wonder stage, you **must**, discarding the cards used."
+   ],
+   [
+    "Blue",
+    "Points; a cat icon takes the cat pawn."
+   ],
+   [
+    "Green",
+    "2 identical or 3 different science symbols: you must take a progress token."
+   ],
+   [
+    "Red",
+    "Shields; horns flip conflict tokens. The last one flipped means a battle at the end of your turn."
+   ]
+  ],
+  "roundTitle": "Battles",
+  "round": [
+   "Compare shields with each neighbour; more than one of them = a military token each.",
+   "Then everyone discards red cards with horns, and the conflict tokens flip back.",
+   "2 players: twice as many shields gives 2 tokens."
+  ],
+  "end": [
+   "Score built stages, the cat, blue cards, military tokens and progress tokens.",
+   "Ties: most stages built."
+  ],
+  "forget": [
+   "Wonder stages are built bottom to top.",
+   "An empty deck stays empty.",
+   "Each progress token works once per turn (end-game ones only at the end)."
+  ]
+ },
+ "178900": {
+  "src": "the Codenames rulebook (Czech Games Edition)",
+  "goal": "Two teams: be first to contact all your agents from the 25 codenames, and never touch the assassin.",
+  "turn": [
+   "Your spymaster gives a one-word clue and a number.",
+   "Operatives touch words one at a time: your colour = keep going (up to the number + 1); a bystander or the other colour = turn over; the assassin = your team loses.",
+   "You must make at least one guess; you can stop any time."
+  ],
+  "actions": [
+   [
+    "Valid clues",
+    "About meaning only: no letters, positions, or any form or part of a visible word."
+   ],
+   [
+    "Straight face",
+    "The spymaster gives no hints beyond word and number."
+   ],
+   [
+    "Zero / unlimited",
+    "Expert clues: 0 means 'none of ours', unlimited allows any number of guesses."
+   ],
+   [
+    "Invalid clue",
+    "Turn ends, and the other spymaster covers one of their own words."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "Whatever the other spymaster allows counts as valid.",
+   "The key card's edge lights show which team starts."
+  ],
+  "end": [
+   "All your words covered (even on the other team's turn) wins.",
+   "Touching the assassin loses at once."
+  ],
+  "forget": [
+   "Use the extra guess for words from earlier clues.",
+   "2–3 players: play as one team against a simulated opponent."
+  ]
+ },
+ "446497": {
+  "src": "the Hot Streak rulebook",
+  "goal": "Most money after 3 mascot races: bet well, then nudge the races with the cards you add.",
+  "turnTitle": "Each race",
+  "turn": [
+   "**Bet**: snake-draft 2 tickets each (the top of a stack pays more); choose the safe or risky side as you take it.",
+   "**Seed**: everyone secretly adds 1 card from hand; the race deck is 18 cards.",
+   "**Race**: burn 3 cards, then flip one at a time while the handler moves the mascots.",
+   "**Payouts**, then deal everyone a card from the race deck."
+  ],
+  "actions": [
+   [
+    "Numbers / star",
+    "Move that far / to the next star, in the direction faced."
+   ],
+   [
+    "Fall down",
+    "Lies down: every move becomes 1 space. Falling again = disqualified."
+   ],
+   [
+    "Turn around",
+    "Moves now go backwards."
+   ],
+   [
+    "Swerve",
+    "Changes lane; moving into a standing mascot knocks it down."
+   ],
+   [
+    "Recover",
+    "Stand up and/or face forward first."
+   ],
+   [
+    "Green cards",
+    "Affect everyone; no collisions, nobody crosses the line."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "Deck runs out: fold the track shorter, reshuffle, burn 3, restart; anyone under the fold is out.",
+   "A race ends when 3 mascots have finished or been disqualified.",
+   "Off the side or back of the track is a disqualification (lowest place)."
+  ],
+  "end": [
+   "Race 3: one of your two tickets pays double (losses too).",
+   "Most money after race 3 wins."
+  ],
+  "forget": [
+   "4th place pays nothing.",
+   "Risky side bets can lose money; you can't go below $0."
+  ]
+ },
+ "420087": {
+  "src": "the Flip 7 rulebook (The Op)",
+  "goal": "First to **200 points** at the end of a round wins. Push your luck: a duplicate number busts you.",
+  "turnTitle": "Each round",
+  "turn": [
+   "The dealer gives everyone one card face up (resolve action cards at once).",
+   "Going round, each active player says **hit** (another card) or **stay** (bank your points).",
+   "The round ends when nobody is active, or someone has 7 different numbers."
+  ],
+  "actions": [
+   [
+    "Bust",
+    "A number you already have: you score nothing this round."
+   ],
+   [
+    "Freeze",
+    "That player banks and is out of the round."
+   ],
+   [
+    "Flip Three",
+    "That player must take the next 3 cards."
+   ],
+   [
+    "Second Chance",
+    "Cancels one duplicate (discard both); max one each."
+   ],
+   [
+    "Modifiers",
+    "+2 to +10 added; ×2 doubles your numbers (before the pluses). Never bust you."
+   ]
+  ],
+  "roundTitle": "Scoring",
+  "round": [
+   "Add your number cards; ×2 if you have it; then the + cards.",
+   "7 different numbers: +15 and the round ends at once."
+  ],
+  "end": [
+   "At the end of a round with someone on 200+, the highest score wins."
+  ],
+  "forget": [
+   "Action cards can target any active player, including you.",
+   "Used cards aren't reshuffled until the deck runs out.",
+   "The deck has twelve 12s down to one 1, plus a 0."
+  ]
+ },
+ "335204": {
+  "src": "the I Would Kill Hitler rules (Spite House Studios), as listed by ICv2",
+  "goal": "A storytelling party game: first to win **5 hypothetical cards**.",
+  "turnTitle": "Each round",
+  "turn": [
+   "Everyone holds 5 plot cards.",
+   "This round's judge reads a hypothetical card aloud.",
+   "Everyone else picks one plot card and tells a story answering it, working that card in.",
+   "The judge chooses the best story; its teller keeps the hypothetical card."
+  ],
+  "actions": [
+   [
+    "Plot cards",
+    "Items, people, points of view, lines of dialogue or story twists you must include."
+   ],
+   [
+    "Judging",
+    "Funniest, most plausible, or best — the judge decides."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "Each hypothetical card won is one point."
+  ],
+  "end": [
+   "The first player with 5 hypothetical cards wins."
+  ],
+  "forget": [
+   "You must use the plot card you played in your story."
+  ]
  }
 };
