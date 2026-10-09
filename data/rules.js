@@ -2794,5 +2794,295 @@ const RULES = {
    "Gold isn't a good.",
    "Taking the card facing the robber is allowed."
   ]
+ },
+ "344258": {
+  "src": "the That Time You Killed Me rulebook (Rock Manor Games)",
+  "goal": "Two rival time travellers. Wipe your opponent out of **two of the three eras** (past, present, future), checked at the end of your turn.",
+  "turn": [
+   "**Choose a copy** of yourself in the era where your focus token is.",
+   "**Take 2 actions** with that copy (the same one twice is fine; you must take both if you can).",
+   "**Shift focus** to a different era: that's where you'll act next turn."
+  ],
+  "actions": [
+   [
+    "Move",
+    "1 space orthogonally in your era."
+   ],
+   [
+    "Push",
+    "Moving into your opponent pushes them 1 space. Into a wall or an unmovable object: squished (dead)."
+   ],
+   [
+    "Paradox",
+    "Push them into another copy of themselves and both die. Never move into your own copy."
+   ],
+   [
+    "Travel forward",
+    "To the same space in the next era (must be empty)."
+   ],
+   [
+    "Travel back",
+    "To the same space in the previous era (empty), leaving a new copy of yourself behind from your supply."
+   ],
+   [
+    "Chapters",
+    "Each new chapter adds pieces and actions (seeds and trees, statues, elephants); its own rules apply."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "No copies in your focus era: you lose your actions; just shift focus.",
+   "Dead copies are gone for good; your supply can run out, and then you can't travel back.",
+   "An action in an earlier era can change later ones (objects carry forward)."
+  ],
+  "end": [
+   "At the end of your turn, if your opponent has copies in only one era (or none), you win.",
+   "You can't lose on your own turn."
+  ],
+  "forget": [
+   "Your focus can't stay in the same era two turns running.",
+   "Two actions to cross two eras: the middle era's space must be empty too.",
+   "Your active copy keeps acting even after it travels."
+  ]
+ },
+ "155987": {
+  "src": "the Abyss rulebook (Bombyx)",
+  "goal": "Most **influence points**: recruit lords with allies, control locations, slay monsters.",
+  "turn": [
+   "**Plot at court** (optional): 1 pearl per lord added to an empty court space.",
+   "**One action**: explore the depths, ask the council for support, or recruit a lord.",
+   "**Control a location** at once when you hold 3 keys."
+  ],
+  "actions": [
+   [
+    "Explore",
+    "Reveal cards one by one. Each ally is first offered to the others: the first buyer pays you 1, then 2, then 3 pearls (one buy per opponent per turn). Nobody buys: take it (turn ends) or keep going."
+   ],
+   [
+    "Monsters",
+    "Fight (automatic win, reward by the threat track, threat resets, turn ends) or keep exploring (threat +1)."
+   ],
+   [
+    "Track full",
+    "The last space forces you to take that ally (+1 pearl) or fight that monster (+1 pearl). Leftover allies go to the council by race."
+   ],
+   [
+    "Council",
+    "Take a whole council stack of one race, unseen."
+   ],
+   [
+    "Recruit a lord",
+    "Play allies of exactly the number of races shown (including the big-bubble one), worth at least the total; pearls cover missing points. Your lowest played ally is affiliated, the rest discarded."
+   ],
+   [
+    "Locations",
+    "With 3 keys, take a face-up location or draw 1–4 and choose; the lords used go underneath and lose their powers."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "Lord powers with an arrow happen once when recruited; others last until the lord goes under a location.",
+   "When only 2 lords remain at court, you get 2 pearls and refill it.",
+   "Ambassadors carry 3 keys on their own."
+  ],
+  "end": [
+   "Someone's 7th lord, or the court can't be refilled: finish the turn, then everyone else gets one more.",
+   "Affiliate the lowest ally of each race still in hand. Score locations, lords, your highest affiliated ally of each race, monster tokens.",
+   "Ties: most pearls, then the highest lord."
+  ],
+  "forget": [
+   "Each opponent may buy only one ally per explore.",
+   "Overpaying a lord gives no change.",
+   "Lords under a location still score."
+  ]
+ },
+ "318084": {
+  "src": "the Furnace rulebook (Hobby World / Arcane Wonders)",
+  "goal": "Most **money** after 4 rounds: win companies at auction (or get paid for losing), then run your production chain.",
+  "turnTitle": "Each round",
+  "turn": [
+   "**Auction**: deal a row of company cards (players + 4). In turn order, place one capital disc at a time on a card: never two of yours on one card, never two equal values on one card.",
+   "Resolve cards left to right: the highest disc takes the card; every other bidder there gets its **compensation** × their disc's value.",
+   "**Production**: run each of your cards once, in any order you choose."
+  ],
+  "actions": [
+   [
+    "Extraction",
+    "Gain the resources shown (mandatory)."
+   ],
+   [
+    "Processing",
+    "Swap the left resources for the right ones, up to the number above the arrow (optional)."
+   ],
+   [
+    "Compensation",
+    "For outbid players only: extraction × disc value, or processing up to disc value times."
+   ],
+   [
+    "Upgrade",
+    "Your start-up card gives an upgrade token; flip companies for 1 coal + 1 token each. Upgraded cards add their second effect."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "An empty card in the auction row is discarded.",
+   "The winner of a card gets no compensation from it.",
+   "Once you move on to the next card in production, you can't go back."
+  ],
+  "end": [
+   "After round 4, most money wins.",
+   "Ties: most cards, then most resources."
+  ],
+  "forget": [
+   "Left-to-right resolution matters: gain resources from one compensation before spending them on the next.",
+   "Upgrade a card before using it to get both its effects this round."
+  ]
+ },
+ "75547": {
+  "src": "the Shipwrights of the North Sea rulebook (Garphill Games)",
+  "goal": "Most **VP** when someone finishes their 4th ship: build longships, buildings, and win military majority.",
+  "turnTitle": "Each day",
+  "turn": [
+   "**Morning**: three drafts — draw players + 1 cards, keep 1, pass on; repeat until everyone holds 3.",
+   "**Afternoon**: in turn, take actions as you like; you must play or discard all 3 cards.",
+   "**Evening**: gold and workers come in; trim goods and workers to capacity."
+  ],
+  "actions": [
+   [
+    "Buy goods",
+    "2 gold + 2 workers: oak, wool or iron, as the back of the top draw card shows."
+   ],
+   [
+    "Tools",
+    "Buy for gold (only one at a time): build a ship without one good, or the Trade Cart."
+   ],
+   [
+    "Craftsmen",
+    "Keep up to 4 under your board for later ships."
+   ],
+   [
+    "Townsfolk",
+    "Play now or discard: raids, theft, gold, protection (Watchman), start player (Pioneer)…"
+   ],
+   [
+    "Ships",
+    "Place in one of your 2 workshops, then finish later by paying its gold, workers, goods and craftsmen."
+   ],
+   [
+    "Buildings",
+    "Pay gold and workers; one of each type."
+   ]
+  ],
+  "roundTitle": "Evening",
+  "round": [
+   "Gold: 1 per worker in your village + gold icons on your ships (max 12).",
+   "Workers: 1 + ship worker modifiers (always at least 1).",
+   "Overnight limits: 8 goods in the mill (± ships), 8 workers."
+  ],
+  "end": [
+   "Ends after the evening of the day someone builds a 4th ship.",
+   "Ship VP + building VP + 3 for the most military points.",
+   "Ties: most gold."
+  ],
+  "forget": [
+   "Unbuilt ships only leave a workshop when finished or barbarians destroy them.",
+   "Limits apply only overnight.",
+   "Tools are discarded once used."
+  ]
+ },
+ "194607": {
+  "src": "the Mystic Vale rulebook (AEG)",
+  "goal": "Most **VP** when the VP pool runs out: improve your cards by sleeving advancements into them, and buy vales.",
+  "turn": [
+   "**Plant**: push your on-deck card into your field (reveal a new on-deck) or pass. 4+ decay showing (field + on-deck, minus growth) = **spoil**: skip the harvest, flip your mana token active.",
+   "**Harvest**: harvest abilities, VP from cards' left side, buy up to 2 vales (spirit symbols) and up to 2 advancements (mana).",
+   "**Discard**: sleeve the new advancements into field cards, discard the field, refill the market.",
+   "**Prep**: lay out your next field until 3 decay show."
+  ],
+  "actions": [
+   [
+    "Mana",
+    "Only cards in your field count (not the on-deck card); your active mana token adds 1."
+   ],
+   [
+    "Spirit symbols",
+    "Each pays for one vale; wild pays for any."
+   ],
+   [
+    "Sleeving",
+    "An advancement can't cover another (except long abilities over long abilities)."
+   ],
+   [
+    "Abilities",
+    "When Played (on entering the field), Harvest (field only), Ongoing (always)."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "On-deck cards count only for decay and growth.",
+   "Vale abilities can't be used the turn you buy them.",
+   "Each growth cancels one decay."
+  ],
+  "end": [
+   "When the VP pool empties, finish the round.",
+   "VP tokens + right-side VP on advancements and vales.",
+   "Ties: most level 3 advancements + level 2 vales."
+  ],
+  "forget": [
+   "Avoid crafting cards with 2+ decay.",
+   "You can't buy an advancement with nowhere legal to sleeve it.",
+   "Unspent mana is lost; an unspent active mana token stays."
+  ]
+ },
+ "258779": {
+  "src": "the Planet Unknown rulebook (Adam's Apple Games)",
+  "goal": "Most **medals**: fill your planet with tiles, climb five resource tracks, rescue lifepods and clear meteorites.",
+  "turnTitle": "Each round",
+  "turn": [
+   "The station commander may turn the space station.",
+   "Everyone at once drafts one of the 2 tiles at their depot and places it on their planet.",
+   "Advance a resource track for each resource on the tile; then the commander passes left."
+  ],
+  "actions": [
+   [
+    "Placement",
+    "The first tile touches the edge; later ones touch an earlier tile. No overlaps, on the grid. A tile on a lifepod or rover destroys it."
+   ],
+   [
+    "Meteors",
+    "A tile with a meteor symbol gets a meteorite on it; that row and column can't score."
+   ],
+   [
+    "Water",
+    "Only advances if a water square covers planetary ice."
+   ],
+   [
+    "Energy",
+    "Advances the tile's other resource or a resource touching the energy area."
+   ],
+   [
+    "Rovers",
+    "Rover milestones place a rover; rover numbers move them; driving over meteorites and lifepods collects them."
+   ],
+   [
+    "Civ / tech / biomass",
+    "Civ cards, tech powers for the rest of the game, biomass patches to fill gaps."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "Synergy boosts: advance any one track.",
+   "A track at the top gives no more from that resource (rovers still move).",
+   "If you can play one of your 2 tiles, you must."
+  ],
+  "end": [
+   "Ends when someone can't place either tile (finish the round) or a depot empties.",
+   "Complete rows and columns without meteorites: their medal; each track's highest medal reached; 1 per lifepod, 1 per 3 meteorites; end-game civ cards; neighbour objectives.",
+   "Ties: fewest empty squares, then fewest meteorites left."
+  ],
+  "forget": [
+   "Each resource on a tile advances once, whatever the tile's size.",
+   "A player who can't place still takes a tile and advances both resources."
+  ]
  }
 };
