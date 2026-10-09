@@ -1477,6 +1477,25 @@
 
   /* ── Game Notes (shared) ── */
 
+  /* The Rules tab: a one-screen reference card (rules.js), the notes under it */
+  .rules-card{margin-bottom:1.6rem}
+  .rules-wait,.rules-none{font-size:0.8rem;color:var(--text-3);padding:0.4rem 0}
+  .rules-none a,.rules-src a{color:var(--accent);text-decoration:none;white-space:nowrap}
+  .rules-head{display:flex;align-items:baseline;justify-content:space-between;gap:0.5rem;margin-bottom:0.6rem}
+  .rules-title{font-size:1rem;font-weight:700;color:var(--accent)}
+  .rules-sub{font-size:0.7rem;color:var(--text-3)}
+  .rules-goal{margin:0 0 0.9rem;padding:0.6rem 0.75rem;border-radius:10px;background:var(--accent-soft);border:1px solid var(--accent-line);font-size:0.84rem;line-height:1.5}
+  .rules-sec{margin:0 0 0.9rem}
+  .rules-sec h4{margin:0 0 0.35rem;font-size:0.68rem;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-3)}
+  .rules-sec ol,.rules-sec ul{margin:0;padding-left:1.15rem;font-size:0.82rem;line-height:1.5}
+  .rules-sec li{margin:0.15rem 0}
+  .rules-sec li::marker{color:var(--accent)}
+  .rules-acts{margin:0;display:grid;grid-template-columns:minmax(0,max-content) minmax(0,1fr);gap:0.3rem 0.75rem;font-size:0.82rem;line-height:1.45}
+  .rules-acts dt{font-weight:700;color:var(--text)}
+  .rules-acts dd{margin:0;color:var(--text-2)}
+  @media (max-width:420px){.rules-acts{grid-template-columns:1fr;gap:0.05rem}.rules-acts dd{margin-bottom:0.4rem}}
+  .rules-src{font-size:0.7rem;color:var(--text-3);margin-top:0.4rem;line-height:1.5}
+  .rules-card + .notes-section{border-top:1px solid var(--line);padding-top:1.1rem}
   .notes-header{display:flex;align-items:baseline;justify-content:space-between;gap:0.5rem;margin-bottom:0.8rem}
   .notes-title{font-size:1rem;font-weight:700;color:var(--accent)}
   .notes-sub{font-size:0.62rem;opacity:0.4;text-transform:uppercase;letter-spacing:0.05em}

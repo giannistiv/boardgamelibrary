@@ -794,7 +794,7 @@ function openModal(game) {
   const roveHtml = typeof buildRoveCampaignHtml === 'function' ? buildRoveCampaignHtml(game) : '';
   const tabs = [['overview', 'Overview'], ['plays', `Plays${plays && plays.length ? ` <span class="gm-tab-n">${plays.length}</span>` : ''}`]]
     .concat(roveHtml ? [['campaign', 'Campaign']] : [])
-    .concat(game.bggId > 0 ? [['notes', 'Notes']] : []);
+    .concat(game.bggId > 0 ? [['rules', 'Rules']] : []);
   if (_modalTabFor !== game.bggId) { _modalTab = ''; _modalTabFor = game.bggId; }
   const tab = tabs.some(t => t[0] === _modalTab) ? _modalTab : (plays && plays.length ? 'plays' : 'overview');
 
@@ -827,7 +827,7 @@ function openModal(game) {
         ${playsPanel || '<div class="gm-empty">No plays logged yet. They show up here after the next BGStats import.</div>'}
       </div>
       ${roveHtml ? `<div class="gm-panel" data-panel="campaign"${tab === 'campaign' ? '' : ' hidden'}>${roveHtml}</div>` : ''}
-      ${game.bggId > 0 ? `<div class="gm-panel" data-panel="notes"${tab === 'notes' ? '' : ' hidden'}>${buildNotesHtml(game.bggId)}</div>` : ''}
+      ${game.bggId > 0 ? `<div class="gm-panel" data-panel="rules"${tab === 'rules' ? '' : ' hidden'}>${buildRulesPanelHtml(game)}</div>` : ''}
     </div>
   `;
   content.querySelector('.gm-tabs').addEventListener('click', (e) => {
@@ -836,7 +836,9 @@ function openModal(game) {
     _modalTab = t.dataset.tab;
     content.querySelectorAll('.gm-tab').forEach(x => { x.classList.toggle('active', x === t); x.setAttribute('aria-selected', String(x === t)); });
     content.querySelectorAll('.gm-panel').forEach(pn => { pn.hidden = pn.dataset.panel !== _modalTab; });
+    if (_modalTab === 'rules') wireRulesPanel(content, game);   // the card loads when first shown
   });
+  if (tab === 'rules') wireRulesPanel(content, game);
   overlay.classList.add('open');
   document.body.classList.add('modal-open');
   content.scrollTop = 0;
