@@ -648,5 +648,355 @@ const RULES = {
    "Releasing an animal for a project loses its appeal.",
    "Only 4 upgrades a game (conservation track, reputation track, 2nd partner zoo, 2nd university): you can't upgrade every action."
   ]
+ },
+ "181260": {
+  "src": "the Burano rulebook",
+  "goal": "Most **VP** after 4 seasons (14 turns): build houses on the main island to fish, make lace and earn coins, and roof them for points.",
+  "turnTitle": "Each season",
+  "turn": [
+   "**Pyramid**: everyone secretly stacks 14 cubes (3×3, then 2×2, then 1). Each cube left in your reserve goes back for 1 coin.",
+   "**Turns** (4, 4, 3, 3 per season): up to 4 moves in any mix and order. The 1st move pays you 1 coin; the 2nd costs 3, the 3rd 3, the 4th 4.",
+   "No move at all: take 1 coin instead."
+  ],
+  "actions": [
+   [
+    "Pick up a house",
+    "Move a free cube (nothing on top of it) from your pyramid to your preparation area (3 spaces)."
+   ],
+   [
+    "Build a house",
+    "Put a prepared cube on the main island, touching another cube there (a corner is enough), or on a rooftop block (matching colour: +1 privilege). Then do the action its colour has this season."
+   ],
+   [
+    "Roof houses",
+    "Lay a roof tile across 2 cubes in its two colours, side by side on the same floor (never the 3rd). Take 2 privilege or a building card, then score the roof."
+   ],
+   [
+    "Fishing",
+    "Move your boat one step. To an island: 1–3 fish cards for the colours your schedule ring's arrows match there, and send workers. To a port: sell one set to a merchant ship for VP."
+   ],
+   [
+    "Lace making",
+    "Send up to 3 workers to workshop spaces in your arrows' colours, each next to your other lace workers."
+   ],
+   [
+    "Earning",
+    "1 coin per visible coin on your schedule ring, plus 1 per worker you call back home."
+   ],
+   [
+    "Privilege",
+    "1 point each: swap two dock houses before fishing, place a lace worker anywhere (bumping one), add a cube to your pyramid, or take 1 coin."
+   ]
+  ],
+  "roundTitle": "End of a season",
+  "round": [
+   "Each island's majority: 4 VP (3 with 3 players, 2 with 2); ties split it.",
+   "Lace: for each lace worker, return a pyramid cube matching its space for 2 VP, plus a bonus for each group of connected paid workers (2: +1 … 9: +21).",
+   "Then (not after winter): action colours reshuffle, cubes and roofs refill, the start player passes left."
+  ],
+  "end": [
+   "After winter's island and lace scoring: privilege counts as coins, every 5 coins is 1 VP.",
+   "Unsold fish 1 VP each; building cards their VP.",
+   "Ties: most cubes in the preparation area, then most coins."
+  ],
+  "forget": [
+   "The action colours change every season: check the action board before you build.",
+   "Your schedule ring must always keep at least one worker.",
+   "Sending workers to an island bumps one worker of each other player there (they get 2 coins).",
+   "Roofs only go on cubes on the same floor, never on the 3rd floor."
+  ]
+ },
+ "102794": {
+  "src": "the Caverna: The Cave Farmers rulebook (Lookout Games)",
+  "goal": "Most **gold points** after 12 rounds (11 with 2 players): grow your dwarf family, furnish caverns, farm, raise animals and fill your home board.",
+  "turnTitle": "Each round",
+  "turn": [
+   "Reveal a new action space; accumulating spaces get their goods (they pile up).",
+   "In turn order, place one dwarf at a time on a free action space and do it at once. Unarmed dwarfs go first, then armed ones from the weakest weapon up.",
+   "Dwarfs return home, then the harvest (if any)."
+  ],
+  "actions": [
+   [
+    "Excavation / Drift mining",
+    "Take the stone; place a cavern/tunnel twin tile on 2 mountain spaces joined to your cave."
+   ],
+   [
+    "Clearing / Sustenance / Slash-and-burn",
+    "Take the goods; place a meadow/field twin tile in the forest (the first one at the cave entrance)."
+   ],
+   [
+    "Sow",
+    "Up to 2 grain fields (1 becomes 3) and 2 vegetable fields (1 becomes 2)."
+   ],
+   [
+    "Furnish",
+    "Pay for a furnishing tile and put it in an empty cavern; dwellings make room for more dwarfs."
+   ],
+   [
+    "Family growth",
+    "Only with free room in your dwellings: a new dwarf who works from next round (max 5, 6 with the Additional dwelling)."
+   ],
+   [
+    "Fences and stables",
+    "Small pasture 2 wood, large pasture 4 wood; a stable 1 stone (max 3)."
+   ],
+   [
+    "Mines",
+    "Ore mine on 2 tunnels (+3 ore); ruby mine on a tunnel (+1 ruby if it's a deep tunnel)."
+   ],
+   [
+    "Weapons and expeditions",
+    "Forge: an unarmed dwarf spends up to 8 ore for a weapon of that strength. Expedition: pick loot up to your strength, then the weapon gets +1."
+   ],
+   [
+    "Starting player",
+    "Take the token and the food there, plus 2 ore (1–3 players) or 1 ruby (4+)."
+   ]
+  ],
+  "roundTitle": "Harvest",
+  "round": [
+   "**Fields**: take 1 grain or vegetable from each sown field.",
+   "**Feed**: 2 food per dwarf (1 for one born this round). Each missing food is a begging marker: −3 points.",
+   "**Breed**: each farm animal type with 2+ gets one baby, if you have room for it.",
+   "No harvest after rounds 1, 2 and 4 (after 4: just 1 food per dwarf). From round 5, every round, unless a red ? harvest marker changes it."
+  ],
+  "end": [
+   "+1 per animal (dogs too) and per dwarf; −2 per missing farm animal type (sheep, donkey, boar, cattle).",
+   "Grain ½ (rounded up), vegetables, rubies and gold 1 each; −1 per unused home board space; −3 per begging marker.",
+   "Pastures 2/4, ore mine 3, ruby mine 4, furnishing tiles their value, plus parlor, storage and chamber bonuses."
+  ],
+  "forget": [
+   "The starting player only changes when someone takes the Starting player action.",
+   "Rubies are wild: 1 for most goods, a field, meadow or tunnel; 2 for a cavern; or to play an armed dwarf out of order.",
+   "Animals can't wait in your supply: house them at once or turn them into food.",
+   "Food any time: grain 1, vegetable 2, sheep 1, boar 2, cattle 3, ruby 2; gold buys food at one more gold than the food.",
+   "Dogs let a meadow or pasture hold one more sheep than there are dogs."
+  ]
+ },
+ "403150": {
+  "src": "the World Order rulebook",
+  "goal": "Most **VP** after 6 rounds: spread Influence across the world's regions (each cube pays the VP on its slot), with region majorities scored after rounds 3 and 6.",
+  "turnTitle": "Each round",
+  "turn": [
+   "**Preparation** (from round 2): draw 6, reveal new country cards, fewest VP picks turn order first, produce Energy, Raw Materials and Food, choose a Focus.",
+   "**Actions**: in turn order, play one Ability card per turn, 4 turns each. Or place a card face down to use a Strategic Asset, or to pass for 10 Ordis.",
+   "**Research** (not in round 6): discard what you played; the cards left in hand give their bonus and Research to buy Market cards onto your deck."
+  ],
+  "actions": [
+   [
+    "Improve Relations",
+    "Pay Diplomacy = a country's value to ally it. Exhausting your allies in that region pays part of it."
+   ],
+   [
+    "Engage",
+    "Pay the region's Diplomacy cost (allies there discount it): +1 Influence and an Engage token."
+   ],
+   [
+    "Trade",
+    "Export by the icons on your allies (5 / 15 / 20 Ordis); import from allies or players (3 / 10). Each resource in one deal only."
+   ],
+   [
+    "Invest",
+    "Pay and exhaust a ready ally: an FDI token (money every round) and +1 Influence."
+   ],
+   [
+    "Move",
+    "5 Ordis per army moved to your zone of interest, or to a region where you have a base."
+   ],
+   [
+    "Build a Base",
+    "Exhaust a ready ally showing your flag: send armies up to its value, 5 Ordis for the base and per army, +1 Influence."
+   ],
+   [
+    "Growth card",
+    "Pay for the next level up: its VP now, its ability from the round matching its level."
+   ],
+   [
+    "Produce",
+    "Primary resources as your production shows; secondary ones up to your production, paying their inputs."
+   ]
+  ],
+  "roundTitle": "Aftermath",
+  "round": [
+   "Investments: 2 Ordis × each FDI country's value. Discard Engage tokens for 5 Ordis per ally in that region.",
+   "Prosperity: pay Consumer Goods to move one step, for VP and money.",
+   "THREAT: in each region of your zone of interest, lose 2 VP per opponent with more armies than your defence.",
+   "Rounds 3 and 6: regions with all permanent slots full score 1 VP per cube plus majority bonuses (ties: most armies). Then the money, armies-on-board and allies majorities."
+  ],
+  "end": [
+   "At the final scoring: +2 VP per unused Strategic Asset.",
+   "Ties: most first places in the final region scoring, then most Influence on the board."
+  ],
+  "forget": [
+   "Temporary slots pay more VP, but when the row is full the leftmost cube is pushed out (and the newcomer gets no VP).",
+   "A region with an empty permanent slot scores nothing for anyone.",
+   "Focus: Domestic +2 Research; Diplomatic Engage 2 cheaper; Military +1 THREAT and +1 defence.",
+   "USA and EU ignore each other's THREAT (NATO)."
+  ]
+ },
+ "341169": {
+  "src": "the Great Western Trail: Second Edition rulebook",
+  "goal": "Most **VP**: drive your herd to Kansas City again and again (5–7 times), ship it by rail, and build, hire and collect along the trail.",
+  "turn": [
+   "**Move** your herder 1 up to your step limit locations forward (empty spaces don't count). Pay for the hands you pass: hazards and outlaws to the bank, others' buildings to their owner.",
+   "**Act**: on a neutral building or your own, use each local action once. Anywhere else, or instead, one single auxiliary action.",
+   "**Draw** back up to your hand limit (4, up to 6)."
+  ],
+  "actions": [
+   [
+    "Hire a worker",
+    "Pay its row's cost (± the icon), never from the job market token's row. Cowboys buy cattle, builders build, engineers drive the train."
+   ],
+   [
+    "Buy cattle",
+    "Spend cowboys and money on market cattle (more cowboys, better deals); a spare cowboy can add 2 cards to the market."
+   ],
+   [
+    "Build",
+    "Place a private building for 2 Dollars per builder it needs, or replace one of yours paying the difference."
+   ],
+   [
+    "Move the engine",
+    "Up to 1 space per engineer; stop at a station to upgrade it (disc, VP) and you may make one of your workers its station master for the tile."
+   ],
+   [
+    "Objective card",
+    "Take one to your discard pile; play it from hand for its bonus. Met at the end: VP; missed: the minus."
+   ],
+   [
+    "Hazards and outlaws",
+    "Remove a hazard (VP at the end) or collect an outlaw's bounty."
+   ],
+   [
+    "Auxiliary actions",
+    "1 Dollar, draw and discard, engine forward, or engine back for certificates or to trim your deck. Unlocked as you clear discs."
+   ]
+  ],
+  "roundTitle": "In Kansas City",
+  "round": [
+   "Take 3 foresight tiles: workers go to the job market, hazards and outlaws onto the trail.",
+   "**Income**: the breeding value of each **different** cattle type in hand, plus any certificates. Take that many Dollars.",
+   "**Delivery**: a disc on a city worth no more than that (no repeats, except Kansas City and New York). Pay 1 Dollar per cross if your engine is behind it.",
+   "Back to the start of the trail; refill the foresight spaces."
+  ],
+  "end": [
+   "When the last job market space fills, everyone else takes one final turn.",
+   "1 VP per 5 Dollars; buildings, cities, stations, hazards, cattle cards, objectives (minus the missed ones), station masters.",
+   "4 VP per worker on a 5th or 6th space; 3 for clearing the step-limit disc marked with VP; 2 for the job market token. Ties share."
+  ],
+  "forget": [
+   "Each cattle type counts once at income: variety beats duplicates.",
+   "Discs from dark-cornered spaces only go on dark-cornered cities and stations.",
+   "Delivering to Kansas City pays 4 Dollars but costs 6 VP at the end.",
+   "A cattle cost with a red arrow means those exact cards from your hand."
+  ]
+ },
+ "12333": {
+  "src": "the Twilight Struggle rulebook (GMT Games)",
+  "goal": "Pull the VP track your way: plus for the US, minus for the USSR. **20 VP**, controlling Europe when it's scored, or your opponent starting nuclear war wins at once.",
+  "turnTitle": "Each turn",
+  "turn": [
+   "DEFCON improves by 1 (if below 5); deal up to 8 cards (9 from turn 4).",
+   "**Headline**: both secretly pick a card for its event; the higher Ops goes first (ties: US).",
+   "**Action rounds**: 6 (7 from turn 4), USSR first. You must play a card every round, for its event or its Ops.",
+   "10 turns in all."
+  ],
+  "actions": [
+   [
+    "Event",
+    "Do the card's text. Play your opponent's event for Ops and it still happens; you choose before or after."
+   ],
+   [
+    "Place influence",
+    "1 Op per marker, 2 into an enemy-controlled country; only in or next to countries where you had influence at the start of the round."
+   ],
+   [
+    "Realign",
+    "1 Op per roll; both roll, +1 per adjacent controlled country, for more influence there, and for an adjacent superpower. The winner removes the difference."
+   ],
+   [
+    "Coup",
+    "Roll + Ops against twice the stability: remove enemy influence by the excess, then add yours. Counts as military ops; in a battleground it lowers DEFCON."
+   ],
+   [
+    "Space race",
+    "Once per turn, a card with Ops ≥ the box: roll to advance for VP or abilities."
+   ],
+   [
+    "China Card",
+    "An extra card: +1 Ops if all spent in Asia, then it passes face down to your opponent."
+   ]
+  ],
+  "roundTitle": "End of a turn",
+  "round": [
+   "Military ops: each player needs at least the DEFCON number; the opponent gains 1 VP per point short.",
+   "Usually one card stays in hand for next turn; a scoring card can never be held.",
+   "Mid War cards join at turn 4, Late War at turn 8."
+  ],
+  "end": [
+   "After turn 10, score every region as if its card were played; most VP wins (zero is a draw).",
+   "Regions: presence, domination or control, +1 per battleground controlled and per country next to the enemy superpower."
+  ],
+  "forget": [
+   "Control = influence at least the stability **and** at least the stability more than your opponent's.",
+   "DEFCON 4: no coups or realignments in Europe; 3: Asia too; 2: the Middle East too. Whoever takes it to 1 loses.",
+   "Starred (*) events leave the game once played.",
+   "The China Card can't be a headline."
+  ]
+ },
+ "247763": {
+  "src": "the Underwater Cities rulebook (Delicious Games)",
+  "goal": "Most **points** after 10 rounds and 3 Productions: build cities, tunnels and buildings, connect them, and keep your people fed.",
+  "turn": [
+   "Each round everyone takes 3 turns, in play order.",
+   "Put an action tile on a free action slot and play 1 card. Same colour: also use the card (before or after the action). Different: just the action.",
+   "End of your turn: draw 1 card. Start each turn with 3 (discard down)."
+  ],
+  "actions": [
+   [
+    "Colours",
+    "Green cards are strongest but match the weakest slots; yellow cards are weakest but match the strongest; red in between. The colourless slot is always open: 2 cards and 2 credits."
+   ],
+   [
+    "Build a city",
+    "Next to an existing city: 2 steelplast, 1 kelp, 1 credit. Symbiotic cities need biomatter but make 2 points each Production."
+   ],
+   [
+    "Build a tunnel",
+    "1 steelplast + 1 credit, always joined to your network."
+   ],
+   [
+    "Build a building",
+    "Farm 1 kelp, desalination plant 1 credit, laboratory 1 steelplast; next to a city or city site."
+   ],
+   [
+    "Upgrade",
+    "Usually 1 science: upgraded structures produce more."
+   ],
+   [
+    "Claim cards",
+    "Matching permanent, action, production and end-scoring cards stay. Max 4 action cards (the Personal Assistant counts), each once per era."
+   ],
+   [
+    "Biomatter",
+    "Can replace kelp or steelplast when building."
+   ]
+  ],
+  "round": [
+   "Action tiles come back; next round's order follows the Federation track (furthest ahead first).",
+   "Production after rounds 4, 7 and 10: tunnels next to cities, connected buildings and symbiotic cities produce, then production cards and metropolises.",
+   "Then feed 1 kelp per connected city; short: 1 biomatter, then 3 points per unfed city.",
+   "New era: draw 3 new cards, keep 3 in all; action cards are ready again."
+  ],
+  "end": [
+   "Your connected metropolis and end-scoring cards.",
+   "Each connected city: 2 points, or 3 / 4 / 6 with 1 / 2 / 3 building types next to it.",
+   "Biomatter sells for 2 credits; every 4 credits, kelp, science or steelplast is 1 point. Ties: the final play order."
+  ],
+  "forget": [
+   "Disconnected cities and buildings don't produce, don't eat and don't score.",
+   "A tunnel only produces next to a city.",
+   "Moving up the Federation track is how you go first next round."
+  ]
  }
 };

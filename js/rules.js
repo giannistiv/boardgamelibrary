@@ -3,7 +3,8 @@
 // written from each game's official rulebook into data/rules.js and loaded
 // only when the tab is first opened. The same layout for every game: the
 // goal, your turn, the actions, the end of a round, the end of the game and
-// its scoring, and what's easy to forget. The shared notes follow underneath.
+// its scoring, and what's easy to forget (a card may rename the turn and round
+// headings, e.g. Kansas City or the harvest). The shared notes follow underneath.
 
 let _rules = null, _rulesLoading = null;
 function _loadRules() {
@@ -48,9 +49,9 @@ function rulesCardHtml(game, r) {
     ? `<dl class="rules-acts">${r.actions.map(([name, what]) => `<dt>${_rulesText(name)}</dt><dd>${_rulesText(what)}</dd>`).join('')}</dl>` : '';
   return `<div class="rules-head"><span class="rules-title">&#128220; Rules</span><span class="rules-sub">quick reference</span></div>
     ${r.goal ? `<p class="rules-goal">${_rulesText(r.goal)}</p>` : ''}
-    ${sec('On your turn', r.turn && r.turn.length ? steps(r.turn) : '')}
+    ${sec(_rulesText(r.turnTitle || 'On your turn'), r.turn && r.turn.length ? steps(r.turn) : '')}
     ${sec('Actions', actions)}
-    ${sec('End of a round', r.round && r.round.length ? list(r.round) : '')}
+    ${sec(_rulesText(r.roundTitle || 'End of a round'), r.round && r.round.length ? list(r.round) : '')}
     ${sec('End of the game', r.end && r.end.length ? list(r.end) : '')}
     ${sec('Easy to forget', r.forget && r.forget.length ? list(r.forget) : '')}
     <div class="rules-src">From ${_rulesText(r.src || 'the rulebook')}. Spot a mistake? Add a note below. &middot; <a href="${aids}" target="_blank" rel="noopener">Player aids on BGG &#8599;</a></div>`;
