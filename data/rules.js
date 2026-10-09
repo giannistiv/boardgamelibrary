@@ -3354,5 +3354,273 @@ const RULES = {
    "Trashing weak letters makes your deck better.",
    "The common card can be used only once per word."
   ]
+ },
+ "345972": {
+  "src": "the Cat in the Box rulebook (Bezier Games)",
+  "goal": "Trick-taking where cards have no colour until played: you declare it. Most points after as many rounds as players.",
+  "turnTitle": "Each round",
+  "turn": [
+   "Deal the cards (10 each with 2–4 players, 9 with 5); everyone puts 1 face down, unused this round.",
+   "In order, bet how many tricks you'll win (with 3 players: 1, 3 or 4).",
+   "Play tricks until 1 card is left in hand (8 tricks with 4 players), or until a paradox."
+  ],
+  "actions": [
+   [
+    "Declaring",
+    "Name the colour of the card you play; that colour's slot for that number on the research board must be empty, and you must still have that colour on your board. Mark it with a token."
+   ],
+   [
+    "Leading",
+    "The leader can't declare red (trump) until someone has, unless they can't declare anything else."
+   ],
+   [
+    "Following",
+    "Any colour you're allowed; declaring a colour other than the led one means you can never declare the led colour again this round."
+   ],
+   [
+    "Winning",
+    "Red beats everything, then the led colour; highest number wins."
+   ],
+   [
+    "Paradox",
+    "If you can't legally play any card, reveal your hand: the round ends at once."
+   ]
+  ],
+  "roundTitle": "Scoring",
+  "round": [
+   "1 point per trick won (−1 each instead for whoever caused a paradox).",
+   "Bet exactly right: bonus = your largest group of connected tokens on the research board (not for the paradox player).",
+   "2 players: no bets; winning 4 or fewer tricks earns the bonus."
+  ],
+  "end": [
+   "After everyone has started a round, most points wins; ties: best final round."
+  ],
+  "forget": [
+   "You can't cause a paradox on purpose: if any card is legal, you must play one.",
+   "The face-down card doesn't count this round."
+  ]
+ },
+ "374173": {
+  "src": "the Star Wars: The Deckbuilding Game rulebook (Fantasy Flight Games)",
+  "goal": "Two players, Empire vs Rebels. Destroy **3** of your opponent's bases.",
+  "turn": [
+   "Start: reveal a new base if you lost yours; Force fully on your side = +1 resource; capital ships give their resources.",
+   "Then in any order: play cards, buy from the galaxy row, use abilities, commit and resolve attacks.",
+   "End: discard units in play and your hand, lose unspent resources, draw 5."
+  ],
+  "actions": [
+   [
+    "Play",
+    "Take its resources and Force (move the Force marker your way)."
+   ],
+   [
+    "Buy",
+    "Your faction's or neutral cards, to your discard pile; refill the row."
+   ],
+   [
+    "Attack a base",
+    "Total the committed attack; enemy capital ships must be destroyed first, the rest hits the base."
+   ],
+   [
+    "Bounty / sabotage",
+    "Units attack an enemy-faction card in the galaxy row: beat its target value to discard it and take its reward."
+   ],
+   [
+    "Abilities",
+    "Once per turn each, optional; 'If the Force is with you' needs the marker on your side."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "Capital ships stay in play until destroyed; units leave at end of turn.",
+   "Each card can join one attack a turn.",
+   "Extra damage beyond a base's hit points is lost."
+  ],
+  "end": [
+   "Your opponent's third base destroyed: you win at once."
+  ],
+  "forget": [
+   "Exiling weak starting cards strengthens your deck.",
+   "'When' abilities trigger each time; others once a turn.",
+   "Damage on a base stays until repaired."
+  ]
+ },
+ "342070": {
+  "src": "the Thunder Road: Vendetta rulebook (Restoration Games)",
+  "goal": "First car over the finish line, or the last player with a working car.",
+  "turnTitle": "Each round",
+  "turn": [
+   "Everyone rolls their 4 movement dice; the first player rolls the road die. Each player takes 3 turns.",
+   "Your turn: **assign** a die to a car that hasn't moved this round (if none are left, a car may coast); once a round also a die to a **command**.",
+   "**Move** that car exactly that far, into its front three spaces; then **shoot** (not in round 1)."
+  ],
+  "actions": [
+   [
+    "Commands",
+    "Airstrike (any die: drop your chopper, shoot from it), Nitro (1–3: add to movement), Drift (3–5: pass through the first car), Repair (6: remove a damage)."
+   ],
+   [
+    "Road die",
+    "A car that started and stayed on road may add the road die after moving."
+   ],
+   [
+    "Slam",
+    "Entering an occupied space stops you; roll slam and direction dice to see which car is shoved where (the bigger car may reroll)."
+   ],
+   [
+    "Shoot",
+    "Roll the shooting die: hit if it matches the target's size."
+   ],
+   [
+    "Coast",
+    "Move exactly 1; max twice per car."
+   ]
+  ],
+  "roundTitle": "Damage",
+  "round": [
+   "Draw a damage token and resolve it; 2 damage makes a car inoperable (it can still be slammed).",
+   "Eliminated: impassable space, ending a turn with a chopper, left on the removed rear tile, or pushed off the side or back.",
+   "Moving off the front adds a new tile and removes the rear one."
+  ],
+  "end": [
+   "When a player is out (or after the 5th tile with 2 players), the lead tile gets the finish line.",
+   "Win by driving onto the finish line, or by being the only one with an operable car."
+  ],
+  "forget": [
+   "Choppers eliminate any car ending a turn on them, yours included.",
+   "You may shoot your own cars."
+  ]
+ },
+ "340677": {
+  "src": "the Bad Company rulebook",
+  "goal": "Most points: pull off heists with your gang, upgrade them, and stay ahead of the police.",
+  "turnTitle": "Each turn",
+  "turn": [
+   "The boss rolls all 5 dice (pay to reroll) and pairs the 4 gold dice into two sums.",
+   "The boss activates both gang members with those numbers; everyone else activates one of them.",
+   "Then everyone recruits, completes tasks and heists. The police car moves by its die; refill heists to 2; the boss passes left."
+  ],
+  "actions": [
+   [
+    "Rewards",
+    "Coins, car moves, or markers on matching symbols of your heists and tasks."
+   ],
+   [
+    "Fixer (2) / Chauffeur (12)",
+    "Markers for every matching symbol on your gang / your car moves 2."
+   ],
+   [
+    "Recruit",
+    "Pay coins to advance your recruiter: draw 3 upgrades, keep 1 on its gang member. At the end of the track: $5 for 3 points."
+   ],
+   [
+    "Tasks",
+    "2 markers on a task for its bonus."
+   ],
+   [
+    "Heists",
+    "Fully covered: take its bonus and flip it. Most of a mission symbol takes that necklace (1 point, and 1 more each activation)."
+   ],
+   [
+    "Car chase",
+    "Passing a checkpoint before the police gives its bonus; shortcuts skip it."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "Doubles: the boss activates that gang member twice.",
+   "Loot cards can be used any time.",
+   "Heist abilities stay with you for the rest of the game."
+  ],
+  "end": [
+   "Triggered by someone's 6th heist or any car entering the red zone: one final turn, everyone pairing the gold dice their own way and activating two.",
+   "Heists, heist effects, loot, top upgrade cards, 2 per necklace, 1 per 2 markers; −3 if your car is behind the police.",
+   "Ties: most coins."
+  ],
+  "forget": [
+   "The police car never takes shortcuts.",
+   "Only the top upgrade card on each gang member scores."
+  ]
+ },
+ "258210": {
+  "src": "the Blitzkrieg! rulebook (PSC Games)",
+  "goal": "Two players, Axis vs Allies. First to **25** war victory points (the Axis reaching it first gives the Allies one last turn).",
+  "turn": [
+   "Place one unit from your reserve on a free battle space in the topmost open campaign of any theatre.",
+   "Do the space's effect.",
+   "Move that theatre's battle marker your way by the unit's value.",
+   "Draw a unit from your bag."
+  ],
+  "actions": [
+   [
+    "Units",
+    "Armies on land, navies on sea, airforces anywhere; generals and admirals push by the units you already have there; blitz units let you place another."
+   ],
+   [
+    "Space effects",
+    "Production (draw units), bombing (opponent loses a reserve unit), research (special weapons), tactical or strategic advantage, propaganda (VP)."
+   ],
+   [
+    "Closing a campaign",
+    "Filling its last space: whoever the marker favours scores its VP (both if it's in the middle)."
+   ],
+   [
+    "Closing a theatre",
+    "Pushing the marker to your end closes all its campaigns, gives you their unused space effects and VP."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "VP icons on the battle tracks score as the marker passes them.",
+   "Only the theatre you just played in can be closed; other pushes stop one space short.",
+   "The nuclear bomb: +7 here, −2 everywhere else."
+  ],
+  "end": [
+   "Allies reach 25 first: they win. Axis first: the Allies get one more turn, then most VP. Tied at 25+: Allies.",
+   "A player who can't place a unit at the start of their turn loses."
+  ],
+  "forget": [
+   "Your reserve can grow and shrink: protect it from bombing.",
+   "Spies copy the unit your opponent just played."
+  ]
+ },
+ "345584": {
+  "src": "the Mindbug: First Contact rulebook (Nerdlab Games)",
+  "goal": "Two players. Bring your opponent from 3 life to 0 with your creatures — and steal theirs with your 2 Mindbugs.",
+  "turn": [
+   "Do one: **play a card** or **attack** with one creature.",
+   "Whenever a card leaves your hand, draw back to 5 at once (while your deck lasts)."
+  ],
+  "actions": [
+   [
+    "Play a card",
+    "Your opponent may spend a Mindbug to take it (and its play effect) instead; then you take another turn."
+   ],
+   [
+    "Attack",
+    "Your opponent may block with a creature: the lower power is defeated (equal: both). Unblocked: they lose a life."
+   ],
+   [
+    "Frenzy / Hunter",
+    "Attack a second time if it survives / choose which enemy must block."
+   ],
+   [
+    "Poisonous / Sneaky / Tough",
+    "Always defeats what it fights / only sneaky creatures can block it / survives its first defeat by exhausting."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "Mindbugs only work on cards played from hand, never on cards already in play.",
+   "Play effects happen for whoever ends up with the card.",
+   "Defeated effects trigger only when it goes to the discard pile."
+  ],
+  "end": [
+   "Your opponent at 0 life: you win."
+  ],
+  "forget": [
+   "A mindbugged card can't be mindbugged back.",
+   "Resolve as much of an effect as you can and ignore the rest."
+  ]
  }
 };
