@@ -14,6 +14,7 @@ token is needed. Facts and pictures are fetched once per game and kept while
 it stays; the campaigns' numbers and the hot list's order are fresh every run.
 """
 import html
+import urllib.parse
 import importlib.util
 import json
 import os
@@ -27,7 +28,7 @@ API = 'https://api.geekdo.com/api'
 PICTURES = 6          # gallery pictures per game
 UPCOMING_OWNERS = 150  # fewer BGG owners than this and it's not out yet
 ABOUT_MAX = 2500      # characters of BGG's description kept per game
-CAMPAIGN_LINK = 'https://boardgamegeek.com/project/link/version/{}'
+KS_SEARCH = 'https://www.kickstarter.com/discover/advanced?term={}'
 
 _spec = importlib.util.spec_from_file_location('fetch_covers', os.path.join(ROOT, 'tools', 'fetch-covers.py'))
 covers = importlib.util.module_from_spec(_spec)
@@ -123,13 +124,37 @@ def details(gid):
     }
 
 
-def campaign(c):
+def _real(url):
+    return url.startswith('https://') and '%' not in url and 'boardgamegeek.com/project/link' not in url
+
+
+def campaign_link(c, old):
+    """The campaign's page. BGG's countdown gives Kickstarter links without
+    the creator ("kickstarter.com/%/parry"); the game version's own record
+    has the whole link, looked up once per campaign and kept from the last
+    run. Failing that, a Kickstarter search for the campaign."""
+    url = (c.get('orderUrl') or '').strip()
+    if _real(url):
+        return url
+    ver = str(c.get('versionid') or '')
+    if old and old.get('ver') == ver and _real(old.get('url') or ''):
+        return old['url']
+    try:
+        item = get(f'{API}/geekitems?objectid={ver}&objecttype=version').get('item') or {}
+        full = (item.get('orderurl') or '').split('?')[0].strip()
+        if _real(full):
+            return full
+    except Exception as e:
+        print(f'fetch-hot: campaign {ver}: {type(e).__name__}: {e}')
+    slug = url.rstrip('/').split('/')[-1] if '/' in url else ''
+    return KS_SEARCH.format(urllib.parse.quote((slug or c.get('name') or '').replace('-', ' ')))
+
+
+def campaign(c, old=None):
     """A live crowdfunding campaign, as the tab shows it."""
-    url = c.get('orderUrl') or ''
-    if not url.startswith('https://') or '%' in url:   # Kickstarter links come without the creator:
-        url = CAMPAIGN_LINK.format(c.get('versionid'))  # BGG's own link takes you there
     return {
-        'on': c.get('orderType') or '', 'url': url, 'ends': c.get('endDate') or '',
+        'on': c.get('orderType') or '', 'url': campaign_link(c, old), 'ver': str(c.get('versionid') or ''),
+        'ends': c.get('endDate') or '',
         'pct': _int(c.get('progress')), 'backers': _int(c.get('backersCount')),
         'pledged': _int(c.get('pledged')), 'cur': c.get('currency') or '',
         'more': [a.get('name') for a in c.get('additionalItems') or [] if a.get('name')][:6],
@@ -183,10 +208,11 @@ def main():
         gid = str(item.get('id') or '')
         if not gid.isdigit() or gid in games:
             continue
+        old_camp = (before.get(gid) or {}).get('camp')   # (with_details drops it)
         g = with_details(gid, before)
         year = next((_int(d.get('displayValue')) for d in item.get('descriptors') or [] if d.get('name') == 'yearpublished'), 0)
         g.update({'name': item.get('name') or c.get('name') or g.get('name') or f'Game #{gid}',
-                  'year': year or g.get('year', 0), 'camp': campaign(c)})
+                  'year': year or g.get('year', 0), 'camp': campaign(c, old_camp)})
         g['img'] = g.get('img') or ((item.get('imageSets') or {}).get('square100') or {}).get('src@2x', '')
         g['desc'] = g.get('desc') or re.sub(r'\s+', ' ', c.get('description') or '').strip()[:300]
         games[gid] = g
