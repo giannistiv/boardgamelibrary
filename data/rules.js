@@ -4737,5 +4737,226 @@ const RULES = {
    "Going to sleep early discards the rest of your deck.",
    "Tool tokens are used up when you use them."
   ]
+ },
+ "253344": {
+  "src": "the Cthulhu: Death May Die rulebook (CMON)",
+  "goal": "**Co-op**: complete the episode's tasks to disrupt the ritual, then kill the Elder One by beating its final stage.",
+  "turn": [
+   "**Take 3 actions**: run (up to 3 spaces; enemies follow you), attack, rest (safe space: heal 3 of stress and wounds), trade, or the episode's own actions.",
+   "**Draw a Mythos card** and resolve it top to bottom.",
+   "**Investigate** if your space is safe (draw a Discovery card), or **fight**: every enemy there attacks you.",
+   "**End of turn**: fire, then check the Mythos discard for 3 summoning symbols (the Elder One advances), then summoning and Elder One effects."
+  ],
+  "actions": [
+   [
+    "Rolling",
+    "3 black dice (+ green bonus dice): success = 1 wound or a hit; elder sign for skills; tentacle = lose 1 sanity on every roll; blank."
+   ],
+   [
+    "Stress",
+    "Take 1 stress to reroll a die (yours or an enemy's), as often as your track allows."
+   ],
+   [
+    "Order of results",
+    "Successes first, then other effects, then tentacles."
+   ],
+   [
+    "Sanity thresholds",
+    "Hitting one stops the loss there: your insanity activates and you level up a skill."
+   ]
+  ],
+  "roundTitle": "The Elder One",
+  "round": [
+   "It can't be hurt until the ritual is disrupted; disrupting it summons the Elder One at end of turn.",
+   "Once on the board it attacks anyone ending their turn in its space, with all its stages' dice.",
+   "Each stage has its own health; extra wounds don't carry over."
+  ],
+  "end": [
+   "Win: defeat its final stage.",
+   "Lose: anyone dies or goes mad before it's summoned; everyone dies after; or the progression reaches the last summoning space."
+  ],
+  "forget": [
+   "Resting doesn't heal sanity.",
+   "Leaving a space with fire gives you its fire tokens.",
+   "Companions can absorb wounds."
+  ]
+ },
+ "253759": {
+  "src": "the Paint the Roses rulebook (North Star Games)",
+  "goal": "**Co-op**: fill the Queen's garden before she catches the gardeners on the score track, by working out each other's secret whims.",
+  "turn": [
+   "**Place** a shrub tile from the greenhouse anywhere in the garden.",
+   "**Clues**: everyone whose whim is matched by the new tile and an adjacent one puts a clue token on the new tile (one per matching neighbour).",
+   "**Guess**: the team must guess at least one player's whim (both symbols). Right: move the gardeners on and you may guess again. Wrong: stop.",
+   "**Move the Queen** by her speed (double after a wrong guess), then replenish whims and the greenhouse and pass it left."
+  ],
+  "actions": [
+   [
+    "Whims",
+    "Two symbols (colours or shapes) on adjacent shrubs; easy 1–2 points, medium 2–3, hard 4–5."
+   ],
+   [
+    "Queen's speed",
+    "1 + a flower for each time the gardeners pass the White Rabbit."
+   ],
+   [
+    "Notes",
+    "Take notes about others' whims, never your own."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "Never talk about or react to discussion of your own whim.",
+   "Only one player at a time may hold an easy whim.",
+   "A new whim isn't matched retroactively."
+  ],
+  "end": [
+   "Win: the garden is full and the Queen hasn't caught you (finish that turn).",
+   "Lose: the Queen reaches or passes the gardeners."
+  ],
+  "forget": [
+   "Each adjacent tile gives at most 1 clue.",
+   "2 players: 3 skip tokens let you skip guessing (the Queen still moves)."
+  ]
+ },
+ "129437": {
+  "src": "the Legendary: A Marvel Deck Building Game rulebook (Upper Deck)",
+  "goal": "**Co-op** against the Mastermind: defeat them **4 times** before their Scheme's 'Evil Wins' happens. Most victory points is the personal winner.",
+  "turn": [
+   "**Play the top Villain deck card**: villains enter the city (pushing others; the last escapes), bystanders get captured, scheme twists and master strikes resolve.",
+   "**Play your hand** for recruit points and attack; recruit heroes from the HQ and fight villains or the Mastermind, in any order.",
+   "**Discard everything and draw 6.**"
+  ],
+  "actions": [
+   [
+    "Recruit",
+    "Pay a hero's cost: it goes to your discard; refill the HQ at once."
+   ],
+   [
+    "Fight",
+    "Spend attack equal to a villain's: it and its bystanders go to your victory pile."
+   ],
+   [
+    "Mastermind",
+    "Fight it like a villain; take a random tactic card (its fight effect, VP). Four tactics beats it."
+   ],
+   [
+    "Superpowers",
+    "Class or team ability that works only if you already played another card of that class this turn."
+   ],
+   [
+    "Escapes",
+    "An escaping villain KOs a hero costing 6 or less from the HQ; captured bystanders make everyone discard a card."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "KO = removed from the game; KOing your starting S.H.I.E.L.D. cards is good.",
+   "Wounds: if you recruit and fight nothing this turn, you may KO all wounds in hand.",
+   "Don't shuffle your discard until your deck is empty and you need to draw."
+  ],
+  "end": [
+   "4 tactics defeated: good wins; then compare victory points.",
+   "The scheme's 'Evil Wins' condition: everyone loses.",
+   "Hero or villain deck runs out: a draw (highest VP wins individually)."
+  ],
+  "forget": [
+   "Masterminds don't count as villains.",
+   "Bystanders, scheme twists and master strikes don't push villains forward."
+  ]
+ },
+ "160610": {
+  "src": "the Thunderbirds rulebook (Modiphius)",
+  "goal": "**Co-op** as International Rescue: defeat The Hood's 3 schemes before he activates one, a disaster hits the skull slot, or the disaster deck runs out.",
+  "turn": [
+   "**Actions** (up to 3): move your machine up to its speed, rescue, plan, or scan (from Thunderbird 5).",
+   "Free operations any time between actions: transfer characters, load and unload Thunderbird 2, defeat schemes, use bonus tokens.",
+   "**Disaster phase**: draw a disaster card (slide the track along) or a 'Hood advances' card.",
+   "Pass the dice left."
+  ],
+  "actions": [
+   [
+    "Rescue",
+    "On the disaster's location: roll 2 dice + bonuses for the machines and pods there; meet its difficulty to avert it and take its reward. Each Hood face advances The Hood."
+   ],
+   [
+    "Plan",
+    "Draw a F.A.B. card, but The Hood advances."
+   ],
+   [
+    "Scan",
+    "Push a disaster back one slot."
+   ],
+   [
+    "Defeat a scheme",
+    "Discard its bonus tokens with characters at its locations, with the machines and pods it needs in place."
+   ],
+   [
+    "Bonus tokens",
+    "Teamwork +2, intelligence reroll, determination extra action, logistics F.A.B. card, technology build a pod."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "Speeds: TB1 3, TB2 2, TB3 3 (space only), TB4 1, FAB 1 1, TB5 stays put.",
+   "Thunderbird 2 carries TB4 or FAB 1, or two pods.",
+   "The board wraps around."
+  ],
+  "end": [
+   "Win: all 3 schemes defeated.",
+   "Lose: a disaster reaches the skull, The Hood reaches an undefeated scheme, or the disaster deck runs out."
+  ],
+  "forget": [
+   "Operations can't happen in the middle of an action.",
+   "Bonus tokens and F.A.B. cards can't be given to others.",
+   "Rerolling a Hood face away means The Hood doesn't move."
+  ]
+ },
+ "351817": {
+  "src": "the Marvel Zombies: A Zombicide Game rulebook (CMON)",
+  "goal": "**Co-op** as zombie heroes: complete the mission's objectives. Lose at the end of any round in which a zombie hero was eliminated.",
+  "turnTitle": "Each round",
+  "turn": [
+   "**Player phase**: every hunger track +1; then each zombie hero acts in any order with 3 actions (4 from yellow danger).",
+   "**Enemy phase**: enemies attack (1 wound each, no roll) or move toward zombie heroes; then spawn at each spawn point.",
+   "**End phase**: mission effects; anyone eliminated = you lose."
+  ],
+  "actions": [
+   [
+    "Move",
+    "To an adjacent zone; +1 action per enemy in the zone you leave."
+   ],
+   [
+    "Open door",
+    "First opening of a building spawns everything inside."
+   ],
+   [
+    "Gain trait",
+    "Once a turn; max 2 trait cards."
+   ],
+   [
+    "Attack",
+    "Your attack or Devour: roll its dice + your hunger; hits must follow target priority (super hero, guard, trooper, specialist)."
+   ],
+   [
+    "Devour",
+    "Kills one target only, resets your hunger to 0; the only way to eat bystanders (for their power)."
+   ]
+  ],
+  "roundTitle": "The Hunger",
+  "round": [
+   "Hunger adds dice; each hunger symbol rolled raises it.",
+   "At 4 you're **Ravenous**: only move and devour, and you take a wound at the end of your turn.",
+   "Spawns use the line of the highest danger level among the zombie heroes."
+  ],
+  "end": [
+   "Win the moment every objective is done.",
+   "Lose at the end of a round with an eliminated zombie hero, or by the mission's own loss condition."
+  ],
+  "forget": [
+   "Hits must eliminate in one attack; they don't carry over.",
+   "Enemies can't open doors.",
+   "Running out of an enemy type gives that type an extra activation."
+  ]
  }
 };
