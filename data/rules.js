@@ -3879,5 +3879,268 @@ const RULES = {
    "Points alone don't win: you need every colour bonus and the Time stone.",
    "Reserved cards in hand cost nothing at the end."
   ]
+ },
+ "247367": {
+  "src": "the Air, Land, & Sea rulebook (Arcane Wonders)",
+  "goal": "Two players. First to **12 VP**, won battle by battle: control more of the three theaters (air, land, sea), or make your opponent withdraw.",
+  "turnTitle": "Each battle",
+  "turn": [
+   "Deal 6 cards each; nobody draws during a battle.",
+   "On your turn do one: **deploy** a card face up in its matching theater, **improvise** a card face down in any theater (strength 2), or **withdraw**.",
+   "New cards cover older ones in that theater."
+  ],
+  "actions": [
+   [
+    "Instant abilities",
+    "Happen as the card is played face up or flipped face up."
+   ],
+   [
+    "Ongoing abilities",
+    "Work while the card is face up."
+   ],
+   [
+    "Flip",
+    "Turn any card (yours or theirs) face up or down, unless the card says otherwise."
+   ],
+   [
+    "Destroy",
+    "The card goes face down under the deck, with no ability."
+   ],
+   [
+    "Move",
+    "Isn't playing: it doesn't trigger 'when played' effects."
+   ]
+  ],
+  "roundTitle": "Winning a battle",
+  "round": [
+   "All cards played: whoever controls 2 theaters wins 6 VP. Ties in a theater (or empty) go to the 1st player.",
+   "Withdraw: your opponent scores what your commander card shows for the cards you still hold.",
+   "The longer you wait to withdraw, the more you give away."
+  ],
+  "end": [
+   "First to 12 VP (or 18 for a longer game).",
+   "Beginner mode: 1 VP per battle, first to 3."
+  ],
+  "forget": [
+   "Face-down cards are strength 2 and have no ability.",
+   "Abilities are compulsory unless they say 'may'.",
+   "You may look at your own face-down cards, not your opponent's."
+  ]
+ },
+ "281474": {
+  "src": "the Lands of Galzyr rulebook (Snowdale Design)",
+  "goal": "Earn the most **prestige** (competitive) or as much as you can together (co-op/solo) in a persistent story world; the Book of Adventures app tells the scenes.",
+  "turnTitle": "Each round",
+  "turn": [
+   "**Travel**: move up to 2 spaces (trade, pick up quests and drop quests freely).",
+   "**Story**: begin one scene (a mandatory ⚡ one if you have it); another player reads it from the app.",
+   "**Calendar**: after everyone, advance the day; timers on that day trigger."
+  ],
+  "actions": [
+   [
+    "Scene sources",
+    "Your quests, statuses, companions, your location, a local status, or the top event card."
+   ],
+   [
+    "Skill checks",
+    "5 base dice; each skill mark swaps one for an advanced die. Roll, then may reroll all once. Easy 1, medium 2, hard 3 successes."
+   ],
+   [
+    "Partner",
+    "On a handshake scene, someone on your space may join and lend you their marks, items, companions, gold and tags."
+   ],
+   [
+    "Quests",
+    "Pick up at their location; max 3 in hand."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "Card effects are compulsory unless they say otherwise.",
+   "Gold caps at 20 and carries to the next game.",
+   "The story master only reads and resolves; the active player decides."
+  ],
+  "end": [
+   "After 8 / 7 / 6 / 5 rounds (1 / 2 / 3 / 4+ players), changed by Discord or Harmony.",
+   "Competitive: most prestige wins (scene #0150). Co-op: scene #0200.",
+   "Save the game: everything is kept on the physical cards."
+  ],
+  "forget": [
+   "Each adventurer's special ability is once per game.",
+   "Answer the book's questions truthfully.",
+   "Don't touch the dice until the story master has checked the outcome."
+  ]
+ },
+ "158600": {
+  "src": "the Hanamikoji rulebook (EmperorS4)",
+  "goal": "Two players. Win **4 geishas** or **11 charm points** by having more of each geisha's items.",
+  "turnTitle": "Each round",
+  "turn": [
+   "Remove 1 card unseen; deal 6 each.",
+   "Alternate 4 turns each: draw a card, then use one of your 4 action markers (each once per round).",
+   "Score, then the other player starts the next round."
+  ],
+  "actions": [
+   [
+    "Secret",
+    "1 card face down: it scores for you at round end."
+   ],
+   [
+    "Trade-off",
+    "2 cards face down: out of this round."
+   ],
+   [
+    "Gift",
+    "Show 3 cards: your opponent takes 1, you score the other 2."
+   ],
+   [
+    "Competition",
+    "Show 4 cards in two pairs: your opponent takes a pair, you score the other."
+   ]
+  ],
+  "roundTitle": "Scoring",
+  "round": [
+   "Reveal secrets; for each geisha, more items wins her favour (a tie leaves the marker where it was).",
+   "Victory markers stay put into the next round."
+  ],
+  "end": [
+   "At 4 geishas or 11+ charm, the game ends at once.",
+   "One with 4 geishas and the other with 11 charm: charm wins."
+  ],
+  "forget": [
+   "A geisha's charm equals her number of item cards.",
+   "Every action must be used once each round."
+  ]
+ },
+ "128882": {
+  "src": "The Resistance: Avalon rulebook (Indie Boards & Cards)",
+  "goal": "Hidden roles. **Good** wins with 3 successful quests (and Merlin unfound); **Evil** wins with 3 failed quests, 5 rejected teams in a row, or by assassinating Merlin.",
+  "turnTitle": "Each round",
+  "turn": [
+   "Reveal stage at the start: Evil see each other; Merlin sees Evil (eyes closed, thumbs up).",
+   "The leader proposes a team of the size shown; everyone votes at once; majority approves. Rejected: leadership passes on.",
+   "The team secretly plays success or fail; one fail fails the quest. Then leadership passes on."
+  ],
+  "actions": [
+   [
+    "Team sizes",
+    "5–10 players: quest 1 is 2–3, quest 2 is 3–4, quest 3 is 2–4, quests 4–5 are 3–5."
+   ],
+   [
+    "Good players",
+    "Must play success."
+   ],
+   [
+    "Evil players",
+    "May play either."
+   ],
+   [
+    "Merlin",
+    "Knows Evil, but must stay hidden."
+   ]
+  ],
+  "roundTitle": "Optional",
+  "round": [
+   "Percival sees Merlin (and Morgana, who looks the same); Mordred hides from Merlin; Oberon is alone.",
+   "Lady of the Lake (7+): after quests 2–4, check someone's loyalty.",
+   "Excalibur lets a team member swap another's quest card."
+  ],
+  "end": [
+   "3 successes: Evil may name Merlin once; right, and Evil wins.",
+   "3 fails, or 5 rejected teams in one round: Evil wins."
+  ],
+  "forget": [
+   "With 7+ players, quest 4 needs 2 fails.",
+   "Never show your character card.",
+   "Shuffle the quest cards before revealing them."
+  ]
+ },
+ "300367": {
+  "src": "the Boomerang: Europe rulebook (Grail Games)",
+  "goal": "Most points after 4 rounds of drafting a 7-card holiday across Europe.",
+  "turnTitle": "Each round",
+  "turn": [
+   "Deal 7 each; keep one face down as your **throw** card.",
+   "Pass the rest left; keep one face up, pass again… The last card passed to you is your **catch**.",
+   "Score the round."
+  ],
+  "actions": [
+   [
+    "Throw & catch",
+    "The difference between their numbers."
+   ],
+   [
+    "Sites",
+    "Cross off each new country (1 each at the end); first to finish a region takes its bonus; the passport bonus for visiting every region (7 / 3 / 1)."
+   ],
+   [
+    "Cuisine",
+    "Beer 1, cheese 2, wine 3, spirits 5; 8 or more is halved (rounded up)."
+   ],
+   [
+    "Transport",
+    "Each matching pair: car 3, train 4, bike 5, boat 7, plane 9."
+   ],
+   [
+    "Treasures",
+    "Pick one type you have: 4 / 3 / 2 (2 / 3 / 4 players) per matching icon on the others' cards; each type once a game."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "Regions finished together all get the bonus.",
+   "Visiting a site again scores nothing more.",
+   "A treasure type not scored by the end is lost."
+  ],
+  "end": [
+   "After round 4, add every category.",
+   "Ties: best passport bonus, then most throw & catch."
+  ],
+  "forget": [
+   "Your throw card stays hidden until scoring.",
+   "Three of a kind in transport scores just one pair."
+  ]
+ },
+ "266830": {
+  "src": "the QE rulebook",
+  "goal": "Most points from companies you bail out — but whoever spends the most is **eliminated**.",
+  "turnTitle": "Each auction",
+  "turn": [
+   "The auctioneer reveals a company and bids openly (more than 0).",
+   "Everyone else bids secretly (any amount, even 0, but not the auctioneer's number).",
+   "The auctioneer announces the winner and secretly writes the price on the company's back (open if the auctioneer won).",
+   "Zero bids score 2 (once per round; not with 3 players). The auctioneer passes left."
+  ],
+  "actions": [
+   [
+    "Companies",
+    "Their printed VP."
+   ],
+   [
+    "Nationalisation",
+    "Companies of your own nation: 1/3/6/10 (3–4 players)."
+   ],
+   [
+    "Monopoly",
+    "2/3/4 of one industry: 3/6/10 (your industry token counts)."
+   ],
+   [
+    "Diversification",
+    "Sets of 3/4 different industries: 4/8."
+   ]
+  ],
+  "roundTitle": "Spending",
+  "round": [
+   "Highest total spent is eliminated (ties all out).",
+   "Lowest spender scores 6 (7 with 5 players).",
+   "Unlimited money: the only limit is the elimination."
+  ],
+  "end": [
+   "16 companies (15 with 5 players); most points among those left wins; ties: least spent."
+  ],
+  "forget": [
+   "Tied top bids rebid (three ties: the highest untied bid wins).",
+   "With 5 players each may peek at one winning bid per game."
+  ]
  }
 };
