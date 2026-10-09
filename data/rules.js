@@ -1982,5 +1982,294 @@ const RULES = {
    "Played cards can't be bought back until after the next planning phase.",
    "Hand limit 10 when buying."
   ]
+ },
+ "275974": {
+  "src": "the Margraves of Valeria rulebook (Daily Magic Games)",
+  "goal": "Most **VP**, mostly from guild icons × how far your influence has climbed on each guild's track. Build ward towers, slay monsters and ship goods.",
+  "turn": [
+   "Play one citizen card next to your board and use it one way: its **pennant actions**, its **power text**, **Recall**, or **Build**.",
+   "With only 1 card in hand at the start of your turn, you must Recall.",
+   "End of turn: hero tomb rewards, refill privilege tiles, flip monsters, refill the citizen line."
+  ],
+  "actions": [
+   [
+    "Pennants",
+    "Top to bottom, skipping any: +1 strength, +1 wild resource, +2 gold, move your margrave, deploy a knight."
+   ],
+   [
+    "Moving",
+    "Your margrave (or a knight) entering a location triggers its power, or take 2 gold instead."
+   ],
+   [
+    "Power text",
+    "Do it in order; 'all players' powers go round the table. Some let you slay an adjacent monster."
+   ],
+   [
+    "Slay a monster",
+    "Pay its magic, then its strength from your track or knights sent to the hero tombs (1 each). Take its rewards and influence."
+   ],
+   [
+    "Recall",
+    "Remove 1 card from the citizen line from the game, take your played cards back, then you may hire a citizen for its gold."
+   ],
+   [
+    "Build",
+    "Pay stone, wood, magic and a gem: a ward tower in your margrave's location (one per location), its slot reward and 3 influence."
+   ],
+   [
+    "Influence",
+    "Move up a guild track; crossing a river costs gold and gives a privilege tile."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "Storage holds 12 tokens (resources, gems, knights, towers); gold and strength don't use it. Strength caps at 8.",
+   "Knights on the board belong to nobody: anyone can deploy them.",
+   "Filling a hero tomb row or column pays its reward at the end of your turn."
+  ],
+  "end": [
+   "Triggered by a 4th ward tower, an empty citizen deck, or no privilege tiles to refill; play on until everyone has had equal turns.",
+   "Guild icons (end-game tiles, citizens in hand and played, towers' locations) × your influence level on that guild.",
+   "Banner tiles: different banners squared per set; gems 2, 3 resources 1, 5 gold 1. Ties: most gold."
+  ],
+  "forget": [
+   "Not using a location's power gives 2 gold.",
+   "Each location you build in counts its 2 guild icons.",
+   "Knights in the hero tombs give strength but go back to the barracks when it fills."
+  ]
+ },
+ "422780": {
+  "src": "the Mistborn: The Deckbuilding Game rulebook (Brotherwise Games)",
+  "goal": "Win one of three ways: reach the top of **all three mission tracks**, be the **last one alive**, or burn 4 atium on Confrontation.",
+  "turn": [
+   "Move 1 up your training track.",
+   "In any order and as often as you like: play cards, burn or flare metals, use cards as metals, discard to refresh a flared metal, use allies and your character, move up missions, buy from the market.",
+   "Attack allies, then players; discard everything (not allies) and draw 5."
+  ],
+  "actions": [
+   [
+    "Burn",
+    "Up to your burn icons per turn: put a metal token on a card to fire its ability (once per turn each)."
+   ],
+   [
+    "Flare",
+    "More metals beyond that: flip a token over. It stays used until refreshed by discarding a card of that metal pairing."
+   ],
+   [
+    "Cards as metal",
+    "Use a card as either metal of its pairing (savant abilities fire this way)."
+   ],
+   [
+    "Allies",
+    "Stay in play above your character; their metal effects trigger whenever you burn that metal."
+   ],
+   [
+    "Buy",
+    "Coins buy market cards (to your discard) and boxings (2 coins, cash in later for 1)."
+   ],
+   [
+    "Missions",
+    "Mission points move you up any track; rewards on the way, first-player bonuses, a prize at the top (12)."
+   ]
+  ],
+  "roundTitle": "Combat",
+  "round": [
+   "Damage is dealt at the end of your turn; allies die only to their full defence in one go. Defenders must be dealt with first.",
+   "2 players: hit your opponent and their allies as you like.",
+   "3–4 players: after allies, all damage goes to whoever holds the **Target**; a holder who takes damage may pass it on."
+  ],
+  "end": [
+   "Top of all three missions, last character standing, or 4 atium on Confrontation: an instant win."
+  ],
+  "forget": [
+   "A metal fires each ability only once a turn, however many you burn.",
+   "Health caps at 40.",
+   "Unspent coins and combat are lost."
+  ]
+ },
+ "291845": {
+  "src": "the Three Sisters rulebook (Bitewing Games)",
+  "goal": "Most points after 8 rounds: grow corn, beans and pumpkins, and fill your sheet's perennials, apiary, fruit and shed for chains of bonuses.",
+  "turnTitle": "Each round",
+  "turn": [
+   "**Planning**: the first player rolls all the dice and groups them by value onto the rondel, lowest first from Farmer Edith.",
+   "**Gardening**: in turn order, take a die: a garden action in that die's zone **and** the rondel action of its space.",
+   "Then everyone uses the lowest remaining die at once.",
+   "**Event**: the round's shed, rain or market event for everyone; the first player passes left."
+  ],
+  "actions": [
+   [
+    "Plant",
+    "Fill the bottom box of up to 2 crops in the zone (a bean only once its corn is 2 high)."
+   ],
+   [
+    "Water",
+    "Fill the next box of every planted crop in the zone."
+   ],
+   [
+    "Rondel",
+    "Plant or water (again); shed time; 1 compost and 4 goods; apiary or fruit; farmer's market."
+   ],
+   [
+    "Farmer's market",
+    "Your goods total picks the row: compost, perennial, fruit or bonus actions."
+   ],
+   [
+    "Compost",
+    "Spend 1 to change a die's zone by ±1 (wraps 6↔1)."
+   ],
+   [
+    "Bonus action",
+    "From stars on the goods track: fill a box in perennials, apiary, fruit or shed (not the garden)."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "Filling a circle harvests it; two adjacent harvested pumpkins give the perennial between them.",
+   "Perennials, apiary and crops fill bottom to top; fruit and shed left to right.",
+   "Rain waters every zone, 1 to 6."
+  ],
+  "end": [
+   "Corn 3, beans 1 (pumpkins 0); completed perennials; wax and honey as listed, split hive 3.",
+   "Apples 3, blackberries 2, raspberries as listed (peaches 0); completed shed items.",
+   "Ties: most garden points."
+  ],
+  "forget": [
+   "With a plant-or-water rondel space, both actions use the same (adjusted) zone.",
+   "Later wax, honey and raspberries are worth more, and add up.",
+   "Iris works like free compost."
+  ]
+ },
+ "356123": {
+  "src": "the Turing Machine rulebook (Le Scorpion Masqué)",
+  "goal": "Be first to find the one 3-digit code (▲ ■ ⬤, each 1–5) that passes every verifier's hidden criterion, asking the fewest questions.",
+  "turnTitle": "Each round",
+  "turn": [
+   "**Compose** a proposal from three punch cards (same proposal all round).",
+   "**Question** up to 3 verifiers: stack the verification card under it and read ✔ or ✘. Note each answer.",
+   "**Deduce** on your note sheet.",
+   "Everyone shows a thumb at once: up if you think you've got the code."
+  ],
+  "actions": [
+   [
+    "What a verifier tells you",
+    "Only whether your proposal meets **its** one criterion, never anything else about the code."
+   ],
+   [
+    "Criteria cards",
+    "List the criteria that verifier might be checking; work out which one it is."
+   ],
+   [
+    "Public / secret",
+    "Your proposal and which verifiers you ask are public; your answers and notes are secret."
+   ]
+  ],
+  "roundTitle": "Verification",
+  "round": [
+   "Thumbs up: write your code, then check it against the solution.",
+   "Several right: fewest questions wins (then a shared win).",
+   "Wrong guesses are out; the rest keep playing (the last one left wins)."
+  ],
+  "end": [
+   "The first right code (fewest questions on a tie) wins."
+  ],
+  "forget": [
+   "Every verifier is needed and none repeats another: that's a clue in itself.",
+   "A ✔ on '▲ < 3' with ▲ = 2 doesn't mean ▲ is 2.",
+   "Erase the ✔ marks on the verification cards after the game."
+  ]
+ },
+ "365717": {
+  "src": "the Clank! Catacombs rulebook (Dire Wolf)",
+  "goal": "Grab an **artifact** and get back to the Crypt alive, with more points than everyone else. Be quiet: clank feeds the dragon.",
+  "turn": [
+   "Play all 5 cards in any order, for skill, swords, boots, gold, clank and draws.",
+   "Take actions as often as you can pay for them.",
+   "End: discard your play area, draw 5, refill the dungeon row (6 cards); a new dragon symbol means an attack."
+  ],
+  "actions": [
+   [
+    "Acquire",
+    "Skill buys blue cards from the row or reserve, to your discard pile; the row isn't refilled until the turn ends."
+   ],
+   [
+    "Device",
+    "Pay skill to use a purple card at once; it's discarded."
+   ],
+   [
+    "Fight",
+    "Swords beat a red monster for its reward (the reserve goblin can be fought again and again)."
+   ],
+   [
+    "Move",
+    "1 boot per tunnel (footprints 2); monster icons hurt unless you pay swords; locks need a lockpick. Off the edge, place a new tile."
+   ],
+   [
+    "Artifact",
+    "Take one (only one, ever); the dragon's rage goes up."
+   ],
+   [
+    "Market and locks",
+    "In a market, 7 gold buys an item. A lockpick opens a chest, library or prison."
+   ]
+  ],
+  "roundTitle": "Dragon attack",
+  "round": [
+   "All clank cubes go in the bag; draw cubes = the rage level (+1 per Danger card in the row).",
+   "Each coloured cube is 1 damage to its owner; a ghost cube hurts everyone.",
+   "A full health meter knocks you out."
+  ],
+  "end": [
+   "Ends when everyone has escaped (back in the Crypt with an artifact: +20 mastery) or been knocked out.",
+   "Knocked out in the Depths, or without an artifact: 0 points.",
+   "Otherwise: artifact, gold, tokens and card points. Ties: the more valuable artifact."
+  ],
+  "forget": [
+   "A Crystal Cave stops your boots for the rest of the turn.",
+   "Once you're out, each of your turns draws 4 cubes (6 with 2 players) from the bag.",
+   "Reward rooms pay once per turn."
+  ]
+ },
+ "279537": {
+  "src": "The Search for Planet X rulebook (Foxtrot Games)",
+  "goal": "Most points: find **Planet X** and submit correct theories about the other objects. The app hides a new solar system every game.",
+  "turn": [
+   "Whoever is furthest back on the time track takes one action and moves their pawn by its time cost.",
+   "Then rotate the earth board toward the rearmost pawn, pausing for conference and theory phases on the way."
+  ],
+  "actions": [
+   [
+    "Survey",
+    "An object type and a range of visible sectors: how many are there (1–3 sectors 4 time, 4–6 sectors 3 time). Comet ranges must start and end on comet sectors."
+   ],
+   [
+    "Target",
+    "One visible sector: what's in it (4 time, 2 tokens a game)."
+   ],
+   [
+    "Research",
+    "A topic's logic rule (1 time); never twice in a row."
+   ],
+   [
+    "Locate Planet X",
+    "Its sector and both neighbours' objects (5 time). Right ends the game."
+   ]
+  ],
+  "roundTitle": "Theories",
+  "round": [
+   "Theory phase: everyone secretly picks 1 theory (2 in expert), placed in back-to-front order; all theories move one step in.",
+   "Theories reaching the centre are peer-reviewed: right ones stay (and confirm the sector); wrong ones cost 1 time.",
+   "Conference phase: everyone learns a new Planet X clue (once each)."
+  ],
+  "end": [
+   "Players behind the finder get a last chance: theories (1–3 back: 1, 4–5 back: 2) or try to locate it (2 points per sector back).",
+   "1 point per sector you were first to theorise correctly; asteroids 2, comets 3, gas clouds 4, dwarf planets 4 (expert 2).",
+   "Finding Planet X first: 10. Ties: Planet X points, then leader bonuses."
+  ],
+  "forget": [
+   "Planet X looks empty in surveys and targets.",
+   "Survey and target results are private; announce only what you asked.",
+   "Don't reveal where Planet X is when you find it."
+  ]
  }
 };
