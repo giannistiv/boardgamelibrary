@@ -3084,5 +3084,275 @@ const RULES = {
    "Each resource on a tile advances once, whatever the tile's size.",
    "A player who can't place still takes a tile and advances both resources."
   ]
+ },
+ "193483": {
+  "src": "the Dwar7s Fall rulebook (Vesuvius Media)",
+  "goal": "Most **VP**: build kingdoms with tiles, send dwarfs to mines, the tavern and the store, complete goals and slay monsters.",
+  "turn": [
+   "**3 actions** (4 if your castle is in play): play a kingdom tile, place a dwarf, or move a dwarf.",
+   "**Resolve**: tiles holding enough of one player's dwarfs do their task; those dwarfs come home.",
+   "**Discard** down to 9 cards (gems or ogres, never tiles)."
+  ],
+  "actions": [
+   [
+    "Play a tile",
+    "Next to any tile, or on top of one of the same type (not on dwarfs, dragons or frost giants)."
+   ],
+   [
+    "Place a dwarf",
+    "On any free spot on any tile, even an opponent's castle."
+   ],
+   [
+    "Move a dwarf",
+    "To an adjacent tile with a free spot, not through walls."
+   ],
+   [
+    "Tasks",
+    "Mines give gems; the tavern gives ogre cards; the store trades gems for a trading goal; 2 dwarfs on a castle dig a stack."
+   ],
+   [
+    "Ogre cards",
+    "Free actions: ambush, brute, thief, panic, crown."
+   ],
+   [
+    "Monsters",
+    "Dragons and frost giants block that tile type in the kingdom; 5 of your dwarfs on it slay it (+3 VP)."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "Dwarfs only come home by completing a task; extra dwarfs stay.",
+   "A task that can't happen still sends its dwarfs home, empty-handed.",
+   "A frost giant on your castle takes away your extra action and kingdom points."
+  ],
+  "end": [
+   "When someone has 3 goals (trading or secret) at the end of their turn, finish the round.",
+   "Goals, 3 per monster slain, gems in hand, and your kingdom's tile VP (castle in play and free).",
+   "Ties: biggest kingdom, then most dwarfs on the board."
+  ],
+  "forget": [
+   "All dwarfs completing a task must be the same colour: one of another colour blocks it.",
+   "Secret goals (7 VP) can be revealed any time they're met.",
+   "Tiles in hand score nothing."
+  ]
+ },
+ "366013": {
+  "src": "the Heat: Pedal to the Metal rulebook (Days of Wonder)",
+  "goal": "Be first over the line after the set number of laps.",
+  "turnTitle": "Each round",
+  "turn": [
+   "Everyone at once: **shift gears** (±1 free, ±2 costs 1 heat), then **play cards** face down, as many as your gear.",
+   "From the leading car back: reveal and **move** exactly your speed.",
+   "Then adrenaline (last car), react (boost, cooldown), slipstream, corner check, discard, **draw back to 7**."
+  ],
+  "actions": [
+   [
+    "Move",
+    "Cars never block passing, but if your space is full you stop behind it. Inside spot = ahead."
+   ],
+   [
+    "Stress cards",
+    "Must be played; each flips cards from your deck until a basic card, which counts instead."
+   ],
+   [
+    "Boost",
+    "Once a turn, pay 1 heat: flip for +1–4 speed (counts for corners)."
+   ],
+   [
+    "Cooldown",
+    "1st gear 3, 2nd gear 1: heat cards from hand back to the engine."
+   ],
+   [
+    "Adrenaline",
+    "Last car: +1 space (+1 speed) and/or +1 cooldown."
+   ],
+   [
+    "Slipstream",
+    "Next to or behind a car: +2 spaces (not counted as speed)."
+   ]
+  ],
+  "roundTitle": "Corners",
+  "round": [
+   "Crossed a corner line? Pay heat for each point of speed over its limit (each corner separately).",
+   "Can't pay: **spin out** — back before the corner, 1 stress (gear 1–2) or 2 (gear 3–4), drop to 1st gear.",
+   "Heat in hand can't be played or discarded; it clogs your hand."
+  ],
+  "end": [
+   "First across the line after the last lap wins; finishing together, the car furthest ahead.",
+   "No corner limits after the finish line, and no slipstreaming over it."
+  ],
+  "forget": [
+   "You can't discard stress or heat cards.",
+   "Discard piles are private except the top card.",
+   "Too few playable cards for your gear: you don't move, and drop to 1st."
+  ]
+ },
+ "196526": {
+  "src": "the Coffee Roaster rulebook (Saashi & Saashi)",
+  "goal": "**Solo**: roast a bag of beans as close as you can to the coffee card's ideal, then taste the cup. Three games make a challenge rank.",
+  "turnTitle": "Roasting round",
+  "turn": [
+   "Raise the thermostat one step (smoke there goes in the bag).",
+   "Draw as many tokens as it shows; moisture is removed for good.",
+   "Optionally use tokens: immediate effects, then flavour effects (which also unlock cup effects).",
+   "**Roast**: every drawn bean goes up a level (2 in the red zone); level 4 roasted again burns. Put everything back.",
+   "Stop and taste, or roast again."
+  ],
+  "actions": [
+   [
+    "Roast levels",
+    "Hard bean → 0 → 1 → 2 → 3 → 4 → burned. Hard beans only ever go up 1."
+   ],
+   [
+    "Flavour tokens",
+    "Body, acidity, aroma: used for effects or kept for the cup."
+   ],
+   [
+    "Cup testing",
+    "Draw one token at a time: into the cup (top to bottom, left to right) or the tray, until the cup's 10 spaces are full or the bag is empty."
+   ]
+  ],
+  "roundTitle": "Scoring",
+  "round": [
+   "Roast points by the cup's total bean level (scale on the coffee card).",
+   "Flavour matches: 1 / 3 / 6 / 10 points for 1–4.",
+   "Skill: 3+ beans of the same level, 1–5 points."
+  ],
+  "end": [
+   "Minus: hard, burned beans and smoke 1 each, defective beans 2; −3 with no flavour in the cup, −5 for empty cup spaces.",
+   "Your score picks the next coffee's difficulty; three games add up to your roaster rank."
+  ],
+  "forget": [
+   "Each immediate effect can be used only once a game.",
+   "Tokens put in the tray don't score.",
+   "The thermostat track ends: you must stop roasting there."
+  ]
+ },
+ "43570": {
+  "src": "the Friday rulebook (2F-Spiele)",
+  "goal": "**Solo**: help Robinson survive the island's hazards, then beat both pirates.",
+  "turn": [
+   "Draw 2 hazards; fight one, discard the other.",
+   "Draw free fighting cards up to the hazard's number (stop whenever); pay 1 life per extra card.",
+   "Use card abilities in any order; aging cards' abilities are compulsory.",
+   "Win: the hazard joins your deck on its knowledge side. Lose: pay the difference in life, and destroy that many played cards (2 life for an aging card)."
+  ],
+  "actions": [
+   [
+    "Steps",
+    "Green, yellow, then red: each time the hazard deck runs out, the next step's values count."
+   ],
+   [
+    "Deck runs out",
+    "Shuffle the discards, adding an aging card each time."
+   ],
+   [
+    "Destroying",
+    "Losing on purpose is how you thin weak cards."
+   ],
+   [
+    "Pirates",
+    "After red, fight both pirates in a row; you can't lose deliberately."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "Life caps at 22.",
+   "Zero life is fine; needing one more is a loss.",
+   "With exactly 1 hazard card left, you may fight it or skip to the next step."
+  ],
+  "end": [
+   "Beat the second pirate to win.",
+   "Score: card values (aging −5 each) + 15 per pirate beaten + 5 per life left − 3 per unbeaten hazard."
+  ],
+  "forget": [
+   "'Double' and 'step −1' only apply when you compare totals at the end.",
+   "Levels 2–4 add aging cards and less life."
+  ]
+ },
+ "266524": {
+  "src": "the PARKS rulebook (Keymaster Games)",
+  "goal": "Most points after 4 seasons: hike the trail with your two hikers, collect tokens, visit parks, take photos.",
+  "turnTitle": "Your turn",
+  "turn": [
+   "Move one of your hikers any distance forward to a site and take its action (you must be able to).",
+   "Landing first on a weather token takes it too.",
+   "An occupied site needs your campfire (it relights when a hiker reaches trail end)."
+  ],
+  "actions": [
+   [
+    "Sites",
+    "Forest 1, mountain 1, valley 2 sunshine, ocean 2 water; vista: a canteen or a photo (2 tokens, 1 with the camera)."
+   ],
+   [
+    "Advanced sites",
+    "Wildlife (1 token for a wild), lodge (swap 2 tokens), lookout (park or gear), river (1 water to copy an occupied site)."
+   ],
+   [
+    "Trail end",
+    "Reserve a park (first there takes the first-hiker marker), buy gear with sunshine, or visit a park by paying its tokens."
+   ],
+   [
+    "Canteens",
+    "Fill one with a token gained this turn for its effect."
+   ]
+  ],
+  "roundTitle": "End of a season",
+  "round": [
+   "When both your hikers are at trail end you're done; the last hiker on the trail must go straight to the end.",
+   "The camera holder may take one last cheap photo.",
+   "Canteens empty, the trail gets one site longer, a new season card."
+  ],
+  "end": [
+   "After 4 seasons: parks, photos (1 each), your year card bonus, and 1 for the first-hiker marker.",
+   "Ties: most parks visited."
+  ],
+  "forget": [
+   "Carry at most 12 tokens.",
+   "Wildlife can't go in canteens or buy gear.",
+   "Each season card changes the rules a little."
+  ]
+ },
+ "141572": {
+  "src": "the Paperback rulebook (Fowers Games)",
+  "goal": "Most **fame** points on cards in your deck: spell words from your hand to buy better letters and fame cards.",
+  "turn": [
+   "Make a word from your hand (plus the common card if you like).",
+   "Score it: letter values plus bonuses from the cards used.",
+   "Spend that score on cards from the offer (to your discard pile).",
+   "Discard everything; draw 5 (plus any bonus cards)."
+  ],
+  "actions": [
+   [
+    "Wilds",
+    "Any letter."
+   ],
+   [
+    "Common card",
+    "Shared by everyone; a word longer than the length track's highest number claims it."
+   ],
+   [
+    "Abilities",
+    "Only cards used in the word activate."
+   ],
+   [
+    "Two-letter cards",
+    "Both letters in that order; they count as 2 length."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "No proper nouns or names.",
+   "Unspent money is lost.",
+   "Attack cards stay in play until your next turn."
+  ],
+  "end": [
+   "Ends when two of the wild (fame) piles are empty or the common cards run out.",
+   "Most fame in your deck wins; ties: most common cards."
+  ],
+  "forget": [
+   "Trashing weak letters makes your deck better.",
+   "The common card can be used only once per word."
+  ]
  }
 };
