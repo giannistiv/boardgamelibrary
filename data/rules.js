@@ -321,5 +321,332 @@ const RULES = {
    "Removed species go to the box, not back to your gene pool.",
    "Insects place a free species and arachnids compete for free every turn."
   ]
+ },
+ "120677": {
+  "src": "the Terra Mystica rulebook (Feuerland / Z-Man Games)",
+  "goal": "Most **VP** after 6 rounds: build on your home terrain, upgrade buildings, climb the four cults. Each round's scoring tile pays for certain builds.",
+  "turn": [
+   "**Income**: workers (dwellings), coins (trading houses), priests (temples), power, plus bonus card and favor tiles.",
+   "**Actions**: one action per turn, around the table, until everyone passes. Conversions are free any time on your turn.",
+   "**Cult bonuses and clean-up**: the scoring tile's cult rewards; +1 coin on each unused bonus card."
+  ],
+  "actions": [
+   [
+    "Transform and build",
+    "Terraform a space next to your buildings (1 spade per step on your terrain cycle; workers at your exchange rate) and build a dwelling there: 1 worker + 2 coins."
+   ],
+   [
+    "Shipping",
+    "1 priest + 4 coins: +1 shipping (reach across rivers), VP as shown."
+   ],
+   [
+    "Spade exchange",
+    "2 workers + 5 coins + 1 priest: spades get cheaper, +6 VP."
+   ],
+   [
+    "Upgrade",
+    "Dwelling to trading house (2 workers + 6 coins, 3 if an opponent is adjacent); trading house to stronghold (faction ability) or temple (2 workers + 5 coins, favor tile); temple to sanctuary (favor tile)."
+   ],
+   [
+    "Priest to a cult",
+    "Place a priest for +3 or +2 on that cult (it stays), or return it for +1."
+   ],
+   [
+    "Power actions",
+    "Spend power from bowl III (once per round each): bridge, priest, 2 workers, 7 coins, 1 or 2 spades."
+   ],
+   [
+    "Special action",
+    "From your stronghold, a favor tile or a bonus card, once per round."
+   ],
+   [
+    "Pass",
+    "Swap your bonus card for an available one; the first to pass starts next round."
+   ]
+  ],
+  "round": [
+   "When an opponent builds or upgrades next to you, you may gain power = your adjacent buildings' power (dwelling 1, trading house/temple 2, stronghold/sanctuary 3) paying VP equal to the power gained **minus 1**.",
+   "Power moves bowl I to II, then II to III; you spend from III. Sacrifice: burn one token from II to move another to III.",
+   "Conversions: 5 power = priest, 3 = worker, 1 = coin; priest to worker, worker to coin.",
+   "Town: 4+ directly adjacent buildings (3 if one is the sanctuary) with power 7+ found a town: take a town tile."
+  ],
+  "end": [
+   "After round 6: each cult 8/4/2 VP for the top three.",
+   "Largest connected area 18/12/6 VP.",
+   "Turn everything into coins: every 3 coins is 1 VP."
+  ],
+  "forget": [
+   "Only one player per cult can reach space 10, and it needs a town key.",
+   "Cult rewards at 3/5/7/10: 1/2/2/3 power.",
+   "Spades must be used at once; cult-bonus spades can't build a dwelling.",
+   "You can't take less power from an opponent's build to pay fewer VP: all or nothing."
+  ]
+ },
+ "161970": {
+  "src": "the Alchemists rulebook (Czech Games Edition)",
+  "goal": "Most **points** after 6 rounds, mostly from **publishing correct theories** about what each ingredient is. Reputation, artifacts and grants also score. The app tells you what you mix.",
+  "turn": [
+   "**Order**: from the start player, pick an order space: lower spaces give more ingredients and favors but act later.",
+   "**Declare**: from the lowest order space up, place all your action cubes at once (3 cubes in round 1).",
+   "**Resolve** the action spaces in board order; on each one the top row acts first. You may always decline a cube (unused pairs give a favor card).",
+   "**End of round**: top alchemist (+1 reputation for most seals), favors for unused cube pairs, new adventurer, new ingredients."
+  ],
+  "actions": [
+   [
+    "Forage",
+    "Take a face-up ingredient or draw one."
+   ],
+   [
+    "Transmute",
+    "Discard an ingredient for 1 gold."
+   ],
+   [
+    "Buy artifact",
+    "Pay its cost; it lasts the game or acts once, and most are worth points."
+   ],
+   [
+    "Sell potion (2 cubes)",
+    "Bid a discount for order, pick a potion the adventurer wants and a guarantee; paid only if your mix is at least that good. Wrong sign or neutral: −1 reputation."
+   ],
+   [
+    "Debunk",
+    "Reveal an aspect of a published ingredient. Theory proven wrong: +2 reputation, and every seal on it loses 5 reputation unless it hedged that colour. Theory holds: −1 reputation."
+   ],
+   [
+    "Publish",
+    "Put an alchemical token on an ingredient and your seal on it: 1 gold, +1 reputation. Or endorse someone's: 1 gold to each seal already there."
+   ],
+   [
+    "Test on student",
+    "Mix two ingredients; free until someone makes a negative potion, then 1 gold."
+   ],
+   [
+    "Drink potion",
+    "Mix on yourself: insanity −1 reputation, paralysis act last next round, poison lose a cube next round."
+   ]
+  ],
+  "round": [
+   "Conferences at the end of rounds 3 and 5: enough seals on the board = +1 reputation, too few loses reputation (see the tile); new artifacts come out.",
+   "Grants: seals on 2 ingredients of a grant tile (3 for later grants) give 2 gold and points.",
+   "Final round: exhibit potions (+1 reputation for the first to show one, +2 for both signs of a colour)."
+  ],
+  "end": [
+   "Reputation becomes points; add artifacts and grants; favors are 2 gold, gold is 1/3 point.",
+   "Then the truth: correct theory gold seal +5, silver +3; wrong theory starred seal −4, unstarred −4 unless it hedged the wrong colour.",
+   "Ties: leftover gold."
+  ],
+  "forget": [
+   "Starred seals are bets: +5/+3 points if right, but they can never hedge, so a debunk always costs 5 reputation.",
+   "Reputation never drops below 1; in the blue zone (18+) every loss costs 2 more.",
+   "Ingredients left in hand are worth nothing at the end.",
+   "A negative potion can't hit you twice in the same round."
+  ]
+ },
+ "177736": {
+  "src": "the A Feast for Odin rulebook (Feuerland / Z-Man Games)",
+  "goal": "Most points after 7 rounds (6 in the short game): cover your home board and islands with goods, earn income, keep everyone fed.",
+  "turn": [
+   "Each round: new Viking, harvest, exploration boards turn, new weapon card.",
+   "**Actions**: in turn order, put Vikings on one free action space (1–4 Vikings, by its column) and do it at once. Keep going until everyone passes.",
+   "Then: start player (last to place), income, animals breed, **feast**, board bonuses, mountain strips move, Vikings come home."
+  ],
+  "actions": [
+   [
+    "Production",
+    "Take the goods shown."
+   ],
+   [
+    "Exchange",
+    "Build sheds, houses and ships; upgrade or craft goods."
+   ],
+   [
+    "Mountains",
+    "Take wood, stone, ore and silver from the mountain strips, nearest the arrow first."
+   ],
+   [
+    "Trading",
+    "Upgrade goods one step: orange, red, green, blue."
+   ],
+   [
+    "Overseas trading",
+    "Needs a knarr: upgrade different green goods to blue."
+   ],
+   [
+    "Emigration",
+    "Pay silver = the round: turn a knarr or longship over onto the leftmost banquet space, so you serve less food. You keep your Vikings."
+   ],
+   [
+    "Raid, pillage, hunt",
+    "Roll the die and add weapon cards (and ore on your longship) to reach a better tile. Raid and pillage need a longship; hunting wants a low roll."
+   ],
+   [
+    "Exploration",
+    "Take an island board with the ship and Vikings it needs; you keep the ship."
+   ],
+   [
+    "Occupations",
+    "Play occupation cards for their effects."
+   ]
+  ],
+  "round": [
+   "**Income**: the lowest uncovered number on your board's income diagonal.",
+   "**Feast**: fill your banquet table with food; orange and red can't touch their own colour, silver can. Each empty space is a −3 penalty.",
+   "**Bonus**: fully surround a bonus space on your boards and its good is yours every round.",
+   "Animals breed every second round."
+  ],
+  "end": [
+   "Ships 3/5/8, emigrated ships 18/21, islands and buildings their value, animals, occupations, silver, final income.",
+   "Minus uncovered spaces on all your boards and 3 per feast penalty."
+  ],
+  "forget": [
+   "Green goods may not touch each other side by side (corners are fine); blue, silver and ore may.",
+   "Income is the smallest number still uncovered on the diagonal, so one gap holds it back.",
+   "Once placed on a board, goods can't be taken back.",
+   "A bonus space only pays if you leave it uncovered and cover all 8 spaces around it."
+  ]
+ },
+ "224517": {
+  "src": "the Brass: Birmingham rulebook (Roxley)",
+  "goal": "Most **VP** after the Canal and Rail eras: links and flipped industries score at the end of each era.",
+  "turn": [
+   "In turn order, take **2 actions** (1 in the game's first round), discarding a card for each.",
+   "Refill your hand to 8. Money you spend goes on your character: the least spent goes first next round."
+  ],
+  "actions": [
+   [
+    "Build",
+    "A location card (anywhere there) or an industry card (in your network); pay the tile, plus coal and iron."
+   ],
+   [
+    "Network",
+    "Canal era: a canal for £3. Rail era: a rail for £5 + 1 coal, or two for £15 + 2 coal + 1 beer."
+   ],
+   [
+    "Develop",
+    "Remove 1–2 of your lowest tiles from your mat, 1 iron each."
+   ],
+   [
+    "Sell",
+    "Flip cotton, manufacturers or pottery connected to a matching merchant, paying the beer shown; merchant beer gives its bonus."
+   ],
+   [
+    "Loan",
+    "Take £30, income drops 3 levels."
+   ],
+   [
+    "Scout",
+    "Discard 3 cards to take the wild location and wild industry."
+   ],
+   [
+    "Pass",
+    "Discard without acting."
+   ]
+  ],
+  "round": [
+   "**Income**: your income level (negative: pay, selling tiles if short).",
+   "Coal: the nearest connected mine (free), else the market, which needs a link to a merchant. Iron: any iron works, else the market.",
+   "Beer: your own brewery anywhere, or a connected opponent's, or merchant beer when selling."
+  ],
+  "end": [
+   "Each era ends when the deck and hands run out (8/9/10 rounds for 4/3/2 players).",
+   "Links: 1 VP per link icon in their two locations; then flipped industries' VP.",
+   "After the Canal era level 1 industries are removed; level 2+ stay and score again.",
+   "Ties: income, then money."
+  ],
+  "forget": [
+   "In the Canal era you may have only one industry per location.",
+   "Opponents' coal mines and iron works can be overbuilt only when none of that resource is left anywhere.",
+   "A brewery holds 1 beer in the Canal era, 2 in the Rail era.",
+   "A loan can't take your income below −10; you can't Scout while holding a wild card."
+  ]
+ },
+ "310873": {
+  "src": "the Carnegie rulebook (Quined Games)",
+  "goal": "Most **VP** after 20 rounds: projects across the US, linked cities, departments, donations and active employees.",
+  "turn": [
+   "The first player picks one of the four timelines: **everyone** takes that action type this round.",
+   "Its space triggers an event: **income** from a region (bring employees home: transport income per employee + income from your built projects) and/or **donations**.",
+   "Each player uses their departments of that type, once per active employee in each, one department at a time.",
+   "End of round: pay to activate employees; the first player passes left."
+  ],
+  "actions": [
+   [
+    "Human Resources",
+    "3 moves per active employee: move employees around your company (moving an active one lays it down)."
+   ],
+   [
+    "Management",
+    "Commerce: $3, a goods cube, or a mission ($6 or 2 goods). Strategic planning: build a new department (1 or 2 goods)."
+   ],
+   [
+    "Construction",
+    "Send an employee on a mission to a region, pay 1–2 goods, place a project disk from your tabs."
+   ],
+   [
+    "R&D",
+    "Study points: advance a project tab or a regional transport track."
+   ]
+  ],
+  "round": [
+   "Donations: $5, then $10, $15… each, scored at the end (max 12 VP each).",
+   "3–4 players: an Action Choice tile lets you take a different action once (3 VP if unused).",
+   "A transport track's last space gives a one-off reward to the first to get there."
+  ],
+  "end": [
+   "Linking New York, Chicago, New Orleans and San Francisco: up to 36 VP, by your lowest transport level on the way.",
+   "Departments 2–3 VP, active employees 1 VP, project tabs, projects by city 0–3, donations.",
+   "Tied players share the win."
+  ],
+  "forget": [
+   "Employees activate only at the end of a round, and it costs money.",
+   "A department works once per active employee in it.",
+   "Employees on missions are inactive until an income event brings them home.",
+   "Transport income = your level in that region × employees returned."
+  ]
+ },
+ "342942": {
+  "src": "the Ark Nova rulebook (Feuerland / Capstone Games)",
+  "goal": "Build a zoo and push your **Appeal** and **Conservation** counters toward each other: your score is how far they've crossed.",
+  "turn": [
+   "Choose one of your 5 action cards: its **strength = its slot** (1–5). Each X-token spent adds +1.",
+   "Do the action, then move that card to slot 1 and slide the others right.",
+   "Or take 1 X-token instead (the card still moves; max 5 X-tokens)."
+  ],
+  "actions": [
+   [
+    "Cards",
+    "Advance the break 2; draw by strength (max 3), maybe discard one. Strength 5+: snap 1 card from the display instead, any reputation. Upgraded: also from the display within reputation range."
+   ],
+   [
+    "Build",
+    "One building up to size X, 2 money per space. Upgraded: several buildings totalling X, plus the reptile house and aviary."
+   ],
+   [
+    "Animals",
+    "Play animals (the card shows how many) into empty enclosures that fit (size, rock, water, conditions); pay, gain appeal and effects. Upgraded: from the display too."
+   ],
+   [
+    "Association",
+    "One task with strength ≥ its value: reputation (2), partner zoo (3), university (4), conservation project (5). Upgraded: several, plus a donation."
+   ],
+   [
+    "Sponsors",
+    "Play 1 sponsor with level ≤ X, or advance the break X and take X money. Upgraded: several sponsors, or 2X money."
+   ]
+  ],
+  "round": [
+   "**Break** when the break token reaches the end (that player gets an X-token): hand down to 3 (5 with the right university), association workers return, display refreshes, everyone takes income (appeal, kiosks, recurring effects)."
+  ],
+  "end": [
+   "When someone's two counters reach the same scoring area at the end of their turn, everyone else takes one more turn (during a break: everyone, them included).",
+   "Add final scoring cards (up to 4 conservation each) and sponsors' end-game effects.",
+   "Score = the gap between your counters; highest wins."
+  ],
+  "forget": [
+   "The further right an action card sits, the stronger it is.",
+   "Each partner zoo makes its continent's animals 3 cheaper per continent icon on the card.",
+   "Releasing an animal for a project loses its appeal.",
+   "Only 4 upgrades a game (conservation track, reputation track, 2nd partner zoo, 2nd university): you can't upgrade every action."
+  ]
  }
 };
