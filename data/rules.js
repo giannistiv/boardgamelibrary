@@ -5224,5 +5224,306 @@ const RULES = {
    "Starting a new action with your other timer ends the previous one.",
    "Appoint a timekeeper."
   ]
+ },
+ "284083": {
+  "src": "The Crew: The Quest for Planet Nine rulebook (KOSMOS)",
+  "goal": "**Co-op** trick-taking through the logbook's missions: every task card must be won by the player who took it.",
+  "turnTitle": "Each mission",
+  "turn": [
+   "Deal all the cards; whoever has the **rocket 4** is commander.",
+   "Reveal the mission's task cards; starting with the commander, players take them one at a time.",
+   "The commander leads the first trick. Follow suit if you can, otherwise play anything; **rockets are trump**.",
+   "The highest rocket wins, or else the highest card of the colour led; the winner leads next."
+  ],
+  "actions": [
+   [
+    "Communication",
+    "Once per mission, before a trick (never during one): put a card face up with your token at the top (your highest of that colour), middle (your only one) or bottom (your lowest). Never a rocket."
+   ],
+   [
+    "Task tokens",
+    "1–5 must be done in that order, Ω last; arrows (>, >>…) set the order relative to each other."
+   ],
+   [
+    "Dead zone",
+    "Communicate without the token: the others don't know if it's your highest, only or lowest."
+   ],
+   [
+    "Disruption",
+    "Nobody may communicate before the trick shown."
+   ],
+   [
+    "Distress signal",
+    "Before anyone communicates, everyone passes one card left or right (no rockets); it costs one extra attempt in the logbook."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "No talking about your cards apart from the communication.",
+   "A communicated card stays in front of you and is played from there.",
+   "With 2 players, use the JARVIS rules from the rulebook."
+  ],
+  "end": [
+   "Success when every task is done.",
+   "The mission fails at once if a task card is won by the wrong player or a task is done out of order: try again and log the attempts."
+  ],
+  "forget": [
+   "You must still follow suit after communicating.",
+   "Rockets can't be communicated or passed."
+  ]
+ },
+ "324856": {
+  "src": "The Crew: Mission Deep Sea rulebook (KOSMOS)",
+  "goal": "**Co-op** trick-taking through the logbook's missions: every player must complete all the task cards they took.",
+  "turnTitle": "Each mission",
+  "turn": [
+   "Deal all the cards; whoever has the **submarine 4** is captain.",
+   "Draw task cards until their difficulty for your player count adds up **exactly** to the mission's number (skip cards that overshoot).",
+   "Starting with the captain, take tasks one at a time until all are taken (anyone may pass if there are fewer tasks than players).",
+   "The captain leads the first trick. Follow suit; **submarines are trump**; the winner leads next."
+  ],
+  "actions": [
+   [
+    "Sonar",
+    "Once per mission: put a card face up with your sonar token at the top (highest of that colour), middle (only) or bottom (lowest). Never a submarine."
+   ],
+   [
+    "Task cards",
+    "Win certain cards, win with certain cards, win so many tricks, beat the others in a comparison, predict…: read each one carefully."
+   ],
+   [
+    "Completed",
+    "A task is done once it can no longer fail: turn it face down."
+   ],
+   [
+    "Currents",
+    "Communicate with the sonar token's red side: nobody knows if it's highest, only or lowest."
+   ],
+   [
+    "Rapture of the Deep",
+    "Only players − 2 sonar tokens in the middle, for anyone to grab."
+   ],
+   [
+    "Unfamiliar Terrain",
+    "Draw a random card: 1–3 normal, 4–6 currents, 7–9 rapture of the deep."
+   ],
+   [
+    "Free selection",
+    "Discuss openly who takes which task, without revealing your cards."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "Impossible task combinations: swap the last revealed task for a new one.",
+   "A failure you couldn't have avoided doesn't count as an attempt: redeal.",
+   "Distress signal: everyone passes one card left or right (no submarines); +1 attempt."
+  ],
+  "end": [
+   "Success when everyone's tasks are face down.",
+   "A task that can no longer be done fails the attempt: try again and log it."
+  ],
+  "forget": [
+   "One trick can complete several tasks.",
+   "Real-time missions are optional: you can skip the timer."
+  ]
+ },
+ "373106": {
+  "src": "the Sky Team rulebook (Scorpion Masqué)",
+  "goal": "**Co-op** for 2 (pilot and co-pilot): land the plane after **7 rounds**, with the approach clear, the plane level, all gear and flaps out, and your speed below the brakes.",
+  "turnTitle": "Each round",
+  "turn": [
+   "**Talk strategy**, never dice. Then each rolls 4 dice in secret behind the screen. Silence from now on.",
+   "**Alternate placing dice** (the altitude track shows who starts), one at a time, on spaces matching your colour and any number rule.",
+   "**End of round**: once all 8 dice are placed, the plane descends 1,000 feet; take the dice back."
+  ],
+  "actions": [
+   [
+    "Axis (both)",
+    "When the 2nd die lands: tilt by the difference, toward the higher die. Reaching an ✕ is a spin: you lose."
+   ],
+   [
+    "Engines (both)",
+    "Sum = speed. Below the blue marker: approach doesn't move; between: 1 space; above the orange: 2."
+   ],
+   [
+    "Radio",
+    "Remove a plane that many spaces ahead (1 = your current space). Pilot 1 space, co-pilot 2."
+   ],
+   [
+    "Landing gear (pilot)",
+    "Any order; each moves the blue marker up."
+   ],
+   [
+    "Flaps (co-pilot)",
+    "In order from the top; each moves the orange marker up."
+   ],
+   [
+    "Brakes (pilot)",
+    "In order 2, 4, 6; they only matter in the final round."
+   ],
+   [
+    "Concentration",
+    "Gain a coffee (max 3). Any player spends coffees for ±1 per token on a die (no wrapping 6↔1)."
+   ]
+  ],
+  "roundTitle": "Losing on the way",
+  "round": [
+   "No die on the axis or engines from each player by the end of a round.",
+   "Moving the approach with a plane in your current space (collision), or past the airport (overshoot).",
+   "Reaching the last altitude without the airport in your current position. Arriving early: you circle, moving 0 spaces."
+  ],
+  "end": [
+   "Final round: compare the engine speed with the red brake marker instead.",
+   "Win if no planes are left, every gear and flap switch is green, the axis is level, and speed is less than the brakes."
+  ],
+  "forget": [
+   "The axis arrow stays where it is between rounds.",
+   "Reroll tokens appear on some altitudes: either player may spend one, and then both may reroll any dice still behind their screens, once.",
+   "Brakes must be at least on 2 by the end."
+  ]
+ },
+ "413246": {
+  "src": "the Bomb Busters rulebook",
+  "goal": "**Co-op** deduction: cut every wire on everyone's stand without touching a red wire or letting the detonator reach the skull.",
+  "turn": [
+   "Wires stand sorted low to high, hidden from the others; at setup each player points an info token at one of their blue wires.",
+   "On your turn, do **one** action: dual cut, solo cut, or reveal your red wires."
+  ],
+  "actions": [
+   [
+    "Dual cut",
+    "Point at a teammate's wire and name a value you hold. Right: both wires go face up. Wrong: the dial advances 1 and an info token shows that wire's real value; a red wire explodes the bomb."
+   ],
+   [
+    "Solo cut",
+    "If the last 2 or 4 wires of a value are all in your hand, cut them alone."
+   ],
+   [
+    "Reveal reds",
+    "Only if all your remaining wires are red."
+   ],
+   [
+    "Yellow wires",
+    "Count only as 'yellow' during play: cut with 'this wire is yellow'."
+   ],
+   [
+    "Equipment",
+    "Unlocks once 2 wires of its number are cut; each card once."
+   ],
+   [
+    "Character",
+    "Your personal equipment, once per mission."
+   ]
+  ],
+  "roundTitle": "Talking",
+  "round": [
+   "Forbidden: anything about your wires, hinting values, recalling earlier turns, or guessing aloud.",
+   "Allowed: general tactics, equipment, special rules."
+  ],
+  "end": [
+   "Success: every stand is empty.",
+   "Failure: a red wire is cut or the dial reaches the skull. Change captain and replay."
+  ],
+  "forget": [
+   "The dial starts on the section for your player count.",
+   "There are four of each blue wire: mark a value with a validation token once all four are cut.",
+   "A failed dual cut doesn't reveal where your own matching wire was."
+  ]
+ },
+ "298047": {
+  "src": "the Marvel United rulebook (CMON)",
+  "goal": "**Co-op**: complete at least **2 of the 3 missions**, then defeat the Villain before they complete their master plan.",
+  "turnTitle": "The rhythm",
+  "turn": [
+   "**Villain turn**: play a master plan card: move, BAM! effect, place thugs and civilians, special effect.",
+   "Then **3 hero turns** (only 2 once Under Pressure starts, after the first mission), then the Villain again.",
+   "**Hero turn**: draw 1, play 1 card into the storyline, use its symbols plus the previous hero card's, then you may use your location's end-of-turn effect (if no threat covers it)."
+  ],
+  "actions": [
+   [
+    "Move",
+    "To an adjacent location."
+   ],
+   [
+    "Attack",
+    "Defeat a thug or henchman in your location, or damage the Villain (after 2 missions)."
+   ],
+   [
+    "Heroic",
+    "Rescue a civilian, or work on a threat."
+   ],
+   [
+    "Wild",
+    "Any of the three."
+   ],
+   [
+    "Special",
+    "Only usable on your own card, not from the previous hero's."
+   ]
+  ],
+  "roundTitle": "Missions & damage",
+  "round": [
+   "Missions: rescue the civilians, defeat the thugs, clear the threats.",
+   "A hero taking damage discards that many cards from hand to the bottom of their deck.",
+   "Knocked out when you discard your last card: the Villain's BAM! triggers; next turn stand up and draw up to 4.",
+   "A location that can't hold more thugs or civilians triggers the effect on the Villain's dashboard."
+  ],
+  "end": [
+   "Win: the Villain's health is gone.",
+   "Lose: the villainous plot happens, the master plan deck is empty when the Villain must draw, or a hero starts their turn with no cards."
+  ],
+  "forget": [
+   "Symbols from your teammate's last card are shared; specials aren't.",
+   "The Villain can only be damaged after 2 missions are complete.",
+   "Action tokens you earn can be spent on any later turn."
+  ]
+ },
+ "336382": {
+  "src": "the Marvel United: X-Men rulebook (CMON)",
+  "goal": "**Co-op**: complete at least **2 of the 3 missions**, then defeat the Villain. Optional **Super Villain** mode: one player controls the Villain (up to 5 players).",
+  "turnTitle": "The rhythm",
+  "turn": [
+   "**Villain turn**: play a master plan card: move, BAM! effect, place thugs and civilians, special effect.",
+   "Then **3 hero turns** (only 2 once Under Pressure starts, after the first mission), then the Villain again.",
+   "**Hero turn**: draw 1, play 1 card into the storyline, use its symbols plus the previous hero card's, then you may use your location's end-of-turn effect (if no threat covers it)."
+  ],
+  "actions": [
+   [
+    "Move / Attack / Heroic / Wild",
+    "As in Marvel United: move, defeat thugs or hurt the Villain, rescue or clear threats, or any of them."
+   ],
+   [
+    "Special",
+    "Only usable on your own card."
+   ],
+   [
+    "Anti-heroes",
+    "Purple figures can be played as a hero or a villain (not both in one game)."
+   ],
+   [
+    "Delayed / accelerated",
+    "The Villain's next turn comes one card later or earlier (mark it with a token)."
+   ],
+   [
+    "Invulnerable",
+    "Ignore damage until your next turn."
+   ]
+  ],
+  "roundTitle": "Super Villain mode",
+  "round": [
+   "The Villain player keeps a hand of 2 master plan cards: each turn draw one, then play one.",
+   "They pick 3 of 4 secret Super Villain cards; each hero picks 1 of 2 Super Hero cards. Each is played once, when its trigger happens (Villain: max 1 a turn).",
+   "The heroes share the action tokens shown on the dashboard's back, and choose the Villain's start location and who starts.",
+   "Heroes lose when the Villain must play a card and has none in hand."
+  ],
+  "end": [
+   "Win: the Villain's health is gone.",
+   "Lose: the villainous plot happens, the master plan deck is empty when the Villain must draw, or a hero starts their turn with no cards."
+  ],
+  "forget": [
+   "Super Hero cards aren't part of your hand.",
+   "In Super Villain mode, hero effects can't touch the Villain's hand.",
+   "The heroes break ties (unless a Super Villain card says otherwise)."
+  ]
  }
 };
