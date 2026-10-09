@@ -1974,6 +1974,22 @@ const RULES = {
    "Unsold goods are lost at the end of the round.",
    "Unused progress markers vanish at the end of your turn.",
    "A cheap price acts first but earns less per phone."
+  ],
+  "exp": [
+   {
+    "id": 306864,
+    "name": "Update 1.1",
+    "src": "the Update 1.1 rulebook (Arcane Wonders)",
+    "lines": [
+     "**4 modules** for experienced players; use any of them, alone or together.",
+     "**Directives**: deal 5 / 6 / 7 / 8 for 2 / 3 / 4 / 5 players and read them out. The first to meet one takes it (several at once: the active player, else the lowest price); you may wait and take it in a later round. Flip yours face down at round end; they score at the end.",
+     "**2–3 player board**: 2 players or solo add 1 S and 1 M retailer at random. Pick companies in turn; then, from the last player, choose a starting region among the 3 M regions. Only 3 improvement spaces.",
+     "**Mixed buyers** (2–3 board): sell to them if you meet either demand; still 1 phone per buyer, left to right.",
+     "**New technologies**: 5 pairs (CEO, patent, world-changing, spatial, blitz); mix them or use a recommended set. CEO techs: your CEO starts in your starting region and moves for 1 logistics.",
+     "**Hardcore mode**: after prices are revealed, pay VP for each icon on your decision: research 3, logistics 2, +$ 1, production 1, office 0, −$ gains 1; −2 per office (min 0). Production costs 1 per phone.",
+     "Hardcore scoring: patents and retailers score as you get them (lose a retailer's VP if your office leaves); after research, below 0 pay 1 per 10 VP below, above 0 gain 1 per 20 VP (rounded up); directives score at round end."
+    ]
+   }
   ]
  },
  "301880": {
@@ -2887,6 +2903,22 @@ const RULES = {
    "Only one tribe card can be held in hand; play it later with the Noble.",
    "Gold isn't a good.",
    "Taking the card facing the robber is allowed."
+  ],
+  "exp": [
+   {
+    "id": 202453,
+    "name": "Targi: The Expansion",
+    "src": "the Targi: The Expansion rulebook (Kosmos)",
+    "lines": [
+     "**Setup**: a 16-card border (the base game's 6 goods borders + 10 new); use only the new tribe cards in your first games; water goods cards go into the goods deck; 3 sand dunes face up. Each player: 1 date, 1 salt, 1 pepper, 1 gold, 2 water, 4 VP.",
+     "**Targia** (purple): after the Robber, she moves one border card counter-clockwise (starting on 15, Salt). She doesn't block. A Targi on her card also takes 1 good, or pays 1 good to reveal goods cards (pay again to redraw) and takes one.",
+     "**Water** isn't a good. Swap any time: 3 water = 1 gold, 2 water = 1 good. Max 10 at the end of a round. Worth 1 VP per 2 at the end; many '/' costs accept water.",
+     "**Sand dunes**: place a Targi on a free dune instead of a border card (one Targi per dune). Take its one-time bonus with your actions, then discard it. Each Targi on a dune costs you a crossing point (central card) that round.",
+     "New dunes: if none is out at the start of a round, reveal 1; after a raid (and the Targia's move), discard them all and reveal 3.",
+     "**Tribe card icons**: one-time when played, permanent, an action token (use once, any later turn), or end-game scoring. '/' costs: pay either. '(…)' costs: pay extra for those VP tokens now.",
+     "End as in the base game; water scores 1 VP per 2. Ties: most gold, then most goods."
+    ]
+   }
   ]
  },
  "344258": {
@@ -3599,6 +3631,25 @@ const RULES = {
   "forget": [
    "Choppers eliminate any car ending a turn on them, yours included.",
    "You may shoot your own cars."
+  ],
+  "exp": [
+   {
+    "id": 415878,
+    "name": "Carnival of Chaos",
+    "src": "the Carnival of Chaos rulebook (Restoration Games)",
+    "lines": [
+     "Adds a 5th (purple) crew for any game.",
+     "**Carnival mode**: no finish line. After 6 rounds (Tina's 5-card deck runs out), or the round a player is knocked out, the surviving player with the most **scrap** wins.",
+     "**Setup**: pick an arena side (Haulasseum easier, Slaytona 500 brutal) on the foundation board with 3 road tiles; party favors face down on every hazard and favor space (no hazard tokens); killer pillars road-side up; super-weapon tokens out; 5 Tina's Turn cards.",
+     "**Scrap** on your turn: +2 for each damage token an opponent's car takes, +3 for each opponent's car eliminated (whatever caused it). Spotlights and some favors give more. Nothing during Tina's turn.",
+     "**Witness Me!** once a game, at the start of your turn: +1 scrap for every shot or slam that turn.",
+     "Each car starts on its own road tile; in round 1 each car's first move goes to a road tile you haven't used. No shooting from road tiles (slams are fine).",
+     "**In the arena**: move to any of your 3 front-arc spaces and turn to face the way you moved (not when forced). A slammed car turns to match the slammer. You can't drive back out; off an edge with no road tile = eliminated.",
+     "**Super-weapons**: end a move on a token, draw one (one per car, kept until it's eliminated). **Party favors**: end a move on one, keep it face down, play any number on your turn for any of your cars.",
+     "**Tina's turn** (after everyone's 3 turns): spotlight cars earn the scrap shown; the card's killer pillars flip impassable (cars on them die), the rest flip back; her decree beats every rule until next round.",
+     "Ties: most operable vehicles, then super-weapons, then unused party favors, then roll all your dice."
+    ]
+   }
   ]
  },
  "340677": {
@@ -4962,6 +5013,26 @@ const RULES = {
   "forget": [
    "Each adjacent tile gives at most 1 clue.",
    "2 players: 3 skip tokens let you skip guessing (the Queen still moves)."
+  ],
+  "exp": [
+   {
+    "id": 348997,
+    "name": "Escape the Castle",
+    "src": "the Escape the Castle rulebook (North Star Games)",
+    "lines": [
+     "**Goal**: stay ahead of the Queen as usual, but also find the **5 keys** to the Royal Gate. Play one character module per game.",
+     "**Queen cards** (a constant obstacle) and **Helper cards** (an action once per turn): start with one of each in play.",
+     "Each time the gardeners pass the White Rabbit, flip another of each; as a team keep one Queen and one Helper card, discard the others. They take effect before phase 4 (Move the Queen).",
+     "Moving tiles: never move or remove a shrub with clue tokens on it or next to one that has them. Extra greenhouse tiles sit below it (not leftmost or rightmost).",
+     "Keys you've won are never lost.",
+     "**Alice**: a key for solving a whim worth the Queen's current speed (1–5, once per value). Eat Me / Drink Me spaces add / remove a Queen flower (max 4, min 0) when you place a shrub there.",
+     "**Cheshire Cat**: 5 objective cards: a key for each line of 4 matching shapes or colours (any direction).",
+     "**Jabberwocky**: 2 face-down 'destroyed' tiles at setup; a key each time the Helper card destroys 2 shrubs (each with a symbol from the card, next to an empty space, no clue tokens on or beside it).",
+     "**Mad Hatter**: an empty space touching all four colours gets a tea table (no shape or colour, permanent): a key each.",
+     "**Tweedledum & Tweedledee**: 5 objective cards: a key for guessing two whims in one turn that match one.",
+     "**White Rabbit**: time yourselves: fill the garden in 40 / 35 / 30 / 25 / 20 minutes for 1–5 keys."
+    ]
+   }
   ]
  },
  "129437": {
