@@ -76,7 +76,8 @@ function _pbMission(p) {
   return null;
 }
 
-function buildMissionMapHtml(game, plays) {
+function buildMissionMapHtml(game, plays, opts) {
+  const trail = !!(opts && opts.trail);
   const id = Number(game && game.bggId);
   if (!id || PB_SKIP.has(id) || !plays || plays.length < 3) return '';
   const tagged = plays.filter(p => p.b);
@@ -144,7 +145,7 @@ function buildMissionMapHtml(game, plays) {
   const unit = (cfg.label || (tagged[0] && (String(tagged[0].b).match(/^[A-Za-z]+/) || [''])[0]) || 'Mission').replace(/^./, ch => ch.toUpperCase());
 
   // beaten (or, with no winner to beat, played) since this device last looked
-  const fresh = pbFresh(id, cells.filter(c => (byKey.get(c.key) || {}).won).map(c => c.key));
+  const fresh = pbFresh(trail ? `${id}:trail` : id, cells.filter(c => (byKey.get(c.key) || {}).won).map(c => c.key));
   const cellHtml = (c) => {
     const e = byKey.get(c.key);
     const cls = (!e ? 'todo' : e.won ? (coop && e.tries === 1 ? 'won1' : 'won') : 'lost') + (fresh.has(c.key) ? ' pb-new' : '');
@@ -177,6 +178,17 @@ function buildMissionMapHtml(game, plays) {
     return drawn ? capOf(nextCell || lastPlayed || cells[0]) : '';
   })();
   const pct = total ? Math.round(won / total * 100) : null;
+
+  // the Oathsworn campaign page (ilioupoli.js): the trail through the Deepwood, on its own
+  if (trail) {
+    const cap = capOf(nextCell || [...cells].reverse().find(c => byKey.has(c.key)) || cells[0]);
+    return `<div class="pb-board pb-trailbox">
+      <div class="st-head"><span class="st-title">&#127794; Into the Deepwood</span><span class="pb-count">${won}${total ? ` / ${total}` : ''} chapters</span></div>
+      ${_pbTrailHtml(cells, byKey, nextCell, capOf, fresh, coop)}
+      <div class="pb-cap" aria-live="polite">${cap}</div>
+      <div class="pb-legend"><span><i class="pbt-key fire"></i>Cleared</span><span><i class="pbt-key lost"></i>Lost there</span><span>&#9876;&#65039; Your party</span><span><i class="pbt-key todo"></i>Ahead</span></div>
+    </div>`;
+  }
 
   return `<div class="pb-board pb-missions">
     <div class="st-head"><span class="st-title">&#128506; ${esc(unit)}s</span><span class="pb-count">${won}${total ? ` / ${total}` : ''} ${coop ? 'beaten' : 'played'}</span></div>
@@ -234,6 +246,7 @@ function _pbClocksHtml(cells, byKey, nextCell, last, per, coop, capOf, fresh) {
 // draws on, the rocket flies over, the new stops pop in.
 function _pbVoyageHtml(o) {
   const { cells, byKey, nextCell, capOf, fresh, coop, pts, stopIdx, W, H, cls, deco, names, r } = o;
+  const marker = o.marker || '&#128640;', turns = o.marker ? false : true;
   const reached = (c) => { const e = byKey.get(c.key); return !!e && (coop ? e.won : true); };
   const furthest = cells.reduce((f, c, i) => (reached(c) ? i : f), -1);
   const before = cells.reduce((f, c, i) => (reached(c) && !fresh.has(c.key) ? i : f), -1);
@@ -256,7 +269,7 @@ function _pbVoyageHtml(o) {
     return `<g class="pbm-stop pbm-${st}${fresh.has(c.key) ? ' pb-new' : ''}" data-pb-cap="${_escapeHtml(capOf(c))}" tabindex="0">
         <title>${_escapeHtml(capOf(c).replace(/<[^>]+>/g, ''))}</title>
         <circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r}"/>
-        <text class="pbm-n" x="${x.toFixed(1)}" y="${(y + r * 0.37).toFixed(1)}">${c.n}</text>
+        <text class="pbm-n${String(c.label || c.n).length > 2 ? ' pbm-n-sm' : ''}" x="${x.toFixed(1)}" y="${(y + r * 0.37).toFixed(1)}">${c.label || c.n}</text>
         ${lab ? `<text class="pbm-name" x="${lab[0].toFixed(1)}" y="${(lab[1] + 6).toFixed(1)}">${_escapeHtml(name)}</text>` : ''}
       </g>`;
   }).join('');
@@ -276,54 +289,55 @@ function _pbVoyageHtml(o) {
         ${done}
         ${stops}
         <g class="${flew ? 'pbm-fly' : ''}" style="--dx:${(was[0] - at[0]).toFixed(1)}px;--dy:${(was[1] - at[1]).toFixed(1)}px">
-          <g transform="translate(${at[0].toFixed(1)} ${at[1].toFixed(1)}) rotate(${(heading(rocketK(furthest)) + 45).toFixed(0)})"><text class="pbm-rocket" y="10">&#128640;</text></g>
+          <g transform="translate(${at[0].toFixed(1)} ${at[1].toFixed(1)})${turns ? ` rotate(${(heading(rocketK(furthest)) + 45).toFixed(0)})` : ''}"><text class="pbm-rocket" y="${turns ? 10 : -8}">${marker}</text></g>
         </g>
       </svg>
     </div>`;
 }
 
-// Bomb Busters: the missions as the wires of a bomb, eleven to a row. A
-// beaten mission's wire is cut, lost tries leave scorch marks, the cutters
-// wait on the next one; a timer counts the wires defused.
+// Bomb Busters: the missions as the wires of a bomb, 22 to a row. A beaten
+// mission's wire is cut, lost tries leave scorch marks, the cutters wait on
+// the next one; a timer counts the wires defused. Numbers on every fifth wire
+// (and the next); tap any wire for its story.
 function _pbBombHtml(cells, byKey, nextCell, capOf, fresh, won, total) {
-  const per = 11, W = 440, X0 = 30, DX = (W - 2 * X0) / (per - 1), HEAD = 70, ROW = 86;
+  const per = 22, W = 440, X0 = 22, DX = (W - 2 * X0) / (per - 1), HEAD = 46, ROW = 58;
   const rows = Math.ceil(cells.length / per);
-  const H = HEAD + rows * ROW + 12;
+  const H = HEAD + rows * ROW + 8;
   const COLOURS = ['#3d7be0', '#e8c23a', '#d9483b', '#46a35a', '#d8d3c8', '#9a6bdc'];
   const f = (v) => v.toFixed(1);
   const wires = cells.map((c, i) => {
     const e = byKey.get(c.key);
     const x = X0 + (i % per) * DX, y = HEAD + Math.floor(i / per) * ROW;
-    const top = y + 14, bot = y + 70, col = COLOURS[i % COLOURS.length];
+    const top = y + 15, bot = y + 49, mid = (top + bot) / 2, col = COLOURS[i % COLOURS.length];
     const cut = !!(e && e.won), isNext = c === nextCell, losses = e ? e.losses : 0;
     const st = cut ? 'cut' : isNext ? 'next' : e ? 'lost' : 'todo';
     const wire = cut
-      ? `<g class="pbb-half pbb-top"><path d="M${f(x)} ${top} C${f(x + 9)} ${top + 10} ${f(x + 7)} ${top + 18} ${f(x + 3)} ${top + 22}" stroke="${col}"/><circle class="pbb-copper" cx="${f(x + 3)}" cy="${top + 22}" r="2.2"/></g>
-         <g class="pbb-half pbb-bot"><path d="M${f(x - 3)} ${bot - 22} C${f(x - 7)} ${bot - 18} ${f(x - 9)} ${bot - 10} ${f(x)} ${bot}" stroke="${col}"/><circle class="pbb-copper" cx="${f(x - 3)}" cy="${bot - 22}" r="2.2"/></g>
-         ${fresh.has(c.key) ? `<circle class="pbb-spark" cx="${f(x)}" cy="${(top + bot) / 2}" r="9"/>` : ''}`
-      : `<path class="pbb-wire" d="M${f(x)} ${top} C${f(x + 11)} ${top + 18} ${f(x - 11)} ${bot - 18} ${f(x)} ${bot}" stroke="${col}"/>`;
-    const scorch = losses ? `<circle class="pbb-scorch" cx="${f(x)}" cy="${(top + bot) / 2}" r="${Math.min(15, 8 + losses * 1.5)}"/>` : '';
+      ? `<g class="pbb-half pbb-top"><path d="M${f(x)} ${top} C${f(x + 5)} ${top + 6} ${f(x + 4)} ${top + 10} ${f(x + 2)} ${top + 13}" stroke="${col}"/><circle class="pbb-copper" cx="${f(x + 2)}" cy="${top + 13}" r="1.7"/></g>
+         <g class="pbb-half pbb-bot"><path d="M${f(x - 2)} ${bot - 13} C${f(x - 4)} ${bot - 10} ${f(x - 5)} ${bot - 6} ${f(x)} ${bot}" stroke="${col}"/><circle class="pbb-copper" cx="${f(x - 2)}" cy="${bot - 13}" r="1.7"/></g>
+         ${fresh.has(c.key) ? `<circle class="pbb-spark" cx="${f(x)}" cy="${mid}" r="7"/>` : ''}`
+      : `<path class="pbb-wire" d="M${f(x)} ${top} C${f(x + 7)} ${top + 11} ${f(x - 7)} ${bot - 11} ${f(x)} ${bot}" stroke="${col}"/>`;
+    const scorch = losses ? `<circle class="pbb-scorch" cx="${f(x)}" cy="${mid}" r="${Math.min(9, 4.5 + losses)}"/>` : '';
+    const label = c.n % 5 === 0 || i % per === 0 || isNext;
     return `<g class="pbb pbb-${st}${fresh.has(c.key) ? ' pb-new' : ''}" data-pb-cap="${_escapeHtml(capOf(c))}" tabindex="0">
         <title>${_escapeHtml(capOf(c).replace(/<[^>]+>/g, ''))}</title>
-        <rect class="pbb-hit" x="${f(x - DX / 2)}" y="${y}" width="${f(DX)}" height="${ROW - 6}"/>
+        <rect class="pbb-hit" x="${f(x - DX / 2)}" y="${y}" width="${f(DX)}" height="${ROW - 4}"/>
         ${scorch}
-        <text class="pbb-n" x="${f(x)}" y="${y + 8}">${c.n}</text>
-        <rect class="pbb-term" x="${f(x - 4)}" y="${top - 4}" width="8" height="6" rx="1.5"/>
-        <rect class="pbb-term" x="${f(x - 4)}" y="${bot - 2}" width="8" height="6" rx="1.5"/>
+        ${label ? `<text class="pbb-n" x="${f(x)}" y="${y + 8}">${c.n}</text>` : ''}
+        <rect class="pbb-term" x="${f(x - 3)}" y="${top - 3}" width="6" height="4.5" rx="1"/>
+        <rect class="pbb-term" x="${f(x - 3)}" y="${bot - 1.5}" width="6" height="4.5" rx="1"/>
         ${wire}
-        ${losses && !cut ? `<text class="pbb-loss" x="${f(x + 9)}" y="${top + 6}">${losses}</text>` : ''}
-        ${isNext ? `<text class="pbb-snip" x="${f(x + 13)}" y="${(top + bot) / 2 + 6}">&#9986;&#65039;</text>` : ''}
+        ${isNext ? `<text class="pbb-snip" x="${f(x + 11)}" y="${mid + 5}">&#9986;&#65039;</text>` : ''}
       </g>`;
   }).join('');
-  const screws = [[12, 12], [W - 12, 12], [12, H - 12], [W - 12, H - 12]].map(([x, y]) => `<g class="pbb-screw"><circle cx="${x}" cy="${y}" r="5"/><path d="M${x - 3} ${y} h6"/></g>`).join('');
+  const screws = [[10, 10], [W - 10, 10], [10, H - 10], [W - 10, H - 10]].map(([x, y]) => `<g class="pbb-screw"><circle cx="${x}" cy="${y}" r="4"/><path d="M${x - 2.5} ${y} h5"/></g>`).join('');
   const shown = `${String(won).padStart(2, '0')}/${total || cells.length}`;
   return `<div class="pb-bomb">
       <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${won} of ${total || cells.length} wires cut">
-        <rect class="pbb-panel" x="2" y="2" width="${W - 4}" height="${H - 4}" rx="14"/>
+        <rect class="pbb-panel" x="2" y="2" width="${W - 4}" height="${H - 4}" rx="12"/>
         ${screws}
-        <rect class="pbb-timer" x="${W / 2 - 92}" y="14" width="184" height="42" rx="7"/>
-        <text class="pbb-label" x="${W / 2 - 80}" y="40">DEFUSED</text>
-        <text class="pbb-digits" x="${W / 2 + 80}" y="46">${shown}</text>
+        <rect class="pbb-timer" x="${W / 2 - 78}" y="8" width="156" height="30" rx="6"/>
+        <text class="pbb-label" x="${W / 2 - 68}" y="27">DEFUSED</text>
+        <text class="pbb-digits" x="${W / 2 + 68}" y="31.5">${shown}</text>
         ${wires}
       </svg>
     </div>`;
@@ -348,9 +362,11 @@ function _pbMoonHtml(cells, byKey, nextCell, capOf, fresh) {
 
 // The Crew: 50 missions winding out through the solar system, ten to a row,
 // swinging round Mars, Jupiter, Saturn and Neptune on the way to Planet Nine.
-function _pbCrewHtml(cells, byKey, nextCell, capOf, fresh, coop) {
-  const L = 60, R = 380, Y0 = 70, ROW = 90, TURN = ROW / 2, per = 10;
-  const rows = Math.max(1, Math.ceil(cells.length / per));
+// A route that winds down the page, `per` stops to a row, turning round at the
+// ends: its points, every stop's point and the rows.
+function _pbWinding(n, per, L, R, Y0, ROW) {
+  const TURN = ROW / 2;
+  const rows = Math.max(1, Math.ceil(n / per));
   const pts = [], len = [];
   const push = (x, y) => {
     if (pts.length) len.push(len[len.length - 1] + Math.hypot(x - pts[pts.length - 1][0], y - pts[pts.length - 1][1]));
@@ -362,7 +378,7 @@ function _pbCrewHtml(cells, byKey, nextCell, capOf, fresh, coop) {
     const y = Y0 + r * ROW, ltr = r % 2 === 0;
     rowStart.push(len.length ? len[len.length - 1] : 0);
     for (let x = 0; x <= R - L; x += 4) push(ltr ? L + x : R - x, y);
-    if (r < rows - 1) {   // the turn down to the next row, round a planet
+    if (r < rows - 1) {   // the turn down to the next row
       const cx = ltr ? R : L, cy = y + TURN;
       for (let a = 4; a < 180; a += 4) {
         const rad = (ltr ? -90 + a : -90 - a) * Math.PI / 180;
@@ -370,9 +386,15 @@ function _pbCrewHtml(cells, byKey, nextCell, capOf, fresh, coop) {
       }
     }
   }
-  const step = (R - L) / (per - 1);
+  const step = (R - L) / Math.max(1, per - 1);
   const idxAt = (want) => { let i = 0; while (i < len.length - 1 && len[i] < want) i++; return i; };
-  const stopIdx = cells.map((_, i) => idxAt(rowStart[Math.floor(i / per)] + (i % per) * step));
+  const stopIdx = Array.from({ length: n }, (_, i) => idxAt(rowStart[Math.floor(i / per)] + (i % per) * step));
+  return { pts, stopIdx, rows, TURN };
+}
+
+function _pbCrewHtml(cells, byKey, nextCell, capOf, fresh, coop) {
+  const L = 60, R = 380, Y0 = 70, ROW = 90, per = 10;
+  const { pts, stopIdx, rows, TURN } = _pbWinding(cells.length, per, L, R, Y0, ROW);
   const H = Y0 + (rows - 1) * ROW + 36;
   const planet = (k, x, y) => ({
     earth: `<g class="pbc-earth"><title>Earth</title><circle cx="${x}" cy="${y}" r="17"/><path d="M${x - 9} ${y - 6} q6 -6 12 -1 q2 6 -4 9 q-7 1 -8 -8Z M${x + 3} ${y + 6} q5 -4 9 0 q-2 5 -7 5Z"/></g>`,
@@ -389,6 +411,33 @@ function _pbCrewHtml(cells, byKey, nextCell, capOf, fresh, coop) {
     + turns.slice(0, rows - 1).map((k, r) => planet(k, r % 2 === 0 ? R : L, Y0 + r * ROW + TURN)).join('')
     + planet('nine', (rows - 1) % 2 === 0 ? R + 44 : L - 44, lastY);
   return _pbVoyageHtml({ cells, byKey, nextCell, capOf, fresh, coop, pts, stopIdx, W: 452, H, cls: 'pb-crewmap', deco, names: null, r: 11.5 });
+}
+
+// Oathsworn: the chapters as a trail winding down through the Deepwood, six
+// to a row, from the camp to the heart of the wood; a campfire burns at each
+// chapter cleared and your party's swords stand at the next.
+function _pbTrailHtml(cells, byKey, nextCell, capOf, fresh, coop) {
+  const L = 74, R = 378, Y0 = 64, ROW = 88, per = 6, W = 452;
+  const { pts, stopIdx, rows } = _pbWinding(cells.length, per, L, R, Y0, ROW);
+  const H = Y0 + (rows - 1) * ROW + 44;
+  // pines in the gaps between the rows and down the sides, scattered the same way every time
+  let seed = 7;
+  const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+  const pine = (x, y, k) => `<g class="pbt-pine${k}"><path d="M${x} ${y - 16} l-8 11 h4 l-7 10 h22 l-7 -10 h4 Z"/><rect x="${x - 1.5}" y="${y + 5}" width="3" height="4"/></g>`;
+  const trees = [];
+  for (let r = 0; r < rows - 1; r++) {
+    const y = Y0 + r * ROW + ROW / 2 + 6;
+    for (let k = 0; k < 6; k++) trees.push(pine(Math.round(L + 34 + k * (R - L - 68) / 5 + (rnd() - 0.5) * 22), Math.round(y + (rnd() - 0.5) * 10), k % 3));
+  }
+  for (let k = 0; k < rows + 1; k++) {
+    trees.push(pine(Math.round(14 + rnd() * 10), Math.round(Y0 + 30 + k * ROW * 0.92), 1));
+    trees.push(pine(Math.round(W - 14 - rnd() * 10), Math.round(Y0 + 10 + k * ROW * 0.92), 2));
+  }
+  const endX = (rows - 1) % 2 === 0 ? R + 46 : L - 46, endY = Y0 + (rows - 1) * ROW;
+  const deco = trees.join('')
+    + `<text class="pbt-icon" x="${L - 44}" y="${Y0 + 9}">&#127957;&#65039;</text>`
+    + `<g class="pbt-heart"><title>The heart of the Deepwood</title><circle cx="${endX}" cy="${endY}" r="20"/><text class="pbt-icon" x="${endX}" y="${endY + 9}">&#127795;</text></g>`;
+  return _pbVoyageHtml({ cells, byKey, nextCell, capOf, fresh, coop, pts, stopIdx, W, H, cls: 'pb-trail', deco, names: null, r: 13, marker: '&#9876;&#65039;' });
 }
 
 // Tap a clock quarter or a stop on the way to the Moon to read about it.

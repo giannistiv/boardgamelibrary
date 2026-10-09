@@ -8,7 +8,7 @@ let _ilioSubTab = 'library'; // 'library' | 'oathsworn' | 'gauntlet' | 'rove'
 const OATHSWORN_BGGID = 251661;
 const OATHSWORN_VOTERS = ['Στιβ', 'Δημητρης', 'Μαντσος'];
 let oathswornRanks = {};      // canonical voter name → ordered [bossName, …]
-let _oathSubTab = 'overall';  // inner tab: 'overall' | a voter name
+let _oathSubTab = 'campaign'; // inner tab: 'campaign' (the trail) | 'overall' | a voter name
 
 // Derive the master boss list from PLAY_HISTORY, in chapter order. Picking
 // it up live means later imported plays add their bosses automatically.
@@ -261,18 +261,23 @@ function showIlioupoliView() {
     const me = rawPlayer ? (NAME_MAP[rawPlayer] || rawPlayer) : null;
 
     // Inner tabs: Overall + one per voter.
-    const innerTabs = ['overall', ...OATHSWORN_VOTERS];
-    if (!innerTabs.includes(_oathSubTab)) _oathSubTab = 'overall';
+    const innerTabs = ['campaign', 'overall', ...OATHSWORN_VOTERS];
+    if (!innerTabs.includes(_oathSubTab)) _oathSubTab = 'campaign';
     const innerTabsHtml = `
       <div class="bs-subtabs oath-subtabs">
         ${innerTabs.map(t => {
-          const label = t === 'overall' ? '🏆 Overall' : t;
+          const label = t === 'campaign' ? '🌲 Campaign' : t === 'overall' ? '🏆 Overall' : t;
           return `<button class="bs-subtab${t === _oathSubTab ? ' active' : ''}" data-oath-sub="${_escapeHtml(t)}">${_escapeHtml(label)}</button>`;
         }).join('')}
       </div>`;
 
     let body;
-    if (bosses.length === 0) {
+    if (_oathSubTab === 'campaign') {
+      // the campaign: the trail through the Deepwood, from the logged chapters (progress-boards.js)
+      const game = findGameByBggId(OATHSWORN_BGGID) || { bggId: OATHSWORN_BGGID, name: 'Oathsworn' };
+      body = (typeof buildMissionMapHtml === 'function' && buildMissionMapHtml(game, PLAY_HISTORY[OATHSWORN_BGGID] || [], { trail: true }))
+        || `<div class="bsv-empty">The trail appears once Oathsworn plays are logged with their chapter ("Chapter 12 - …").</div>`;
+    } else if (bosses.length === 0) {
       body = `<div class="bsv-empty">No bosses yet. Once Oathsworn plays are imported with a
         "Chapter # - Boss Name" board label, the bosses appear here to rank.</div>`;
     } else if (_oathSubTab === 'overall') {
@@ -315,13 +320,14 @@ function showIlioupoliView() {
     container.innerHTML = `
       <div class="lb-header">
         <div class="lb-title">Ilioupoli Bros</div>
-        <div class="lb-count">Oathsworn boss ranking</div>
+        <div class="lb-count">${_oathSubTab === 'campaign' ? 'Oathsworn campaign' : 'Oathsworn boss ranking'}</div>
       </div>
       ${subTabsHtml}
       ${innerTabsHtml}
       ${body}`;
 
     wireSubTabs();
+    if (_oathSubTab === 'campaign' && typeof wireProgressBoards === 'function') wireProgressBoards(container);
     container.querySelectorAll('[data-oath-sub]').forEach(el => {
       el.addEventListener('click', () => {
         const s = el.dataset.oathSub;

@@ -3608,24 +3608,25 @@
   .pbb-screw circle{fill:#4a4f56;stroke:#2a2d31;stroke-width:1.5}
   .pbb-screw path{stroke:#2a2d31;stroke-width:1.5}
   .pbb-timer{fill:#0a0606;stroke:#3a2222;stroke-width:2}
-  .pbb-label{font:800 11px/1 ui-monospace,Menlo,monospace;letter-spacing:0.12em;fill:#c9483f}
-  .pbb-digits{font:800 30px/1 ui-monospace,Menlo,monospace;text-anchor:end;fill:#ff4a3d;filter:drop-shadow(0 0 5px rgba(255,74,61,0.85))}
+  .pbb-label{font:800 9px/1 ui-monospace,Menlo,monospace;letter-spacing:0.12em;fill:#c9483f}
+  .pbb-digits{font:800 21px/1 ui-monospace,Menlo,monospace;text-anchor:end;fill:#ff4a3d;filter:drop-shadow(0 0 5px rgba(255,74,61,0.85))}
   .pbb{cursor:pointer}
   .pbb-hit{fill:transparent}
-  .pbb-n{font-size:10.5px;font-weight:800;text-anchor:middle;fill:rgba(240,230,211,0.55)}
+  .pbb-n{font-size:9.5px;font-weight:800;text-anchor:middle;fill:rgba(240,230,211,0.55)}
   .pbb-cut .pbb-n{fill:#86d993}
   .pbb-next .pbb-n,.pbb-lost .pbb-n{fill:#f0e6d3}
   .pbb-term{fill:#8d939b;stroke:#2a2d31;stroke-width:1}
-  .pbb-wire,.pbb-half path{fill:none;stroke-width:5;stroke-linecap:round}
+  .pbb-wire,.pbb-half path{fill:none;stroke-width:3.6;stroke-linecap:round}
   .pbb-todo .pbb-wire{opacity:0.35}
   .pbb-lost .pbb-wire{opacity:0.85}
   .pbb-next .pbb-wire{filter:drop-shadow(0 0 4px rgba(255,255,255,0.7))}
   .pbb-cut .pbb-half{opacity:0.8}
   .pbb-copper{fill:#d98a4a}
-  .pbb-scorch{fill:rgba(20,10,6,0.85);stroke:rgba(140,60,30,0.5);stroke-width:2;stroke-dasharray:2 3}
+  .pbb-scorch{fill:rgba(20,10,6,0.85);stroke:rgba(140,60,30,0.5);stroke-width:1.5;stroke-dasharray:1.5 2}
   .pbb-loss{font-size:9px;font-weight:800;fill:#ff7a6e}
-  .pbb-snip{font-size:17px;text-anchor:middle;pointer-events:none}
-  .pbb.pb-sel .pbb-n{fill:#fff;text-decoration:underline}
+  .pbb-snip{font-size:12px;text-anchor:middle;pointer-events:none}
+  .pbb.pb-sel .pbb-term{fill:#fff}
+  .pbb.pb-sel .pbb-n{fill:#fff}
   .pbb-spark{fill:rgba(255,214,120,0.9);opacity:0}
   .pbb-key{display:inline-block;width:14px;height:10px;border-radius:2px;vertical-align:middle}
   .pbb-key.cut{background:linear-gradient(90deg,#3d7be0 40%,transparent 40% 60%,#3d7be0 60%)}
@@ -3655,6 +3656,26 @@
   .sky-pass-stub b{font-size:0.72rem}
   .sky-pass-code{font-size:1.4rem;font-weight:900;letter-spacing:0.04em}
   .sky-pass-bars{display:block;width:4.2rem;height:1.6rem;margin-top:0.2rem;background:repeating-linear-gradient(90deg,#1d1a14 0 2px,transparent 2px 3px,#1d1a14 3px 4px,transparent 4px 7px,#1d1a14 7px 10px,transparent 10px 11px)}
+  /* Oathsworn: the trail through the Deepwood (progress-boards.js) */
+  .pb-trailbox{max-width:560px;margin:0 auto 1.1rem}
+  .pb-trail{background:#0d1610;border-color:rgba(120,170,110,0.15)}
+  .pb-trail .pbm-path{stroke:rgba(196,160,110,0.45);stroke-dasharray:2 7;stroke-width:3}
+  .pb-trail .pbm-done{stroke:#d89a52;stroke-width:3.5}
+  .pb-trail .pbm-stop circle{fill:#1a2418;stroke:rgba(200,190,160,0.35)}
+  .pb-trail .pbm-won circle,.pb-trail .pbm-won1 circle{fill:#e8803a;stroke:#ffc07a;filter:drop-shadow(0 0 5px rgba(255,140,50,0.8))}
+  .pb-trail .pbm-won .pbm-n,.pb-trail .pbm-won1 .pbm-n{fill:#2a1206}
+  .pb-trail .pbm-lost circle{fill:rgba(192,80,77,0.55);stroke:rgba(230,120,110,0.9)}
+  .pb-trail .pbm-n{font-size:11px}
+  .pbm-n.pbm-n-sm{font-size:8.5px;letter-spacing:-0.02em}
+  .pb-trail .pbm-rocket{font-size:20px}
+  .pbt-pine0 path{fill:#1f3a24}.pbt-pine1 path{fill:#24442a}.pbt-pine2 path{fill:#1a3020}
+  .pbt-pine0 rect,.pbt-pine1 rect,.pbt-pine2 rect{fill:#3a2a1a}
+  .pbt-icon{font-size:24px;text-anchor:middle}
+  .pbt-heart circle{fill:rgba(140,220,120,0.14);stroke:rgba(140,220,120,0.35)}
+  .pbt-key{display:inline-block;width:11px;height:11px;border-radius:50%;vertical-align:middle}
+  .pbt-key.fire{background:#e8803a;box-shadow:0 0 5px rgba(255,140,50,0.8)}
+  .pbt-key.lost{background:rgba(192,80,77,0.7)}
+  .pbt-key.todo{background:#1a2418;border:1px solid rgba(200,190,160,0.35)}
   /* What's new since this device last looked, animated once (pbFresh) */
   @keyframes pbPop{0%{transform:scale(0.4);opacity:0}60%{transform:scale(1.18);opacity:1}100%{transform:scale(1)}}
   @keyframes pbFill{0%{transform:scale(0.2);opacity:0}70%{transform:scale(1.06);opacity:1}100%{transform:scale(1)}}
