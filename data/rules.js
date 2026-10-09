@@ -109,7 +109,8 @@ const RULES = {
    "Period 1 ends at someone's 2nd rubble set or when 3 decks run out; the game at the 4th set or 3 decks again, plus one final round.",
    "Wigs: hull sizes of ships in your Portfolio; 3 per rubble set (at each period end).",
    "Store majorities: gold 3/2/1, tools 6/3/1, books and cloth 9/6/3.",
-   "1 wig per 5 réis; fulfilled Decrees; officials in Public Buildings 15/10/5 (2 players 15/5); 2 per Royal Favor."
+   "1 wig per 5 réis; fulfilled Decrees; officials in Public Buildings 15/10/5 (2 players 15/5); 2 per Royal Favor.",
+   "Ties: most rubble sets, then most stores, then most completed Plans, then most money."
   ],
   "forget": [
    "Playing to your Portfolio **forces** Sell Goods or Trade with Nobles right after.",
@@ -197,7 +198,8 @@ const RULES = {
   "end": [
    "After round 5: Capitalists −5 VP per loan; others repay 55 per loan or lose 1 VP per 5 short.",
    "Policies in your section (A Working, B Middle, C Capitalist): 1/4/8/12/18 VP (Middle 1/3/6/10/15).",
-   "Leftover goods and money convert to VP, differently for each class."
+   "Leftover goods and money convert to VP, differently for each class.",
+   "Ties: most of Policies 1–5 in your section (the State: its agenda), then the State wins, then most voting cubes."
   ],
   "forget": [
    "Loans only when forced to pay something mandatory; 5 interest each round.",
@@ -217,7 +219,7 @@ const RULES = {
   "actions": [
    [
     "Recruit",
-    "Take an adviser (you need its resource; pay $1–2) + 1 fleeting influence. Follow: recruit."
+    "Take an adviser (you need its resource; pay $1–2): +1 lasting influence and any points shown, plus 1 fleeting influence on the main action. Follow: recruit."
    ],
    [
     "Trade",
@@ -280,7 +282,7 @@ const RULES = {
    ],
    [
     "Wasteland",
-    "Remove an element type from the tundra."
+    "Optionally return one element from the Wasteland box; then every tundra element matching a type still there is removed."
    ],
    [
     "Depletion",
@@ -304,7 +306,7 @@ const RULES = {
    ],
    [
     "Competition",
-    "Remove an opposing species on up to 3 terrain types."
+    "On up to one tile of each terrain type shown (where you have a species), remove one opposing species."
    ],
    [
     "Domination",
@@ -414,7 +416,7 @@ const RULES = {
    ],
    [
     "Publish",
-    "Put an alchemical token on an ingredient and your seal on it: 1 gold, +1 reputation. Or endorse someone's: 1 gold to each seal already there."
+    "Put an alchemical token on an ingredient and your seal on it: 1 gold to the bank, +1 reputation. Or endorse someone's: 1 gold to the bank and 1 to each seal already there (no reputation)."
    ],
    [
     "Test on student",
@@ -432,12 +434,12 @@ const RULES = {
   ],
   "end": [
    "Reputation becomes points; add artifacts and grants; favors are 2 gold, gold is 1/3 point.",
-   "Then the truth: correct theory gold seal +5, silver +3; wrong theory starred seal −4, unstarred −4 unless it hedged the wrong colour.",
+   "Then the truth: correct theory gold seal +5, silver +3; wrong theory: starred seals −4, unstarred −4 unless it hedged the one wrong colour (with two wrong colours no hedge works).",
    "Ties: leftover gold."
   ],
   "forget": [
    "Starred seals are bets: +5/+3 points if right, but they can never hedge, so a debunk always costs 5 reputation.",
-   "Reputation never drops below 1; in the blue zone (18+) every loss costs 2 more.",
+   "Reputation never drops below 1. Each loss costs 1 more in the green zone (14–17), 2 more in blue (18+), 1 less in red (6 or less).",
    "Ingredients left in hand are worth nothing at the end.",
    "A negative potion can't hit you twice in the same round."
   ],
@@ -489,7 +491,7 @@ const RULES = {
    ],
    [
     "Overseas trading",
-    "Needs a knarr: upgrade different green goods to blue."
+    "Needs a knarr: pay 1 silver to turn any number of different green goods in your supply to blue."
    ],
    [
     "Emigration",
@@ -635,7 +637,7 @@ const RULES = {
   "actions": [
    [
     "Cards",
-    "Advance the break 2; draw by strength (max 3), maybe discard one. Strength 5+: snap 1 card from the display instead, any reputation. Upgraded: also from the display within reputation range."
+    "Advance the break 2; draw by strength (max 3), maybe discard one. Strength 5+: snap 1 card from the display instead, any reputation. Upgraded: draw within reputation range too, and snap from strength 3."
    ],
    [
     "Build",
@@ -651,7 +653,7 @@ const RULES = {
    ],
    [
     "Sponsors",
-    "Play 1 sponsor with level ≤ X, or advance the break X and take X money. Upgraded: several sponsors, or 2X money."
+    "Play 1 sponsor with level ≤ X, or advance the break X and take X money. Upgraded: several sponsors with total level ≤ X+1 (from the display too), or 2X money."
    ]
   ],
   "round": [
@@ -766,7 +768,7 @@ const RULES = {
    ],
    [
     "Weapons and expeditions",
-    "Forge: an unarmed dwarf spends up to 8 ore for a weapon of that strength. Expedition: pick loot up to your strength, then the weapon gets +1."
+    "Forge: an unarmed dwarf spends up to 8 ore for a weapon of that strength. Expedition: take as many different loot items as its level, each needing your strength or less; then the weapon gets +1."
    ],
    [
     "Starting player",
@@ -789,7 +791,7 @@ const RULES = {
    "The starting player only changes when someone takes the Starting player action.",
    "Rubies are wild: 1 for most goods, a field, meadow or tunnel; 2 for a cavern; or to play an armed dwarf out of order.",
    "Animals can't wait in your supply: house them at once or turn them into food.",
-   "Food any time: grain 1, vegetable 2, sheep 1, boar 2, cattle 3, ruby 2; gold buys food at one more gold than the food.",
+   "Food any time: grain 1, vegetable 2, sheep 1, donkey 1 (a pair 3), boar 2, cattle 3, ruby 2; gold buys food at one more gold than the food.",
    "Dogs let a meadow or pasture hold one more sheep than there are dogs."
   ],
   "exp": [
@@ -834,7 +836,7 @@ const RULES = {
    ],
    [
     "Trade",
-    "Export by the icons on your allies (5 / 15 / 20 Ordis); import from allies or players (3 / 10). Each resource in one deal only."
+    "Export by the icons on your allies (5 / 15 / 20 Ordis); import from allies or players (3 / 10). Each resource in one deal only. Buying from a player also gives 1 Diplomacy."
    ],
    [
     "Invest",
@@ -929,7 +931,8 @@ const RULES = {
    "Each cattle type counts once at income: variety beats duplicates.",
    "Discs from dark-cornered spaces only go on dark-cornered cities and stations.",
    "Delivering to Kansas City pays 4 Dollars but costs 6 VP at the end.",
-   "A cattle cost with a red arrow means those exact cards from your hand."
+   "A cattle cost with a red arrow means those exact cards from your hand.",
+   "Exchange tokens: any time, even on others' turns, return one to draw up to 2 cards, then discard as many."
   ]
  },
  "12333": {
@@ -949,7 +952,7 @@ const RULES = {
    ],
    [
     "Place influence",
-    "1 Op per marker, 2 into an enemy-controlled country; only in or next to countries where you had influence at the start of the round."
+    "1 Op per marker, 2 into an enemy-controlled country; only in or next to countries where you had influence at the start of the round (or next to your superpower)."
    ],
    [
     "Realign",
@@ -1000,7 +1003,7 @@ const RULES = {
    ],
    [
     "Build a city",
-    "Next to an existing city: 2 steelplast, 1 kelp, 1 credit. Symbiotic cities need biomatter but make 2 points each Production."
+    "Next to an existing city: 2 steelplast, 1 kelp, 1 credit. Symbiotic cities make 2 points each Production."
    ],
    [
     "Build a tunnel",
@@ -1107,7 +1110,7 @@ const RULES = {
   "end": [
    "Glory; basic goods 1 VP, processed goods 2; £10 = 1 VP; hops 1 each.",
    "Cotton, tobacco and sugar cane: 3 / 4 / 5 VP each, the least imported overall worth the most.",
-   "Most fulfilled contracts 12 / 6 VP; most settlements within shipping reach 18 / 12 / 6. Ties: leftover money."
+   "Most fulfilled contracts 12 / 6 VP; most settlements within shipping reach 18 / 12 / 6 (2 players: 8 and 12, first place only). Tied places split; leftover money breaks overall ties."
   ],
   "forget": [
    "Grassland takes animals, fields and buildings; forest only woodcutters; mountains only miners.",
