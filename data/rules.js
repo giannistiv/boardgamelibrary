@@ -998,5 +998,346 @@ const RULES = {
    "A tunnel only produces next to a city.",
    "Moving up the Federation track is how you go first next round."
   ]
+ },
+ "216132": {
+  "src": "the Clans of Caledonia rulebook (Karma Games)",
+  "goal": "Most **VP** after 5 rounds: spread your clan over Scotland, produce and process goods, trade at the market and fulfil export contracts.",
+  "turnTitle": "Each round",
+  "turn": [
+   "**Preparation** (from round 2): refill the export board, take your merchants back.",
+   "**Actions**: one action per turn, in turn order, until everyone has passed. Every action except Pass can be repeated.",
+   "**Production**, then **scoring** by this round's scoring tile."
+  ],
+  "actions": [
+   [
+    "Trade",
+    "Send merchants to the market, one per good: buy or sell one type at its price, then the price moves that many steps. Never buy and sell the same good in a round."
+   ],
+   [
+    "Export contract",
+    "Pay this round's cost (in round 1 you get £5 instead). Only one unfulfilled contract at a time."
+   ],
+   [
+    "Expand",
+    "Place a unit next to yours or within shipping reach, paying for the unit and the land. Next to an opponent: buy their good at a discount (max 3)."
+   ],
+   [
+    "Shipping",
+    "£4 per level: cross rivers, then one more loch per level."
+   ],
+   [
+    "Technology",
+    "£10: that worker type earns £2 more each production."
+   ],
+   [
+    "Hire a merchant",
+    "£4 for one more merchant."
+   ],
+   [
+    "Fulfil a contract",
+    "Pay its goods (meat by slaughtering a cow or sheep) for its imports and bonuses: money, a free land space, an upgrade."
+   ],
+   [
+    "Pass",
+    "Take the pass money; the order you pass in is next round's turn order."
+   ]
+  ],
+  "round": [
+   "Woodcutters £4, miners £6 (+£2 upgraded); sheep 1 wool, cows 1 milk, fields 2 grain.",
+   "Then you may process: dairy milk → cheese, bakery grain → bread, distillery grain → whisky.",
+   "Glory for the round's scoring tile."
+  ],
+  "end": [
+   "Glory; basic goods 1 VP, processed goods 2; £10 = 1 VP; hops 1 each.",
+   "Cotton, tobacco and sugar cane: 3 / 4 / 5 VP each, the least imported overall worth the most.",
+   "Most fulfilled contracts 12 / 6 VP; most settlements within shipping reach 18 / 12 / 6. Ties: leftover money."
+  ],
+  "forget": [
+   "Grassland takes animals, fields and buildings; forest only woodcutters; mountains only miners.",
+   "Port bonuses within reach are free extras, each once per game.",
+   "Settlements are separate clusters of your units: several small ones beat one big one.",
+   "Contracts never ask for grain or milk."
+  ]
+ },
+ "350458": {
+  "src": "the Terracotta Army rulebook",
+  "goal": "Most **VP** after 5 rounds: sculpt warriors and specialists for the emperor's mausoleum and win majorities in its rows, columns, quarters and groups.",
+  "turn": [
+   "In turn order, place one worker at a time on the action wheel until everyone's are used.",
+   "First you may pay 2 coins to turn the inner ring (clockwise) or the middle ring (counterclockwise) one step.",
+   "An empty segment takes any worker; next to a craftsman only an artisan fits; nobody joins an artisan.",
+   "Do the segment's actions from the inner ring out. Instead of an inner or middle action you may take 1 wet clay or 1 coin."
+  ],
+  "actions": [
+   [
+    "Coins / clay",
+    "Take 2–4 coins or 2–4 wet clay."
+   ],
+   [
+    "Make a warrior",
+    "Pay 2–4 wet clay (one goes dry to the nearby warehouse), place it anywhere in the mausoleum, score its row on the organiser. You may then spend its weapon for its ability."
+   ],
+   [
+    "Warrior abilities",
+    "Officer (sword) 1 VP + move an inspector 1; Guard (halberd) 3 VP + slide one of your warriors; Crossbowman (crossbow) 1 VP per empty space to a statue in line; Soldier (spear) 1 VP + 2 coins."
+   ],
+   [
+    "Soak the clay",
+    "Turn all your dry clay wet."
+   ],
+   [
+    "Upgrade",
+    "The craftsman you used becomes an artisan."
+   ],
+   [
+    "Master",
+    "Buy it once (the coins on your token), then use its ability every time."
+   ],
+   [
+    "Priority",
+    "Take the top priority token: you go earlier next round."
+   ],
+   [
+    "Outer ring",
+    "Ready that weapon, or buy a specialist with coins and its weapon."
+   ]
+  ],
+  "round": [
+   "Inspectors: your warriors in the inspector's row, then column: dominance 7 VP, presence 3. Then each inspector moves on.",
+   "Musicians: 1 VP per warrior of yours in their row or column.",
+   "This round's scoring tile: dominance and presence.",
+   "Cleanup: priority tokens set the turn order, **all wet clay dries**, masters pay 1 coin (or keep 1 clay wet), the rings turn."
+  ],
+  "end": [
+   "Footmen: most warriors in the 8 spaces around: 8 VP, presence 2.",
+   "Warriors outside a group (2+ of one type touching) are removed. In each group every warrior is worth 1 VP per player in it; with 2+ players, dominance 5 / presence 2.",
+   "Kneeling archers: 2 VP to the owner of the warrior they face. 1 VP per 2 clay and coins. Ties: turn order."
+  ],
+  "forget": [
+   "Dominance means most **alone**: a tie gives nobody dominance, only presence.",
+   "A kneeling archer breaks ties for the warrior it faces.",
+   "Wet clay dries every round: spend it, protect it, or soak it again.",
+   "A specialist needs its weapon ready, and spends it."
+  ]
+ },
+ "300322": {
+  "src": "the Hallertau rulebook (Lookout Games)",
+  "goal": "Most **VP** after 6 rounds: deliver goods to move your village's craft buildings and community centre, raise sheep, rotate fields and play cards.",
+  "turnTitle": "Each round",
+  "turn": [
+   "Remove the top row of workers from the action spaces (1–3 players: only in the quadrant(s) on the quadrant card).",
+   "New workers: the number in your community centre's window. Sheep on this round's farmyard card die.",
+   "Income from your played bonus cards (not round 1).",
+   "**Actions**: in turn order, place workers on a space or swap workers for tools, until all are used.",
+   "Then: new card, fallow fields, harvest, milking, **progress**, boulders."
+  ],
+  "actions": [
+   [
+    "Placing workers",
+    "Bottom row 1 worker, middle row 2, top row 3; a full space is closed. Take each of its actions once, all optional."
+   ],
+   [
+    "Card spaces",
+    "The corners: draw from that deck and take the first player marker."
+   ],
+   [
+    "Sow",
+    "Move crops from your '1' supply onto empty fields; the field's row (2–5) is what it yields."
+   ],
+   [
+    "Sheep",
+    "Breed (2 milk = 1 sheep, 4 = 2), shear (1 wool per sheep), butcher (1 sheep = 4 meat + 2 hides). Shearing and Small Trade also move 1 sheep a card on."
+   ],
+   [
+    "Tools",
+    "Instead of placing, swap any number of workers for tools."
+   ],
+   [
+    "Cards",
+    "Play any time, even on others' turns: meet the book's condition or pay the arrow's cost."
+   ]
+  ],
+  "round": [
+   "**Fallow**: every empty field moves up a row, then one of them moves up again.",
+   "**Harvest**: each planted field yields its row's amount, then drops a row. **Milking**: 1 milk per sheep.",
+   "**Progress**: move a craft building one space right for goods equal to the round number (or 1 jewelry). The community centre follows once all have moved: more workers, later VP.",
+   "Each tool moves a boulder 1 space; tools only break (are spent) in round 6."
+  ],
+  "end": [
+   "Community centre VP (18 / 34 / 50 / 70) plus 3 per '3 VP' symbol left of a craft building.",
+   "Sheep in the stables and jewelry 1 VP each; fields (their row), goods and tools: 1 VP per 5.",
+   "VP on your played bonus and point cards. Ties: the remainder of the 1-per-5 category."
+  ],
+  "forget": [
+   "Sheep die three rounds on unless moved along; in the stables they're safe.",
+   "You can never discard resources by choice.",
+   "Carpentry needs more clay than rye, the brewhouse more barley than hops, the bakehouse at most 1 flax.",
+   "From round 3, paying different types of goods makes progress cheaper.",
+   "The first player only changes when someone uses a card space."
+  ]
+ },
+ "2651": {
+  "src": "the Power Grid rulebook (2F-Spiele)",
+  "goal": "Be able to **power the most cities** when the game ends: buy power plants, buy fuel and grow your network.",
+  "turnTitle": "Each round",
+  "turn": [
+   "**Player order**: most cities first (tie: biggest power plant).",
+   "**Auction**, in order: put a plant from the current market up for auction or pass. At most 1 plant each per round; in round 1 everyone must buy one.",
+   "**Resources**, in reverse order: buy fuel your plants can use, up to twice what each burns.",
+   "**Build**, in reverse order: pay connections plus 10 / 15 / 20 to add cities to your network.",
+   "**Bureaucracy**: power cities for money, refill the resource market, update the plant market."
+  ],
+  "actions": [
+   [
+    "Bidding",
+    "Open at least at the plant's number (the discounted smallest one: 1). Once you pass you're out of that auction."
+   ],
+   [
+    "Plants",
+    "Max 3; a 4th scraps one. A plant burns exactly the fuel shown and powers the cities on it. Green plants need no fuel."
+   ],
+   [
+    "Hybrid plants",
+    "Coal and oil in any mix."
+   ],
+   [
+    "First city",
+    "Any empty city in the play area, for 10."
+   ],
+   [
+    "More cities",
+    "The cheapest route from your network plus the city's next free space. You may pass through cities."
+   ]
+  ],
+  "roundTitle": "Steps",
+  "round": [
+   "**Step 1**: one house per city. In Steps 1 and 2, each round the biggest future-market plant goes under the deck.",
+   "**Step 2** starts once someone has 7 cities (6 with 6 players): two houses per city; the smallest plant leaves once.",
+   "**Step 3** starts when its card is drawn: three houses per city, all 6 plants on sale, the smallest leaves each round."
+  ],
+  "end": [
+   "Ends after building, once someone has 17 cities (18 with 2, 15 with 5, 14 with 6).",
+   "Then whoever can power the most cities wins; tie: most money."
+  ],
+  "forget": [
+   "Resources and building go in reverse order: the leader pays more and builds last.",
+   "Powering no cities still pays 10.",
+   "Most cities isn't enough: you must be able to power them at the end."
+  ]
+ },
+ "304783": {
+  "src": "the Hadrian's Wall rulebook (Garphill Games)",
+  "goal": "Most **VP** after 6 years: build up your fort and its town on your sheets, raise your four attributes and fulfil your 6 Path cards, while holding off the Picts.",
+  "turnTitle": "Each year",
+  "turn": [
+   "Reveal a Fate card: everyone takes its workers and resources.",
+   "Draw 2 player cards: keep one as a Path card (end goal), the other as a Prospect card (its bonus, trade good and scouting pattern).",
+   "Gain from your sheets: resource production, hotel (civilians), workshop (builders), road (attributes).",
+   "Everyone acts at once, spending workers and resources to fill boxes, until done. Leftovers are lost."
+  ],
+  "actions": [
+   [
+    "Tracks",
+    "Fill left to right; a box with icons gives you them. A # box takes the year number (limited each year)."
+   ],
+   [
+    "Cohorts",
+    "Each cohort icon you fill adds a box to one cohort: your defence."
+   ],
+   [
+    "Fort, cippi, wall",
+    "Fort: 1 builder or soldier (raises infrastructure). Cippi and wall: 1 resource each, only where the fort is built."
+   ],
+   [
+    "Granaries",
+    "Medium and large granaries open the middle and right columns of the left sheet."
+   ],
+   [
+    "Wall guard / training",
+    "1 soldier per wall guard box; training turns 1 builder into a soldier once a year."
+   ],
+   [
+    "Citizens",
+    "1 civilian per box on a citizen track; they open the right sheet's buildings (market, theatre, temples, baths…)."
+   ],
+   [
+    "Forum",
+    "Once a year swap 2 workers for 1 of another type (no soldiers)."
+   ],
+   [
+    "Market and scouts",
+    "Buy a trade good (1 resource) or scout a pattern (1 soldier) from your or a neighbour's prospect card; a neighbour gets the payment."
+   ]
+  ],
+  "roundTitle": "End of a year",
+  "round": [
+   "The Picts attack: reveal Fate cards (more each year). Each cohort needs at least as many filled boxes as arrows against it.",
+   "All held: Valour equal to the year's grey flag. Each attack through: 1 Disdain (up to the flag), the rest as Valour.",
+   "Favour cancels attack cards: from temples any card, from a diplomat only for its cohort."
+  ],
+  "end": [
+   "After year 6's attack: total the scoring column on your sheet (attributes and path cards, minus Disdain).",
+   "Ties: least Disdain, then most from path cards."
+  ],
+  "forget": [
+   "Path cards score 1–3 VP each for how far you got.",
+   "The baths remove Disdain (2 bribes a year).",
+   "Attributes past 25 are wasted.",
+   "Workers gained from Valour carry over to next year."
+  ]
+ },
+ "316554": {
+  "src": "the Dune: Imperium rulebook (Dire Wolf)",
+  "goal": "Most **VP** when the game ends: at the end of a round in which someone has 10+, or when the conflict deck runs out. Win conflicts, gain influence and alliances, build your deck.",
+  "turnTitle": "Each round",
+  "turn": [
+   "Reveal a conflict card; everyone draws 5.",
+   "In turn order, take **Agent turns** until you choose (or have) to take your **Reveal turn**.",
+   "**Combat**, then **Makers**: 1 bonus spice on each maker space without an agent.",
+   "**Recall** your agents; the first player passes left."
+  ],
+  "actions": [
+   [
+    "Agent turn",
+    "Play a card to send an agent to a free space with a matching icon. Pay its cost; get the space's effects and the card's agent box."
+   ],
+   [
+    "Faction spaces",
+    "+1 influence. At 2: 1 VP (lost if you drop). At 4: the bonus, and the first there takes the alliance (+1 VP) until someone passes them."
+   ],
+   [
+    "Combat spaces",
+    "Deploy the troops you recruit this turn plus up to 2 from your garrison."
+   ],
+   [
+    "Reveal turn",
+    "Reveal the rest of your hand: persuasion buys cards (to your discard pile), swords add strength."
+   ],
+   [
+    "Key spaces",
+    "High Council 5 Solari (+2 persuasion every reveal); Swordmaster 8 Solari (a 3rd agent); Mentat 2 Solari (an extra agent this round)."
+   ],
+   [
+    "Intrigue",
+    "Plot cards on your turns, combat cards in combat, endgame cards at the end."
+   ]
+  ],
+  "roundTitle": "Combat",
+  "round": [
+   "Strength: 2 per troop in the conflict + 1 per sword. No troops there = 0 strength.",
+   "Highest takes the first reward, second the second (third too with 4 players).",
+   "Tie for first: no winner, the tied players take the second reward. Tie for second: the third.",
+   "Troops in the conflict return to your supply, not your garrison."
+  ],
+  "end": [
+   "Play endgame intrigues; most VP wins.",
+   "Ties: spice, then Solari, water, garrisoned troops."
+  ],
+  "forget": [
+   "One agent per space, and one card sends one agent.",
+   "Waiting to reveal (and to commit troops) keeps your strength hidden.",
+   "Unspent persuasion is lost after your reveal.",
+   "Sietch Tabr needs 2 Fremen influence."
+  ]
  }
 };
