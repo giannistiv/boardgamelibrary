@@ -5525,5 +5525,257 @@ const RULES = {
    "In Super Villain mode, hero effects can't touch the Villain's hand.",
    "The heroes break ties (unless a Super Villain card says otherwise)."
   ]
+ },
+ "429293": {
+  "src": "The Fellowship of the Ring: Trick-Taking Game rulebook",
+  "goal": "**Co-op** trick-taking through the chapters: by the end of each round, every player must complete their character's goal.",
+  "turnTitle": "Each round",
+  "turn": [
+   "Deal the cards. Whoever holds the 1 of Rings is Frodo; the others choose characters from the chapter card and do their setup actions.",
+   "Frodo leads the first trick. Follow suit if you can, otherwise play anything; the highest card of the lead suit wins and leads next.",
+   "Play until hands are empty (Gandalf keeps 1 card)."
+  ],
+  "actions": [
+   [
+    "Rings suit",
+    "Only 1–5. Nobody may lead Rings until one has been played off-suit (unless you hold only Rings)."
+   ],
+   [
+    "The One Ring",
+    "When you play the 1 of Rings you may declare that it wins the trick; otherwise it's just a 1."
+   ],
+   [
+    "Goals",
+    "Put a star on your character once the goal is done and can no longer fail."
+   ],
+   [
+    "Threat cards",
+    "Some characters draw one at setup; their goal depends on it."
+   ]
+  ],
+  "roundTitle": "Talking",
+  "round": [
+   "Only discuss what everyone can see: no hints about your hand, and no character preferences during setup.",
+   "Reminding each other of goals and progress is fine."
+  ],
+  "end": [
+   "Every goal done: chapter won. Long chapters need every character completed, over several rounds.",
+   "Any goal failed: the round is lost for everyone; replay it."
+  ],
+  "forget": [
+   "Card text beats the rulebook.",
+   "You may stop a round early once it's clearly won or lost.",
+   "2 players: one also runs a face-up pyramid hand. Solo: 4 hands, each refilled after every trick."
+  ]
+ },
+ "209778": {
+  "src": "the Magic Maze rulebook (Sit Down!)",
+  "goal": "**Co-op in real time**: get all 4 heroes onto their item spaces at the same moment, then out through the exits before the sand timer runs out.",
+  "turnTitle": "How it plays",
+  "turn": [
+   "No turns: everyone acts whenever they like, on any hero, but **only with the actions on their own tile**.",
+   "Explore the mall, then stand all four heroes on their items: the theft happens automatically and the vortexes switch off.",
+   "Escape: a hero leaving through a usable exit comes off the board.",
+   "You start with 3 minutes; moving a hero onto a sand timer space flips the timer (each space once)."
+  ],
+  "actions": [
+   [
+    "Move",
+    "Any distance in your arrow's direction, stopping before walls and other heroes."
+   ],
+   [
+    "Explore",
+    "When a hero stands on an exploration space of its colour, add the next tile so the arrows line up."
+   ],
+   [
+    "Vortex",
+    "Send a hero to any vortex of its colour (not after the theft)."
+   ],
+   [
+    "Escalator",
+    "Move a hero from one end to the other."
+   ]
+  ],
+  "roundTitle": "Silence",
+  "round": [
+   "No talking, pointing or sounds: you may only stare at someone or put the 'Do Something!' pawn in front of them.",
+   "Right after the timer flips you may talk freely, until anyone takes an action.",
+   "From scenario 3: pass your action tile left every time the timer flips."
+  ],
+  "end": [
+   "Win when the last hero escapes; lose the moment the sand runs out."
+  ],
+  "forget": [
+   "Two heroes never share a space, and you can't stop someone else's move.",
+   "Explored passages are open to every hero, both ways.",
+   "Learn it with scenarios 1–7: each adds a rule (exits by colour, dwarf, elf, mage, barbarian)."
+  ]
+ },
+ "422120": {
+  "src": "the Witness: On the Trail of the Chameleon rulebook",
+  "goal": "**Co-op deduction**: four characters pass on secret clues by whispering, then each answers the case's 3 questions alone. Score as a team (12 is perfect).",
+  "turnTitle": "Each case",
+  "turn": [
+   "Read the prologue; each character takes their secret clue card and memorises it.",
+   "**4 whisper rounds**: the whisper card shows who whispers to whom. Pass on your own clues and everything you've heard so far, saying whose each clue is.",
+   "After the 4th round, take notes in secret (never before).",
+   "Reveal the questions; everyone writes their answers alone, in silence.",
+   "Reveal the solutions, score, then read the epilogue."
+  ],
+  "actions": [
+   [
+    "Whispering",
+    "Clues only, never your conclusions; quiet enough that the others can't hear."
+   ],
+   [
+    "Listening",
+    "No questions except asking to hear it all again; clues only travel the way the arrow points."
+   ],
+   [
+    "Correct answer",
+    "1 point per player per question; it counts if it contains the solution's bold parts."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "Between rounds you may reread your own clue card and the prologue.",
+   "No talking about clues until the solutions are out."
+  ],
+  "end": [
+   "12 perfect · 10–11 very well done · 7–9 pretty good · 0–6 room to improve.",
+   "The cases build on each other: play them in order."
+  ],
+  "forget": [
+   "Always say which character a clue came from.",
+   "No notes until after the 4th whisper round."
+  ]
+ },
+ "411567": {
+  "src": "The Gang rulebook (KOSMOS)",
+  "goal": "**Co-op poker**: rank your hands correctly with star chips. Win with 3 successful heists before 3 alarms.",
+  "turnTitle": "Each heist",
+  "turn": [
+   "Deal 2 pocket cards each; take the **white** chips.",
+   "Reveal 3 community cards; take the **yellow** chips.",
+   "Reveal a 4th card, take the **orange** chips; a 5th card, take the **red** chips.",
+   "**Showdown**: reveal hands in order, starting with the red 1-star chip."
+  ],
+  "actions": [
+   [
+    "Chips",
+    "More stars means you think your hand is stronger. Anyone may take one from the middle or from another player at any time, or put theirs back."
+   ],
+   [
+    "Never",
+    "Put a chip in front of someone else, or hold two of the same colour."
+   ],
+   [
+    "Round ends",
+    "When everyone has a chip of that colour."
+   ],
+   [
+    "Best hand",
+    "Exactly 5 of your 7 cards (2 pocket + 5 community)."
+   ],
+   [
+    "Hand ranks",
+    "High card, pair, two pair, three of a kind, straight, flush, full house, four of a kind, straight flush, royal flush."
+   ]
+  ],
+  "roundTitle": "Showdown",
+  "round": [
+   "Each hand must be equal to or stronger than the one before: success, flip a vault card.",
+   "A weaker hand after a stronger one: fail, flip an alarm card.",
+   "Exact ties may be in either order."
+  ],
+  "end": [
+   "3 vaults: you win. 3 alarms: you lose.",
+   "Advanced: after a success the next heist gets a challenge card; after a failure, a specialist card."
+  ],
+  "forget": [
+   "No talking about your cards, not even what you deduce from them.",
+   "Never bluff: you're on the same team.",
+   "An ace is high or low in a straight, never in the middle."
+  ]
+ },
+ "287607": {
+  "src": "The Mind Extreme rulebook (NSV)",
+  "goal": "**Co-op without talking**: play every level's cards in order (white rising, red falling) before you lose your last life.",
+  "turnTitle": "Each level",
+  "turn": [
+   "Deal as many cards as the level number. Everyone puts a hand on the table to sync up, then lifts it.",
+   "No turns: whoever feels it's time plays a card. White goes left of the level card and rises; red goes right and falls.",
+   "Play both stacks at the same time, always your lowest white or highest red.",
+   "All cards down correctly: on to the next level."
+  ],
+  "actions": [
+   [
+    "Mistake",
+    "Whoever holds a card that should have come first calls stop: lose 1 life and put aside every such card."
+   ],
+   [
+    "Resync",
+    "Anyone can say 'stop'; everyone puts a hand on the table again."
+   ],
+   [
+    "Throwing star",
+    "If everyone agrees: each picks their lowest white or highest red face down, then all reveal; spend the star."
+   ],
+   [
+    "Blind",
+    "Levels with the hand symbol play one colour (later both) face down; checked at the end, each mistake costs a life."
+   ]
+  ],
+  "roundTitle": "Setup & rewards",
+  "round": [
+   "2 players: levels 1–12, 2 lives. 3: levels 1–10, 3 lives. 4: levels 1–8, 4 lives. Always 1 throwing star.",
+   "Levels 2, 3, 5, 6, 8 and 9 reward a life or a star (shown on the card).",
+   "Max 5 lives and 3 stars."
+  ],
+  "end": [
+   "Win by finishing the last level; lose when you give up your last life."
+  ],
+  "forget": [
+   "No signs, numbers or signals: timing only.",
+   "Don't finish one colour first and then the other."
+  ]
+ },
+ "329839": {
+  "src": "the So Clover! rulebook (Repos Production)",
+  "goal": "**Co-op word game**: write clues linking pairs of words on your clover, then the team rebuilds everyone's clover. One team score.",
+  "turnTitle": "How it plays",
+  "turn": [
+   "**Clues** (all at once, in secret): for each of your 4 pairs of keywords, write a one-word clue linking them.",
+   "Take the 4 cards off, add 1 random decoy, shuffle the 5.",
+   "**Resolution**: one player at a time is the silent spectator while the others put the cards back on their clover.",
+   "Two tries, then the next player's clover."
+  ],
+  "actions": [
+   [
+    "Valid clues",
+    "One word: compounds, names, acronyms, numbers and sounds are fine."
+   ],
+   [
+    "Not allowed",
+    "A keyword or its translation, a word from the same family, or a made-up word."
+   ],
+   [
+    "Disagreement",
+    "The player to the spectator's left decides."
+   ]
+  ],
+  "roundTitle": "Scoring",
+  "round": [
+   "All right first time: 4 + 2 bonus = 6 points.",
+   "Otherwise the spectator silently takes off the wrong cards; after the second try, 1 point per correct card."
+  ],
+  "end": [
+   "When everyone has been spectator once, add up the team score and compare with your record."
+  ],
+  "forget": [
+   "The spectator can't talk or react at all.",
+   "One card is a decoy and fits nowhere.",
+   "For a harder game, add more decoys."
+  ]
  }
 };
