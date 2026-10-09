@@ -4430,5 +4430,312 @@ const RULES = {
   "forget": [
    "You must use the plot card you played in your story."
   ]
+ },
+ "162886": {
+  "src": "the Spirit Island rulebook (Greater Than Games)",
+  "goal": "**Co-op**: drive the Invaders off the island. Win by meeting the current Terror Level's condition (I: no Invaders; II: no towns or cities; III: no cities). Lose if blight runs out, a Spirit has no presence left, or the Invader deck is empty when you must explore.",
+  "turnTitle": "Each turn",
+  "turn": [
+   "**Spirit phase** (together): grow (one growth option), gain energy (highest uncovered number), play and pay for power cards (up to your card plays; slow ones paid now too).",
+   "**Fast powers** resolve (cards and innate powers).",
+   "**Invader phase**: blighted island effect, then earned fear cards, then Ravage, Build, Explore; slide the Invader cards left.",
+   "**Slow powers** resolve.",
+   "**Time passes**: discard played cards; damage and elements clear."
+  ],
+  "actions": [
+   [
+    "Ravage",
+    "In lands of the shown type with Invaders: explorer 1, town 2, city 3 damage to the land and Dahan. 2+ damage to the land adds blight. Surviving Dahan then deal 2 each."
+   ],
+   [
+    "Build",
+    "In those lands with Invaders: more towns than cities → add a city, otherwise add a town."
+   ],
+   [
+    "Explore",
+    "Add an explorer to each land of the type that has or touches a town or city, or touches the ocean."
+   ],
+   [
+    "Blight",
+    "Destroys one presence of each Spirit there; if the land already had blight it cascades to an adjacent land."
+   ],
+   [
+    "Fear",
+    "Destroying a town 1, a city 2, plus fear on powers. A full pool earns a fear card (resolved next Invader phase); dividers raise the Terror Level."
+   ],
+   [
+    "Gain a power",
+    "Draw 4 minors or majors and keep 1; a major means forgetting a card."
+   ],
+   [
+    "Gather / push",
+    "Pull things in from adjacent lands / send them out to adjacent lands."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "One land, one turn, one use: a power targets one land and lasts this turn only.",
+   "Elements are only checked, never spent; innate powers need the thresholds.",
+   "You may skip a power's effect (energy stays spent, elements still count).",
+   "Sacred site = 2+ of your presence in one land."
+  ],
+  "end": [
+   "Win the moment the current Terror Level's condition is met (Terror victory: win at once).",
+   "Lose: no blight left on the card (usually), a Spirit with no presence, or no Invader card to explore."
+  ],
+  "forget": [
+   "Ravage and Build only hit lands of the card's type that have Invaders.",
+   "Unspent energy carries over; card plays don't.",
+   "Destroyed presence leaves the game; it doesn't return to your tracks.",
+   "Stage II cards with a flag trigger the adversary's escalation."
+  ]
+ },
+ "367498": {
+  "src": "the Horizons of Spirit Island rulebook (Greater Than Games)",
+  "goal": "**Co-op**: drive the Invaders off the island. Win by meeting the current Terror Level's condition (I: no Invaders; II: no towns or cities; III: no cities). Lose if blight runs out, a Spirit has no presence left, or the Invader deck is empty when you must explore.",
+  "turnTitle": "Each turn",
+  "turn": [
+   "**Spirit phase** (together): grow (one growth option), gain energy (highest uncovered number), play and pay for power cards (up to your card plays; slow ones paid now too).",
+   "**Fast powers** resolve (cards and innate powers).",
+   "**Invader phase**: blighted island effect, then earned fear cards, then Ravage, Build, Explore; slide the Invader cards left.",
+   "**Slow powers** resolve.",
+   "**Time passes**: discard played cards; damage and elements clear."
+  ],
+  "actions": [
+   [
+    "Ravage",
+    "In lands of the shown type with Invaders: explorer 1, town 2, city 3 damage to the land and Dahan. 2+ damage to the land adds blight. Surviving Dahan then deal 2 each."
+   ],
+   [
+    "Build",
+    "In those lands with Invaders: more towns than cities → add a city, otherwise add a town."
+   ],
+   [
+    "Explore",
+    "Add an explorer to each land of the type that has or touches a town or city, or touches the ocean."
+   ],
+   [
+    "Blight",
+    "Destroys one presence of each Spirit there; if the land already had blight it cascades to an adjacent land."
+   ],
+   [
+    "Fear",
+    "Destroying a town 1, a city 2, plus fear on powers. A full pool earns a fear card (resolved next Invader phase); dividers raise the Terror Level."
+   ],
+   [
+    "Gain a power",
+    "Draw 4 minors or majors and keep 1; a major means forgetting a card."
+   ],
+   [
+    "Gather / push",
+    "Pull things in from adjacent lands / send them out to adjacent lands."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "One land, one turn, one use: a power targets one land and lasts this turn only.",
+   "Elements are only checked, never spent; innate powers need the thresholds.",
+   "You may skip a power's effect (energy stays spent, elements still count).",
+   "Sacred site = 2+ of your presence in one land."
+  ],
+  "end": [
+   "Win the moment the current Terror Level's condition is met (Terror victory: win at once).",
+   "Lose: no blight left on the card (usually), a Spirit with no presence, or no Invader card to explore."
+  ],
+  "forget": [
+   "Ravage and Build only hit lands of the card's type that have Invaders.",
+   "Unspent energy carries over; card plays don't.",
+   "Destroyed presence leaves the game; it doesn't return to your tracks.",
+   "Stage II cards with a flag trigger the adversary's escalation."
+  ]
+ },
+ "285774": {
+  "src": "the Marvel Champions: The Card Game rulebook (Fantasy Flight Games)",
+  "goal": "**Co-op**: beat every stage of the villain before they complete their scheme or knock out all the heroes.",
+  "turnTitle": "Each round",
+  "turn": [
+   "**Player phase**: each player in turn may change form (once), play cards, use basic powers, use allies and action abilities.",
+   "Then everyone discards down to and draws up to their hand size, and readies their cards.",
+   "**Villain phase**: threat on the main scheme; the villain activates against each player (with their engaged minions); deal and reveal one encounter card each; pass the first-player token."
+  ],
+  "actions": [
+   [
+    "Paying costs",
+    "Discard cards for their resource icons, or use resource abilities; wild pays anything."
+   ],
+   [
+    "Hero form",
+    "Basic attack (ATK damage), thwart (remove THW threat), defense (prevent DEF damage); each exhausts your hero."
+   ],
+   [
+    "Alter-ego form",
+    "Basic recovery: heal REC. The villain schemes against you instead of attacking."
+   ],
+   [
+    "Allies",
+    "Max 3. Exhaust to attack or thwart, then take the consequential damage shown."
+   ],
+   [
+    "Villain activation",
+    "Boost card adds ATK or SCH. Defend with your hero (DEF) or an ally (takes it all)."
+   ]
+  ],
+  "roundTitle": "Encounter cards",
+  "round": [
+   "Minions engage the player who revealed them; treacheries resolve and go; attachments go on the villain; side schemes come with threat.",
+   "Crisis side schemes block thwarting the main scheme; acceleration adds threat; hazard deals an extra encounter card.",
+   "Surge: reveal another card."
+  ],
+  "end": [
+   "Defeat the final villain stage: you win.",
+   "The last main-scheme stage fills, or every hero is down: the villain wins."
+  ],
+  "forget": [
+   "You can change form only once a round, on your own turn.",
+   "Stunned / confused / tough cards cancel the next attack / thwart / damage.",
+   "Card text beats the rulebook."
+  ]
+ },
+ "338960": {
+  "src": "the Slay the Spire: The Board Game rulebook (Contention Games)",
+  "goal": "**Co-op** deckbuilding climb: beat the final boss of the acts you choose to play. Anyone at 0 HP and everyone loses.",
+  "turnTitle": "Each combat round",
+  "turn": [
+   "**Player turn** (all at once): energy to 3, block to 0, draw 5; roll the die (one roll for the round); start-of-turn and die relic abilities.",
+   "Play cards by paying energy; discuss freely.",
+   "End of turn abilities, then discard your hand.",
+   "**Enemy turn**: enemies lose block, act top row to bottom (left to right, boss last), then cube tracks advance."
+  ],
+  "actions": [
+   [
+    "Card types",
+    "Attacks, skills (block, utility), powers (stay all combat), curses, status and daze."
+   ],
+   [
+    "Targeting",
+    "You can hit any enemy; area attacks hit a whole row and the boss. Enemies hit the player in their row."
+   ],
+   [
+    "Weak / vulnerable",
+    "Apply to every hit of a multi-hit; remove one token after."
+   ],
+   [
+    "Map rooms",
+    "Encounter, elite, event, campfire (rest 3 HP or upgrade), treasure, merchant, boss."
+   ],
+   [
+    "Rewards",
+    "Card (3 shown, take 1 or skip), potion (max 3), relic, gold; remove, upgrade or transform cards."
+   ]
+  ],
+  "roundTitle": "After combat",
+  "round": [
+   "End-of-combat abilities, then rewards (encounters: from your row's enemy; elites and bosses: everyone).",
+   "Powers, discards and exhausted cards go back into your deck; status and daze leave.",
+   "Lose all tokens except gold; players may switch rows."
+  ],
+  "end": [
+   "Beat the boss of your last act to win (stop after any act, or save and continue).",
+   "Any player reaching 0 HP loses the game for everyone."
+  ],
+  "forget": [
+   "Max 6 energy; no hand limit.",
+   "Only potions can be traded, and only outside combat.",
+   "Enemy strength and block always go on the enemy."
+  ]
+ },
+ "191189": {
+  "src": "the Aeon's End rulebook (Indie Boards & Cards)",
+  "goal": "**Co-op**: defeat the nemesis (0 life, or its deck and everything in play gone) before Gravehold falls or every mage is exhausted.",
+  "turnTitle": "Turn order",
+  "turn": [
+   "No fixed order: flip the turn order deck to see who acts next (reshuffle when empty).",
+   "**Casting**: cast spells prepped in open breaches if you like; spells in closed breaches must be cast.",
+   "**Main**: play gems and relics, buy from the supply with aether, gain a charge (2 aether), focus or open breaches, prep spells.",
+   "**Draw**: put played gems and relics on your discard pile in any order, then draw to 5."
+  ],
+  "actions": [
+   [
+    "No shuffling",
+    "Your deck is never shuffled: the order you discard in is the order you'll draw."
+   ],
+   [
+    "Breaches",
+    "Prep spells only to open breaches, or ones focused this turn; the fourth focus opens one."
+   ],
+   [
+    "Charges",
+    "Fill your ability's charges to use your mage's unique power."
+   ],
+   [
+    "Nemesis turn",
+    "Its minions and powers act oldest first, then it draws a card: attacks resolve; minions and powers enter play."
+   ]
+  ],
+  "roundTitle": "Exhausted",
+  "round": [
+   "A mage at 0 life is exhausted: the nemesis unleashes twice, they destroy a breach, and they lose their charges.",
+   "Exhausted mages keep playing but can't gain life."
+  ],
+  "end": [
+   "Win: nemesis at 0 life, or its deck empty with nothing left in play.",
+   "Lose: all mages exhausted, Gravehold at 0, or the nemesis's own loss condition."
+  ],
+  "forget": [
+   "You can cast an ally's prepped spell when a card allows; it goes to their discard.",
+   "Unleash is specific to each nemesis.",
+   "Beginner and expert modes change the starting life."
+  ]
+ },
+ "300531": {
+  "src": "the Paleo rulebook (Z-Man Games)",
+  "goal": "**Co-op**: finish the cave painting with **5 victory tokens** before your tribe collects **5 skulls**.",
+  "turnTitle": "Day",
+  "turn": [
+   "Everyone at once looks at the backs of their top 3 cards and picks one; return the other two on top in any order.",
+   "Reveal together; each player resolves one option on their card (or helps someone, or ignores it), in an order the group agrees.",
+   "Out of cards = asleep. When everyone sleeps, night falls."
+  ],
+  "actions": [
+   [
+    "Requirements",
+    "Strength, awareness and skill: the total of your people."
+   ],
+   [
+    "Costs",
+    "Resources from storage, tool tokens, or cards from the top of your deck (1 wound per red-backed card)."
+   ],
+   [
+    "Help",
+    "Add your group's abilities to another player's card; split the rewards, share the wounds."
+   ],
+   [
+    "Hazards",
+    "Red cards can't be ignored; resolve as much as you can."
+   ],
+   [
+    "Crafting",
+    "Needs the idea on the workbench; pay its cost for the tool."
+   ],
+   [
+    "Wounds",
+    "On one person; a full card means death (and a skull)."
+   ]
+  ],
+  "roundTitle": "Night",
+  "round": [
+   "Feed each person 1 food; each unfed person is a skull (they don't die).",
+   "Resolve the mission cards' night actions (and any moon cards in your groups).",
+   "Shuffle all discards and deal them out evenly for the next day."
+  ],
+  "end": [
+   "5th victory token: you win at once (even if a 5th skull arrives at the same moment).",
+   "5th skull token: you lose."
+  ],
+  "forget": [
+   "You can look at card backs in your deck but never change their order.",
+   "Going to sleep early discards the rest of your deck.",
+   "Tool tokens are used up when you use them."
+  ]
  }
 };
