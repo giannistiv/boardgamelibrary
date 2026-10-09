@@ -1685,5 +1685,302 @@ const RULES = {
    "Old Ones head for the nearest port or farm; a farm they reach is blighted.",
    "Leftover gold and resources score nothing."
   ]
+ },
+ "331106": {
+  "src": "the Witcher: Old World rulebook (Go On Board)",
+  "goal": "First to **4 trophies** wins at once: defeat monsters (the main way), beat other witchers you attack, or meditate once an attribute reaches 5.",
+  "turn": [
+   "**Move and act**: discard cards to move (matching terrain; any 2 cards, or 1 card + 1 gold, for any terrain). At each stop: the location action once, dice poker, quests. You must move before acting.",
+   "**Fight, meditate or explore** (one of them): fight a monster or witcher here, take an attribute-5 trophy, or draw a City or Wilds card.",
+   "**Draw**: discard any cards, draw up to 3, then you must take 1 card from the row, paying its cost by discarding (rightmost 1 cheaper, two leftmost 1 dearer)."
+  ],
+  "actions": [
+   [
+    "Dice poker",
+    "With a witcher here who has gold: 1 gold each + 1 from the bank; roll 5 dice, each may reroll once (other player first). Best hand wins the pot."
+   ],
+   [
+    "Fight setup",
+    "Your deck and discards become your life pool; you keep your hand. Life runs out and your hand is empty = knocked out."
+   ],
+   [
+    "Your fight turn",
+    "Potions (up to your Alchemy, per fight), specialties, then play a combo: each card must match a colour extension of the one below. Deal its damage, raise your shield, then draw cards = your Combat."
+   ],
+   [
+    "Monster's turn",
+    "The player on your right runs it; players take turns choosing charge or bite and reveal its top card. A trail token lets you strike first."
+   ],
+   [
+    "Damage to a witcher",
+    "Comes off your shield first, then your deck, then your hand."
+   ],
+   [
+    "Explore",
+    "The player on your right reads the card; you pick an option before hearing any result. Quests send you to a location later."
+   ]
+  ],
+  "roundTitle": "After a fight",
+  "round": [
+   "Monster defeated: its card, 2 gold, a trophy and fatigue; a stronger monster spawns.",
+   "Knocked out with the monster at 0–1 life: drive it away (2 gold, a 0-cost card). Otherwise a trail token and a 0-cost card, and only 2 cards in phase III.",
+   "Witcher fight: the attacker who wins takes a trophy (one per school) and gold; the loser takes a 0-cost card. Spectators may wager 1 gold.",
+   "Fatigue: trash cards equal to your fatigue value. Everyone reshuffles and resets their shield to Defense."
+  ],
+  "end": [
+   "Reaching the last trophy space wins immediately.",
+   "A meditation can never give the final trophy."
+  ],
+  "forget": [
+   "No witcher fights on a school location or where the Closed Tavern token is.",
+   "You can't fight a witcher you played dice poker with this turn.",
+   "Hand limit 7; at most 4 potions held."
+  ]
+ },
+ "424981": {
+  "src": "the Eternal Decks rulebook",
+  "goal": "**Co-op**: keep everyone's cards flowing by playing to the Field to revive Eternals and gain their decks. Stage A: win with 4 **Stars**; other stages need 4 **Keys**. Anyone unable to act on their turn and you all lose.",
+  "turn": [
+   "Do one of: play a card, generate a Jewel, or give a card to a teammate.",
+   "Then draw back up to 3 (none if you already have 3 or more)."
+  ],
+  "actions": [
+   [
+    "Play to the Field",
+    "Leftmost empty space of a row: never the same colour or number next to each other, plus the row's own rule (Mountain up, Cave down, …)."
+   ],
+   [
+    "Revive an Eternal",
+    "Fill a row up to the Eternals: pick one, its 8 cards go under your deck, the row is cleared, and its Curse starts."
+   ],
+   [
+    "Play to the River",
+    "No placement rules. The 5th card there gives a River Rare card; none left = game over."
+   ],
+   [
+    "Generate a Jewel",
+    "Pay a recipe (each once) to the River and give the Jewel to a revived Eternal to lift its Curse. 1/5/9 also gives a Star."
+   ],
+   [
+    "Give a card",
+    "Spend a Heart to hand a teammate any card, face down."
+   ],
+   [
+    "Rare cards",
+    "Any colour and number, and ignore placement rules."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "Curses only stop cards going to the Field; cursed cards can still go to the River or into Jewels.",
+   "Each row closes after its 4th lap, with a bonus: Camp card, all Hearts back, or a Star.",
+   "Stage A stars: Jewels on Eternals 1–3 and 4–6, all 9 revived, the 1/5/9 Jewel, the bottom row's 4th lap, all three A ability cards."
+  ],
+  "end": [
+   "Win at the 4th Star (Keys in later stages).",
+   "Lose if someone can't take an action, or draws the Game Over card. A win and a loss on the same turn is a win."
+  ],
+  "forget": [
+   "Never say the numbers or colours in your hand; talk around them and use your two Communication Discs.",
+   "Only the player who revives an Eternal gets its deck: plan who runs out next.",
+   "An empty deck takes a revived Eternal's cards straight away."
+  ]
+ },
+ "270844": {
+  "src": "the Imperial Settlers: Empires of the North rulebook (Portal Games)",
+  "goal": "Most **VP**: grow your clan's empire and sail to the islands. The game ends at the end of the round in which someone reaches 25 VP during the action phase.",
+  "turnTitle": "Each round",
+  "turn": [
+   "**Lookout**: draw 4 cards; keep each by spending a worker, discard the rest. Storage cards pay out.",
+   "**Actions**: one action at a time in turn order until everyone has passed.",
+   "**Expedition**: ships resolve in queue order, each pillaging or conquering one island.",
+   "**Cleanup**: workers back, unexhaust cards, take back pawns, new islands, first player passes left. Goods stay."
+  ],
+  "actions": [
+   [
+    "Build",
+    "Pay a location's cost from your supply; it's ready to use at once. Fields are built by declaring their action instead."
+   ],
+   [
+    "Clan pawn",
+    "Place it on Explore (1 card), Populate (1 worker), Construct (build a card free, not fields), Harvest (one field and its upgrades) or Sail (queue a ship, with fish for distant islands, a raze token to conquer)."
+   ],
+   [
+    "Second use",
+    "Later, pay 1 food to move a pawn to an adjacent tile and use it again (flip it to exhausted)."
+   ],
+   [
+    "Boost / field",
+    "When declaring a pawn action, first play one Boost card or build one Field naming that action."
+   ],
+   [
+    "Raid",
+    "Discard a raze token to exhaust an opponent's action location (not after they've passed)."
+   ],
+   [
+    "Location action",
+    "Pay its cost and exhaust it."
+   ]
+  ],
+  "roundTitle": "Expedition",
+  "round": [
+   "Pillage: take the island's goods and discard it.",
+   "Conquer (ship has a raze token): add the island to your empire, with its ability and building bonus.",
+   "Fish and raze tokens on a ship are lost whether used or not."
+  ],
+  "end": [
+   "+1 VP per card in your empire (fields, upgrades and islands too), +1 per 2 resources, +1 per gold left.",
+   "Ties: most locations, then workers, then cards in hand."
+  ],
+  "forget": [
+   "No production phase: goods only come from harvesting and actions.",
+   "Gold replaces any resource, never the other way round.",
+   "Only action locations exhaust; features and fields keep working."
+  ]
+ },
+ "246684": {
+  "src": "the Smartphone Inc. rulebook (Cosmodrome Games)",
+  "goal": "Most VP (money) after 5 rounds: sell phones, control regions, and be first to patent technologies.",
+  "turnTitle": "Each round",
+  "turn": [
+   "**Plan** in secret: lay one pad on the other, covering 1–4 cells (improvements may cover more). Visible symbols are active.",
+   "**Price** starts at 5: ±1 per price symbol. Lowest price acts first from now on (tie: fewest VP).",
+   "**Produce**: 1 per production symbol, 1 per covered cell, plus face-down improvements and goods tokens.",
+   "**Improve, research, logistics, sell**, then score."
+  ],
+  "actions": [
+   [
+    "Improve",
+    "Improve symbol active: take an improvement (from next round); otherwise a goods token."
+   ],
+   [
+    "Research",
+    "1 progress marker per research symbol, placed on technologies; enough = an office there. The first to finish takes the patent (and it's 1 cheaper afterwards)."
+   ],
+   [
+    "Logistics",
+    "1 progress per logistics symbol, in regions next to yours; enough = an office in its leftmost free space."
+   ],
+   [
+    "Sell",
+    "In your regions without a retailer, fill buyers left to right: red ones only up to their price, purple ones need their technology."
+   ]
+  ],
+  "roundTitle": "Scoring",
+  "round": [
+   "Goods sold × your price.",
+   "Most goods sold in a region: the VP above its rightmost office (and second place if shown). Ties: the office further left.",
+   "Then reset prices to 5 and put out 5 new improvements."
+  ],
+  "end": [
+   "After round 5: add patents and retailer VP.",
+   "Ties: most technologies, then most patents."
+  ],
+  "forget": [
+   "Unsold goods are lost at the end of the round.",
+   "Unused progress markers vanish at the end of your turn.",
+   "A cheap price acts first but earns less per phone."
+  ]
+ },
+ "301880": {
+  "src": "the Raiders of Scythia rulebook (Garphill Games)",
+  "goal": "Most **VP**: hire a crew, train animals, gather provisions and raid settlements, then take plunder and complete quests.",
+  "turn": [
+   "**Work**: place your worker on a free building in the village and use it, then pick up a **different** worker there and use that building too.",
+   "Or **Raid**: place the right colour worker on a settlement with enough crew, provisions and wagons."
+  ],
+  "actions": [
+   [
+    "Stables",
+    "2 silver for an eagle, or 1 equipment for a horse (grey or red worker)."
+   ],
+   [
+    "Barracks",
+    "Hire a crew card from hand for its silver (max 5), or 1 kumis to heal 2 wounds."
+   ],
+   [
+    "Silversmith / Farm",
+    "Silver (3 with blue, 2 otherwise) / provisions (2; red: 3 or a wagon)."
+   ],
+   [
+    "Chief's Tent",
+    "1 livestock for 2 provisions + 1 kumis, or complete a quest (grey or red worker)."
+   ],
+   [
+    "Town Centre",
+    "Play a card's action, your hero's ability, or an eagle's."
+   ],
+   [
+    "Meeting Tent / Market",
+    "Draw 2 cards or 1 + 2 kumis / discard cards for silver, a wagon or equipment."
+   ],
+   [
+    "Raid",
+    "Pay provisions and wagons, spend kumis (+1 strength each), roll the dice shown, add crew and animal strength. Take VP or wounds, then a plunder space and its new worker."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "Wounds go on crew (not heroes or animals); each cuts its strength by 1. A wound at 0 strength kills.",
+   "Animals only count when sitting with a crew member.",
+   "Limits at the end of your turn: 8 silver, 8 provisions, 8 kumis, 8 cards."
+  ],
+  "end": [
+   "When only 2 raid spaces or 2 quests are left, finish the turn; everyone (you too) gets one last turn.",
+   "Crew, animals, quests and plunder VP; gold 2 each, equipment and wagons 1, every 2 livestock 1.",
+   "Ties: most quests + crew + animals, then silver + provisions + kumis."
+  ],
+  "forget": [
+   "Blue workers can't use the Stables or the Chief's Tent.",
+   "Raid workers stay on the settlement for the rest of the game.",
+   "Yellow dice: one per raid space there still holding gold."
+  ]
+ },
+ "277659": {
+  "src": "the Final Girl rulebook (Van Ryder Games)",
+  "goal": "**Solo**: kill the Killer before it kills you. Save victims along the way for rewards and your ultimate ability.",
+  "turn": [
+   "**Action**: play action cards (move, search, attack, rest…). Most need a horror roll; each costs time.",
+   "**Planning**: spend leftover time buying cards from the tableau (not ones played since the last planning), then reset time to 6.",
+   "**Killer**: its Finale action, then a Terror card.",
+   "**Panic**: if a victim died this turn, victims with the Killer flee by die roll.",
+   "**Upkeep**: no Terror cards left = reveal the Finale; rearrange items."
+  ],
+  "actions": [
+   [
+    "Horror roll",
+    "Dice = the horror level. 5–6 success; 3–4 a success if you discard 2 cards; none = failure. The card shows results for 2+, 1 and fail."
+   ],
+   [
+    "Discard for time",
+    "Any time in the action phase, discard cards for +1 time each."
+   ],
+   [
+    "Moving",
+    "Take up to 2 victims with you, but they won't follow you into the Killer's space."
+   ],
+   [
+    "Saving victims",
+    "On an exit space, save the victims there for the rewards on your Final Girl card."
+   ],
+   [
+    "Reaction cards",
+    "Only against an attack on you: roll to reduce or cancel it."
+   ]
+  ],
+  "roundTitle": "The Killer",
+  "round": [
+   "It targets the closest (victim or you, as shown), moves by its bloodlust speed, and attacks by its bloodlust damage.",
+   "Each victim it kills raises bloodlust.",
+   "Horror past the top of the track raises bloodlust; past the bottom gives 1 time."
+  ],
+  "end": [
+   "Win when the Killer is dead (its last, black health token may save it); lose when you die. Both at once is a win."
+  ],
+  "forget": [
+   "The action phase ends at once if time drops below 0.",
+   "Played cards can't be bought back until after the next planning phase.",
+   "Hand limit 10 when buying."
+  ]
  }
 };
