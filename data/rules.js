@@ -2271,5 +2271,528 @@ const RULES = {
    "Survey and target results are private; announce only what you asked.",
    "Don't reveal where Planet X is when you find it."
   ]
+ },
+ "360153": {
+  "src": "the Marvel Dice Throne rulebook (Roxley)",
+  "goal": "Bring your opponent's health to **0** (start: 50 in a duel). Roll your hero's five dice for abilities, and play cards with combat points (CP).",
+  "turn": [
+   "**Upkeep**: status effects and passives that trigger now.",
+   "**Income**: +1 CP (max 15) and draw 1 (the start player skips their first).",
+   "**Main 1**: play upgrades and main-phase actions; sell any card for 1 CP.",
+   "**Offensive roll**: up to 3 roll attempts, then activate one offensive ability your dice meet.",
+   "**Defensive roll**: the defender rolls their defence once (if the damage is defendable). Then **Main 2**, then discard down to 6 (selling for CP)."
+  ],
+  "actions": [
+   [
+    "Upgrades",
+    "Permanently replace an ability on your board (main phases only); level II → III pays only the difference."
+   ],
+   [
+    "Instant cards (red)",
+    "Any time, even to interrupt; nothing interrupts them."
+   ],
+   [
+    "Roll-phase cards (orange)",
+    "During any player's roll phases, e.g. to change dice."
+   ],
+   [
+    "Status effects",
+    "Tokens with stack limits; spendable ones can be used any time, persistent ones stay."
+   ],
+   [
+    "Damage types",
+    "Normal (defendable, preventable, modifiable), undefendable, pure (can't be modified), collateral, and ultimate (can't be stopped or reduced at all)."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "All damage, prevention and healing in a phase land together at its end.",
+   "You can heal up to 10 above your starting health.",
+   "Before an ability activates, opponents may change your dice; you may then pick another ability or use your remaining rerolls."
+  ],
+  "end": [
+   "Reach 0 health and you're out; everyone left at 0 together is a draw.",
+   "3 players (King of the Hill, 35 health): attacking the leader draws you a card. 2v2: teams share 50 health; roll a die to target."
+  ],
+  "forget": [
+   "Once an ultimate activates nothing can stop or reduce it; the only answer is changing the dice before it does.",
+   "Selling any card is always worth 1 CP.",
+   "Hand limit 6 at the end of your turn; CP max 15."
+  ]
+ },
+ "360061": {
+  "src": "the Marvel Dice Throne rulebook (Roxley)",
+  "goal": "Bring your opponent's health to **0** (start: 50 in a duel). Roll your hero's five dice for abilities, and play cards with combat points (CP).",
+  "turn": [
+   "**Upkeep**: status effects and passives that trigger now.",
+   "**Income**: +1 CP (max 15) and draw 1 (the start player skips their first).",
+   "**Main 1**: play upgrades and main-phase actions; sell any card for 1 CP.",
+   "**Offensive roll**: up to 3 roll attempts, then activate one offensive ability your dice meet.",
+   "**Defensive roll**: the defender rolls their defence once (if the damage is defendable). Then **Main 2**, then discard down to 6 (selling for CP)."
+  ],
+  "actions": [
+   [
+    "Upgrades",
+    "Permanently replace an ability on your board (main phases only); level II → III pays only the difference."
+   ],
+   [
+    "Instant cards (red)",
+    "Any time, even to interrupt; nothing interrupts them."
+   ],
+   [
+    "Roll-phase cards (orange)",
+    "During any player's roll phases, e.g. to change dice."
+   ],
+   [
+    "Status effects",
+    "Tokens with stack limits; spendable ones can be used any time, persistent ones stay."
+   ],
+   [
+    "Damage types",
+    "Normal (defendable, preventable, modifiable), undefendable, pure (can't be modified), collateral, and ultimate (can't be stopped or reduced at all)."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "All damage, prevention and healing in a phase land together at its end.",
+   "You can heal up to 10 above your starting health.",
+   "Before an ability activates, opponents may change your dice; you may then pick another ability or use your remaining rerolls."
+  ],
+  "end": [
+   "Reach 0 health and you're out; everyone left at 0 together is a draw.",
+   "3 players (King of the Hill, 35 health): attacking the leader draws you a card. 2v2: teams share 50 health; roll a die to target."
+  ],
+  "forget": [
+   "Once an ultimate activates nothing can stop or reduce it; the only answer is changing the dice before it does.",
+   "Selling any card is always worth 1 CP.",
+   "Hand limit 6 at the end of your turn; CP max 15."
+  ]
+ },
+ "360152": {
+  "src": "the Marvel Dice Throne rulebook (Roxley)",
+  "goal": "Bring your opponent's health to **0** (start: 50 in a duel). Roll your hero's five dice for abilities, and play cards with combat points (CP).",
+  "turn": [
+   "**Upkeep**: status effects and passives that trigger now.",
+   "**Income**: +1 CP (max 15) and draw 1 (the start player skips their first).",
+   "**Main 1**: play upgrades and main-phase actions; sell any card for 1 CP.",
+   "**Offensive roll**: up to 3 roll attempts, then activate one offensive ability your dice meet.",
+   "**Defensive roll**: the defender rolls their defence once (if the damage is defendable). Then **Main 2**, then discard down to 6 (selling for CP)."
+  ],
+  "actions": [
+   [
+    "Upgrades",
+    "Permanently replace an ability on your board (main phases only); level II → III pays only the difference."
+   ],
+   [
+    "Instant cards (red)",
+    "Any time, even to interrupt; nothing interrupts them."
+   ],
+   [
+    "Roll-phase cards (orange)",
+    "During any player's roll phases, e.g. to change dice."
+   ],
+   [
+    "Status effects",
+    "Tokens with stack limits; spendable ones can be used any time, persistent ones stay."
+   ],
+   [
+    "Damage types",
+    "Normal (defendable, preventable, modifiable), undefendable, pure (can't be modified), collateral, and ultimate (can't be stopped or reduced at all)."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "All damage, prevention and healing in a phase land together at its end.",
+   "You can heal up to 10 above your starting health.",
+   "Before an ability activates, opponents may change your dice; you may then pick another ability or use your remaining rerolls."
+  ],
+  "end": [
+   "Reach 0 health and you're out; everyone left at 0 together is a draw.",
+   "3 players (King of the Hill, 35 health): attacking the leader draws you a card. 2v2: teams share 50 health; roll a die to target."
+  ],
+  "forget": [
+   "Once an ultimate activates nothing can stop or reduce it; the only answer is changing the dice before it does.",
+   "Selling any card is always worth 1 CP.",
+   "Hand limit 6 at the end of your turn; CP max 15."
+  ]
+ },
+ "348406": {
+  "src": "the Marvel Dice Throne rulebook (Roxley)",
+  "goal": "Bring your opponent's health to **0** (start: 50 in a duel). Roll your hero's five dice for abilities, and play cards with combat points (CP).",
+  "turn": [
+   "**Upkeep**: status effects and passives that trigger now.",
+   "**Income**: +1 CP (max 15) and draw 1 (the start player skips their first).",
+   "**Main 1**: play upgrades and main-phase actions; sell any card for 1 CP.",
+   "**Offensive roll**: up to 3 roll attempts, then activate one offensive ability your dice meet.",
+   "**Defensive roll**: the defender rolls their defence once (if the damage is defendable). Then **Main 2**, then discard down to 6 (selling for CP)."
+  ],
+  "actions": [
+   [
+    "Upgrades",
+    "Permanently replace an ability on your board (main phases only); level II → III pays only the difference."
+   ],
+   [
+    "Instant cards (red)",
+    "Any time, even to interrupt; nothing interrupts them."
+   ],
+   [
+    "Roll-phase cards (orange)",
+    "During any player's roll phases, e.g. to change dice."
+   ],
+   [
+    "Status effects",
+    "Tokens with stack limits; spendable ones can be used any time, persistent ones stay."
+   ],
+   [
+    "Damage types",
+    "Normal (defendable, preventable, modifiable), undefendable, pure (can't be modified), collateral, and ultimate (can't be stopped or reduced at all)."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "All damage, prevention and healing in a phase land together at its end.",
+   "You can heal up to 10 above your starting health.",
+   "Before an ability activates, opponents may change your dice; you may then pick another ability or use your remaining rerolls."
+  ],
+  "end": [
+   "Reach 0 health and you're out; everyone left at 0 together is a draw.",
+   "3 players (King of the Hill, 35 health): attacking the leader draws you a card. 2v2: teams share 50 health; roll a die to target."
+  ],
+  "forget": [
+   "Once an ultimate activates nothing can stop or reduce it; the only answer is changing the dice before it does.",
+   "Selling any card is always worth 1 CP.",
+   "Hand limit 6 at the end of your turn; CP max 15."
+  ]
+ },
+ "403494": {
+  "src": "the Marvel Dice Throne rulebook (Roxley)",
+  "goal": "Bring your opponent's health to **0** (start: 50 in a duel). Roll your hero's five dice for abilities, and play cards with combat points (CP).",
+  "turn": [
+   "**Upkeep**: status effects and passives that trigger now.",
+   "**Income**: +1 CP (max 15) and draw 1 (the start player skips their first).",
+   "**Main 1**: play upgrades and main-phase actions; sell any card for 1 CP.",
+   "**Offensive roll**: up to 3 roll attempts, then activate one offensive ability your dice meet.",
+   "**Defensive roll**: the defender rolls their defence once (if the damage is defendable). Then **Main 2**, then discard down to 6 (selling for CP)."
+  ],
+  "actions": [
+   [
+    "Upgrades",
+    "Permanently replace an ability on your board (main phases only); level II → III pays only the difference."
+   ],
+   [
+    "Instant cards (red)",
+    "Any time, even to interrupt; nothing interrupts them."
+   ],
+   [
+    "Roll-phase cards (orange)",
+    "During any player's roll phases, e.g. to change dice."
+   ],
+   [
+    "Status effects",
+    "Tokens with stack limits; spendable ones can be used any time, persistent ones stay."
+   ],
+   [
+    "Damage types",
+    "Normal (defendable, preventable, modifiable), undefendable, pure (can't be modified), collateral, and ultimate (can't be stopped or reduced at all)."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "All damage, prevention and healing in a phase land together at its end.",
+   "You can heal up to 10 above your starting health.",
+   "Before an ability activates, opponents may change your dice; you may then pick another ability or use your remaining rerolls."
+  ],
+  "end": [
+   "Reach 0 health and you're out; everyone left at 0 together is a draw.",
+   "3 players (King of the Hill, 35 health): attacking the leader draws you a card. 2v2: teams share 50 health; roll a die to target."
+  ],
+  "forget": [
+   "Once an ultimate activates nothing can stop or reduce it; the only answer is changing the dice before it does.",
+   "Selling any card is always worth 1 CP.",
+   "Hand limit 6 at the end of your turn; CP max 15."
+  ]
+ },
+ "266964": {
+  "src": "the Dice Throne Season Two rulebook (Roxley)",
+  "goal": "Bring your opponent's health to **0** (start: 50 in a duel). Roll your hero's five dice for abilities, and play cards with combat points (CP).",
+  "turn": [
+   "**Upkeep**: status effects and passives that trigger now.",
+   "**Income**: +1 CP (max 15) and draw 1 (the start player skips their first).",
+   "**Main 1**: play upgrades and main-phase actions; sell any card for 1 CP.",
+   "**Offensive roll**: up to 3 roll attempts, then activate one offensive ability your dice meet.",
+   "**Defensive roll**: the defender rolls their defence once (if the damage is defendable). Then **Main 2**, then discard down to 6 (selling for CP)."
+  ],
+  "actions": [
+   [
+    "Upgrades",
+    "Permanently replace an ability on your board (main phases only); level II → III pays only the difference."
+   ],
+   [
+    "Instant cards (red)",
+    "Any time, even to interrupt; nothing interrupts them."
+   ],
+   [
+    "Roll-phase cards (orange)",
+    "During any player's roll phases, e.g. to change dice."
+   ],
+   [
+    "Status effects",
+    "Tokens with stack limits; spendable ones can be used any time, persistent ones stay."
+   ],
+   [
+    "Damage types",
+    "Normal (defendable, preventable), undefendable, pure, and ultimate (can't be stopped or reduced at all)."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "All damage, prevention and healing in a phase land together at its end.",
+   "You can heal up to 10 above your starting health.",
+   "Before an ability activates, opponents may change your dice; you may then pick another ability or use your remaining rerolls."
+  ],
+  "end": [
+   "Reach 0 health and you're out; everyone left at 0 together is a draw."
+  ],
+  "forget": [
+   "Once an ultimate activates nothing can stop or reduce it; the only answer is changing the dice before it does.",
+   "Selling any card is always worth 1 CP.",
+   "Hand limit 6 at the end of your turn; CP max 15."
+  ]
+ },
+ "374595": {
+  "src": "the Kelp: Shark vs Octopus rulebook",
+  "goal": "Asymmetric duel. The **Octopus** wins by eating all 4 food blocks or outlasting the Shark (7 dice on its hunger track). The **Shark** wins only by striking the Octopus and winning the confrontation.",
+  "turnTitle": "Octopus turn",
+  "turn": [
+   "Take **2 actions** (repeats allowed): play a card, draw back up to your hand size, or discard a card to hide 1 block.",
+   "Card costs are paid by revealing that many hidden blocks (the double shell counts 2)."
+  ],
+  "actions": [
+   [
+    "Move cards",
+    "Swap two adjacent blocks (they keep their state), or shuffle hidden blocks into the bag and redraw them where the Shark points."
+   ],
+   [
+    "Hide",
+    "Stand blocks back up."
+   ],
+   [
+    "Learn",
+    "Gain new cards or new blocks (swapped for revealed blocks); an Eat card brings its food block."
+   ],
+   [
+    "Eat",
+    "Octopus next to its food and the matching Eat card: the food goes to the food track, with a one-time bonus."
+   ],
+   [
+    "Shark turn",
+    "Draw 2 dice and roll; place currents, move (you must), search (yellow) or strike (red) adjacent zones with dice at least the zone value, then growth, then energy."
+   ],
+   [
+    "Energy",
+    "Leftover dice are stored; their pips buy shark cards (new dice). Using stored energy puts a die on the hunger track."
+   ]
+  ],
+  "roundTitle": "Confrontation",
+  "round": [
+   "A strike on the Octopus: both secretly pick one of 3 colour cards.",
+   "Shark picks the matching colour: the Shark wins. Otherwise the Octopus escapes and uses its card; both cards leave the game.",
+   "So the second confrontation is 50-50, and the third always goes to the Shark."
+  ],
+  "end": [
+   "Octopus: 4th food on the food track, or the Shark's 7th hunger die.",
+   "Shark: a winning confrontation."
+  ],
+  "forget": [
+   "Every strike puts its red die on the hunger track, hit or miss.",
+   "The Shark can't stop on a current, turn round or stand still.",
+   "Traps fire when the Shark reveals them."
+  ]
+ },
+ "274364": {
+  "src": "the Watergate rulebook (Frosted Games / Capstone Games)",
+  "goal": "Two players. **Nixon** wins with 5 momentum tokens (or if momentum runs out); the **Editor** wins by linking 2 informants to Nixon on the evidence board through face-up evidence.",
+  "turnTitle": "Each round",
+  "turn": [
+   "Both draw 4 or 5 cards (as the initiative card shows). Nixon draws 3 evidence tokens and puts them face down at 0 on the research track.",
+   "Starting with the initiative, alternate playing one card until both hands are empty.",
+   "Evaluation: tokens on your side of the track are yours."
+  ],
+  "actions": [
+   [
+    "Value",
+    "Move one token (initiative, momentum, or evidence of the card's colour) that many spaces your way. Reaching your 5 takes it at once."
+   ],
+   [
+    "Face-down evidence",
+    "Nixon flips and moves it. The Editor asks for a colour; Nixon must flip a match, or the Editor moves something else."
+   ],
+   [
+    "Action",
+    "Do the card's text instead. Events leave the game; conspirators and journalists go back to your discard pile."
+   ],
+   [
+    "Pinning evidence",
+    "On a matching empty space: the Editor face up (links), Nixon face down (blocks). Momentum-symbol evidence also nudges momentum your way."
+   ]
+  ],
+  "roundTitle": "Evaluation",
+  "round": [
+   "Evidence still at 0 goes back in the bag.",
+   "Initiative to whoever's side it's on (at 0: the player who didn't have it).",
+   "Momentum to whoever's side it's on (at 0: back to the supply); then reset initiative and a new momentum at 0.",
+   "Finally each player pins their evidence (initiative first)."
+  ],
+  "end": [
+   "Nixon: the 5th momentum on the momentum card, or no momentum left to place.",
+   "Editor: 2 face-up informants connected to Nixon by face-up evidence."
+  ],
+  "forget": [
+   "Nixon may look at face-down evidence on the research track any time; the Editor may not.",
+   "Either player may look through both discard piles and removed cards.",
+   "Momentum the Editor gains with a full card is removed from the game."
+  ]
+ },
+ "329082": {
+  "src": "the Radlands rulebook (Roxley)",
+  "goal": "Two players. Destroy all 3 of your opponent's **camps**.",
+  "turn": [
+   "**Events**: resolve the one in your [1] space, then move your events forward.",
+   "**Replenish**: draw a card, take 3 water (the start player gets 1 on their first turn).",
+   "**Actions**, any order, as often as you can pay. Unspent water is lost."
+  ],
+  "actions": [
+   [
+    "Play a person",
+    "Pay water; place in a column in front of a camp (max 2 people per column). Not ready the turn it's played."
+   ],
+   [
+    "Play an event",
+    "Pay water; it goes in the queue space its bomb shows (or further back). A [0] event happens at once."
+   ],
+   [
+    "Junk",
+    "Discard a card for its junk icon effect."
+   ],
+   [
+    "Draw / Water Silo",
+    "2 water: draw a card. 1 water: take your Water Silo into hand (junk it later for 1 water)."
+   ],
+   [
+    "Use an ability",
+    "On a ready camp or person: pay water; it's no longer ready this turn."
+   ],
+   [
+    "Raid",
+    "Play your Raiders to [2], or move them 1 forward; when they resolve, your opponent damages one of their own camps."
+   ]
+  ],
+  "roundTitle": "Damage",
+  "round": [
+   "Damage only hits **unprotected** cards (nothing in front of them), unless stated.",
+   "Damaged cards turn sideways; a second damage destroys. A damaged punk is destroyed.",
+   "A person isn't ready if played, restored or used this turn, or if damaged."
+  ],
+  "end": [
+   "Win when all three enemy camps are destroyed.",
+   "The deck running out a second time is a draw."
+  ],
+  "forget": [
+   "Traits only work on undamaged people.",
+   "A card can't restore itself.",
+   "'Enemy' means people, not camps."
+  ]
+ },
+ "218074": {
+  "src": "the Detective: City of Angels rulebook (Van Ryder Games)",
+  "goal": "Detectives race to solve the murder (suspect, weapon and a motive); the **Chisel** plays the suspects, lies through them, and wins if the case goes cold.",
+  "turnTitle": "Each day",
+  "turn": [
+   "Detectives take turns (from the Chisel's left), 4 actions each, in any order and repeats allowed.",
+   "Attempts to solve happen at the start of your turn, before acting.",
+   "End of day: the day marker moves down; removed evidence may come back."
+  ],
+  "actions": [
+   [
+    "Move",
+    "Anywhere in your district (border spaces count as both)."
+   ],
+   [
+    "Search",
+    "A location or a suspect: the Chisel hands you its search card."
+   ],
+   [
+    "Question",
+    "Ask a suspect here about one case card you know (by its letter). The Chisel picks the response: the one true most useful answer, or a lie."
+   ],
+   [
+    "Challenge",
+    "Think it's a lie? Hand over leverage. Right: you gain leverage over the suspect and get the true answer. Wrong: the Chisel gains leverage over you."
+   ],
+   [
+    "Analyze / Kickback",
+    "1 scratch per Analyze; Kickback at a mob joint once a day = scratch equal to the number of players."
+   ],
+   [
+    "Bribes",
+    "Goon 2 (force an answer), detective 2, officer 3 (at a station), snitch 3 (hear another's answer)."
+   ]
+  ],
+  "roundTitle": "Leverage",
+  "round": [
+   "Your leverage over a suspect forces their most useful answer and blocks snitches.",
+   "The Chisel's leverage over you can block a question or a snitch.",
+   "If both could, the detective decides first."
+  ],
+  "end": [
+   "Solve once: write suspect, weapon (cards you've seen) and one motive. Wrong: the Chisel tells you how many parts were right.",
+   "After the last day everyone makes a final guess; if nobody's right, the Chisel wins. Ties: reverse player order."
+  ],
+  "forget": [
+   "Don't show your case cards to the other detectives.",
+   "Taken evidence must come back face up three days later.",
+   "A newly found suspect gives a free question."
+  ]
+ },
+ "118048": {
+  "src": "the Targi rulebook (Kosmos)",
+  "goal": "Two players. Most **VP** from tribe cards and tokens: place your Targis on the border, take the crossings in the middle.",
+  "turnTitle": "Each round",
+  "turn": [
+   "The robber moves one border card (a corner = a raid).",
+   "Alternate placing your 3 Targis on border cards: not on the robber, a corner, an occupied card, or opposite an opponent's Targi.",
+   "Put your 2 tribe markers where your Targis' lines cross in the middle.",
+   "Each player does all their actions; then flip the new middle cards and pass the first-player amulet."
+  ],
+  "actions": [
+   [
+    "Border cards",
+    "Each Targi takes its card's action (goods, gold, trades, the Noble to play your held card)."
+   ],
+   [
+    "Middle cards",
+    "Goods cards give their goods; tribe cards are played by paying their cost, or one may be kept in hand. Each taken card is replaced by the other type."
+   ],
+   [
+    "Tribe cards",
+    "Build a display of up to 3 rows of 4, left to right; many give an advantage."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "End of a round: keep at most 10 goods and 3 gold.",
+   "Raids: each player loses the goods shown (gold on the last) or VP instead.",
+   "Two Targis in the same row or column cross nowhere: only 1 tribe marker then."
+  ],
+  "end": [
+   "At the end of the round in which someone has 12 tribe cards, or when the robber reaches the last raid card.",
+   "Tribe card VP, VP tokens, card bonuses; a row of 4 same symbols +4, 4 different +2.",
+   "Ties: most gold, then most goods."
+  ],
+  "forget": [
+   "Only one tribe card can be held in hand; play it later with the Noble.",
+   "Gold isn't a good.",
+   "Taking the card facing the robber is allowed."
+  ]
  }
 };
