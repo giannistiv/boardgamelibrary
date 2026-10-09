@@ -1496,6 +1496,16 @@
   .rules-acts dd{margin:0;color:var(--text-2)}
   @media (max-width:420px){.rules-acts{grid-template-columns:1fr;gap:0.05rem}.rules-acts dd{margin-bottom:0.4rem}}
   .rules-src{font-size:0.7rem;color:var(--text-3);margin-top:0.4rem;line-height:1.5}
+  .rules-base{margin:0 0 0.7rem;font-size:0.78rem;color:var(--text-2)}
+  .rules-exp{border:1px solid var(--line-2);border-radius:10px;margin:0 0 0.4rem;background:var(--card-2)}
+  .rules-exp > summary{cursor:pointer;padding:0.5rem 0.7rem;font-size:0.82rem;font-weight:700;color:var(--text);list-style:none;display:flex;align-items:center;gap:0.4rem}
+  .rules-exp > summary::-webkit-details-marker{display:none}
+  .rules-exp > summary::before{content:'\25B8';color:var(--accent);font-size:0.75rem;transition:transform .15s}
+  .rules-exp[open] > summary::before{transform:rotate(90deg)}
+  .rules-exp > ul{margin:0 0.7rem 0.3rem;padding-left:1.15rem;font-size:0.82rem;line-height:1.5}
+  .rules-exp li{margin:0.15rem 0}
+  .rules-exp li::marker{color:var(--accent)}
+  .rules-exp-src{font-size:0.68rem;color:var(--text-3);margin:0 0.7rem 0.55rem}
   .rules-card + .notes-section{border-top:1px solid var(--line);padding-top:1.1rem}
   .notes-header{display:flex;align-items:baseline;justify-content:space-between;gap:0.5rem;margin-bottom:0.8rem}
   .notes-title{font-size:1rem;font-weight:700;color:var(--accent)}

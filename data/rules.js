@@ -771,6 +771,27 @@ const RULES = {
    "Animals can't wait in your supply: house them at once or turn them into food.",
    "Food any time: grain 1, vegetable 2, sheep 1, boar 2, cattle 3, ruby 2; gold buys food at one more gold than the food.",
    "Dogs let a meadow or pasture hold one more sheep than there are dogs."
+  ],
+  "exp": [
+   {
+    "id": 245932,
+    "name": "The Forgotten Folk",
+    "src": "The Forgotten Folk rulebook (Lookout Games)",
+    "lines": [
+     "**Choosing**: each player plays the Dwarves (base rules) or a Folk. With 1–4 Folk players, each is dealt 2 random Folk boards and keeps one. Follow any setup printed on your board.",
+     "Each Folk's 4 furnishing tiles replace the base tiles named on their backs.",
+     "Your Folk board beats the base rules. 'Dwarf' now means any person: dwellings house anyone.",
+     "Elves and Silicoids are the hardest: not for a first game.",
+     "**Cave Goblins**: start with a 3rd person in an extra dwelling; give back one good from every accumulation space you take; weapons cost 2 extra ore (3–8 ore = strength 1–6); 6 people without the Additional Dwelling; dwellings score 0.",
+     "**Dark Elves**: a strength-10 expedition loot builds a dwelling for 2 wood + 1 stone with a goblin in it (6 people max in all); every ruby mine gives a ruby; dwellings score 0.",
+     "**Elves**: start with 2 gemfruits. Empty forest spaces work as fields, as pasture ground and as caverns for furnishing; no wild boar or water-source bonuses. Cavern twin tiles cost 2 rubies (1 for a single tile, or skip it). No minus points for any empty space.",
+     "**Humans**: forest twin tiles may overhang (2 food + 1 gold each time; no Office Room); no cavern twin tiles (a single tile or nothing); no minus points for an empty mountain.",
+     "**Mountain Dwarves**: pay wood with stone or ore; mountain twin tiles may overhang (2 gold each time); no field/meadow twins (a single tile or nothing); no minus points for an empty forest.",
+     "**Pale Ones**: may use Drift Mining and Excavation even when taken (one person each); mountain overhangs give 1 gold + 1 mushroom; no field/meadow twins; no minus points for an empty forest.",
+     "**Silicoids**: each eats 1 stone instead of food (newborns too); furnishings cost 1 stone less and stables are free; at each harvest swap 3 / 6 food for 1 / 2 gold, and up to 1 gold for 1 stone.",
+     "**Trolls**: a weapon costs exactly 2 wood for strength 4, and caps at 10; expeditions give 1 extra loot; each eats 3 food; trade dogs, sheep and donkeys for 2 food any time."
+    ]
+   }
   ]
  },
  "403150": {
@@ -1338,6 +1359,43 @@ const RULES = {
    "Waiting to reveal (and to commit troops) keeps your strength hidden.",
    "Unspent persuasion is lost after your reveal.",
    "Sietch Tabr needs 2 Fremen influence."
+  ],
+  "exp": [
+   {
+    "id": 342031,
+    "name": "Rise of Ix",
+    "src": "the Rise of Ix rulebook (Dire Wolf)",
+    "lines": [
+     "**Setup**: the CHOAM overlay covers the Landsraad and CHOAM spaces; the Ix board gets 3 stacks of 6 tech tiles (top one face up). Each player adds 2 dreadnoughts to their supply and a freighter at the bottom of the shipping track.",
+     "The conflict deck is still 1 × I, 5 × II, 4 × III: one Conflict III stays in the box.",
+     "**New spaces**: Dreadnought (3 Solari: a dreadnought and/or tech), Tech Negotiation, Smuggling (1 Solari + freighter), Interstellar Shipping (needs 2 Guild influence: freighter twice).",
+     "**Tech tiles** come only from the Acquire Tech icon: pay their spice (the icon may give −1 or −2), and return any of your Negotiators from Ix for −1 each. Once-a-round tiles flip face down and refresh at the start of the round.",
+     "**Tech Negotiation**: acquire tech at −1, or send a troop from your supply to Ix as a Negotiator; +1 persuasion on your reveal while your agent is there.",
+     "**Freighter** icon: advance one step, or recall it to the bottom and take the reward of its step and every step below: 1st 5 Solari (each opponent +1) or 2 spice; 2nd 2 troops + 1 influence; 3rd a tech at −2.",
+     "**Dreadnoughts** (max 2 out): 3 strength each, count even with no troops in the conflict, and survive combat (back to the garrison if you don't win).",
+     "Win a conflict with a dreadnought in it: it must take Arrakeen, Carthag or the Imperial Basin (one without a dreadnought), covering any control marker, until the end of the next combat.",
+     "**Units** = troops or dreadnoughts: deploy this turn's plus up to 2 from your garrison. Base cards that say 'troops' don't touch dreadnoughts.",
+     "**Infiltration** agent icons ignore enemy agents on that space. **Unload** reveal boxes also trigger when the card is discarded or trashed.",
+     "**Epic mode**: play to 12 VP; conflicts are 5 × II over 5 × III; swap one Dune, the Desert Planet for Control the Spice; everyone draws an intrigue and starts with 5 troops in their garrison."
+    ]
+   },
+   {
+    "id": 367466,
+    "name": "Immortality",
+    "src": "the Immortality rulebook (Dire Wolf)",
+    "lines": [
+     "**Setup**: the Bene Tleilax board (2 spice on the 4th Tleilaxu space; your tokens at the start of both tracks); a Tleilaxu Row of Reclaimed Forces + 2 cards; the Research Station overlay; swap both Dune, the Desert Planet for Experimentation; everyone takes a Family Atomics token.",
+     "**Research** icon: move one space right (up-right or down-right, never straight up/down or left) and take that space's bonus.",
+     "**Genetic markers**: once your token reaches a marker's column, card effects with that icon work for you. From the first you may put Tleilaxu cards you acquire on top of your deck; after the second, research draws a card instead.",
+     "**Tleilaxu** icon: one step on the Tleilaxu track, taking its bonus. Everyone reaching the VP space scores 1; the first also takes the 2 spice.",
+     "**Specimens**: put a troop from your supply in the Axolotl tanks. Spend them on Tleilaxu Row cards (on your reveal) or on specimen costs; you may take them back to your supply any time.",
+     "**Reclaimed Forces** never leaves the row: 'buying' it gives 2 troops or 1 Tleilaxu step. Persuasion effects can't get Tleilaxu cards.",
+     "**Graft**: a Graft card is played with exactly one other card on an agent turn. Use either card's agent icon, and get both cards' agent effects.",
+     "**Family Atomics**: once a game, on your turn, clear the Imperium Row and deal a new one.",
+     "**Research Station** is now a combat space: 2 water, draw 2 cards and research.",
+     "**Go to 11** (optional): play to 11 VP (4 players: start at 0 and play to 10)."
+    ]
+   }
   ]
  },
  "227935": {
