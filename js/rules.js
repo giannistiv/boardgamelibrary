@@ -16,7 +16,7 @@ function _loadRules() {
     _rulesLoading = fetch('data/rules.js', { cache: 'no-cache' })
       .then(r => r.text())
       .then(src => (_rules = JSON.parse(src.slice(src.indexOf('{'), src.lastIndexOf('}') + 1))))
-      .catch(() => { _rulesLoading = null; return {}; });
+      .catch(() => { _rulesLoading = null; return null; });   // offline with no saved copy
   }
   return _rulesLoading;
 }
@@ -32,6 +32,10 @@ async function wireRulesPanel(root, game) {
   if (!box || box.dataset.filled) return;
   const all = await _loadRules();
   if (!box.isConnected) return;
+  if (!all) {
+    box.innerHTML = '<div class="rules-none">The rules couldn\'t load. Check the connection and open the tab again.</div>';
+    return;
+  }
   box.dataset.filled = '1';
   let r = all[game.bggId], open = null, base = null;
   if (!r) {

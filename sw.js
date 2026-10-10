@@ -3,6 +3,9 @@
 //   pages (index.html)       network first (always revalidated), the last copy when offline
 //   css / js / data (?v=…)   cache first: a stamped URL never changes
 //   covers (images/)         cache first, the most recent MAX_COVERS kept
+//   lazy data (data/*.js     network first, the last copy when offline; rules
+//     fetched without ?v=)   and the Rove sheet's data are also stored ahead of
+//                            time, so the Rules tab works at a table with no signal
 //   Firebase reads           network first, the last answer when offline
 //   a shared BGStats export  kept for the page, which imports it (boot.js)
 //   everything else          straight to the network
@@ -17,6 +20,7 @@ const DATA = 'bgl-data';
 const SHARED = 'bgl-shared';     // a file shared to the app from BGStats, until the page takes it
 const MAX_COVERS = 600;
 const FIREBASE = 'firebasedatabase.app';
+const LAZY_DATA = ['data/rules.js', 'data/rove.js'];   // stored on install, before anyone opens them
 
 const assetUrls = (html) => {
   const out = new Set();
@@ -37,6 +41,12 @@ async function storeShell(res) {
   for (const req of await assets.keys()) if (!wanted.has(req.url)) await assets.delete(req);
   const have = new Set((await assets.keys()).map(r => r.url));
   await Promise.all([...wanted].filter(u => !have.has(u)).map(u => assets.add(u).catch(() => {})));
+  // the lazily loaded data, if this phone doesn't have a copy yet (using it refreshes it)
+  const data = await caches.open(DATA);
+  await Promise.all(LAZY_DATA.map(async (path) => {
+    const url = new URL(path, self.registration.scope).href;
+    if (!(await data.match(url))) await data.add(url).catch(() => {});
+  }));
 }
 
 async function refreshShell() {
@@ -198,6 +208,7 @@ self.addEventListener('fetch', (event) => {
   if (url.origin === location.origin) {
     if (url.searchParams.has('v')) { event.respondWith(cacheFirst(ASSETS, req)); return; }
     if (url.pathname.includes('/images/')) { event.respondWith(cacheFirst(COVERS, req, trimCovers)); return; }
+    if (url.pathname.includes('/data/') && url.pathname.endsWith('.js')) { event.respondWith(networkFirst(DATA, req, url.origin + url.pathname)); return; }
     return;
   }
   if (url.hostname.endsWith(FIREBASE) && url.pathname.endsWith('.json')) {
