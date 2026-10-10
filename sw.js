@@ -15,7 +15,7 @@
 // asset versions it no longer uses.
 const SHELL = 'bgl-shell';
 const ASSETS = 'bgl-assets';
-const COVERS = 'bgl-covers-2';   // a new name when a cover file changes: every phone fetches covers again
+const COVERS = 'bgl-covers-3';   // a new name when a cover file changes: every phone fetches covers again (-3: covers shrunk to 800px)
 const DATA = 'bgl-data';
 const SHARED = 'bgl-shared';     // a file shared to the app from BGStats, until the page takes it
 const MAX_COVERS = 600;
