@@ -629,6 +629,56 @@ function _applyGameAccent(game) {
   }
 }
 
+// ── Game page numbers for whoever is signed in ──
+// Your own plays, wins, win rate and last play of this game. Someone who
+// isn't signed in, or hasn't played it yet, sees the group's instead.
+function _gameMyPlays(plays) {
+  const me = typeof _ptViewer === 'function' ? _ptViewer() : null;
+  if (!me || !plays) return null;
+  const meCanon = _origCanon(me);
+  const isMe = s => s && (s.n === me || _origCanon(s.n) === meCanon);
+  const mine = plays.filter(p => p.sc.some(isMe));
+  if (!mine.length) return null;
+  return { mine, wins: mine.filter(p => p.sc.some(s => isMe(s) && s.w)).length };
+}
+
+function _gamePlayStatsHtml(game, plays, noResult, fmtDate) {
+  const stat = (val, label, cls = '') => `<div class="ph-stat${cls}"><span class="ph-stat-val">${val}</span><span class="ph-stat-label">${label}</span></div>`;
+  const my = _gameMyPlays(plays);
+  if (my) {
+    const rate = Math.round((my.wins / my.mine.length) * 100);
+    return `<div class="play-history-stats">
+          ${stat(my.mine.length, 'Your plays')}
+          ${stat(noResult ? '&mdash;' : my.wins, 'Your wins')}
+          ${stat(noResult ? '&mdash;' : rate + '%', 'Win rate')}
+          ${stat(fmtDate(my.mine[0].date), 'You last played')}
+        </div>`;
+  }
+  const players = new Set(), wins = new Map();
+  for (const p of plays) for (const s of p.sc) {
+    if (!s || !s.n || (typeof _ptIsAnon === 'function' && _ptIsAnon(s.n))) continue;
+    players.add(s.n);
+    if (s.w) wins.set(s.n, (wins.get(s.n) || 0) + 1);
+  }
+  const coop = typeof _recIsCoop === 'function' ? _recIsCoop(game, plays) : isCoop(game);
+  let third;
+  if (noResult) third = stat('&mdash;', 'Wins');
+  else if (coop) {
+    const won = plays.filter(p => p.sc.some(s => s && s.w)).length;
+    third = stat(Math.round((won / plays.length) * 100) + '%', 'Won');
+  } else {
+    const top = [...wins.entries()].sort((a, b) => b[1] - a[1])[0];
+    third = top ? stat(`${_escapeHtml(top[0])} <small>&times;${top[1]}</small>`, 'Most wins', ' ph-stat-name') : stat('&mdash;', 'Most wins');
+  }
+  const signedIn = typeof _ptViewer === 'function' && _ptViewer();
+  return `<div class="play-history-stats">
+          ${stat(plays.length, signedIn ? 'Group plays' : 'Plays')}
+          ${stat(players.size, 'Players')}
+          ${third}
+          ${stat(fmtDate(plays[0].date), 'Last played')}
+        </div>`;
+}
+
 function openModal(game) {
   _modalOpenedFromStats = document.getElementById('stats-view').classList.contains('open');
   _modalOpenedFromGames = document.getElementById('games-view').classList.contains('open');
@@ -664,13 +714,20 @@ function openModal(game) {
     coverHtml = `<div class="modal-cover"><div class="modal-cover-fallback" style="background:${fallbackBg}">${game.name}</div></div>`;
   }
 
-  // Rating tiles: BGG, the group's average, and how often it's been played.
+  // Rating tiles: BGG, the group's average, and how often you (or, for a
+  // visitor, everyone) played it.
   const community = game.bggId > 0 ? getCommunityRating(game.bggId) : null;
   const bggVal = Number(game.bggRating) || 0;
   const ratingTiles = [
     bggVal ? `<div class="gm-tile"><div class="gm-tile-val" style="color:${ratingColor(bggVal)}">${bggVal.toFixed(1)}</div><div class="gm-tile-label">BGG rating</div></div>` : '',
     community ? `<div class="gm-tile"><div class="gm-tile-val" style="color:${ratingColor(community.avg)}">&#9733; ${community.avg}</div><div class="gm-tile-label">Group &middot; ${community.count}</div></div>` : '',
-    `<div class="gm-tile"><div class="gm-tile-val">${(PLAY_HISTORY[game.bggId] || []).length}</div><div class="gm-tile-label">Plays</div></div>`,
+    (() => {
+      const all = PLAY_HISTORY[game.bggId] || [];
+      const my = _gameMyPlays(all);
+      return my
+        ? `<div class="gm-tile" title="${all.length} play${all.length !== 1 ? 's' : ''} by everyone"><div class="gm-tile-val">${my.mine.length}</div><div class="gm-tile-label">Your plays</div></div>`
+        : `<div class="gm-tile"><div class="gm-tile-val">${all.length}</div><div class="gm-tile-label">Plays</div></div>`;
+    })(),
     buildGameTimeTile(game.bggId),
   ].filter(Boolean);
 
@@ -685,12 +742,7 @@ function openModal(game) {
   const plays = PLAY_HISTORY[game.bggId];
   const noResultGame = isNoResultGame(game.bggId);
   if (plays && plays.length > 0) {
-    // Compute stats
     const totalPlays = plays.length;
-    const userPlays = plays.filter(p => p.sc.some(s => _origCanon(s.n) === 'Στιβ'));
-    const wins = plays.filter(p => p.sc.some(s => _origCanon(s.n) === 'Στιβ' && s.w));
-    const winRate = userPlays.length > 0 ? Math.round((wins.length / userPlays.length) * 100) : 0;
-    const lastPlayed = plays[0].date;
 
     // Format date helper
     const fmtDate = (d) => {
@@ -756,12 +808,7 @@ function openModal(game) {
           <span class="play-history-title">Play History</span>
           <span class="play-history-count">${totalPlays} play${totalPlays !== 1 ? 's' : ''} recorded</span>
         </div>
-        <div class="play-history-stats">
-          <div class="ph-stat"><span class="ph-stat-val">${totalPlays}</span><span class="ph-stat-label">Plays</span></div>
-          <div class="ph-stat"><span class="ph-stat-val">${noResultGame ? '&mdash;' : wins.length}</span><span class="ph-stat-label">Wins</span></div>
-          <div class="ph-stat"><span class="ph-stat-val">${noResultGame ? '&mdash;' : winRate + '%'}</span><span class="ph-stat-label">Win Rate</span></div>
-          <div class="ph-stat"><span class="ph-stat-val">${fmtDate(lastPlayed)}</span><span class="ph-stat-label">Last Played</span></div>
-        </div>
+        ${_gamePlayStatsHtml(game, plays, noResultGame, fmtDate)}
         ${buildScoreTrendHtml(game, plays)}
         ${buildGameRecordsHtml(game, plays)}
         ${buildRolesHtml(game, plays)}

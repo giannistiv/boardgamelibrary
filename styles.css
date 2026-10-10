@@ -827,6 +827,9 @@
     gap:1.2rem;
   }
   .ph-stat{display:flex;flex-direction:column;align-items:center;gap:0.15rem}
+  .ph-stat-name{min-width:0;flex:1 1 auto}
+  .ph-stat-name .ph-stat-val{font-size:0.9rem;max-width:100%;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ph-stat-name .ph-stat-val small{font-size:0.75rem;color:var(--text-3);font-weight:700}
 
   .ph-stat-label{text-transform:uppercase;letter-spacing:0.05em;color:var(--text-3);opacity:1;font-size:0.62rem;font-weight:600}
   /* ── Player count: BGG votes vs how the group plays ── */
