@@ -1748,6 +1748,7 @@ const GIANNIS_GAMES = {
   65907:{name:"Mystery Express",bggId:65907,year:2010,complexity:2.66,players:"3-5",playTime:"90 min",bggRating:6.5},
   915:{name:"Mystery of the Abbey",bggId:915,year:1995,complexity:2.2,players:"3-6",playTime:"90 min",bggRating:6.5},
   153912:{name:"Mystery of the Abbey with The Pilgrims' Chronicles",bggId:153912,year:2007,complexity:2.24,players:"3-6",playTime:"90 min",bggRating:6.9},
+  234691:{name:"Mystery of the Temples",bggId:234691,year:2017,complexity:2.3,players:"2-4",playTime:"40 min",bggRating:6.5},
   198455:{name:"Mystic ScROLLS",bggId:198455,year:2017,complexity:1.62,players:"2-4",playTime:"15 min",bggRating:6.5},
   186751:{name:"Mythic Battles: Pantheon",bggId:186751,year:2017,complexity:3.06,players:"2-4",playTime:"90 min",bggRating:8.3},
   220000:{name:"Mythic Battles: Pantheon – Pandora's Box",bggId:220000,year:2017,complexity:3.0,players:"1-4",playTime:"90 min",bggRating:8.7},

@@ -23,12 +23,21 @@ let _rvCampsAt = 0;
 let _rvId = null;            // the campaign on screen
 let _rvTab = 'sheet';        // 'sheet' | 'rovers' | 'shop' | 'xulc' | 'notes'
 let _rvShopSlot = 'all';
+let _rvAsk = null;           // {id, slot}: the shop asking "bought or free?" for that Rover
 let _rvSaveTimers = {};
 
 const _rvKey = (id) => String(id).replace(/[.#$\[\]\/]/g, '_');   // Firebase keys can't hold . # $ [ ] /
 const _rvSlug = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
-// who has an item: {r0: true, r2: true} (older sheets saved a single slot string)
+// who has an item: {r0: true, r2: 'free'} — true when bought from the merchant,
+// 'free' for starting gear, rewards and finds (older sheets saved a single slot string)
 const _rvOwners = (v) => typeof v === 'string' ? [v] : v && typeof v === 'object' ? Object.keys(v).filter(k => v[k]) : [];
+const _rvHow = (v, slot) => typeof v === 'string' ? (v === slot ? 'buy' : null) : v && v[slot] ? (v[slot] === 'free' ? 'free' : 'buy') : null;
+// the items a Rover's base class starts with
+const _rvStartGear = (c, slot) => {
+  const r = ((c && c.rovers) || {})[slot] || {};
+  const base = _rvData && _rvData.classByName[r.base];
+  return (base && base.start) || [];
+};
 
 async function _rvLoad(force) {
   if (!_rvData) {
@@ -424,17 +433,24 @@ function _rvShopHtml(c, edit) {
     const locked = i.reward ? !rewards[_rvSlug(i.name)] && !owners.length : (i.ml || 0) > merchant && !owners.length;
     return `<div class="rv-item${locked ? ' locked' : ''}${owners.length ? ' owned' : ''}">
       <span class="rv-item-name">${esc(i.name)}<small>${esc(RV_SLOT_NAMES[i.slot] || i.slot)}${i.hands > 1 ? ` · ${i.hands} slots` : ''}${i.x ? ' · Xulc' : ''}</small></span>
-      <span class="rv-item-price">${i.price ? `${i.price}<small> lyst</small>` : i.reward ? 'reward' : ''}</span>
+      <span class="rv-item-price">${i.reward ? 'reward' : i.price ? `${i.price}<small> lyst</small>` : ''}</span>
       ${who.length ? `<span class="rv-item-who" role="group" aria-label="Who has ${esc(i.name)}">${who.map(w => {
-        const on = owners.includes(w.s);
-        return `<button type="button" class="rv-opt${on ? ' on' : ''}" data-rv-own="${esc(i.id)}|${w.s}" aria-pressed="${on}"${(locked && !on) || !edit ? ' disabled' : ''}>${esc(w.n)}</button>`;
+        const how = _rvHow(items[_rvKey(i.id)], w.s);
+        const tip = how === 'free' ? 'Got it free' : how === 'buy' ? `Bought for ${i.price} lyst` : '';
+        return `<button type="button" class="rv-opt${how ? ' on' : ''}${how === 'free' ? ' free' : ''}" data-rv-own="${esc(i.id)}|${w.s}" aria-pressed="${!!how}"${tip ? ` title="${tip}"` : ''}${(locked && !how) || !edit ? ' disabled' : ''}>${esc(w.n)}</button>`;
       }).join('')}</span>` : ''}
+      ${_rvAsk && _rvAsk.id === i.id ? `<span class="rv-ask">
+        <span>${esc(((rovers[_rvAsk.slot] || {}).player) || 'Rover')}:</span>
+        <button type="button" class="rv-btn rv-btn-sm" data-rv-acq="${esc(i.id)}|${_rvAsk.slot}|buy">Buy · ${i.price} lyst</button>
+        <button type="button" class="rv-btn rv-btn-sm" data-rv-acq="${esc(i.id)}|${_rvAsk.slot}|free">Got it free</button>
+        <button type="button" class="rv-link" data-rv-acq-cancel>Cancel</button>
+      </span>` : ''}
     </div>`;
   };
   return `<div class="rv-card rv-shop-top">
       <div class="rv-row"><span class="rv-label">Merchant level</span><b>${merchant || '–'}</b><span class="rv-label">Lyst</span><b>${Number(c.lyst) || 0}</b></div>
       <div class="rv-chips">${slots.map(s => `<button type="button" class="rv-chip${_rvShopSlot === s ? ' on' : ''}" data-rv-slot="${s}">${s === 'all' ? 'All' : RV_SLOT_NAMES[s]}</button>`).join('')}</div>
-      <div class="rv-hint">Tap a Rover's name to buy the item for them: the price comes off the lyst (tap again to undo, and it goes back). Any number of Rovers can own the same item. Items above your merchant level, and rewards you haven't earned, are greyed out.</div>
+      <div class="rv-hint">Tap a Rover's name to give them the item. Starting gear and earned rewards are free; anything else asks whether it was bought (the price comes off the lyst) or came free. Tap again to take it back (a purchase is refunded). Any number of Rovers can own the same item. Items above your merchant level, and rewards you haven't earned, are greyed out.</div>
     </div>
     ${groups.map(([label, its]) => `<div class="rv-sec">${esc(label)}${label.startsWith('Merchant') && Number(label.slice(-1)) > merchant ? ' <span class="rv-dim">· not yet</span>' : ''}</div><div class="rv-card rv-items">${its.map(row).join('')}</div>`).join('')}`;
 }
@@ -500,7 +516,7 @@ function _rvNotesHtml(c, edit) {
 
 // ── what a tap or an edit does ──
 async function _rvClick(panel, ev) {
-  const t = ev.target.closest('button[data-rv-tab],button[data-rv-start],button[data-rv-enc],button[data-rv-level],button[data-rv-ms],button[data-rv-msv],button[data-rv-merchant],button[data-rv-reward],button[data-rv-ether],button[data-rv-lyst],button[data-rv-lystadd],button[data-rv-fill],button[data-rv-slot],button[data-rv-own],button[data-rv-remove],button[data-rv-xon],button[data-rv-xenc],button[data-rv-xms],button[data-rv-xinf],button[data-rv-xboard],button[data-rv-xether]');
+  const t = ev.target.closest('button[data-rv-tab],button[data-rv-start],button[data-rv-enc],button[data-rv-level],button[data-rv-ms],button[data-rv-msv],button[data-rv-merchant],button[data-rv-reward],button[data-rv-ether],button[data-rv-lyst],button[data-rv-lystadd],button[data-rv-fill],button[data-rv-slot],button[data-rv-own],button[data-rv-acq],button[data-rv-acq-cancel],button[data-rv-remove],button[data-rv-xon],button[data-rv-xenc],button[data-rv-xms],button[data-rv-xinf],button[data-rv-xboard],button[data-rv-xether]');
   if (!t || !panel.contains(t) || t.disabled) return;
   const ds = t.dataset;
   if (ds.rvTab) { _rvTab = ds.rvTab; _rvRender(panel); return; }
@@ -539,22 +555,36 @@ async function _rvClick(panel, ev) {
     _rvLystUp(c, up, amt, panel.querySelector('.rv-lyst-note').value.trim());
   }
   else if (ds.rvFill !== undefined) _rvPlays().forEach(p => { if (p.enc && p.won && !p.xulc && !(c.enc || {})[_rvKey(p.enc)]) up[`enc/${_rvKey(p.enc)}`] = p.date; });
-  else if (ds.rvOwn) {
-    const [id, slot] = ds.rvOwn.split('|');
+  else if (ds.rvAcqCancel !== undefined) { _rvAsk = null; _rvRender(panel); return; }
+  else if (ds.rvOwn || ds.rvAcq) {
+    const [id, slot, pick] = (ds.rvOwn || ds.rvAcq).split('|');
     const it = _rvData.items.find(i => i.id === id);
+    if (!it) return;
     const k = _rvKey(id);
-    const owners = _rvOwners((c.items || {})[k]);
-    const had = owners.includes(slot);
-    const next = had ? owners.filter(s => s !== slot) : [...owners, slot];
-    up[`items/${k}`] = next.length ? Object.fromEntries(next.map(s => [s, true])) : null;
-    // buying from the merchant takes the price off the lyst; untapping gives it back
-    if (it && it.price) {
-      const bought = `Bought ${it.name} · ${((c.rovers || {})[slot] || {}).player || 'Rover'}`;
-      const [lastKey, last] = Object.entries(c.lystLog || {}).sort((a, b) => b[1].at - a[1].at)[0] || [];
-      // undoing the latest purchase just takes its line back out of the log
-      if (had && last && last.note === bought) { up.lyst = (Number(c.lyst) || 0) + it.price; up[`lystLog/${lastKey}`] = null; }
-      else _rvLystUp(c, up, had ? it.price : -it.price, had ? `Gave back ${it.name} · ${bought.split(' · ').pop()}` : bought);
+    const cur = (c.items || {})[k];
+    const has = {};   // the item's owners as {slot: true | 'free'}
+    if (typeof cur === 'string') has[cur] = true;
+    else if (cur && typeof cur === 'object') for (const s of _rvOwners(cur)) has[s] = cur[s];
+    const how = _rvHow(cur, slot);
+    const player = ((c.rovers || {})[slot] || {}).player || 'Rover';
+    const bought = `Bought ${it.name} · ${player}`;
+    _rvAsk = null;
+    if (how) {
+      // taking it back: a purchase is refunded, a free item just goes
+      delete has[slot];
+      if (how === 'buy' && it.price && !it.reward) {
+        const [lastKey, last] = Object.entries(c.lystLog || {}).sort((a, b) => b[1].at - a[1].at)[0] || [];
+        // undoing the latest purchase just takes its line back out of the log
+        if (last && last.note === bought) { up.lyst = (Number(c.lyst) || 0) + it.price; up[`lystLog/${lastKey}`] = null; }
+        else _rvLystUp(c, up, it.price, `Gave back ${it.name} · ${player}`);
+      }
+    } else {
+      const free = !it.price || it.reward || _rvStartGear(c, slot).includes(it.name);
+      if (!free && !pick) { _rvAsk = { id, slot }; _rvRender(panel); return; }   // bought or free?
+      if (free || pick === 'free') has[slot] = 'free';
+      else { has[slot] = true; _rvLystUp(c, up, -it.price, bought); }
     }
+    up[`items/${k}`] = Object.keys(has).length ? has : null;
   }
   else if (ds.rvRemove) { if (!confirm('Remove this Rover from the sheet?')) return; up[`rovers/${ds.rvRemove}`] = null; }
   else if (ds.rvXon !== undefined) up['xulc/on'] = true;
