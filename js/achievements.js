@@ -237,7 +237,7 @@ function computeAchievements(playerName) {
 
     if (meWon) totalWins++;
     if (isCoop && meWon) coopWins++;
-    if (isCoop && !meWon && !isNoResultGame(p.bggId)) mark('tragic-hero', p.date);
+    if (isCoop && !meWon && !isNoResultPlay(p.orig, p.bggId)) mark('tragic-hero', p.date);
 
     if (!perGameWR[p.bggId]) perGameWR[p.bggId] = { plays: 0, wins: 0 };
     perGameWR[p.bggId].plays++;
@@ -366,7 +366,7 @@ function computeAchievements(playerName) {
 
     // ── Wooden Spoon: finish last in 5 different competitive games. ──
     if (!isCoop && !isSolo) {
-      const ranks = _leaderboardRanksForPlay(p.sc, p.bggId);
+      const ranks = _leaderboardRanksForPlay(p.sc, p.bggId, p.orig);
       if (ranks) {
         const myRank = ranks.find(r => r.player === playerName);
         if (myRank) {
@@ -583,7 +583,7 @@ function _openLatestPlaysModal(playerName, plays) {
       const coverHtml = initialSrc
         ? `<img class="lpm-row-cover" src="${initialSrc}" alt="" loading="lazy" onerror="window.__lpmImgFallback(this, '${fallback}')">`
         : '<div class="lpm-row-cover"></div>';
-      const noResult = isNoResultGame(p.game.bggId);
+      const noResult = p.noResult || isNoResultGame(p.game.bggId);
       const tagHtml = noResult
         ? ''
         : (p.isCoop
@@ -606,7 +606,7 @@ function _openLatestPlaysModal(playerName, plays) {
       // *lower* score wins, like Last Will, still list the winner first).
       // Fall back to win-flag-then-original-order for plays where ranks
       // can't be computed (coop, solo, missing scores).
-      const ranks = _leaderboardRanksForPlay(p.allScores || [], p.bggId) || [];
+      const ranks = _leaderboardRanksForPlay(p.allScores || [], p.bggId, p.play) || [];
       const rankByName = {};
       for (const r of ranks) {
         if (rankByName[r.player] == null || r.rank < rankByName[r.player]) {

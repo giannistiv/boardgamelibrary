@@ -10,20 +10,22 @@ function buildRolesHtml(game, plays) {
   if (!plays || plays.length < 3) return '';
   const noResult = isNoResultGame(game.bggId);
   const me = _ptViewer();
-  const tags = new Map();   // role → {name, plays, wins, mine, myWins}
+  const tags = new Map();   // role → {name, plays, wins, dec, mine, myWins, myDec}
   const sets = new Set();   // which roles were at the table, play by play
   let withRoles = 0;
   for (const p of plays) {
     let any = false;
+    const dec = isNoResultPlay(p, game.bggId) ? 0 : 1;  // no result: neither won nor lost
     sets.add(p.sc.flatMap(s => s ? _giRoleTags(s.r) : []).sort().join('\u0000'));
     for (const s of p.sc) {
       if (!s) continue;
       for (const t of _giRoleTags(s.r)) {
         any = true;
-        const r = tags.get(t) || { name: t, plays: 0, wins: 0, mine: 0, myWins: 0 };
+        const r = tags.get(t) || { name: t, plays: 0, wins: 0, dec: 0, mine: 0, myWins: 0, myDec: 0 };
         r.plays++;
+        r.dec += dec;
         if (s.w) r.wins++;
-        if (s.n === me) { r.mine++; if (s.w) r.myWins++; }
+        if (s.n === me) { r.mine++; r.myDec += dec; if (s.w) r.myWins++; }
         tags.set(t, r);
       }
     }
@@ -32,7 +34,7 @@ function buildRolesHtml(game, plays) {
   if (withRoles < 3 || tags.size < 2) return '';
   sets.delete('');
   const list = [...tags.values()].sort((a, b) => b.plays - a.plays || b.wins - a.wins);
-  const pct = (w, n) => Math.round((w / n) * 100);
+  const pct = (w, n) => (n ? Math.round((w / n) * 100) : 0);
   const esc = _escapeHtml;
   const logged = `${withRoles}${withRoles < plays.length ? ` of ${plays.length}` : ''} play${plays.length !== 1 ? 's' : ''}`;
 
@@ -51,7 +53,7 @@ function buildRolesHtml(game, plays) {
           <div class="pt-p mine" title="${esc(r.name)}: you ${r.mine} play${r.mine !== 1 ? 's' : ''}, ${r.myWins} won">
             <span class="pt-p-name">${esc(r.name)}</span>
             <span class="pt-p-bar"><i style="width:${Math.max(3, Math.round((r.mine / most) * 100))}%"></i></span>
-            <span class="pt-p-val">${r.mine}<small> &middot; ${pct(r.myWins, r.mine)}% won</small></span>
+            <span class="pt-p-val">${r.mine}${r.myDec ? `<small> &middot; ${pct(r.myWins, r.myDec)}% won</small>` : ''}</span>
           </div>`).join('')}
         </div>`;
   }
@@ -60,15 +62,15 @@ function buildRolesHtml(game, plays) {
   const mine = list.filter(r => r.mine > 0);
   const fav = mine.slice().sort((a, b) => b.mine - a.mine)[0];
   // (a best only when it beats your other characters by a clear margin, not on a tie)
-  const tried = noResult ? [] : mine.filter(r => r.mine >= 3)
-    .sort((a, b) => b.myWins / b.mine - a.myWins / a.mine || b.mine - a.mine);
+  const tried = noResult ? [] : mine.filter(r => r.myDec >= 3)
+    .sort((a, b) => b.myWins / b.myDec - a.myWins / a.myDec || b.mine - a.mine);
   const best = tried.length >= 2 && tried[0].myWins > 0
-    && tried[0].myWins / tried[0].mine - tried[1].myWins / tried[1].mine >= 0.1 ? tried[0] : null;
+    && tried[0].myWins / tried[0].myDec - tried[1].myWins / tried[1].myDec >= 0.1 ? tried[0] : null;
   let yours = '';
   if (fav && fav.mine >= 2) {
     yours = best && best !== fav
-      ? `Your favourite: <b>${esc(fav.name)}</b> (${fav.mine} plays) &middot; your best: <b>${esc(best.name)}</b> (${pct(best.myWins, best.mine)}% won)`
-      : `Your favourite${best ? ' and your best' : ''}: <b>${esc(fav.name)}</b> (${fav.mine} plays${best ? `, ${pct(best.myWins, best.mine)}% won` : ''})`;
+      ? `Your favourite: <b>${esc(fav.name)}</b> (${fav.mine} plays) &middot; your best: <b>${esc(best.name)}</b> (${pct(best.myWins, best.myDec)}% won)`
+      : `Your favourite${best ? ' and your best' : ''}: <b>${esc(fav.name)}</b> (${fav.mine} plays${best ? `, ${pct(best.myWins, best.myDec)}% won` : ''})`;
   }
 
   const SHOW = 8;
@@ -77,7 +79,7 @@ function buildRolesHtml(game, plays) {
           <div class="pt-p${r.mine ? ' mine' : ''}" title="${esc(r.name)}: ${r.plays} play${r.plays !== 1 ? 's' : ''}${noResult ? '' : `, ${r.wins} won`}${r.mine ? ` · you: ${r.mine}` : ''}">
             <span class="pt-p-name">${esc(r.name)}</span>
             <span class="pt-p-bar"><i style="width:${Math.max(3, Math.round((r.plays / top) * 100))}%"></i></span>
-            <span class="pt-p-val">${r.plays}${noResult ? '' : `<small> &middot; ${pct(r.wins, r.plays)}%</small>`}</span>
+            <span class="pt-p-val">${r.plays}${noResult || !r.dec ? '' : `<small> &middot; ${pct(r.wins, r.dec)}%</small>`}</span>
           </div>`).join('');
   const more = list.length - SHOW;
   return `

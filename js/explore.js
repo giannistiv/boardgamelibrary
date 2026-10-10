@@ -76,10 +76,12 @@ function showGamesView() {
       const loc = play.l || '';
       if (loc) allLocs[loc] = (allLocs[loc] || 0) + 1;
 
+      const decided = !isNoResultPlay(play, bggId);  // no result: neither won nor lost
       for (const s of play.sc) {
         if (HIDDEN_PLAYERS.has(s.n)) continue;
-        if (!playerStats[s.n]) playerStats[s.n] = { plays: 0, wins: 0, games: new Set() };
+        if (!playerStats[s.n]) playerStats[s.n] = { plays: 0, wins: 0, decided: 0, games: new Set() };
         playerStats[s.n].plays++;
+        if (decided) playerStats[s.n].decided++;
         if (s.w) playerStats[s.n].wins++;
         playerStats[s.n].games.add(Number(bggId));
       }
@@ -171,7 +173,7 @@ function showGamesView() {
   };
   const topPlayers = Object.entries(playerStats)
     .filter(([, d]) => d.plays >= 1)
-    .map(([name, d]) => ({ name, plays: d.plays, wins: d.wins, games: d.games.size, wr: Math.round(d.wins / d.plays * 100) }))
+    .map(([name, d]) => ({ name, plays: d.plays, wins: d.wins, games: d.games.size, wr: d.decided ? Math.round(d.wins / d.decided * 100) : 0 }))
     .sort((a, b) => b.plays - a.plays);
 
   const buildPlayersTab = () => `

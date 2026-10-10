@@ -65,8 +65,16 @@ function difficultyBucket(complexity) {
 // Games that have no winners or losers at all (purely cooperative/zen builders
 // with no win condition). Imported games carry no categories, so coop can't be
 // auto-detected — list these explicitly so plays aren't scored as losses.
-//   456440 = Cozy Stickerville
-const NO_RESULT_GAMES = new Set([456440]);
+//   456440 = Cozy Stickerville · 415776 = Kingdom Legacy: Feudal Kingdom
+const NO_RESULT_GAMES = new Set([456440, 415776]);
+// Single plays with no result: a game that has winners, logged without one.
+// Built-in plays carry `nr: true`; imported plays are listed by their uuid.
+const NO_RESULT_PLAYS = new Set([
+  '308ea126-4d97-4b75-8c25-68b4ba69fd0c',  // AuZtralia, 14 Apr 2026
+  'aab1f335-b911-4213-b38d-a616d76fd6c1',  // Eternal Decks, 16 May 2026
+  'b42139e4-ec22-45ab-b23b-563f68224415',  // Gloomhaven: Buttons & Bugs, 10 Sep 2024
+  'c8b2ac38-a04b-4314-8505-74224b4d0ac6',  // Gloomhaven: Buttons & Bugs, 11 Sep 2024
+]);
 // One game, several BGG entries: a new edition or a big box of the same game
 // counts as that game for BGG's Top 100 (the challenge and the achievements).
 // Editions that changed the game, like Great Western Trail's second, stay apart.
@@ -89,6 +97,12 @@ function sameGameIds(bggId) {
 
 function isNoResultGame(bggId) {
   return NO_RESULT_GAMES.has(Number(bggId));
+}
+// Neither a win nor a loss: a no-result game, or a play marked no result
+// (only while nobody has a win in it).
+function isNoResultPlay(play, bggId) {
+  if (isNoResultGame(bggId)) return true;
+  return !!(play && play.nr && !(play.sc || []).some(s => s && s.w));
 }
 // Campaign / legacy games played across a fixed number of stages. The current
 // stage is parsed from each play's board/scenario tag (the `b` field).

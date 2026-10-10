@@ -37,9 +37,9 @@ function computeWrapped(playerName, year) {
     }
   }
   const totalPlays = plays.length;
-  let wins = 0, minutes = 0, coop = 0, pvp = 0, solo = 0, coopWins = 0, maxTable = 0;
+  let wins = 0, decided = 0, minutes = 0, coop = 0, coopDecided = 0, pvp = 0, solo = 0, coopWins = 0, maxTable = 0;
   let biggestTablePlay = null;
-  const gameCount = {}, gameWins = {}, comp = {}, mech = {}, cat = {}, byDate = {}, byDow = {}, byMonth = {}, byLoc = {}, byDateMin = {}, designer = {};
+  const gameCount = {}, gameWins = {}, gameDecided = {}, comp = {}, mech = {}, cat = {}, byDate = {}, byDow = {}, byMonth = {}, byLoc = {}, byDateMin = {}, designer = {};
   const gameMin = {}, compMin = {};   // time per game, time with each companion
   let wSum = 0, wN = 0, heaviest = null, lightest = null;
   let oldest = null, newest = null;
@@ -49,7 +49,10 @@ function computeWrapped(playerName, year) {
     const g = findGameByBggId(p.bggId);
     const est = playTimeEstimate(p.orig);   // the same estimate as the profile's Time at the table
     const mins = est ? est.min : _estPlayMinutes(g);
+    // A play with no result is neither a win nor a loss.
+    const noResult = isNoResultPlay(p.orig, p.bggId);
     if (p.me.w) wins++;
+    if (!noResult) { decided++; gameDecided[p.bggId] = (gameDecided[p.bggId] || 0) + 1; }
     minutes += mins;
     gameMin[p.bggId] = (gameMin[p.bggId] || 0) + mins;
     gameCount[p.bggId] = (gameCount[p.bggId] || 0) + 1;
@@ -79,8 +82,9 @@ function computeWrapped(playerName, year) {
     const isSolo = p.sc.length === 1;
     if (isSolo) solo++;
     const allSame = p.sc.every(s => !!s.w === !!p.sc[0].w);
-    const isCoop = !isSolo && allSame;
-    if (isCoop) { coop++; if (p.me.w) coopWins++; }
+    // (a competitive game's play marked no result stays competitive)
+    const isCoop = !isSolo && allSame && !(noResult && !isNoResultGame(p.bggId));
+    if (isCoop) { coop++; if (p.me.w) coopWins++; if (!noResult) coopDecided++; }
     const isPvP = !isSolo && !isCoop;
     if (isPvP) pvp++;
     for (const s of p.sc) {
@@ -89,7 +93,7 @@ function computeWrapped(playerName, year) {
       if (!isOwner && isOwnerCo) continue; // exclude the owner from others' crew
       comp[s.n] = (comp[s.n] || 0) + 1;
       compMin[s.n] = (compMin[s.n] || 0) + mins;
-      if (isPvP) {
+      if (isPvP && !noResult) {
         const r = rivalStats[s.n] || (rivalStats[s.n] = { games: 0, myWins: 0, theirWins: 0 });
         r.games++; if (p.me.w) r.myWins++; if (s.w) r.theirWins++;
       }
@@ -118,7 +122,7 @@ function computeWrapped(playerName, year) {
   const favDow = sortEnt(byDow)[0] || null;
   const favMonth = sortEnt(byMonth)[0] || null;
   const favLoc = sortEnt(byLoc)[0] || null;
-  const winRate = totalPlays ? Math.round(wins / totalPlays * 100) : 0;
+  const winRate = decided ? Math.round(wins / decided * 100) : 0;
   const coopRatio = totalPlays ? coop / totalPlays : 0;
   const newRatio = topGames.length ? newToMe.length / topGames.length : 0;
   const topDesigner = sortEnt(designer)[0] || null;
@@ -138,7 +142,7 @@ function computeWrapped(playerName, year) {
   // Bogey (most-played low-win game) & specialty (most-played high-win game).
   let bogey = null, specialty = null;
   for (const bId in gameCount) {
-    const c = gameCount[bId]; if (c < 5) continue;
+    const c = gameDecided[bId] || 0; if (c < 5) continue;
     const wr = (gameWins[bId] || 0) / c;
     const g = findGameByBggId(bId);
     if (wr <= 0.30 && (!bogey || wr < bogey.wr || (wr === bogey.wr && c > bogey.count))) bogey = { game: g, bggId: Number(bId), count: c, wins: gameWins[bId] || 0, wr };
@@ -207,7 +211,7 @@ function computeWrapped(playerName, year) {
     busiestDay, favDow: favDow ? { name: DOW[favDow[0]], count: favDow[1] } : null,
     favMonth: favMonth ? { name: MON[favMonth[0]], count: favMonth[1] } : null,
     favLoc: favLoc ? { name: favLoc[0], count: favLoc[1] } : null,
-    coop, pvp, solo, coopWins, ch, isBoardSouth, isIlioupoli, arch,
+    coop, coopDecided, pvp, solo, coopWins, ch, isBoardSouth, isIlioupoli, arch,
     // newer slices
     firstPlay, loveAtFirst, winStreak, bogey, specialty,
     biggestTable: biggestTablePlay,
@@ -539,12 +543,12 @@ function openWrappedModal(playerName, isOwnProfile) {
     <div class="wr-lead">${d.winRate >= 65 ? 'Ruthless. The table fears you.' : d.winRate >= 45 ? 'A worthy and balanced opponent.' : 'You play for the love of the game (and snacks).'}</div>`);
 
   // Co-op record
-  if (d.coop >= 10) {
-    const cwr = Math.round(d.coopWins / d.coop * 100);
+  if (d.coopDecided >= 10) {
+    const cwr = Math.round(d.coopWins / d.coopDecided * 100);
     slide(G.teal, `
       <div class="wr-kicker">TEAM RECORD</div>
       <div class="wr-num">${cnum(cwr)}<span style="font-size:2rem">%</span></div>
-      <div class="wr-label">co-op win rate &middot; ${d.coopWins}/${d.coop} beaten</div>
+      <div class="wr-label">co-op win rate &middot; ${d.coopWins}/${d.coopDecided} beaten</div>
       <div class="wr-lead">${cwr >= 65 ? 'Your table tackles the toughest games and wins.' : 'The games fought back — but what a ride.'}</div>`);
   }
 

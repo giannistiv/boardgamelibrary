@@ -235,6 +235,7 @@ function _mergePlayIntoHistory(uuid, p) {
   if (p.b) entry.b = p.b;
   if (p.l) entry.l = p.l;
   if (p.src) entry.src = p.src;   // a friend's own upload (IMPORT_SOURCES)
+  if (NO_RESULT_PLAYS.has(uuid)) entry.nr = true;
 
   const newNames = new Set(p.sc.map(s => s.n));
   const isHardcodedDup = (e) => {
@@ -290,6 +291,7 @@ function _mergePlayIntoHistory(uuid, p) {
     if (idx !== -1) {
       status = _playSignature(PLAY_HISTORY[bggId][idx]) === _playSignature(entry) ? 'same' : 'changed';
       entry._paired = true;   // this play has taken the place of its built-in copy
+      if (PLAY_HISTORY[bggId][idx].nr) entry.nr = true;
       PLAY_HISTORY[bggId][idx] = entry;
     } else {
       PLAY_HISTORY[bggId].push(entry);
@@ -307,7 +309,7 @@ function _mergePlayIntoHistory(uuid, p) {
   if (!entry._paired && !p.src) {
     const arr = PLAY_HISTORY[bggId];
     const idx = findTwin(arr);
-    if (idx !== -1) { arr.splice(idx, 1); entry._paired = true; }
+    if (idx !== -1) { if (arr[idx].nr) entry.nr = true; arr.splice(idx, 1); entry._paired = true; }
   }
   return status;
 }

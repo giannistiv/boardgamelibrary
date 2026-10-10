@@ -1475,6 +1475,7 @@
     display:inline-block;
   }
   .play-no-winner{font-size:0.72rem;color:#f87171;opacity:0.8;font-style:italic;margin-top:0.25rem}
+  .play-no-winner.play-no-result{color:var(--text-3)}
   .play-show-more{
     display:block;width:100%;padding:0.5rem;margin-top:0.4rem;
     

@@ -632,25 +632,27 @@ function _applyGameAccent(game) {
 // ── Game page numbers for whoever is signed in ──
 // Your own plays, wins, win rate and last play of this game. Someone who
 // isn't signed in, or hasn't played it yet, sees the group's instead.
-function _gameMyPlays(plays) {
+function _gameMyPlays(plays, bggId) {
   const me = typeof _ptViewer === 'function' ? _ptViewer() : null;
   if (!me || !plays) return null;
   const meCanon = _origCanon(me);
   const isMe = s => s && (s.n === me || _origCanon(s.n) === meCanon);
   const mine = plays.filter(p => p.sc.some(isMe));
   if (!mine.length) return null;
-  return { mine, wins: mine.filter(p => p.sc.some(s => isMe(s) && s.w)).length };
+  // Plays with no result count as plays, not as wins or losses.
+  const decided = mine.filter(p => !isNoResultPlay(p, bggId)).length;
+  return { mine, decided, wins: mine.filter(p => p.sc.some(s => isMe(s) && s.w)).length };
 }
 
 function _gamePlayStatsHtml(game, plays, noResult, fmtDate) {
   const stat = (val, label, cls = '') => `<div class="ph-stat${cls}"><span class="ph-stat-val">${val}</span><span class="ph-stat-label">${label}</span></div>`;
-  const my = _gameMyPlays(plays);
+  const my = _gameMyPlays(plays, game.bggId);
   if (my) {
-    const rate = Math.round((my.wins / my.mine.length) * 100);
+    const rate = my.decided ? Math.round((my.wins / my.decided) * 100) + '%' : '&mdash;';
     return `<div class="play-history-stats">
           ${stat(my.mine.length, 'Your plays')}
           ${stat(noResult ? '&mdash;' : my.wins, 'Your wins')}
-          ${stat(noResult ? '&mdash;' : rate + '%', 'Win rate')}
+          ${stat(noResult ? '&mdash;' : rate, 'Win rate')}
           ${stat(fmtDate(my.mine[0].date), 'You last played')}
         </div>`;
   }
@@ -664,8 +666,9 @@ function _gamePlayStatsHtml(game, plays, noResult, fmtDate) {
   let third;
   if (noResult) third = stat('&mdash;', 'Wins');
   else if (coop) {
-    const won = plays.filter(p => p.sc.some(s => s && s.w)).length;
-    third = stat(Math.round((won / plays.length) * 100) + '%', 'Won');
+    const decided = plays.filter(p => !isNoResultPlay(p, game.bggId));
+    const won = decided.filter(p => p.sc.some(s => s && s.w)).length;
+    third = stat(decided.length ? Math.round((won / decided.length) * 100) + '%' : '&mdash;', 'Won');
   } else {
     const top = [...wins.entries()].sort((a, b) => b[1] - a[1])[0];
     third = top ? stat(`${_escapeHtml(top[0])} <small>&times;${top[1]}</small>`, 'Most wins', ' ph-stat-name') : stat('&mdash;', 'Most wins');
@@ -723,7 +726,7 @@ function openModal(game) {
     community ? `<div class="gm-tile"><div class="gm-tile-val" style="color:${ratingColor(community.avg)}">&#9733; ${community.avg}</div><div class="gm-tile-label">Group &middot; ${community.count}</div></div>` : '',
     (() => {
       const all = PLAY_HISTORY[game.bggId] || [];
-      const my = _gameMyPlays(all);
+      const my = _gameMyPlays(all, game.bggId);
       return my
         ? `<div class="gm-tile" title="${all.length} play${all.length !== 1 ? 's' : ''} by everyone"><div class="gm-tile-val">${my.mine.length}</div><div class="gm-tile-label">Your plays</div></div>`
         : `<div class="gm-tile"><div class="gm-tile-val">${all.length}</div><div class="gm-tile-label">Plays</div></div>`;
@@ -760,7 +763,9 @@ function openModal(game) {
       const hasWinner = play.sc.some(s => s.w);
       const scoreHtml = play.sc.map(_playScoreChipHtml).join('');
       const boardHtml = play.b ? `<div class="play-board">&#9876; ${play.b}</div>` : '';
-      const noWinnerHtml = (!hasWinner && !noResultGame) ? '<div class="play-no-winner">&#9760;&#65038; The game won</div>' : '';
+      const noWinnerHtml = hasWinner || noResultGame ? ''
+        : play.nr ? '<div class="play-no-winner play-no-result">No result</div>'
+        : '<div class="play-no-winner">&#9760;&#65038; The game won</div>';
       const durHtml = playTimeBadge(play);
       const msHtml = milestoneBadges(_ptViewer(), play, true);
       return `<div class="play-entry">
@@ -948,16 +953,18 @@ const HIDDEN_PLAYERS = new Set([
   'Game 🤖', 'Game2 🤖', 'Γιωργος Ιος - BS', 'Γιαννης Γιαουριδακης',
   'Giorgos - filos Dimitri', 'Kike', 'Κωστας Κορνηλιας',
   'Mike - Barcelona', 'Oscar - Barcelona', 'Πανος Μαντσου',
-  'Raul - Barcelona ', 'Σακης - φιλος Μαντσου', 'Sharif'
+  'Raul - Barcelona', 'Σακης - φιλος Μαντσου', 'Sharif'
 ]);
 
 function getAllPlayers() {
   const playerMap = {};
   for (const bggId in PLAY_HISTORY) {
     for (const play of PLAY_HISTORY[bggId]) {
+      const decided = !isNoResultPlay(play, bggId);  // no result: neither won nor lost
       for (const s of play.sc) {
-        if (!playerMap[s.n]) playerMap[s.n] = { plays: 0, wins: 0, games: new Set() };
+        if (!playerMap[s.n]) playerMap[s.n] = { plays: 0, wins: 0, decided: 0, games: new Set() };
         playerMap[s.n].plays++;
+        if (decided) playerMap[s.n].decided++;
         if (s.w) playerMap[s.n].wins++;
         playerMap[s.n].games.add(Number(bggId));
       }
@@ -965,7 +972,7 @@ function getAllPlayers() {
   }
   return Object.entries(playerMap)
     .filter(([name]) => !HIDDEN_PLAYERS.has(name))
-    .map(([name, d]) => ({ name, plays: d.plays, wins: d.wins, games: d.games.size }))
+    .map(([name, d]) => ({ name, plays: d.plays, wins: d.wins, decided: d.decided, games: d.games.size }))
     .sort((a, b) => b.plays - a.plays);
 }
 
@@ -976,7 +983,7 @@ function renderPickerList(filter) {
   const filtered = q ? players.filter(p => p.name.toLowerCase().includes(q)) : players;
 
   list.innerHTML = filtered.map(p => {
-    const wr = p.plays > 0 ? Math.round(p.wins / p.plays * 100) : 0;
+    const wr = p.decided > 0 ? Math.round(p.wins / p.decided * 100) : 0;
     return `<div class="picker-player" data-name="${_escapeHtml(p.name)}">
       <span class="picker-avatar" aria-hidden="true">${avatarInner(p.name)}</span>
       <span class="picker-player-name">${_escapeHtml(p.name)}</span>

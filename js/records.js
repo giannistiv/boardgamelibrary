@@ -117,14 +117,17 @@ function buildGameRecordsHtml(game, plays) {
   }
 
   if (coop) {
-    const results = asc.map(p => p.sc.some(s => s.w));
+    const decided = asc.filter(p => !isNoResultPlay(p, game.bggId));  // no result: neither won nor lost
+    const results = decided.map(p => p.sc.some(s => s.w));
     const won = results.filter(Boolean).length;
-    const last = asc[asc.length - 1];
+    const last = decided[decided.length - 1];
     const lastWon = results[results.length - 1];
-    tiles.push(_recTile('&#129309;', 'Team record', `${won}&ndash;${results.length - won}`,
-      `${Math.round((won / results.length) * 100)}% won`));
-    tiles.push(_recTile(lastWon ? '&#9989;' : '&#9760;&#65039;', 'Last result', lastWon ? 'Won' : 'Lost',
-      _fmtDateShort(last.date) + (last.b ? ` &middot; ${_escapeHtml(last.b)}` : '')));
+    if (last) {
+      tiles.push(_recTile('&#129309;', 'Team record', `${won}&ndash;${results.length - won}`,
+        `${Math.round((won / results.length) * 100)}% won`));
+      tiles.push(_recTile(lastWon ? '&#9989;' : '&#9760;&#65039;', 'Last result', lastWon ? 'Won' : 'Lost',
+        _fmtDateShort(last.date) + (last.b ? ` &middot; ${_escapeHtml(last.b)}` : '')));
+    }
     const st = _recStreak(results);
     if (st.max >= 2) {
       tiles.push(_recTile('&#128293;', 'Win streak', `${st.max} in a row`, st.ongoing ? 'still going' : ''));

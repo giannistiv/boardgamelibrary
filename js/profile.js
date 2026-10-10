@@ -534,9 +534,10 @@ function showStatsView(playerName, visiting) {
       // Classify play: PvP = competitive multi-player game (>=2 players, mixed
       // win flags). Excludes solo games and coop (everyone won/lost together).
       const isSoloPlay = play.sc.length === 1;
+      const noResult    = isNoResultPlay(play, bggId);  // neither won nor lost
       const allSameFlag = play.sc.every(s => !!s.w === !!play.sc[0].w);
-      const isCoopPlay  = !isSoloPlay && allSameFlag;
-      const isPvP       = !isSoloPlay && !isCoopPlay;
+      const isCoopPlay  = !isSoloPlay && !noResult && allSameFlag;
+      const isPvP       = !isSoloPlay && !noResult && !isCoopPlay;
       if (isPvP) {
         gameStats[bggId].pvpPlays++;
         if (playerEntry.w) gameStats[bggId].pvpWins++;
@@ -553,6 +554,7 @@ function showStatsView(playerName, visiting) {
         e: play.e,
         won: playerEntry.w,
         noWinner: !hasWinner,
+        noResult,
         score: playerEntry.s,
         role: playerEntry.r || '',
         board: play.b || '',
@@ -573,13 +575,13 @@ function showStatsView(playerName, visiting) {
   // together OR everyone lost together). A coop *win* is the all-won subset.
   // Plays with mixed flags (some won, some lost) are competitive (incl. team games).
   const coopPlays = recentPlays.filter(p => {
-    if (!p.allScores || p.allScores.length < 2) return false;
+    if (p.noResult || !p.allScores || p.allScores.length < 2) return false;
     const first = !!p.allScores[0].w;
     return p.allScores.every(s => !!s.w === first);
   });
   const coopWins = coopPlays.filter(p => p.won).length;
-  // Win rate ignores no-result games (no win/loss to score).
-  const decisivePlays = recentPlays.filter(p => !isNoResultGame(p.bggId)).length;
+  // Win rate ignores plays with no result (no win/loss to score).
+  const decisivePlays = recentPlays.filter(p => !p.noResult).length;
   const winRate = decisivePlays > 0 ? Math.round(totalWins / decisivePlays * 100) : 0;
   const uniqueGames = Object.keys(gameStats).length;
   const uniquePlayers = (() => {
@@ -607,7 +609,7 @@ function showStatsView(playerName, visiting) {
     const imgSrc = p.game.bggId >= 0 ? `images/${p.game.bggId}.jpg` : '';
     // "No human winner" almost always means coop/solo loss (the game won),
     // so render LOSS instead of a dash — unless the game has no win/loss at all.
-    const result = isNoResultGame(p.bggId)
+    const result = p.noResult
       ? '<span class="stats-game-wr" style="color:#8a8f98">PLAYED</span>'
       : (p.won
           ? '<span class="stats-game-wr" style="color:#22c55e">WIN</span>'

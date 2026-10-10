@@ -100,11 +100,12 @@ function buildMissionMapHtml(game, plays, opts) {
     byKey.set(m.key, e);
   }
   for (const e of byKey.values()) {
-    e.won = coop ? e.plays.some(_pbWon) : true;
-    const first = coop ? e.plays.findIndex(_pbWon) : 0;
-    e.tries = first >= 0 ? first + 1 : e.plays.length;
-    e.losses = coop ? e.plays.filter(p => !_pbWon(p)).length : 0;
-    e.when = (coop ? e.plays.find(_pbWon) : e.plays[0]) || null;
+    const tried = e.plays.filter(p => !isNoResultPlay(p, id));   // a play with no result is no try
+    e.won = coop ? tried.some(_pbWon) : true;
+    const first = coop ? tried.findIndex(_pbWon) : 0;
+    e.tries = first >= 0 ? first + 1 : tried.length;
+    e.losses = coop ? tried.filter(p => !_pbWon(p)).length : 0;
+    e.when = (coop ? tried.find(_pbWon) : e.plays[0]) || null;
   }
 
   // the whole map: 1..total, or as far as you've got and a little beyond
@@ -136,6 +137,7 @@ function buildMissionMapHtml(game, plays, opts) {
   // streaks, in play order (co-op: a win; competitive: every play counts)
   let streak = 0, best = 0, run = 0;
   for (const { p } of _pbOrder(numbered.map(x => x.p)).map(p => ({ p }))) {
+    if (coop && isNoResultPlay(p, id)) continue;
     if (!coop || _pbWon(p)) { run++; best = Math.max(best, run); } else run = 0;
   }
   streak = run;
@@ -148,8 +150,8 @@ function buildMissionMapHtml(game, plays, opts) {
   const fresh = pbFresh(trail ? `${id}:trail` : id, cells.filter(c => (byKey.get(c.key) || {}).won).map(c => c.key));
   const cellHtml = (c) => {
     const e = byKey.get(c.key);
-    const cls = (!e ? 'todo' : e.won ? (coop && e.tries === 1 ? 'won1' : 'won') : 'lost') + (fresh.has(c.key) ? ' pb-new' : '');
-    const tip = `${unit} ${c.label}${e && e.title ? ` · ${e.title}` : ''}${e ? (e.won ? (coop ? ` · won${e.tries > 1 ? ` on try ${e.tries}` : ' first try'}` : ` · played ${e.plays.length}×`) : ` · ${e.losses} loss${e.losses > 1 ? 'es' : ''}`) : ''}`;
+    const cls = (!e ? 'todo' : e.won ? (coop && e.tries === 1 ? 'won1' : 'won') : e.losses ? 'lost' : 'todo') + (fresh.has(c.key) ? ' pb-new' : '');
+    const tip = `${unit} ${c.label}${e && e.title ? ` · ${e.title}` : ''}${e ? (e.won ? (coop ? ` · won${e.tries > 1 ? ` on try ${e.tries}` : ' first try'}` : ` · played ${e.plays.length}×`) : e.losses ? ` · ${e.losses} loss${e.losses > 1 ? 'es' : ''}` : ' · no result yet') : ''}`;
     return `<span class="pb-cell pb-${cls}${c === nextCell ? ' pb-next' : ''}" title="${esc(tip)}">${esc(c.label)}${e && e.losses ? `<i>${e.losses}</i>` : ''}</span>`;
   };
   // what a mission says when tapped
@@ -164,7 +166,7 @@ function buildMissionMapHtml(game, plays, opts) {
       const w = Object.entries(wins).sort((a, b) => b[1] - a[1]).map(([n, k]) => `${esc(n)}${k > 1 ? ` (${k})` : ''}`);
       say += ` · played ${e.plays.length === 1 ? 'once' : `${e.plays.length}×`}${w.length ? ` · won by ${w.join(', ')}` : ''}`;
     } else if (e.won) say += ` · ${e.tries === 1 ? 'won first try' : `won on try ${e.tries}`} · ${fmtPlayDate(e.when.date)}`;
-    else say += ` · ${e.losses} loss${e.losses > 1 ? 'es' : ''} so far`;
+    else say += e.losses ? ` · ${e.losses} loss${e.losses > 1 ? 'es' : ''} so far` : ' · played, no result yet';
     return say;
   };
   const drawn = clocks || id === PB_MOON || id === PB_CREW || id === PB_BOMB;
@@ -210,7 +212,7 @@ const fmtPlayDate = (d) => {
   const [y, m, day] = String(d || '').split('-').map(Number);
   return y ? `${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][m - 1]} ${day}, ${y}` : '';
 };
-const _pbState = (e, coop, isNext) => (isNext ? 'next' : !e ? 'todo' : e.won ? (coop && e.tries === 1 ? 'won1' : 'won') : 'lost');
+const _pbState = (e, coop, isNext) => (isNext ? 'next' : !e ? 'todo' : e.won ? (coop && e.tries === 1 ? 'won1' : 'won') : e.losses ? 'lost' : 'todo');
 
 // Take Time: each chapter a clock whose four quarters fill as its missions are
 // beaten; the hand points at the one that's next.

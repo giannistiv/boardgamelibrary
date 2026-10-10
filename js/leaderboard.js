@@ -1,8 +1,9 @@
 const AUZTRALIA_BGG_IDS = new Set([231581, 320110]); // base + Tasmania
 const GAME_PLAYER_NAME = '__GAME__';
 
-function _leaderboardRanksForPlay(sc, bggId) {
+function _leaderboardRanksForPlay(sc, bggId, play) {
   if (!Array.isArray(sc) || sc.length < 1) return null;
+  if (play && isNoResultPlay(play, bggId)) return null;   // nobody won or lost
   const isAuztralia = bggId && AUZTRALIA_BGG_IDS.has(Number(bggId));
   const winners = sc.filter(s => s && s.w === true);
   if (winners.length === 0) {
@@ -75,14 +76,14 @@ function _computeMainEloForYear(year) {
     for (const p of PLAY_HISTORY[bggId]) {
       if (!p || !p.date || !Array.isArray(p.sc)) continue;
       if (p.date < start || p.date > end) continue;
-      flat.push({ bggId: Number(bggId), date: p.date, t: playOrderKey(p), sc: p.sc });
+      flat.push({ bggId: Number(bggId), date: p.date, t: playOrderKey(p), sc: p.sc, p });
     }
   }
   flat.sort((a, b) => a.t.localeCompare(b.t));
 
   const ratings = {}, plays = {}, lastPlayDate = {};
   for (const play of flat) {
-    const ranks = _leaderboardRanksForPlay(play.sc, play.bggId);
+    const ranks = _leaderboardRanksForPlay(play.sc, play.bggId, play.p);
     if (!ranks) continue;
     const byName = {};
     for (const r of ranks) {
@@ -162,7 +163,7 @@ function _computePerPlayElo(mode) {
   const out = new Map();
 
   for (const { bggId, idx, p } of flat) {
-    const ranks = _leaderboardRanksForPlay(p.sc, bggId);
+    const ranks = _leaderboardRanksForPlay(p.sc, bggId, p);
     if (!ranks) continue;
     const byName = {};
     for (const r of ranks) {
@@ -244,7 +245,7 @@ function _computeEloLeaderboard(mode) {
       if (!p || !p.date || !Array.isArray(p.sc)) return;
       if (p.date < yearStart) return;
       if (mode === 'south' && !_isBoardSouthPlay(p)) return;
-      flat.push({ bggId: Number(bggId), idx, date: p.date, t: playOrderKey(p), sc: p.sc });
+      flat.push({ bggId: Number(bggId), idx, date: p.date, t: playOrderKey(p), sc: p.sc, p });
     });
   }
   // Replay oldest→newest. Full timestamp first (from the BGStats import) so
@@ -267,7 +268,7 @@ function _computeEloLeaderboard(mode) {
   const streaks = {}; // current consecutive-win streak per player
 
   for (const play of flat) {
-    const ranks = _leaderboardRanksForPlay(play.sc, play.bggId);
+    const ranks = _leaderboardRanksForPlay(play.sc, play.bggId, play.p);
     if (!ranks) continue;
 
     // Normalize names via NAME_MAP, dedupe duplicate names (keep best rank)
@@ -347,7 +348,7 @@ function _computeRivalryOfYear(mode, forPlayer) {
     for (const play of PLAY_HISTORY[bggId]) {
       if (!play || !play.date || play.date < cutoff || !Array.isArray(play.sc)) continue;
       if (mode === 'south' && !_isBoardSouthPlay(play)) continue;
-      const ranks = _leaderboardRanksForPlay(play.sc, bggId);
+      const ranks = _leaderboardRanksForPlay(play.sc, bggId, play);
       if (!ranks) continue;
       const byName = {};
       for (const r of ranks) {

@@ -62,7 +62,7 @@ function _boardSouthPlaysSectionHtml() {
 
     // Order the scoreboard by computed rank (so lower-score-wins games still
     // list the winner first); fall back to win-flag then original order.
-    const ranks = _leaderboardRanksForPlay(p.sc, bggId) || [];
+    const ranks = _leaderboardRanksForPlay(p.sc, bggId, p) || [];
     const rankByName = {};
     for (const r of ranks) {
       const m = NAME_MAP[r.player] || r.player;

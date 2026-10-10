@@ -21,7 +21,7 @@ function buildBestTeamsHtml(game, plays) {
   for (const p of plays) {
     const sc = (p.sc || []).filter(s => s && s.n);
     const names = [...new Set(sc.map(s => s.n))].sort((a, b) => a.localeCompare(b));
-    if (names.length < 2 || (twoOnly && names.length > 2)) continue;
+    if (names.length < 2 || (twoOnly && names.length > 2) || isNoResultPlay(p, id)) continue;
     const w = sc.filter(s => s.w).length;
     if (w && w < sc.length) continue;   // played competitively that time
     const key = names.join('\u0000');
