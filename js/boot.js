@@ -366,7 +366,8 @@ window.initImporter = function(source){
     }
     let newPlayers = 0;
     data.players.forEach(p => {
-      const mapped = NAME_MAP[p.name] || p.name;
+      const nm = String(p.name || '').trim().replace(/\s+/g, ' ');   // BGStats keeps stray spaces
+      const mapped = NAME_MAP[nm] || nm;
       if(existingPlayerNames.has(mapped)) return;
       existingPlayerNames.add(mapped);
       newPlayers++;
@@ -444,7 +445,7 @@ window.initImporter = function(source){
 
       const sc = (play.playerScores || []).map(ps => {
         const player = importedPlayersById[ps.playerRefId];
-        let rawName = player ? player.name : ('Player ' + ps.playerRefId);
+        let rawName = player ? String(player.name || '').trim().replace(/\s+/g, ' ') : ('Player ' + ps.playerRefId);
         const mappedName = NAME_MAP[rawName] || rawName;
         return {
           n: mappedName,
