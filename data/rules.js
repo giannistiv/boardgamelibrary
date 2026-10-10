@@ -6028,5 +6028,497 @@ const RULES = {
    "One card is a decoy and fits nowhere.",
    "For a harder game, add more decoys."
   ]
+ },
+ "434367": {
+  "src": "the Nippon: Zaibatsu rulebook",
+  "goal": "Most **VP** after 3 periods: grow your zaibatsu (factories, machines, ships, trains) and win influence majorities in Japan's regions.",
+  "turn": [
+   "On your turn either **take an action** or **consolidate**.",
+   "**Action**: take a worker from the hiring space above an action, put it on your lowest free worker space, then pay and do the action (some up to 3 times). What you gain arrives after the whole action.",
+   "No free worker space, or nothing you can pay for: you must consolidate."
+  ],
+  "actions": [
+   [
+    "R&D / Mining",
+    "1 / 3 / 6 money to advance 1 / 2 / 3 spaces; take track bonuses as you pass them."
+   ],
+   [
+    "Factory",
+    "6 money; needs R&D 2 / 4 / 6 for level 1 / 2 / 3 (silk 1 / 3 / 6 adds +1 / 2 / 3 R&D for it). Apply its immediate effect."
+   ],
+   [
+    "Machines",
+    "Up to 3, in different factories: 5 money each (the 2nd slot also 1 iron). Each adds 1 good to that factory's output."
+   ],
+   [
+    "Production",
+    "Up to 3 factories: 2 / 3 / 4 coal by level; 1 good + 1 per machine (4 stored at most)."
+   ],
+   [
+    "Trains / Ships",
+    "Up to 3: 3 iron, or 5 money + 1 iron each. Trains go to regions; ships to a destination for its expert worker and department upgrade."
+   ],
+   [
+    "Investment & Contracts",
+    "Goods of different types: 1 good = once, 1 + 2 goods = twice, 1 + 2 + 3 = three times; each time Finance +2 or fulfil a contract."
+   ],
+   [
+    "Local Markets",
+    "In one region, up to 3 times: spend 1–3 goods of a demanded type for an influence token (level-1 goods 1/2/3, level-2 3/4/5, level-3 5/6/7), then the region bonus or 2 VP. You can only replace a lower token."
+   ]
+  ],
+  "roundTitle": "Consolidation and scoring",
+  "round": [
+   "**Consolidate**: put a favor token (by your top worker) on a personal objective; discard all money and coal; department bonus of your bottom worker (and the top one too with 4+ workers in two colours); coal by Mining, money by Finance.",
+   "Then pay 3 money per worker colour (you always keep 1; each money short is −1 VP); the workers go back.",
+   "End of each period: in each region, your tokens + 2 per train (if you have a token there) against the others and the printed overseas values; VP by place, ties share."
+  ],
+  "end": [
+   "Once the second round marker comes out, everyone has 3 more turns; then everyone consolidates.",
+   "Personal objectives: favor tokens on tracks, ships, machines and trains 5 / 8 / 10 (lower threshold) or 10 / 16 / 20 (higher); factories and contracts by the value under your rightmost.",
+   "1 VP per 3 goods, coal, silk and iron, 1 per 5 money. Ties: the player who went later."
+  ],
+  "forget": [
+   "Consolidating throws away all your money and coal before income.",
+   "1 silk = 1 money any time on your turn.",
+   "Only one factory modifier per action."
+  ]
+ },
+ "360899": {
+  "src": "the Harrow County: The Game of Gothic Conflict rulebook",
+  "goal": "First to **7 points** at the end of a round. Protectors rescue townsfolk, the Family destroys buildings with storms, Kammi hunts her doll; everyone also scores by killing haints and holding the Brambles.",
+  "turnTitle": "Each round",
+  "turn": [
+   "**Phase 1**: each player places one of the opponent's townsfolk or buildings on a matching terrain (skipped against Kammi).",
+   "**Phase 2**: alternate turns until each player has flipped 3 of their 4 mason jars. A turn: flip a jar for its action, use any bonus tile above it, play up to one card.",
+   "**Phase 3**: 1 point for a unit on the Brambles; check for 7 points; the first player token switches (they go twice in a row); jars and bonus tiles refresh."
+  ],
+  "actions": [
+   [
+    "Abilities jar",
+    "Protectors: pick one row (Advance, Spawn or Strengthen) and take that many. Family: draw tokens from the bag, put back the number shown, resolve the rest. Kammi: push a token into a grid row and use its two abilities."
+   ],
+   [
+    "Wild jar",
+    "Take a wild token, then one basic action per wild token you own (you keep them)."
+   ],
+   [
+    "Legend jar",
+    "Your legend track, left to right, one space per scroll token; and your legend's unique power."
+   ],
+   [
+    "Attack jar",
+    "One free basic action, then attack a hex within 2 (3 from a mountain). Whoever has more units there +1 cube. Drop all cubes through the Tree."
+   ],
+   [
+    "Basic actions",
+    "Advance: move units from one hex to the next (+1 onto a mountain; Protectors and Kammi +1 onto storms). Spawn: a haint on your legend or home hex. Strengthen: +1 cube in the battleground."
+   ]
+  ],
+  "roundTitle": "Combat",
+  "round": [
+   "Attacker cubes ≥ defender cubes: pay 2 cubes (1 against the Brambles) to kill a haint; haints go before the legend. A hit legend is pushed and you kill any enemy haint. Keep going while you still have as many cubes.",
+   "Fewer cubes: a haint clash, each side may pay to kill one haint.",
+   "Kills score on your haint dial: the first kill 1 point, then 2 kills per point, then 3.",
+   "You may attack again by flipping another jar (no free action)."
+  ],
+  "end": [
+   "Protectors: move townsfolk along a chain of your units or path tokens to your home hex: 2 points.",
+   "Family: your legend leaves a storm at the end of each turn; a storm path from a building to your home destroys it: 2 points.",
+   "Kammi: Kammi ending on her real doll token: 4 points.",
+   "After a round with 7+ points: most points wins; ties go to the first player."
+  ],
+  "forget": [
+   "Max 4 units on a hex; enemy units never share one (no Protectors on buildings, no Family on townsfolk).",
+   "At the end of your turn: max 6 cubes, and take ability tokens from hexes with your units to level up.",
+   "Storms and townsfolk never go on the Brambles."
+  ]
+ },
+ "397931": {
+  "src": "the Deep Regrets rulebook (Tettix Games)",
+  "goal": "Most points after six days at sea: catch fish, sell or mount them, and don't end with the heaviest regrets.",
+  "turnTitle": "Each day",
+  "turn": [
+   "**Start** (from day 2): the day moves on, the first player passes left, revealed fish are discarded, the market shifts (Wed/Fri worms face up; Thu/Sat a tackle die each).",
+   "**Refresh**: roll your spent dice (and any fresh ones you like); keep up to your max dice. The highest roller gives the Life Preserver to someone else.",
+   "**Declare** (from day 2): sea or port; equip a rod and reel.",
+   "**Action**: one action per turn until you pass. The last player left gets 2 more turns at sea, 4 at port."
+  ],
+  "actions": [
+   [
+    "Fish (sea)",
+    "Reveal the top fish of a shoal (or take one already revealed); be at its depth or deeper (any die moves you one deeper); spend dice ≥ its difficulty. Can't or won't: spend a die and take a dink."
+   ],
+   [
+    "Abandon ship",
+    "Flip your lifeboat to make port at once (+10 regret value at the end)."
+   ],
+   [
+    "Sell (port)",
+    "A fish for its value ± your madness; a foul fish also gives you a regret."
+   ],
+   [
+    "Mount (port)",
+    "A fish under a ×2 or ×3 slot, for good."
+   ],
+   [
+    "Buy (port)",
+    "A rod, reel or supply, or tackle dice ($1 green, $2 blue, $3 orange). $1 cycles one market row."
+   ]
+  ],
+  "roundTitle": "Regrets and madness",
+  "round": [
+   "Making port: reroll your dice, worms face up, and you may discard a regret.",
+   "Your number of regret cards sets your madness: fair fish lose value, foul fish gain it, max dice rises from 4 to 8.",
+   "Catching a shoal's last fish costs a regret."
+  ],
+  "end": [
+   "After day six, the highest regret value (lifeboat +10) loses a mounted fish (2 players: the lowest; 3+: the highest).",
+   "Score fish in hand (± madness), mounted fish (± madness, then ×2 / ×3) and 1 per 2 fishbucks.",
+   "Ties: lower regret value, then fewer regret cards."
+  ],
+  "forget": [
+   "How many regret cards you have is public; their values are secret.",
+   "Fish with eat abilities can be eaten any time for the effect.",
+   "Life Preserver: −2 difficulty at sea or −$2 at port."
+  ]
+ },
+ "307305": {
+  "src": "the Bullet♥︎ rulebook (Level 99 Games)",
+  "goal": "Be the **last heroine standing**: survive the bullets you draw, clear them with patterns and send them at the player on your left.",
+  "turnTitle": "Each round",
+  "turn": [
+   "Everyone plays at once (on a 3-minute timer if you like); you must draw every bullet in your bag.",
+   "**Option phase**, in any order, as often as you can: place a bullet, use actions, use patterns, use powerups.",
+   "**End phase** (once your bag is empty): take a powerup, draw patterns up to your hand size (usually 3), and put bullets from the center equal to the intensity into your bag.",
+   "**Cleanup**: refill the powerups, intensity +1 (+1 more per heroine knocked out), your incoming bullets go into your bag, AP back to full."
+  ],
+  "actions": [
+   [
+    "Place a bullet",
+    "Draw it blind: it goes in the column of its colour, as many spaces down as its number, skipping filled spaces. Past the bottom it hits you: lose a life."
+   ],
+   [
+    "Patterns",
+    "If your sight matches one exactly (no rotating or mirroring), clear the bullets on its Δ spaces into the incoming area of the player on your left; discard the pattern."
+   ],
+   [
+    "Actions",
+    "Spend AP on your heroine's actions, e.g. moving bullets (never off the board or into your own hitbox)."
+   ],
+   [
+    "Stars",
+    "Clearing a star bullet triggers every star action on your board (everyone has +1 AP)."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "Bullets go up to 4, so you're only at risk with 3 or more bullets in a column.",
+   "Effects only affect you and last until the end of your round, unless they say otherwise.",
+   "If part of an effect can't happen, none of it does."
+  ],
+  "end": [
+   "Losing your last life: finish the round; if others still have life, you're out.",
+   "The last heroine left wins if she survives her round. If all those left would lose, the fewest bullets in the bag wins (tie: sudden death)."
+  ],
+  "forget": [
+   "When the timer runs out you may only place bullets.",
+   "An empty center bag ends the game in a tie."
+  ]
+ },
+ "421006": {
+  "src": "The Lord of the Rings: Duel for Middle-earth rulebook (Repos Production)",
+  "goal": "Two players, Fellowship against Sauron, over 3 chapters. Win at once with the **Quest of the Ring**, **6 different Races**, or **presence in all 7 regions**; otherwise most regions after chapter 3.",
+  "turn": [
+   "Sauron starts; then take turns.",
+   "**Take a chapter card** that isn't covered: play it (pay its cost) or discard it for 1 / 2 / 3 coins in chapter 1 / 2 / 3. Then reveal any cards it uncovered.",
+   "**Or take a landmark tile**: pay it, put a fortress in its region and take its effect.",
+   "A chapter ends when its last card is taken; lay out the next one."
+  ],
+  "actions": [
+   [
+    "Costs",
+    "The coins shown; each missing skill symbol costs 1 coin. Landmarks cost +1 coin per fortress you already have."
+   ],
+   [
+    "Chaining",
+    "From chapter 2, a matching chain symbol on one of your cards plays the card for free."
+   ],
+   [
+    "Grey / Yellow",
+    "Skills (each symbol once per turn) / coins at once."
+   ],
+   [
+    "Blue",
+    "Advance on the Quest of the Ring, taking bonus spaces as you pass them."
+   ],
+   [
+    "Green",
+    "Races: 2 matching symbols, pick 1 of 2 alliance tokens; 3 different symbols (once a game), pick 1 of 3."
+   ],
+   [
+    "Red / Purple",
+    "Place units in one of the two regions shown / (chapter 3) move a unit, opponent loses a coin, or remove an enemy unit."
+   ]
+  ],
+  "roundTitle": "Conflicts",
+  "round": [
+   "Units entering a region with enemy units fight: both sides remove one at a time until one has none left.",
+   "Fortresses don't fight or block: both players can be present in a region."
+  ],
+  "end": [
+   "Fellowship: Frodo and Sam reach Mount Doom. Sauron: the Nazgûl catch them.",
+   "Either player: 6 different Race symbols, or present (fortress or unit) in all 7 regions.",
+   "After chapter 3: most regions you're present in; ties share."
+  ],
+  "forget": [
+   "The Nazgûl move with Frodo and Sam, so the gap only ever shrinks.",
+   "The Eagle alliance counts as a Race symbol.",
+   "The player who ends a chapter doesn't start the next one."
+  ]
+ },
+ "406652": {
+  "src": "the Compile: Main 1 rulebook",
+  "goal": "Two players. Be first to **compile all 3 of your protocols** by winning lines with 10 or more value.",
+  "turn": [
+   "**Start** effects; with the control rule, more total value in 2+ lines takes the control piece.",
+   "**Compile** if you can (10+ in a line and more than your opponent there): that's your whole turn.",
+   "Otherwise **play 1 card** or **refresh** (draw up to 5; you must if you can't play).",
+   "Discard down to 5, then **End** effects."
+  ],
+  "actions": [
+   [
+    "Face up",
+    "Only in its own protocol's line; resolve its middle text. The top text works while it's face up, the bottom one only while uncovered."
+   ],
+   [
+    "Face down",
+    "In any line, worth 2, no text."
+   ],
+   [
+    "Compile",
+    "Delete every card in that line on both sides and flip your protocol. Recompiling a compiled line instead takes the top card of your opponent's deck for good."
+   ],
+   [
+    "Control",
+    "When you compile or refresh while holding it, return it and you may rearrange one player's protocols."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "Only the uncovered card of each stack can be affected, unless a card says covered or all.",
+   "New text resolves at once, last in, first out.",
+   "Draft: protocols picked 1, 2, 2, 1; your deck is your 3 protocols' 18 cards."
+  ],
+  "end": [
+   "The first to flip all 3 protocols to Compiled wins."
+  ],
+  "forget": [
+   "Only one compile per turn.",
+   "The cards beat the rules."
+  ]
+ },
+ "303553": {
+  "src": "the Skulls of Sedlec rulebook",
+  "goal": "Build the best-scoring pyramid of skulls: 9 cards with 2 players, 6 with 3.",
+  "turn": [
+   "One action: **Dig** (flip the top card of 2 face-down piles, keep one), **Collect** (take a face-up card) or **Stack** (place a card from your hand).",
+   "Hand limit 2: start your turn holding 2 and you must Stack."
+  ],
+  "actions": [
+   [
+    "Placement",
+    "Start the bottom row anywhere and add beside it (4 wide with 2 players, 3 with 3); higher cards sit centred on two adjacent cards below. No rotating."
+   ],
+   [
+    "Royals",
+    "1 per Royal and Peasant on any lower level."
+   ],
+   [
+    "Peasants",
+    "1 each."
+   ],
+   [
+    "Priests",
+    "2 per level that has a Priest."
+   ],
+   [
+    "Romantics",
+    "6 per adjacent pair (each Romantic in one pair only)."
+   ],
+   [
+    "Criminals",
+    "2 each if next to a Priest."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "Adjacent means touching edges, not corners.",
+   "You don't have to finish a row before building above it."
+  ],
+  "end": [
+   "When every stack is complete. Ties: compare your best-scoring skull type, then the next."
+  ],
+  "forget": [
+   "No face-down piles left: you can't Dig."
+  ]
+ },
+ "262543": {
+  "src": "the Wavelength rulebook",
+  "goal": "Two teams. First to **10 points**: guess where the psychic's clue sits on a spectrum between two opposites.",
+  "turnTitle": "Each round",
+  "turn": [
+   "The psychic picks a card, spins the target in secret, peeks, and gives one clue for where it sits between the two concepts.",
+   "Their team talks it over and sets the dial; the other team guesses whether the target is left or right of it.",
+   "Reveal and score; the other team goes next with a new psychic."
+  ],
+  "actions": [
+   [
+    "Team score",
+    "The wedge the dial points at: 2, 3 or 4 (on a line, the better one); outside the target, 0."
+   ],
+   [
+    "Left / right",
+    "1 point if right, unless the dial hit the 4."
+   ],
+   [
+    "Catch-up",
+    "Score 4 and still be behind: take another turn straight away."
+   ]
+  ],
+  "roundTitle": "Clue rules",
+  "round": [
+   "One thought; something that exists (fiction is fine); on topic.",
+   "No words from the card or their synonyms, and no numbers.",
+   "After the clue the psychic gives nothing away."
+  ],
+  "end": [
+   "When a team reaches 10, most points wins. Ties: sudden-death rounds."
+  ],
+  "forget": [
+   "Spin again if the 4-point wedge isn't visible.",
+   "Talk in gut phrases, not numbers."
+  ]
+ },
+ "454103": {
+  "src": "the Magical Athlete rulebook",
+  "goal": "Most points after **4 races**: draft 4 racers, each runs once, and later races pay more.",
+  "turn": [
+   "**Draft**: flip twice as many racers as players and snake-draft twice, so everyone has 4.",
+   "**Each race**: everyone reveals a racer at once; take turns rolling and moving (your **main move**) while powers go off.",
+   "The race ends the moment a 2nd racer finishes: 1st takes the top gold chip, 2nd the top silver.",
+   "Flip the track (Mild, Wild, Mild, Wild); whoever's racer was furthest behind starts the next race."
+  ],
+  "actions": [
+   [
+    "Powers",
+    "'Can' is optional, everything else is mandatory. At the same time: track spaces, then the current player, then the others clockwise."
+   ],
+   [
+    "Trip",
+    "Skip your next main move (your powers still work)."
+   ],
+   [
+    "Warp",
+    "Put the racer there: it isn't a move and triggers nothing."
+   ],
+   [
+    "Wild track",
+    "Arrows move you again, rocks trip you, stars give a bronze 1-point chip."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "Passing = starting a move behind a racer and ending it ahead.",
+   "Moving 0 isn't moving; the Start counts as a space.",
+   "Infinite loops: run once, then stop."
+  ],
+  "end": [
+   "After the 4th race, most points wins; ties share."
+  ],
+  "forget": [
+   "Each racer runs once, so save your best for the later races."
+  ]
+ },
+ "15512": {
+  "src": "the Incan Gold rulebook",
+  "goal": "Most treasure after **5 rounds** of pressing deeper into the temple or getting out with what you've found.",
+  "turnTitle": "Each turn",
+  "turn": [
+   "Everyone still inside secretly picks Torch (stay) or Camp (leave), then all reveal.",
+   "Leavers split any treasure left on the path and bank everything in their tent; a lone leaver also takes every artifact.",
+   "For those staying, flip the next card."
+  ],
+  "actions": [
+   [
+    "Treasure",
+    "Split equally among those inside (rounded down); the rest stays on the card."
+   ],
+   [
+    "Artifact",
+    "Waits on the path for a single leaver: the first three out are worth 5, later ones 10."
+   ],
+   [
+    "Hazard",
+    "The first of a kind is a warning; a second of the same kind ends the round, and everyone inside loses this round's gems."
+   ]
+  ],
+  "roundTitle": "Between rounds",
+  "round": [
+   "That second hazard leaves the game; artifacts still on the path are lost.",
+   "Shuffle in the next temple's artifact and pass the deck left."
+  ],
+  "end": [
+   "After round 5: turquoise 1, obsidian 5, gold 10, artifacts 5 / 10. Ties: most artifacts."
+  ],
+  "forget": [
+   "Gems beside your tent aren't safe until you leave.",
+   "Two people leaving together get no artifacts."
+  ]
+ },
+ "463441": {
+  "src": "the Flip 7: With A Vengeance rulebook (The Op)",
+  "goal": "First to **200 points** at the end of a round wins. Push your luck: a repeated number busts you, and this deck fights back.",
+  "turnTitle": "Each round",
+  "turn": [
+   "The dealer gives everyone one face-up card (resolve action and modifier cards at once).",
+   "Going round, each active player says **hit** or **stay**.",
+   "The round ends when nobody is active, or someone has 7 different numbers (+15)."
+  ],
+  "actions": [
+   [
+    "The Zero",
+    "Your score is 0 unless you Flip 7; you must keep hitting."
+   ],
+   [
+    "Unlucky 7",
+    "Discard all your other cards (it can't bust you)."
+   ],
+   [
+    "Lucky 13",
+    "You may hold one other 13."
+   ],
+   [
+    "Modifiers",
+    "−2 to −10, or ÷2 (halve first), played on any player who hasn't busted. Scores never drop below 0."
+   ],
+   [
+    "Actions",
+    "Just One More (take one card, then stay), Swap, Steal, Discard, Flip Four."
+   ]
+  ],
+  "roundTitle": "Good to know",
+  "round": [
+   "Actions and modifiers can hit anyone who hasn't busted, even players who stayed.",
+   "Used cards aren't reshuffled until the deck runs out.",
+   "Brutal mode: scores can go negative, and a Flip 7 can take 15 from someone instead."
+  ],
+  "end": [
+   "At the end of a round with someone on 200+, the highest score wins."
+  ],
+  "forget": [
+   "Staying isn't safe: your cards can still be swapped, stolen or discarded.",
+   "Flip Four: actions and modifiers in it resolve after all four cards."
+  ]
  }
 };
