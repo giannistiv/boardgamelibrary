@@ -84,7 +84,7 @@ function _gbPanelHtml(libs) {
     row('BGG', _gbChips('bgg', [[6.5, '6.5+'], [7, '7+'], [7.5, '7.5+'], [8, '8+']], v => _gb.bgg === Number(v))),
     row('Group', _gbChips('group', [[6, '6+'], [7, '7+'], [8, '8+'], [9, '9+']].map(([v, l]) => [v, '&#9733; ' + l, 'Average rating from the app\'s players']), v => _gb.group === Number(v))),
     me ? row('You', _gbChips('mine', [['rated', 'Rated'], ['unrated', 'Not rated']], v => _gb.mine === v)) : '',
-    row('Played', _gbChips('played', [['played', 'Played'], ['unplayed', 'Never played']], v => _gb.played === v)),
+    row('Played', _gbChips('played', me ? [['played', 'Played', 'Games you have played'], ['unplayed', 'Never played', 'Games you have never played']] : [['played', 'Played'], ['unplayed', 'Never played']], v => _gb.played === v)),
   ].join('');
 }
 
@@ -133,7 +133,9 @@ function _gbMatches(libs) {
     const mine = me ? getPlayerRating(me, g.bggId) : 0;
     if (_gb.mine === 'rated' && !mine) continue;
     if (_gb.mine === 'unrated' && mine) continue;
-    const plays = (PLAY_HISTORY[g.bggId] || []).length;
+    // a signed-in player's own plays; everyone's for a visitor
+    const all = PLAY_HISTORY[g.bggId] || [];
+    const plays = me ? ((typeof _gameMyPlays === 'function' && _gameMyPlays(all, g.bggId)) || { mine: [] }).mine.length : all.length;
     if (_gb.played === 'played' && !plays) continue;
     if (_gb.played === 'unplayed' && plays) continue;
     out.push({ g, weight, bgg, group: group ? group.avg : 0, plays, mine });
@@ -159,7 +161,7 @@ function _gbRowHtml(m, libs) {
   if (gameTimeText(g)) bits.push(_escapeHtml(gameTimeText(g)));
   if (m.weight) bits.push(`weight ${m.weight.toFixed(1)}`);
   if (m.bgg) bits.push(`BGG ${m.bgg.toFixed(1)}`);
-  if (m.plays) bits.push(`${m.plays} play${m.plays !== 1 ? 's' : ''}`);
+  if (m.plays) bits.push(_gbPlayer() ? `you played ${m.plays}&times;` : `${m.plays} play${m.plays !== 1 ? 's' : ''}`);
   const owners = libs.filter(l => l.ids.has(Number(g.bggId))).map(l => `<span class="gb-owner">${_escapeHtml(l.label)}</span>`).join('');
   const img = g.bggId >= 0
     ? `<img class="stats-game-img" src="images/${g.bggId}.jpg" alt="" loading="lazy" onerror="__imgFallback(this, ${g.bggId})">` : '';
