@@ -1538,7 +1538,6 @@ const GIANNIS_GAMES = {
   253574:{name:"Crusader Kings",bggId:253574,year:2019,complexity:3.35,players:"1-5",playTime:"180 min",bggRating:6.8},
   282579:{name:"Crusader Kings: Councilors & Inventions Expansion",bggId:282579,year:2019,complexity:3.5,players:"1-5",playTime:"180 min",bggRating:6.6},
   192457:{name:"Cry Havoc",bggId:192457,year:2016,complexity:3.3,players:"2-4",playTime:"120 min",bggRating:7.1},
-  139976:{name:"Cthulhu Wars",bggId:139976,year:2015,complexity:3.14,players:"2-4",playTime:"120 min",bggRating:7.8},
   404509:{name:"Cthulhu: Dark Providence",bggId:404509,year:2025,complexity:3.27,players:"1-5",playTime:"120 min",bggRating:7.5},
   30380:{name:"Cuba",bggId:30380,year:2007,complexity:3.26,players:"2-5",playTime:"120 min",bggRating:7.1},
   111799:{name:"Cuba Libre",bggId:111799,year:2013,complexity:3.61,players:"1-4",playTime:"180 min",bggRating:7.6},
