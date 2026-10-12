@@ -17,7 +17,8 @@ const GAUNTLET = {
   // under way when they were agreed.
   rulesFrom: 'toafk',
   // Two strikes (a loss burns the aspects, a second burns the heroes) count
-  // losses from this day on.
+  // losses from this day on, and from then a loss sends the box back to its
+  // first scenario.
   strikesFrom: '2026-10-02',
   strikes: 2,
   // How a logged play counts, where the log is wrong:
@@ -160,8 +161,9 @@ function _gtCanAct() {
 
 // Each player's hero and aspect in the box you're playing, replayed from the
 // draws, picks and spins and the games logged since: a loss (from
-// strikesFrom on) burns both aspects; a second loss in a row burns both
-// heroes, and the new heroes start the wheel fresh. A win clears the strikes.
+// strikesFrom on) burns both aspects and starts the box over; a second loss
+// before you've beaten that villain burns both heroes, and the new heroes
+// start the wheel fresh. Beating the villain who beat you clears the strikes.
 function _gtDraft(st) {
   const u = st.current;
   if (!u) return null;
@@ -175,7 +177,7 @@ function _gtDraft(st) {
     sl.hero = h || null;
     sl.aspects = !h ? [] : h.id === 'warlock' ? GT_ASPECTS.slice() : h.id === 'deadpool' ? ["'Pool"] : [];
   };
-  let strikes = 0, heroesBurned = false;
+  let strikes = 0, heroesBurned = false, lostAt = -1;   // lostAt: the furthest scenario lost on
   const tl = [
     ...evs.map(e => ({ at: e.at || '', e })),
     // a game counts from when it was logged (its start time can be a made-up 10:00)
@@ -207,9 +209,14 @@ function _gtDraft(st) {
       }
     }
     if (a.replay) continue;                           // a beaten scenario again: no strike, no clear
-    if (a.won) { strikes = 0; heroesBurned = false; continue; }
+    const at = u.scen.indexOf(a.scen);
+    if (a.won) {                                      // beating the villain who beat you clears the strikes
+      if (at >= lostAt) { strikes = 0; heroesBurned = false; lostAt = -1; }
+      continue;
+    }
     if (a.date < GAUNTLET.strikesFrom) continue;      // losses before the rule just count
     strikes++;
+    lostAt = Math.max(lostAt, at);
     heroesBurned = strikes >= GAUNTLET.strikes;
     for (const p of GAUNTLET.players) {
       const sl = slots[p];
@@ -225,7 +232,7 @@ function _gtDraft(st) {
         sl.aspects = [];
       }
     }
-    if (strikes >= GAUNTLET.strikes) strikes = 0;
+    if (strikes >= GAUNTLET.strikes) { strikes = 0; lostAt = -1; }
   }
   for (const p of GAUNTLET.players) {
     const sl = slots[p];
@@ -324,16 +331,24 @@ function _gtState() {
     if (!scen) { problems.push({ kind: 'scenario', a, text: `A play on ${_gtFmtDate(p.date)} (“${p.b || 'no scenario'}”) doesn't name a scenario the app knows, so it isn't counted.` }); continue; }
     if (!expert) problems.push({ kind: 'expert', a, text: `${scen.name} on ${_gtFmtDate(p.date)} isn't marked Expert in the log. It's counted anyway.` });
     picks.forEach(pk => pk.unknown.forEach(u => problems.push({ kind: 'hero', a, text: `“${u}” (${pk.player}, ${scen.name}, ${_gtFmtDate(p.date)}) isn't a hero the app knows.` })));
-    // a scenario already beaten, played again: it doesn't move the run or the strikes
+    // a scenario already beaten in this run of the box, played again: it
+    // doesn't move the run or the strikes
     a.replay = scen.won;
     if (a.replay) problems.push({ kind: 'replay', a, text: `${scen.name} was played again on ${_gtFmtDate(p.date)} (${a.won ? 'a win' : 'a loss'}), after it was beaten on ${_gtFmtDate(scen.wonOn)}. It doesn't count for the strikes; if it was logged by mistake, delete it in BGStats.` });
     scen.attempts.push(a);
     if (!scen.won) { scen.tries++; if (won) { scen.won = true; scen.wonOn = p.date; } }
+    // losing on a villain sends the box back to its first scenario: what was
+    // beaten has to be beaten again
+    if (!won && !a.replay && p.date >= GAUNTLET.strikesFrom) {
+      a.restart = true;
+      for (const x of scen.unit.scen) if (x.won) { x.won = false; x.wonOn = null; x.tries = 0; }
+    }
     for (const pk of picks) for (const h of pk.heroes) h.uses.push({ a, player: pk.player, unit: scen.unit, aspects: pk.aspects });
   }
 
   // units: done, started; the current one is the first released unit not done
   units.forEach(u => {
+    u.scen.forEach(s => { s.losses = s.attempts.filter(x => !x.won).length; });
     u.done = u.scen.every(s => s.won);
     u.attempts = u.scen.flatMap(s => s.attempts).sort((x, y) => ((x.t || x.date)).localeCompare(y.t || y.date));
     u.started = u.attempts.length > 0;
@@ -430,8 +445,8 @@ function _gtProgressHtml(st) {
   const segs = st.units.map(u => {
     const cells = u.scen.map(s => {
       const cur = s === st.nextScen;
-      const cls = s.won ? (s.tries === 1 ? 'won1' : 'won') : s.attempts.length ? 'lost' : !u.released ? 'future' : 'todo';
-      return `<i class="gt-cell gt-${cls}${cur ? ' gt-cur' : ''}" title="${_escapeHtml(s.name)}${s.won ? ` · won ${_gtFmtDate(s.wonOn)}${s.tries > 1 ? ` (try ${s.tries})` : ''}` : s.attempts.length ? ` · ${s.attempts.length} loss${s.attempts.length > 1 ? 'es' : ''}` : ''}"></i>`;
+      const cls = s.won ? (s.tries === 1 ? 'won1' : 'won') : s.losses ? 'lost' : !u.released ? 'future' : 'todo';
+      return `<i class="gt-cell gt-${cls}${cur ? ' gt-cur' : ''}" title="${_escapeHtml(s.name)}${s.won ? ` · won ${_gtFmtDate(s.wonOn)}${s.tries > 1 ? ` (try ${s.tries})` : ''}` : s.losses ? ` · ${s.losses} loss${s.losses > 1 ? 'es' : ''}` : ''}"></i>`;
     }).join('');
     return `<span class="gt-seg${u === st.current ? ' gt-seg-cur' : ''}${u.done ? ' gt-seg-done' : ''}" style="flex:${u.scen.length} 1 0" data-gt-unit="${u.idx}">${cells}</span>`;
   }).join('');
@@ -503,8 +518,8 @@ function _gtRunHtml(st) {
     const pos = `${u.scen.indexOf(s) + 1} of ${u.scen.length}`;
     const d = st.draft;
     const drawing = d && GAUNTLET.players.some(p => d.slots[p].need === 'draw' || d.slots[p].need === 'pick');
-    const strikeText = st.strikes === 1 ? 'Strike 1 of 2: your aspects burned. Spin again; one more loss burns your heroes.'
-      : d && d.heroesBurned && drawing ? 'Strike 2 of 2: your heroes burned. Draw three heroes each, pick a new one and spin a fresh wheel.' : '';
+    const strikeText = st.strikes === 1 ? 'Strike 1 of 2: your aspects burned and the box starts over. Spin again; one more loss burns your heroes.'
+      : d && d.heroesBurned && drawing ? 'Strike 2 of 2: your heroes burned and the box starts over. Draw three heroes each, pick a new one and spin a fresh wheel.' : '';
     const strikeDots = st.strikes || (strikeText ? GAUNTLET.strikes : 0);
     html += `
       <div class="gt-next" data-gt-scen="${esc(s.key)}">
@@ -639,8 +654,8 @@ function _gtUnitRowHtml(st, u) {
     : u === st.current ? `<span class="gt-tag gt-tag-cur">Now</span>`
     : !u.released ? `<span class="gt-tag">Out ${_gtFmtDate(u.date)}</span>` : '';
   const scen = u.scen.map(s => {
-    const cls = s.won ? (s.tries === 1 ? 'won1' : 'won') : s.attempts.length ? 'lost' : !u.released ? 'future' : 'todo';
-    const res = s.won ? (s.tries > 1 ? `won on try ${s.tries}` : 'won first try') : s.attempts.length ? `${s.attempts.length} loss${s.attempts.length > 1 ? 'es' : ''}` : '';
+    const cls = s.won ? (s.tries === 1 ? 'won1' : 'won') : s.losses ? 'lost' : !u.released ? 'future' : 'todo';
+    const res = s.won ? (s.tries > 1 ? `won on try ${s.tries}` : 'won first try') : s.losses ? `${s.losses} loss${s.losses > 1 ? 'es' : ''}` : '';
     return `<button type="button" class="gt-srow" data-gt-scen="${esc(s.key)}">
       <i class="gt-cell gt-${cls}${s === st.nextScen ? ' gt-cur' : ''}"></i>
       <span class="gt-srow-name">${esc(s.name)}${s.final ? ' <span class="gt-dim">(finale)</span>' : ''}</span>
@@ -824,7 +839,8 @@ function _gtRulesHtml(st) {
       <li><b>Draw three, pick one.</b> Before a box, each of you draws three heroes from the pool and picks one to play the whole box.</li>
       <li><b>Spin for your aspect.</b> Then each of you spins the aspect wheel. You get every aspect before any repeats, never the one you had in the box before, and never the same as the other. 'Pool joins the wheel from wave 7, when Deadpool came out. Adam Warlock and Deadpool skip the wheel; Spider-Woman spins one aspect and picks her second.</li>
       <li><b>Spent on play.</b> A hero is spent the moment they're played, win or lose, and never comes back.</li>
-      <li><b>Two strikes.</b> Lose a scenario and both your aspects burn: spin again (a burned aspect can't come back for that hero) and replay it. Lose it again and both heroes burn: draw three each, pick, spin a fresh wheel, and replay. A win clears the strikes.</li>
+      <li><b>Lose and start over.</b> Losing on a villain sends you back to the first scenario of the box: everything in it has to be beaten again.</li>
+      <li><b>Two strikes.</b> Lose and both your aspects burn: spin again (a burned aspect can't come back for that hero). Lose again before you've beaten that villain and both heroes burn: draw three each, pick and spin a fresh wheel. Beating the villain who beat you clears the strikes.</li>
       <li><b>Time travel.</b> If the pool can't give you three heroes to draw from, the next wave lends some. A borrowed hero is spent when that wave arrives.</li>
       <li><b>Legend score.</b> A scenario won on the first try is worth 3, on the second 2, after that 1.</li>
     </ol>
@@ -890,7 +906,7 @@ function _gtOpenScen(st, key) {
         <div>
           <div class="modal-title">${esc(s.name)}</div>
           <div class="modal-designer">${esc(u.name)} · wave ${u.wave} · ${_gtFmtDate(u.date)}</div>
-          <div class="gt-sheet-status ${s.won ? 'gt-hs-spent' : s.attempts.length ? 'gt-hs-fallen' : 'gt-hs-pool'}">${s.won ? `Beaten ${_gtFmtDate(s.wonOn)}${s.tries > 1 ? ` on try ${s.tries}` : ', first try'}` : s.attempts.length ? `${s.attempts.length} loss${s.attempts.length > 1 ? 'es' : ''} so far` : u.released ? 'Not played yet' : 'Not out yet'}</div>
+          <div class="gt-sheet-status ${s.won ? 'gt-hs-spent' : s.losses ? 'gt-hs-fallen' : 'gt-hs-pool'}">${s.won ? `Beaten ${_gtFmtDate(s.wonOn)}${s.tries > 1 ? ` on try ${s.tries}` : ', first try'}` : s.losses ? `${s.losses} loss${s.losses > 1 ? 'es' : ''} so far` : u.released ? 'Not played yet' : 'Not out yet'}</div>
           ${s.villains && s.villains.length ? `<div class="gt-sheet-desc"><span class="gt-dim">${s.leader ? 'Leader' : 'Villain'}${s.villains.length > 1 ? 's' : ''}:</span> ${esc(s.villains.join(', '))}</div>` : ''}
           ${s.scheme ? `<div class="gt-sheet-desc"><span class="gt-dim">Opening scheme:</span> ${esc(s.scheme)}</div>` : ''}
           ${s.modulars && s.modulars.length ? `<div class="gt-sheet-desc"><span class="gt-dim">Modular:</span> ${esc(s.modulars.join(', '))}</div>` : ''}
