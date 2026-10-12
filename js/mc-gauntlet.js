@@ -175,7 +175,7 @@ function _gtDraft(st) {
     sl.hero = h || null;
     sl.aspects = !h ? [] : h.id === 'warlock' ? GT_ASPECTS.slice() : h.id === 'deadpool' ? ["'Pool"] : [];
   };
-  let strikes = 0;
+  let strikes = 0, heroesBurned = false;
   const tl = [
     ...evs.map(e => ({ at: e.at || '', e })),
     // a game counts from when it was logged (its start time can be a made-up 10:00)
@@ -206,9 +206,11 @@ function _gtDraft(st) {
         st.problems.push(`${pk.player} played ${pk.aspects.join(' + ')} in ${a.scen.name} (${_gtFmtDate(a.date)}); the wheel gave ${sl.aspects.join(' + ')}.`);
       }
     }
-    if (a.won) { strikes = 0; continue; }
+    if (a.replay) continue;                           // a beaten scenario again: no strike, no clear
+    if (a.won) { strikes = 0; heroesBurned = false; continue; }
     if (a.date < GAUNTLET.strikesFrom) continue;      // losses before the rule just count
     strikes++;
+    heroesBurned = strikes >= GAUNTLET.strikes;
     for (const p of GAUNTLET.players) {
       const sl = slots[p];
       if (strikes >= GAUNTLET.strikes) {             // second strike: the heroes burn
@@ -229,7 +231,7 @@ function _gtDraft(st) {
     const sl = slots[p];
     sl.need = !sl.hero ? (sl.offer ? 'pick' : 'draw') : !sl.aspects.length ? 'spin' : null;
   }
-  return { unit: u, slots, strikes, fresh };
+  return { unit: u, slots, strikes, heroesBurned, fresh };
 }
 
 // The aspects one player's spin can land on. Each player gets every aspect
@@ -322,6 +324,9 @@ function _gtState() {
     if (!scen) { problems.push({ kind: 'scenario', a, text: `A play on ${_gtFmtDate(p.date)} (“${p.b || 'no scenario'}”) doesn't name a scenario the app knows, so it isn't counted.` }); continue; }
     if (!expert) problems.push({ kind: 'expert', a, text: `${scen.name} on ${_gtFmtDate(p.date)} isn't marked Expert in the log. It's counted anyway.` });
     picks.forEach(pk => pk.unknown.forEach(u => problems.push({ kind: 'hero', a, text: `“${u}” (${pk.player}, ${scen.name}, ${_gtFmtDate(p.date)}) isn't a hero the app knows.` })));
+    // a scenario already beaten, played again: it doesn't move the run or the strikes
+    a.replay = scen.won;
+    if (a.replay) problems.push({ kind: 'replay', a, text: `${scen.name} was played again on ${_gtFmtDate(p.date)} (${a.won ? 'a win' : 'a loss'}), after it was beaten on ${_gtFmtDate(scen.wonOn)}. It doesn't count for the strikes; if it was logged by mistake, delete it in BGStats.` });
     scen.attempts.push(a);
     if (!scen.won) { scen.tries++; if (won) { scen.won = true; scen.wonOn = p.date; } }
     for (const pk of picks) for (const h of pk.heroes) h.uses.push({ a, player: pk.player, unit: scen.unit, aspects: pk.aspects });
@@ -496,7 +501,11 @@ function _gtRunHtml(st) {
   if (u && s) {
     const vill = s.villains && s.villains.length ? s.villains.join(', ') : '';
     const pos = `${u.scen.indexOf(s) + 1} of ${u.scen.length}`;
-    const strikeText = st.strikes === 1 ? 'Strike 1 of 2: your aspects burned. Spin again; one more loss burns your heroes.' : '';
+    const d = st.draft;
+    const drawing = d && GAUNTLET.players.some(p => d.slots[p].need === 'draw' || d.slots[p].need === 'pick');
+    const strikeText = st.strikes === 1 ? 'Strike 1 of 2: your aspects burned. Spin again; one more loss burns your heroes.'
+      : d && d.heroesBurned && drawing ? 'Strike 2 of 2: your heroes burned. Draw three heroes each, pick a new one and spin a fresh wheel.' : '';
+    const strikeDots = st.strikes || (strikeText ? GAUNTLET.strikes : 0);
     html += `
       <div class="gt-next" data-gt-scen="${esc(s.key)}">
         ${_gtImg(s.img, 'gt-next-img', s.name)}
@@ -506,7 +515,7 @@ function _gtRunHtml(st) {
           ${vill && vill !== s.name ? `<div class="gt-next-line">${esc(vill)}</div>` : ''}
           ${s.modulars && s.modulars.length ? `<div class="gt-next-line gt-dim">Modular: ${esc(s.modulars.join(', '))}</div>` : ''}
           ${s.wr != null ? `<div class="gt-next-line">${_gtWrBar(s.wr, s.n, 'Community win rate on Expert')} <span class="gt-dim">on Expert, ${_gtDifficultyWord(s.wr)}</span></div>` : ''}
-          ${strikeText ? `<div class="gt-strikes">${Array.from({ length: GAUNTLET.strikes }, (_, i) => `<i class="${i < st.strikes ? 'on' : ''}"></i>`).join('')}<span>${strikeText}</span></div>` : ''}
+          ${strikeText ? `<div class="gt-strikes">${Array.from({ length: GAUNTLET.strikes }, (_, i) => `<i class="${i < strikeDots ? 'on' : ''}"></i>`).join('')}<span>${strikeText}</span></div>` : ''}
         </div>
       </div>`;
     if (st.draft) html += _gtDraftHtml(st, st.draft);
