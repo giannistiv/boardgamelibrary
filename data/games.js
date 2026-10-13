@@ -1899,6 +1899,7 @@ const GIANNIS_GAMES = {
   1568:{name:"Space Crusade",bggId:1568,year:1990,complexity:2.3,players:"2-4",playTime:"120 min",bggRating:7.1},
   128671:{name:"Spartacus: A Game of Blood and Treachery",bggId:128671,year:2012,complexity:2.73,players:"3-4",playTime:"180 min",bggRating:7.5},
   375459:{name:"Speakeasy",bggId:375459,year:2025,complexity:4.43,players:"1-4",playTime:"180 min",bggRating:8.4},
+  1036:{name:"Speculation",bggId:1036,year:1992,complexity:2.02,players:"3-6",playTime:"45 min",bggRating:6.7},
   256606:{name:"Spirits of the Wild",bggId:256606,year:2018,complexity:1.44,players:"2",playTime:"30 min",bggRating:7.3},
   166384:{name:"Spyfall",bggId:166384,year:2014,complexity:1.23,players:"3-8",playTime:"15 min",bggRating:6.7},
   187645:{name:"Star Wars: Rebellion",bggId:187645,year:2016,complexity:3.75,players:"2-4",playTime:"240 min",bggRating:8.4},
