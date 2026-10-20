@@ -238,17 +238,21 @@ function _lpGameSearch() {
   if (input) input.blur();
   _lpGameList(q || null);
 }
+let _lpList = [], _lpSeq = 0;   // the games on show, and which search they came from
 function _lpGameList(q) {
+  if (!q) { _lpShowGames(_lpRecentGames(), _lpRecentGames().length ? 'Your games and the ones you played lately:' : 'Type a game\'s name and tap Search.'); return; }
+  const seq = ++_lpSeq;
+  searchGames(q, (list, state) => { if (seq === _lpSeq) _lpShowGames(list, searchHint(q, list, state)); });
+}
+function _lpShowGames(list, hintText) {
   const box = document.getElementById('lp-gresults');
   const hint = document.getElementById('lp-ghint');
   if (!box) return;
-  const list = q ? _myLibSearch(q) : _lpRecentGames();
-  if (hint) hint.textContent = q
-    ? (list.length ? '' : `No game called “${q}” here yet.`)
-    : (list.length ? 'Your games and the ones you played lately:' : 'Type a game\'s name and tap Search.');
-  box.innerHTML = list.slice(0, 30).map(g => `<button type="button" class="mylib-row lp-gpick" data-lp-game="${g.id}">
+  _lpList = list;
+  if (hint) hint.textContent = hintText;
+  box.innerHTML = list.slice(0, 40).map(g => `<button type="button" class="mylib-row lp-gpick" data-lp-game="${g.id}">
       <img class="mylib-cover" src="images/${g.id}.jpg" alt="" loading="lazy" data-img="${_escapeHtml(g.img || '')}" onerror="__myLibImg(this)">
-      <span class="mylib-info"><b>${_escapeHtml(g.name)}</b><span>${[g.year, g.mine ? `you played ${g.mine}&times;` : ''].filter(Boolean).join(' &middot; ')}</span></span>
+      <span class="mylib-info"><b>${_escapeHtml(g.name)}</b><span>${gameRowMeta(g)}</span></span>
     </button>`).join('');
 }
 
@@ -355,7 +359,7 @@ async function _lpClick(e) {
   if (what === 'delete') { await _lpDelete(); return; }
   if (b.dataset.lpGame) {
     const id = Number(b.dataset.lpGame);
-    _lpPicked = _myLibIndex().find(g => g.id === id) || { id, name: b.querySelector('b').textContent };
+    _lpPicked = _lpList.find(g => g.id === id) || _myLibIndex().find(g => g.id === id) || { id, name: b.querySelector('b').textContent };
     _lp.bggId = id;
     _lpRenderGame();
     _lpRenderLen();

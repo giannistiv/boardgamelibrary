@@ -4,3 +4,6 @@ BGStatsExport.json
 __pycache__/
 tools/.bgg-token
 tools/.collections-synced
+worker/node_modules/
+worker/.wrangler/
+worker/.dev.vars

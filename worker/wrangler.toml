@@ -1,0 +1,11 @@
+# BGG search for Board Game Library (worker/src/index.js).
+# Deploy from this folder:  npx wrangler@4 deploy
+# The BGG token is a secret, never in this file:
+#   cat ../tools/.bgg-token | npx wrangler@4 secret put BGG_TOKEN
+name = "bgl-bgg"
+main = "src/index.js"
+compatibility_date = "2025-09-01"
+workers_dev = true
+
+[vars]
+ALLOWED_ORIGINS = "https://giannistiv.github.io,http://localhost:8765"

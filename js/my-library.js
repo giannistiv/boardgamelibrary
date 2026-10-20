@@ -63,17 +63,77 @@ function _myShelf() {
   }).sort((a, b) => a.name.localeCompare(b.name)));
 }
 
-// Add a game: unknown to the site, it's saved for everyone first (its name,
-// year, players and picture as far as they're known).
+// ── BoardGameGeek, through the site's search service ──
+// worker/ (a Cloudflare Worker) holds the BGG token, which the site can't:
+// it searches BGG and gives a game's details. The site's own games come
+// first; BGG adds the rest.
+const BGG_PROXY = 'https://bgl-bgg.giannistiv.workers.dev';   // worker/, deployed with wrangler
+const _bggMemo = new Map();
+function _myPlaysOf(id) {
+  const me = typeof _navPlayer === 'function' ? _navPlayer() : null;
+  return me ? (PLAY_HISTORY[id] || []).filter(p => p.sc.some(s => s.n === me)).length : 0;
+}
+async function bggSearch(q) {
+  const key = q.trim().toLowerCase();
+  if (_bggMemo.has(key)) return _bggMemo.get(key);
+  const res = await fetch(`${BGG_PROXY}/search?q=${encodeURIComponent(q.trim())}`);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+  const list = (data.results || []).map(g => ({ id: g.id, name: g.name, year: g.year || '', img: g.img || '', players: g.players || '',
+    time: g.time || '', exp: !!g.exp, rated: g.rated || 0, plays: (PLAY_HISTORY[g.id] || []).length, mine: _myPlaysOf(g.id), bgg: true }));
+  _bggMemo.set(key, list);
+  return list;
+}
+async function bggThing(id) {
+  const res = await fetch(`${BGG_PROXY}/thing?id=${Number(id)}`);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+  return (data.items || [])[0] || null;
+}
+// A search: the site's games at once, then BoardGameGeek's (those not listed
+// already). onUpdate(list, state): state 'searching' | 'done' | 'failed'.
+async function searchGames(q, onUpdate) {
+  const local = _myLibSearch(q);
+  onUpdate(local, 'searching');
+  try {
+    const remote = await bggSearch(q);
+    const have = new Set(local.map(g => g.id));
+    // the closest names first, wherever they come from: the same name, then
+    // names starting with it, then a word starting with it; among equals the
+    // app's own games, then the ones you played, then BGG's most rated
+    const nq = _myNorm(q);
+    const tier = (g) => { const n = _myNorm(g.name); return n === nq ? 0 : n.startsWith(nq) ? 1 : n.split(' ').some(w => w.startsWith(nq)) ? 2 : 3; };
+    const all = local.map((g, i) => ({ g, i, own: 0 })).concat(remote.filter(g => !have.has(g.id)).map((g, i) => ({ g, i, own: 1 })));
+    all.sort((a, b) => tier(a.g) - tier(b.g) || (b.g.mine || 0) - (a.g.mine || 0) || a.own - b.own || a.i - b.i);
+    onUpdate(all.map(x => x.g), 'done');
+  } catch (e) {
+    onUpdate(local, 'failed');
+  }
+}
+function searchHint(q, list, state) {
+  if (state === 'searching') return list.length ? 'Searching BoardGameGeek for more…' : 'Searching BoardGameGeek…';
+  if (state === 'failed') return list.length ? 'BoardGameGeek didn\'t answer, so these are only the games the app knows.' : 'BoardGameGeek didn\'t answer. Try again in a moment.';
+  return list.length ? '' : `No game called “${q}” on BoardGameGeek either.`;
+}
+function gameRowMeta(g) {
+  return [g.year, g.exp ? 'expansion' : '', g.players ? `${g.players} players` : '', g.mine ? `you played ${g.mine}&times;` : ''].filter(Boolean).join(' &middot; ');
+}
+
+// Add a game: unknown to the site, it's saved for everyone first, with
+// BoardGameGeek's name, year, players, length, weight and cover.
 async function ensureKnownGame(id, info) {
   id = Number(id);
   if (!(id > 0) || findGameByBggId(id)) return;
+  let b = null;
+  try { b = await bggThing(id); } catch (_) {}
+  info = info || {};
   const entry = {
-    id: 'imported_' + id, name: (info && info.name) || `Game #${id}`, bggId: id,
-    year: (info && Number(info.year)) || null, designer: '',
-    players: (info && info.players) || '', playTime: (info && info.playTime) || '',
-    categories: [], mechanics: [], description: '', bggRating: null,
-    urlImage: (info && info.img) || null, imported: true,
+    id: 'imported_' + id, name: (b && b.name) || info.name || `Game #${id}`, bggId: id,
+    year: (b && b.year) || Number(info.year) || null, designer: b && b.designers ? b.designers.join(', ') : '',
+    players: (b && b.players) || info.players || '', playTime: (b && b.playTime) || info.playTime || info.time || '',
+    categories: [], mechanics: (b && b.mechanics) || [], description: '',
+    bggRating: b && b.rating ? b.rating.toFixed(1) : null, complexity: (b && b.weight) || 0,
+    urlImage: (b && (b.image || b.img)) || info.img || null, imported: true,
   };
   EXTRA_GAMES[id] = entry;
   await persistImportedGame(entry);
@@ -220,24 +280,31 @@ function _myAddClose() {
 }
 
 let _myAddQuery = '';   // what was last searched (results change on the Search button, not while typing)
+let _myAddList = [], _myAddState = '', _myAddSeq = 0;
 function _myAddSearch() {
   const input = document.getElementById('mylib-q');
   _myAddQuery = ((input || {}).value || '').trim();
   if (input) input.blur();
-  _myAddResults();
+  if (!_myAddQuery) { _myAddList = []; _myAddState = ''; _myAddResults(); return; }
+  const seq = ++_myAddSeq;
+  searchGames(_myAddQuery, (list, state) => {
+    if (seq !== _myAddSeq) return;
+    _myAddList = list; _myAddState = state;
+    _myAddResults();
+  });
 }
 function _myAddResults() {
   const box = document.getElementById('mylib-results');
   if (!box) return;
   const q = _myAddQuery;
-  const list = _myLibSearch(q);
+  const list = q ? _myAddList : _myLibSearch('');
   const hint = document.getElementById('mylib-hint');
-  if (hint) hint.textContent = q ? (list.length ? '' : `No game called “${q}” here yet.`) : (list.length ? 'Games you\'ve played:' : 'Type a game\'s name and tap Search.');
+  if (hint) hint.textContent = q ? searchHint(q, list, _myAddState) : (list.length ? 'Games you\'ve played:' : 'Type a game\'s name and tap Search.');
   box.innerHTML = list.map(g => {
     const on = myLibHas(g.id);
     return `<div class="mylib-row">
       <img class="mylib-cover" src="images/${g.id}.jpg" alt="" loading="lazy" data-img="${_escapeHtml(g.img || '')}" onerror="__myLibImg(this)">
-      <div class="mylib-info"><b>${_escapeHtml(g.name)}</b><span>${[g.year, g.players ? `${g.players} players` : '', g.mine ? `you played ${g.mine}&times;` : ''].filter(Boolean).join(' &middot; ')}</span></div>
+      <div class="mylib-info"><b>${_escapeHtml(g.name)}</b><span>${gameRowMeta(g)}</span></div>
       <button type="button" class="mylib-add${on ? ' on' : ''}" data-mylib-add="${g.id}">${on ? '&#10003; Added' : 'Add'}</button>
     </div>`;
   }).join('');
@@ -258,7 +325,7 @@ async function _myAddClick(e) {
   try {
     if (myLibHas(id)) await myLibRemove(id);
     else {
-      const g = _myLibIndex().find(x => x.id === id) || {};
+      const g = _myAddList.find(x => x.id === id) || _myLibIndex().find(x => x.id === id) || {};
       await myLibAdd(id, g);
     }
   } catch (err) { _myAddSay(err.message); }
