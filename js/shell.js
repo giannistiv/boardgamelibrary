@@ -796,11 +796,13 @@ function openModal(game) {
         : '<div class="play-no-winner">&#9760;&#65038; The game won</div>';
       const durHtml = playTimeBadge(play);
       const msHtml = milestoneBadges(_ptViewer(), play, true);
-      const sendHtml = typeof bgsSendBtnHtml === 'function' ? bgsSendBtnHtml(game.bggId, plays.indexOf(play)) : '';
+      const sendHtml = (typeof logPlayEditBtnHtml === 'function' ? logPlayEditBtnHtml(play) : '')
+        + (typeof bgsSendBtnHtml === 'function' ? bgsSendBtnHtml(game.bggId, plays.indexOf(play)) : '');
       return `<div class="play-entry">
         <div class="play-entry-top"><span class="play-date">${fmtDate(play.date)}</span>${msHtml ? `<span class="ms-badges">${msHtml}</span>` : ''}${sendHtml ? `<span class="play-entry-end">${durHtml}${sendHtml}</span>` : durHtml}</div>
         <div class="play-scores">${scoreHtml}</div>
         ${boardHtml}${noWinnerHtml}
+        ${play.c ? `<div class="play-note">${_escapeHtml(play.c)}</div>` : ''}
       </div>`;
     };
 
@@ -871,7 +873,8 @@ function openModal(game) {
     gameTimeText(game) ? gmFact('time', _escapeHtml(gameTimeText(game))) : '',
     game.complexity > 0 ? gmFact('weight', `Weight ${Number(game.complexity).toFixed(1)}`) : '',
   ].join('');
-  const playsPanel = [marvelUnitedHtml, marvelChampionsHtml, spiritIslandHtml, eternalDecksHtml, aeonsEndHtml, leviathanHtml, playHistoryHtml].join('');
+  const logHtml = typeof logPlayBtnHtml === 'function' ? logPlayBtnHtml(game) : '';
+  const playsPanel = [logHtml, marvelUnitedHtml, marvelChampionsHtml, spiritIslandHtml, eternalDecksHtml, aeonsEndHtml, leviathanHtml, playHistoryHtml].join('');
   const roveHtml = typeof buildRoveCampaignHtml === 'function' ? buildRoveCampaignHtml(game) : '';
   const tabs = [['overview', 'Overview'], ['plays', `Plays${plays && plays.length ? ` <span class="gm-tab-n">${plays.length}</span>` : ''}`]]
     .concat(roveHtml ? [['campaign', 'Campaign']] : [])
@@ -906,7 +909,7 @@ function openModal(game) {
         }
       </div>
       <div class="gm-panel" data-panel="plays"${tab === 'plays' ? '' : ' hidden'}>
-        ${playsPanel || '<div class="gm-empty">No plays logged yet. They show up here after the next BGStats import.</div>'}
+        ${playsPanel.replace(logHtml, '') ? playsPanel : `${logHtml}<div class="gm-empty">No plays logged yet.${logHtml ? '' : ' They show up here after the next BGStats import.'}</div>`}
       </div>
       ${roveHtml ? `<div class="gm-panel" data-panel="campaign"${tab === 'campaign' ? '' : ' hidden'}>${roveHtml}</div>` : ''}
       ${game.bggId > 0 ? `<div class="gm-panel" data-panel="rules"${tab === 'rules' ? '' : ' hidden'}>${buildRulesPanelHtml(game)}</div>` : ''}

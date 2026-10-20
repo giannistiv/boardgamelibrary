@@ -65,21 +65,24 @@ function _myShelf() {
 
 // Add a game: unknown to the site, it's saved for everyone first (its name,
 // year, players and picture as far as they're known).
+async function ensureKnownGame(id, info) {
+  id = Number(id);
+  if (!(id > 0) || findGameByBggId(id)) return;
+  const entry = {
+    id: 'imported_' + id, name: (info && info.name) || `Game #${id}`, bggId: id,
+    year: (info && Number(info.year)) || null, designer: '',
+    players: (info && info.players) || '', playTime: (info && info.playTime) || '',
+    categories: [], mechanics: [], description: '', bggRating: null,
+    urlImage: (info && info.img) || null, imported: true,
+  };
+  EXTRA_GAMES[id] = entry;
+  await persistImportedGame(entry);
+}
 async function myLibAdd(id, info) {
   id = Number(id);
   const a = acctMe();
   if (!a || !(id > 0)) return;
-  if (!findGameByBggId(id)) {
-    const entry = {
-      id: 'imported_' + id, name: (info && info.name) || `Game #${id}`, bggId: id,
-      year: (info && Number(info.year)) || null, designer: '',
-      players: (info && info.players) || '', playTime: (info && info.playTime) || '',
-      categories: [], mechanics: [], description: '', bggRating: null,
-      urlImage: (info && info.img) || null, imported: true,
-    };
-    EXTRA_GAMES[id] = entry;
-    await persistImportedGame(entry);
-  }
+  await ensureKnownGame(id, info);
   const at = Date.now();
   await acctWrite(`libraries/${a.uid}/${id}`, 'PUT', { at });
   (_myLib = _myLib || {})[id] = at;

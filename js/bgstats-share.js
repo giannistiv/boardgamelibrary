@@ -60,7 +60,7 @@ function bgsPlayData(bggId, play) {
   const out = {
     sourceName: BGS_SOURCE,
     // a play from a BG Stats file keeps its own id, so the same play is known again
-    sourcePlayId: play._uuid || `bgl-${id}-${String(play.t || play.date).replace(/\D/g, '')}-${String(play.e || '').replace(/\D/g, '')}`,
+    sourcePlayId: play._uuid || (play.mp ? `bgl-${play.mp}` : '') || `bgl-${id}-${String(play.t || play.date).replace(/\D/g, '')}-${String(play.e || '').replace(/\D/g, '')}`,
     playDate: _bgsEndUtc(play),
     game: g,
     players,
@@ -101,6 +101,7 @@ function _bgsQrSvg(text) {
 
 // Whose BG Stats a play came from: a friend's own upload, or the library's.
 function _bgsFrom(play) {
+  if (play.mp) return '';   // logged in this app (js/log-play.js)
   return play.src || (typeof WRAPPED_OWNER !== 'undefined' ? WRAPPED_OWNER : '');
 }
 

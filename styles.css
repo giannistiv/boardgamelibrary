@@ -1110,6 +1110,40 @@
   .mylib-add{flex-shrink:0;padding:0.4rem 0.75rem;border-radius:999px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);font:inherit;font-size:0.78rem;font-weight:700;cursor:pointer}
   .mylib-add.on{background:transparent;border-color:var(--line-2);color:var(--win)}
   .mylib-linkform{margin-top:0.4rem;padding-top:0.7rem;border-top:1px solid var(--line)}
+  /* ── Log a play (js/log-play.js) ── */
+  .lp-open{display:inline-flex;align-items:center;gap:0.3rem;padding:0.45rem 0.9rem;border-radius:999px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);font:inherit;font-size:0.84rem;font-weight:700;cursor:pointer}
+  .gm-panel > .lp-open{margin:0 0 0.8rem}
+  .lp-open.lp-open-profile{margin-top:0.45rem;padding:0.35rem 0.8rem;font-size:0.8rem}
+  .lp-edit{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;margin-left:0.4rem;padding:0;border-radius:8px;border:1px solid var(--line-2);background:transparent;color:var(--text-3);cursor:pointer;flex-shrink:0}
+  .lp-edit:hover{color:var(--accent);border-color:var(--accent-line)}
+  .lp-edit svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round}
+  .play-note{font-size:0.78rem;color:var(--text-2);margin-top:0.35rem;white-space:pre-line;overflow-wrap:anywhere}
+  .lp-sheet{max-width:480px;gap:0.55rem}
+  .lp-sheet label{display:flex;flex-direction:column;gap:0.25rem}
+  .lp-sheet small{font-weight:400;color:var(--text-3)}
+  .lp-sheet textarea.acct-input{resize:vertical;min-height:2.6rem}
+  .lp-when{display:grid;grid-template-columns:1.4fr 1fr 0.9fr;gap:0.5rem}
+  .lp-when .acct-input{padding:0.55rem 0.5rem;min-width:0}
+  .lp-sec{display:flex;align-items:center;justify-content:space-between;margin-top:0.2rem}
+  .lp-sec .acct-link{align-self:auto}
+  .lp-hint{font-size:0.72rem;color:var(--text-3);margin-top:-0.3rem}
+  .lp-gamecard{display:flex;align-items:center;gap:0.6rem;padding:0.4rem;border-radius:var(--r-s);background:var(--card)}
+  .lp-gamecard b{flex:1;min-width:0;font-size:0.92rem;overflow-wrap:anywhere}
+  .lp-gamecard .acct-link{align-self:auto}
+  .lp-gresults{max-height:min(34vh,300px)}
+  .lp-gpick{width:100%;border:1px solid transparent;color:var(--text);font:inherit;text-align:left;cursor:pointer}
+  .lp-gpick:hover{border-color:var(--accent-line)}
+  .lp-prow{display:flex;flex-direction:column;gap:0.3rem;padding:0.4rem;border-radius:var(--r-s);background:var(--card);margin-bottom:0.3rem}
+  .lp-pmain{display:flex;align-items:center;gap:0.45rem}
+  .lp-pn{flex:1;min-width:0;font-weight:600;font-size:0.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .lp-score{width:5.2rem;flex:0 0 auto;padding:0.45rem 0.5rem;text-align:center}
+  .lp-win{flex:0 0 auto;width:36px;height:36px;border-radius:50%;border:1px solid var(--line-2);background:transparent;color:var(--text-4);font-size:1.05rem;cursor:pointer;line-height:1}
+  .lp-win.on{background:var(--win-soft);border-color:var(--win);color:var(--win)}
+  .lp-x{flex:0 0 auto;width:28px;height:28px;border:none;background:transparent;color:var(--text-3);font-size:1.2rem;cursor:pointer;line-height:1}
+  .lp-role{padding:0.45rem 0.6rem;font-size:0.84rem}
+  .lp-addp{display:flex;gap:0.4rem}
+  .lp-addp .acct-btn{width:auto;flex:0 0 auto;padding:0.6rem 0.9rem}
+  .lp-del{color:var(--loss);align-self:center}
   /* ── Send a play to BG Stats (js/bgstats-share.js) ── */
   .bgs-send{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;margin-left:0.4rem;padding:0;border-radius:8px;border:1px solid var(--line-2);background:transparent;color:var(--text-3);cursor:pointer;flex-shrink:0}
   .bgs-send:hover{color:var(--accent);border-color:var(--accent-line)}

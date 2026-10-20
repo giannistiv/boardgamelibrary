@@ -138,7 +138,7 @@ if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 let _navRestoring = false;
 let _navSeq = 0;
 const _navScroll = new Map();   // entry id → scrollY on that screen
-const NAV_OVERLAYS = { lpm: 'lpm-overlay', wrapped: 'wrapped-overlay', pics: 'pics-overlay', first: 'fc-overlay', bgs: 'bgs-overlay', acct: 'acct-overlay', mylib: 'mylib-overlay' };
+const NAV_OVERLAYS = { lpm: 'lpm-overlay', wrapped: 'wrapped-overlay', pics: 'pics-overlay', first: 'fc-overlay', bgs: 'bgs-overlay', acct: 'acct-overlay', mylib: 'mylib-overlay', lp: 'lp-overlay' };
 
 function _navKey(st) {
   return st.visiting ? 'visit:' + _viewingProfile : st.group + '/' + (st.sub || '');
@@ -197,7 +197,7 @@ window.addEventListener('popstate', (e) => {
     const p = document.getElementById('pics-overlay');
     if (p && p._navClose) p._navClose();
   }
-  for (const k of ['bgs', 'acct', 'mylib']) {
+  for (const k of ['bgs', 'acct', 'mylib', 'lp']) {
     if (!keep.has(k) && _navIsOpen(NAV_OVERLAYS[k])) {
       const el = document.getElementById(NAV_OVERLAYS[k]);
       if (el && el._navClose) el._navClose();

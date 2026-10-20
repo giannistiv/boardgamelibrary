@@ -184,9 +184,11 @@ async function _saveProfilePhoto(dataUrl) {
   return { ok: true };
 }
 
-Promise.all([loadAllRatings(), loadRateSkips(), loadAllFavorites(), loadImportedGames(), loadImportedPlays(), loadGameImages(), loadBoardSouthVotes(), loadOathswornRanks(), loadAllNotes(), loadProfiles()]).then(() => {
+Promise.all([loadAllRatings(), loadRateSkips(), loadAllFavorites(), loadImportedGames(), loadImportedPlays(), loadGameImages(), loadBoardSouthVotes(), loadOathswornRanks(), loadAllNotes(), loadProfiles(),
+  typeof loadManualPlays === 'function' ? loadManualPlays() : null]).then(() => {
   _applyProfileOverrides();
   _applyAllPlayOverrides();
+  if (typeof mergeManualPlays === 'function') mergeManualPlays();   // plays logged in the app (js/log-play.js)
   _sortPlayHistory();
   if (typeof _updateBoardSouthBtnVisibility === 'function') _updateBoardSouthBtnVisibility();
   // A signed-in account (js/account.js) sets this device's player; a join link
