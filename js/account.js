@@ -24,7 +24,8 @@ const ACCT_OWNERS = { stiv: 'Στιβ', dimitris: 'Δημητρης' };   // who
 let _acct = null;         // the signed-in person: { uid, email, provider, name, player, friendOf, joined }
 let _acctAuth = null;     // firebase.auth(), once loaded
 let _acctSdk = null;      // the SDK loading
-let _acctClaims = null;   // playerClaims: encoded player name → uid
+let _acctClaims = null;   // playerClaims: player name → uid
+let _acctFresh = false;   // signed in on this page: the profile says so until the next refresh
 
 // What this device remembers of the account, so the app knows who it is
 // before Firebase has loaded (and offline).
@@ -114,6 +115,7 @@ function acctJoinPending() {
 }
 
 async function _acctOnUser(user) {
+  const wasHere = !!_acctCached();
   if (!user) {
     if (_acctCached()) _acctSignedOut();
     if (acctJoinPending() && !_acctOpen) acctOpenSheet();
@@ -133,6 +135,7 @@ async function _acctOnUser(user) {
     } catch (e) { _acctToast(e.message); }
   }
   try { sessionStorage.removeItem('bgl-join'); } catch (_) {}
+  if (!wasHere) _acctFresh = true;
   _acctApply();
   if (_acctOpen) _acctClose();
 }
@@ -370,6 +373,7 @@ async function _acctClaim(name, isNew) {
     if (_acct.photoURL) rec.photo = _acct.photoURL;
     await acctWrite(`users/${_acct.uid}`, 'PUT', rec);
     Object.assign(_acct, rec);
+    _acctFresh = true;
     try { sessionStorage.removeItem('bgl-join'); } catch (_) {}
     _acctClose();
     _acctApply();
@@ -428,14 +432,29 @@ function acctProfileHtml() {
     return `<div class="acct-card"><div><b>Sign in to keep your own games</b><span>Your list of games, and the plays you log, saved to your account.</span></div>
       <button type="button" class="acct-btn acct-main acct-card-btn" data-acct-open>Sign in or join</button></div>`;
   }
-  const how = a.provider === 'google' ? 'Google' : 'email';
+  // signed in: said once, right after signing in (Sign out is in Profile settings)
+  if (!_acctFresh) return '';
+  return `<div class="acct-card"><div><b>Signed in${a.email ? ` as ${esc(a.email)}` : ''}</b><span>${_acctHow(a)}</span></div></div>`;
+}
+function _acctHow(a) {
   const friends = Object.keys(a.friendOf || {}).filter(k => a.friendOf[k]).map(k => `${ACCT_OWNERS[k]}'s`);
-  const owner = Object.entries(ACCT_OWNERS).find(([, n]) => n === _acctDisplay(a.player));
-  return `<div class="acct-card">
-      <div><b>Signed in${a.email ? ` as ${esc(a.email)}` : ''}</b><span>With ${how}${friends.length ? ` &middot; ${esc(friends.join(' and '))} friend` : ''}</span></div>
-      ${owner ? `<button type="button" class="acct-btn acct-card-btn" data-acct-invite="${owner[0]}">Invite friends</button>` : ''}
-      <button type="button" class="acct-btn acct-card-btn" data-acct-signout>Sign out</button>
-    </div>`;
+  return `With ${a.provider === 'google' ? 'Google' : 'email'}${friends.length ? ` &middot; ${_escapeHtml(friends.join(' and '))} friend` : ''}`;
+}
+// Profile settings: the account, and signing out.
+function acctSettingsHtml() {
+  const a = acctMe();
+  if (!a) return `<div class="profile-edit-label">Account</div><button type="button" class="profile-edit-save" data-acct-open>Sign in</button>`;
+  return `<div class="profile-edit-label">Account</div>
+    <div class="acct-settings"><span>${a.email ? _escapeHtml(a.email) : 'Signed in'}<small>${_acctHow(a)}</small></span>
+    <button type="button" class="profile-edit-cancel" data-acct-signout>Sign out</button></div>`;
+}
+// Next to Profile settings, for Στιβ and Δημητρης: send your join link.
+function acctInviteBtnHtml() {
+  const a = acctMe();
+  const owner = a && Object.entries(ACCT_OWNERS).find(([, n]) => n === _acctDisplay(a.player));
+  if (!owner) return '';
+  return `<button type="button" class="profile-cog profile-invite" data-acct-invite="${owner[0]}" title="Invite friends: send your join link" aria-label="Invite friends">`
+    + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg></button>';
 }
 
 // Your join link: friends who open it see your shelf.

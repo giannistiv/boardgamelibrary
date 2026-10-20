@@ -759,6 +759,7 @@ function showStatsView(playerName, visiting) {
         ${_bggCollectionUrl(playerName)
           ? `<a class="profile-bgg" href="${_bggCollectionUrl(playerName)}" target="_blank" rel="noopener">BGG collection&nbsp;&#8599;</a>` : ''}
       </div>
+      ${isOwnProfile && typeof acctInviteBtnHtml === 'function' ? acctInviteBtnHtml() : ''}
       ${isOwnProfile ? `<button class="profile-cog" id="btn-edit-name" title="Profile settings" aria-label="Profile settings"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>` : ''}
       ${isOwnProfile ? `<div class="profile-edit-form" id="profile-edit-form">
         <div class="profile-edit-label">Photo</div>
@@ -775,6 +776,7 @@ function showStatsView(playerName, visiting) {
           <button class="profile-edit-cancel" id="profile-name-cancel">Cancel</button>
         </div>
         <div class="profile-edit-err" id="profile-name-err"></div>
+        ${typeof acctSettingsHtml === 'function' ? acctSettingsHtml() : ''}
       </div>` : ''}
     </div>
     ${isOwnProfile && typeof acctProfileHtml === 'function' ? acctProfileHtml() : ''}
