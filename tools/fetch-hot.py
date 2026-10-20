@@ -29,6 +29,7 @@ PICTURES = 6          # gallery pictures per game
 UPCOMING_OWNERS = 150  # fewer BGG owners than this and it's not out yet
 ABOUT_MAX = 2500      # characters of BGG's description kept per game
 KS_SEARCH = 'https://www.kickstarter.com/discover/advanced?term={}'
+NO_IMAGE = 'pic1657689'  # BGG's grey "no image yet" picture: a game it's on is asked again next run
 
 _spec = importlib.util.spec_from_file_location('fetch_covers', os.path.join(ROOT, 'tools', 'fetch-covers.py'))
 covers = importlib.util.module_from_spec(_spec)
@@ -162,14 +163,16 @@ def campaign(c, old=None):
 
 
 def with_details(gid, before):
-    """The game from the last run, or fetched from BGG when it's new."""
+    """The game from the last run, or fetched from BGG when it's new, or
+    again while BGG had no cover or pictures for it (they come later)."""
     g = before.get(gid)
-    if not g or 'pics' not in g:
+    bare = not g or 'pics' not in g or not g['pics'] or NO_IMAGE in (g.get('img') or NO_IMAGE)
+    if bare:
         try:
-            g = {'id': int(gid), **details(gid)}
+            g = {**(g or {}), 'id': int(gid), **details(gid)}
         except Exception as e:   # one game failing shouldn't sink the list
             print(f'fetch-hot: {gid}: {type(e).__name__}: {e}')
-            g = {'id': int(gid), 'pics': []}
+            g = g or {'id': int(gid), 'pics': []}
     elif 'mechs' not in g:       # kept from before the detail sheet: add what it shows
         try:
             g.update(item_fields(get(f'{API}/geekitems?objectid={gid}&objecttype=thing').get('item') or {}))

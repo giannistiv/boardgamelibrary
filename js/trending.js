@@ -8,7 +8,7 @@
 // job (tools/fetch-hot.py) and fetched when the tab opens, so it's the latest.
 
 let _hot = null;            // BGG_HOT once loaded
-let _hotFilter = null;      // 'yours' (news for the games you play, js/game-news.js) | 'live' (campaigns running now) | 'soon' (hot on BGG, no campaign running)
+let _hotFilter = null;      // 'live' (campaigns running now, the default) | 'soon' (hot on BGG, no campaign running) | 'yours' (news for the games you play, js/game-news.js)
 let _hotSort = 'you';       // 'you' | 'ending' | 'backers' | 'hot'
 
 function trendingAllowed() { return true; }   // open to everyone
@@ -233,9 +233,9 @@ function _renderHot(box) {
   const all = (_hot.games || []).filter(g => _hotLive(g) || g.pos);
   const live = all.filter(_hotLive), soon = all.filter(g => !_hotLive(g));
   const yours = _gnForYou();
-  if (!_hotFilter) _hotFilter = yours.length ? 'yours' : 'live';
+  if (!_hotFilter) _hotFilter = live.length ? 'live' : soon.length ? 'soon' : 'yours';
   if (_hotFilter === 'soon' && !soon.length) _hotFilter = 'live';
-  const chips = _gbChips('hot', [['yours', `For your games ${yours.length}`], ['live', `Live campaigns ${live.length}`], ['soon', `Coming soon ${soon.length}`]], v => _hotFilter === v);
+  const chips = _gbChips('hot', [['live', `Live campaigns ${live.length}`], ['soon', `Coming soon ${soon.length}`], ['yours', `For your games ${yours.length}`]], v => _hotFilter === v);
   if (_hotFilter === 'yours') {
     box.innerHTML = `
       <div class="hot-head">

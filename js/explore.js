@@ -46,7 +46,7 @@ function buildChartsHtml(days, locations, total) {
 
 // ── Insights View ──
 // ── Explore (merged Games + Players + Stats) ──
-let _exploreTab = 'trending'; // active sub-tab (Trending first); survives re-renders and modal round-trips
+let _exploreTab = 'games'; // active sub-tab (Games first, then Trending); survives re-renders and modal round-trips
 
 function showGamesView() {
   const container = document.getElementById('games-view');
@@ -222,11 +222,11 @@ function showGamesView() {
       <div class="stats-player-name">Explore</div>
       <div class="stats-player-sub">${_exploreTab === 'tonight'
         ? 'What should we play tonight? Pick how many of you are playing, whose place it is and how long you have.'
-        : _exploreTab === 'trending' ? 'What&rsquo;s new for the games you play, the crowdfunding campaigns running now and BGG&rsquo;s most talked-about games still to come out.'
+        : _exploreTab === 'trending' ? 'The crowdfunding campaigns running now, BGG&rsquo;s most talked-about games still to come out and what&rsquo;s new for the games you play.'
         : `${totalPlays.toLocaleString('en')} plays &middot; ${Object.keys(gamePlayCounts).length} games &middot; ${topPlayers.length} players`}</div>
     </div>
     <div class="explore-tabs">
-      ${tabBtn('games', 'Games')}${tabBtn('tonight', 'Tonight')}${tabBtn('players', 'Players')}${tabBtn('stats', 'Stats')}
+      ${tabBtn('games', 'Games')}${tabBtn('trending', 'Trending')}${tabBtn('tonight', 'Tonight')}${tabBtn('players', 'Players')}${tabBtn('stats', 'Stats')}
     </div>
     ${tabContent}
   `;

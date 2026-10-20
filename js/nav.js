@@ -20,7 +20,7 @@ const NAV_ICONS = {
 const NAV_ITEMS = [
   ['library', 'Library'], ['explore', 'Explore'], ['ranks', 'Ranks'], ['you', 'You'],
 ];
-let _navLastExploreTab = 'trending';
+let _navLastExploreTab = 'games';
 
 function _navPlayer() {
   const raw = localStorage.getItem('bgl-player');
@@ -57,8 +57,8 @@ function _navSubItems(group) {
       ? [['shelf', 'Our shelf'], ['ilioupoli', 'Ilioupoli']] : [];
   }
   if (group === 'explore') {
-    const items = [['games', 'Games'], ['tonight', 'Tonight'], ['players', 'Players'], ['stats', 'Stats']];
-    return typeof trendingAllowed === 'function' && trendingAllowed() ? [['trending', 'Trending']].concat(items) : items;
+    const trending = typeof trendingAllowed === 'function' && trendingAllowed() ? [['trending', 'Trending']] : [];
+    return [['games', 'Games'], ...trending, ['tonight', 'Tonight'], ['players', 'Players'], ['stats', 'Stats']];
   }
   if (group === 'ranks') {
     const bs = typeof _activeBoardSouthVoter === 'function' ? _activeBoardSouthVoter() : null;
@@ -72,7 +72,7 @@ function _navGo(group, sub) {
   if (group === 'library') return sub === 'ilioupoli' ? switchToIlioupoli() : switchToLibrary();
   if (group === 'tonight') return _navGo('explore', 'tonight');
   if (group === 'explore') {
-    const tab = sub || _navLastExploreTab || 'trending';
+    const tab = sub || _navLastExploreTab || 'games';
     const alreadyThere = _navIsOpen('games-view');
     _exploreTab = tab;
     return alreadyThere ? showGamesView() : switchToGames();
