@@ -102,7 +102,7 @@ function _libGames() {
 function _libChoices() {
   if (typeof myLibActive !== 'function' || !myLibActive()) return null;
   const a = acctMe();
-  return ['mine', ...['stiv', 'dimitris'].filter(k => a.friendOf && a.friendOf[k])];
+  return ['mine', ...['stiv', 'dimitris'].filter(k => acctFriendOf(k, a))];
 }
 let _libPick = null;   // the shelf a signed-in friend chose: 'mine' | 'stiv' | 'dimitris'
 // The game page for a shelf entry: the fullest record the site has of it.

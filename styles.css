@@ -1079,8 +1079,6 @@
   .acct-player.taken{opacity:0.45;cursor:default}
   .acct-pname{flex:1;min-width:0;font-weight:600;font-size:0.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .acct-pmeta{font-size:0.72rem;color:var(--text-3);flex-shrink:0}
-  .acct-friends{display:flex;flex-wrap:wrap;gap:0.8rem}
-  .acct-check{display:inline-flex;align-items:center;gap:0.35rem;font-size:0.86rem}
   .acct-toast{position:fixed;left:50%;bottom:calc(5.5rem + var(--safe-b));transform:translate(-50%,1rem);z-index:700;max-width:min(90vw,420px);padding:0.65rem 0.95rem;border-radius:var(--r);background:var(--card-3);border:1px solid var(--line-2);color:var(--text);font-size:0.85rem;box-shadow:0 10px 30px rgba(0,0,0,0.5);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
   .acct-toast.show{opacity:1;transform:translate(-50%,0)}
   .acct-card{display:flex;flex-wrap:wrap;align-items:center;gap:0.6rem 0.8rem;margin:0 0 1rem;padding:0.75rem 0.9rem;border-radius:var(--r);border:1px solid var(--line-2);background:var(--card)}

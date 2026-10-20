@@ -43,7 +43,28 @@ function acctMe() {
   const a = _acct || _acctCached();
   return a && a.uid && a.player ? a : null;
 }
-function acctFriendOf(owner) { const a = acctMe(); return !!(a && a.friendOf && a.friendOf[owner]); }
+// Whose shelf someone sees: the people they've played with (Στιβ, Δημητρης),
+// and whoever's join link brought them in. Worked out from the plays each
+// time, so the first game with the other one opens that shelf too.
+function acctFriendOf(owner, a) {
+  a = a || acctMe();
+  if (!a || !ACCT_OWNERS[owner]) return false;
+  if (a.friendOf && a.friendOf[owner]) return true;
+  const me = _acctDisplay(a.player), them = ACCT_OWNERS[owner];
+  if (!me || me === them || typeof PLAY_HISTORY === 'undefined') return false;
+  let n = 0;
+  for (const id in PLAY_HISTORY) n += PLAY_HISTORY[id].length;
+  const key = `${me}|${them}|${n}`;   // the plays changed (an import, a logged play): look again
+  const memo = acctFriendOf.memo || (acctFriendOf.memo = new Map());
+  if (!memo.has(key)) {
+    let met = false;
+    for (const id in PLAY_HISTORY) {
+      if (PLAY_HISTORY[id].some(p => p.sc.some(s => s.n === me) && p.sc.some(s => s.n === them))) { met = true; break; }
+    }
+    memo.set(key, met);
+  }
+  return memo.get(key);
+}
 // Στιβ and Δημητρης: their library is their shelf, not a list of their own.
 function acctIsOwner(a) { a = a || acctMe(); return !!(a && Object.values(ACCT_OWNERS).includes(_acctDisplay(a.player))); }
 
@@ -227,12 +248,8 @@ function _acctRender() {
   const msg = _acctMsg ? `<div class="acct-msg">${esc(_acctMsg)}</div>` : '';
   let body = '';
   if (_acctStep === 'player') {
-    const friends = { ...((_acct && _acct.friendOf) || {}) };
-    if (join) friends[join] = true;
     body = `
       <div class="acct-title">Which player are you?</div>
-      <div class="acct-label">Whose friend are you? You'll see their shelf.</div>
-      <div class="acct-friends">${Object.entries(ACCT_OWNERS).map(([k, n]) => `<label class="acct-check"><input type="checkbox" name="friend" value="${k}"${friends[k] ? ' checked' : ''}> ${esc(n)}</label>`).join('')}</div>
       <div class="acct-sub">If you've played with us, pick your name: your plays and ratings come with it. Each name belongs to one account.</div>
       <input type="search" class="acct-input" id="acct-psearch" placeholder="Search players…" autocomplete="off">
       <div class="acct-players" id="acct-players"><div class="acct-sub">Loading the players…</div></div>
@@ -362,8 +379,10 @@ async function _acctClaim(name, isNew) {
   if (isNew && known.has(name)) { _acctSay(`Someone has already played as ${name}. If that's you, pick the name from the list above.`); return; }
   const canon = typeof _origCanon === 'function' ? _origCanon(name) : name;
   const key = _acctKey(canon);
-  const friendOf = {};
-  document.querySelectorAll('#acct-overlay input[name="friend"]:checked').forEach(c => { friendOf[c.value] = true; });
+  // whose shelf they see comes from who they play with (acctFriendOf); a join link counts too
+  const friendOf = { ...(_acct.friendOf || {}) };
+  const join = acctJoinPending();
+  if (join) friendOf[join] = true;
   _acctSay('Saving…');
   try {
     const claims = (await _acctGet('playerClaims')) || {};
@@ -437,7 +456,7 @@ function acctProfileHtml() {
   return `<div class="acct-card"><div><b>Signed in${a.email ? ` as ${esc(a.email)}` : ''}</b><span>${_acctHow(a)}</span></div></div>`;
 }
 function _acctHow(a) {
-  const friends = Object.keys(a.friendOf || {}).filter(k => a.friendOf[k]).map(k => `${ACCT_OWNERS[k]}'s`);
+  const friends = Object.keys(ACCT_OWNERS).filter(k => acctFriendOf(k, a)).map(k => `${ACCT_OWNERS[k]}'s`);
   return `With ${a.provider === 'google' ? 'Google' : 'email'}${friends.length ? ` &middot; ${_escapeHtml(friends.join(' and '))} friend` : ''}`;
 }
 // Profile settings: the account, and signing out.
