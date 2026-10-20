@@ -119,11 +119,14 @@ function _myLibBtnState(btn) {
 // and the games on Trending; a game it doesn't know comes by its BGG link.
 function _myLibIndex() {
   const out = new Map();
+  // how often the person looking played each game (not everyone's plays)
+  const me = typeof _navPlayer === 'function' ? _navPlayer() : null;
+  const mine = (id) => me ? (PLAY_HISTORY[id] || []).filter(p => p.sc.some(s => s.n === me)).length : 0;
   const add = (id, name, year, img, players) => {
     id = Number(id);
     if (!(id > 0) || !name) return;
     const g = out.get(id);
-    if (!g) out.set(id, { id, name, year: year || '', img: img || '', players: players || '', plays: (PLAY_HISTORY[id] || []).length });
+    if (!g) out.set(id, { id, name, year: year || '', img: img || '', players: players || '', plays: (PLAY_HISTORY[id] || []).length, mine: mine(id) });
     else { g.year = g.year || year || ''; g.img = g.img || img || ''; g.players = g.players || players || ''; }
   };
   GAMES.forEach(g => add(g.bggId, g.name, g.year, '', g.players));
@@ -142,8 +145,14 @@ function _myLibSearch(q) {
   if (!nq) {
     // nothing typed: the games you've played that aren't on your list yet
     const me = typeof _navPlayer === 'function' ? _navPlayer() : null;
-    return all.filter(g => !myLibHas(g.id) && me && (PLAY_HISTORY[g.id] || []).some(p => p.sc.some(s => s.n === me)))
-      .sort((a, b) => b.plays - a.plays).slice(0, 30);
+    return all.filter(g => !myLibHas(g.id) && me && g.mine)
+      .sort((a, b) => b.mine - a.mine).slice(0, 30);
+  }
+  // a BoardGameGeek link (or its number) pasted in finds that game, known or not
+  const link = _myLibParseLink(q);
+  if (link) {
+    const g = all.find(x => x.id === link.id);
+    return [g || { id: link.id, name: (findGameByBggId(link.id) || {}).name || link.name || `Game #${link.id}`, year: '', img: '', players: '', plays: 0, mine: 0 }];
   }
   const words = nq.split(' ');
   return all.map(g => {
@@ -151,14 +160,14 @@ function _myLibSearch(q) {
     if (!words.every(w => n.includes(w))) return null;
     const rank = n === nq ? 0 : n.startsWith(nq) ? 1 : n.split(' ').some(x => x.startsWith(words[0])) ? 2 : 3;
     return { g, rank };
-  }).filter(Boolean).sort((a, b) => a.rank - b.rank || b.g.plays - a.g.plays || a.g.name.localeCompare(b.g.name))
+  }).filter(Boolean).sort((a, b) => a.rank - b.rank || b.g.mine - a.g.mine || b.g.plays - a.g.plays || a.g.name.localeCompare(b.g.name))
     .slice(0, 40).map(x => x.g);
 }
 
-// A BoardGameGeek link (or just its number): the game's id, and a name from the link.
+// A BoardGameGeek link: the game's id, and a name from the link.
 function _myLibParseLink(text) {
   const t = String(text || '').trim();
-  const m = /boardgamegeek\.com\/(?:boardgame|boardgameexpansion|thing)\/(\d+)(?:\/([^/?#]+))?/i.exec(t) || (/^(\d{1,7})$/.exec(t) && [null, t, '']);
+  const m = /boardgamegeek\.com\/(?:boardgame|boardgameexpansion|thing)\/(\d+)(?:\/([^/?#]+))?/i.exec(t);
   if (!m) return null;
   const slug = decodeURIComponent(m[2] || '').replace(/-/g, ' ').trim();
   return { id: Number(m[1]), name: slug ? slug.replace(/\b\w/g, c => c.toUpperCase()) : '' };
@@ -176,30 +185,18 @@ function myLibOpenAdd() {
     ov.setAttribute('aria-modal', 'true');
     document.body.appendChild(ov);
     ov.addEventListener('click', _myAddClick);
-    ov.addEventListener('input', (e) => {
-      if (e.target.id === 'mylib-q') _myAddResults();
-      if (e.target.id === 'mylib-link') {
-        const p = _myLibParseLink(e.target.value);
-        const name = document.getElementById('mylib-linkname');
-        if (p && name && !name.dataset.typed) name.value = (findGameByBggId(p.id) || {}).name || p.name;
-      }
-      if (e.target.id === 'mylib-linkname') e.target.dataset.typed = '1';
-    });
-    ov.addEventListener('submit', _myAddLink);
+    ov.addEventListener('submit', (e) => { e.preventDefault(); _myAddSearch(); });
   }
   ov.innerHTML = `<div class="acct-sheet mylib-sheet">
       <button type="button" class="acct-x" data-mylib="close" aria-label="Close">&times;</button>
       <div class="acct-title">Add a game</div>
-      <input type="search" class="acct-input" id="mylib-q" placeholder="Search games…" autocomplete="off">
+      <form class="lp-gsearch">
+        <input type="search" class="acct-input" id="mylib-q" placeholder="A game's name" autocomplete="off" enterkeyhint="search">
+        <button type="submit" class="acct-btn acct-main">Search</button>
+      </form>
       <div class="mylib-hint" id="mylib-hint"></div>
       <div class="mylib-results" id="mylib-results"></div>
-      <form class="acct-form mylib-linkform">
-        <div class="acct-label">Not in the list? Paste its BoardGameGeek link</div>
-        <input class="acct-input" id="mylib-link" placeholder="boardgamegeek.com/boardgame/…" autocomplete="off" inputmode="url">
-        <input class="acct-input" id="mylib-linkname" placeholder="The game's name" maxlength="120">
-        <button type="submit" class="acct-btn acct-main">Add this game</button>
-        <div class="acct-msg" id="mylib-msg" hidden></div>
-      </form>
+      <div class="acct-msg" id="mylib-msg" hidden></div>
     </div>`;
   if (!_myAddOpen) {
     _myAddOpen = true;
@@ -207,9 +204,10 @@ function myLibOpenAdd() {
     ov._navClose = _myAddClose;
     if (typeof navOverlayOpened === 'function') navOverlayOpened('mylib');
   }
+  _myAddQuery = '';
   _myAddResults();
   // Trending's games join the search once they've loaded
-  if (typeof _loadHot === 'function' && (typeof _hot === 'undefined' || !_hot)) _loadHot().then(() => _myAddResults()).catch(() => {});
+  if (typeof _loadHot === 'function' && (typeof _hot === 'undefined' || !_hot)) _loadHot().catch(() => {});
   setTimeout(() => { const q = document.getElementById('mylib-q'); if (q && !_isTouchDevice()) q.focus(); }, 60);
 }
 function _myAddClose() {
@@ -221,18 +219,25 @@ function _myAddClose() {
   if (typeof navOverlayClosed === 'function') navOverlayClosed('mylib');
 }
 
+let _myAddQuery = '';   // what was last searched (results change on the Search button, not while typing)
+function _myAddSearch() {
+  const input = document.getElementById('mylib-q');
+  _myAddQuery = ((input || {}).value || '').trim();
+  if (input) input.blur();
+  _myAddResults();
+}
 function _myAddResults() {
   const box = document.getElementById('mylib-results');
   if (!box) return;
-  const q = (document.getElementById('mylib-q') || {}).value || '';
+  const q = _myAddQuery;
   const list = _myLibSearch(q);
   const hint = document.getElementById('mylib-hint');
-  if (hint) hint.textContent = q.trim() ? (list.length ? '' : 'Nothing by that name here. Add it by its BoardGameGeek link below.') : (list.length ? 'Games you\'ve played:' : 'Type a game\'s name.');
+  if (hint) hint.textContent = q ? (list.length ? '' : `No game called “${q}” here yet.`) : (list.length ? 'Games you\'ve played:' : 'Type a game\'s name and tap Search.');
   box.innerHTML = list.map(g => {
     const on = myLibHas(g.id);
     return `<div class="mylib-row">
       <img class="mylib-cover" src="images/${g.id}.jpg" alt="" loading="lazy" data-img="${_escapeHtml(g.img || '')}" onerror="__myLibImg(this)">
-      <div class="mylib-info"><b>${_escapeHtml(g.name)}</b><span>${[g.year, g.players ? `${g.players} players` : '', g.plays ? `played ${g.plays}&times;` : ''].filter(Boolean).join(' &middot; ')}</span></div>
+      <div class="mylib-info"><b>${_escapeHtml(g.name)}</b><span>${[g.year, g.players ? `${g.players} players` : '', g.mine ? `you played ${g.mine}&times;` : ''].filter(Boolean).join(' &middot; ')}</span></div>
       <button type="button" class="mylib-add${on ? ' on' : ''}" data-mylib-add="${g.id}">${on ? '&#10003; Added' : 'Add'}</button>
     </div>`;
   }).join('');
@@ -261,22 +266,6 @@ async function _myAddClick(e) {
   _myAddResults();
 }
 
-async function _myAddLink(e) {
-  e.preventDefault();
-  const p = _myLibParseLink(document.getElementById('mylib-link').value);
-  if (!p) { _myAddSay('Paste a link like boardgamegeek.com/boardgame/480901/rebirth-ii'); return; }
-  const name = document.getElementById('mylib-linkname').value.trim() || (findGameByBggId(p.id) || {}).name || p.name;
-  if (!name) { _myAddSay('Type the game\'s name too.'); return; }
-  if (myLibHas(p.id)) { _myAddSay(`${name} is already in your games.`); return; }
-  _myAddSay('Adding…');
-  try {
-    await myLibAdd(p.id, { name });
-    _myAddSay(`Added ${name}. Its cover comes with the next BGG sync (every few hours).`);
-    document.getElementById('mylib-link').value = '';
-    const n = document.getElementById('mylib-linkname'); n.value = ''; delete n.dataset.typed;
-    _myAddResults();
-  } catch (err) { _myAddSay(err.message); }
-}
 function _myAddSay(text) {
   const m = document.getElementById('mylib-msg');
   if (m) { m.hidden = false; m.textContent = text; }

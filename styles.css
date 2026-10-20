@@ -1122,8 +1122,27 @@
   .lp-sheet label{display:flex;flex-direction:column;gap:0.25rem}
   .lp-sheet small{font-weight:400;color:var(--text-3)}
   .lp-sheet textarea.acct-input{resize:vertical;min-height:2.6rem}
-  .lp-when{display:grid;grid-template-columns:1.4fr 1fr 0.9fr;gap:0.5rem}
-  .lp-when .acct-input{padding:0.55rem 0.5rem;min-width:0}
+  .lp-date{max-width:12rem}
+  .lp-gsearch{display:flex;gap:0.4rem;margin:0}
+  .lp-gsearch .acct-input{flex:1;min-width:0}
+  .lp-gsearch .acct-btn{width:auto;flex:0 0 auto;padding:0.6rem 1rem}
+  .lp-all{display:grid;grid-template-columns:1fr 1fr;gap:0.4rem}
+  .lp-all .acct-btn{padding:0.55rem 0.5rem;font-size:0.84rem}
+  .lp-gamewon{font-size:0.82rem;color:var(--loss);font-style:italic;padding:0.1rem 0.2rem 0.3rem}
+  .lp-lenrow{display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;font-size:0.82rem;color:var(--text-2)}
+  .lp-lenrow .acct-input{width:6rem;flex:0 0 auto}
+  .lp-lenrow .acct-link{align-self:auto;margin-left:auto}
+  .lp-lenauto{flex:1;min-width:0}
+  #lp-len{display:flex;flex-direction:column;gap:0.25rem}
+  /* js/combo.js: a field's own list of choices, solid and above everything in the sheet */
+  .combo-wrap{position:relative;flex:1 1 auto;min-width:0}
+  .combo-wrap > input{width:100%;box-sizing:border-box}
+  .imp-new-row .combo-wrap{flex:1 1 12rem}
+  .combo-list{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:20;max-height:min(42vh,260px);overflow-y:auto;overscroll-behavior:contain;
+    display:flex;flex-direction:column;padding:0.25rem;border-radius:var(--r-s);background:var(--bg-2);border:1px solid var(--line-3);box-shadow:0 14px 34px rgba(0,0,0,0.65)}
+  .combo-list[hidden]{display:none}
+  .combo-opt{display:block;width:100%;text-align:left;padding:0.6rem 0.65rem;border:none;border-radius:6px;background:transparent;color:var(--text);font:inherit;font-size:0.9rem;cursor:pointer}
+  .combo-opt:hover,.combo-opt.on{background:var(--card-2)}
   .lp-sec{display:flex;align-items:center;justify-content:space-between;margin-top:0.2rem}
   .lp-sec .acct-link{align-self:auto}
   .lp-hint{font-size:0.72rem;color:var(--text-3);margin-top:-0.3rem}

@@ -638,7 +638,7 @@ function _askNewPeople(source, newPlayers, newPlaces) {
   const row = (kind, it, value) => `
     <div class="imp-new-row" data-kind="${kind}" data-uuid="${esc(it.uuid)}">
       <span class="imp-new-his">${esc(it.name)} <small>${it.plays} play${it.plays !== 1 ? 's' : ''}</small></span>
-      <input type="text" list="imp-${kind}-list" value="${esc(value)}" autocomplete="off" aria-label="${esc(it.name)} here">
+      <input type="text" value="${esc(value)}" autocomplete="off" aria-label="${esc(it.name)} here">
       <div class="imp-new-hint"></div>
     </div>`;
 
@@ -682,14 +682,17 @@ function _askNewPeople(source, newPlayers, newPlaces) {
     <div class="imp-new-help">Who are they here? Pick someone who is already in the app, or keep or type a new name. ${esc(source)}'s next uploads will remember the answer.</div>
     ${newPlayers.length ? `<div class="imp-new-sec">People</div>${newPlayers.map(it => row('players', it, suggestPlayer(it.name))).join('')}` : ''}
     ${newPlaces.length ? `<div class="imp-new-sec">Places</div>${newPlaces.map(it => row('places', it, suggestPlace(it.name))).join('')}` : ''}
-    <datalist id="imp-players-list">${[...known].sort().map(n => `<option value="${esc(n)}">`).join('')}</datalist>
-    <datalist id="imp-places-list">${Object.keys(placeCount).sort().map(n => `<option value="${esc(n)}">`).join('')}</datalist>
     <div class="imp-new-actions">
       <button type="button" class="btn-primary" data-imp="go">Import</button>
       <button type="button" class="btn-ghost" data-imp="cancel">Cancel</button>
     </div>`;
   const rows = () => [...rl.querySelectorAll('.imp-new-row')];
   rows().forEach(update);
+  // each answer's choices: everyone (or every place) here, the whole list on a tap (js/combo.js)
+  if (typeof comboAttach === 'function') rows().forEach(rowEl => {
+    const places = rowEl.dataset.kind === 'places';
+    comboAttach(rowEl.querySelector('input'), { options: () => places ? Object.keys(placeCount).sort() : [...known].sort() });
+  });
   r.scrollIntoView({ block: 'center', behavior: 'smooth' });
 
   return new Promise((resolve) => {

@@ -69,12 +69,12 @@ function logPlayEditBtnHtml(play) {
 }
 
 // ── The form ──
-let _lp = null;          // what's being logged: { id, bggId, date, time, d, l, b, c, sc: [{n, s, w, r}], roles }
+let _lp = null;          // what's being logged: { id, bggId, date, time, d, lenSet, l, b, c, sc: [{n, s, w, r}], roles, gameWon }
 let _lpOpen = false;
 
 const _lpPad = (n) => String(n).padStart(2, '0');
 function _lpToday() { const d = new Date(); return `${d.getFullYear()}-${_lpPad(d.getMonth() + 1)}-${_lpPad(d.getDate())}`; }
-function _lpNow() { const d = new Date(); return `${_lpPad(d.getHours())}:${_lpPad(d.getMinutes())}`; }
+function _lpNow() { const d = new Date(); return `${_lpPad(d.getHours())}:${_lpPad(d.getMinutes())}:${_lpPad(d.getSeconds())}`; }
 
 // The people you play with, most often first; then everyone else.
 function _lpPeople() {
@@ -91,7 +91,7 @@ function _lpPeople() {
   const rank = (n) => (withMe.get(n) || 0) * 1000 + (all.get(n) || 0);
   return [...all.keys()].sort((a, b) => rank(b) - rank(a));
 }
-// Where you play, most recent first.
+// Where you play, the places you've been lately first.
 function _lpPlaces() {
   const me = _navPlayer();
   const last = new Map();
@@ -107,17 +107,16 @@ function logPlayOpen(bggId) {
   const a = typeof acctMe === 'function' ? acctMe() : null;
   if (!a) { if (typeof acctOpenSheet === 'function') acctOpenSheet(); return; }
   const me = _navPlayer();
-  _lp = { id: null, bggId: Number(bggId) || 0, date: _lpToday(), time: _lpNow(), d: '', l: _lpPlaces()[0] || '', b: '', c: '',
-    sc: me ? [{ n: me, s: '', w: false, r: '' }] : [], roles: false };
+  _lp = { id: null, bggId: Number(bggId) || 0, date: _lpToday(), time: _lpNow(), d: '', lenSet: false, l: _lpPlaces()[0] || '', b: '', c: '',
+    sc: me ? [{ n: me, s: '', w: false, r: '' }] : [], roles: false, gameWon: false };
   _lpShow();
 }
 function logPlayEdit(id) {
   const p = manualPlaysCache[id];
   if (!p) return;
-  const t = String(p.t || '');
   const sc = (Array.isArray(p.sc) ? p.sc : Object.values(p.sc || {})).map(s => ({ n: NAME_MAP[s.n] || s.n, s: s.s == null ? '' : String(s.s), w: !!s.w, r: s.r || '' }));
-  _lp = { id, bggId: Number(p.bggId), date: p.date, time: t.slice(11, 16) || '20:00', d: p.d || '', l: p.l || '', b: p.b || '', c: p.c || '',
-    sc, roles: sc.some(s => s.r) };
+  _lp = { id, bggId: Number(p.bggId), date: p.date, time: String(p.t || '').slice(11, 19) || _lpNow(), d: p.d || '', lenSet: !!p.d,
+    l: p.l || '', b: p.b || '', c: p.c || '', sc, roles: sc.some(s => s.r), gameWon: sc.length > 0 && !sc.some(s => s.w) };
   _lpShow();
 }
 
@@ -131,9 +130,10 @@ function _lpEl() {
     ov.setAttribute('aria-modal', 'true');
     document.body.appendChild(ov);
     ov.addEventListener('click', _lpClick);
-    ov.addEventListener('input', (e) => { if (e.target.id === 'lp-gq') _lpGameResults(); });
     ov.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && e.target.id === 'lp-pname') { e.preventDefault(); _lpAddPlayer(); }
+      if (e.key !== 'Enter') return;
+      if (e.target.id === 'lp-pname') { e.preventDefault(); _lpAddPlayer(); }
+      else if (e.target.id === 'lp-gq') { e.preventDefault(); _lpGameSearch(); }
     });
     ov.addEventListener('submit', (e) => { e.preventDefault(); _lpSave(); });
   }
@@ -147,21 +147,20 @@ function _lpShow() {
       <button type="button" class="acct-x" data-lp="close" aria-label="Close">&times;</button>
       <div class="acct-title">${_lp.id ? 'Edit the play' : 'Log a play'}</div>
       <div id="lp-game"></div>
-      <div class="lp-when">
-        <label><span class="acct-label">Day</span><input class="acct-input" type="date" id="lp-date" value="${esc(_lp.date)}" max="${_lpToday()}" required></label>
-        <label><span class="acct-label">Started</span><input class="acct-input" type="time" id="lp-time" value="${esc(_lp.time)}"></label>
-        <label><span class="acct-label">Minutes</span><input class="acct-input" type="number" id="lp-d" value="${esc(String(_lp.d || ''))}" min="0" max="10000" inputmode="numeric" placeholder="—"></label>
-      </div>
+      <label><span class="acct-label">Day</span><input class="acct-input lp-date" type="date" id="lp-date" value="${esc(_lp.date)}" max="${_lpToday()}" required></label>
       <div class="lp-sec"><span class="acct-label">Players</span><button type="button" class="acct-link" data-lp="roles">${_lp.roles ? 'Hide characters' : '+ Characters'}</button></div>
-      <div class="lp-hint">Tap &#9733; for the winners. Co-op: star everyone if you won, no one if the game won.</div>
+      <div class="lp-all">
+        <button type="button" class="acct-btn" data-lp="allwon">&#9733; Everyone won</button>
+        <button type="button" class="acct-btn" data-lp="alllost">&#9760;&#65038; Everyone lost</button>
+      </div>
+      <div class="lp-hint">Or tap &#9733; for each winner.</div>
       <div id="lp-players"></div>
       <div class="lp-addp">
-        <input class="acct-input" id="lp-pname" list="lp-people" placeholder="Add a player: a name" autocomplete="off" maxlength="60">
+        <input class="acct-input" id="lp-pname" placeholder="Add a player" maxlength="60" enterkeyhint="done">
         <button type="button" class="acct-btn" data-lp="addp">Add</button>
       </div>
-      <datalist id="lp-people">${_lpPeople().slice(0, 300).map(n => `<option value="${esc(n)}">`).join('')}</datalist>
-      <label><span class="acct-label">Where</span><input class="acct-input" id="lp-l" list="lp-places" value="${esc(_lp.l)}" maxlength="80" placeholder="Home, a friend's place, a café…" autocomplete="off"></label>
-      <datalist id="lp-places">${_lpPlaces().slice(0, 60).map(n => `<option value="${esc(n)}">`).join('')}</datalist>
+      <div id="lp-len"></div>
+      <label><span class="acct-label">Where</span><input class="acct-input" id="lp-l" value="${esc(_lp.l)}" maxlength="80" placeholder="Home, a friend's place, a café…"></label>
       <label><span class="acct-label">Scenario, map or variant <small>(if any)</small></span><input class="acct-input" id="lp-b" value="${esc(_lp.b)}" maxlength="300" autocomplete="off"></label>
       <label><span class="acct-label">Notes <small>(if any)</small></span><textarea class="acct-input" id="lp-c" rows="2" maxlength="1000">${esc(_lp.c)}</textarea></label>
       <div class="acct-msg" id="lp-msg" hidden></div>
@@ -170,6 +169,14 @@ function _lpShow() {
     </form>`;
   _lpRenderGame();
   _lpRenderPlayers();
+  _lpRenderLen();
+  if (typeof comboAttach === 'function') {
+    comboAttach(document.getElementById('lp-pname'), {
+      options: () => { const inPlay = new Set(_lp.sc.map(p => p.n)); return _lpPeople().filter(n => !inPlay.has(n)); },
+      onPick: () => _lpAddPlayer(),
+    });
+    comboAttach(document.getElementById('lp-l'), { options: _lpPlaces });
+  }
   if (!_lpOpen) {
     _lpOpen = true;
     ov.classList.add('open');
@@ -187,7 +194,8 @@ function _lpClose() {
   if (typeof navOverlayClosed === 'function') navOverlayClosed('lp');
 }
 
-// The game: the one picked, or a search for one.
+// The game: the one picked, or a search for one (run by the Search button).
+let _lpPicked = null;   // the game picked from the search, while the site may not know it yet
 function _lpRenderGame() {
   const box = document.getElementById('lp-game');
   if (!box) return;
@@ -202,38 +210,75 @@ function _lpRenderGame() {
     return;
   }
   box.innerHTML = `<span class="acct-label">Game</span>
-    <input type="search" class="acct-input" id="lp-gq" placeholder="Search games…" autocomplete="off">
+    <div class="lp-gsearch">
+      <input type="search" class="acct-input" id="lp-gq" placeholder="A game's name" autocomplete="off" enterkeyhint="search">
+      <button type="button" class="acct-btn acct-main" data-lp="gsearch">Search</button>
+    </div>
+    <div class="mylib-hint" id="lp-ghint"></div>
     <div class="mylib-results lp-gresults" id="lp-gresults"></div>`;
-  _lpGameResults();
-  if (typeof _loadHot === 'function' && (typeof _hot === 'undefined' || !_hot)) _loadHot().then(_lpGameResults).catch(() => {});
+  _lpGameList(null);
+  if (typeof _loadHot === 'function' && (typeof _hot === 'undefined' || !_hot)) _loadHot().catch(() => {});
 }
-let _lpPicked = null;   // the game picked from the search, while the site may not know it yet
-function _lpGameResults() {
-  const box = document.getElementById('lp-gresults');
-  if (!box) return;
-  const q = ((document.getElementById('lp-gq') || {}).value || '').trim();
-  let list;
-  if (q) {
-    list = _myLibSearch(q);
-    const link = _myLibParseLink(q);
-    if (link && !list.some(g => g.id === link.id)) list.unshift({ id: link.id, name: (findGameByBggId(link.id) || {}).name || link.name || `Game #${link.id}`, year: '', img: '', players: '', plays: 0 });
-  } else {
-    // your games and the games you've played lately
-    const me = _navPlayer();
-    const recent = [];
-    for (const id in PLAY_HISTORY) {
-      const last = PLAY_HISTORY[id].find(p => p.sc.some(s => s.n === me));
-      if (last) recent.push([Number(id), last.t || last.date]);
-    }
-    recent.sort((a, b) => b[1].localeCompare(a[1]));
-    const ids = [...new Set([...Object.keys((typeof _myLib !== 'undefined' && _myLib) || {}).map(Number), ...recent.map(r => r[0])])].slice(0, 12);
-    const idx = new Map(_myLibIndex().map(g => [g.id, g]));
-    list = ids.map(id => idx.get(id)).filter(Boolean);
+// Your games and the games you've played lately: what's shown before a search.
+function _lpRecentGames() {
+  const me = _navPlayer();
+  const recent = [];
+  for (const id in PLAY_HISTORY) {
+    const last = PLAY_HISTORY[id].find(p => p.sc.some(s => s.n === me));
+    if (last) recent.push([Number(id), last.t || last.date]);
   }
+  recent.sort((a, b) => b[1].localeCompare(a[1]));
+  const ids = [...new Set([...Object.keys((typeof _myLib !== 'undefined' && _myLib) || {}).map(Number), ...recent.map(r => r[0])])].slice(0, 12);
+  const idx = new Map(_myLibIndex().map(g => [g.id, g]));
+  return ids.map(id => idx.get(id)).filter(Boolean);
+}
+function _lpGameSearch() {
+  const q = ((document.getElementById('lp-gq') || {}).value || '').trim();
+  const input = document.getElementById('lp-gq');
+  if (input) input.blur();
+  _lpGameList(q || null);
+}
+function _lpGameList(q) {
+  const box = document.getElementById('lp-gresults');
+  const hint = document.getElementById('lp-ghint');
+  if (!box) return;
+  const list = q ? _myLibSearch(q) : _lpRecentGames();
+  if (hint) hint.textContent = q
+    ? (list.length ? '' : `No game called “${q}” here yet.`)
+    : (list.length ? 'Your games and the ones you played lately:' : 'Type a game\'s name and tap Search.');
   box.innerHTML = list.slice(0, 30).map(g => `<button type="button" class="mylib-row lp-gpick" data-lp-game="${g.id}">
       <img class="mylib-cover" src="images/${g.id}.jpg" alt="" loading="lazy" data-img="${_escapeHtml(g.img || '')}" onerror="__myLibImg(this)">
-      <span class="mylib-info"><b>${_escapeHtml(g.name)}</b><span>${[g.year, g.plays ? `played ${g.plays}&times;` : ''].filter(Boolean).join(' &middot; ')}</span></span>
-    </button>`).join('') || `<div class="mylib-hint">${q ? 'No game by that name here. Paste its BoardGameGeek link instead.' : 'Type a game\'s name, or paste its BoardGameGeek link.'}</div>`;
+      <span class="mylib-info"><b>${_escapeHtml(g.name)}</b><span>${[g.year, g.mine ? `you played ${g.mine}&times;` : ''].filter(Boolean).join(' &middot; ')}</span></span>
+    </button>`).join('');
+}
+
+// The length: worked out like every play without one (BGG's time, the
+// players, first plays), unless you set it.
+function _lpEstimate() {
+  if (!_lp.bggId || !_lp.sc.length || typeof _ptEstimate !== 'function') return 0;
+  const game = findGameByBggId(_lp.bggId) || { bggId: _lp.bggId };
+  const before = new Set();
+  const others = (PLAY_HISTORY[_lp.bggId] || []).filter(p => p.mp !== _lp.id);
+  for (const p of others) for (const s of p.sc) before.add(s.n);
+  const date = (document.getElementById('lp-date') || {}).value || _lp.date;
+  try {
+    const e = _ptEstimate(game, { sc: _lp.sc, d: 0 }, _lp.sc.filter(s => !before.has(s.n)).length, others.some(p => p.date === date));
+    return Math.round(e.est || 0);
+  } catch (_) { return 0; }
+}
+function _lpRenderLen() {
+  const box = document.getElementById('lp-len');
+  if (!box) return;
+  if (_lp.lenSet) {
+    box.innerHTML = `<span class="acct-label">Length</span>
+      <div class="lp-lenrow"><input class="acct-input" type="number" id="lp-d" value="${_escapeHtml(String(_lp.d || ''))}" min="1" max="10000" inputmode="numeric" placeholder="${_lpEstimate() || ''}"><span>minutes</span>
+      <button type="button" class="acct-link" data-lp="lenauto">Work it out</button></div>`;
+    return;
+  }
+  const est = _lpEstimate();
+  box.innerHTML = `<span class="acct-label">Length</span>
+    <div class="lp-lenrow"><span class="lp-lenauto">${est ? `About ${fmtPlayTime(est)}, worked out from BGG's time and who played` : 'Worked out once the game and the players are in'}</span>
+    <button type="button" class="acct-link" data-lp="lenset">Set it</button></div>`;
 }
 
 function _lpSyncPlayers() {
@@ -244,12 +289,15 @@ function _lpSyncPlayers() {
     const r = row.querySelector('.lp-role');
     if (r) p.r = r.value.trim();
   });
+  const d = document.getElementById('lp-d');
+  if (d) _lp.d = d.value;
 }
 function _lpRenderPlayers() {
   const box = document.getElementById('lp-players');
   if (!box) return;
   const esc = _escapeHtml;
-  box.innerHTML = _lp.sc.map((p, i) => `<div class="lp-prow" data-i="${i}">
+  const lost = _lp.gameWon && _lp.sc.length && !_lp.sc.some(p => p.w);
+  box.innerHTML = (_lp.sc.map((p, i) => `<div class="lp-prow" data-i="${i}">
       <div class="lp-pmain">
         <span class="picker-avatar" aria-hidden="true">${avatarInner(p.n)}</span>
         <span class="lp-pn">${esc(p.n)}</span>
@@ -258,7 +306,8 @@ function _lpRenderPlayers() {
         <button type="button" class="lp-x" data-lp-del="${i}" aria-label="Remove ${esc(p.n)}">&times;</button>
       </div>
       ${_lp.roles ? `<input class="acct-input lp-role" value="${esc(p.r || '')}" placeholder="Character, faction, colour…" maxlength="120" aria-label="${esc(p.n)}'s character">` : ''}
-    </div>`).join('') || '<div class="mylib-hint">Add the players below.</div>';
+    </div>`).join('') || '<div class="mylib-hint">Add the players below.</div>')
+    + (lost ? '<div class="lp-gamewon">&#9760;&#65038; The game won</div>' : '');
 }
 function _lpAddPlayer() {
   const input = document.getElementById('lp-pname');
@@ -270,7 +319,9 @@ function _lpAddPlayer() {
   if (_lp.sc.some(p => p.n.toLowerCase() === name.toLowerCase())) { _lpSay(`${name} is already in this play.`); return; }
   _lp.sc.push({ n: name, s: '', w: false, r: '' });
   input.value = '';
+  input.blur();   // keyboard away: the next tap is usually a score or the next player
   _lpRenderPlayers();
+  _lpRenderLen();
   _lpSay('');
 }
 
@@ -288,25 +339,37 @@ async function _lpClick(e) {
   if (!b) return;
   const what = b.dataset.lp;
   if (what === 'close') { _lpClose(); return; }
-  if (what === 'game') { _lp.bggId = 0; _lpRenderGame(); setTimeout(() => { const q = document.getElementById('lp-gq'); if (q) q.focus(); }, 30); return; }
+  if (what === 'game') { _lp.bggId = 0; _lpRenderGame(); _lpRenderLen(); setTimeout(() => { const q = document.getElementById('lp-gq'); if (q) q.focus(); }, 30); return; }
+  if (what === 'gsearch') { _lpGameSearch(); return; }
   if (what === 'roles') { _lpSyncPlayers(); _lp.roles = !_lp.roles; b.textContent = _lp.roles ? 'Hide characters' : '+ Characters'; _lpRenderPlayers(); return; }
   if (what === 'addp') { _lpAddPlayer(); return; }
+  if (what === 'allwon' || what === 'alllost') {
+    _lpSyncPlayers();
+    _lp.sc.forEach(p => { p.w = what === 'allwon'; });
+    _lp.gameWon = what === 'alllost';
+    _lpRenderPlayers();
+    return;
+  }
+  if (what === 'lenset') { _lpSyncPlayers(); _lp.lenSet = true; _lpRenderLen(); const d = document.getElementById('lp-d'); if (d) d.focus(); return; }
+  if (what === 'lenauto') { _lpSyncPlayers(); _lp.lenSet = false; _lp.d = ''; _lpRenderLen(); return; }
   if (what === 'delete') { await _lpDelete(); return; }
   if (b.dataset.lpGame) {
     const id = Number(b.dataset.lpGame);
     _lpPicked = _myLibIndex().find(g => g.id === id) || { id, name: b.querySelector('b').textContent };
     _lp.bggId = id;
     _lpRenderGame();
+    _lpRenderLen();
     return;
   }
   if (b.dataset.lpWin) {
+    _lpSyncPlayers();
     const p = _lp.sc[Number(b.dataset.lpWin)];
     p.w = !p.w;
-    b.classList.toggle('on', p.w);
-    b.setAttribute('aria-pressed', String(p.w));
+    _lp.gameWon = false;
+    _lpRenderPlayers();
     return;
   }
-  if (b.dataset.lpDel) { _lpSyncPlayers(); _lp.sc.splice(Number(b.dataset.lpDel), 1); _lpRenderPlayers(); }
+  if (b.dataset.lpDel) { _lpSyncPlayers(); _lp.sc.splice(Number(b.dataset.lpDel), 1); _lpRenderPlayers(); _lpRenderLen(); }
 }
 
 async function _lpSave() {
@@ -314,8 +377,7 @@ async function _lpSave() {
   if (!a) { _lpSay('Sign in first.'); return; }
   _lpSyncPlayers();
   const date = document.getElementById('lp-date').value;
-  const time = document.getElementById('lp-time').value || '20:00';
-  const d = Number(document.getElementById('lp-d').value) || 0;
+  const d = _lp.lenSet ? Number(_lp.d) || 0 : 0;
   const l = document.getElementById('lp-l').value.trim();
   const b = document.getElementById('lp-b').value.trim();
   const c = document.getElementById('lp-c').value.trim();
@@ -324,7 +386,7 @@ async function _lpSave() {
   if (date > _lpToday()) { _lpSay('That day hasn\'t come yet.'); return; }
   if (!_lp.sc.length) { _lpSay('Add the players.'); return; }
   const rec = {
-    bggId: _lp.bggId, date, t: `${date} ${time}:00`,
+    bggId: _lp.bggId, date, t: `${date} ${_lp.time}`,
     sc: _lp.sc.map(p => {
       const o = { n: typeof _origCanon === 'function' ? _origCanon(p.n) : p.n, w: !!p.w };
       if (p.s) o.s = p.s.slice(0, 40);
