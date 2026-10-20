@@ -1043,7 +1043,7 @@ function openPicker() {
   document.getElementById('picker-search').value = '';
   renderPickerList('');
   document.getElementById('picker-overlay').classList.add('open');
-  setTimeout(() => document.getElementById('picker-search').focus(), 100);
+  if (!_isTouchDevice()) setTimeout(() => document.getElementById('picker-search').focus(), 100);   // a phone shows the list to tap, not the keyboard
 }
 
 document.getElementById('picker-search').addEventListener('input', e => {

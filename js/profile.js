@@ -984,7 +984,7 @@ function showStatsView(playerName, visiting) {
     editBtn.addEventListener('click', () => {
       const opening = !editForm.classList.contains('open');
       editForm.classList.toggle('open', opening);
-      if (opening) { input.focus(); input.select(); }
+      // no focus on opening: on a phone it pops the keyboard up before you've chosen what to change
     });
     document.getElementById('profile-name-cancel').addEventListener('click', close);
 

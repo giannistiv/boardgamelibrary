@@ -585,7 +585,7 @@ function openFavPicker(playerName) {
   overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
   searchEl.addEventListener('input', () => render(searchEl.value));
   render('');
-  setTimeout(() => searchEl.focus(), 50);
+  if (!_isTouchDevice()) setTimeout(() => searchEl.focus(), 50);   // no keyboard popping up on a phone
 }
 
 // ── Init ──

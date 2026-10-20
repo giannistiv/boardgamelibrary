@@ -345,7 +345,7 @@ async function _lpClick(e) {
   if (!b) return;
   const what = b.dataset.lp;
   if (what === 'close') { _lpClose(); return; }
-  if (what === 'game') { _lp.bggId = 0; _lpRenderGame(); _lpRenderLen(); setTimeout(() => { const q = document.getElementById('lp-gq'); if (q) q.focus(); }, 30); return; }
+  if (what === 'game') { _lp.bggId = 0; _lpRenderGame(); _lpRenderLen(); if (!_isTouchDevice()) setTimeout(() => { const q = document.getElementById('lp-gq'); if (q) q.focus(); }, 30); return; }
   if (what === 'gsearch') { _lpGameSearch(); return; }
   if (what === 'roles') { _lpSyncPlayers(); _lp.roles = !_lp.roles; b.textContent = _lp.roles ? 'Hide characters' : '+ Characters'; _lpRenderPlayers(); return; }
   if (what === 'addp') { _lpAddPlayer(); return; }

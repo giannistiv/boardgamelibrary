@@ -757,7 +757,7 @@ function _openBoardSouthAddModal(skipFlagSet) {
   weightEl.addEventListener('change', renderResults);
   sortEl.addEventListener('change', renderResults);
   // Focus the search box and render initial results
-  setTimeout(() => searchEl.focus(), 30);
+  if (!_isTouchDevice()) setTimeout(() => searchEl.focus(), 30);   // no keyboard popping up on a phone
   renderResults();
 }
 
