@@ -36,22 +36,25 @@ function _bgsEndUtc(play) {
   return end.toISOString().slice(0, 19).replace('T', ' ');
 }
 
-// The play in BG Stats' words. Empty fields are left out: the link has to fit in a QR code.
+// The play in BG Stats' words. BG Stats on Android complains about a missing
+// startPlayer, so every player carries startPlayer, winner and role, and the
+// game its highestWins and noPoints; only a score nobody kept is left out.
 function bgsPlayData(bggId, play) {
   const id = Number(bggId);
   const game = findGameByBggId(id);
   const all = PLAY_HISTORY[id] || [];
   const anyScore = all.some(p => (p.sc || []).some(s => _bgsScore(s.s) !== null));
-  const g = { name: game ? game.name : `Game #${id}`, sourceGameId: String(id) };
+  const g = {
+    name: game ? game.name : `Game #${id}`,
+    sourceGameId: String(id),
+    highestWins: !(anyScore && typeof _recLowBest === 'function' && _recLowBest(all, false)),
+    noPoints: !anyScore,
+  };
   if (id > 0) g.bggId = id;
-  if (!anyScore) g.noPoints = true;
-  else if (typeof _recLowBest === 'function' && _recLowBest(all, false)) g.highestWins = false;
   const players = (play.sc || []).map(s => {
-    const p = { name: s.n, sourcePlayerId: _bgsId(s.n) };
-    if (s.w) p.winner = true;
+    const p = { startPlayer: false, name: s.n, sourcePlayerId: _bgsId(s.n), winner: !!s.w, role: s.r || '' };
     const v = _bgsScore(s.s);
     if (v !== null) p.score = v;
-    if (s.r) p.role = s.r;
     return p;
   });
   const out = {
