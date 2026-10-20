@@ -189,12 +189,20 @@ Promise.all([loadAllRatings(), loadRateSkips(), loadAllFavorites(), loadImported
   _applyAllPlayOverrides();
   _sortPlayHistory();
   if (typeof _updateBoardSouthBtnVisibility === 'function') _updateBoardSouthBtnVisibility();
+  // A signed-in account (js/account.js) sets this device's player; a join link
+  // waits for the sign-in.
+  if (typeof acctBoot === 'function') acctBoot();
+  if (typeof myLibLoad === 'function') myLibLoad();
+  if (typeof _libRefresh === 'function') _libRefresh();
+  const acct = typeof acctMe === 'function' ? acctMe() : null;
   const savedPlayer = localStorage.getItem('bgl-player');
   // Self-heal: a login can only ever be a player who exists in the play
-  // history. If localStorage points at a name with no plays (e.g. a rename
-  // that failed to persist), recover by sending them back to the picker
-  // instead of rendering an empty zero-games profile.
-  const isOrphanLogin = savedPlayer && !_knownPlayerNames().has(savedPlayer);
+  // history (or a signed-in account's player, who may not have played yet).
+  // If localStorage points at a name with no plays (e.g. a rename that
+  // failed to persist), recover by sending them back to the picker instead
+  // of rendering an empty zero-games profile.
+  const isOrphanLogin = savedPlayer && !_knownPlayerNames().has(savedPlayer)
+    && !(acct && _acctDisplay(acct.player) === savedPlayer);
   if (savedPlayer && !isOrphanLogin) {
     // The boot-to-profile CSS hook already hid the library shell on first
     // paint; drop the class now so subsequent navigation works normally.
@@ -203,7 +211,8 @@ Promise.all([loadAllRatings(), loadRateSkips(), loadAllFavorites(), loadImported
   } else {
     if (isOrphanLogin) localStorage.removeItem('bgl-player');
     document.documentElement.classList.remove('boot-to-profile');
-    openPicker();
+    if (typeof acctJoinPending === 'function' && acctJoinPending()) acctOpenSheet();
+    else openPicker();
   }
   navBooted();   // from here on, each new screen is a step back can return to
   _takeSharedFile();

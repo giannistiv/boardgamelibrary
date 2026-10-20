@@ -32,7 +32,9 @@ const _navIsOpen = (id) => { const el = document.getElementById(id); return !!(e
 // Which destination (and which sub-tab) the open view belongs to.
 function _navState() {
   const lib = document.getElementById('library-view');
-  if (lib && lib.style.display !== 'none' && !document.querySelector('.stats-view.open')) return { group: 'library', sub: 'shelf' };
+  if (lib && lib.style.display !== 'none' && !document.querySelector('.stats-view.open')) {
+    return { group: 'library', sub: typeof _libChoices === 'function' && _libChoices() ? _libOwnerNow : 'shelf' };
+  }
   if (_navIsOpen('ilioupoli-view')) return { group: 'library', sub: 'ilioupoli' };
   if (_navIsOpen('games-view')) return { group: 'explore', sub: (typeof _exploreTab !== 'undefined' ? _exploreTab : 'games') };
   if (_navIsOpen('leaderboard-view')) return { group: 'ranks', sub: _ranksTab === 'hours' ? 'hours' : 'everyone' };
@@ -53,8 +55,15 @@ function _navState() {
 function _navSubItems(group) {
   const me = _navPlayer();
   if (group === 'library') {
-    return (me && typeof ILIOUPOLI_MEMBERS !== 'undefined' && ILIOUPOLI_MEMBERS.has(me))
-      ? [['shelf', 'Our shelf'], ['ilioupoli', 'Ilioupoli']] : [];
+    const member = me && typeof ILIOUPOLI_MEMBERS !== 'undefined' && ILIOUPOLI_MEMBERS.has(me);
+    // a signed-in friend: their games, and the shelves of whose friend they are
+    const choices = typeof _libChoices === 'function' ? _libChoices() : null;
+    if (choices) {
+      const label = { mine: 'My games', stiv: `${LIB_OWNER_NAMES.stiv}'s shelf`, dimitris: `${LIB_OWNER_NAMES.dimitris}'s shelf` };
+      const items = choices.map(k => [k, label[k]]).concat(member ? [['ilioupoli', 'Ilioupoli']] : []);
+      return items.length > 1 ? items : [];
+    }
+    return member ? [['shelf', 'Our shelf'], ['ilioupoli', 'Ilioupoli']] : [];
   }
   if (group === 'explore') {
     const trending = typeof trendingAllowed === 'function' && trendingAllowed() ? [['trending', 'Trending']] : [];
@@ -69,7 +78,11 @@ function _navSubItems(group) {
 }
 
 function _navGo(group, sub) {
-  if (group === 'library') return sub === 'ilioupoli' ? switchToIlioupoli() : switchToLibrary();
+  if (group === 'library') {
+    if (sub === 'ilioupoli') return switchToIlioupoli();
+    if (['mine', 'stiv', 'dimitris'].includes(sub) && typeof _libChoices === 'function' && _libChoices()) { _libPick = sub; _libRefresh(); }
+    return switchToLibrary();
+  }
   if (group === 'tonight') return _navGo('explore', 'tonight');
   if (group === 'explore') {
     const tab = sub || _navLastExploreTab || 'games';
@@ -125,7 +138,7 @@ if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 let _navRestoring = false;
 let _navSeq = 0;
 const _navScroll = new Map();   // entry id → scrollY on that screen
-const NAV_OVERLAYS = { lpm: 'lpm-overlay', wrapped: 'wrapped-overlay', pics: 'pics-overlay', first: 'fc-overlay', bgs: 'bgs-overlay' };
+const NAV_OVERLAYS = { lpm: 'lpm-overlay', wrapped: 'wrapped-overlay', pics: 'pics-overlay', first: 'fc-overlay', bgs: 'bgs-overlay', acct: 'acct-overlay', mylib: 'mylib-overlay' };
 
 function _navKey(st) {
   return st.visiting ? 'visit:' + _viewingProfile : st.group + '/' + (st.sub || '');
@@ -184,9 +197,11 @@ window.addEventListener('popstate', (e) => {
     const p = document.getElementById('pics-overlay');
     if (p && p._navClose) p._navClose();
   }
-  if (!keep.has('bgs') && _navIsOpen('bgs-overlay')) {
-    const b = document.getElementById('bgs-overlay');
-    if (b && b._navClose) b._navClose();
+  for (const k of ['bgs', 'acct', 'mylib']) {
+    if (!keep.has(k) && _navIsOpen(NAV_OVERLAYS[k])) {
+      const el = document.getElementById(NAV_OVERLAYS[k]);
+      if (el && el._navClose) el._navClose();
+    }
   }
   if (!keep.has('first') && _navIsOpen('fc-overlay')) {
     const f = document.getElementById('fc-overlay');

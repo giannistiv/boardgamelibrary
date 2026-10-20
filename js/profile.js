@@ -777,6 +777,7 @@ function showStatsView(playerName, visiting) {
         <div class="profile-edit-err" id="profile-name-err"></div>
       </div>` : ''}
     </div>
+    ${isOwnProfile && typeof acctProfileHtml === 'function' ? acctProfileHtml() : ''}
 
     <div class="stats-grid">
       <div class="stats-card key">

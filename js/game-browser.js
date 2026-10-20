@@ -48,8 +48,12 @@ function _gbLibraries() {
     { key: 'lgeorge', label: 'LGeorge', ids: new Set(Object.keys(LGEORGE_GAMES || {}).map(Number)) },
   ];
   const me = _gbPlayer();
-  if (me && typeof ILIOUPOLI_MEMBERS !== 'undefined' && ILIOUPOLI_MEMBERS.has(me)) {
+  if (me && ((typeof ILIOUPOLI_MEMBERS !== 'undefined' && ILIOUPOLI_MEMBERS.has(me)) || (typeof acctFriendOf === 'function' && acctFriendOf('dimitris')))) {
     libs.push({ key: 'dimitris', label: 'Δημητρης', ids: new Set(Object.keys(DIMITRIS_GAMES || {}).map(Number)) });
+  }
+  // a signed-in friend's own games (js/my-library.js)
+  if (typeof myLibActive === 'function' && myLibActive()) {
+    libs.unshift({ key: 'mine', label: me || 'Mine', ids: new Set(Object.keys(_myLib || {}).map(Number)) });
   }
   return libs;
 }

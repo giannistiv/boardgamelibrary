@@ -46,7 +46,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Board Games">
-<link rel="stylesheet" href="styles.css?v=fc0ca528">
+<link rel="stylesheet" href="styles.css?v=a5bae34d">
 </head>
 <body>
 <script>
@@ -120,6 +120,7 @@
       <input type="text" class="search-input" id="search-input" placeholder="Search the shelf" autocomplete="off">
     </div>
     <button type="button" class="lib-filter-toggle" id="lib-filter-toggle" aria-expanded="false" aria-controls="filters">Filters</button>
+    <button type="button" class="lib-add" id="lib-add" data-mylib-open hidden>+ Add a game</button>
   </div>
 
 <div class="filters" id="filters">
@@ -188,6 +189,7 @@
   <button type="button" id="btn-other-side" class="btn-ghost">&#x21C4; Show Other Side</button>
 </div>
 <div class="lib-covers" id="lib-covers"></div>
+<div class="lib-empty" id="lib-empty" hidden></div>
 </div><!-- /library-view -->
 
 <div class="stats-view" id="stats-view"><div class="boot-loader"><img src="icons/icon-192.png" alt="">Setting up the table&hellip;</div></div>
@@ -219,6 +221,7 @@
       <input type="text" class="picker-search" id="picker-search" placeholder="Search players..." autocomplete="off">
     </div>
     <div class="picker-list" id="picker-list"></div>
+    <button type="button" class="picker-signin" data-acct-open>Sign in or join</button>
     <button class="picker-skip" id="picker-skip">Just browse the library</button>
   </div>
 </div>
@@ -248,7 +251,7 @@
 <script src="js/progress-boards.js?v=990ffd69"></script>
 <script src="js/leviathan-wilds.js?v=9e324c22"></script>
 <script src="js/rove-campaign.js?v=65e05646"></script>
-<script src="js/shell.js?v=b58b9ea0"></script>
+<script src="js/shell.js?v=e7cbe748"></script>
 <script src="js/records.js?v=2d818be7"></script>
 <script src="js/player-count.js?v=227fd189"></script>
 <script src="js/play-time.js?v=28c21fed"></script>
@@ -261,11 +264,13 @@
 <script src="js/wrapped.js?v=8d8d669e"></script>
 <script src="js/mc-gauntlet.js?v=10af4be3"></script>
 <script src="js/ilioupoli.js?v=09e6dfb1"></script>
-<script src="js/profile.js?v=e978e537"></script>
+<script src="js/profile.js?v=f590a6a3"></script>
 <script src="js/firebase-data.js?v=235d8f2a"></script>
 <script src="js/explore.js?v=5e67b261"></script>
-<script src="js/game-browser.js?v=99d06a2d"></script>
+<script src="js/game-browser.js?v=d8321e78"></script>
 <script src="js/rules.js?v=8a31ad0d"></script>
+<script src="js/account.js?v=a2252ff9"></script>
+<script src="js/my-library.js?v=edf50ca2"></script>
 <script src="js/bgstats-share.js?v=c0f51dbe"></script>
 <script src="js/finger-chooser.js?v=d129f489"></script>
 <script src="js/game-picker.js?v=b631fbd7"></script>
@@ -274,7 +279,7 @@
 <script src="js/leaderboard.js?v=4f7e359b"></script>
 <script src="js/board-south.js?v=a2f017ab"></script>
 <script src="js/favorites.js?v=83e84f13"></script>
-<script src="js/nav.js?v=0a5239d9"></script>
-<script src="js/boot.js?v=4b3ed721"></script>
+<script src="js/nav.js?v=caf3f60d"></script>
+<script src="js/boot.js?v=79594f68"></script>
 </body>
 </html>

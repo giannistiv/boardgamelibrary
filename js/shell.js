@@ -91,7 +91,20 @@ function _dimitrisShelf() {
       spineColor: g.spineColor || rich.spineColor || '#555', boxSize: g.boxSize || rich.boxSize || 'md' };
   }).sort((a, b) => a.name.localeCompare(b.name)));
 }
-function _libGames() { return _libOwnerNow === 'dimitris' ? _dimitrisShelf() : GAMES; }
+function _libGames() {
+  if (_libOwnerNow === 'mine') return typeof _myShelf === 'function' ? _myShelf() : [];
+  return _libOwnerNow === 'dimitris' ? _dimitrisShelf() : GAMES;
+}
+// The shelves a signed-in friend can open: their own games, and the shelves
+// of the people whose friend they are (js/account.js, js/my-library.js).
+// null: the Library follows the viewer as before (Στιβ, Δημητρης, or nobody
+// signed in).
+function _libChoices() {
+  if (typeof myLibActive !== 'function' || !myLibActive()) return null;
+  const a = acctMe();
+  return ['mine', ...['stiv', 'dimitris'].filter(k => a.friendOf && a.friendOf[k])];
+}
+let _libPick = null;   // the shelf a signed-in friend chose: 'mine' | 'stiv' | 'dimitris'
 // The game page for a shelf entry: the fullest record the site has of it.
 function _libGameById(id) {
   const g = _libGames().find(x => x.id === id);
@@ -100,7 +113,8 @@ function _libGameById(id) {
 // Redraw the Library when whose shelf it is changes (a login, or once the
 // imported plays have loaded and say who plays with whom).
 function _libRefresh() {
-  const owner = _libOwner();
+  const choices = _libChoices();
+  const owner = choices ? (choices.includes(_libPick) ? _libPick : 'mine') : _libOwner();
   const key = `${owner}|${_libViewer()}`;   // the heading says "Your shelf" to Δημητρης himself
   if (key === _libRefresh.key) return;
   _libRefresh.key = key;
@@ -110,6 +124,8 @@ function _libRefresh() {
   document.getElementById('lib-covers').innerHTML = '';
   _applyLibMode();
 }
+// Draw the shelf on show again (its games changed).
+function _libRedraw() { _libRefresh.key = null; _libRefresh(); }
 function isCampaign(game) {
   if (!game) return false;
   const hasCampaignCat = Array.isArray(game.categories) && game.categories.includes('Campaign');
@@ -313,8 +329,8 @@ function renderShelf() {
   const shelfEl = document.getElementById('shelf');
   shelfEl.innerHTML = '';
   const otherBtn = document.getElementById('btn-other-side');
-  if (otherBtn) otherBtn.style.display = _libOwnerNow === 'dimitris' ? 'none' : '';
-  if (_libOwnerNow === 'dimitris') { _renderListShelf(shelfEl, _libGames()); _renderNewArrivals(); return; }
+  if (otherBtn) otherBtn.style.display = _libOwnerNow !== 'stiv' ? 'none' : '';
+  if (_libOwnerNow !== 'stiv') { _renderListShelf(shelfEl, _libGames()); _renderNewArrivals(); return; }
   shelfEl.style.gridTemplateColumns = _showingOtherSide ? 'repeat(3,1fr)' : 'repeat(6,1fr)';
 
   const rowRange = _showingOtherSide ? [7, 8] : [1, 6];
@@ -455,12 +471,24 @@ function _applyLibMode() {
   });
   if (mode === 'covers' && !document.getElementById('lib-covers').childElementCount) renderCovers();
   const sub = document.getElementById('lib-sub');
-  const dim = _libOwnerNow === 'dimitris';
+  const dim = _libOwnerNow === 'dimitris', mine = _libOwnerNow === 'mine';
+  const n = _libGames().length;
   if (sub) {
-    sub.textContent = dim ? `${_libGames().length} games · ${LIB_OWNER_NAMES.dimitris}'s library` : `${GAMES.length} games · front and back`;
+    sub.textContent = mine ? `${n} game${n !== 1 ? 's' : ''} · your list`
+      : dim ? `${n} games · ${LIB_OWNER_NAMES.dimitris}'s library` : `${GAMES.length} games · front and back`;
   }
   const title = document.querySelector('#library-view .page-title');
-  if (title) title.textContent = dim ? `${_libViewer() === LIB_OWNER_NAMES.dimitris ? 'Your' : LIB_OWNER_NAMES.dimitris + '\'s'} shelf` : 'The shelf';
+  if (title) title.textContent = mine ? 'Your games'
+    : dim ? `${_libViewer() === LIB_OWNER_NAMES.dimitris ? 'Your' : LIB_OWNER_NAMES.dimitris + '\'s'} shelf`
+    : (_libChoices() ? `${LIB_OWNER_NAMES.stiv}'s shelf` : 'The shelf');
+  const add = document.getElementById('lib-add');
+  if (add) add.hidden = !mine;
+  const empty = document.getElementById('lib-empty');
+  view.classList.toggle('lib-is-empty', mine && !n);
+  if (empty) {
+    empty.hidden = !(mine && !n);
+    if (mine && !n) empty.innerHTML = `<b>Your games go here</b><span>Add the games you own: search the ones the site knows, or paste a BoardGameGeek link.</span><button type="button" class="acct-btn acct-main" data-mylib-open>+ Add a game</button>`;
+  }
   applyFilters();
 }
 
@@ -859,6 +887,7 @@ function openModal(game) {
         ${game.year ? `<span class="modal-year">${game.year}</span>` : ''}
       </div>
       ${game.designer ? `<div class="modal-designer">by ${_escapeHtml(game.designer)}</div>` : ''}
+      ${typeof myLibModalBtnHtml === 'function' ? myLibModalBtnHtml(game) : ''}
       <div class="gm-facts">${facts}</div>
       <div class="gm-tiles n${ratingTiles.length}">${ratingTiles.join('')}</div>
       ${game.bggId > 0 ? buildStarRatingHtml(game.bggId) : ''}
