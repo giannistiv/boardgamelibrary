@@ -542,20 +542,24 @@ function _scrollToShelfCenter() {
   window.scrollTo(scrollX, 0);
 }
 
+// After a game page or sheet closes: the zoomed-out 1200-px viewport only
+// when the shelf itself is what's showing. (Going by where the page was
+// opened from isn't enough: a sheet opened from Trending, the BGG link
+// sheets, say, has no such mark, and closing one used to turn Explore 1200
+// px wide, scrolling sideways on a phone.)
 function _restoreAfterModal() {
   if (!_isTouchDevice()) return;
-  if (_modalOpenedFromStats || _modalOpenedFromGames || _modalOpenedFromLeaderboard || _modalOpenedFromBoardSouth || _modalOpenedFromIlioupoli || _modalOpenedFromChallenges) {
-    document.body.style.minWidth = 'auto';
-    _setViewport(VP_LOCKED);
-    window.scrollTo(0, 0);
-  } else if (_libZoomedShelf()) {
+  const lib = document.getElementById('library-view');
+  const onLibrary = lib && lib.style.display !== 'none' && !document.querySelector('.stats-view.open');
+  if (onLibrary && _libZoomedShelf()) {
     document.body.style.minWidth = '';
     _setViewport(VP_LIBRARY);
     requestAnimationFrame(_scrollToShelfCenter);
-  } else {
-    document.body.style.minWidth = 'auto';
-    _setViewport(VP_LOCKED);
+    return;
   }
+  document.body.style.minWidth = 'auto';
+  _setViewport(VP_LOCKED);
+  if (_modalOpenedFromStats || _modalOpenedFromGames || _modalOpenedFromLeaderboard || _modalOpenedFromBoardSouth || _modalOpenedFromIlioupoli || _modalOpenedFromChallenges) window.scrollTo(0, 0);
 }
 
 function closeModal() {
