@@ -1052,6 +1052,33 @@
   }
   .mu-divider{height:1px;background:rgba(255,255,255,0.08);margin:0.9rem 0 0.8rem}
   .st-count.mu-count-red{background:rgba(224,97,58,0.16);color:#e0613a}
+  /* ── Send a play to BG Stats (js/bgstats-share.js) ── */
+  .bgs-send{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;margin-left:0.4rem;padding:0;border-radius:8px;border:1px solid var(--line-2);background:transparent;color:var(--text-3);cursor:pointer;flex-shrink:0}
+  .bgs-send:hover{color:var(--accent);border-color:var(--accent-line)}
+  .bgs-send svg{width:15px;height:15px}
+  .play-entry-end{display:inline-flex;align-items:center;margin-left:auto}
+  .bgs-overlay{position:fixed;inset:0;z-index:400;display:none;align-items:flex-start;justify-content:center;background:rgba(0,0,0,0.72);padding:calc(1.2rem + var(--safe-t)) 16px calc(1.2rem + var(--safe-b));overflow-y:auto;overscroll-behavior:contain}
+  .bgs-overlay.open{display:flex}
+  .bgs-sheet{width:100%;max-width:420px;margin:auto 0;background:var(--bg-2);border:1px solid var(--line-2);border-radius:var(--r-l);padding:0.9rem 1rem 1.1rem;color:var(--text);box-shadow:0 18px 60px rgba(0,0,0,0.6)}
+  .bgs-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.7rem}
+  .bgs-title{font-family:var(--font-display);font-weight:700;font-size:1.05rem}
+  .bgs-x{background:transparent;border:none;color:var(--text);font-size:1.5rem;line-height:1;cursor:pointer;padding:0 0.3rem}
+  .bgs-play{display:flex;gap:0.7rem;align-items:center}
+  .bgs-cover{width:44px;height:44px;border-radius:8px;object-fit:cover;flex-shrink:0;background:var(--card)}
+  .bgs-name{font-weight:700;line-height:1.2}
+  .bgs-meta{font-size:0.75rem;color:var(--text-3);margin-top:0.15rem;overflow-wrap:anywhere}
+  .bgs-players{display:flex;flex-wrap:wrap;gap:0.3rem;margin:0.6rem 0 0.8rem}
+  .bgs-p{font-size:0.75rem;padding:0.2rem 0.5rem;border-radius:999px;background:var(--card-2);color:var(--text-2)}
+  .bgs-p.w{color:var(--win);background:var(--win-soft)}
+  .bgs-p small{opacity:0.75}
+  .bgs-qr{width:100%;max-width:340px;aspect-ratio:1;margin:0 auto;display:flex;align-items:center;justify-content:center;padding:1rem;background:#fff;color:#333;border-radius:12px;overflow:hidden;font-size:0.8rem;text-align:center}
+  .bgs-qr:has(svg){padding:0}
+  .bgs-qr svg{width:100%;height:100%;display:block}
+  .bgs-hint{font-size:0.78rem;color:var(--text-2);text-align:center;margin:0.6rem 0 0.8rem}
+  .bgs-acts{display:flex;flex-direction:column;gap:0.45rem}
+  .bgs-btn{display:block;text-align:center;padding:0.65rem 0.8rem;border-radius:var(--r-s);border:1px solid var(--line-2);background:var(--card-2);color:var(--text);font:inherit;font-size:0.88rem;font-weight:600;text-decoration:none;cursor:pointer}
+  .bgs-btn.bgs-main{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+  .bgs-small{font-size:0.72rem;color:var(--text-3);margin-top:0.7rem;line-height:1.45}
   /* ── Rove campaign sheet (js/rove-campaign.js) ── */
   .rv{--rv-gold:#e2b04a;--rv-ink:#241703}
   .rv-loading{padding:1.2rem;text-align:center;color:var(--text-3);font-size:0.85rem}

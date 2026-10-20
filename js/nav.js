@@ -125,7 +125,7 @@ if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 let _navRestoring = false;
 let _navSeq = 0;
 const _navScroll = new Map();   // entry id → scrollY on that screen
-const NAV_OVERLAYS = { lpm: 'lpm-overlay', wrapped: 'wrapped-overlay', pics: 'pics-overlay', first: 'fc-overlay' };
+const NAV_OVERLAYS = { lpm: 'lpm-overlay', wrapped: 'wrapped-overlay', pics: 'pics-overlay', first: 'fc-overlay', bgs: 'bgs-overlay' };
 
 function _navKey(st) {
   return st.visiting ? 'visit:' + _viewingProfile : st.group + '/' + (st.sub || '');
@@ -183,6 +183,10 @@ window.addEventListener('popstate', (e) => {
   if (!keep.has('pics') && _navIsOpen('pics-overlay')) {
     const p = document.getElementById('pics-overlay');
     if (p && p._navClose) p._navClose();
+  }
+  if (!keep.has('bgs') && _navIsOpen('bgs-overlay')) {
+    const b = document.getElementById('bgs-overlay');
+    if (b && b._navClose) b._navClose();
   }
   if (!keep.has('first') && _navIsOpen('fc-overlay')) {
     const f = document.getElementById('fc-overlay');

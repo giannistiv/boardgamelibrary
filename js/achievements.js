@@ -651,6 +651,7 @@ function _openLatestPlaysModal(playerName, plays) {
           </div>
           ${tagHtml}
           ${resultHtml}
+          ${p.play && typeof bgsSendBtnHtml === 'function' ? bgsSendBtnHtml(p.bggId, p.playIdx) : ''}
         </div>
         <div class="lpm-scoreboard">${scoreboardRows}</div>
       </div>`;

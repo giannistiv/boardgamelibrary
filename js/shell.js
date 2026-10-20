@@ -768,8 +768,9 @@ function openModal(game) {
         : '<div class="play-no-winner">&#9760;&#65038; The game won</div>';
       const durHtml = playTimeBadge(play);
       const msHtml = milestoneBadges(_ptViewer(), play, true);
+      const sendHtml = typeof bgsSendBtnHtml === 'function' ? bgsSendBtnHtml(game.bggId, plays.indexOf(play)) : '';
       return `<div class="play-entry">
-        <div class="play-entry-top"><span class="play-date">${fmtDate(play.date)}</span>${msHtml ? `<span class="ms-badges">${msHtml}</span>` : ''}${durHtml}</div>
+        <div class="play-entry-top"><span class="play-date">${fmtDate(play.date)}</span>${msHtml ? `<span class="ms-badges">${msHtml}</span>` : ''}${sendHtml ? `<span class="play-entry-end">${durHtml}${sendHtml}</span>` : durHtml}</div>
         <div class="play-scores">${scoreHtml}</div>
         ${boardHtml}${noWinnerHtml}
       </div>`;
@@ -941,7 +942,7 @@ document.getElementById('modal-overlay').addEventListener('click', e => {
 });
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
-    if (document.querySelector('#pics-overlay.open')) return;   // Escape closes the pictures first
+    if (document.querySelector('#pics-overlay.open, #bgs-overlay.open')) return;   // Escape closes those first
     closeModal();
     document.getElementById('picker-overlay').classList.remove('open');
   }
