@@ -35,12 +35,14 @@ async function loadAllRatings() {
   }
 }
 
-// ── Nodes the database rules don't open yet ──
-// The rules only let the site write to the nodes it started with. Newer
-// features keep their data under their own node once a rule allows it, and
-// meanwhile under gameImages (writable; loadGameImages skips anything
-// without a url), as profiles and import maps already do. Reads take both.
-const FB_SPARE = { roveCampaigns: '_bglRoveCampaigns', mcGauntlet: '_bglMcGauntlet', rateSkips: '_bglRateSkips' };
+// ── A node the database rules don't open yet ──
+// The rules (pasted in the Firebase console) only take writes to the nodes
+// they name. A new feature's node can wait under gameImages (writable;
+// loadGameImages skips anything without a url) until its rule is added:
+// list it here, e.g. { myFeature: '_bglMyFeature' }, and reads take both.
+// Rove, the Gauntlet and the rating skips have their own nodes since 20 Oct
+// 2026; nothing waits here now.
+const FB_SPARE = {};
 const _fbDenied = new Set();   // nodes that refused a write this session: go straight to the spare
 function _fbRoot(path) { return path.split('/')[0]; }
 function _fbSpare(path) {

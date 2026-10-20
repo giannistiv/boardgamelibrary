@@ -28,13 +28,8 @@ if (_sp && NAME_MAP[_sp]) localStorage.setItem('bgl-player', NAME_MAP[_sp]);
 let PROFILE_OVERRIDES = {};   // originalCanonicalName → chosen display name
 let PROFILE_DATA = {};        // originalCanonicalName → { name, photo, … }
 let DISPLAY_TO_CANON = {};    // display name → originalCanonicalName (for re-renames)
-// Profiles live at the clean /profiles node once a Firebase rule permits it.
-// Until then we fall back to a namespaced child of the already-writable
-// gameImages node (loadGameImages ignores it — no .url). Reads merge both
-// (primary wins); writes try /profiles first, then the fallback. This makes
-// the migration seamless: add the /profiles rule and it upgrades on its own.
+// Profiles live at /profiles (its rule checks each has a name).
 const PROFILE_STORE_PRIMARY = 'profiles';
-const PROFILE_STORE_FALLBACK = 'gameImages/_bglProfiles';
 
 async function _fetchProfileStore(path) {
   try {
@@ -47,9 +42,7 @@ async function _fetchProfileStore(path) {
 
 async function loadProfiles() {
   if (!FIREBASE_DB) return;
-  const fallback = await _fetchProfileStore(PROFILE_STORE_FALLBACK);
-  const primary = await _fetchProfileStore(PROFILE_STORE_PRIMARY);
-  const data = Object.assign({}, fallback || {}, primary || {}); // primary wins
+  const data = (await _fetchProfileStore(PROFILE_STORE_PRIMARY)) || {};
   for (const enc in data) {
     const entry = data[enc];
     if (!entry || typeof entry !== 'object') continue;
@@ -157,9 +150,7 @@ async function _saveProfileName(newName) {
   return { ok: true };
 }
 
-// Write a whole profile entry. Prefer the clean /profiles node; fall back to
-// the gameImages piggyback if its rule isn't in place yet. fetch resolves even
-// on HTTP errors, so we check ok.
+// Write a whole profile entry. fetch resolves even on HTTP errors, so we check ok.
 async function _putProfile(orig, entry) {
   const body = JSON.stringify(entry);
   const put = async (path) => {
@@ -168,7 +159,7 @@ async function _putProfile(orig, entry) {
       return !!(res && res.ok);
     } catch (e) { return false; }
   };
-  return (await put(PROFILE_STORE_PRIMARY)) || (await put(PROFILE_STORE_FALLBACK));
+  return put(PROFILE_STORE_PRIMARY);
 }
 
 // Set (a data URL) or remove (null) the logged-in player's photo.
@@ -562,26 +553,20 @@ window.initImporter = function(source){
 // plays remember whose upload they came from (`src`), so a later upload
 // updates them instead of adding copies.
 const IMPORT_MAPS_PRIMARY = 'importMaps';
-const IMPORT_MAPS_FALLBACK = 'gameImages/_bglImportMaps';   // loadGameImages skips entries without a url
 
 async function _loadSourceMaps(source) {
   const out = { players: {}, places: {} };
-  for (const base of [IMPORT_MAPS_FALLBACK, IMPORT_MAPS_PRIMARY]) {   // the primary store wins
-    const data = await _fetchProfileStore(`${base}/${encodeURIComponent(source)}`);
-    if (data) { Object.assign(out.players, data.players || {}); Object.assign(out.places, data.places || {}); }
-  }
+  const data = await _fetchProfileStore(`${IMPORT_MAPS_PRIMARY}/${encodeURIComponent(source)}`);
+  if (data) { Object.assign(out.players, data.players || {}); Object.assign(out.places, data.places || {}); }
   return out;
 }
 
 async function _saveSourceMap(source, kind, uuid, name) {
   const path = `${encodeURIComponent(source)}/${kind}/${encodeURIComponent(uuid)}.json`;
-  for (const base of [IMPORT_MAPS_PRIMARY, IMPORT_MAPS_FALLBACK]) {
-    try {
-      const res = await fetch(`${FIREBASE_DB}/${base}/${path}`, { method: 'PUT', body: JSON.stringify(name) });
-      if (res.ok) return true;
-    } catch (e) { /* try the next store */ }
-  }
-  return false;
+  try {
+    const res = await fetch(`${FIREBASE_DB}/${IMPORT_MAPS_PRIMARY}/${path}`, { method: 'PUT', body: JSON.stringify(name) });
+    return res.ok;
+  } catch (e) { return false; }
 }
 
 // A play someone else already logged here: same game and day, the same
