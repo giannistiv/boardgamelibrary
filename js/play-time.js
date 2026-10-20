@@ -27,6 +27,7 @@ const PT_PER_PLAYER_RT = 0.05;  // …real-time games
 const PT_SESSION = 180;         // most one sitting of a campaign game takes, in minutes
 const PT_SLOW_MAX = 1.3;        // first plays: at most this much slower
 const PT_REPLAY = 0.75;         // the same game again that day: already set up, rules fresh
+const PT_TABLE = 3;             // the table a box time is for, when nothing says how many play it
 
 function _ptRange(str) {
   const nums = String(str || '').match(/\d+/g);
@@ -66,18 +67,20 @@ function _ptBoxMinutes(game, n) {
 function _ptBoxRaw(game, n) {
   const time = (typeof bggTimes === 'function' && bggTimes(game.bggId)) || _ptRange(game.playTime) || [Math.round(15 + 20 * _ptWeight(game))];
   const t = time.length === 1 ? [time[0], time[0]] : time;
-  const p = _ptRange(game.players) || [n, n];
+  const p = _ptRange(game.players);
   const share = _ptPerPlayer(game);
   // from the time at `from` players to the time at n
   const scale = (min, from) => min * Math.min(1.8, Math.max(0.5, 1 + share * (n - from) / from));
-  if (t[1] > t[0] && p[1] > p[0]) {
+  if (p && t[1] > t[0] && p[1] > p[0]) {
     const m = Math.min(p[1], Math.max(p[0], n));
     const at = t[0] + (t[1] - t[0]) * (m - p[0]) / (p[1] - p[0]);
     return m === n ? at : scale(at, m);
   }
   const poll = typeof bggPlayerPoll === 'function' ? bggPlayerPoll(game.bggId) : null;
   const best = poll && poll.best.size ? [...poll.best] : null;
-  const ref = best ? best.reduce((a, v) => a + v, 0) / best.length : (p[0] + p[1]) / 2;
+  // the box time is for BGG's best count, else the middle of the game's range,
+  // else a usual table (so more players still take longer)
+  const ref = best ? best.reduce((a, v) => a + v, 0) / best.length : p ? (p[0] + p[1]) / 2 : PT_TABLE;
   return scale((t[0] + t[1]) / 2, ref);
 }
 

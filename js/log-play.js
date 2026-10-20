@@ -260,7 +260,9 @@ function _lpShowGames(list, hintText) {
 // players, first plays), unless you set it.
 function _lpEstimate() {
   if (!_lp.bggId || !_lp.sc.length || typeof _ptEstimate !== 'function') return 0;
-  const game = findGameByBggId(_lp.bggId) || { bggId: _lp.bggId };
+  // a game just picked from BoardGameGeek isn't saved yet: its players and time come with the pick
+  const picked = _lpPicked && _lpPicked.id === _lp.bggId ? _lpPicked : {};
+  const game = findGameByBggId(_lp.bggId) || { bggId: _lp.bggId, players: picked.players || '', playTime: picked.time || picked.playTime || '' };
   const before = new Set();
   const others = (PLAY_HISTORY[_lp.bggId] || []).filter(p => p.mp !== _lp.id);
   for (const p of others) for (const s of p.sc) before.add(s.n);
