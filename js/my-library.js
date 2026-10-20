@@ -13,7 +13,27 @@ function myLibActive() {
   const a = typeof acctMe === 'function' ? acctMe() : null;
   return !!(a && !acctIsOwner(a));
 }
-function myLibHas(bggId) { return !!(_myLib && _myLib[Number(bggId)]); }
+// Their BGG collection joins the list by itself, kept in step by the BGG sync
+// (tools/sync-collections.py): the username they linked in Profile settings,
+// or the one the site knows for their player (js/players.js). Γιαννης's and
+// LGeorge's are the shelves the site has kept for them all along.
+const MY_HAND_WIRED = { johnnydgame: () => (typeof GIANNIS_GAMES !== 'undefined' ? GIANNIS_GAMES : {}), kukugames: () => (typeof LGEORGE_GAMES !== 'undefined' ? LGEORGE_GAMES : {}) };
+function myBggUser() {
+  const a = typeof acctMe === 'function' ? acctMe() : null;
+  if (!a) return '';
+  return a.bgg || (typeof BGG_USERS !== 'undefined' && (BGG_USERS[_navPlayer()] || BGG_USERS[a.player])) || '';
+}
+function _myBggGames() {
+  const u = myBggUser().toLowerCase();
+  if (!u) return {};
+  if (MY_HAND_WIRED[u]) return MY_HAND_WIRED[u]() || {};
+  const C = typeof BGG_COLLECTIONS !== 'undefined' ? BGG_COLLECTIONS : {};
+  const key = Object.keys(C).find(k => k.toLowerCase() === u);
+  return key ? C[key] : {};
+}
+function myLibSynced(bggId) { return !!_myBggGames()[Number(bggId)]; }
+function myLibHas(bggId) { return !!(_myLib && _myLib[Number(bggId)]) || myLibSynced(bggId); }
+function myLibIds() { return [...new Set([...Object.keys(_myLib || {}), ...Object.keys(_myBggGames())].map(Number))]; }
 
 function _myLibStore(uid, lib) {
   try { localStorage.setItem('bgl-mylib', JSON.stringify({ uid, lib })); } catch (_) {}
@@ -50,7 +70,7 @@ function _myLibRedraw() {
 // The list as shelf entries, filled in from what the site knows of each game.
 function _myShelf() {
   if (_myShelf.cache) return _myShelf.cache;
-  const ids = Object.keys(_myLib || {}).map(Number);
+  const ids = myLibIds();
   return (_myShelf.cache = ids.map(id => {
     const g = findGameByBggId(id) || { name: `Game #${id}`, bggId: id, players: '', playTime: '' };
     const rich = GAMES.find(x => x.bggId === id) || EXTRA_GAMES[id] || {};
@@ -154,6 +174,7 @@ async function myLibRemove(id) {
   id = Number(id);
   const a = acctMe();
   if (!a) return;
+  if (myLibSynced(id)) throw new Error('It\'s on your BGG collection: take it off there and it goes with the next sync.');
   await acctWrite(`libraries/${a.uid}/${id}`, 'DELETE');
   if (_myLib) delete _myLib[id];
   _myLibStore(a.uid, _myLib || {});
@@ -165,12 +186,12 @@ async function myLibRemove(id) {
 function myLibModalBtnHtml(game) {
   if (!myLibActive() || !game || !(game.bggId > 0)) return '';
   const on = myLibHas(game.bggId);
-  return `<button type="button" class="mylib-btn${on ? ' on' : ''}" data-mylib-toggle="${game.bggId}">${on ? '&#10003; In my games' : '+ Add to my games'}</button>`;
+  return `<button type="button" class="mylib-btn${on ? ' on' : ''}" data-mylib-toggle="${game.bggId}">${on ? `&#10003; In my games${myLibSynced(game.bggId) ? ' (BGG)' : ''}` : '+ Add to my games'}</button>`;
 }
 function _myLibBtnState(btn) {
   const on = myLibHas(btn.dataset.mylibToggle);
   btn.classList.toggle('on', on);
-  btn.innerHTML = on ? '&#10003; In my games' : '+ Add to my games';
+  btn.innerHTML = on ? `&#10003; In my games${myLibSynced(btn.dataset.mylibToggle) ? ' (BGG)' : ''}` : '+ Add to my games';
   btn.title = on ? 'Tap to take it off your list' : 'Add it to your list of games';
 }
 

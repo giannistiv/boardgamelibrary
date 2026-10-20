@@ -34,7 +34,7 @@ function _acctCached() {
 }
 function _acctRemember(a) {
   try {
-    if (a) localStorage.setItem('bgl-acct', JSON.stringify({ uid: a.uid, name: a.name, player: a.player, friendOf: a.friendOf || {}, email: a.email || '', provider: a.provider || '' }));
+    if (a) localStorage.setItem('bgl-acct', JSON.stringify({ uid: a.uid, name: a.name, player: a.player, friendOf: a.friendOf || {}, bgg: a.bgg || '', email: a.email || '', provider: a.provider || '' }));
     else localStorage.removeItem('bgl-acct');
   } catch (_) {}
 }
@@ -444,9 +444,32 @@ function _acctHow(a) {
 function acctSettingsHtml() {
   const a = acctMe();
   if (!a) return `<div class="profile-edit-label">Account</div><button type="button" class="profile-edit-save" data-acct-open>Sign in</button>`;
-  return `<div class="profile-edit-label">Account</div>
+  const owner = acctIsOwner(a);
+  const bgg = a.bgg || (typeof BGG_USERS !== 'undefined' && BGG_USERS[_acctDisplay(a.player)]) || '';
+  return `${owner ? '' : `<div class="profile-edit-label">BGG collection</div>
+    <div class="acct-bgg"><input type="text" class="profile-name-input" id="acct-bgg" value="${_escapeHtml(bgg)}" placeholder="Your BoardGameGeek username" maxlength="40" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <button type="button" class="profile-edit-save" data-acct-bgg>Save</button></div>
+    <div class="acct-bgg-note" id="acct-bgg-note">What you own on BGG comes to My games by itself, with every BGG sync (every few hours).</div>`}
+    <div class="profile-edit-label">Account</div>
     <div class="acct-settings"><span>${a.email ? _escapeHtml(a.email) : 'Signed in'}<small>${_acctHow(a)}</small></span>
     <button type="button" class="profile-edit-cancel" data-acct-signout>Sign out</button></div>`;
+}
+// Link a BGG username: the BGG sync brings that collection to My games.
+async function acctSaveBgg() {
+  const input = document.getElementById('acct-bgg');
+  const note = document.getElementById('acct-bgg-note');
+  const name = (input.value || '').trim();
+  const say = (t) => { if (note) note.textContent = t; };
+  if (name && !/^[A-Za-z0-9_ .-]{1,40}$/.test(name)) { say('A BGG username has letters, numbers, spaces, dots, dashes or underscores.'); return; }
+  say('Saving…');
+  try {
+    await acctWrite(`users/${_acct.uid}/bgg`, name ? 'PUT' : 'DELETE', name || undefined);
+    _acct.bgg = name;
+    _acctRemember(_acct);
+    input.blur();
+    say(name ? `Saved. ${name}'s collection comes to My games with the next BGG sync, within a few hours.` : 'Unlinked.');
+    if (typeof _myShelf === 'function') { _myShelf.cache = null; if (typeof _myLibRedraw === 'function') _myLibRedraw(); }
+  } catch (e) { say(e.message); }
 }
 // Next to Profile settings, for Στιβ and Δημητρης: send your join link.
 function acctInviteBtnHtml() {
@@ -469,6 +492,7 @@ async function acctInvite(owner) {
 document.addEventListener('click', (e) => {
   if (e.target.closest('[data-acct-open]')) { e.preventDefault(); acctOpenSheet(); return; }
   if (e.target.closest('[data-acct-signout]')) { e.preventDefault(); acctSignOut(); return; }
+  if (e.target.closest('[data-acct-bgg]')) { e.preventDefault(); acctSaveBgg(); return; }
   const inv = e.target.closest('[data-acct-invite]');
   if (inv) { e.preventDefault(); acctInvite(inv.dataset.acctInvite); }
 });

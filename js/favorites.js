@@ -233,7 +233,19 @@ function findGameByBggId(bggId) {
     || (typeof GIANNIS_GAMES !== 'undefined' && GIANNIS_GAMES[num])
     || (typeof LGEORGE_GAMES !== 'undefined' && LGEORGE_GAMES[num])
     || (typeof DIMITRIS_GAMES !== 'undefined' && DIMITRIS_GAMES[num])
+    || _collectionGame(num)
     || null;
+}
+// A game from a signed-in person's BGG collection (data/collections.js).
+function _collectionGame(id) {
+  if (!_collectionGame.idx) {
+    _collectionGame.idx = new Map();
+    const C = typeof BGG_COLLECTIONS !== 'undefined' ? BGG_COLLECTIONS : {};
+    for (const user in C) for (const k in C[user]) if (!_collectionGame.idx.has(Number(k))) {
+      _collectionGame.idx.set(Number(k), { categories: [], mechanics: [], ...C[user][k], id: 'coll_' + k });
+    }
+  }
+  return _collectionGame.idx.get(id) || null;
 }
 
 // ── Board South "what to play next" voting (Firebase-backed) ──

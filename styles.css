@@ -3545,6 +3545,9 @@
   .profile-hero .profile-edit-form{order:4;flex-basis:100%}
   .profile-hero .profile-invite:hover{transform:none}
   .profile-hero .profile-invite + .profile-cog{margin-left:-0.5rem}
+  .acct-bgg{display:flex;gap:0.4rem;align-items:center;margin-bottom:0.3rem}
+  .acct-bgg .profile-name-input{flex:1;min-width:0;margin:0}
+  .acct-bgg-note{font-size:0.74rem;color:var(--text-3);margin-bottom:0.8rem;line-height:1.4}
   .acct-settings{display:flex;align-items:center;justify-content:space-between;gap:0.6rem;font-size:0.85rem;overflow-wrap:anywhere}
   .acct-settings span{display:flex;flex-direction:column;gap:0.1rem;min-width:0}
   .acct-settings small{font-size:0.72rem;color:var(--text-3)}

@@ -487,7 +487,10 @@ function _applyLibMode() {
   view.classList.toggle('lib-is-empty', mine && !n);
   if (empty) {
     empty.hidden = !(mine && !n);
-    if (mine && !n) empty.innerHTML = `<b>Your games go here</b><span>Add the games you own: search the ones the site knows, or paste a BoardGameGeek link.</span><button type="button" class="acct-btn acct-main" data-mylib-open>+ Add a game</button>`;
+    const bgg = typeof myBggUser === 'function' ? myBggUser() : '';
+    if (mine && !n) empty.innerHTML = `<b>Your games go here</b><span>${bgg
+      ? `Your BGG collection (${_escapeHtml(bgg)}) arrives with the next BGG sync, within a few hours. Meanwhile, add games yourself.`
+      : 'Search for the games you own and add them, or link your BGG username in Profile settings and your collection comes by itself.'}</span><button type="button" class="acct-btn acct-main" data-mylib-open>+ Add a game</button>`;
   }
   applyFilters();
 }

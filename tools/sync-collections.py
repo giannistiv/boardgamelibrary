@@ -9,6 +9,9 @@ The lists and the BGG collections that feed them:
     GIANNIS_GAMES   JohnnyDgame   Board South votes
     LGEORGE_GAMES   kukugames     Board South votes
     DIMITRIS_GAMES  Rhogarj       Ilioupoli Bros shelf
+Anyone else signed in to the site gets theirs too, in data/collections.js:
+the BGG username they linked in Profile settings (users/{uid}/bgg), or the
+one js/players.js's BGG_USERS has for their player (see sync_accounts).
 Στιβ's GAMES isn't synced like those: it's the physical shelf, with
 hand-placed cubbies, and his BGG collection doesn't match it. Instead, a game
 that newly appears among his owned games on BGG (johnstiv) is added as a "new
@@ -60,6 +63,10 @@ SPINE_COLORS = ['#2e3a6e', '#2e5a7a', '#2e7a73', '#3a6e3a', '#3b7a4f', '#444b6e'
                 '#5a2e7a', '#6e2e2e', '#6e4a2e', '#7a2e52', '#7a3b2e', '#7a6b2e']
 SHELF_OWNER = 'johnstiv'   # Στιβ's BGG account, for new arrivals on GAMES
 BASELINE_FILE = os.path.join(ROOT, 'tools', 'owned-baseline.json')
+COLLECTIONS_JS = os.path.join(ROOT, 'data', 'collections.js')
+PLAYERS_JS = os.path.join(ROOT, 'js', 'players.js')
+COLLECTIONS_HEAD = ('// What the signed-in people own on BGG: the username they linked in Profile settings, or the\n'
+                    '// one js/players.js knows for their player. Written by tools/sync-collections.py; don\'t edit by hand.\n')
 # BGG categories the shelf's own tags use (plus Co-op from the mechanic)
 SHELF_TAGS = {'Card Game': 'Card Game', 'Party Game': 'Party', 'Deduction': 'Deduction', 'Puzzle': 'Puzzle',
               'Abstract Strategy': 'Abstract', 'Dice': 'Dice', 'Adventure': 'Adventure', 'Fantasy': 'Fantasy'}
@@ -360,6 +367,97 @@ def plan(const, username, votes_path, token, src):
     return '\n'.join(body), adds, removes, unvote, votes, notes
 
 
+def _account_usernames():
+    """The BGG usernames of the signed-in people: the one each linked, or
+    BGG_USERS's for their player. None when Firebase can't be read."""
+    status, body = curl(f'{FIREBASE}/users.json', timeout=10)
+    if status != 200:
+        return None
+    try:
+        with open(PLAYERS_JS, encoding='utf-8') as f:
+            block = re.search(r'const BGG_USERS = \{(.*?)\};', f.read(), re.S).group(1)
+        known = dict(re.findall(r"'([^']+)'\s*:\s*'([^']+)'", block))
+    except (OSError, AttributeError):
+        known = {}
+    hand = {u.lower() for _, u, _ in LISTS} | {SHELF_OWNER.lower()}   # these have lists of their own
+    out = {}
+    for user in (json.loads(body) or {}).values():
+        if not isinstance(user, dict):
+            continue
+        name = str(user.get('bgg') or known.get(str(user.get('name') or '')) or known.get(str(user.get('player') or '')) or '').strip()
+        if re.fullmatch(r'[A-Za-z0-9_ .-]{1,40}', name) and name.lower() not in hand:
+            out[name.lower()] = name
+    return sorted(out.values(), key=str.lower)
+
+
+def _collection_entry(gid, g, weight):
+    e = {'name': g['name'], 'bggId': gid, 'year': g['year'] or None}
+    if weight:
+        e['complexity'] = round(weight, 2)
+    if g['minp'] or g['maxp']:
+        lo, hi = g['minp'] or g['maxp'], g['maxp'] or g['minp']
+        e['players'] = str(lo) if lo == hi else f'{lo}-{hi}'
+    if g['time']:
+        e['playTime'] = f'{g["time"]} min'
+    if g['rating']:
+        e['bggRating'] = round(g['rating'], 1)
+    return e
+
+
+def sync_accounts(token, say, auto, dry):
+    """data/collections.js: every signed-in person's BGG collection. A game
+    already in it keeps its entry; new ones get their BGG data. Returns
+    (written, ok)."""
+    users = _account_usernames()
+    if users is None:
+        say('accounts: could not read Firebase; collections left as they were')
+        return False, False
+    try:
+        with open(COLLECTIONS_JS, encoding='utf-8') as f:
+            src = f.read()
+        before = json.loads(src[src.index('{'):src.rindex('}') + 1])
+    except (FileNotFoundError, ValueError):
+        before = {}
+    after, ok = {}, True
+    for user in users:
+        old = {int(k): v for k, v in (before.get(user) or {}).items()}
+        try:
+            owned = owned_games(user, token)
+        except (Pending, RuntimeError) as e:
+            say(f'{user}: {e}; kept as it was')
+            if old:
+                after[user] = {str(k): v for k, v in old.items()}
+            ok = False
+            continue
+        if not owned and old:
+            say(f'{user}: the collection came back empty (private, or a BGG hiccup); kept as it was')
+            after[user] = {str(k): v for k, v in old.items()}
+            continue
+        gone = set(old) - set(owned)
+        if len(gone) > max(5, len(old) // 4):
+            say(f'{user}: {len(gone)} games would go, which looks like a bad read, so nothing was removed')
+            gone = set()
+        new = sorted(set(owned) - set(old))
+        extra = weights(new, token) if new else {}
+        games = {gid: e for gid, e in old.items() if gid not in gone}
+        for gid in new:
+            name, weight = extra.get(gid, ('', 0.0))
+            g = dict(owned[gid])
+            g['name'] = g['name'] or name or f'Game #{gid}'
+            games[gid] = _collection_entry(gid, g, weight)
+        if new or gone:
+            say(f'{user}: +{len(new)} -{len(gone)}')
+        after[user] = {str(k): games[k] for k in sorted(games)}
+    if after == before:
+        return False, ok
+    if not dry:
+        with open(COLLECTIONS_JS, 'w', encoding='utf-8') as f:
+            f.write(COLLECTIONS_HEAD + 'const BGG_COLLECTIONS = ' + json.dumps(after, ensure_ascii=False, separators=(',', ':')) + ';\n')
+        if auto:
+            git('add', COLLECTIONS_JS)
+    return True, ok
+
+
 def git(*args):
     return subprocess.run(['git', *args], cwd=ROOT, capture_output=True)
 
@@ -427,6 +525,17 @@ def main():
         m = list_block(src, const)
         src = src[:m.start(1)] + body + src[m.end(1):]
         changed = True
+
+    # everyone signed in: their own collections
+    try:
+        _, accounts_ok = sync_accounts(token, say, auto, dry)
+        all_ok = all_ok and accounts_ok
+    except AuthError as e:
+        say(str(e))
+        return
+    except Exception as e:
+        say(f'accounts: skipped ({type(e).__name__}: {e})')
+        all_ok = False
 
     # Στιβ's new arrivals
     label = f'GAMES ({SHELF_OWNER})'

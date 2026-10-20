@@ -121,6 +121,12 @@ def known_games():
     with open(os.path.join(ROOT, 'data', 'play-history.js'), encoding='utf-8') as f:
         for i in re.findall(r'^\s*(\d+)\s*:\s*\[', f.read(), re.M):
             games.setdefault(i, None)
+    try:  # the signed-in people's BGG collections (tools/sync-collections.py)
+        with open(os.path.join(ROOT, 'data', 'collections.js'), encoding='utf-8') as f:
+            for i in re.findall(r'"bggId":(\d+)', f.read()):
+                games.setdefault(i, None)
+    except FileNotFoundError:
+        pass
     try:  # games imported through the app live in Firebase, not in the repo
         imported = get(f'{FIREBASE}/importedGames.json', timeout=5, retries=0) or {}
         for g in imported.values():

@@ -53,7 +53,7 @@ function _gbLibraries() {
   }
   // a signed-in friend's own games (js/my-library.js)
   if (typeof myLibActive === 'function' && myLibActive()) {
-    libs.unshift({ key: 'mine', label: me || 'Mine', ids: new Set(Object.keys(_myLib || {}).map(Number)) });
+    libs.unshift({ key: 'mine', label: me || 'Mine', ids: new Set(typeof myLibIds === 'function' ? myLibIds() : Object.keys(_myLib || {}).map(Number)) });
   }
   return libs;
 }
