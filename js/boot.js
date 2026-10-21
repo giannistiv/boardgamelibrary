@@ -208,8 +208,28 @@ Promise.all([loadAllRatings(), loadRateSkips(), loadAllFavorites(), loadImported
     else openPicker();
   }
   navBooted();   // from here on, each new screen is a step back can return to
+  _takeGoLink();
   _takeSharedFile();
 });
+
+// ── A link into the app, from a notification (sw.js): ?go=game:ID | backed | hot:ID ──
+function _takeGoLink() {
+  const go = new URLSearchParams(location.search).get('go');
+  if (!go) return;
+  history.replaceState(history.state, '', location.pathname);
+  const [kind, arg] = go.split(':');
+  const id = Number(arg);
+  if (kind === 'game') {
+    const g = findGameByBggId(id);
+    if (g) { _modalTab = 'plays'; _modalTabFor = g.bggId; openModal(g); }
+  } else if (kind === 'backed' || kind === 'hot') {
+    if (typeof _hotFilter !== 'undefined') _hotFilter = kind === 'backed' ? 'backed' : 'live';
+    _navGo('explore', 'trending');
+    if (kind === 'hot' && typeof _loadHot === 'function') {
+      _loadHot().then(h => { const g = (h.games || []).find(x => x.id === id); if (g) _openHotGame(g); }).catch(() => {});
+    }
+  }
+}
 
 // ── A BGStats export shared to the app (Android share sheet → "Board Games") ──
 // sw.js keeps the file; here it goes to the logged-in player's importer

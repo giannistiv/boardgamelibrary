@@ -1,7 +1,8 @@
-# BGG search for Board Game Library (worker/src/index.js).
+# BGG search and notifications for Board Game Library (worker/src/index.js, worker/src/push.js).
 # Deploy from this folder:  npx wrangler@4 deploy
-# The BGG token is a secret, never in this file:
-#   cat ../tools/.bgg-token | npx wrangler@4 secret put BGG_TOKEN
+# Secrets, never in this file:
+#   BGG_TOKEN      cat ../tools/.bgg-token | npx wrangler@4 secret put BGG_TOKEN
+#   VAPID_PRIVATE  the private half of the notification key (a JWK)
 name = "bgl-bgg"
 main = "src/index.js"
 compatibility_date = "2025-09-01"
@@ -9,3 +10,16 @@ workers_dev = true
 
 [vars]
 ALLOWED_ORIGINS = "https://giannistiv.github.io,http://localhost:8765"
+FIREBASE_DB = "https://boardgamelibrary0-default-rtdb.europe-west1.firebasedatabase.app"
+FIREBASE_PROJECT = "boardgamelibrary0"
+VAPID_PUBLIC = "BBe4fg0Y6TYnt2dDtKDEzOf850CkG9t1KSWvuyuvPruex5IN5sJf-Z3WcYSyF7YefjgZX3nL8DOXjHb_WnCb0rc"
+VAPID_SUBJECT = "https://giannistiv.github.io/boardgamelibrary/"
+
+# the phones and browsers that turned notifications on
+[[kv_namespaces]]
+binding = "PUSH"
+id = "eccbcaa917244a1489dd6d14e54235d2"
+
+# every morning, 09:00 or 10:00 in Greece: campaigns ending, backed games due
+[triggers]
+crons = ["0 7 * * *"]

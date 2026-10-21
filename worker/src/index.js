@@ -7,6 +7,16 @@
 //   GET /thing?id=1,2     → { items: [{ id, name, year, exp, img, image, players, playTime, weight, rating, rated, designers, mechanics, categories }] }
 // Only the site's own pages may use it (ALLOWED_ORIGINS). Answers are kept
 // for a day, so the same search doesn't ask BGG again.
+//
+// It also sends the app's notifications (Web Push, ./push.js):
+//   POST /push/subscribe   { subscription }   a phone or browser that wants them
+//   POST /push/unsubscribe { endpoint }
+//   POST /push/play        { id, game }       a play was just logged: tell the others in it
+//   POST /push/test                           "notifications are on"
+// each with the person's Firebase sign-in token, and every morning (the cron
+// trigger) it tells people about campaigns they watch ending and backed games
+// due that month.
+import { handlePush, daily } from './push.js';
 
 const BGG = 'https://boardgamegeek.com/xmlapi2/';
 const DAY = 86400;
@@ -19,9 +29,19 @@ export default {
     const allowed = String(env.ALLOWED_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean);
     const cors = allowed.includes(origin) ? { 'Access-Control-Allow-Origin': origin, Vary: 'Origin' } : null;
     if (request.method === 'OPTIONS') {
-      return new Response(null, { status: cors ? 204 : 403, headers: { ...(cors || {}), 'Access-Control-Allow-Methods': 'GET', 'Access-Control-Max-Age': String(DAY) } });
+      return new Response(null, { status: cors ? 204 : 403, headers: { ...(cors || {}), 'Access-Control-Allow-Methods': 'GET, POST', 'Access-Control-Allow-Headers': 'Content-Type, Authorization', 'Access-Control-Max-Age': String(DAY) } });
     }
     if (!cors) return json({ error: 'Only Board Game Library can use this.' }, 403);
+    if (url.pathname.startsWith('/push/')) {
+      if (request.method !== 'POST') return json({ error: 'POST only' }, 405, cors);
+      try {
+        const { status, body } = await handlePush(url.pathname.slice(6), request, env);
+        return json(body, status, cors, true);
+      } catch (e) {
+        const msg = String(e && e.message || e);
+        return json({ error: msg }, /sign/i.test(msg) ? 401 : 500, cors, true);
+      }
+    }
     if (request.method !== 'GET') return json({ error: 'GET only' }, 405, cors);
     if (!env.BGG_TOKEN) return json({ error: 'The BGG token is missing (wrangler secret put BGG_TOKEN).' }, 500, cors);
 
@@ -48,12 +68,15 @@ export default {
       return json({ error: String(e && e.message || e) }, 502, cors);
     }
   },
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(daily(env));
+  },
 };
 
-function json(body, status, cors) {
+function json(body, status, cors, noStore) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': status === 200 ? `public, max-age=${DAY}` : 'no-store', ...(cors || {}) },
+    headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': status === 200 && !noStore ? `public, max-age=${DAY}` : 'no-store', ...(cors || {}) },
   });
 }
 

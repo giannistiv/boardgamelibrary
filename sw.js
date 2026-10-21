@@ -10,6 +10,9 @@
 //   a shared BGStats export  kept for the page, which imports it (boot.js)
 //   everything else          straight to the network
 //
+// It also shows the app's notifications (js/notify.js, worker/src/push.js):
+// a push carries {title, body, url, tag}; tapping one opens the app there.
+//
 // Installing precaches index.html and every stamped asset it references, so
 // the app opens offline after the first visit. Each new index.html prunes the
 // asset versions it no longer uses.
@@ -214,4 +217,32 @@ self.addEventListener('fetch', (event) => {
   if (url.hostname.endsWith(FIREBASE) && url.pathname.endsWith('.json')) {
     event.respondWith(networkFirst(DATA, req));
   }
+});
+
+// ── Notifications ──
+self.addEventListener('push', (event) => {
+  let msg = {};
+  try { msg = event.data ? event.data.json() : {}; } catch (e) { msg = { body: event.data ? event.data.text() : '' }; }
+  const scope = self.registration.scope;
+  event.waitUntil(self.registration.showNotification(msg.title || 'Board Game Library', {
+    body: msg.body || '',
+    icon: new URL('icons/icon-192.png', scope).href,
+    badge: new URL('icons/icon-192.png', scope).href,
+    tag: msg.tag || undefined,
+    data: { url: msg.url || scope },
+  }));
+});
+// Tapping one: the app's window if it's open (taken to the page), else a new one.
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = (event.notification.data && event.notification.data.url) || self.registration.scope;
+  event.waitUntil((async () => {
+    const wins = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    const mine = wins.find(w => w.url.startsWith(self.registration.scope));
+    if (mine) {
+      try { await mine.navigate(url); } catch (e) { /* not ours to steer: just bring it up */ }
+      return mine.focus();
+    }
+    return self.clients.openWindow(url);
+  })());
 });

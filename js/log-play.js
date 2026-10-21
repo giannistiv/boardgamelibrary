@@ -498,7 +498,11 @@ async function _lpSave() {
     if (typeof ensureKnownGame === 'function') await ensureKnownGame(rec.bggId, _lpPicked && _lpPicked.id === rec.bggId ? _lpPicked : null);
     let id = _lp.id;
     if (id) await acctWrite(`plays/${id}`, 'PUT', rec);
-    else id = (await acctWrite('plays', 'POST', rec)).name;
+    else {
+      id = (await acctWrite('plays', 'POST', rec)).name;
+      // the others in it hear about it (js/notify.js)
+      if (typeof notifyPlayLogged === 'function') notifyPlayLogged(id, (findGameByBggId(rec.bggId) || {}).name || '');
+    }
     manualPlaysCache[id] = rec;
     _lpMerge(id, rec);
     _sortPlayHistory();

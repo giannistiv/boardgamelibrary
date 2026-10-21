@@ -105,6 +105,11 @@ async function _acctGet(path) {
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
+// The sign-in token, for the site's own service (notifications: js/notify.js).
+async function acctIdToken() {
+  const user = _acctAuth && _acctAuth.currentUser;
+  return user ? user.getIdToken() : null;
+}
 async function acctWrite(path, method, data) {
   const user = _acctAuth && _acctAuth.currentUser;
   if (!user) throw new Error('You\'re not signed in on this device.');
@@ -165,6 +170,7 @@ async function _acctOnUser(user) {
 // depends on who's looking redraws.
 function _acctApply() {
   _acctRemember(_acct);
+  if (typeof notifySync === 'function' && _acctAuth && _acctAuth.currentUser) notifySync();
   const before = localStorage.getItem('bgl-player');
   const name = _acctDisplay(_acct.player);
   localStorage.setItem('bgl-player', name);
@@ -188,6 +194,7 @@ function _acctSignedOut() {
   if (typeof _navSync === 'function') _navSync();
 }
 async function acctSignOut() {
+  try { if (typeof notifyOff === 'function') await notifyOff(); } catch (_) {}   // this device stops getting their notifications
   try { if (_acctAuth) await _acctAuth.signOut(); } catch (_) {}
   _acctSignedOut();
   if (typeof switchToLibrary === 'function') switchToLibrary();
@@ -469,6 +476,7 @@ function acctSettingsHtml() {
     <div class="acct-bgg"><input type="text" class="profile-name-input" id="acct-bgg" value="${_escapeHtml(bgg)}" placeholder="Your BoardGameGeek username" maxlength="40" autocomplete="off" autocapitalize="off" spellcheck="false">
     <button type="button" class="profile-edit-save" data-acct-bgg>Save</button></div>
     <div class="acct-bgg-note" id="acct-bgg-note">What you own on BGG comes to My games by itself, with every BGG sync (every few hours).</div>`}
+    ${typeof notifySettingsHtml === 'function' ? notifySettingsHtml() : ''}
     <div class="profile-edit-label">Account</div>
     <div class="acct-settings"><span>${a.email ? _escapeHtml(a.email) : 'Signed in'}<small>${_acctHow(a)}</small></span>
     <button type="button" class="profile-edit-cancel" data-acct-signout>Sign out</button></div>`;
