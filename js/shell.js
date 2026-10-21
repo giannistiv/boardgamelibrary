@@ -803,7 +803,8 @@ function openModal(game) {
         : '<div class="play-no-winner">&#9760;&#65038; The game won</div>';
       const durHtml = playTimeBadge(play);
       const msHtml = milestoneBadges(_ptViewer(), play, true);
-      const sendHtml = (typeof logPlayEditBtnHtml === 'function' ? logPlayEditBtnHtml(play) : '')
+      const sendHtml = (typeof logPlayAgainBtnHtml === 'function' ? logPlayAgainBtnHtml(game.bggId, plays.indexOf(play), play) : '')
+        + (typeof logPlayEditBtnHtml === 'function' ? logPlayEditBtnHtml(play) : '')
         + (typeof bgsSendBtnHtml === 'function' ? bgsSendBtnHtml(game.bggId, plays.indexOf(play)) : '');
       return `<div class="play-entry">
         <div class="play-entry-top"><span class="play-date">${fmtDate(play.date)}</span>${msHtml ? `<span class="ms-badges">${msHtml}</span>` : ''}${sendHtml ? `<span class="play-entry-end">${durHtml}${sendHtml}</span>` : durHtml}</div>

@@ -77,6 +77,13 @@ function logPlayBtnHtml(game, where) {
   if (!a || (game && !(Number(game.bggId) > 0))) return '';   // a play is saved by the game's BGG id
   return `<button type="button" class="lp-open${where ? ' lp-open-' + where : ''}" data-lp-open="${game ? game.bggId : ''}">+ Log a play</button>`;
 }
+// ↻ on a play you were in: the same game and people again, today.
+function logPlayAgainBtnHtml(bggId, idx, play) {
+  const a = typeof acctMe === 'function' ? acctMe() : null;
+  const me = a && _navPlayer();
+  if (!me || !(Number(bggId) > 0) || idx < 0 || !play || !play.sc.some(s => s.n === me)) return '';
+  return `<button type="button" class="lp-edit lp-again" data-lp-again="${Number(bggId)}|${idx}" title="Log this again" aria-label="Log this again"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v4.5h-4.5"/></svg></button>`;
+}
 function logPlayEditBtnHtml(play) {
   if (!_lpCanEdit(play)) return '';
   return `<button type="button" class="lp-edit" data-lp-edit="${_escapeHtml(play.mp)}" title="Edit this play" aria-label="Edit this play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></button>`;
@@ -125,6 +132,35 @@ function logPlayOpen(bggId) {
     sc: me ? [{ n: me, s: '', w: false, r: '' }] : [], roles: false, gameWon: false };
   _lpShow();
 }
+// The same game, people, characters, place and scenario as a past play;
+// today, and no scores or winners yet.
+function logPlayAgain(bggId, idx) {
+  const play = (PLAY_HISTORY[bggId] || [])[idx];
+  if (!play) return logPlayOpen(bggId);
+  const a = typeof acctMe === 'function' ? acctMe() : null;
+  if (!a) { if (typeof acctOpenSheet === 'function') acctOpenSheet(); return; }
+  const sc = play.sc.filter(s => s && s.n).map(s => ({ n: s.n, s: '', w: false, r: s.r || '' }));
+  _lp = { id: null, bggId: Number(bggId), date: _lpToday(), time: _lpNow(), d: '', lenSet: false, l: play.l || _lpPlaces()[0] || '',
+    b: play.b || '', c: '', sc, roles: sc.some(s => s.r), gameWon: false };
+  _lpShow();
+}
+// Your last few plays, one per game and group: the picks at the top of a new log.
+function _lpRecentCombos() {
+  const me = _navPlayer();
+  if (!me) return [];
+  const mine = [];
+  for (const id in PLAY_HISTORY) PLAY_HISTORY[id].forEach((p, i) => { if (p.sc.some(s => s.n === me)) mine.push({ id: Number(id), i, p }); });
+  mine.sort((x, y) => String(y.p.t || y.p.date).localeCompare(String(x.p.t || x.p.date)));
+  const seen = new Set(), out = [];
+  for (const m of mine) {
+    const key = m.id + '|' + m.p.sc.map(s => s.n).sort().join(',');
+    if (seen.has(key) || !findGameByBggId(m.id)) continue;
+    seen.add(key);
+    out.push(m);
+    if (out.length === 3) break;
+  }
+  return out;
+}
 function logPlayEdit(id) {
   const p = manualPlaysCache[id];
   if (!p) return;
@@ -164,6 +200,18 @@ function _lpShow() {
         <button type="button" class="lp-close" data-lp="close" aria-label="Close">&times;</button>
       </header>
       <div class="lp-body">
+        ${!_lp.id && !_lp.bggId && _lpRecentCombos().length ? `<section class="lp-part">
+          <h3 class="lp-h">Play it again</h3>
+          <div class="lp-again-list">${_lpRecentCombos().map(m => {
+            const g = findGameByBggId(m.id);
+            const others = m.p.sc.map(s => s.n).filter(n => n !== _navPlayer());
+            return `<button type="button" class="lp-gpick" data-lp-again="${m.id}|${m.i}">
+              <img class="lp-gcover" src="images/${m.id}.jpg" alt="" loading="lazy" onerror="__imgFallback(this, ${m.id})">
+              <span class="lp-gname"><b>${esc(g.name)}</b><span>${others.length ? 'with ' + esc(others.slice(0, 3).join(', ')) + (others.length > 3 ? ` +${others.length - 3}` : '') : 'solo'} &middot; ${_fmtDateShort(m.p.date)}</span></span>
+              <span class="lp-again-ico" aria-hidden="true">&#8635;</span>
+            </button>`;
+          }).join('')}</div>
+        </section>` : ''}
         <section class="lp-part">
           <h3 class="lp-h">Game</h3>
           <div id="lp-game"></div>
@@ -491,6 +539,8 @@ document.addEventListener('click', (e) => {
   const o = e.target.closest('[data-lp-open]');
   if (o) { e.preventDefault(); e.stopPropagation(); logPlayOpen(o.dataset.lpOpen); return; }
   const ed = e.target.closest('[data-lp-edit]');
-  if (ed) { e.preventDefault(); e.stopPropagation(); logPlayEdit(ed.dataset.lpEdit); }
+  if (ed) { e.preventDefault(); e.stopPropagation(); logPlayEdit(ed.dataset.lpEdit); return; }
+  const ag = e.target.closest('[data-lp-again]');
+  if (ag) { e.preventDefault(); e.stopPropagation(); const [id, i] = ag.dataset.lpAgain.split('|').map(Number); logPlayAgain(id, i); }
 }, true);
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && _lpOpen) _lpClose(); });
