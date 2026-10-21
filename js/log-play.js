@@ -16,10 +16,18 @@ async function loadManualPlays() {
     manualPlaysCache = {};
   }
 }
-// After the BGStats plays have merged (boot.js).
+// After the BGStats plays have merged (boot.js), and again after an upload
+// brings more: oldest first, so each pairs with its own BGStats copy.
 function mergeManualPlays() {
-  for (const id in manualPlaysCache) _lpMerge(id, manualPlaysCache[id]);
+  for (const id in manualPlaysCache) _lpUnmerge(id);
+  Object.keys(manualPlaysCache)
+    .sort((x, y) => String(manualPlaysCache[x].t || '').localeCompare(String(manualPlaysCache[y].t || '')))
+    .forEach(id => _lpMerge(id, manualPlaysCache[id]));
 }
+// A logged play hidden because a BGStats file has the same play: that copy,
+// so each BGStats play stands in for one logged play only.
+const _lpTwin = new Map();      // logged play id → the BGStats play it matched
+const _lpTaken = new Set();     // BGStats plays already matched
 
 function _lpEntry(id, p) {
   const sc = (Array.isArray(p.sc) ? p.sc : Object.values(p.sc || {})).filter(s => s && s.n).map(s => {
@@ -35,6 +43,8 @@ function _lpEntry(id, p) {
   return e;
 }
 function _lpUnmerge(id) {
+  const tw = _lpTwin.get(id);
+  if (tw) { _lpTaken.delete(tw); _lpTwin.delete(id); }
   for (const g in PLAY_HISTORY) {
     const i = PLAY_HISTORY[g].findIndex(e => e.mp === id);
     if (i >= 0) PLAY_HISTORY[g].splice(i, 1);
@@ -45,21 +55,14 @@ function _lpMerge(id, p) {
   if (!p || !(Number(p.bggId) > 0) || !p.date) return;
   const arr = PLAY_HISTORY[p.bggId] || (PLAY_HISTORY[p.bggId] = []);
   const entry = _lpEntry(id, p);
-  // the same play from a BGStats file: same day, the same people (one may be
-  // missing), and no score that differs; two games in one evening stay two
-  const mine = new Map(entry.sc.map(s => [s.n, s.s]));
-  const twin = arr.some(e => {
-    if (e.mp || e.date !== entry.date || Math.abs(e.sc.length - entry.sc.length) > 1) return false;
-    let both = 0;
-    for (const s of e.sc) {
-      if (!mine.has(s.n)) continue;
-      const a = String(s.s == null ? '' : s.s), b = mine.get(s.n);
-      if (a && b && a !== b) return false;
-      both++;
-    }
-    return both >= Math.max(1, Math.max(e.sc.length, entry.sc.length) - 1);
-  });
-  if (!twin) arr.push(entry);
+  // the same play from a BGStats file (samePlay: scores, results, scenarios
+  // agree), one not already standing in for another logged play; the nearest
+  // in time when several fit. Two games in one evening stay two.
+  const when = (x) => Date.parse(String(x.t || x.date).replace(' ', 'T')) || 0;
+  const twin = arr.filter(e => !e.mp && !_lpTaken.has(e) && samePlay(e, entry))
+    .sort((x, y) => Math.abs(when(x) - when(entry)) - Math.abs(when(y) - when(entry)))[0];
+  if (twin) { _lpTaken.add(twin); _lpTwin.set(id, twin); return; }
+  arr.push(entry);
 }
 
 // Who may change a logged play here: whoever logged it, and Στιβ (the rules decide in the end).

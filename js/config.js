@@ -200,6 +200,38 @@ function byPlayOrder(a, b) {
   return x < y ? -1 : x > y ? 1 : 0;
 }
 
+// Two logs of the same play? Same day, the same people (one may be missing
+// from either copy), and nothing that tells them apart: a score or a result
+// that differs, or scenarios that have no word in common. Co-op games without
+// scores played twice in an evening look alike, so callers pair each copy
+// with one play at most: a second game still counts.
+// Words that say how a scenario was played, not which one ("Crossbones,
+// Expert" and "Absorbing Man, Expert" are two games).
+const SAME_PLAY_SKIP = new Set(['expert', 'standard', 'heroic', 'normal', 'easy', 'medium', 'hard', 'harder', 'beginner',
+  'advanced', 'legendary', 'nightmare', 'level', 'mode', 'variant', 'solo', 'campaign', 'scenario', 'mission', 'chapter',
+  'map', 'side', 'the', 'and', 'with', 'game']);
+function samePlay(a, b) {
+  if (!a || !b || a.date !== b.date || !Array.isArray(a.sc) || !Array.isArray(b.sc)) return false;
+  if (Math.abs(a.sc.length - b.sc.length) > 1) return false;
+  const fold = (x) => String(x == null ? '' : x).trim().toLowerCase();
+  if (a.b && b.b) {
+    const words = (x) => new Set(fold(x).split(/[^\p{L}\p{N}]+/u).filter(w => w.length > 2 && !SAME_PLAY_SKIP.has(w)));
+    const wa = words(a.b), wb = words(b.b);
+    if (wa.size && wb.size && ![...wa].some(w => wb.has(w))) return false;
+  }
+  const other = new Map(b.sc.map(s => [s.n, s]));
+  let both = 0;
+  for (const s of a.sc) {
+    const t = other.get(s.n);
+    if (!t) continue;
+    const x = fold(s.s), y = fold(t.s);
+    if (x && y && x !== y) return false;
+    if (!!s.w !== !!t.w) return false;
+    both++;
+  }
+  return both >= Math.max(1, Math.max(a.sc.length, b.sc.length) - 1);
+}
+
 // Keep every game's plays newest first, in true play order within a day.
 function _sortPlayHistory() {
   for (const id in PLAY_HISTORY) PLAY_HISTORY[id].sort((a, b) => byPlayOrder(b, a));

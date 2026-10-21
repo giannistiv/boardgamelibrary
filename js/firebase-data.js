@@ -241,7 +241,7 @@ function _mergePlayIntoHistory(uuid, p) {
 
   const newNames = new Set(p.sc.map(s => s.n));
   const isHardcodedDup = (e) => {
-    if (e._uuid) return false;
+    if (e._uuid || e.mp) return false;   // a play logged in the app is never a file's built-in copy
     if (e.date !== p.date) return false;
     if (e.sc.length !== p.sc.length) return false;
     let overlap = 0;

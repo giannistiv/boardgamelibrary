@@ -497,6 +497,8 @@ window.initImporter = function(source){
       nothingNew && !unchanged && !olderSkipped ? 'This file has no plays.' : '',
     ];
 
+    // plays logged in the app pair with the BGStats copies afresh (js/log-play.js)
+    if (typeof mergeManualPlays === 'function') { mergeManualPlays(); _sortPlayHistory(); }
     finish(resType, resTitle, resLines);
   }
 
@@ -569,20 +571,13 @@ async function _saveSourceMap(source, kind, uuid, name) {
   } catch (e) { return false; }
 }
 
-// A play someone else already logged here: same game and day, the same
-// people (one may be missing from either copy) with the same scores.
-function _alreadyHere(bggId, p, source) {
-  return (PLAY_HISTORY[bggId] || []).some(e => {
-    if (e.src === source || e.date !== p.date) return false;
-    const mine = new Map(p.sc.map(s => [s.n, s.s]));
-    let both = 0;
-    for (const s of e.sc) {
-      if (!mine.has(s.n)) continue;
-      if (String(s.s == null ? '' : s.s) !== mine.get(s.n)) return false;
-      both++;
-    }
-    return both >= Math.max(1, Math.max(e.sc.length, p.sc.length) - 1);
-  });
+// A play someone else already logged here (samePlay: same day and people,
+// no score, result or scenario that differs), not already matched to another
+// play of this upload: two co-op games of an evening, without scores, are two.
+function _alreadyHere(bggId, p, source, taken) {
+  const e = (PLAY_HISTORY[bggId] || []).find(x => x.src !== source && !(taken && taken.has(x)) && samePlay(x, p));
+  if (e && taken) taken.add(e);
+  return !!e;
 }
 
 // Asks who the people and places new in an upload are. Resolves to
@@ -783,6 +778,7 @@ async function _importFromSource(source, src, data, showResult, finish) {
   const known = _knownPlayerNames();
   const newNames = new Set();
   let newPlays = 0, updatedPlays = 0, unchanged = 0, olderSkipped = 0, alreadyHere = 0, newGames = 0;
+  const matched = new Set();   // plays here already matched to one of this upload's (_alreadyHere)
   const persists = [];
   for (const { play, people, bggId } of todo) {
     const g = games[play.gameRefId];
@@ -822,7 +818,7 @@ async function _importFromSource(source, src, data, showResult, finish) {
 
     const saved = importedPlaysCache[play.uuid];
     if (saved && saved.m && entry.m && saved.m > entry.m) { olderSkipped++; continue; }
-    if (!saved && _alreadyHere(bggId, entry, source)) { alreadyHere++; continue; }
+    if (!saved && _alreadyHere(bggId, entry, source, matched)) { alreadyHere++; continue; }
     const status = _mergePlayIntoHistory(play.uuid, entry);
     if (status === 'same') { unchanged++; continue; }
     persists.push(persistImportedPlay(play.uuid, entry));
@@ -830,6 +826,7 @@ async function _importFromSource(source, src, data, showResult, finish) {
   }
   await Promise.all(persists);
 
+  if (typeof mergeManualPlays === 'function') { mergeManualPlays(); _sortPlayHistory(); }   // re-pair the app's own plays
   const plural = (n, w) => `${n} ${w}${n !== 1 ? 's' : ''}`;
   const nothingNew = !newPlays && !updatedPlays && !newGames;
   const skipNames = [...skipWith].join(', ');
