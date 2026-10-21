@@ -45,9 +45,20 @@ function _lpMerge(id, p) {
   if (!p || !(Number(p.bggId) > 0) || !p.date) return;
   const arr = PLAY_HISTORY[p.bggId] || (PLAY_HISTORY[p.bggId] = []);
   const entry = _lpEntry(id, p);
-  const names = new Set(entry.sc.map(s => s.n));
-  const twin = arr.some(e => !e.mp && e.date === entry.date && e.sc.length === entry.sc.length
-    && e.sc.filter(s => names.has(s.n)).length >= Math.max(1, e.sc.length - 1));
+  // the same play from a BGStats file: same day, the same people (one may be
+  // missing), and no score that differs; two games in one evening stay two
+  const mine = new Map(entry.sc.map(s => [s.n, s.s]));
+  const twin = arr.some(e => {
+    if (e.mp || e.date !== entry.date || Math.abs(e.sc.length - entry.sc.length) > 1) return false;
+    let both = 0;
+    for (const s of e.sc) {
+      if (!mine.has(s.n)) continue;
+      const a = String(s.s == null ? '' : s.s), b = mine.get(s.n);
+      if (a && b && a !== b) return false;
+      both++;
+    }
+    return both >= Math.max(1, Math.max(e.sc.length, entry.sc.length) - 1);
+  });
   if (!twin) arr.push(entry);
 }
 
@@ -60,7 +71,7 @@ function _lpCanEdit(play) {
 // ── Buttons ──
 function logPlayBtnHtml(game, where) {
   const a = typeof acctMe === 'function' ? acctMe() : null;
-  if (!a) return '';
+  if (!a || (game && !(Number(game.bggId) > 0))) return '';   // a play is saved by the game's BGG id
   return `<button type="button" class="lp-open${where ? ' lp-open-' + where : ''}" data-lp-open="${game ? game.bggId : ''}">+ Log a play</button>`;
 }
 function logPlayEditBtnHtml(play) {
@@ -143,29 +154,49 @@ function _lpEl() {
 function _lpShow() {
   const ov = _lpEl();
   const esc = _escapeHtml;
-  ov.innerHTML = `<form class="acct-sheet lp-sheet" novalidate>
-      <button type="button" class="acct-x" data-lp="close" aria-label="Close">&times;</button>
-      <div class="acct-title">${_lp.id ? 'Edit the play' : 'Log a play'}</div>
-      <div id="lp-game"></div>
-      <label><span class="acct-label">Day</span><input class="acct-input lp-date" type="date" id="lp-date" value="${esc(_lp.date)}" max="${_lpToday()}" required></label>
-      <div class="lp-sec"><span class="acct-label">Players</span><button type="button" class="acct-link" data-lp="roles">${_lp.roles ? 'Hide characters' : '+ Characters'}</button></div>
-      <div class="lp-all">
-        <button type="button" class="acct-btn" data-lp="allwon">&#9733; Everyone won</button>
-        <button type="button" class="acct-btn" data-lp="alllost">&#9760;&#65038; Everyone lost</button>
+  ov.innerHTML = `<form class="lp-sheet" novalidate>
+      <header class="lp-head">
+        <span class="lp-headside"></span>
+        <div class="lp-title">${_lp.id ? 'Edit the play' : 'Log a play'}</div>
+        <button type="button" class="lp-close" data-lp="close" aria-label="Close">&times;</button>
+      </header>
+      <div class="lp-body">
+        <section class="lp-part">
+          <h3 class="lp-h">Game</h3>
+          <div id="lp-game"></div>
+        </section>
+        <section class="lp-part">
+          <h3 class="lp-h">When and where</h3>
+          <div class="lp-pair">
+            <label class="lp-field"><span>Day</span><input class="lp-input" type="date" id="lp-date" value="${esc(_lp.date)}" max="${_lpToday()}" required></label>
+            <label class="lp-field"><span>Where</span><input class="lp-input" id="lp-l" value="${esc(_lp.l)}" maxlength="80" placeholder="Home, a café…"></label>
+          </div>
+          <div id="lp-len" class="lp-len"></div>
+        </section>
+        <section class="lp-part">
+          <div class="lp-hrow"><h3 class="lp-h">Players</h3><button type="button" class="lp-textbtn" data-lp="roles">${_lp.roles ? 'Hide characters' : '+ Characters'}</button></div>
+          <div class="lp-all">
+            <button type="button" class="lp-chip" data-lp="allwon"><span aria-hidden="true">&#9733;</span> Everyone won</button>
+            <button type="button" class="lp-chip" data-lp="alllost"><span aria-hidden="true">&#9760;&#65038;</span> Everyone lost</button>
+          </div>
+          <div id="lp-players" class="lp-players"></div>
+          <div class="lp-addp">
+            <input class="lp-input" id="lp-pname" placeholder="Add a player" maxlength="60" enterkeyhint="done">
+            <button type="button" class="lp-btn" data-lp="addp">Add</button>
+          </div>
+          <div class="lp-hint">Tap &#9733; for each winner.</div>
+        </section>
+        <details class="lp-part lp-more"${_lp.b || _lp.c ? ' open' : ''}>
+          <summary class="lp-h">Scenario and notes</summary>
+          <label class="lp-field"><span>Scenario, map or variant</span><input class="lp-input" id="lp-b" value="${esc(_lp.b)}" maxlength="300" autocomplete="off"></label>
+          <label class="lp-field"><span>Notes</span><textarea class="lp-input" id="lp-c" rows="3" maxlength="1000">${esc(_lp.c)}</textarea></label>
+        </details>
+        ${_lp.id ? '<button type="button" class="lp-textbtn lp-del" data-lp="delete">Delete this play</button>' : ''}
       </div>
-      <div class="lp-hint">Or tap &#9733; for each winner.</div>
-      <div id="lp-players"></div>
-      <div class="lp-addp">
-        <input class="acct-input" id="lp-pname" placeholder="Add a player" maxlength="60" enterkeyhint="done">
-        <button type="button" class="acct-btn" data-lp="addp">Add</button>
-      </div>
-      <div id="lp-len"></div>
-      <label><span class="acct-label">Where</span><input class="acct-input" id="lp-l" value="${esc(_lp.l)}" maxlength="80" placeholder="Home, a friend's place, a café…"></label>
-      <label><span class="acct-label">Scenario, map or variant <small>(if any)</small></span><input class="acct-input" id="lp-b" value="${esc(_lp.b)}" maxlength="300" autocomplete="off"></label>
-      <label><span class="acct-label">Notes <small>(if any)</small></span><textarea class="acct-input" id="lp-c" rows="2" maxlength="1000">${esc(_lp.c)}</textarea></label>
-      <div class="acct-msg" id="lp-msg" hidden></div>
-      <button type="submit" class="acct-btn acct-main">${_lp.id ? 'Save the changes' : 'Save the play'}</button>
-      ${_lp.id ? '<button type="button" class="acct-link lp-del" data-lp="delete">Delete this play</button>' : ''}
+      <footer class="lp-foot">
+        <div class="acct-msg lp-msg" id="lp-msg" hidden></div>
+        <button type="submit" class="lp-save">${_lp.id ? 'Save the changes' : 'Save the play'}</button>
+      </footer>
     </form>`;
   _lpRenderGame();
   _lpRenderPlayers();
@@ -183,7 +214,8 @@ function _lpShow() {
     ov._navClose = _lpClose;
     if (typeof navOverlayOpened === 'function') navOverlayOpened('lp');
   }
-  ov.scrollTop = 0;
+  const body = ov.querySelector('.lp-body');
+  if (body) body.scrollTop = 0;
 }
 function _lpClose() {
   const ov = document.getElementById('lp-overlay');
@@ -202,20 +234,20 @@ function _lpRenderGame() {
   const esc = _escapeHtml;
   if (_lp.bggId) {
     const g = findGameByBggId(_lp.bggId) || (_lpPicked && _lpPicked.id === _lp.bggId ? _lpPicked : { name: `Game #${_lp.bggId}` });
+    const sub = [g.year, g.players ? `${g.players} players` : ''].filter(Boolean).join(' &middot; ');
     box.innerHTML = `<div class="lp-gamecard">
-        <img class="mylib-cover" src="images/${_lp.bggId}.jpg" alt="" data-img="${esc(g.urlImage || g.img || '')}" onerror="__myLibImg(this)">
-        <b>${esc(g.name)}</b>
-        <button type="button" class="acct-link" data-lp="game">Change</button>
+        <img class="lp-gcover" src="images/${_lp.bggId}.jpg" alt="" data-img="${esc(g.urlImage || g.img || '')}" onerror="__myLibImg(this)">
+        <div class="lp-gname"><b>${esc(g.name)}</b>${sub ? `<span>${sub}</span>` : ''}</div>
+        <button type="button" class="lp-textbtn" data-lp="game">Change</button>
       </div>`;
     return;
   }
-  box.innerHTML = `<span class="acct-label">Game</span>
-    <div class="lp-gsearch">
-      <input type="search" class="acct-input" id="lp-gq" placeholder="A game's name" autocomplete="off" enterkeyhint="search">
-      <button type="button" class="acct-btn acct-main" data-lp="gsearch">Search</button>
+  box.innerHTML = `<div class="lp-gsearch">
+      <input type="search" class="lp-input" id="lp-gq" placeholder="A game's name" autocomplete="off" enterkeyhint="search">
+      <button type="button" class="lp-btn lp-btn-main" data-lp="gsearch">Search</button>
     </div>
-    <div class="mylib-hint" id="lp-ghint"></div>
-    <div class="mylib-results lp-gresults" id="lp-gresults"></div>`;
+    <div class="lp-hint" id="lp-ghint"></div>
+    <div class="lp-gresults" id="lp-gresults"></div>`;
   _lpGameList(null);
   if (typeof _loadHot === 'function' && (typeof _hot === 'undefined' || !_hot)) _loadHot().catch(() => {});
 }
@@ -228,7 +260,9 @@ function _lpRecentGames() {
     if (last) recent.push([Number(id), last.t || last.date]);
   }
   recent.sort((a, b) => b[1].localeCompare(a[1]));
-  const ids = [...new Set([...Object.keys((typeof _myLib !== 'undefined' && _myLib) || {}).map(Number), ...recent.map(r => r[0])])].slice(0, 12);
+  const mine = typeof myLibIds === 'function' ? myLibIds() : [];
+  // the games you played lately first, then the rest of your games
+  const ids = [...new Set([...recent.map(r => r[0]), ...mine])].slice(0, 12);
   const idx = new Map(_myLibIndex().map(g => [g.id, g]));
   return ids.map(id => idx.get(id)).filter(Boolean);
 }
@@ -250,9 +284,9 @@ function _lpShowGames(list, hintText) {
   if (!box) return;
   _lpList = list;
   if (hint) hint.textContent = hintText;
-  box.innerHTML = list.slice(0, 40).map(g => `<button type="button" class="mylib-row lp-gpick" data-lp-game="${g.id}">
-      <img class="mylib-cover" src="images/${g.id}.jpg" alt="" loading="lazy" data-img="${_escapeHtml(g.img || '')}" onerror="__myLibImg(this)">
-      <span class="mylib-info"><b>${_escapeHtml(g.name)}</b><span>${gameRowMeta(g)}</span></span>
+  box.innerHTML = list.slice(0, 40).map(g => `<button type="button" class="lp-gpick" data-lp-game="${g.id}">
+      <img class="lp-gcover" src="images/${g.id}.jpg" alt="" loading="lazy" data-img="${_escapeHtml(g.img || '')}" onerror="__myLibImg(this)">
+      <span class="lp-gname"><b>${_escapeHtml(g.name)}</b><span>${gameRowMeta(g)}</span></span>
     </button>`).join('');
 }
 
@@ -276,15 +310,15 @@ function _lpRenderLen() {
   const box = document.getElementById('lp-len');
   if (!box) return;
   if (_lp.lenSet) {
-    box.innerHTML = `<span class="acct-label">Length</span>
-      <div class="lp-lenrow"><input class="acct-input" type="number" id="lp-d" value="${_escapeHtml(String(_lp.d || ''))}" min="1" max="10000" inputmode="numeric" placeholder="${_lpEstimate() || ''}"><span>minutes</span>
-      <button type="button" class="acct-link" data-lp="lenauto">Work it out</button></div>`;
+    box.innerHTML = `<span class="lp-lenico" aria-hidden="true">&#9201;&#65038;</span>
+      <input class="lp-input lp-mins" type="number" id="lp-d" value="${_escapeHtml(String(_lp.d || ''))}" min="1" max="10000" inputmode="numeric" placeholder="${_lpEstimate() || ''}" aria-label="Length in minutes"><span class="lp-lentext">minutes</span>
+      <button type="button" class="lp-textbtn" data-lp="lenauto">Work it out</button>`;
     return;
   }
   const est = _lpEstimate();
-  box.innerHTML = `<span class="acct-label">Length</span>
-    <div class="lp-lenrow"><span class="lp-lenauto">${est ? `About ${fmtPlayTime(est)}, worked out from BGG's time and who played` : 'Worked out once the game and the players are in'}</span>
-    <button type="button" class="acct-link" data-lp="lenset">Set it</button></div>`;
+  box.innerHTML = `<span class="lp-lenico" aria-hidden="true">&#9201;&#65038;</span>
+    <span class="lp-lentext">${est ? `About <b>${fmtPlayTime(est)}</b>, from BGG's time and who played` : 'The length is worked out once the game and players are in'}</span>
+    <button type="button" class="lp-textbtn" data-lp="lenset">Set it</button>`;
 }
 
 function _lpSyncPlayers() {
@@ -303,16 +337,18 @@ function _lpRenderPlayers() {
   if (!box) return;
   const esc = _escapeHtml;
   const lost = _lp.gameWon && _lp.sc.length && !_lp.sc.some(p => p.w);
-  box.innerHTML = (_lp.sc.map((p, i) => `<div class="lp-prow" data-i="${i}">
+  box.innerHTML = (_lp.sc.map((p, i) => `<div class="lp-prow${p.w ? ' won' : ''}" data-i="${i}">
       <div class="lp-pmain">
-        <span class="picker-avatar" aria-hidden="true">${avatarInner(p.n)}</span>
+        <span class="lp-avatar" aria-hidden="true">${avatarInner(p.n)}</span>
         <span class="lp-pn">${esc(p.n)}</span>
-        <input class="acct-input lp-score" value="${esc(p.s)}" placeholder="Score" maxlength="40" inputmode="decimal" aria-label="${esc(p.n)}'s score">
-        <button type="button" class="lp-win${p.w ? ' on' : ''}" data-lp-win="${i}" aria-pressed="${p.w}" title="${p.w ? 'Won' : 'Tap if they won'}">&#9733;</button>
         <button type="button" class="lp-x" data-lp-del="${i}" aria-label="Remove ${esc(p.n)}">&times;</button>
       </div>
-      ${_lp.roles ? `<input class="acct-input lp-role" value="${esc(p.r || '')}" placeholder="Character, faction, colour…" maxlength="120" aria-label="${esc(p.n)}'s character">` : ''}
-    </div>`).join('') || '<div class="mylib-hint">Add the players below.</div>')
+      <div class="lp-pscore">
+        <input class="lp-input lp-score" value="${esc(p.s)}" placeholder="Score" maxlength="40" inputmode="decimal" aria-label="${esc(p.n)}'s score">
+        <button type="button" class="lp-win${p.w ? ' on' : ''}" data-lp-win="${i}" aria-pressed="${p.w}">&#9733; ${p.w ? 'Won' : 'Winner?'}</button>
+      </div>
+      ${_lp.roles ? `<input class="lp-input lp-role" value="${esc(p.r || '')}" placeholder="Character, faction, colour…" maxlength="120" aria-label="${esc(p.n)}'s character">` : ''}
+    </div>`).join('') || '<div class="lp-hint">Add the players below.</div>')
     + (lost ? '<div class="lp-gamewon">&#9760;&#65038; The game won</div>' : '');
 }
 function _lpAddPlayer() {
