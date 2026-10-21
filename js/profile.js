@@ -809,7 +809,6 @@ function showStatsView(playerName, visiting) {
       </div>
     </div>
     <div class="stats-more">${totalWins.toLocaleString('en')} wins &middot; ${coopWins}/${coopPlays.length} co-op won &middot; ${uniquePlayers} players</div>
-    <div class="bk-strip-holder" data-bk-prof="${_escapeHtml(playerName)}" hidden></div>
 
     <div class="profile-cols">
       <div class="profile-main">
@@ -903,7 +902,6 @@ function showStatsView(playerName, visiting) {
 
   _wirePcFolds(container);
   wireRatingsGraph(container, playerName);
-  if (typeof backingProfileFill === 'function') backingProfileFill(container);   // their backed games, once loaded
 
   // Make game rows clickable
   container.querySelectorAll('[data-bgg-id]').forEach(el => {

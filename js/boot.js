@@ -210,6 +210,7 @@ Promise.all([loadAllRatings(), loadRateSkips(), loadAllFavorites(), loadImported
   }
   navBooted();   // from here on, each new screen is a step back can return to
   _takeGoLink();
+  if (typeof loadBacking === 'function') loadBacking().then(() => _navSync()).catch(() => {});   // Library → Backed, for backers
   _takeSharedFile();
 });
 
@@ -223,9 +224,8 @@ function _takeGoLink() {
   if (kind === 'game') {
     const g = findGameByBggId(id);
     if (g) { _modalTab = 'plays'; _modalTabFor = g.bggId; openModal(g); }
-  } else if (kind === 'backed') {   // your profile, with your backed games open
-    _navGo('you', 'profile');
-    if (typeof backingProfileShow === 'function') backingProfileShow();
+  } else if (kind === 'backed') {   // Library → Backed
+    _navGo('library', 'backed');
   } else if (kind === 'hot') {
     if (typeof _hotFilter !== 'undefined') _hotFilter = 'live';
     _navGo('explore', 'trending');

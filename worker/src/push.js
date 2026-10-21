@@ -222,7 +222,7 @@ export async function daily(env) {
         const rel = e.relMine || (fresh[gid] && fresh[gid].rel) || e.rel || '';
         if (rel === ym) {
           await once(env, `sent:${uid}:${gid}:due:${ym}`, 40 * 86400, () => notifyUser(env, uid, {
-            title: clip(e.name, 80), body: `Due this month, by ${e.relMine ? 'its estimate' : 'BGG\'s date'}. When it arrives, mark it under Backed on your profile.`,
+            title: clip(e.name, 80), body: `Due this month, by ${e.relMine ? 'its estimate' : 'BGG\'s date'}. When it arrives, mark it in Library → Backed.`,
             url: `${SITE}?go=backed`, tag: `due-${gid}`,
           }));
         }

@@ -1083,6 +1083,7 @@ function _deactivateAllTabs() {
   document.getElementById('challenges-view').classList.remove('open');
   document.getElementById('boardsouth-view').classList.remove('open');
   document.getElementById('ilioupoli-view').classList.remove('open');
+  document.getElementById('backed-view').classList.remove('open');
   document.getElementById('btn-library').classList.remove('active');
   document.getElementById('btn-mystats').classList.remove('active');
   document.getElementById('btn-games').classList.remove('active');
@@ -1216,6 +1217,19 @@ function switchToIlioupoli() {
     window.scrollTo(0, 0);
   }
   showIlioupoliView();
+}
+
+// Library → Backed (js/backing.js)
+function switchToBacked() {
+  _deactivateAllTabs();
+  document.getElementById('backed-view').classList.add('open');
+  if (_isTouchDevice()) {
+    document.body.style.minWidth = 'auto';
+    document.body.classList.remove('mobile-library');
+    _setViewport(VP_LOCKED);
+    window.scrollTo(0, 0);
+  }
+  showBackedView();
 }
 
 function _updateBoardSouthBtnVisibility() {

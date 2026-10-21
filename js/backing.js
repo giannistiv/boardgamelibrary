@@ -188,11 +188,11 @@ function _bkToolsHtml(id, mine) {
     </div>`;
 }
 
-// ── A player's profile: the games they backed ──
-// Only for someone who backed something: a strip at the top of their profile
-// with each game's cover and when it's due (soonest first, arrived last). Its
-// heading opens the whole list, with the countdowns, and on your own profile
-// the month and "It arrived". A cover or a row opens the game's page.
+// ── Library → Backed: what someone backed, and when it should arrive ──
+// The tab is there for someone who backed something: their games, soonest
+// due first and arrived last, each with its countdown; on their own (signed
+// in) the month and "It arrived". Chips switch to the others who backed
+// games. A row opens the game's page.
 function _bkOfPlayer(name) {
   if (!_backing) return null;
   const uids = Object.keys(_backPlayer).filter(uid => _bkPlayerOf(uid) === name);
@@ -217,26 +217,7 @@ function _bkGame(id, e) {
   const g = typeof _hot !== 'undefined' && _hot && ((_hot.games || []).find(x => x.id === Number(id)) || (_hot.backedGames || []).find(x => x.id === Number(id)));
   return { name: e.name || (g && g.name) || `Game #${id}`, img: e.img || (g && g.img) || '' };
 }
-function _bkStripHtml(name, b) {
-  const esc = _escapeHtml;
-  const tiles = b.rows.map(({ id, e, rel, came }) => {
-    const g = _bkGame(id, e);
-    const cd = came ? null : backingCountdown(rel.rel, rel.st, e.at);
-    const label = came ? '&#10003; Arrived' : cd.cls === 'late' ? 'Late' : rel.st === 'released' ? 'Out now' : rel.rel ? _bkShort(rel.rel) : 'No date';
-    return `<button type="button" class="bk-tile${came ? ' came' : ''}" data-bk-prof-open="${id}">
-        <img src="${esc(g.img)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
-        <span class="bk-tile-name">${esc(g.name)}</span>
-        <span class="bk-tile-due ${came ? 'arrived' : cd.cls}">${label}</span>
-      </button>`;
-  }).join('');
-  return `<div class="bk-strip">
-      <button type="button" class="bk-strip-head" data-bk-all="${esc(name)}">
-        <span class="bk-strip-title">Backed</span><span class="bk-strip-sum">${b.summary}</span><span class="bk-strip-all">All &rsaquo;</span>
-      </button>
-      <div class="bk-strip-row">${tiles}</div>
-    </div>`;
-}
-// The whole list, in a sheet.
+// One backer's list.
 function _bkListHtml(name, b) {
   const esc = _escapeHtml;
   const a = typeof acctMe === 'function' ? acctMe() : null;
@@ -257,43 +238,56 @@ function _bkListHtml(name, b) {
         </div>
       </div>`;
   };
-  return `<div class="modal-header"><span class="modal-title">${own ? 'Your backed games' : `${esc(name)}&rsquo;s backed games`}</span></div>
-    <div class="bk-sheet-sum">${b.summary}</div>
-    ${b.coming.map(row).join('')}
+  return `${b.coming.map(row).join('')}
     ${b.came.length ? `<div class="hot-sec">Arrived &middot; ${b.came.length}</div>${b.came.map(row).join('')}` : ''}`;
 }
-function openBackedList(name) {
-  loadBacking().then(() => {
-    const b = _bkOfPlayer(name);
-    if (b) openInfoModal(`<div class="modal-body bk-sheet" data-bk-sheet="${_escapeHtml(name)}">${_bkListHtml(name, b)}</div>`);
-  }).catch(() => {});
+let _bkWho = null;   // whose list the tab shows (a player)
+const _bkMe = () => (typeof _libViewer === 'function' ? _libViewer() : localStorage.getItem('bgl-player'));
+// Everyone who backed something, you first.
+function _bkBackers() {
+  const me = _bkMe(), names = new Set();
+  for (const id in _backing || {}) for (const uid in _backing[id]) {
+    const e = _backing[id][uid];
+    if (e && e.s === 'backed' && _bkPlayerOf(uid)) names.add(_bkPlayerOf(uid));
+  }
+  return [...names].sort((x, y) => (y === me) - (x === me) || x.localeCompare(y));
 }
-// The profile draws a spot for the strip; it fills once the backings have loaded.
-function backingProfileFill(root) {
-  const els = (root || document).querySelectorAll('[data-bk-prof]');
-  if (els.length) loadBacking().then(() => els.forEach(_bkProfRender)).catch(() => {});
-}
-function _bkProfRender(el) {
-  const b = _bkOfPlayer(el.dataset.bkProf);
-  el.hidden = !b;
-  el.innerHTML = b ? _bkStripHtml(el.dataset.bkProf, b) : '';
-}
-// After a change (a month, "It arrived"): the strips and an open list.
-function _bkProfRedraw() {
-  document.querySelectorAll('[data-bk-prof]').forEach(_bkProfRender);
-  document.querySelectorAll('[data-bk-sheet]').forEach(el => {
-    const b = _bkOfPlayer(el.dataset.bkSheet);
-    if (b) el.innerHTML = _bkListHtml(el.dataset.bkSheet, b);
+// Whether the Library shows the tab: you've backed something.
+function backingMine() { const me = _bkMe(); return !!(me && _bkOfPlayer(me)); }
+function showBackedView() {
+  const box = document.getElementById('backed-view');
+  if (!box) return;
+  if (!box.dataset.wired) {
+    box.dataset.wired = '1';
+    box.addEventListener('click', (e) => {
+      const chip = e.target.closest('[data-gb="bkwho"]');
+      if (chip) { _bkWho = chip.dataset.v; _bkViewRender(box); }
+    });
+  }
+  if (!_backing) box.innerHTML = '<div class="stats-player-sub gb-empty">Loading&hellip;</div>';
+  loadBacking().then(() => _bkViewRender(box)).catch(() => {
+    box.innerHTML = '<div class="stats-player-sub gb-empty">The backed games couldn&rsquo;t be loaded. Try again in a moment.</div>';
   });
 }
-// A notification's link: your backed games.
-function backingProfileShow() {
-  const me = localStorage.getItem('bgl-player');
-  if (me) openBackedList(me);
+function _bkViewRender(box) {
+  const esc = _escapeHtml;
+  const me = _bkMe(), backers = _bkBackers();
+  if (!backers.includes(_bkWho)) _bkWho = backers[0] || null;
+  const b = _bkWho && _bkOfPlayer(_bkWho);
+  box.innerHTML = b ? `<div class="bk-view">
+      ${backers.length > 1 ? `<div class="gb-chips bk-view-who">${_gbChips('bkwho', backers.map(n => [esc(n), n === me ? 'Mine' : esc(n)]), v => v === esc(_bkWho))}</div>` : ''}
+      <h2 class="bk-view-title">${_bkWho === me ? 'Your backed games' : `${esc(_bkWho)}&rsquo;s backed games`}</h2>
+      <div class="bk-view-sum">${b.summary}</div>
+      ${_bkListHtml(_bkWho, b)}
+    </div>` : '<div class="stats-player-sub gb-empty">Nothing backed yet. On a live campaign in Trending, tap <b>I backed it</b>.</div>';
+}
+// After a change (a month, "It arrived", a new backing): the tab, and whether it's there.
+function _bkProfRedraw() {
+  const box = document.getElementById('backed-view');
+  if (box && box.classList.contains('open')) _bkViewRender(box);
+  if (typeof _navSync === 'function') _navSync();
 }
 document.addEventListener('click', (e) => {
-  const all = e.target.closest('[data-bk-all]');
-  if (all) { openBackedList(all.dataset.bkAll); return; }
   const row = e.target.closest('[data-bk-prof-open]');
   if (row && !e.target.closest('input, label, a') && typeof openBackedGame === 'function') openBackedGame(Number(row.dataset.bkProfOpen));
 });

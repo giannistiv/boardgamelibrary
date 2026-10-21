@@ -3,7 +3,7 @@
 // screens and a bottom tab bar on phones (same buttons; CSS moves them).
 // A row of sub-tabs under the bar switches between the views that belong
 // together:
-//   Library  → our shelf · Ilioupoli (members)
+//   Library  → Στιβ's (or Δημητρης's) shelf · Ilioupoli (members) · Backed (backers)
 //   Explore  → Games · Tonight · Players · Stats · Trending (Board South)
 //   Ranks    → Leaderboard · Hours · Board South (regulars)
 //   You      → Profile · Achievements · Challenges
@@ -36,6 +36,7 @@ function _navState() {
     return { group: 'library', sub: typeof _libChoices === 'function' && _libChoices() ? _libOwnerNow : 'shelf' };
   }
   if (_navIsOpen('ilioupoli-view')) return { group: 'library', sub: 'ilioupoli' };
+  if (_navIsOpen('backed-view')) return { group: 'library', sub: 'backed' };
   if (_navIsOpen('games-view')) return { group: 'explore', sub: (typeof _exploreTab !== 'undefined' ? _exploreTab : 'games') };
   if (_navIsOpen('leaderboard-view')) return { group: 'ranks', sub: _ranksTab === 'hours' ? 'hours' : 'everyone' };
   if (_navIsOpen('boardsouth-view')) return { group: 'ranks', sub: 'boardsouth' };
@@ -56,14 +57,15 @@ function _navSubItems(group) {
   const me = _navPlayer();
   if (group === 'library') {
     const member = me && typeof ILIOUPOLI_MEMBERS !== 'undefined' && ILIOUPOLI_MEMBERS.has(me);
+    const more = (member ? [['ilioupoli', 'Ilioupoli']] : [])
+      .concat(typeof backingMine === 'function' && backingMine() ? [['backed', 'Backed']] : []);
     // a signed-in friend: their games, and the shelves of whose friend they are
     const choices = typeof _libChoices === 'function' ? _libChoices() : null;
-    if (choices) {
-      const label = { mine: 'My games', stiv: `${LIB_OWNER_NAMES.stiv}'s shelf`, dimitris: `${LIB_OWNER_NAMES.dimitris}'s shelf` };
-      const items = choices.map(k => [k, label[k]]).concat(member ? [['ilioupoli', 'Ilioupoli']] : []);
-      return items.length > 1 ? items : [];
-    }
-    return member ? [['shelf', 'Our shelf'], ['ilioupoli', 'Ilioupoli']] : [];
+    const shelf = (k) => `${LIB_OWNER_NAMES[k]}'s shelf`;
+    const items = choices
+      ? choices.map(k => [k, k === 'mine' ? 'My games' : shelf(k)]).concat(more)
+      : [['shelf', shelf(typeof _libOwner === 'function' ? _libOwner() : 'stiv')]].concat(more);
+    return items.length > 1 ? items : [];
   }
   if (group === 'explore') {
     const trending = typeof trendingAllowed === 'function' && trendingAllowed() ? [['trending', 'Trending']] : [];
@@ -80,6 +82,7 @@ function _navSubItems(group) {
 function _navGo(group, sub) {
   if (group === 'library') {
     if (sub === 'ilioupoli') return switchToIlioupoli();
+    if (sub === 'backed') return switchToBacked();
     if (['mine', 'stiv', 'dimitris'].includes(sub) && typeof _libChoices === 'function' && _libChoices()) { _libPick = sub; _libRefresh(); }
     return switchToLibrary();
   }
@@ -249,7 +252,7 @@ function _navSync() {
   const subnav = document.getElementById('subnav');
   if (subnav) {
     const items = st.visiting ? [] : _navSubItems(st.group);
-    const tabsKey = `${st.group}:${items.map(i => i[0]).join(',')}`;
+    const tabsKey = `${st.group}:${items.map(i => i.join('=')).join(',')}`;   // a renamed tab (whose shelf) rebuilds them too
     const inner = subnav.querySelector('.subnav-inner');
     if (items.length > 1 && inner && inner.dataset.tabs === tabsKey) {
       // the same tabs, another one picked: move the highlight and leave the
@@ -304,13 +307,13 @@ function initNav() {
   // (called straight away, not on the next frame: frames don't run in background tabs)
   const obs = new MutationObserver(() => _navSync());
   ['library-view', 'stats-view', 'games-view', 'leaderboard-view', 'achievements-view',
-   'challenges-view', 'boardsouth-view', 'ilioupoli-view'].forEach(id => {
+   'challenges-view', 'boardsouth-view', 'ilioupoli-view', 'backed-view'].forEach(id => {
     const el = document.getElementById(id);
     if (el) obs.observe(el, { attributes: true, attributeFilter: ['class', 'style'], childList: true });
   });
   // …and after every view has rendered: some views flip state (visiting a
   // profile, the Explore sub-tab) after the DOM change the observer sees.
-  ['showStatsView', 'showGamesView', 'showLeaderboardView', 'showBoardSouthView', 'showIlioupoliView',
+  ['showStatsView', 'showGamesView', 'showLeaderboardView', 'showBoardSouthView', 'showIlioupoliView', 'showBackedView',
    'showAchievementsView', 'showChallengesView'].forEach(name => {
     const f = window[name];
     if (typeof f !== 'function') return;
