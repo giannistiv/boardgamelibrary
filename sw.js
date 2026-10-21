@@ -227,7 +227,9 @@ self.addEventListener('push', (event) => {
   event.waitUntil(self.registration.showNotification(msg.title || 'Board Game Library', {
     body: msg.body || '',
     icon: new URL('icons/icon-192.png', scope).href,
-    badge: new URL('icons/icon-192.png', scope).href,
+    // the small one beside it (Android's status bar): only its shape shows,
+    // so a white meeple on clear, not the square app icon
+    badge: new URL('icons/badge-96.png', scope).href,
     tag: msg.tag || undefined,
     data: { url: msg.url || scope },
   }));

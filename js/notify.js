@@ -79,7 +79,7 @@ async function notifyRenderRow(msg) {
   const say = msg ? `<small class="nt-msg">${_escapeHtml(msg)}</small>` : '';
   const what = '<small>A play someone logs with you, a campaign you\'re interested in ending, a backed game due.</small>';
   row.innerHTML = st === 'on'
-    ? `<span>On for this device${what}${say}</span><span class="nt-btns"><button type="button" class="profile-edit-cancel" data-nt="test">Test</button><button type="button" class="profile-edit-cancel" data-nt="off">Turn off</button></span>`
+    ? `<span>On for this device${what}${say}</span><button type="button" class="profile-edit-cancel" data-nt="off">Turn off</button>`
     : st === 'off'
       ? `<span>Off${what}${say}</span><button type="button" class="profile-edit-save" data-nt="on">Turn on</button>`
       : st === 'denied'
@@ -96,8 +96,7 @@ document.addEventListener('click', async (e) => {
   let msg = '';
   try {
     if (b.dataset.nt === 'on') { await notifyOn(); msg = 'A test notification is on its way.'; }
-    else if (b.dataset.nt === 'off') { await notifyOff(); msg = 'Turned off for this device.'; }
-    else { const r = await _notifyCall('test'); msg = r.sent ? 'Sent: it should show in a moment.' : 'Nothing was sent: turn them off and on again.'; }
+    else { await notifyOff(); msg = 'Turned off for this device.'; }
   } catch (err) { msg = err.message; }
   b.disabled = false;
   notifyRenderRow(msg);
