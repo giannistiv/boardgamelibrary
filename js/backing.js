@@ -1,8 +1,8 @@
 // ── Crowdfunding together ──
 // backing/{bggId}/{uid} = { s: 'backed' | 'interested', at, name, img, url, on, ends, ver, rel, arrived }
 // A signed-in person marks a live campaign Interested or Backed (Trending), so
-// the group sees who's in before it ends. Trending → Backed lists everything
-// someone backed, with when it should arrive: BGG's release month for the
+// the group sees who's in before it ends. Each player's profile lists what
+// they backed, with when it should arrive: BGG's release month for the
 // campaign's edition (tools/fetch-hot.py keeps it fresh in data/bgg-hot.js
 // 'backed'), or the month the backer set when BGG has none. It counts as
 // arrived once the backer says so, or once it's in their collection.
@@ -11,7 +11,7 @@
 let _backing = null;        // bggId → { uid → entry }
 let _backNames = {};        // uid → name, from users/
 let _backPlayer = {};       // uid → the player they are (users/), for their profile
-let _backFixed = {};        // bggId → its line in data/backed.js (for the pledge note)
+let _backFixed = {};        // uid → bggId → its line in data/backed.js (for the pledge note)
 let _backingLoading = null;
 const BACKING_NOT_BGG = 9000000;   // ids from here up are made up (data/backed.js): no BGG page
 
@@ -47,7 +47,7 @@ function _backingAddFixed(fixed, users) {
     if (!_backNames[uid]) _backNames[uid] = player;
     if (!_backPlayer[uid]) _backPlayer[uid] = player;
     for (const f of fixed[player]) {
-      _backFixed[f.id] = f;
+      (_backFixed[uid] = _backFixed[uid] || {})[f.id] = f;
       const people = (_backing[f.id] = _backing[f.id] || {});
       if (!people[uid]) people[uid] = { s: 'backed', at: Date.parse(f.at) || 0, name: f.name, img: f.img, url: f.url, on: f.on, relMine: f.rel, fixed: true };
     }
@@ -188,52 +188,6 @@ function _bkToolsHtml(id, mine) {
     </div>`;
 }
 
-// ── Trending → Backed: what the group backed, and what it's watching ──
-function backedCount() {
-  if (!_backing) return 0;
-  return Object.keys(_backing).filter(id => backingFor(id).length).length;
-}
-function backedListHtml() {
-  const esc = _escapeHtml;
-  const a = typeof acctMe === 'function' ? acctMe() : null;
-  const ids = Object.keys(_backing || {}).filter(id => backingFor(id).length);
-  const row = (id) => {
-    const all = backingFor(id);
-    const first = all[0];
-    const backed = all.filter(e => e.s === 'backed');
-    const mine = a && all.find(e => e.uid === a.uid);
-    const g = typeof _hot !== 'undefined' && _hot && (_hot.games || []).find(x => x.id === Number(id));
-    const live = g && typeof _hotLive === 'function' && _hotLive(g);
-    const img = (g && g.img) || first.img || '';
-    const name = (g && g.name) || first.name;
-    const note = _backFixed[id] && _backFixed[id].note;
-    const status = backed.length ? _bkStatusHtml(id, backed, backingRelease(id, mine && mine.s === 'backed' ? mine : backed[0])) : '';
-    const camp = live ? `<span class="bk-live">${HOT_PLATFORMS[g.camp.on] || 'Campaign'} &middot; ${_hotEnds(g.camp)}</span>` : (first.on ? `<span class="bk-ended">${HOT_PLATFORMS[first.on] || 'Campaign'} ended</span>` : '');
-    const tools = _bkToolsHtml(id, mine);
-    return `<div class="bk-item" data-bk-open="${id}">
-        <img class="bk-cover" src="${esc(img)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
-        <div class="bk-info">
-          <b>${esc(name)}</b>
-          ${note ? `<div class="bk-note">${esc(note)}</div>` : ''}
-          <div class="bk-meta">${camp}</div>
-          ${backingWhoHtml(id)}
-          ${status}
-          ${tools}
-        </div>
-      </div>`;
-  };
-  const backedIds = ids.filter(id => backingFor(id).some(e => e.s === 'backed'));
-  const watchIds = ids.filter(id => !backingFor(id).some(e => e.s === 'backed'));
-  const due = (id) => { const r = backingRelease(id, backingFor(id)[0]).rel || '9999'; return r.length === 4 ? r + '-12' : r; };
-  backedIds.sort((x, y) => due(x).localeCompare(due(y)));
-  watchIds.sort((x, y) => String(backingFor(x)[0].ends || '9').localeCompare(String(backingFor(y)[0].ends || '9')));
-  if (!ids.length) {
-    return `<div class="stats-player-sub gb-empty">Nothing backed yet. On a live campaign, tap <b>I backed it</b> or <b>Interested</b>: the group sees it here, with a countdown to when it arrives.</div>`;
-  }
-  return `${backedIds.length ? `<div class="hot-sec">Backed &middot; ${backedIds.length}</div>${backedIds.map(row).join('')}` : ''}
-    ${watchIds.length ? `<div class="hot-sec">Watching &middot; ${watchIds.length}</div>${watchIds.map(row).join('')}` : ''}`;
-}
-
 // ── A player's profile: only the games they backed ──
 // On the way first (soonest due), then the ones that came. Someone else's
 // profile shows theirs too; only your own has the month and "It arrived".
@@ -254,7 +208,7 @@ function backedProfile(name) {
   rows.sort((x, y) => (x.came - y.came) || x.due.localeCompare(y.due));
   const row = ({ id, e, rel }) => {
     const g = typeof _hot !== 'undefined' && _hot && (_hot.games || []).find(x => x.id === Number(id));
-    const note = _backFixed[id] && _backFixed[id].note;
+    const note = _backFixed[e.uid] && _backFixed[e.uid][id] && _backFixed[e.uid][id].note;
     const others = backingFor(id).filter(o => o.s === 'backed' && !uids.includes(o.uid)).map(o => esc(o.who));
     const meta = [e.on ? HOT_PLATFORMS[e.on] || '' : '', others.length ? `also backed by ${others.join(', ')}` : ''].filter(Boolean).join(' &middot; ');
     return `<div class="bk-item" data-bk-prof-open="${id}">
@@ -283,11 +237,17 @@ function backingProfileFill(root) {
   const els = (root || document).querySelectorAll('[data-bk-prof]');
   if (els.length) loadBacking().then(() => els.forEach(_bkProfRender)).catch(() => {});
 }
+// A notification's link: scroll to the section once it's drawn. The profile
+// is drawn again while the app starts (and the page jumps back to the top),
+// so every drawing in the next few seconds scrolls to it.
+let _bkProfShowUntil = 0;
+function backingProfileShow() { _bkProfShowUntil = Date.now() + 5000; }
 function _bkProfRender(el) {
   const p = backedProfile(el.dataset.bkProf);
   el.hidden = !p;
   el.innerHTML = p && typeof _pcFold === 'function' ? _pcFold('backed', 'Backed', p.summary, p.html) : p ? p.html : '';
   if (p && typeof _wirePcFolds === 'function') _wirePcFolds(el);
+  if (p && el.isConnected && Date.now() < _bkProfShowUntil) setTimeout(() => el.scrollIntoView({ block: 'start' }), 50);
 }
 const _bkProfRedraw = () => document.querySelectorAll('[data-bk-prof]').forEach(_bkProfRender);
 document.addEventListener('click', (e) => {

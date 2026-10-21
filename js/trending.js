@@ -8,7 +8,7 @@
 // job (tools/fetch-hot.py) and fetched when the tab opens, so it's the latest.
 
 let _hot = null;            // BGG_HOT once loaded
-let _hotFilter = null;      // 'live' (campaigns running now, the default) | 'soon' (hot on BGG, no campaign running) | 'yours' (news for the games you play, js/game-news.js) | 'backed' (what the group backed, js/backing.js)
+let _hotFilter = null;      // 'live' (campaigns running now, the default) | 'soon' (hot on BGG, no campaign running) | 'yours' (news for the games you play, js/game-news.js)
 let _hotBox = null;         // the tab's list, to redraw after a backing changes
 let _hotSort = 'you';       // 'you' | 'ending' | 'backers' | 'hot'
 
@@ -237,18 +237,7 @@ function _renderHot(box) {
   const yours = _gnForYou();
   if (!_hotFilter) _hotFilter = live.length ? 'live' : soon.length ? 'soon' : 'yours';
   if (_hotFilter === 'soon' && !soon.length) _hotFilter = 'live';
-  const nBacked = typeof backedCount === 'function' ? backedCount() : 0;
-  const chips = _gbChips('hot', [['live', `Live campaigns ${live.length}`], ['soon', `Coming soon ${soon.length}`], ['yours', `For your games ${yours.length}`]]
-    .concat(typeof backedListHtml === 'function' ? [['backed', `Backed ${nBacked}`]] : []), v => _hotFilter === v);
-  if (_hotFilter === 'backed') {
-    box.innerHTML = `
-      <div class="hot-head">
-        <div class="gb-chips">${chips}</div>
-        <span class="hot-updated">What the group backed, with when it should arrive (BGG's month for the edition), and the campaigns people are watching</span>
-      </div>
-      ${backedListHtml()}`;
-    return;
-  }
+  const chips = _gbChips('hot', [['live', `Live campaigns ${live.length}`], ['soon', `Coming soon ${soon.length}`], ['yours', `For your games ${yours.length}`]], v => _hotFilter === v);
   if (_hotFilter === 'yours') {
     box.innerHTML = `
       <div class="hot-head">
@@ -294,11 +283,6 @@ function wireTrendingTab(container) {
     }
     if (e.target.closest('[data-gn-all]')) { _gnShowAll = true; _renderHot(box); return; }
     if (_hotPicClick(e)) return;
-    const bk = e.target.closest('[data-bk-open]');
-    if (bk && !e.target.closest('button, input, label, a')) {
-      openBackedGame(Number(bk.dataset.bkOpen));
-      return;
-    }
     const card = e.target.closest('.hot-card');
     if (card && !e.target.closest('a')) {
       const g = (_hot.games || []).find(x => x.id === Number(card.dataset.hotId));
@@ -307,7 +291,7 @@ function wireTrendingTab(container) {
   });
 }
 
-// A game from a Backed list (Trending or a profile): its page, with the campaign's link.
+// A game from a profile's Backed list: its page, with the campaign's link.
 function openBackedGame(id) {
   _loadHot().then(() => {
     const first = (typeof backingFor === 'function' && backingFor(id)[0]) || {};
@@ -360,7 +344,7 @@ function _openHotGame(g) {
   const camp = live ? `${_hotCampHtml(g.camp, false)}
       ${g.camp.more && g.camp.more.length ? `<div class="hot-more">Also in the campaign: ${g.camp.more.map(esc).join(', ')}</div>` : ''}
       <a class="modal-bgg-link hot-back-big" href="${esc(g.camp.url)}" target="_blank" rel="noopener">Back it on ${HOT_PLATFORMS[g.camp.on] || 'the campaign page'} &#8599;</a>` : '';
-  // opened from Backed: the campaign's page, for its updates
+  // opened from a Backed list: the campaign's page, for its updates
   const campPage = !live && g.backUrl ? `<a class="modal-bgg-link" href="${esc(g.backUrl)}" target="_blank" rel="noopener">The campaign on ${HOT_PLATFORMS[g.backOn] || 'its page'} &#8599;</a>` : '';
   const onBgg = typeof backingOnBgg !== 'function' || backingOnBgg(g.id);
   const about = (g.about && g.about.length ? g.about : g.desc ? [g.desc] : []).map(p => `<p>${esc(p)}</p>`).join('');

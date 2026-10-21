@@ -1,13 +1,14 @@
 // Backed games given as a list rather than tapped in the app (js/backing.js
-// adds them to Trending → Backed, worker/src/push.js to the morning check):
+// adds them to the player's profile, worker/src/push.js to the morning check):
 // player → their games. Each counts as that player's backing until they
 // change it in the app, which saves it to Firebase like any other.
 //   rel   when it should arrive: the campaign's latest estimate (its page, or
 //         a newer update from the publisher), looked up on 21 Oct 2026
 //   at    when the campaign ended, the start of the countdown bar
-//   note  what the pledge was, shown under the name
-// 9000001 is made up: the Gloomhaven RPG is an RPGGeek item, not on BGG, so
-// it has an id above BGG's range. Kept as JSON so the Worker can read it.
+//   note  what the pledge was (or a caveat about the date), under the name
+// Ids from 9000001 up are made up, for what isn't on BGG (the Gloomhaven RPG
+// is an RPGGeek item; sleeves and accessories). Kept as JSON so the Worker
+// can read it.
 const BACKED_FIXED = {
   "Στιβ": [
     { "id": 401596, "name": "DCeased: A Zombicide Game", "on": "kickstarter", "url": "https://www.kickstarter.com/projects/cmon/dceased-zombicide", "at": "2023-11-30", "rel": "2027-03",
@@ -38,5 +39,31 @@ const BACKED_FIXED = {
       "img": "https://cf.geekdo-images.com/5Abz5vNtrRXauBzP91fy5Q__square100@2x/img/RCD27YyUZvnPYTZOsvshgwoiPe0=/200x200/filters:strip_icc()/pic9209060.png" },
     { "id": 388641, "name": "Defenders of the Dictionary", "on": "kickstarter", "url": "https://www.kickstarter.com/projects/adamsapplegames/defenders-of-the-dictionary", "at": "2026-10-10", "rel": "2027-04",
       "img": "https://cf.geekdo-images.com/rQZ-wLXOOg9HhJmIZlU5Fw__square100@2x/img/l4vC99l8TW6FKhdTiP4AFVPwAEs=/200x200/filters:strip_icc()/pic9683745.png" }
+  ],
+  "Δημητρης": [
+    { "id": 462710, "name": "Bullet Galaxy: Fan+ and Paw+", "on": "gamefound", "url": "https://gamefound.com/en/projects/level-99-games/bullet-galaxy", "at": "2026-07-29", "rel": "2027-03",
+      "note": "New Content pledge",
+      "img": "https://cf.geekdo-images.com/kP5dM28HJayiz4b7SjIQMw__square100@2x/img/afbpz4AjSZTVylST-xbgxlhqRHE=/0x1627:1719x3346/200x200/filters:strip_icc()/pic9346205.png" },
+    { "id": 9000002, "name": "Astral Forge: Tabletop Essentials 2026", "on": "gamefound", "url": "https://gamefound.com/en/projects/astral-forge/gamingcloth", "at": "2026-05-05", "rel": "2026-12",
+      "note": "Was due Oct 2026; held up by China's Golden Week, new date to come",
+      "img": "https://imgcdn.gamefound.com/og-image-fb/projects/6127/c8395143-b4a7-41cc-833d-9578076c5373.png" },
+    { "id": 9000003, "name": "Paladin Sleeves: Season 11", "on": "gamefound", "url": "https://gamefound.com/en/projects/board-and-dice/paladin-season11", "at": "2026-08-14", "rel": "2026-12",
+      "note": "Second shipping wave, from late Nov",
+      "img": "https://imgcdn.gamefound.com/og-image-fb/projects/11589/090c666d-781e-42b5-b181-4f1c710e2902.png" },
+    { "id": 449019, "name": "Paperback Adventures: Volume 2", "on": "gamefound", "url": "https://gamefound.com/en/projects/tim-fowers/paperback-adventures-volume-2", "at": "2025-07-17", "rel": "2026-12",
+      "note": "Big Box + Binding Nexus + Iron Knee",
+      "img": "https://imgcdn.gamefound.com/productimage/projects/5481/3aa3f702-f78e-46f5-80fe-cce87cbd97cb.png" },
+    { "id": 457260, "name": "Escape the Dark Castle (2nd Edition) & Escape the Dark Forest", "on": "gamefound", "url": "https://gamefound.com/en/projects/themeborne/escape-the-dark-castle-and-forest", "at": "2025-11-20", "rel": "2027-04",
+      "note": "Double Pack",
+      "img": "https://cf.geekdo-images.com/8o0bCK11BexLWMIWjZJJVQ__square100@2x/img/iq9nmt-oOkxZ_3NFTzz9mch4V_8=/200x200/filters:strip_icc()/pic9204090.jpg" },
+    { "id": 448713, "name": "Heroes of the Shire: Light & Shadow", "on": "gamefound", "url": "https://gamefound.com/en/projects/senior-games/heroes-of-the-shire-light-shadow", "at": "2026-03-31", "rel": "2027-05",
+      "note": "Returning Hero Gameplay",
+      "img": "https://cf.geekdo-images.com/WOR2oYhTqGD9Fx-IfyHV6A__square100@2x/img/NPftxB4hpZDrWxExbt5gG8bMCpg=/278x0:998x720/200x200/filters:strip_icc()/pic8892814.png" },
+    { "id": 456213, "name": "Radiance", "on": "gamefound", "url": "https://gamefound.com/en/projects/gabe-barrett/radiance-solo-game-of-the-month", "at": "2025-12-20", "rel": "2026-11",
+      "note": "All-In Bundle",
+      "img": "https://cf.geekdo-images.com/JpZqCpowQtEfy2bKWlLI2A__square100@2x/img/GLPofPL0OevBhEhvEiV8GE9EzwY=/0x224:527x751/200x200/filters:strip_icc()/pic9161175.jpg" },
+    { "id": 456084, "name": "Hellbringer: Bestiary & Forbidden Spells", "on": "gamefound", "url": "https://gamefound.com/en/projects/maxime-gauthier/hellbringer", "at": "2025-10-31", "rel": "2027-03",
+      "note": "Monster Tier",
+      "img": "https://cf.geekdo-images.com/XYcIR84Dve2Z9du8ideFlA__square100@2x/img/qtBVSBtxeuCwDkCYP56_9G8ZluI=/200x200/filters:strip_icc()/pic9153708.png" }
   ]
 };

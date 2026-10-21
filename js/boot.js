@@ -223,10 +223,14 @@ function _takeGoLink() {
   if (kind === 'game') {
     const g = findGameByBggId(id);
     if (g) { _modalTab = 'plays'; _modalTabFor = g.bggId; openModal(g); }
-  } else if (kind === 'backed' || kind === 'hot') {
-    if (typeof _hotFilter !== 'undefined') _hotFilter = kind === 'backed' ? 'backed' : 'live';
+  } else if (kind === 'backed') {   // your profile, at its Backed section
+    if (typeof _pcFoldOpen !== 'undefined') _pcFoldOpen.backed = true;
+    if (typeof backingProfileShow === 'function') backingProfileShow();
+    _navGo('you', 'profile');
+  } else if (kind === 'hot') {
+    if (typeof _hotFilter !== 'undefined') _hotFilter = 'live';
     _navGo('explore', 'trending');
-    if (kind === 'hot' && typeof _loadHot === 'function') {
+    if (typeof _loadHot === 'function') {
       _loadHot().then(h => { const g = (h.games || []).find(x => x.id === id); if (g) _openHotGame(g); }).catch(() => {});
     }
   }
