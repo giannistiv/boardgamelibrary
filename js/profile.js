@@ -828,6 +828,7 @@ function showStatsView(playerName, visiting) {
       <div class="profile-side">
         ${_pcSec(4, h2hHtml)}
         ${_pcSec(5, buildPlayTimeHtml(playerName))}
+        <div class="pc-sec" style="order:9" data-bk-prof="${_escapeHtml(playerName)}" hidden></div>
         ${_pcSec(9, _pcFold('ratings', 'Ratings', ratingStats.total ? `${ratingStats.total} rated &middot; avg ${ratingStats.avg}` : '', buildRatingsGraphHtml(playerName)))}
         ${_pcSec(10, _pcFold('when', 'When &amp; where', whenSummary, chartsHtml))}
         ${_pcSec(11, _pcFold('recs', 'Recommended for you', `${recommendations.length} to try${usualWeight ? ` &middot; weight ~${usualWeight.toFixed(1)}` : ''}`, isOwnProfile && recommendations.length > 0 ? `<div class="stats-section">
@@ -902,6 +903,7 @@ function showStatsView(playerName, visiting) {
 
   _wirePcFolds(container);
   wireRatingsGraph(container, playerName);
+  if (typeof backingProfileFill === 'function') backingProfileFill(container);   // their backed games, once loaded
 
   // Make game rows clickable
   container.querySelectorAll('[data-bgg-id]').forEach(el => {

@@ -10,6 +10,7 @@
 
 let _backing = null;        // bggId → { uid → entry }
 let _backNames = {};        // uid → name, from users/
+let _backPlayer = {};       // uid → the player they are (users/), for their profile
 let _backFixed = {};        // bggId → its line in data/backed.js (for the pledge note)
 let _backingLoading = null;
 const BACKING_NOT_BGG = 9000000;   // ids from here up are made up (data/backed.js): no BGG page
@@ -24,7 +25,11 @@ function loadBacking(force) {
     ]).then(([b, users, fixed]) => {
       _backing = b || {};
       _backNames = {};
-      for (const uid in users || {}) if (users[uid] && users[uid].name) _backNames[uid] = users[uid].name;
+      _backPlayer = {};
+      for (const uid in users || {}) {
+        if (users[uid] && users[uid].name) _backNames[uid] = users[uid].name;
+        if (users[uid] && users[uid].player) _backPlayer[uid] = users[uid].player;
+      }
       _backingAddFixed(fixed, users);
       return _backing;
     }).finally(() => { _backingLoading = null; });
@@ -40,6 +45,7 @@ function _backingAddFixed(fixed, users) {
     if (!Array.isArray(fixed[player])) continue;
     const uid = Object.keys(users || {}).find(u => users[u] && users[u].player === player) || `player:${player}`;
     if (!_backNames[uid]) _backNames[uid] = player;
+    if (!_backPlayer[uid]) _backPlayer[uid] = player;
     for (const f of fixed[player]) {
       _backFixed[f.id] = f;
       const people = (_backing[f.id] = _backing[f.id] || {});
@@ -148,7 +154,7 @@ function backingCountdown(rel, st, from) {
 // In the backer's collection by now (their shelf, BGG collection or My games).
 function _backingHas(e, id) {
   if (e.arrived) return true;
-  const name = e.who;
+  const name = _bkPlayerOf(e.uid) || e.who;
   const lists = { 'Στιβ': () => GAMES.some(g => g.bggId === Number(id)), 'Δημητρης': () => typeof DIMITRIS_GAMES !== 'undefined' && !!DIMITRIS_GAMES[id],
     'Γιαννης Φωτοπουλος': () => typeof GIANNIS_GAMES !== 'undefined' && !!GIANNIS_GAMES[id], 'LGeorge': () => typeof LGEORGE_GAMES !== 'undefined' && !!LGEORGE_GAMES[id] };
   if (lists[name] && lists[name]()) return true;
@@ -157,6 +163,29 @@ function _backingHas(e, id) {
   if (user && C[user] && C[user][id]) return true;
   const a = typeof acctMe === 'function' ? acctMe() : null;
   return !!(a && e.uid === a.uid && typeof myLibHas === 'function' && myLibHas(id));
+}
+
+// The player a backer is, as the app shows them now (a rename changes it).
+function _bkPlayerOf(uid) {
+  const p = _backPlayer[uid];
+  return p && typeof _acctDisplay === 'function' ? _acctDisplay(p) : p;
+}
+// How far along a backed game is, for the backers given (all arrived, or the countdown).
+function _bkStatusHtml(id, backed, rel) {
+  const esc = _escapeHtml;
+  const arrived = backed.filter(e => _backingHas(e, id));
+  if (arrived.length === backed.length) return '<div class="bk-status arrived">&#10003; Arrived</div>';
+  const cd = backingCountdown(rel.rel, rel.st, backed[0].at);
+  return `<div class="bk-status ${cd.cls}">${cd.text}${arrived.length ? ` &middot; arrived for ${arrived.map(e => esc(e.who)).join(', ')}` : ''}</div>
+     ${cd.pct ? `<div class="bk-bar"><i style="width:${cd.pct}%"></i></div>` : ''}`;
+}
+// The backer's own controls: the month (when BGG has none, or they set one) and "It arrived".
+function _bkToolsHtml(id, mine) {
+  if (!mine || mine.s !== 'backed') return '';
+  return `<div class="bk-tools">
+      ${!backingRelease(id, mine).rel || mine.relMine ? `<label class="bk-month">Due <input type="month" value="${_escapeHtml(mine.relMine || '')}" data-bk-month="${id}" aria-label="When it's due"></label>` : ''}
+      <button type="button" class="lp-textbtn" data-bk-arrived="${id}">${mine.arrived ? 'Not arrived yet' : 'It arrived'}</button>
+    </div>`;
 }
 
 // ── Trending → Backed: what the group backed, and what it's watching ──
@@ -178,21 +207,9 @@ function backedListHtml() {
     const img = (g && g.img) || first.img || '';
     const name = (g && g.name) || first.name;
     const note = _backFixed[id] && _backFixed[id].note;
-    let status = '';
-    if (backed.length) {
-      const arrived = backed.filter(e => _backingHas(e, id));
-      const { rel, st } = backingRelease(id, mine && mine.s === 'backed' ? mine : backed[0]);
-      const cd = backingCountdown(rel, st, backed[0].at);
-      status = arrived.length === backed.length
-        ? '<div class="bk-status arrived">&#10003; Arrived</div>'
-        : `<div class="bk-status ${cd.cls}">${cd.text}${arrived.length ? ` &middot; arrived for ${arrived.map(e => esc(e.who)).join(', ')}` : ''}</div>
-           ${cd.pct ? `<div class="bk-bar"><i style="width:${cd.pct}%"></i></div>` : ''}`;
-    }
+    const status = backed.length ? _bkStatusHtml(id, backed, backingRelease(id, mine && mine.s === 'backed' ? mine : backed[0])) : '';
     const camp = live ? `<span class="bk-live">${HOT_PLATFORMS[g.camp.on] || 'Campaign'} &middot; ${_hotEnds(g.camp)}</span>` : (first.on ? `<span class="bk-ended">${HOT_PLATFORMS[first.on] || 'Campaign'} ended</span>` : '');
-    const tools = mine && mine.s === 'backed' ? `<div class="bk-tools">
-        ${!backingRelease(id, mine).rel || mine.relMine ? `<label class="bk-month">Due <input type="month" value="${esc(mine.relMine || '')}" data-bk-month="${id}" aria-label="When it's due"></label>` : ''}
-        <button type="button" class="lp-textbtn" data-bk-arrived="${id}">${mine.arrived ? 'Not arrived yet' : 'It arrived'}</button>
-      </div>` : '';
+    const tools = _bkToolsHtml(id, mine);
     return `<div class="bk-item" data-bk-open="${id}">
         <img class="bk-cover" src="${esc(img)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
         <div class="bk-info">
@@ -216,6 +233,67 @@ function backedListHtml() {
   return `${backedIds.length ? `<div class="hot-sec">Backed &middot; ${backedIds.length}</div>${backedIds.map(row).join('')}` : ''}
     ${watchIds.length ? `<div class="hot-sec">Watching &middot; ${watchIds.length}</div>${watchIds.map(row).join('')}` : ''}`;
 }
+
+// ── A player's profile: only the games they backed ──
+// On the way first (soonest due), then the ones that came. Someone else's
+// profile shows theirs too; only your own has the month and "It arrived".
+function backedProfile(name) {
+  if (!_backing) return null;
+  const esc = _escapeHtml;
+  const a = typeof acctMe === 'function' ? acctMe() : null;
+  const uids = Object.keys(_backPlayer).filter(uid => _bkPlayerOf(uid) === name);
+  const rows = [];
+  for (const id in _backing) {
+    const uid = uids.find(u => _backing[id][u] && _backing[id][u].s === 'backed');
+    if (!uid) continue;
+    const e = { ..._backing[id][uid], uid, who: _backNames[uid] || name };
+    const rel = backingRelease(id, e);
+    rows.push({ id, e, rel, came: _backingHas(e, id), due: rel.rel ? (rel.rel.length === 4 ? `${rel.rel}-12` : rel.rel) : '9999' });
+  }
+  if (!rows.length) return null;
+  rows.sort((x, y) => (x.came - y.came) || x.due.localeCompare(y.due));
+  const row = ({ id, e, rel }) => {
+    const g = typeof _hot !== 'undefined' && _hot && (_hot.games || []).find(x => x.id === Number(id));
+    const note = _backFixed[id] && _backFixed[id].note;
+    const others = backingFor(id).filter(o => o.s === 'backed' && !uids.includes(o.uid)).map(o => esc(o.who));
+    const meta = [e.on ? HOT_PLATFORMS[e.on] || '' : '', others.length ? `also backed by ${others.join(', ')}` : ''].filter(Boolean).join(' &middot; ');
+    return `<div class="bk-item" data-bk-prof-open="${id}">
+        <img class="bk-cover" src="${esc((g && g.img) || e.img || '')}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+        <div class="bk-info">
+          <b>${esc((g && g.name) || e.name)}</b>
+          ${note ? `<div class="bk-note">${esc(note)}</div>` : ''}
+          ${meta ? `<div class="bk-meta">${meta}</div>` : ''}
+          ${_bkStatusHtml(id, [e], rel)}
+          ${a && a.uid === e.uid ? _bkToolsHtml(id, _backing[id][e.uid]) : ''}
+        </div>
+      </div>`;
+  };
+  const coming = rows.filter(r => !r.came), came = rows.filter(r => r.came);
+  const next = coming.find(r => r.rel.rel);
+  const nextLabel = next ? (next.rel.rel.length === 4 ? next.rel.rel : _bkMonth(...next.rel.rel.split('-').map(Number))) : '';
+  const summary = [coming.length ? `${coming.length} on the way` : '', nextLabel ? `next ${nextLabel}` : '', came.length ? `${came.length} arrived` : ''].filter(Boolean).join(' &middot; ');
+  return { summary, html: `<div class="stats-section bk-prof">
+      <div class="stats-section-title">Backed</div>
+      ${coming.map(row).join('')}
+      ${came.length ? `<div class="hot-sec">Arrived &middot; ${came.length}</div>${came.map(row).join('')}` : ''}
+    </div>` };
+}
+// The profile draws a spot for it; it fills once the backings have loaded.
+function backingProfileFill(root) {
+  const els = (root || document).querySelectorAll('[data-bk-prof]');
+  if (els.length) loadBacking().then(() => els.forEach(_bkProfRender)).catch(() => {});
+}
+function _bkProfRender(el) {
+  const p = backedProfile(el.dataset.bkProf);
+  el.hidden = !p;
+  el.innerHTML = p && typeof _pcFold === 'function' ? _pcFold('backed', 'Backed', p.summary, p.html) : p ? p.html : '';
+  if (p && typeof _wirePcFolds === 'function') _wirePcFolds(el);
+}
+const _bkProfRedraw = () => document.querySelectorAll('[data-bk-prof]').forEach(_bkProfRender);
+document.addEventListener('click', (e) => {
+  const row = e.target.closest('[data-bk-prof-open]');
+  if (row && !e.target.closest('button, input, label, a') && typeof openBackedGame === 'function') openBackedGame(Number(row.dataset.bkProfOpen));
+});
 
 // The month a backer sets when BGG has none, and "it arrived".
 async function setBackingMonth(id, month) {
@@ -256,10 +334,12 @@ document.addEventListener('click', async (e) => {
   } catch (err) { if (typeof _acctToast === 'function') _acctToast(err.message); }
   b.disabled = false;
   if (typeof backingRedraw === 'function') backingRedraw();
+  _bkProfRedraw();
 }, true);
 document.addEventListener('change', async (e) => {
   const m = e.target.closest('[data-bk-month]');
   if (!m) return;
   try { await setBackingMonth(Number(m.dataset.bkMonth), m.value); } catch (err) { if (typeof _acctToast === 'function') _acctToast(err.message); }
   if (typeof backingRedraw === 'function') backingRedraw();
+  _bkProfRedraw();
 });

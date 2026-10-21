@@ -296,10 +296,7 @@ function wireTrendingTab(container) {
     if (_hotPicClick(e)) return;
     const bk = e.target.closest('[data-bk-open]');
     if (bk && !e.target.closest('button, input, label, a')) {
-      const id = Number(bk.dataset.bkOpen);
-      const first = (typeof backingFor === 'function' && backingFor(id)[0]) || {};
-      const hg = (_hot.games || []).find(x => x.id === id) || { id, name: first.name || `Game #${id}`, img: first.img || '' };
-      _openHotGame({ ...hg, backUrl: first.url, backOn: first.on });
+      openBackedGame(Number(bk.dataset.bkOpen));
       return;
     }
     const card = e.target.closest('.hot-card');
@@ -308,6 +305,15 @@ function wireTrendingTab(container) {
       if (g) _openHotGame(g);
     }
   });
+}
+
+// A game from a Backed list (Trending or a profile): its page, with the campaign's link.
+function openBackedGame(id) {
+  _loadHot().then(() => {
+    const first = (typeof backingFor === 'function' && backingFor(id)[0]) || {};
+    const hg = (_hot.games || []).find(x => x.id === id) || { id, name: first.name || `Game #${id}`, img: first.img || '' };
+    _openHotGame({ ...hg, backUrl: first.url, backOn: first.on });
+  }).catch(() => {});
 }
 
 function _hotPicClick(e) {
