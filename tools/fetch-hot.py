@@ -11,6 +11,9 @@ Each campaign also carries its edition's expected release month from BGG
 (the version's releasedate), and 'backed' keeps that month up to date for
 every game someone in the group backed (Firebase backing/, js/backing.js),
 so the Backed list's countdown follows BGG when a delivery slips.
+'backedGames' gives the backed games that aren't in the list (their
+campaigns are over, data/backed.js too) the same facts, description and
+pictures, for their page.
 
     python3 tools/fetch-hot.py
 
@@ -48,14 +51,26 @@ def get(url):
 
 
 def load():
-    """The last run's games by id, and the hot games it found already out."""
+    """The last run's games by id (the list's and the backed ones'), and the
+    hot games it found already out."""
     try:
         with open(OUT, encoding='utf-8') as f:
             src = f.read()
         data = json.loads(src[src.index('{'):src.rindex('}') + 1])
-        return {str(g['id']): g for g in data['games']}, set(map(str, data.get('released', [])))
+        games = {str(g['id']): g for g in data.get('backedGames', []) + data['games']}
+        return games, set(map(str, data.get('released', [])))
     except (FileNotFoundError, ValueError, KeyError):
         return {}, set()
+
+
+def listed_backings():
+    """The backed games given as a list (data/backed.js): player -> games."""
+    try:
+        with open(os.path.join(ROOT, 'data', 'backed.js'), encoding='utf-8') as f:
+            src = f.read()
+        return json.loads(src[src.index('{'):src.rindex('}') + 1])
+    except (FileNotFoundError, ValueError):
+        return {}
 
 
 def _int(v):
@@ -125,6 +140,7 @@ def details(gid):
         'owned': _int(st.get('numowned')),
         'img': img.get('previewthumb') or img.get('thumb') or img.get('square200') or '',
         'desc': re.sub(r'\s+', ' ', item.get('short_description') or '').strip()[:300],
+        'name': item.get('name') or '', 'year': _int(item.get('yearpublished')),
         **item_fields(item),
         'pics': pictures(gid),
     }
@@ -285,8 +301,22 @@ def main():
         except Exception as e:
             print(f'fetch-hot: backed {gid}: {type(e).__name__}: {e}')
 
+    # and their page: every backed game the list above doesn't have (ids from
+    # 9000000 up are data/backed.js's own, not BGG's)
+    want = {str(gid) for gid, people in backing.items() if isinstance(people, dict)
+            and any(isinstance(p, dict) and p.get('s') == 'backed' for p in people.values())}
+    want |= {str(f.get('id')) for lst in listed_backings().values() if isinstance(lst, list) for f in lst}
+    backed_games = []
+    for gid in sorted(want - set(games), key=lambda x: int(x) if x.isdigit() else 0):
+        if not gid.isdigit() or int(gid) >= 9000000:
+            continue
+        g = with_details(gid, before)
+        if g.get('name'):
+            backed_games.append(g)
+
     payload = {'updated': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
-               'games': list(games.values()), 'released': sorted(released, key=int), 'backed': backed}
+               'games': list(games.values()), 'released': sorted(released, key=int), 'backed': backed,
+               'backedGames': backed_games}
     with open(OUT, 'w', encoding='utf-8') as f:
         f.write("// Upcoming games: BGG's live crowdfunding campaigns and the hot list's games still to come\n"
                 "// out. Written by tools/fetch-hot.py (every few hours); don't edit by hand.\n")

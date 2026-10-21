@@ -291,12 +291,20 @@ function wireTrendingTab(container) {
   });
 }
 
-// A game from a profile's Backed list: its page, with the campaign's link.
+// A game from a profile's Backed list: its page like any upcoming game's
+// (BGG's facts, description and pictures: the list's, or 'backedGames' once
+// its campaign is over), with the campaign's link. One BGG doesn't have
+// gets what data/backed.js says about it.
 function openBackedGame(id) {
   _loadHot().then(() => {
     const first = (typeof backingFor === 'function' && backingFor(id)[0]) || {};
-    const hg = (_hot.games || []).find(x => x.id === id) || { id, name: first.name || `Game #${id}`, img: first.img || '' };
-    _openHotGame({ ...hg, backUrl: first.url, backOn: first.on });
+    const listed = (typeof backingListed === 'function' && backingListed(id)) || {};
+    const known = (_hot.games || []).find(x => x.id === id) || (_hot.backedGames || []).find(x => x.id === id);
+    const g = known ? { ...known } : { id, name: first.name || `Game #${id}`, about: [].concat(listed.about || []), by: listed.by ? [listed.by] : [] };
+    const noPic = (u) => !u || u.includes('pic1657689');   // BGG's "no image yet"
+    if (noPic(g.img)) g.img = first.img || '';
+    if (noPic(g.cover)) g.cover = listed.cover || first.img || g.img;
+    _openHotGame({ ...g, name: first.name || g.name, backUrl: first.url, backOn: first.on });   // the campaign's name (Paperback Adventures: Volume 2, not Iron Knee)
   }).catch(() => {});
 }
 

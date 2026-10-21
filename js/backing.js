@@ -188,13 +188,13 @@ function _bkToolsHtml(id, mine) {
     </div>`;
 }
 
-// ── A player's profile: only the games they backed ──
-// On the way first (soonest due), then the ones that came. Someone else's
-// profile shows theirs too; only your own has the month and "It arrived".
-function backedProfile(name) {
+// ── A player's profile: the games they backed ──
+// Only for someone who backed something: a strip at the top of their profile
+// with each game's cover and when it's due (soonest first, arrived last). Its
+// heading opens the whole list, with the countdowns, and on your own profile
+// the month and "It arrived". A cover or a row opens the game's page.
+function _bkOfPlayer(name) {
   if (!_backing) return null;
-  const esc = _escapeHtml;
-  const a = typeof acctMe === 'function' ? acctMe() : null;
   const uids = Object.keys(_backPlayer).filter(uid => _bkPlayerOf(uid) === name);
   const rows = [];
   for (const id in _backing) {
@@ -206,54 +206,102 @@ function backedProfile(name) {
   }
   if (!rows.length) return null;
   rows.sort((x, y) => (x.came - y.came) || x.due.localeCompare(y.due));
+  const coming = rows.filter(r => !r.came), came = rows.filter(r => r.came);
+  const next = coming.find(r => r.rel.rel);
+  const summary = [coming.length ? `${coming.length} on the way` : '', next ? `next ${_bkShort(next.rel.rel)}` : '', came.length ? `${came.length} arrived` : ''].filter(Boolean).join(' &middot; ');
+  return { uids, rows, coming, came, summary };
+}
+const _bkShort = (rel) => (rel.length === 4 ? rel : _bkMonth(...rel.split('-').map(Number)));
+// The game's name and cover as the Backed lists show them.
+function _bkGame(id, e) {
+  const g = typeof _hot !== 'undefined' && _hot && ((_hot.games || []).find(x => x.id === Number(id)) || (_hot.backedGames || []).find(x => x.id === Number(id)));
+  return { name: e.name || (g && g.name) || `Game #${id}`, img: e.img || (g && g.img) || '' };
+}
+function _bkStripHtml(name, b) {
+  const esc = _escapeHtml;
+  const tiles = b.rows.map(({ id, e, rel, came }) => {
+    const g = _bkGame(id, e);
+    const cd = came ? null : backingCountdown(rel.rel, rel.st, e.at);
+    const label = came ? '&#10003; Arrived' : cd.cls === 'late' ? 'Late' : rel.st === 'released' ? 'Out now' : rel.rel ? _bkShort(rel.rel) : 'No date';
+    return `<button type="button" class="bk-tile${came ? ' came' : ''}" data-bk-prof-open="${id}">
+        <img src="${esc(g.img)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+        <span class="bk-tile-name">${esc(g.name)}</span>
+        <span class="bk-tile-due ${came ? 'arrived' : cd.cls}">${label}</span>
+      </button>`;
+  }).join('');
+  return `<div class="bk-strip">
+      <button type="button" class="bk-strip-head" data-bk-all="${esc(name)}">
+        <span class="bk-strip-title">Backed</span><span class="bk-strip-sum">${b.summary}</span><span class="bk-strip-all">All &rsaquo;</span>
+      </button>
+      <div class="bk-strip-row">${tiles}</div>
+    </div>`;
+}
+// The whole list, in a sheet.
+function _bkListHtml(name, b) {
+  const esc = _escapeHtml;
+  const a = typeof acctMe === 'function' ? acctMe() : null;
+  const own = !!(a && b.uids.includes(a.uid));
   const row = ({ id, e, rel }) => {
-    const g = typeof _hot !== 'undefined' && _hot && (_hot.games || []).find(x => x.id === Number(id));
+    const g = _bkGame(id, e);
     const note = _backFixed[e.uid] && _backFixed[e.uid][id] && _backFixed[e.uid][id].note;
-    const others = backingFor(id).filter(o => o.s === 'backed' && !uids.includes(o.uid)).map(o => esc(o.who));
+    const others = backingFor(id).filter(o => o.s === 'backed' && !b.uids.includes(o.uid)).map(o => esc(o.who));
     const meta = [e.on ? HOT_PLATFORMS[e.on] || '' : '', others.length ? `also backed by ${others.join(', ')}` : ''].filter(Boolean).join(' &middot; ');
     return `<div class="bk-item" data-bk-prof-open="${id}">
-        <img class="bk-cover" src="${esc((g && g.img) || e.img || '')}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+        <img class="bk-cover" src="${esc(g.img)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
         <div class="bk-info">
-          <b>${esc((g && g.name) || e.name)}</b>
+          <b>${esc(g.name)}</b>
           ${note ? `<div class="bk-note">${esc(note)}</div>` : ''}
           ${meta ? `<div class="bk-meta">${meta}</div>` : ''}
           ${_bkStatusHtml(id, [e], rel)}
-          ${a && a.uid === e.uid ? _bkToolsHtml(id, _backing[id][e.uid]) : ''}
+          ${own ? _bkToolsHtml(id, _backing[id][e.uid]) : ''}
         </div>
       </div>`;
   };
-  const coming = rows.filter(r => !r.came), came = rows.filter(r => r.came);
-  const next = coming.find(r => r.rel.rel);
-  const nextLabel = next ? (next.rel.rel.length === 4 ? next.rel.rel : _bkMonth(...next.rel.rel.split('-').map(Number))) : '';
-  const summary = [coming.length ? `${coming.length} on the way` : '', nextLabel ? `next ${nextLabel}` : '', came.length ? `${came.length} arrived` : ''].filter(Boolean).join(' &middot; ');
-  return { summary, html: `<div class="stats-section bk-prof">
-      <div class="stats-section-title">Backed</div>
-      ${coming.map(row).join('')}
-      ${came.length ? `<div class="hot-sec">Arrived &middot; ${came.length}</div>${came.map(row).join('')}` : ''}
-    </div>` };
+  return `<div class="modal-header"><span class="modal-title">${own ? 'Your backed games' : `${esc(name)}&rsquo;s backed games`}</span></div>
+    <div class="bk-sheet-sum">${b.summary}</div>
+    ${b.coming.map(row).join('')}
+    ${b.came.length ? `<div class="hot-sec">Arrived &middot; ${b.came.length}</div>${b.came.map(row).join('')}` : ''}`;
 }
-// The profile draws a spot for it; it fills once the backings have loaded.
+function openBackedList(name) {
+  loadBacking().then(() => {
+    const b = _bkOfPlayer(name);
+    if (b) openInfoModal(`<div class="modal-body bk-sheet" data-bk-sheet="${_escapeHtml(name)}">${_bkListHtml(name, b)}</div>`);
+  }).catch(() => {});
+}
+// The profile draws a spot for the strip; it fills once the backings have loaded.
 function backingProfileFill(root) {
   const els = (root || document).querySelectorAll('[data-bk-prof]');
   if (els.length) loadBacking().then(() => els.forEach(_bkProfRender)).catch(() => {});
 }
-// A notification's link: scroll to the section once it's drawn. The profile
-// is drawn again while the app starts (and the page jumps back to the top),
-// so every drawing in the next few seconds scrolls to it.
-let _bkProfShowUntil = 0;
-function backingProfileShow() { _bkProfShowUntil = Date.now() + 5000; }
 function _bkProfRender(el) {
-  const p = backedProfile(el.dataset.bkProf);
-  el.hidden = !p;
-  el.innerHTML = p && typeof _pcFold === 'function' ? _pcFold('backed', 'Backed', p.summary, p.html) : p ? p.html : '';
-  if (p && typeof _wirePcFolds === 'function') _wirePcFolds(el);
-  if (p && el.isConnected && Date.now() < _bkProfShowUntil) setTimeout(() => el.scrollIntoView({ block: 'start' }), 50);
+  const b = _bkOfPlayer(el.dataset.bkProf);
+  el.hidden = !b;
+  el.innerHTML = b ? _bkStripHtml(el.dataset.bkProf, b) : '';
 }
-const _bkProfRedraw = () => document.querySelectorAll('[data-bk-prof]').forEach(_bkProfRender);
+// After a change (a month, "It arrived"): the strips and an open list.
+function _bkProfRedraw() {
+  document.querySelectorAll('[data-bk-prof]').forEach(_bkProfRender);
+  document.querySelectorAll('[data-bk-sheet]').forEach(el => {
+    const b = _bkOfPlayer(el.dataset.bkSheet);
+    if (b) el.innerHTML = _bkListHtml(el.dataset.bkSheet, b);
+  });
+}
+// A notification's link: your backed games.
+function backingProfileShow() {
+  const me = localStorage.getItem('bgl-player');
+  if (me) openBackedList(me);
+}
 document.addEventListener('click', (e) => {
+  const all = e.target.closest('[data-bk-all]');
+  if (all) { openBackedList(all.dataset.bkAll); return; }
   const row = e.target.closest('[data-bk-prof-open]');
-  if (row && !e.target.closest('button, input, label, a') && typeof openBackedGame === 'function') openBackedGame(Number(row.dataset.bkProfOpen));
+  if (row && !e.target.closest('input, label, a') && typeof openBackedGame === 'function') openBackedGame(Number(row.dataset.bkProfOpen));
 });
+// Facts for a listed game BGG doesn't have (data/backed.js: about, cover).
+function backingListed(id) {
+  for (const uid in _backFixed) if (_backFixed[uid][id]) return _backFixed[uid][id];
+  return null;
+}
 
 // The month a backer sets when BGG has none, and "it arrived".
 async function setBackingMonth(id, month) {

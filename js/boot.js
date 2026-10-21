@@ -223,10 +223,9 @@ function _takeGoLink() {
   if (kind === 'game') {
     const g = findGameByBggId(id);
     if (g) { _modalTab = 'plays'; _modalTabFor = g.bggId; openModal(g); }
-  } else if (kind === 'backed') {   // your profile, at its Backed section
-    if (typeof _pcFoldOpen !== 'undefined') _pcFoldOpen.backed = true;
-    if (typeof backingProfileShow === 'function') backingProfileShow();
+  } else if (kind === 'backed') {   // your profile, with your backed games open
     _navGo('you', 'profile');
+    if (typeof backingProfileShow === 'function') backingProfileShow();
   } else if (kind === 'hot') {
     if (typeof _hotFilter !== 'undefined') _hotFilter = 'live';
     _navGo('explore', 'trending');

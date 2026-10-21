@@ -6,6 +6,7 @@
 //         a newer update from the publisher), looked up on 21 Oct 2026
 //   at    when the campaign ended, the start of the countdown bar
 //   note  what the pledge was (or a caveat about the date), under the name
+//   about, by  for a game BGG doesn't have: its page's description
 // Ids from 9000001 up are made up, for what isn't on BGG (the Gloomhaven RPG
 // is an RPGGeek item; sleeves and accessories). Kept as JSON so the Worker
 // can read it.
@@ -15,6 +16,8 @@ const BACKED_FIXED = {
       "img": "https://cf.geekdo-images.com/tFZI-lyp2B54d6AWBaI0jw__square100@2x/img/GdbGmbL7G4mAbAWilQmmsjHp16o=/200x200/filters:strip_icc()/pic7839687.jpg" },
     { "id": 9000001, "name": "Gloomhaven: The Role Playing Game", "on": "backerkit", "url": "https://gloomhaven-rpg.backerkit.com/hosted_preorders", "at": "2023-07-20", "rel": "2027-01",
       "note": "Gloomhaven Grand Festival: the RPG, no miniatures",
+      "about": ["Cephalofair's tabletop role-playing game, set in the world of Gloomhaven. Characters are built from the classes and ancestries of the Gloomhaven and Frosthaven board games, and fights keep their card-driven play.", "The deluxe set has the core rulebook, card decks for 16 classes and 8 ancestries, modifier decks, a backgrounds deck, a character sheet pad and a Gloom Master screen.", "It came from the Gloomhaven Grand Festival campaign on BackerKit (2023), next to Gloomhaven's second edition, a Frosthaven reprint and a line of miniatures."],
+      "by": "Isaac Childres",
       "img": "https://images.backerkit.com/uploads/project/image/34852/ij7gi1r966qve0x0bsnlzcc9sz8m.jpeg?fm=jpg&w=600&h=600&fit=crop&auto=compress" },
     { "id": 449019, "name": "Paperback Adventures: Volume 2", "on": "gamefound", "url": "https://gamefound.com/en/projects/tim-fowers/paperback-adventures-volume-2", "at": "2025-07-17", "rel": "2026-12",
       "note": "Iron Knee and The Binding Nexus",
@@ -46,9 +49,11 @@ const BACKED_FIXED = {
       "img": "https://cf.geekdo-images.com/kP5dM28HJayiz4b7SjIQMw__square100@2x/img/afbpz4AjSZTVylST-xbgxlhqRHE=/0x1627:1719x3346/200x200/filters:strip_icc()/pic9346205.png" },
     { "id": 9000002, "name": "Astral Forge: Tabletop Essentials 2026", "on": "gamefound", "url": "https://gamefound.com/en/projects/astral-forge/gamingcloth", "at": "2026-05-05", "rel": "2026-12",
       "note": "Was due Oct 2026; held up by China's Golden Week, new date to come",
+      "about": ["Table accessories from Astral Forge's 2026 Gamefound campaign: GamingCloth play mats, QuickZip and DrawPouch storage bags, and orgaNicer card organisers."],
       "img": "https://imgcdn.gamefound.com/og-image-fb/projects/6127/c8395143-b4a7-41cc-833d-9578076c5373.png" },
     { "id": 9000003, "name": "Paladin Sleeves: Season 11", "on": "gamefound", "url": "https://gamefound.com/en/projects/board-and-dice/paladin-season11", "at": "2026-08-14", "rel": "2026-12",
       "note": "Second shipping wave, from late Nov",
+      "about": ["The eleventh season of Board&Dice's Paladin card sleeves: sleeves in the sizes each backer picked, ordered in bulk, from 25 to 500 packs.", "A quarter of the orders went out from stock in September; the second wave reaches the warehouses in late November or early December, and the last few early next year."],
       "img": "https://imgcdn.gamefound.com/og-image-fb/projects/11589/090c666d-781e-42b5-b181-4f1c710e2902.png" },
     { "id": 449019, "name": "Paperback Adventures: Volume 2", "on": "gamefound", "url": "https://gamefound.com/en/projects/tim-fowers/paperback-adventures-volume-2", "at": "2025-07-17", "rel": "2026-12",
       "note": "Big Box + Binding Nexus + Iron Knee",
