@@ -291,6 +291,36 @@ document.addEventListener('click', (e) => {
   const row = e.target.closest('[data-bk-prof-open]');
   if (row && !e.target.closest('input, label, a') && typeof openBackedGame === 'function') openBackedGame(Number(row.dataset.bkProfOpen));
 });
+// ── Trending → Interested: the campaigns you're watching ──
+function backingInterestedIds() {
+  const me = _bkMe();
+  if (!_backing || !me) return [];
+  return Object.keys(_backing)
+    .filter(id => Object.entries(_backing[id]).some(([uid, e]) => e && e.s === 'interested' && _bkPlayerOf(uid) === me))
+    .map(Number);
+}
+// One whose campaign is over (it's left the list): back it after all, or let it go.
+function backingInterestedRowHtml(id) {
+  const esc = _escapeHtml;
+  const me = _bkMe(), mine = myBacking(id);
+  const e = (mine && mine.s === 'interested' ? mine : null)
+    || backingFor(id).find(x => x.s === 'interested' && _bkPlayerOf(x.uid) === me) || {};
+  const g = _bkGame(id, e);
+  const ended = e.ends && !isNaN(Date.parse(e.ends)) ? ` ${new Date(e.ends).toLocaleDateString('en', { day: 'numeric', month: 'short' })}` : '';
+  return `<div class="bk-item" data-bk-prof-open="${id}">
+      <img class="bk-cover" src="${esc(g.img)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
+      <div class="bk-info">
+        <b>${esc(g.name)}</b>
+        <div class="bk-meta"><span class="bk-ended">${HOT_PLATFORMS[e.on] || 'Campaign'} ended${ended}</span></div>
+        ${backingWhoHtml(id)}
+        ${mine && mine.s === 'interested' ? `<div class="bk-tools">
+          <button type="button" class="lp-textbtn" data-bk="${id}|backed">I backed it</button>
+          <button type="button" class="lp-textbtn" data-bk="${id}|interested">Not interested</button>
+        </div>` : ''}
+      </div>
+    </div>`;
+}
+
 // Facts for a listed game BGG doesn't have (data/backed.js: about, cover).
 function backingListed(id) {
   for (const uid in _backFixed) if (_backFixed[uid][id]) return _backFixed[uid][id];

@@ -8,7 +8,7 @@
 // job (tools/fetch-hot.py) and fetched when the tab opens, so it's the latest.
 
 let _hot = null;            // BGG_HOT once loaded
-let _hotFilter = null;      // 'live' (campaigns running now, the default) | 'soon' (hot on BGG, no campaign running) | 'yours' (news for the games you play, js/game-news.js)
+let _hotFilter = null;      // 'live' (campaigns running now, the default) | 'soon' (hot on BGG, no campaign running) | 'yours' (news for the games you play, js/game-news.js) | 'interested' (the campaigns you marked Interested, js/backing.js)
 let _hotBox = null;         // the tab's list, to redraw after a backing changes
 let _hotSort = 'you';       // 'you' | 'ending' | 'backers' | 'hot'
 
@@ -237,7 +237,24 @@ function _renderHot(box) {
   const yours = _gnForYou();
   if (!_hotFilter) _hotFilter = live.length ? 'live' : soon.length ? 'soon' : 'yours';
   if (_hotFilter === 'soon' && !soon.length) _hotFilter = 'live';
-  const chips = _gbChips('hot', [['live', `Live campaigns ${live.length}`], ['soon', `Coming soon ${soon.length}`], ['yours', `For your games ${yours.length}`]], v => _hotFilter === v);
+  const watching = typeof backingInterestedIds === 'function' ? backingInterestedIds() : [];   // only for someone who marked one
+  if (_hotFilter === 'interested' && !watching.length) _hotFilter = 'live';
+  const chips = _gbChips('hot', [['live', `Live campaigns ${live.length}`], ['soon', `Coming soon ${soon.length}`], ['yours', `For your games ${yours.length}`]]
+    .concat(watching.length ? [['interested', `Interested ${watching.length}`]] : []), v => _hotFilter === v);
+  if (_hotFilter === 'interested') {
+    const fits = _hotFits();
+    const found = watching.map(id => (_hot.games || []).find(x => x.id === id));
+    const on = found.filter(g => g && _hotLive(g)).sort((a, b) => Date.parse(a.camp.ends) - Date.parse(b.camp.ends));
+    const over = watching.filter(id => !on.some(g => g.id === id));
+    box.innerHTML = `
+      <div class="hot-head">
+        <div class="gb-chips">${chips}</div>
+        <span class="hot-updated">The campaigns you marked Interested, ending soonest first</span>
+      </div>
+      ${on.map(g => _hotCardHtml(g, libs, fits.get(g.id) || _hotFit(g, taste))).join('')}
+      ${over.length ? `<div class="hot-sec">Campaign over &middot; ${over.length}</div>${over.map(backingInterestedRowHtml).join('')}` : ''}`;
+    return;
+  }
   if (_hotFilter === 'yours') {
     box.innerHTML = `
       <div class="hot-head">

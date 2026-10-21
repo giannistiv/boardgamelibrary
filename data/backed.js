@@ -69,6 +69,15 @@ const BACKED_FIXED = {
       "img": "https://cf.geekdo-images.com/JpZqCpowQtEfy2bKWlLI2A__square100@2x/img/GLPofPL0OevBhEhvEiV8GE9EzwY=/0x224:527x751/200x200/filters:strip_icc()/pic9161175.jpg" },
     { "id": 456084, "name": "Hellbringer: Bestiary & Forbidden Spells", "on": "gamefound", "url": "https://gamefound.com/en/projects/maxime-gauthier/hellbringer", "at": "2025-10-31", "rel": "2027-03",
       "note": "Monster Tier",
-      "img": "https://cf.geekdo-images.com/XYcIR84Dve2Z9du8ideFlA__square100@2x/img/qtBVSBtxeuCwDkCYP56_9G8ZluI=/200x200/filters:strip_icc()/pic9153708.png" }
+      "img": "https://cf.geekdo-images.com/XYcIR84Dve2Z9du8ideFlA__square100@2x/img/qtBVSBtxeuCwDkCYP56_9G8ZluI=/200x200/filters:strip_icc()/pic9153708.png" },
+    { "id": 462144, "name": "Stonespine Architects: Invasion", "on": "kickstarter", "url": "https://www.kickstarter.com/projects/thunderworks/stonespine-architects-invasion-expansion", "at": "2026-07-08", "rel": "2027-03",
+      "note": "Stonespine All-In, with the base game reprint",
+      "img": "https://cf.geekdo-images.com/hLzRIc_NGaKkGkhvEWzTeA__square100@2x/img/ieAPyXvb9qZleLalN3MGAc3Xp1s=/0x165:2256x2769/fit-in/200x200/filters:fill(blur):strip_icc()/pic9329088.jpg" },
+    { "id": 460043, "name": "Leviathan Wilds: Shattered Peak", "on": "kickstarter", "url": "https://www.kickstarter.com/projects/mooncrabgames/leviathan-wilds-shattered-peak", "at": "2026-06-02", "rel": "2027-06",
+      "note": "Returning Backers: Everything New!",
+      "img": "https://cf.geekdo-images.com/Tla5ya6wxpJvi8DLi1IpGw__square100@2x/img/OfjV9EFNqG_BTSbgtKgDjyPpmck=/0x384:1600x1984/200x200/filters:strip_icc()/pic9275352.jpg" },
+    { "id": 442214, "name": "Rogue Dungeon: A Rogue's Tale", "on": "kickstarter", "url": "https://www.kickstarter.com/projects/roguedungeon/rogue-dungeon-a-rogues-tale", "at": "2025-04-29", "rel": "2026-01",
+      "note": "Knight of the Realm pledge. Was due Jan 2026; the boxes are done, the campaign is still in testing, no new date yet",
+      "img": "https://cf.geekdo-images.com/2_TJCQW5b2bfyevfO5oVjw__square100@2x/img/uWsfLq7Jyz74HwemANnE1o3QRu8=/732x0:4447x2880/fit-in/200x200/filters:fill(blur):strip_icc()/pic8801779.png" }
   ]
 };

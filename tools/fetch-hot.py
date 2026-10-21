@@ -322,7 +322,8 @@ def main():
                 "// out. Written by tools/fetch-hot.py (every few hours); don't edit by hand.\n")
         f.write('const BGG_HOT = ' + json.dumps(payload, ensure_ascii=False, separators=(',', ':')) + ';\n')
     new = [g['name'] for gid, g in games.items() if gid not in before]
-    gone = [g['name'] for gid, g in before.items() if gid not in games]
+    kept = {str(g['id']) for g in backed_games}   # (a backed game's details stay on, outside the list)
+    gone = [g['name'] for gid, g in before.items() if gid not in games and gid not in kept]
     print(f'fetch-hot: {sum(1 for g in games.values() if g.get("camp"))} live campaigns, '
           f'{sum(1 for g in games.values() if "pos" in g)} upcoming on the hot list; '
           f'{len(new)} new, {len(gone)} gone')
