@@ -463,7 +463,8 @@ function acctProfileHtml() {
   return `<div class="acct-card"><div><b>Signed in${a.email ? ` as ${esc(a.email)}` : ''}</b><span>${_acctHow(a)}</span></div></div>`;
 }
 function _acctHow(a) {
-  const friends = Object.keys(ACCT_OWNERS).filter(k => acctFriendOf(k, a)).map(k => `${ACCT_OWNERS[k]}'s`);
+  // Στιβ and Δημητρης have their own shelf: being each other's friend means nothing to them
+  const friends = acctIsOwner(a) ? [] : Object.keys(ACCT_OWNERS).filter(k => acctFriendOf(k, a)).map(k => `${ACCT_OWNERS[k]}'s`);
   return `With ${a.provider === 'google' ? 'Google' : 'email'}${friends.length ? ` &middot; ${_escapeHtml(friends.join(' and '))} friend` : ''}`;
 }
 // Profile settings: the account, and signing out.
