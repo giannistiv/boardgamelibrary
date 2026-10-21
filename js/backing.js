@@ -78,6 +78,7 @@ async function setBacking(id, state) {
     ver: c.ver || (mine && mine.ver), rel: (mine && mine.rel) || c.rel };
   for (const k in opt) if (opt[k]) e[k] = String(opt[k]).slice(0, k === 'name' ? 200 : 500);
   if (mine && mine.arrived) e.arrived = true;
+  if (mine && mine.relMine) e.relMine = mine.relMine;
   await acctWrite(path, 'PUT', e);
   ((_backing[id] = _backing[id] || {}))[a.uid] = e;
 }
