@@ -8,7 +8,8 @@
 // job (tools/fetch-hot.py) and fetched when the tab opens, so it's the latest.
 
 let _hot = null;            // BGG_HOT once loaded
-let _hotFilter = null;      // 'live' (campaigns running now, the default) | 'soon' (hot on BGG, no campaign running) | 'yours' (news for the games you play, js/game-news.js)
+let _hotFilter = null;      // 'live' (campaigns running now, the default) | 'soon' (hot on BGG, no campaign running) | 'yours' (news for the games you play, js/game-news.js) | 'backed' (what the group backed, js/backing.js)
+let _hotBox = null;         // the tab's list, to redraw after a backing changes
 let _hotSort = 'you';       // 'you' | 'ending' | 'backers' | 'hot'
 
 function trendingAllowed() { return true; }   // open to everyone
@@ -223,6 +224,7 @@ function _hotCardHtml(g, libs, fit) {
       ${why ? `<div class="hot-why">${why}</div>` : ''}
       ${g.desc ? `<p class="hot-desc">${esc(g.desc)}</p>` : ''}
       ${live ? _hotCampHtml(g.camp, true) : ''}
+      ${typeof backingButtonsHtml === 'function' ? `<div class="bk-holder" data-bk-holder="${g.id}">${live ? backingButtonsHtml(g) : backingWhoHtml(g.id)}</div>` : ''}
       ${pics ? `<div class="hot-pics">${pics}</div>` : ''}
     </article>`;
 }
@@ -235,7 +237,18 @@ function _renderHot(box) {
   const yours = _gnForYou();
   if (!_hotFilter) _hotFilter = live.length ? 'live' : soon.length ? 'soon' : 'yours';
   if (_hotFilter === 'soon' && !soon.length) _hotFilter = 'live';
-  const chips = _gbChips('hot', [['live', `Live campaigns ${live.length}`], ['soon', `Coming soon ${soon.length}`], ['yours', `For your games ${yours.length}`]], v => _hotFilter === v);
+  const nBacked = typeof backedCount === 'function' ? backedCount() : 0;
+  const chips = _gbChips('hot', [['live', `Live campaigns ${live.length}`], ['soon', `Coming soon ${soon.length}`], ['yours', `For your games ${yours.length}`]]
+    .concat(typeof backedListHtml === 'function' ? [['backed', `Backed ${nBacked}`]] : []), v => _hotFilter === v);
+  if (_hotFilter === 'backed') {
+    box.innerHTML = `
+      <div class="hot-head">
+        <div class="gb-chips">${chips}</div>
+        <span class="hot-updated">What the group backed, with when it should arrive (BGG's month for the edition), and the campaigns people are watching</span>
+      </div>
+      ${backedListHtml()}`;
+    return;
+  }
   if (_hotFilter === 'yours') {
     box.innerHTML = `
       <div class="hot-head">
@@ -268,7 +281,8 @@ function _renderHot(box) {
 function wireTrendingTab(container) {
   const box = container.querySelector('#hot');
   if (!box) return;
-  Promise.all([_loadHot(), _loadNews().catch(() => null)]).then(() => _renderHot(box)).catch(() => {
+  _hotBox = box;
+  Promise.all([_loadHot(), _loadNews().catch(() => null), typeof loadBacking === 'function' ? loadBacking().catch(() => null) : null]).then(() => _renderHot(box)).catch(() => {
     box.innerHTML = '<div class="stats-player-sub gb-empty">The list couldn&rsquo;t be loaded. Try again in a moment.</div>';
   });
   box.addEventListener('click', (e) => {
@@ -280,6 +294,13 @@ function wireTrendingTab(container) {
     }
     if (e.target.closest('[data-gn-all]')) { _gnShowAll = true; _renderHot(box); return; }
     if (_hotPicClick(e)) return;
+    const bk = e.target.closest('[data-bk-open]');
+    if (bk && !e.target.closest('button, input, label, a')) {
+      const id = Number(bk.dataset.bkOpen);
+      const first = (typeof backingFor === 'function' && backingFor(id)[0]) || {};
+      _openHotGame((_hot.games || []).find(x => x.id === id) || { id, name: first.name || `Game #${id}`, img: first.img || '' });
+      return;
+    }
     const card = e.target.closest('.hot-card');
     if (card && !e.target.closest('a')) {
       const g = (_hot.games || []).find(x => x.id === Number(card.dataset.hotId));
@@ -295,6 +316,16 @@ function _hotPicClick(e) {
   const g = (_hot.games || []).find(x => x.id === id);
   if (g) _openPics(g, i);
   return true;
+}
+
+// After someone marks a campaign Interested or Backed: the list and any open sheet.
+function backingRedraw() {
+  if (_hotBox && _hotBox.isConnected && _hot) _renderHot(_hotBox);
+  document.querySelectorAll('#modal-content [data-bk-holder]').forEach(el => {
+    const id = Number(el.dataset.bkHolder);
+    const g = (_hot && (_hot.games || []).find(x => x.id === id)) || { id };
+    el.innerHTML = _hotLive(g) ? backingButtonsHtml(g) : backingWhoHtml(id);
+  });
 }
 
 // ── An upcoming game's page, in the game-page sheet ──
@@ -338,6 +369,7 @@ function _openHotGame(g) {
       ${facts ? `<div class="gm-facts">${facts}</div>` : ''}
       ${tiles.length ? `<div class="gm-tiles hot-tiles">${tiles.join('')}</div>` : ''}
       ${camp ? `<div class="hot-sheet-camp">${camp}</div>` : ''}
+      ${typeof backingButtonsHtml === 'function' ? `<div class="bk-holder bk-sheet" data-bk-holder="${g.id}">${live ? backingButtonsHtml(g) : backingWhoHtml(g.id)}</div>` : ''}
       ${about ? `<div class="modal-desc hot-about">${about}</div>` : ''}
       ${g.mechs && g.mechs.length ? `<div class="hot-sec">Mechanics</div><div class="modal-mechanics">${chips(g.mechs, 'modal-mech')}</div>` : ''}
       ${g.cats && g.cats.length ? `<div class="hot-sec">Categories</div><div class="modal-categories">${chips(g.cats, 'modal-cat')}</div>` : ''}

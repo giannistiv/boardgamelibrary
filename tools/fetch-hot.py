@@ -7,6 +7,11 @@ aren't out yet. Each comes with a few facts, pictures from its gallery, and
 for its detail sheet BGG's description, mechanics, categories and designers.
 A game whose campaign ends and that isn't on the hot list drops off.
 
+Each campaign also carries its edition's expected release month from BGG
+(the version's releasedate), and 'backed' keeps that month up to date for
+every game someone in the group backed (Firebase backing/, js/backing.js),
+so the Backed list's countdown follows BGG when a delivery slips.
+
     python3 tools/fetch-hot.py
 
 Run every few hours by .github/workflows/bgg-sync.yml. Public BGG data, so no
@@ -151,9 +156,29 @@ def campaign_link(c, old):
     return KS_SEARCH.format(urllib.parse.quote((slug or c.get('name') or '').replace('-', ' ')))
 
 
+def version_release(ver):
+    """(release month 'YYYY-MM' or year 'YYYY' or '', BGG's release status)
+    for a game version: BGG's estimate of when a crowdfunded edition comes out."""
+    if not str(ver or '').isdigit():
+        return '', ''
+    item = get(f'{API}/geekitems?objectid={ver}&objecttype=version').get('item') or {}
+    m = re.match(r'(\d{4})-(\d{2})', item.get('releasedate') or '')
+    rel = '' if not m or m.group(1) == '0000' else (m.group(1) if m.group(2) == '00' else f'{m.group(1)}-{m.group(2)}')
+    return rel, item.get('releasestatus') or ''
+
+
 def campaign(c, old=None):
     """A live crowdfunding campaign, as the tab shows it."""
-    return {
+    ver = str(c.get('versionid') or '')
+    if old and old.get('ver') == ver and 'rel' in old:
+        rel, relst = old.get('rel', ''), old.get('relst', '')
+    else:
+        try:
+            rel, relst = version_release(ver)
+        except Exception as e:
+            print(f'fetch-hot: release of {ver}: {type(e).__name__}: {e}')
+            rel, relst = '', ''
+    return {'rel': rel, 'relst': relst,
         'on': c.get('orderType') or '', 'url': campaign_link(c, old), 'ver': str(c.get('versionid') or ''),
         'ends': c.get('endDate') or '',
         'pct': _int(c.get('progress')), 'backers': _int(c.get('backersCount')),
@@ -238,8 +263,30 @@ def main():
             games[gid] = g
         games[gid].update({'pos': pos, 'delta': _int(it.get('delta')), 'rank': _int(it.get('rank'))})
 
+    # every game someone backed: its edition's release month, fresh each run
+    backed = {}
+    try:
+        backing = get(f'{covers.FIREBASE}/backing.json') or {}
+    except Exception as e:
+        print(f'fetch-hot: backing: {type(e).__name__}: {e}')
+        backing = {}
+    for gid, people in backing.items():
+        if not str(gid).isdigit() or not isinstance(people, dict):
+            continue
+        entries = [p for p in people.values() if isinstance(p, dict)]
+        if not any(p.get('s') == 'backed' for p in entries):
+            continue
+        ver = next((str(p.get('ver')) for p in entries if str(p.get('ver') or '').isdigit()), '')
+        if not ver:
+            continue
+        try:
+            rel, relst = version_release(ver)
+            backed[str(gid)] = {'ver': ver, 'rel': rel, 'relst': relst}
+        except Exception as e:
+            print(f'fetch-hot: backed {gid}: {type(e).__name__}: {e}')
+
     payload = {'updated': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
-               'games': list(games.values()), 'released': sorted(released, key=int)}
+               'games': list(games.values()), 'released': sorted(released, key=int), 'backed': backed}
     with open(OUT, 'w', encoding='utf-8') as f:
         f.write("// Upcoming games: BGG's live crowdfunding campaigns and the hot list's games still to come\n"
                 "// out. Written by tools/fetch-hot.py (every few hours); don't edit by hand.\n")
