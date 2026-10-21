@@ -298,7 +298,8 @@ function wireTrendingTab(container) {
     if (bk && !e.target.closest('button, input, label, a')) {
       const id = Number(bk.dataset.bkOpen);
       const first = (typeof backingFor === 'function' && backingFor(id)[0]) || {};
-      _openHotGame((_hot.games || []).find(x => x.id === id) || { id, name: first.name || `Game #${id}`, img: first.img || '' });
+      const hg = (_hot.games || []).find(x => x.id === id) || { id, name: first.name || `Game #${id}`, img: first.img || '' };
+      _openHotGame({ ...hg, backUrl: first.url, backOn: first.on });
       return;
     }
     const card = e.target.closest('.hot-card');
@@ -353,6 +354,9 @@ function _openHotGame(g) {
   const camp = live ? `${_hotCampHtml(g.camp, false)}
       ${g.camp.more && g.camp.more.length ? `<div class="hot-more">Also in the campaign: ${g.camp.more.map(esc).join(', ')}</div>` : ''}
       <a class="modal-bgg-link hot-back-big" href="${esc(g.camp.url)}" target="_blank" rel="noopener">Back it on ${HOT_PLATFORMS[g.camp.on] || 'the campaign page'} &#8599;</a>` : '';
+  // opened from Backed: the campaign's page, for its updates
+  const campPage = !live && g.backUrl ? `<a class="modal-bgg-link" href="${esc(g.backUrl)}" target="_blank" rel="noopener">The campaign on ${HOT_PLATFORMS[g.backOn] || 'its page'} &#8599;</a>` : '';
+  const onBgg = typeof backingOnBgg !== 'function' || backingOnBgg(g.id);
   const about = (g.about && g.about.length ? g.about : g.desc ? [g.desc] : []).map(p => `<p>${esc(p)}</p>`).join('');
   const chips = (list, cls) => list.map(x => `<span class="${cls}">${esc(x)}</span>`).join('');
   const pics = (g.pics || []).map((p, i) => `<button type="button" class="hot-pic" data-hot-pic="${g.id}:${i}" aria-label="Picture ${i + 1}"><img src="${esc(p.s)}" alt="" loading="lazy"></button>`).join('');
@@ -376,7 +380,8 @@ function _openHotGame(g) {
       ${pics ? `<div class="hot-sec">Pictures</div><div class="hot-pics hot-sheet-pics">${pics}</div>` : ''}
       <div class="hot-sheet-links">
         ${ours ? `<button type="button" class="modal-bgg-link" data-hot-ours="${g.id}">Our game page &rsaquo;</button>` : ''}
-        <a class="modal-bgg-link" href="https://boardgamegeek.com/boardgame/${g.id}" target="_blank" rel="noopener">View on BoardGameGeek &#8599;</a>
+        ${campPage}
+        ${onBgg ? `<a class="modal-bgg-link" href="https://boardgamegeek.com/boardgame/${g.id}" target="_blank" rel="noopener">View on BoardGameGeek &#8599;</a>` : ''}
       </div>
     </div>`, (e) => {
     if (e.target.closest('[data-gn-all]')) { _gnShowAll = true; _renderHot(box); return; }

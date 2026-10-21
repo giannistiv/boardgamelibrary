@@ -188,6 +188,20 @@ export async function daily(env) {
     const src = await (await fetch(`${SITE}data/bgg-hot.js`, { cf: { cacheTtl: 3600 } })).text();
     fresh = (JSON.parse(src.slice(src.indexOf('{'), src.lastIndexOf('}') + 1)).backed) || {};
   } catch (_) { /* the saved months will do */ }
+  // backings given as a list (data/backed.js), until their backer changes one in the app
+  try {
+    const src = await (await fetch(`${SITE}data/backed.js`, { cf: { cacheTtl: 3600 } })).text();
+    const fixed = JSON.parse(src.slice(src.indexOf('{'), src.lastIndexOf('}') + 1));
+    const users = (await fbGet(env, 'users')) || {};
+    for (const [player, list] of Object.entries(fixed)) {
+      const uid = Object.keys(users).find(u => users[u] && users[u].player === player);
+      if (!uid || !Array.isArray(list)) continue;
+      for (const f of list) {
+        const people = (backing[f.id] = backing[f.id] || {});
+        if (!people[uid]) people[uid] = { s: 'backed', name: f.name, relMine: f.rel };
+      }
+    }
+  } catch (_) { /* the ones in Firebase still go */ }
   const now = Date.now();
   const d = new Date();
   const ym = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
@@ -208,7 +222,7 @@ export async function daily(env) {
         const rel = e.relMine || (fresh[gid] && fresh[gid].rel) || e.rel || '';
         if (rel === ym) {
           await once(env, `sent:${uid}:${gid}:due:${ym}`, 40 * 86400, () => notifyUser(env, uid, {
-            title: clip(e.name, 80), body: 'Due this month, by BGG\'s date. When it arrives, mark it in Backed.',
+            title: clip(e.name, 80), body: `Due this month, by ${e.relMine ? 'its estimate' : 'BGG\'s date'}. When it arrives, mark it in Backed.`,
             url: `${SITE}?go=backed`, tag: `due-${gid}`,
           }));
         }

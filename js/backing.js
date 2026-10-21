@@ -6,10 +6,13 @@
 // campaign's edition (tools/fetch-hot.py keeps it fresh in data/bgg-hot.js
 // 'backed'), or the month the backer set when BGG has none. It counts as
 // arrived once the backer says so, or once it's in their collection.
+// data/backed.js adds backings given as a list (fixed: true until changed).
 
 let _backing = null;        // bggId → { uid → entry }
 let _backNames = {};        // uid → name, from users/
+let _backFixed = {};        // bggId → its line in data/backed.js (for the pledge note)
 let _backingLoading = null;
+const BACKING_NOT_BGG = 9000000;   // ids from here up are made up (data/backed.js): no BGG page
 
 function loadBacking(force) {
   if (_backing && !force) return Promise.resolve(_backing);
@@ -17,15 +20,42 @@ function loadBacking(force) {
     _backingLoading = Promise.all([
       fetch(`${FIREBASE_DB}/backing.json`, { cache: 'no-store' }).then(r => (r.ok ? r.json() : null)).catch(() => null),
       fetch(`${FIREBASE_DB}/users.json`, { cache: 'no-store' }).then(r => (r.ok ? r.json() : null)).catch(() => null),
-    ]).then(([b, users]) => {
+      fetch('data/backed.js', { cache: 'no-cache' }).then(r => (r.ok ? r.text() : '')).then(src => JSON.parse(src.slice(src.indexOf('{'), src.lastIndexOf('}') + 1))).catch(() => null),
+    ]).then(([b, users, fixed]) => {
       _backing = b || {};
       _backNames = {};
       for (const uid in users || {}) if (users[uid] && users[uid].name) _backNames[uid] = users[uid].name;
+      _backingAddFixed(fixed, users);
       return _backing;
     }).finally(() => { _backingLoading = null; });
   }
   return _backingLoading;
 }
+
+// The listed backings count as their player's until that player changes one
+// in the app (then Firebase has it, and that wins).
+function _backingAddFixed(fixed, users) {
+  _backFixed = {};
+  for (const player in fixed || {}) {
+    if (!Array.isArray(fixed[player])) continue;
+    const uid = Object.keys(users || {}).find(u => users[u] && users[u].player === player) || `player:${player}`;
+    if (!_backNames[uid]) _backNames[uid] = player;
+    for (const f of fixed[player]) {
+      _backFixed[f.id] = f;
+      const people = (_backing[f.id] = _backing[f.id] || {});
+      if (!people[uid]) people[uid] = { s: 'backed', at: Date.parse(f.at) || 0, name: f.name, img: f.img, url: f.url, on: f.on, relMine: f.rel, fixed: true };
+    }
+  }
+}
+// A listed backing isn't in Firebase yet: its first change saves all of it.
+async function _backingPutWhole(id, a, mine, change) {
+  const e = { ...mine };
+  delete e.fixed;
+  change(e);
+  await acctWrite(`backing/${id}/${a.uid}`, 'PUT', e);
+  _backing[id][a.uid] = e;
+}
+function backingOnBgg(id) { return Number(id) < BACKING_NOT_BGG; }
 
 // Everyone in on a game: [{ uid, who, s, ... }], backers first.
 function backingFor(id) {
@@ -68,6 +98,7 @@ async function setBacking(id, state) {
   const mine = myBacking(id);
   const path = `backing/${id}/${a.uid}`;
   if (mine && mine.s === state) {
+    if (mine.fixed) throw new Error('It\'s on your list of backed games in the app, so it stays in Backed.');
     await acctWrite(path, 'DELETE');
     delete _backing[id][a.uid];
     return;
@@ -84,12 +115,14 @@ async function setBacking(id, state) {
 }
 
 // ── When it should arrive ──
-// BGG's month for the edition (fresh), else the month saved with the backing.
+// The backer's own month, else BGG's for the edition (fresh), else the month
+// saved with the backing. BGG's "released" only counts with BGG's month: a
+// game in shops can still be on its way to backers.
 function backingRelease(id, e) {
   const fresh = typeof _hot !== 'undefined' && _hot && _hot.backed && _hot.backed[id];
   const g = typeof _hot !== 'undefined' && _hot && (_hot.games || []).find(x => x.id === Number(id));
   const rel = (e && e.relMine) || (fresh && fresh.rel) || (g && g.camp && g.camp.rel) || (e && e.rel) || '';
-  const st = (fresh && fresh.relst) || (g && g.camp && g.camp.relst) || '';
+  const st = e && e.relMine ? '' : (fresh && fresh.relst) || (g && g.camp && g.camp.relst) || '';
   return { rel, st };
 }
 const _bkMonth = (y, m) => new Date(y, m - 1, 1).toLocaleString('en', { month: 'short', year: 'numeric' });
@@ -144,6 +177,7 @@ function backedListHtml() {
     const live = g && typeof _hotLive === 'function' && _hotLive(g);
     const img = (g && g.img) || first.img || '';
     const name = (g && g.name) || first.name;
+    const note = _backFixed[id] && _backFixed[id].note;
     let status = '';
     if (backed.length) {
       const arrived = backed.filter(e => _backingHas(e, id));
@@ -163,6 +197,7 @@ function backedListHtml() {
         <img class="bk-cover" src="${esc(img)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">
         <div class="bk-info">
           <b>${esc(name)}</b>
+          ${note ? `<div class="bk-note">${esc(note)}</div>` : ''}
           <div class="bk-meta">${camp}</div>
           ${backingWhoHtml(id)}
           ${status}
@@ -188,6 +223,7 @@ async function setBackingMonth(id, month) {
   const mine = myBacking(id);
   if (!a || !mine) return;
   const v = /^\d{4}-\d{2}$/.test(month) ? month : '';
+  if (mine.fixed) return _backingPutWhole(id, a, mine, e => { if (v) e.relMine = v; else delete e.relMine; });
   await acctWrite(`backing/${id}/${a.uid}/relMine`, v ? 'PUT' : 'DELETE', v || undefined);
   if (v) mine.relMine = v; else delete mine.relMine;
 }
@@ -196,6 +232,7 @@ async function setBackingArrived(id) {
   const mine = myBacking(id);
   if (!a || !mine) return;
   const v = !mine.arrived;
+  if (mine.fixed) return _backingPutWhole(id, a, mine, e => { if (v) e.arrived = true; else delete e.arrived; });
   await acctWrite(`backing/${id}/${a.uid}/arrived`, v ? 'PUT' : 'DELETE', v || undefined);
   if (v) mine.arrived = true; else delete mine.arrived;
 }

@@ -1224,6 +1224,7 @@
   .bk-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:0.25rem}
   .bk-info > b{font-size:0.98rem;line-height:1.25;overflow-wrap:anywhere}
   .bk-meta{font-size:0.76rem;color:var(--text-3)}
+  .bk-note{font-size:0.8rem;color:var(--text-2);line-height:1.35}
   .bk-live{color:var(--accent-2)}
   .bk-info .bk-who{margin-top:0.2rem}
   .bk-status{font-size:0.86rem;font-weight:600;color:var(--text);margin-top:0.35rem}
