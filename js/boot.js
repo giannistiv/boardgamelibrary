@@ -168,7 +168,8 @@ async function _saveProfilePhoto(dataUrl) {
   if (!cur) return { ok: false, err: 'Not logged in.' };
   if (!FIREBASE_DB) return { ok: false, err: 'No connection.' };
   const orig = _origCanon(cur) || (NAME_MAP[cur] || cur);
-  const next = { ...(PROFILE_DATA[orig] || {}), updatedAt: Date.now() };
+  // the rules want every profile to have a name: someone who never renamed keeps their own
+  const next = { name: orig, ...(PROFILE_DATA[orig] || {}), updatedAt: Date.now() };
   if (dataUrl) next.photo = dataUrl; else delete next.photo;
   if (!(await _putProfile(orig, next))) return { ok: false, err: 'Save failed — try again.' };
   PROFILE_DATA[orig] = next;
