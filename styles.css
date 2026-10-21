@@ -1234,8 +1234,10 @@
   .bk-bar{height:6px;border-radius:999px;background:var(--card-3);overflow:hidden;margin-top:0.2rem}
   .bk-bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent-2))}
   .bk-tools{display:flex;align-items:center;flex-wrap:wrap;gap:0.4rem 0.9rem;margin-top:0.3rem}
-  .bk-month{display:inline-flex;align-items:center;gap:0.4rem;font-size:0.8rem;color:var(--text-2)}
-  .bk-month input{min-height:36px;padding:0 0.5rem;border-radius:8px;border:1px solid var(--line-2);background:var(--card-2);color:var(--text);font:inherit;font-size:15px}
+  .bk-month{display:inline-flex;align-items:center;flex-wrap:wrap;gap:0.3rem 0.4rem;max-width:100%;font-size:0.8rem;color:var(--text-2)}
+  .bk-month input{min-height:36px;padding:0 0.5rem;border-radius:8px;border:1px solid var(--line-2);background:var(--card-2);color:var(--text);font:inherit;font-size:15px;width:11.5em;max-width:100%;box-sizing:border-box}
+  /* iPhone: the month sits centred and gets cut at the edge without this */
+  .bk-month input::-webkit-date-and-time-value{text-align:left}
   /* ── Send a play to BG Stats (js/bgstats-share.js) ── */
   .bgs-send{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;margin-left:0.4rem;padding:0;border-radius:8px;border:1px solid var(--line-2);background:transparent;color:var(--text-3);cursor:pointer;flex-shrink:0}
   .bgs-send:hover{color:var(--accent);border-color:var(--accent-line)}
