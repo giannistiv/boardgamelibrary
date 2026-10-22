@@ -62,9 +62,9 @@ async function notifySync() {
     if (sub) await _notifyCall('subscribe', { subscription: sub.toJSON() });
   } catch (_) { /* tried again at the next sign-in */ }
 }
-// A play just logged: the others in it hear about it.
-function notifyPlayLogged(id, game) {
-  _notifyCall('play', { id, game }).catch(() => {});
+// A play just logged: the others in it hear about it, and what it did (a record…).
+function notifyPlayLogged(id, game, note) {
+  _notifyCall('play', note ? { id, game, note } : { id, game }).catch(() => {});
 }
 
 // ── Profile settings ──

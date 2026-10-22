@@ -436,13 +436,13 @@ function _acctError(err) {
   return say || (err && err.message) || 'Something went wrong. Try again.';
 }
 
-function _acctToast(text) {
+function _acctToast(text, ms) {
   let t = document.getElementById('acct-toast');
   if (!t) { t = document.createElement('div'); t.id = 'acct-toast'; t.className = 'acct-toast'; document.body.appendChild(t); }
-  t.textContent = text;
+  t.textContent = text;   // line breaks show (white-space: pre-line)
   t.classList.add('show');
   clearTimeout(t._h);
-  t._h = setTimeout(() => t.classList.remove('show'), 4000);
+  t._h = setTimeout(() => t.classList.remove('show'), ms || 4000);
 }
 
 // ── On your own profile: who you're signed in as, or an invitation to sign in ──

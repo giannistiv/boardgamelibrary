@@ -5,8 +5,10 @@
 // them, unless the same play is there already from a BGStats file (same
 // game, day and players): the file's copy wins. Names are saved as the
 // players' original names, so a rename in Profile settings follows them.
+// Without signal the play is kept on the phone (LP_QUEUE) and shows as
+// waiting to send until it goes up; saving one says what it did (js/play-moments.js).
 
-let manualPlaysCache = {};   // id → the play as saved
+let manualPlaysCache = {};   // id → the play as saved (and any waiting to send: pending)
 
 async function loadManualPlays() {
   try {
@@ -15,6 +17,7 @@ async function loadManualPlays() {
   } catch (e) {
     manualPlaysCache = {};
   }
+  for (const it of _lpQueue()) manualPlaysCache[it.key] = { ...it.rec, pending: true };   // logged without signal
 }
 // After the BGStats plays have merged (boot.js), and again after an upload
 // brings more: oldest first, so each pairs with its own BGStats copy.
@@ -40,6 +43,7 @@ function _lpEntry(id, p) {
   if (p.b) e.b = p.b;
   if (p.l) e.l = typeof canonLocation === 'function' ? canonLocation(p.l, p.date) : p.l;
   if (p.c) e.c = p.c;
+  if (p.pending) e.pending = true;
   return e;
 }
 function _lpUnmerge(id) {
@@ -564,31 +568,103 @@ async function _lpSave() {
   if (l) rec.l = l;
   if (b) rec.b = b;
   if (c) rec.c = c;
+  const picked = _lpPicked && _lpPicked.id === rec.bggId ? _lpPicked : null;
+  // one still waiting to send is changed on the phone, and goes up as it is now
+  if (_lp.id && _lp.id.startsWith('local-')) { _lpKeep(rec, _lp.id, picked); lpFlushQueue(); return; }
   _lpSay('Saving…');
   try {
-    if (typeof ensureKnownGame === 'function') await ensureKnownGame(rec.bggId, _lpPicked && _lpPicked.id === rec.bggId ? _lpPicked : null);
+    if (typeof ensureKnownGame === 'function') await ensureKnownGame(rec.bggId, picked);
     let id = _lp.id;
     if (id) await acctWrite(`plays/${id}`, 'PUT', rec);
-    else {
-      id = (await acctWrite('plays', 'POST', rec)).name;
-      // the others in it hear about it (js/notify.js)
-      if (typeof notifyPlayLogged === 'function') notifyPlayLogged(id, (findGameByBggId(rec.bggId) || {}).name || '');
-    }
+    else id = (await acctWrite('plays', 'POST', rec)).name;
     manualPlaysCache[id] = rec;
     _lpMerge(id, rec);
     _sortPlayHistory();
+    const moments = _lp.id ? [] : _lpMoments(id, rec);
+    // the others in it hear about it (js/notify.js), with what it did
+    if (!_lp.id && typeof notifyPlayLogged === 'function') notifyPlayLogged(id, (findGameByBggId(rec.bggId) || {}).name || '', moments[0] && moments[0].text);
     _lpClose();
     _lpRefresh(rec.bggId);
-    if (typeof _acctToast === 'function') _acctToast(_lp.id ? 'Saved the changes.' : 'Play saved. It counts everywhere now.');
-  } catch (err) { _lpSay(err.message || 'The save failed. Try again.'); }
+    if (typeof _acctToast === 'function') {
+      if (moments.length) _acctToast(['Play saved.', ...moments.map(m => `${m.icon} ${m.text}`)].join('\n'), 8000);
+      else _acctToast(_lp.id ? 'Saved the changes.' : 'Play saved. It counts everywhere now.');
+    }
+  } catch (err) {
+    if (_lpOffline(err)) { _lpKeep(rec, _lp.id, picked); return; }
+    _lpSay(err.message || 'The save failed. Try again.');
+  }
 }
+// What a play just saved did: a record, a first win, a streak… (js/play-moments.js)
+function _lpMoments(id, rec) {
+  if (typeof playMoments !== 'function') return [];
+  const entry = (PLAY_HISTORY[rec.bggId] || []).find(e => e.mp === id);
+  try { return playMoments(rec.bggId, entry); } catch (_) { return []; }
+}
+
+// ── Without signal: kept on the phone, sent when it's back ──
+// LP_QUEUE = [{ key, put, rec, game }]: key is the play's id for a change to
+// one already saved (put), or a 'local-…' one for a new play.
+const LP_QUEUE = 'bgl-lp-queue';
+function _lpQueue() { try { return JSON.parse(localStorage.getItem(LP_QUEUE) || '[]'); } catch (_) { return []; } }
+function _lpQueueSave(q) { try { localStorage.setItem(LP_QUEUE, JSON.stringify(q)); } catch (_) {} }
+function _lpOffline(err) {
+  // fetch's own failures (Chrome "Failed to fetch", Safari "Load failed", Firefox "NetworkError…"), Firebase's auth/network-request-failed
+  return (typeof navigator !== 'undefined' && navigator.onLine === false)
+    || /network|failed to fetch|load failed|offline|internet/i.test(String((err && (err.code || err.message)) || ''));
+}
+function _lpKeep(rec, id, game) {
+  const key = id || `local-${Date.now()}`;
+  _lpQueueSave(_lpQueue().filter(x => x.key !== key).concat([{ key, put: !!id && !id.startsWith('local-'), rec, game: game || null }]));
+  manualPlaysCache[key] = { ...rec, pending: true };
+  _lpMerge(key, manualPlaysCache[key]);
+  _sortPlayHistory();
+  _lpClose();
+  _lpRefresh(rec.bggId);
+  if (typeof _acctToast === 'function') _acctToast('No signal, so the play is kept on this phone.\nIt goes up by itself when you\'re back online.', 7000);
+}
+let _lpFlushing = false;
+async function lpFlushQueue() {
+  const a = typeof acctMe === 'function' ? acctMe() : null;
+  if (_lpFlushing || !a || !_lpQueue().length || navigator.onLine === false) return;
+  _lpFlushing = true;
+  const sent = [];
+  try {
+    for (const item of _lpQueue()) {
+      if (item.rec.by !== a.uid) continue;   // someone else's, from before they signed out here
+      if (typeof ensureKnownGame === 'function') await ensureKnownGame(item.rec.bggId, item.game);
+      const id = item.put ? (await acctWrite(`plays/${item.key}`, 'PUT', item.rec), item.key) : (await acctWrite('plays', 'POST', item.rec)).name;
+      _lpQueueSave(_lpQueue().filter(x => x.key !== item.key));
+      _lpUnmerge(item.key);
+      delete manualPlaysCache[item.key];
+      manualPlaysCache[id] = item.rec;
+      _lpMerge(id, item.rec);
+      sent.push({ id, item });
+    }
+  } catch (err) {
+    if (!_lpOffline(err) && typeof _acctToast === 'function') _acctToast(`A play logged without signal couldn't be sent yet: ${err.message || 'try again later'}.`, 7000);
+  } finally {
+    _lpFlushing = false;
+  }
+  if (!sent.length) return;
+  _sortPlayHistory();
+  for (const { id, item } of sent) {
+    if (item.put || typeof notifyPlayLogged !== 'function') continue;
+    const m = _lpMoments(id, item.rec);
+    notifyPlayLogged(id, (findGameByBggId(item.rec.bggId) || {}).name || '', m[0] && m[0].text);
+  }
+  _lpRefresh(sent[0].item.rec.bggId);
+  if (typeof _acctToast === 'function') _acctToast(sent.length === 1 ? 'The play you logged without signal is up now.' : `The ${sent.length} plays you logged without signal are up now.`);
+}
+window.addEventListener('online', () => lpFlushQueue());
 
 async function _lpDelete() {
   if (!_lp.id || !confirm('Delete this play? This can\'t be undone.')) return;
   _lpSay('Deleting…');
   try {
     const bggId = (manualPlaysCache[_lp.id] || {}).bggId;
-    await acctWrite(`plays/${_lp.id}`, 'DELETE');
+    const queued = _lpQueue().find(x => x.key === _lp.id);
+    if (queued) _lpQueueSave(_lpQueue().filter(x => x.key !== _lp.id));   // not sent yet: it just goes
+    if (!_lp.id.startsWith('local-')) await acctWrite(`plays/${_lp.id}`, 'DELETE');
     delete manualPlaysCache[_lp.id];
     _lpUnmerge(_lp.id);
     _lpClose();

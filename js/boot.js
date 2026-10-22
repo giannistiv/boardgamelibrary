@@ -181,6 +181,7 @@ Promise.all([loadAllRatings(), loadRateSkips(), loadAllFavorites(), loadImported
   _applyProfileOverrides();
   _applyAllPlayOverrides();
   if (typeof mergeManualPlays === 'function') mergeManualPlays();   // plays logged in the app (js/log-play.js)
+  if (typeof lpFlushQueue === 'function') setTimeout(lpFlushQueue, 3000);   // any logged without signal, once signed in
   _sortPlayHistory();
   if (typeof _updateBoardSouthBtnVisibility === 'function') _updateBoardSouthBtnVisibility();
   // A signed-in account (js/account.js) sets this device's player; a join link

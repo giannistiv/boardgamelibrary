@@ -155,6 +155,7 @@ export async function handlePush(action, request, env) {
     const result = winners.length === sc.length && sc.length > 1 ? 'You all won.'
       : winners.length ? `${winners.slice(0, 2).join(' and ')} won.` : 'The game won.';
     const game = clip(data.game, 80) || 'a game';
+    const note = clip(data.note, 140);   // what it did: a record, a first win… (js/play-moments.js)
     let sent = 0;
     const told = new Set([uid]);
     for (const s of sc) {
@@ -163,7 +164,7 @@ export async function handlePush(action, request, env) {
       told.add(to);
       sent += await notifyUser(env, to, {
         title: `${from} logged ${game}`,
-        body: `With you${play.date ? `, ${new Date(play.date + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}` : ''}. ${result} Tap to see it and rate the game.`,
+        body: `With you${play.date ? `, ${new Date(play.date + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}` : ''}. ${result}${note ? ` ${note}.` : ''} Tap to see it and rate the game.`,
         url: `${SITE}?go=game:${Number(play.bggId)}`, tag: `play-${id}`,
       });
     }

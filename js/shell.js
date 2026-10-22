@@ -808,6 +808,7 @@ function openModal(game) {
         + (typeof bgsSendBtnHtml === 'function' ? bgsSendBtnHtml(game.bggId, plays.indexOf(play)) : '');
       return `<div class="play-entry">
         <div class="play-entry-top"><span class="play-date">${fmtDate(play.date)}</span>${msHtml ? `<span class="ms-badges">${msHtml}</span>` : ''}${sendHtml ? `<span class="play-entry-end">${durHtml}${sendHtml}</span>` : durHtml}</div>
+        ${play.pending ? '<div class="play-pending">&#9203; Waiting to send: logged without signal, it goes up when you&rsquo;re back online</div>' : ''}
         <div class="play-scores">${scoreHtml}</div>
         ${boardHtml}${noWinnerHtml}
         ${play.c ? `<div class="play-note">${_escapeHtml(play.c)}</div>` : ''}
