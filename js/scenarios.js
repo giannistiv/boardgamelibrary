@@ -10,8 +10,11 @@
 //
 // A game's picker: { fields: [{ key, label, options(vals) → [[value, text, group]],
 // optional, show(vals), match(token, value) }], order: keys as written,
-// sep: between the parts }. Anything the lists don't cover (a variant, the
-// modular sets) is typed in the form's "Anything else" box and kept after them.
+// sep: between the parts }. A field with `num` is a word and a number to
+// fill in ("Scenario __"), for games whose scenarios are numbered but where
+// how many isn't known: those listed, or any whose plays are logged that
+// way. Anything the lists don't cover (a variant, the modular sets) is typed
+// in the form's "Anything else" box and kept after them.
 
 const SCEN_SEP = '／';
 const _scNorm = (s) => String(s || '').toLowerCase().replace(/^the\s+/, '').replace(/[^a-z0-9+]/g, '');
@@ -28,7 +31,14 @@ const SCEN_NUMBERED = {
   209778: ['Scenario', 17],              // Magic Maze
   209010: ['Mission', 10],               // Mechs vs. Minions (and its Tutorial)
   339789: ['Adventure', 8],              // Welcome to the Moon
+  456440: ['Year', 10],                  // Cozy Stickerville
 };
+// Numbered, but how many isn't known here: the word, and a number to fill in.
+const SCEN_NUMBERED_OPEN = {
+  377470: 'Scenario',   // Sail
+  253344: 'Episode',    // Cthulhu: Death May Die
+};
+const SCEN_TAKE_TIME = 440540;   // Take Time: "2-3", the folder and the clock
 const SCEN_STS_BOSSES = [
   ['Act I', ['Slime Boss', 'The Guardian', 'Hexaghost']],
   ['Act II', ['The Collector', 'Bronze Automaton', 'The Champ']],
@@ -37,7 +47,21 @@ const SCEN_STS_BOSSES = [
 ];
 const SCEN_DIFF_NAME = { easy: 'Easy', medium: 'Medium', hard: 'Hard', extreme: 'Extreme' };
 // "Mission 5", "Scenario 5", "Chapter 5": BG Stats files don't agree on the word, the number is what counts
-const SCEN_NUM = /^(?:mission|scenario|campaign|chapter|adventure)\s*0*(\d+)$/i;
+const SCEN_NUM = /^(?:mission|scenario|campaign|chapter|adventure|case|episode|quest|year)\s*0*(\d{1,3}(?:\.\d+)?)$/i;
+// The word a game's plays number their scenarios with, if they do ("Chapter" in "Chapter 4").
+function _scWordOf(bggId) {
+  const count = {};
+  for (const p of ((typeof PLAY_HISTORY !== 'undefined' && PLAY_HISTORY[bggId]) || [])) {
+    for (const t of String((p && p.b) || '').split(/\s*[／｜|]\s*/)) {
+      const m = t.trim().match(SCEN_NUM);
+      if (m) { const w = t.trim().split(/\s+/)[0]; const W = w[0].toUpperCase() + w.slice(1).toLowerCase(); count[W] = (count[W] || 0) + 1; }
+    }
+  }
+  return Object.keys(count).sort((a, b) => count[b] - count[a])[0] || null;
+}
+// (its own word only: "Chapter 1" in a game of scenarios is something else, and stays as typed)
+const _scNumField = (word) => ({ key: 'm', label: word, num: word });
+const _scIsWord = (t, word) => SCEN_NUM.test(t) && t.trim().split(/\s+/)[0].toLowerCase() === word.toLowerCase();
 
 function scenarioPicker(bggId) {
   const id = Number(bggId);
@@ -109,6 +133,11 @@ function scenarioPicker(bggId) {
       { key: 'stage', label: 'Stage', options: () => ED_STAGES.flatMap(s => [[`Stage ${s.id}`, `${s.id} · ${s.name}`], [`Stage ${s.id}+`, `${s.id}+ · ${s.name}`]]) },
     ] };
   }
+  if (id === SCEN_TAKE_TIME) {
+    const n = (k) => Array.from({ length: k }, (_, i) => [String(i + 1), String(i + 1)]);
+    return { sep: '-', fields: [{ key: 'f', label: 'Folder', options: () => n(10) }, { key: 'c', label: 'Clock', options: () => n(4) }] };
+  }
+  if (SCEN_NUMBERED_OPEN[id]) return { numbered: SCEN_NUMBERED_OPEN[id], fields: [_scNumField(SCEN_NUMBERED_OPEN[id])] };
   if (typeof OATHSWORN_BGGID !== 'undefined' && id === OATHSWORN_BGGID) {
     // "Chapter 7 - Boss": the Ilioupoli tab gathers the bosses from these
     return { sep: ' - ', fields: [
@@ -116,7 +145,9 @@ function scenarioPicker(bggId) {
       { key: 'boss', label: 'Boss', optional: true, options: () => (typeof _oathswornBosses === 'function' ? _oathswornBosses() : []).map(b => [b, b]) },
     ] };
   }
-  return null;
+  // any other game whose plays number their scenarios (not Rove: its campaign has its own "1.2a")
+  const word = typeof ROVE_IDS !== 'undefined' && ROVE_IDS.has(id) ? null : _scWordOf(id);
+  return word ? { numbered: word, fields: [_scNumField(word)] } : null;
 }
 
 // A play's scenario text → what each list has picked, and what's left over.
@@ -124,7 +155,13 @@ function scenarioParse(cfg, text) {
   const vals = {};
   let toks = String(text || '').split(/\s*[／｜|]\s*/).map(t => t.trim()).filter(Boolean);
   if (cfg.sep === ' - ') toks = toks.flatMap(t => t.split(/\s+-\s+/));
+  if (cfg.sep === '-') toks = toks.flatMap(t => (/^\d+\s*-\s*\d+$/.test(t) ? t.split(/\s*-\s*/) : [t]));
   for (const f of cfg.fields) {
+    if (f.num) {
+      const i = toks.findIndex(t => _scIsWord(t, f.num));
+      if (i >= 0) { vals[f.key] = `${f.num} ${toks[i].match(SCEN_NUM)[1]}`; toks.splice(i, 1); }
+      continue;
+    }
     const opts = f.options(vals);
     const i = toks.findIndex(t => opts.some(([v]) => (f.match ? f.match(t, v) : _scNorm(t) === _scNorm(v))));
     if (i < 0) continue;
@@ -155,7 +192,7 @@ function scenarioGuess(bggId, me) {
   if (!cfg || !cfg.numbered || !me) return null;
   const plays = ((typeof PLAY_HISTORY !== 'undefined' && PLAY_HISTORY[bggId]) || [])
     .filter(p => p && Array.isArray(p.sc) && p.sc.some(s => s.n === me));
-  const re = /(?:mission|scenario|campaign|chapter|adventure)\s*(\d+)/i;
+  const re = cfg.fields[0].num ? new RegExp(`(?:^|／)\\s*${cfg.numbered}\\s*0*(\\d+)`, 'i') : /(?:mission|scenario|campaign|chapter|adventure|case|episode|quest|year)\s*(\d+)/i;
   let won = 0, last = null;
   for (const p of plays) {
     const m = String(p.b || '').match(re);
@@ -166,6 +203,7 @@ function scenarioGuess(bggId, me) {
     if (!last || when > last.when) last = { n, won: p.sc.some(s => s.w), when };
   }
   const next = last && !last.won && last.n > won ? last.n : won + 1;
+  if (cfg.fields[0].num) return { m: `${cfg.numbered} ${next}` };
   const opt = cfg.fields[0].options({}).find(([v]) => v === `${cfg.numbered} ${next}`);
   return opt ? { m: opt[0] } : null;
 }

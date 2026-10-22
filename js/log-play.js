@@ -186,6 +186,15 @@ function _lpEl() {
       else if (e.target.id === 'lp-gq') { e.preventDefault(); _lpGameSearch(); }
     });
     ov.addEventListener('submit', (e) => { e.preventDefault(); _lpSave(); });
+    ov.addEventListener('input', (e) => {
+      const n = e.target.closest('[data-sc-num]');
+      if (!n) return;
+      const v = n.value.trim().replace(',', '.');
+      if (/^\d{1,3}(\.\d+)?$/.test(v)) _lp.pick[n.dataset.scNum] = `${n.dataset.word} ${Number(v)}`; else delete _lp.pick[n.dataset.scNum];
+      _lp.scenGuessed = false;
+      const hint = document.getElementById('lp-scen-hint');
+      if (hint) hint.hidden = true;
+    });
     ov.addEventListener('change', (e) => {
       const s = e.target.closest('[data-sc]');
       if (!s) return;
@@ -343,6 +352,11 @@ function _lpRenderScen() {
   if (!cfg) { box.innerHTML = ''; return; }
   const esc = _escapeHtml;
   box.innerHTML = cfg.fields.filter(f => !f.show || f.show(_lp.pick)).map(f => {
+    if (f.num) {   // the word, and the number to fill in
+      const n = (String(_lp.pick[f.key] || '').match(/(\d+(?:\.\d+)?)$/) || [])[1] || '';
+      return `<label class="lp-field"><span class="lp-num"><span class="lp-num-word">${esc(f.num)}</span>
+          <input class="lp-input" data-sc-num="${f.key}" data-word="${esc(f.num)}" value="${esc(n)}" inputmode="decimal" maxlength="6" autocomplete="off" placeholder="No."></span></label>`;
+    }
     const opts = f.options(_lp.pick);
     // a pick this list no longer has (another airport's difficulty) goes; a single choice is made
     if (_lp.pick[f.key] && !opts.some(o => o[0] === _lp.pick[f.key])) delete _lp.pick[f.key];
