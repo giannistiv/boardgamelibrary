@@ -411,21 +411,22 @@ const MC_HEROES = [
   {name:'Ghost-Spider',box:'Campaign'},{name:'Miles Morales',box:'Campaign',m:['milesmorales','milesspiderman']},
   {name:'Tigra',box:'Campaign'},{name:'Hulkling',box:'Campaign'},
 ];
+// m: other names a play may use (the catalog's names too: Log a play's list, js/scenarios.js)
 const MC_SCENARIOS = [
   {name:'Rhino',box:'Core'},{name:'Klaw',box:'Core'},{name:'Ultron',box:'Core'},
   {name:'Crossbones',box:'Red Skull'},{name:'Absorbing Man',box:'Red Skull'},{name:'Taskmaster',box:'Red Skull'},{name:'Zola',box:'Red Skull',m:['armzola']},{name:'Red Skull',box:'Red Skull'},
-  {name:'Drang',box:"Galaxy's"},{name:'Collector: Infiltrate',box:"Galaxy's",m:['infiltratethemuseum','collector']},{name:'Collector: Escape',box:"Galaxy's",m:['escapethemuseum']},{name:'Nebula',box:"Galaxy's"},{name:'Ronan',box:"Galaxy's",m:['ronantheaccuser']},
+  {name:'Drang',box:"Galaxy's",m:['brotherhoodofbadoon']},{name:'Collector: Infiltrate',box:"Galaxy's",m:['infiltratethemuseum','collector']},{name:'Collector: Escape',box:"Galaxy's",m:['escapethemuseum']},{name:'Nebula',box:"Galaxy's"},{name:'Ronan',box:"Galaxy's",m:['ronantheaccuser']},
   {name:'Ebony Maw',box:'Mad Titan'},{name:'Tower Defense',box:'Mad Titan',m:['corvusglaive','proximamidnight']},{name:'Thanos',box:'Mad Titan'},{name:'Hela',box:'Mad Titan'},{name:'Loki',box:'Mad Titan'},
-  {name:'Sandman',box:'Sinister'},{name:'Venom',box:'Sinister'},{name:'Mysterio',box:'Sinister'},{name:'Sinister Six',box:'Sinister'},{name:'Venom Goblin',box:'Sinister'},
+  {name:'Sandman',box:'Sinister'},{name:'Venom',box:'Sinister'},{name:'Mysterio',box:'Sinister'},{name:'Sinister Six',box:'Sinister',m:['thesinistersix']},{name:'Venom Goblin',box:'Sinister'},
   {name:'Sabretooth',box:'Mutant Gen'},{name:'Project Wideawake',box:'Mutant Gen',m:['sentinel']},{name:'Master Mold',box:'Mutant Gen'},{name:'Mansion Attack',box:'Mutant Gen'},{name:'Magneto',box:'Mutant Gen'},
   {name:'Morlock Siege',box:'NeXt Evo',m:['marauders']},{name:'On the Run',box:'NeXt Evo'},{name:'Juggernaut',box:'NeXt Evo'},{name:'Mister Sinister',box:'NeXt Evo'},{name:'Stryfe',box:'NeXt Evo'},
   {name:'Unus',box:'Apocalypse'},{name:'Four Horsemen',box:'Apocalypse'},{name:'Dark Beast',box:'Apocalypse'},{name:'Apocalypse',box:'Apocalypse'},{name:'En Sabah Nur',box:'Apocalypse',m:['apocalypseensabahnur']},
-  {name:'Black Widow (Yelena)',box:'SHIELD',m:['yelena','yelenabelova']},{name:'Batroc',box:'SHIELD'},{name:'M.O.D.O.K.',box:'SHIELD',m:['modok']},{name:'Citizen V',box:'SHIELD'},{name:'Baron Zemo',box:'SHIELD',m:['zemo']},
+  {name:'Black Widow (Yelena)',box:'SHIELD',m:['yelena','yelenabelova','blackwidow']},{name:'Batroc',box:'SHIELD'},{name:'M.O.D.O.K.',box:'SHIELD',m:['modok']},{name:'Citizen V',box:'SHIELD',m:['thunderbolts']},{name:'Baron Zemo',box:'SHIELD',m:['zemo']},
   {name:'Green Goblin: Risky Business',box:'Packs',m:['riskybusiness']},{name:'Green Goblin: Mutagen Formula',box:'Packs',m:['mutagenformula']},
   {name:'Wrecking Crew',box:'Packs'},{name:'Kang',box:'Packs',m:['kangtheconqueror']},{name:'The Hood',box:'Packs',m:['hood']},
   {name:'MojoMania: Magog',box:'Packs',m:['magog']},{name:'MojoMania: Spiral',box:'Packs',m:['spiral']},{name:'MojoMania: Mojo',box:'Packs',m:['mojo']},
   {name:'Trickster: Enchantress',box:'Packs',m:['enchantress']},{name:'Trickster: Loki, God of Lies',box:'Packs',m:['godoflies','lokigodoflies']},
-  {name:'Synthezoid: She-Hulk',box:'Packs',m:['synthezoidshehulk']},{name:'Synthezoid: Vision',box:'Packs',m:['synthezoidvision']},
+  {name:'Synthezoid: She-Hulk',box:'Packs',m:['synthezoidshehulk','shehulk']},{name:'Synthezoid: Vision',box:'Packs',m:['synthezoidvision','vision']},
 ];
 // status precedence: 3 expertWin > 2 standardWin > 1 playedLost > 0 none
 const MC_ST = {NONE:0, LOST:1, STD:2, EXP:3};

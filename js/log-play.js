@@ -186,6 +186,13 @@ function _lpEl() {
       else if (e.target.id === 'lp-gq') { e.preventDefault(); _lpGameSearch(); }
     });
     ov.addEventListener('submit', (e) => { e.preventDefault(); _lpSave(); });
+    ov.addEventListener('change', (e) => {
+      const s = e.target.closest('[data-sc]');
+      if (!s) return;
+      if (s.value) _lp.pick[s.dataset.sc] = s.value; else delete _lp.pick[s.dataset.sc];
+      _lp.scenGuessed = false;
+      _lpRenderScen();
+    });
   }
   return ov;
 }
@@ -216,6 +223,11 @@ function _lpShow() {
           <h3 class="lp-h">Game</h3>
           <div id="lp-game"></div>
         </section>
+        <section class="lp-part" id="lp-scen-part" hidden>
+          <h3 class="lp-h">Scenario</h3>
+          <div id="lp-scen" class="lp-scen"></div>
+          <div class="lp-hint" id="lp-scen-hint" hidden>The next one for you, from your plays so far.</div>
+        </section>
         <section class="lp-part">
           <h3 class="lp-h">When and where</h3>
           <div class="lp-pair">
@@ -238,8 +250,8 @@ function _lpShow() {
           <div class="lp-hint">Tap &#9733; for each winner.</div>
         </section>
         <details class="lp-part lp-more"${_lp.b || _lp.c ? ' open' : ''}>
-          <summary class="lp-h">Scenario and notes</summary>
-          <label class="lp-field"><span>Scenario, map or variant</span><input class="lp-input" id="lp-b" value="${esc(_lp.b)}" maxlength="300" autocomplete="off"></label>
+          <summary class="lp-h" id="lp-more-h">Scenario and notes</summary>
+          <label class="lp-field"><span id="lp-b-label">Scenario, map or variant</span><input class="lp-input" id="lp-b" value="${esc(_lp.b)}" maxlength="300" autocomplete="off"></label>
           <label class="lp-field"><span>Notes</span><textarea class="lp-input" id="lp-c" rows="3" maxlength="1000">${esc(_lp.c)}</textarea></label>
         </details>
         ${_lp.id ? '<button type="button" class="lp-textbtn lp-del" data-lp="delete">Delete this play</button>' : ''}
@@ -291,8 +303,10 @@ function _lpRenderGame() {
         <div class="lp-gname"><b>${esc(g.name)}</b>${sub ? `<span>${sub}</span>` : ''}</div>
         <button type="button" class="lp-textbtn" data-lp="game">Change</button>
       </div>`;
+    _lpRenderScen();
     return;
   }
+  _lpRenderScen();
   box.innerHTML = `<div class="lp-gsearch">
       <input type="search" class="lp-input" id="lp-gq" placeholder="A game's name" autocomplete="off" enterkeyhint="search">
       <button type="button" class="lp-btn lp-btn-main" data-lp="gsearch">Search</button>
@@ -302,6 +316,48 @@ function _lpRenderGame() {
   _lpGameList(null);
   if (typeof _loadHot === 'function' && (typeof _hot === 'undefined' || !_hot)) _loadHot().catch(() => {});
 }
+// The scenario: lists, for a game that has a fixed set of them
+// (js/scenarios.js); anything else goes in the box under "Scenario and notes".
+function _lpRenderScen() {
+  const part = document.getElementById('lp-scen-part'), box = document.getElementById('lp-scen');
+  const bIn = document.getElementById('lp-b'), bLabel = document.getElementById('lp-b-label');
+  if (!part || !box) return;
+  const cfg = _lp.bggId && typeof scenarioPicker === 'function' ? scenarioPicker(_lp.bggId) : null;
+  if (_lp.scenFor !== _lp.bggId) {   // another game: what was written so far, read for this one
+    const typed = bIn ? bIn.value : _lp.b;
+    const raw = _lp.scenCfg ? scenarioCompose(_lp.scenCfg, _lp.pick || {}, typed) : typed;
+    const p = cfg ? scenarioParse(cfg, raw) : { vals: {}, rest: raw };
+    const guess = cfg && !raw && !_lp.id ? scenarioGuess(_lp.bggId, _navPlayer()) : null;
+    if (guess) Object.assign(p.vals, guess);
+    Object.assign(_lp, { pick: p.vals, scenFor: _lp.bggId, scenCfg: cfg, scenGuessed: !!guess });
+    if (bIn) bIn.value = p.rest;
+    const more = document.querySelector('#lp-overlay .lp-more');
+    if (more && cfg) more.open = !!(p.rest || _lp.c);
+  }
+  part.hidden = !cfg;
+  if (bLabel) bLabel.textContent = cfg ? 'Anything else (a variant, modules…)' : 'Scenario, map or variant';
+  const moreH = document.getElementById('lp-more-h');
+  if (moreH) moreH.textContent = cfg ? 'Variant and notes' : 'Scenario and notes';
+  const hint = document.getElementById('lp-scen-hint');
+  if (hint) hint.hidden = !(cfg && _lp.scenGuessed);
+  if (!cfg) { box.innerHTML = ''; return; }
+  const esc = _escapeHtml;
+  box.innerHTML = cfg.fields.filter(f => !f.show || f.show(_lp.pick)).map(f => {
+    const opts = f.options(_lp.pick);
+    // a pick this list no longer has (another airport's difficulty) goes; a single choice is made
+    if (_lp.pick[f.key] && !opts.some(o => o[0] === _lp.pick[f.key])) delete _lp.pick[f.key];
+    if (!_lp.pick[f.key] && !f.optional && opts.length === 1) _lp.pick[f.key] = opts[0][0];
+    let html = '', group = null;
+    for (const [v, text, g] of opts) {
+      if ((g || null) !== group) { html += `${group ? '</optgroup>' : ''}${g ? `<optgroup label="${esc(g)}">` : ''}`; group = g || null; }
+      html += `<option value="${esc(v)}"${_lp.pick[f.key] === v ? ' selected' : ''}>${esc(text)}</option>`;
+    }
+    if (group) html += '</optgroup>';
+    return `<label class="lp-field"><span>${esc(f.label)}</span><select class="lp-input" data-sc="${f.key}">
+        <option value="">${esc(f.optional ? f.none || 'None' : 'Pick…')}</option>${html}</select></label>`;
+  }).join('');
+}
+
 // Your games and the games you've played lately: what's shown before a search.
 function _lpRecentGames() {
   const me = _navPlayer();
@@ -472,7 +528,8 @@ async function _lpSave() {
   const date = document.getElementById('lp-date').value;
   const d = _lp.lenSet ? Number(_lp.d) || 0 : 0;
   const l = document.getElementById('lp-l').value.trim();
-  const b = document.getElementById('lp-b').value.trim();
+  const extra = document.getElementById('lp-b').value.trim();
+  const b = (_lp.scenCfg ? scenarioCompose(_lp.scenCfg, _lp.pick || {}, extra) : extra).slice(0, 300);
   const c = document.getElementById('lp-c').value.trim();
   if (!_lp.bggId) { _lpSay('Pick the game.'); return; }
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { _lpSay('Pick the day.'); return; }
