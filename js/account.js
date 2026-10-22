@@ -110,9 +110,21 @@ async function acctIdToken() {
   const user = _acctAuth && _acctAuth.currentUser;
   return user ? user.getIdToken() : null;
 }
+// The signed-in user once the sign-in library is up (loading it again if it
+// couldn't load before, e.g. the app was opened without signal).
+async function acctReady() {
+  const auth = await _acctLoad();
+  if (auth.currentUser) return auth.currentUser;
+  return new Promise((resolve) => { const off = auth.onAuthStateChanged((u) => { off(); resolve(u); }); });
+}
 async function acctWrite(path, method, data) {
-  const user = _acctAuth && _acctAuth.currentUser;
-  if (!user) throw new Error('You\'re not signed in on this device.');
+  let user = _acctAuth && _acctAuth.currentUser;
+  if (!user && _acctCached()) user = await acctReady().catch(() => null);
+  if (!user) {
+    // remembered on this phone, but the library can't load: no signal (Log a play keeps the play)
+    if (_acctCached() && (!_acctAuth || navigator.onLine === false)) { const e = new Error('No connection.'); e.code = 'offline'; throw e; }
+    throw new Error('You\'re not signed in on this device.');
+  }
   const token = await user.getIdToken();
   const res = await fetch(`${FIREBASE_DB}/${path}.json?auth=${encodeURIComponent(token)}`, { method, body: data === undefined ? undefined : JSON.stringify(data) });
   if (res.status === 401 || res.status === 403) throw new Error('The database refused it (its rules may not be updated yet).');
