@@ -68,7 +68,7 @@ function _navSubItems(group) {
     return items.length > 1 ? items : [];
   }
   if (group === 'explore') {
-    const trending = typeof trendingAllowed === 'function' && trendingAllowed() ? [['trending', 'Trending']] : [];
+    const trending = typeof trendingAllowed === 'function' && trendingAllowed() ? [['trending', 'Crowdfunding']] : [];
     return [['games', 'Games'], ...trending, ['tonight', 'Tonight'], ['players', 'Players'], ['stats', 'Stats']];
   }
   if (group === 'ranks') {

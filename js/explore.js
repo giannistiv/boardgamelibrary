@@ -226,7 +226,7 @@ function showGamesView() {
         : `${totalPlays.toLocaleString('en')} plays &middot; ${Object.keys(gamePlayCounts).length} games &middot; ${topPlayers.length} players`}</div>
     </div>
     <div class="explore-tabs">
-      ${tabBtn('games', 'Games')}${tabBtn('trending', 'Trending')}${tabBtn('tonight', 'Tonight')}${tabBtn('players', 'Players')}${tabBtn('stats', 'Stats')}
+      ${tabBtn('games', 'Games')}${tabBtn('trending', 'Crowdfunding')}${tabBtn('tonight', 'Tonight')}${tabBtn('players', 'Players')}${tabBtn('stats', 'Stats')}
     </div>
     ${tabContent}
   `;

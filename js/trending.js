@@ -8,7 +8,7 @@
 // job (tools/fetch-hot.py) and fetched when the tab opens, so it's the latest.
 
 let _hot = null;            // BGG_HOT once loaded
-let _hotFilter = null;      // 'live' (campaigns running now, the default) | 'soon' (hot on BGG, no campaign running) | 'yours' (news for the games you play, js/game-news.js) | 'interested' (the campaigns you marked Interested, js/backing.js)
+let _hotFilter = null;      // 'live' (campaigns running now, the default) | 'new' (campaigns that turned up this past week) | 'soon' (hot on BGG, no campaign running) | 'yours' (news for the games you play, js/game-news.js) | 'interested' (the campaigns you marked Interested, js/backing.js)
 let _hotBox = null;         // the tab's list, to redraw after a backing changes
 let _hotSort = 'you';       // 'you' | 'ending' | 'backers' | 'hot'
 
@@ -32,6 +32,24 @@ function _hotAgo(iso) {
 }
 
 const HOT_PLATFORMS = { kickstarter: 'Kickstarter', gamefound: 'Gamefound', backerkit: 'BackerKit' };
+
+// ── What's new: campaigns that turned up in BGG's list lately (camp.since,
+// kept by tools/fetch-hot.py), and those this phone hasn't shown before ──
+const HOT_NEW_DAYS = 7;
+const _hotIsNew = (g) => { const t = Date.parse((g.camp && g.camp.since) || ''); return !!t && Date.now() - t < HOT_NEW_DAYS * 864e5; };
+function _hotAdded(g) {
+  const days = Math.floor((Date.now() - Date.parse(g.camp.since)) / 864e5);
+  return days < 1 ? 'today' : days === 1 ? 'yesterday' : `${days} days ago`;
+}
+let _hotUnseen = null;   // the live campaigns this phone hadn't shown before this visit
+function _hotMarkSeen(live) {
+  if (_hotUnseen === null) {
+    let seen = null;
+    try { seen = JSON.parse(localStorage.getItem('bgl-hot-seen') || 'null'); } catch (_) {}
+    _hotUnseen = new Set(Array.isArray(seen) ? live.filter(g => !seen.includes(g.id)).map(g => g.id) : []);
+  }
+  try { localStorage.setItem('bgl-hot-seen', JSON.stringify(live.map(g => g.id))); } catch (_) {}
+}
 const _hotLive = (g) => !!(g.camp && Date.parse(g.camp.ends) > Date.now());
 
 function _hotEnds(c) {
@@ -217,7 +235,7 @@ function _hotCardHtml(g, libs, fit) {
         <img class="hot-box" src="${esc(g.img || '')}" alt="" loading="lazy">
         <div class="hot-main">
           <div class="hot-name">${esc(g.name)}</div>
-          <div class="hot-tags">${match ? `<span class="hot-match ${match[0]}">${match[1]}</span>` : ''}${g.pos ? `<span class="hot-tag">Hot #${g.pos}${move}</span>` : ''}${g.year ? `<span class="hot-tag">${g.year}</span>` : ''}${owners}</div>
+          <div class="hot-tags">${live && _hotIsNew(g) ? `<span class="hot-tag hot-new${_hotUnseen && _hotUnseen.has(g.id) ? ' unseen' : ''}">New &middot; ${_hotAdded(g)}</span>` : ''}${match ? `<span class="hot-match ${match[0]}">${match[1]}</span>` : ''}${g.pos ? `<span class="hot-tag">Hot #${g.pos}${move}</span>` : ''}${g.year ? `<span class="hot-tag">${g.year}</span>` : ''}${owners}</div>
           ${facts ? `<div class="stats-game-detail">${facts}</div>` : ''}
         </div>
       </div>
@@ -234,13 +252,27 @@ function _renderHot(box) {
   const taste = _hotTaste();
   const all = (_hot.games || []).filter(g => _hotLive(g) || g.pos);
   const live = all.filter(_hotLive), soon = all.filter(g => !_hotLive(g));
+  const fresh = live.filter(_hotIsNew).sort((a, b) => b.camp.since.localeCompare(a.camp.since));
+  _hotMarkSeen(live);
+  const unseen = live.filter(g => _hotUnseen.has(g.id)).length;
   const yours = _gnForYou();
   if (!_hotFilter) _hotFilter = live.length ? 'live' : soon.length ? 'soon' : 'yours';
-  if (_hotFilter === 'soon' && !soon.length) _hotFilter = 'live';
+  if ((_hotFilter === 'soon' && !soon.length) || (_hotFilter === 'new' && !fresh.length)) _hotFilter = 'live';
   const watching = typeof backingInterestedIds === 'function' ? backingInterestedIds() : [];   // only for someone who marked one
   if (_hotFilter === 'interested' && !watching.length) _hotFilter = 'live';
-  const chips = _gbChips('hot', [['live', `Live campaigns ${live.length}`], ['soon', `Coming soon ${soon.length}`], ['yours', `For your games ${yours.length}`]]
+  const chips = _gbChips('hot', [['live', `Live campaigns ${live.length}`]].concat(fresh.length ? [['new', `New ${fresh.length}`]] : [])
+    .concat([['soon', `Coming soon ${soon.length}`], ['yours', `For your games ${yours.length}`]])
     .concat(watching.length ? [['interested', `Interested ${watching.length}`]] : []), v => _hotFilter === v);
+  if (_hotFilter === 'new') {
+    const fits = _hotFits();
+    box.innerHTML = `
+      <div class="hot-head">
+        <div class="gb-chips">${chips}</div>
+        <span class="hot-updated">Campaigns that turned up in the last ${HOT_NEW_DAYS} days, newest first${unseen ? ` &middot; ${unseen} you haven&rsquo;t seen before` : ''}</span>
+      </div>
+      ${fresh.map(g => _hotCardHtml(g, libs, fits.get(g.id) || _hotFit(g, taste))).join('')}`;
+    return;
+  }
   if (_hotFilter === 'interested') {
     const fits = _hotFits();
     const found = watching.map(id => (_hot.games || []).find(x => x.id === id));
@@ -279,7 +311,7 @@ function _renderHot(box) {
       <div class="hot-head">
         <div class="gb-chips">${chips}</div>
         <div class="gb-chips hot-sorts">${_gbChips('hotsort', sorts.filter(s => taste || s[0] !== 'you'), v => _hotSort === v)}</div>
-        <span class="hot-updated">${_hotFilter === 'live' ? 'Crowdfunding campaigns running now, from BGG' : 'On BGG&rsquo;s hot list, not out yet'} &middot; updated ${_hotAgo(_hot.updated)}</span>
+        <span class="hot-updated">${_hotFilter === 'live' ? 'Crowdfunding campaigns running now, from BGG' : 'On BGG&rsquo;s hot list, not out yet'} &middot; updated ${_hotAgo(_hot.updated)}${_hotFilter === 'live' && unseen ? ` &middot; <button type="button" class="hot-unseen" data-gb="hot" data-v="new">${unseen} new since you last looked</button>` : ''}</span>
       </div>
       ${list.map(g => _hotCardHtml(g, libs, fits.get(g.id))).join('') || '<div class="stats-player-sub gb-empty">Nothing here right now.</div>'}`;
 }
@@ -323,6 +355,28 @@ function openBackedGame(id) {
     if (noPic(g.cover)) g.cover = listed.cover || first.img || g.img;
     _openHotGame({ ...g, name: first.name || g.name, backUrl: first.url, backOn: first.on });   // the campaign's name (Paperback Adventures: Volume 2, not Iron Knee)
   }).catch(() => {});
+}
+
+// A game nobody here has, found on BoardGameGeek (Explore → Games, a search):
+// its page like any upcoming game's, from BGG's details. One the site knows
+// opens its own page instead.
+async function openBggGame(id, hint) {
+  const known = typeof findGameByBggId === 'function' && findGameByBggId(id);
+  if (known) { openModal(known); return; }
+  hint = hint || {};
+  let t = null;
+  try { [t] = await Promise.all([typeof bggThing === 'function' ? bggThing(id) : null, _loadHot()]); } catch (_) { try { await _loadHot(); } catch (__) {} }
+  t = t || {};
+  const range = (s) => { const m = String(s || '').match(/(\d+)(?:\s*[-–]\s*(\d+))?/); return m ? [Number(m[1]), Number(m[2] || m[1])] : [0, 0]; };
+  const [minp, maxp] = range(t.players || hint.players);
+  const [tmin, tmax] = range(t.playTime || hint.time);
+  _openHotGame({
+    id: Number(id), name: t.name || hint.name || `Game #${id}`, year: t.year || hint.year || 0,
+    img: t.img || hint.img || '', cover: t.image || t.img || hint.img || '',
+    minp, maxp, tmin, tmax, weight: t.weight || 0, rating: t.rating || 0, owned: t.rated || 0,
+    by: t.designers || [], mechs: t.mechanics || [], cats: t.categories || [],
+    about: String(t.desc || '').split('\n').filter(Boolean),
+  });
 }
 
 function _hotPicClick(e) {
@@ -395,6 +449,7 @@ function _openHotGame(g) {
       ${pics ? `<div class="hot-sec">Pictures</div><div class="hot-pics hot-sheet-pics">${pics}</div>` : ''}
       <div class="hot-sheet-links">
         ${ours ? `<button type="button" class="modal-bgg-link" data-hot-ours="${g.id}">Our game page &rsaquo;</button>` : ''}
+        ${!ours && onBgg && typeof acctMe === 'function' && acctMe() ? `<button type="button" class="modal-bgg-link" data-hot-log="${g.id}">+ Log a play</button>` : ''}
         ${campPage}
         ${onBgg ? `<a class="modal-bgg-link" href="https://boardgamegeek.com/boardgame/${g.id}" target="_blank" rel="noopener">View on BoardGameGeek &#8599;</a>` : ''}
       </div>
@@ -402,6 +457,12 @@ function _openHotGame(g) {
     if (e.target.closest('[data-gn-all]')) { _gnShowAll = true; _renderHot(box); return; }
     if (_hotPicClick(e)) return;
     if (e.target.closest('[data-hot-ours]')) openModal(ours);
+    if (e.target.closest('[data-hot-log]') && typeof logPlayOpen === 'function') {
+      // played somewhere, though nobody here has it: Log a play adds it to the site on saving
+      // (over the page, as from any game's page: closing the page first would close the form with it)
+      _lpPicked = { id: g.id, name: g.name, year: g.year, img: g.img || g.cover || '', players: g.minp ? (g.maxp && g.maxp !== g.minp ? `${g.minp}-${g.maxp}` : String(g.minp)) : '' };
+      logPlayOpen(g.id);
+    }
   });
 }
 

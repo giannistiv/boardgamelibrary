@@ -279,7 +279,7 @@ function _bkViewRender(box) {
       <h2 class="bk-view-title">${_bkWho === me ? 'Your backed games' : `${esc(_bkWho)}&rsquo;s backed games`}</h2>
       <div class="bk-view-sum">${b.summary}</div>
       ${_bkListHtml(_bkWho, b)}
-    </div>` : '<div class="stats-player-sub gb-empty">Nothing backed yet. On a live campaign in Trending, tap <b>I backed it</b>.</div>';
+    </div>` : '<div class="stats-player-sub gb-empty">Nothing backed yet. On a live campaign in Crowdfunding, tap <b>I backed it</b>.</div>';
 }
 // After a change (a month, "It arrived", a new backing): the tab, and whether it's there.
 function _bkProfRedraw() {

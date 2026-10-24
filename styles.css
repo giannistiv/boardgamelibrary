@@ -1082,6 +1082,11 @@
   .acct-toast{position:fixed;left:50%;bottom:calc(5.5rem + var(--safe-b));transform:translate(-50%,1rem);z-index:700;max-width:min(90vw,420px);padding:0.65rem 0.95rem;border-radius:var(--r);background:var(--card-3);border:1px solid var(--line-2);color:var(--text);font-size:0.85rem;box-shadow:0 10px 30px rgba(0,0,0,0.5);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s}
   .acct-toast.show{opacity:1;transform:translate(-50%,0)}
   .acct-toast{white-space:pre-line;line-height:1.5}
+  .gb-bgg-head{font-size:0.78rem;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;color:var(--text-3);margin:1.4rem 0 0.4rem}
+  .gb-bgg-btn{margin-top:0.9rem}
+  .hot-new{background:var(--accent-soft);color:var(--accent-2);border-color:var(--accent-line)}
+  .hot-new.unseen{background:var(--accent);color:var(--accent-ink)}
+  .hot-unseen{background:none;border:0;padding:0;font:inherit;color:var(--accent-2);font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
   .play-pending{font-size:0.76rem;font-weight:600;color:var(--accent-2);margin:0.15rem 0 0.35rem}
   .acct-card{display:flex;flex-wrap:wrap;align-items:center;gap:0.6rem 0.8rem;margin:0 0 1rem;padding:0.75rem 0.9rem;border-radius:var(--r);border:1px solid var(--line-2);background:var(--card)}
   .acct-card > div{flex:1 1 200px;display:flex;flex-direction:column;gap:0.15rem;min-width:0}

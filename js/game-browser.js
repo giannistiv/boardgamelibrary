@@ -5,6 +5,8 @@
 // BGG rating, the group's rating, your own rating and whether it's been
 // played, then sorted. While nothing is set the tab shows its usual
 // lists; as soon as something is, the matching games replace them.
+// A name can also be looked up on BoardGameGeek (its button, or Enter), as in
+// Log a play: every other game by that name, each opening its BGG page.
 //
 // The state lives here, outside the view, so it survives re-renders and a
 // round trip through a game's page.
@@ -20,6 +22,7 @@ const _gb = {
   mine: '',          // '' | 'rated' | 'unrated'
   played: '',        // '' | 'played' | 'unplayed'
   sort: 'name',
+  remote: null,      // BoardGameGeek's answer for a name: { q, state: 'searching'|'done'|'failed', list }
 };
 const GB_PAGE = 40;
 
@@ -181,6 +184,35 @@ function _gbRowHtml(m, libs) {
     </div>`;
 }
 
+// Under the app's own matches: BoardGameGeek's for the same name (the ones
+// not listed already), closest names first, then the most rated.
+function _gbBggHtml(local) {
+  const q = _gb.q.trim();
+  if (q.length < 2) return '';
+  const esc = _escapeHtml;
+  const r = _gb.remote && _gb.remote.q === q ? _gb.remote : null;
+  if (!r) return `<button type="button" class="gb-more gb-bgg-btn" id="gb-bgg">Search BoardGameGeek for &ldquo;${esc(q)}&rdquo;</button>`;
+  if (r.state === 'searching') return '<div class="gb-bgg-head">Searching BoardGameGeek&hellip;</div>';
+  if (r.state === 'failed') return '<div class="gb-bgg-head">BoardGameGeek didn&rsquo;t answer.</div><button type="button" class="gb-more gb-bgg-btn" id="gb-bgg">Try again</button>';
+  const have = new Set(local.map(m => Number(m.g.bggId)));
+  const norm = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9α-ω ]/g, '');
+  const nq = norm(q);
+  const tier = (g) => { const n = norm(g.name); return n === nq ? 0 : n.startsWith(nq) ? 1 : n.split(' ').some(w => w.startsWith(nq)) ? 2 : 3; };
+  const list = r.list.filter(g => !have.has(g.id)).sort((a, b) => tier(a) - tier(b) || (b.rated || 0) - (a.rated || 0));
+  const filtered = _gbActiveCount() ? ' (the filters don&rsquo;t apply to these)' : '';
+  return `<div class="gb-bgg-head">On BoardGameGeek &middot; ${list.length} more${filtered}</div>
+    ${list.map(g => {
+      const bits = [g.year, g.exp ? 'expansion' : '', g.players ? `${esc(g.players)} players` : '', g.time ? esc(g.time) : '', g.rated ? `${g.rated.toLocaleString('en')} ratings` : ''].filter(Boolean);
+      return `<div class="stats-game-row gb-bgg-row" data-bgg-remote="${g.id}">
+          ${g.img ? `<img class="stats-game-img" src="${esc(g.img)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">` : '<span class="stats-game-img"></span>'}
+          <div class="stats-game-info">
+            <div class="stats-game-name">${esc(g.name)}</div>
+            <div class="stats-game-detail">${bits.join(' &middot; ')}</div>
+          </div>
+        </div>`;
+    }).join('') || '<div class="stats-player-sub gb-empty">Nothing else by that name on BoardGameGeek.</div>'}`;
+}
+
 function wireGameBrowser(container) {
   const search = container.querySelector('#games-search');
   const toggle = container.querySelector('#gb-toggle');
@@ -210,8 +242,9 @@ function wireGameBrowser(container) {
         <span class="gb-head-right">${sortSel}<button type="button" class="gb-clear" id="gb-clear">Clear</button></span>
       </div>
       ${all.length ? page.map(m => _gbRowHtml(m, libs)).join('')
-        : '<div class="stats-player-sub gb-empty">No games match. Try removing a filter.</div>'}
-      ${all.length > page.length ? `<button type="button" class="gb-more" id="gb-more">Show more (${all.length - page.length} left)</button>` : ''}`;
+        : `<div class="stats-player-sub gb-empty">${_gb.q.trim() ? 'None of the games here match.' : 'No games match. Try removing a filter.'}</div>`}
+      ${all.length > page.length ? `<button type="button" class="gb-more" id="gb-more">Show more (${all.length - page.length} left)</button>` : ''}
+      ${_gbBggHtml(all)}`;
     results.querySelectorAll('[data-bgg-id]').forEach(el => {
       el.addEventListener('click', () => { const game = findGameByBggId(el.dataset.bggId); if (game) openModal(game); });
     });
@@ -226,7 +259,30 @@ function wireGameBrowser(container) {
     });
     const more = results.querySelector('#gb-more');
     if (more) more.addEventListener('click', () => { _gb.shown = page.length + GB_PAGE; render(false); });
+    const bggBtn = results.querySelector('#gb-bgg');
+    if (bggBtn) bggBtn.addEventListener('click', () => searchBgg());
+    results.querySelectorAll('[data-bgg-remote]').forEach(el => el.addEventListener('click', () => {
+      const id = Number(el.dataset.bggRemote);
+      const g = ((_gb.remote && _gb.remote.list) || []).find(x => x.id === id) || {};
+      if (typeof openBggGame === 'function') openBggGame(id, g);
+    }));
   };
+  // BoardGameGeek, for a name (on the button or Enter, not while typing)
+  const searchBgg = async () => {
+    const q = _gb.q.trim();
+    if (q.length < 2 || typeof bggSearch !== 'function') return;
+    search.blur();
+    _gb.remote = { q, state: 'searching', list: [] };
+    render(false);
+    try {
+      const list = await bggSearch(q);
+      if (_gb.remote && _gb.remote.q === q) _gb.remote = { q, state: 'done', list };
+    } catch (_) {
+      if (_gb.remote && _gb.remote.q === q) _gb.remote = { q, state: 'failed', list: [] };
+    }
+    if (results.isConnected && _gb.q.trim() === q) render(false);
+  };
+  search.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); searchBgg(); } });
 
   search.addEventListener('input', () => { _gb.q = search.value; render(true); });
   toggle.addEventListener('click', () => {

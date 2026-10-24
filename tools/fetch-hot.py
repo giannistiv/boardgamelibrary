@@ -183,9 +183,12 @@ def version_release(ver):
     return rel, item.get('releasestatus') or ''
 
 
-def campaign(c, old=None):
-    """A live crowdfunding campaign, as the tab shows it."""
+def campaign(c, old=None, now=''):
+    """A live crowdfunding campaign, as the tab shows it. 'since': when it
+    first turned up in BGG's list (this run, for a new one; '' for those
+    already there before this was kept), for the tab's "New" list."""
     ver = str(c.get('versionid') or '')
+    since = (old.get('since', '') if old else now)
     if old and old.get('ver') == ver and 'rel' in old:
         rel, relst = old.get('rel', ''), old.get('relst', '')
     else:
@@ -194,7 +197,7 @@ def campaign(c, old=None):
         except Exception as e:
             print(f'fetch-hot: release of {ver}: {type(e).__name__}: {e}')
             rel, relst = '', ''
-    return {'rel': rel, 'relst': relst,
+    return {'rel': rel, 'relst': relst, 'since': since,
         'on': c.get('orderType') or '', 'url': campaign_link(c, old), 'ver': str(c.get('versionid') or ''),
         'ends': c.get('endDate') or '',
         'pct': _int(c.get('progress')), 'backers': _int(c.get('backersCount')),
@@ -256,7 +259,7 @@ def main():
         g = with_details(gid, before)
         year = next((_int(d.get('displayValue')) for d in item.get('descriptors') or [] if d.get('name') == 'yearpublished'), 0)
         g.update({'name': item.get('name') or c.get('name') or g.get('name') or f'Game #{gid}',
-                  'year': year or g.get('year', 0), 'camp': campaign(c, old_camp)})
+                  'year': year or g.get('year', 0), 'camp': campaign(c, old_camp, now + 'Z')})
         g['img'] = g.get('img') or ((item.get('imageSets') or {}).get('square100') or {}).get('src@2x', '')
         g['desc'] = g.get('desc') or re.sub(r'\s+', ' ', c.get('description') or '').strip()[:300]
         games[gid] = g

@@ -4,7 +4,7 @@
 // small service holds the token (the BGG_TOKEN secret) and answers the
 // site's two questions:
 //   GET /search?q=brass   → { results: [{ id, name, year, exp, img, players, time, rated }] }
-//   GET /thing?id=1,2     → { items: [{ id, name, year, exp, img, image, players, playTime, weight, rating, rated, designers, mechanics, categories }] }
+//   GET /thing?id=1,2     → { items: [{ id, name, year, exp, img, image, players, playTime, weight, rating, rated, designers, mechanics, categories, desc }] }
 // Only the site's own pages may use it (ALLOWED_ORIGINS). Answers are kept
 // for a day, so the same search doesn't ask BGG again.
 //
@@ -141,7 +141,19 @@ export function parseThing(it) {
     designers: links('boardgamedesigner').slice(0, 4),
     mechanics: links('boardgamemechanic'),
     categories: links('boardgamecategory'),
+    desc: description(x),
   };
+}
+// BGG's description as plain text: paragraphs on their own lines, cut at a
+// sentence near 2,500 characters (a game's page shows it).
+const NAMED = { mdash: '—', ndash: '–', hellip: '…', rsquo: '’', lsquo: '‘', rdquo: '”', ldquo: '“', nbsp: ' ', times: '×', eacute: 'é', bull: '•' };
+function description(x) {
+  const m = /<description>([\s\S]*?)<\/description>/.exec(x);
+  if (!m) return '';
+  let t = unxml(unxml(m[1])).replace(/&(\w+);/g, (all, e) => NAMED[e] || all);
+  t = t.replace(/\r/g, '').split(/\n+/).map(s => s.replace(/\s+/g, ' ').trim()).filter(Boolean).join('\n');
+  if (t.length > 2500) { const cut = t.slice(0, 2500); t = cut.slice(0, Math.max(cut.lastIndexOf('. ') + 1, 2000)) + ' …'; }
+  return t;
 }
 
 async function things(ids, env) {
