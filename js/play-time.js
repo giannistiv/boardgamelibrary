@@ -109,7 +109,8 @@ let _ptCache = null;
 function _ptSig() {
   let games = 0, plays = 0;
   for (const id in PLAY_HISTORY) { games++; plays += PLAY_HISTORY[id].length; }
-  return games + '|' + plays;
+  // + the live revision: a play changed in place (js/live.js) counts the same
+  return games + '|' + plays + '|' + (typeof _playsRev !== 'undefined' ? _playsRev : 0);
 }
 function _ptAll() {
   const sig = _ptSig();

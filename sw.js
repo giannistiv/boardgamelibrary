@@ -6,7 +6,8 @@
 //   lazy data (data/*.js     network first, the last copy when offline; rules
 //     fetched without ?v=)   and the Rove sheet's data are also stored ahead of
 //                            time, so the Rules tab works at a table with no signal
-//   Firebase reads           network first, the last answer when offline
+//   Firebase reads           network first, the last answer when offline (not the live
+//                            stream of new plays: js/live.js)
 //   a shared BGStats export  kept for the page, which imports it (boot.js)
 //   everything else          straight to the network
 //
@@ -215,6 +216,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   if (url.hostname.endsWith(FIREBASE) && url.pathname.endsWith('.json')) {
+    // the live stream of new plays (js/live.js) never ends, so it can't be kept: straight through
+    if ((req.headers.get('accept') || '').includes('text/event-stream')) return;
     event.respondWith(networkFirst(DATA, req));
   }
 });

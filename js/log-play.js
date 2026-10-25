@@ -17,6 +17,7 @@ async function loadManualPlays() {
   } catch (e) {
     manualPlaysCache = {};
   }
+  if (typeof liveRemember === 'function') liveRemember('plays', manualPlaysCache);   // as it came (js/live.js)
   for (const it of _lpQueue()) manualPlaysCache[it.key] = { ...it.rec, pending: true };   // logged without signal
 }
 // After the BGStats plays have merged (boot.js), and again after an upload

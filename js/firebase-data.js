@@ -322,6 +322,7 @@ async function loadImportedPlays() {
     const res = await fetch(`${FIREBASE_DB}/importedPlays.json`);
     const data = await res.json();
     importedPlaysCache = data || {};
+    if (typeof liveRemember === 'function') liveRemember('importedPlays', importedPlaysCache);   // as it came (js/live.js)
     for (const uuid in importedPlaysCache) {
       _mergePlayIntoHistory(uuid, importedPlaysCache[uuid]);
     }
@@ -349,6 +350,7 @@ async function loadImportedGames() {
     const res = await fetch(`${FIREBASE_DB}/importedGames.json`);
     const data = await res.json();
     if (!data) return;
+    if (typeof liveRemember === 'function') liveRemember('importedGames', data);   // (js/live.js)
     for (const bggId in data) {
       if (!EXTRA_GAMES[bggId]) EXTRA_GAMES[bggId] = data[bggId];
     }
