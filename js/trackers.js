@@ -335,7 +335,7 @@ function _muPill(name, done, color, sub){
 function buildMarvelUnitedHtml(bggId){
   const line = _muLineFor(bggId);
   if (!line) return '';
-  const plays = PLAY_HISTORY[line.playBggId] || [];
+  const plays = progressPlaysOf(PLAY_HISTORY[line.playBggId] || []).plays;   // the viewer's, when they've played
   if (!plays.length) return '';
   const playedHeroes = new Set();
   const defeatedVillains = new Set();
@@ -784,10 +784,12 @@ function buildAeonsEndHtml(bggId){
   // spoiler-laden Legacy campaign (tracked separately, name-free).
   const faced = {}; // norm → {name, won, wonNormal, wonIncreased, attempts}
   let legacyPlays = 0, legacyWins = 0;
+  const counted = new Set(progressPlaysOf(_progressFamilyPlays(bggId)).plays);   // the viewer's, when they've played
   for (const id in PLAY_HISTORY){
     if (!_isAeonsEnd(id)) continue;
     const isLegacy = Number(id) === AE_LEGACY_BGGID;
     for (const p of PLAY_HISTORY[id]){
+      if (!counted.has(p)) continue;
       const won = (p.sc || []).some(s => s && s.w);
       if (isLegacy){ legacyPlays++; if (won) legacyWins++; continue; }
       const parsed = _aeParseNemesis(p.b);

@@ -11,6 +11,30 @@
 // Champions, Marvel United, Spirit Island, Aeon's End, Rove, Eternal Decks)
 // and Leviathan Wilds are left out.
 
+// Whose progress a game's page shows: the viewer's own plays when they've
+// played it ({plays, mine: true}), else everyone's ({plays, mine: false}).
+function progressPlaysOf(plays) {
+  const me = typeof _ptViewer === 'function' ? _ptViewer() : null;
+  if (!me || !plays || !plays.length) return { plays: plays || [], mine: false };
+  const meCanon = typeof _origCanon === 'function' ? _origCanon(me) : me;
+  const mine = plays.filter(p => (p.sc || []).some(s => s && (s.n === me || (typeof _origCanon === 'function' && _origCanon(s.n) === meCanon))));
+  return mine.length ? { plays: mine, mine: true } : { plays, mine: false };
+}
+// A line above the boards: yours, or everyone's because you haven't played it.
+function progressWhoHtml(p) {
+  return p.mine
+    ? `<div class="pb-who">Your progress, from the ${p.plays.length} play${p.plays.length !== 1 ? 's' : ''} you were in</div>`
+    : `<div class="pb-who">Everyone&rsquo;s progress${typeof _ptViewer === 'function' && _ptViewer() ? ' (you haven&rsquo;t played it yet)' : ''}</div>`;
+}
+// The plays a board counts across boxes: Marvel United's line, every Aeon's End.
+function _progressFamilyPlays(bggId) {
+  const line = typeof _muLineFor === 'function' && _muLineFor(bggId);
+  if (line) return PLAY_HISTORY[line.playBggId] || [];
+  const out = [];
+  if (typeof _isAeonsEnd === 'function' && _isAeonsEnd(bggId)) for (const id in PLAY_HISTORY) if (_isAeonsEnd(id)) out.push(...PLAY_HISTORY[id]);
+  return out;
+}
+
 const PB_SKIP = new Set([373106, 338960, 285774, 162886, 424981, 365670, 439995, 358737, 241451, 390092]);
 // How many missions a game has, where it's known (more in CAMPAIGN_PROGRESS).
 // chapters × per: Take Time's 10 folders of 4 clocks.

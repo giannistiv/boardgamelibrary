@@ -778,6 +778,11 @@ function openModal(game) {
   // Play History
   let playHistoryHtml = '';
   const plays = PLAY_HISTORY[game.bggId];
+  // Progress (a campaign's bar, mission maps, the game's own boards) is the
+  // viewer's: the plays they were in. Someone who hasn't played it, or with
+  // nobody chosen, sees everyone's. (The play list and records stay everyone's.)
+  const myProgress = progressPlaysOf(plays || []);
+  const progressPlays = myProgress.plays;
   const noResultGame = isNoResultGame(game.bggId);
   if (plays && plays.length > 0) {
     const totalPlays = plays.length;
@@ -818,10 +823,10 @@ function openModal(game) {
     // A mission map or a hero × boss board, when the plays carry one
     // (progress-boards.js). A mission map has its own bar, so it takes the
     // campaign bar's place.
-    const progressHtml = typeof buildProgressBoardHtml === 'function' ? buildProgressBoardHtml(game, plays) : '';
+    const progressHtml = typeof buildProgressBoardHtml === 'function' ? buildProgressBoardHtml(game, progressPlays) : '';
 
     // Campaign progress bar (e.g. Cozy Stickerville's 10 in-game years).
-    const cp = progressHtml.includes('pb-missions') ? null : campaignProgress(game.bggId, plays);
+    const cp = progressHtml.includes('pb-missions') ? null : campaignProgress(game.bggId, progressPlays);
     const campaignHtml = cp ? `
         <div class="campaign-progress">
           <div class="cp-top">
@@ -836,10 +841,10 @@ function openModal(game) {
         </div>` : '';
 
     // Sky Team airport checklist (no percentage — a landed-airports board).
-    const skyTeamHtml = (Number(game.bggId) === SKY_TEAM_BGGID) ? buildSkyTeamHtml(plays) : '';
+    const skyTeamHtml = (Number(game.bggId) === SKY_TEAM_BGGID) ? buildSkyTeamHtml(progressPlays) : '';
 
     // Slay the Spire ascension ladder + the Heart (custom, not a % bar).
-    const slaySpireHtml = (Number(game.bggId) === SLAY_SPIRE_BGGID) ? buildSlaySpireHtml(plays) : '';
+    const slaySpireHtml = (Number(game.bggId) === SLAY_SPIRE_BGGID) ? buildSlaySpireHtml(progressPlays) : '';
 
     const visibleHtml = visiblePlays.map(renderPlay).join('');
     const hiddenHtml = hiddenPlays.length > 0
@@ -859,6 +864,7 @@ function openModal(game) {
         ${buildRolesHtml(game, plays)}
         ${typeof buildBestTeamsHtml === 'function' ? buildBestTeamsHtml(game, plays) : ''}
         ${buildGameTimeHtml(game, plays)}
+        ${campaignHtml || progressHtml || skyTeamHtml || slaySpireHtml ? progressWhoHtml(myProgress) : ''}
         ${campaignHtml}
         ${progressHtml}
         ${skyTeamHtml}
@@ -871,11 +877,14 @@ function openModal(game) {
   // Marvel United heroes/villains board — shown on the core game AND on every
   // expansion page in the line, so it lives outside the play-history block.
   const marvelUnitedHtml = buildMarvelUnitedHtml(game.bggId);
-  const marvelChampionsHtml = buildMarvelChampionsHtml(game.bggId, plays);
-  const eternalDecksHtml = (Number(game.bggId) === ED_BGGID) ? buildEternalDecksHtml(plays || []) : '';
+  const marvelChampionsHtml = buildMarvelChampionsHtml(game.bggId, progressPlays);
+  const eternalDecksHtml = (Number(game.bggId) === ED_BGGID) ? buildEternalDecksHtml(progressPlays) : '';
   const aeonsEndHtml = buildAeonsEndHtml(game.bggId);
-  const spiritIslandHtml = buildSpiritIslandHtml(game.bggId, plays);
-  const leviathanHtml = typeof buildLeviathanWildsHtml === 'function' ? buildLeviathanWildsHtml(game, plays) : '';
+  const spiritIslandHtml = buildSpiritIslandHtml(game.bggId, progressPlays);
+  const leviathanHtml = typeof buildLeviathanWildsHtml === 'function' ? buildLeviathanWildsHtml(game, progressPlays) : '';
+  // the boards above the play history say whose progress they show, once
+  const boardsWho = marvelUnitedHtml || marvelChampionsHtml || spiritIslandHtml || eternalDecksHtml || aeonsEndHtml || leviathanHtml
+    ? progressWhoHtml(_muLineFor(game.bggId) || _isAeonsEnd(game.bggId) ? progressPlaysOf(_progressFamilyPlays(game.bggId)) : myProgress) : '';
 
   const facts = [
     game.players ? gmFact('players', `${_escapeHtml(game.players)} players`) : '',
@@ -883,7 +892,8 @@ function openModal(game) {
     game.complexity > 0 ? gmFact('weight', `Weight ${Number(game.complexity).toFixed(1)}`) : '',
   ].join('');
   const logHtml = typeof logPlayBtnHtml === 'function' ? logPlayBtnHtml(game) : '';
-  const playsPanel = [logHtml, marvelUnitedHtml, marvelChampionsHtml, spiritIslandHtml, eternalDecksHtml, aeonsEndHtml, leviathanHtml, playHistoryHtml].join('');
+  const playsPanel = [logHtml, boardsWho, marvelUnitedHtml, marvelChampionsHtml, spiritIslandHtml, eternalDecksHtml, aeonsEndHtml, leviathanHtml,
+    boardsWho ? playHistoryHtml.replace(progressWhoHtml(myProgress), '') : playHistoryHtml].join('');
   const roveHtml = typeof buildRoveCampaignHtml === 'function' ? buildRoveCampaignHtml(game) : '';
   const tabs = [['overview', 'Overview'], ['plays', `Plays${plays && plays.length ? ` <span class="gm-tab-n">${plays.length}</span>` : ''}`]]
     .concat(roveHtml ? [['campaign', 'Campaign']] : [])
