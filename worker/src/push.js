@@ -137,6 +137,16 @@ export async function handlePush(action, request, env) {
     if (data.endpoint) await env.PUSH.delete(await endpointKey(uid, data.endpoint));
     return { status: 200, body: { ok: true } };
   }
+  if (action === 'forget') {
+    // the account is being deleted: every device it turned notifications on for
+    let cursor;
+    do {
+      const page = await env.PUSH.list({ prefix: `sub:${uid}:`, cursor });
+      for (const k of page.keys) await env.PUSH.delete(k.name);
+      cursor = page.list_complete ? null : page.cursor;
+    } while (cursor);
+    return { status: 200, body: { ok: true } };
+  }
   if (action === 'test') {
     const sent = await notifyUser(env, uid, { title: 'Board Game Library', body: 'Notifications are on. You\'ll hear when someone logs a play with you.', url: SITE, tag: 'test' });
     return { status: 200, body: { sent } };

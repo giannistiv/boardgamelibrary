@@ -1094,6 +1094,16 @@
   .live-pull.ready{color:var(--accent-2);border-color:var(--accent-line)}
   .live-pull-ico{font-size:1rem;transition:transform .2s}
   .live-pull.ready .live-pull-ico{transform:rotate(180deg)}
+  .acct-del{margin-top:1.2rem;text-align:center}
+  .acct-del-open{color:var(--loss)}
+  .acct-del-box{text-align:left;padding:0.9rem;border-radius:12px;border:1px solid color-mix(in srgb, var(--loss) 45%, transparent);background:color-mix(in srgb, var(--loss) 8%, transparent)}
+  .acct-del-box b{display:block;margin-bottom:0.35rem}
+  .acct-del-box p{font-size:0.82rem;color:var(--text-2);line-height:1.45;margin:0 0 0.6rem}
+  .acct-del-box .lp-field{margin-bottom:0.6rem}
+  .acct-del-msg{font-size:0.8rem;color:#f0a868;margin-bottom:0.6rem}
+  .acct-del-btns{display:flex;gap:0.5rem;justify-content:flex-end;flex-wrap:wrap}
+  .acct-del-go{padding:0.42rem 1.1rem;border-radius:999px;border:none;background:var(--loss);color:#fff;font:inherit;font-size:0.82rem;font-weight:600;cursor:pointer}
+  .acct-del-go:disabled{opacity:0.6}
   .pb-who{font-size:0.78rem;color:var(--text-3);margin:0.9rem 0 0.4rem}
   .play-pending{font-size:0.76rem;font-weight:600;color:var(--accent-2);margin:0.15rem 0 0.35rem}
   .acct-card{display:flex;flex-wrap:wrap;align-items:center;gap:0.6rem 0.8rem;margin:0 0 1rem;padding:0.75rem 0.9rem;border-radius:var(--r);border:1px solid var(--line-2);background:var(--card)}

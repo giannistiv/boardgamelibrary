@@ -492,7 +492,8 @@ function acctSettingsHtml() {
     ${typeof notifySettingsHtml === 'function' ? notifySettingsHtml() : ''}
     <div class="profile-edit-label">Account</div>
     <div class="acct-settings"><span>${a.email ? _escapeHtml(a.email) : 'Signed in'}<small>${_acctHow(a)}</small></span>
-    <button type="button" class="profile-edit-cancel" data-acct-signout>Sign out</button></div>`;
+    <button type="button" class="profile-edit-cancel" data-acct-signout>Sign out</button></div>
+    <div class="acct-del" id="acct-del"><button type="button" class="lp-textbtn acct-del-open" data-acct-del="open">Delete my account</button></div>`;
 }
 // Link a BGG username: the BGG sync brings that collection to My games.
 async function acctSaveBgg() {
@@ -517,6 +518,75 @@ async function acctSaveBgg() {
       : `Saved, but BGG shows no games owned by ${name}. Is the collection public, with games marked "Own"?`);
   } catch (e) { say(e.message); }
 }
+// ── Deleting your account (Profile settings) ──
+// Your sign-in, your player link, My games, your Interested / Backed marks and
+// the notifications on every device go. The plays you logged stay: the
+// others in them keep them. Firebase wants a fresh sign-in before it deletes
+// one, so it asks for it first: Google's window, or your password.
+function _acctDelHtml(step, msg) {
+  const a = acctMe();
+  const esc = _escapeHtml;
+  if (step !== 'confirm') return '<button type="button" class="lp-textbtn acct-del-open" data-acct-del="open">Delete my account</button>';
+  return `<div class="acct-del-box">
+      <b>Delete your account?</b>
+      <p>Your sign-in, your link to ${esc(_acctDisplay(a.player))}, My games, your Interested and Backed marks and your notifications go, for good. The plays you logged stay, since others were in them.</p>
+      ${a.provider === 'google' ? '<p class="acct-del-note">Google will ask you to sign in once more, to be sure it&rsquo;s you.</p>'
+        : '<label class="lp-field"><span>Your password, to be sure it&rsquo;s you</span><input type="password" class="lp-input" id="acct-del-pass" autocomplete="current-password"></label>'}
+      ${msg ? `<div class="acct-del-msg">${esc(msg)}</div>` : ''}
+      <div class="acct-del-btns">
+        <button type="button" class="profile-edit-cancel" data-acct-del="cancel">Keep it</button>
+        <button type="button" class="acct-del-go" data-acct-del="go">Delete my account</button>
+      </div>
+    </div>`;
+}
+function _acctDelShow(step, msg) {
+  const box = document.getElementById('acct-del');
+  if (box) box.innerHTML = _acctDelHtml(step, msg);
+}
+async function acctDelete() {
+  const a = acctMe();
+  const user = _acctAuth && _acctAuth.currentUser;
+  if (!a || !user) { _acctDelShow('confirm', 'You\'re not signed in on this device.'); return; }
+  const go = document.querySelector('[data-acct-del="go"]');
+  if (go) { go.disabled = true; go.textContent = 'Deleting…'; }
+  try {
+    // 1. a fresh sign-in (Firebase asks for one before deleting an account)
+    if (a.provider === 'google') await user.reauthenticateWithPopup(new firebase.auth.GoogleAuthProvider());
+    else {
+      const pass = (document.getElementById('acct-del-pass') || {}).value || '';
+      if (!pass) throw new Error('Type your password first.');
+      await user.reauthenticateWithCredential(firebase.auth.EmailAuthProvider.credential(user.email, pass));
+    }
+    // 2. notifications: this device, and the service forgets the others (js/notify.js)
+    try { if (typeof notifyOff === 'function') await notifyOff(); } catch (_) {}
+    try { if (typeof _notifyCall === 'function') await _notifyCall('forget'); } catch (_) {}
+    // 3. what's theirs in the database
+    const uid = a.uid;
+    const backing = (await _acctGet('backing')) || {};
+    for (const id in backing) if (backing[id] && backing[id][uid]) await acctWrite(`backing/${id}/${uid}`, 'DELETE');
+    await acctWrite(`libraries/${uid}`, 'DELETE');
+    const claims = (await _acctGet('playerClaims')) || {};
+    for (const k in claims) if (claims[k] === uid) await acctWrite(`playerClaims/${encodeURIComponent(k)}`, 'DELETE');
+    await acctWrite(`users/${uid}`, 'DELETE');
+    // 4. the sign-in itself
+    await user.delete();
+  } catch (e) {
+    const code = e && e.code || '';
+    const msg = /popup-closed|cancelled-popup/.test(code) ? 'Nothing was deleted: the Google window was closed.'
+      : /wrong-password|invalid-credential|invalid-login/.test(code) ? 'That password isn\'t right. Nothing was deleted.'
+      : /too-many-requests/.test(code) ? 'Too many tries: wait a little and try again.'
+      : e.message || 'It couldn\'t be deleted. Try again.';
+    _acctDelShow('confirm', msg);
+    return;
+  }
+  // gone: this device forgets it too
+  try { ['bgl-mylib', 'bgl-bggcoll', 'bgl-hot-seen'].forEach(k => localStorage.removeItem(k)); } catch (_) {}
+  _acct = null;
+  _acctSignedOut();
+  if (typeof switchToLibrary === 'function') switchToLibrary();
+  _acctToast('Your account is deleted.');
+}
+
 // Next to Profile settings, for Στιβ and Δημητρης: send your join link.
 function acctInviteBtnHtml() {
   const a = acctMe();
@@ -538,6 +608,14 @@ async function acctInvite(owner) {
 document.addEventListener('click', (e) => {
   if (e.target.closest('[data-acct-open]')) { e.preventDefault(); acctOpenSheet(); return; }
   if (e.target.closest('[data-acct-signout]')) { e.preventDefault(); acctSignOut(); return; }
+  const del = e.target.closest('[data-acct-del]');
+  if (del) {
+    e.preventDefault();
+    const step = del.dataset.acctDel;
+    if (step === 'go') acctDelete();
+    else _acctDelShow(step === 'open' ? 'confirm' : '');
+    return;
+  }
   if (e.target.closest('[data-acct-bgg]')) { e.preventDefault(); acctSaveBgg(); return; }
   const inv = e.target.closest('[data-acct-invite]');
   if (inv) { e.preventDefault(); acctInvite(inv.dataset.acctInvite); }
