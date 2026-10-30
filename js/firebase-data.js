@@ -134,26 +134,19 @@ async function refreshRatings() {
 
 async function saveRating(playerName, bggId, rating) {
   if (!ratingsCache[bggId]) ratingsCache[bggId] = {};
-  if (rating === 0) {
-    delete ratingsCache[bggId][playerName];
-    if (Object.keys(ratingsCache[bggId]).length === 0) delete ratingsCache[bggId];
-  } else {
-    ratingsCache[bggId][playerName] = { value: rating, updatedAt: Date.now() };
-  }
+  // A cleared rating stays as 0 rather than going: the BGG sync
+  // (tools/sync-ratings.py) brings ratings only where there's none.
+  ratingsCache[bggId][playerName] = { value: rating, updatedAt: Date.now() };
 
   if (!FIREBASE_DB) return;
   // Persist under the original canonical name so a renamed player's ratings
   // stay keyed consistently (matching how they're loaded).
   const key = encodeURIComponent(_origCanon(playerName));
   try {
-    if (rating === 0) {
-      await fetch(`${FIREBASE_DB}/ratings/${bggId}/${key}.json`, { method: 'DELETE' });
-    } else {
-      await fetch(`${FIREBASE_DB}/ratings/${bggId}/${key}.json`, {
-        method: 'PUT',
-        body: JSON.stringify(ratingsCache[bggId][playerName])
-      });
-    }
+    await fetch(`${FIREBASE_DB}/ratings/${bggId}/${key}.json`, {
+      method: 'PUT',
+      body: JSON.stringify(ratingsCache[bggId][playerName])
+    });
   } catch (e) {
     console.warn('Failed to save rating to Firebase:', e);
   }
@@ -387,12 +380,14 @@ function getCommunityRating(bggId) {
 function buildStarRatingHtml(bggId) {
   const player = localStorage.getItem('bgl-player');
   const current = player ? getPlayerRating(player, bggId) : 0;
+  const entry = player && ratingsCache[bggId] && ratingsCache[bggId][player];
+  const fromBgg = !!(current && entry && entry.src === 'bgg');   // brought from their BGG ratings (tools/sync-ratings.py)
 
   let html = '<div class="star-rating-section">';
 
   // Player rating
   if (player) {
-    html += `<div class="star-rating-label">${current ? 'Your Rating' : 'Rate this game'}</div>`;
+    html += `<div class="star-rating-label">${current ? 'Your Rating' : 'Rate this game'}${fromBgg ? ' <span class="star-rating-src">from BGG</span>' : ''}</div>`;
     html += `<div class="star-rating-line">`;
     html += `<div class="star-rating-row" id="star-row" data-bgg="${bggId}" data-current="${current}">`;
     for (let i = 1; i <= 10; i++) {

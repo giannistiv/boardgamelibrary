@@ -43,6 +43,12 @@ jobs:
           if [ -n "$BGG_TOKEN" ]; then python3 tools/sync-collections.py || echo "collections skipped this time"
           else echo "No BGG_TOKEN secret yet: collections not synced"; fi
 
+      - name: BGG ratings, for games not rated in the app
+        env:
+          BGG_TOKEN: ${{ secrets.BGG_TOKEN }}
+        run: |
+          if [ -n "$BGG_TOKEN" ]; then python3 tools/sync-ratings.py || echo "ratings skipped this time"; fi
+
       - name: Notes on our BGG plays (Spirit Island levels)
         env:
           BGG_TOKEN: ${{ secrets.BGG_TOKEN }}

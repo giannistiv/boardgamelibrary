@@ -512,10 +512,13 @@ async function acctSaveBgg() {
     // the games now, from BGG; the 6-hourly sync keeps them in step from here (js/my-library.js)
     say('Saved. Getting your collection from BGG…');
     const got = typeof myBggFetch === 'function' ? await myBggFetch(name) : { pending: true };
+    // and their BGG ratings, for the games they haven't rated here
+    const rated = !got.error && typeof myBggRatings === 'function' ? await myBggRatings(name).catch(() => 0) : 0;
+    const also = rated ? ` ${rated} of your BGG ratings came too, for games you hadn't rated here.` : '';
     say(got.error ? `Saved, but BGG said: ${got.error}. Check the username; the collection comes with the next sync if BGG has it.`
-      : got.pending ? 'Saved. BGG is still preparing your collection: it comes to My games within a few hours, with the next sync.'
-      : got.count ? `${got.count} game${got.count !== 1 ? 's' : ''} from your BGG collection are in My games now. They stay in step with BGG, every 6 hours.`
-      : `Saved, but BGG shows no games owned by ${name}. Is the collection public, with games marked "Own"?`);
+      : got.pending ? 'Saved. BGG is still preparing your collection: it comes to My games within a few hours, with the next sync.' + also
+      : got.count ? `${got.count} game${got.count !== 1 ? 's' : ''} from your BGG collection are in My games now. They stay in step with BGG, every 6 hours.` + also
+      : `Saved, but BGG shows no games owned by ${name}. Is the collection public, with games marked "Own"?` + also);
   } catch (e) { say(e.message); }
 }
 // ── Deleting your account (Profile settings) ──

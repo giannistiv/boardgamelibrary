@@ -5,6 +5,7 @@
 // site's two questions:
 //   GET /search?q=brass   → { results: [{ id, name, year, exp, img, players, time, rated }] }
 //   GET /collection?user=X → { user, games: { id: { name, bggId, year, players, playTime, bggRating, urlImage } } } (202 { pending } while BGG prepares it)
+//   GET /ratings?user=X    → { user, ratings: { id: 1-10 } } (BGG's rating rounded to whole stars; 202 { pending } likewise)
 //   GET /thing?id=1,2     → { items: [{ id, name, year, exp, img, image, players, playTime, weight, rating, rated, designers, mechanics, categories, desc }] }
 // Only the site's own pages may use it (ALLOWED_ORIGINS). Answers are kept
 // for a day, so the same search doesn't ask BGG again.
@@ -46,12 +47,12 @@ export default {
     if (request.method !== 'GET') return json({ error: 'GET only' }, 405, cors);
     if (!env.BGG_TOKEN) return json({ error: 'The BGG token is missing (wrangler secret put BGG_TOKEN).' }, 500, cors);
 
-    if (url.pathname === '/collection') {
-      // someone's BGG collection, the moment they link it in Profile settings (not kept: it changes)
+    if (url.pathname === '/collection' || url.pathname === '/ratings') {
+      // someone's BGG collection or ratings, the moment they link it in Profile settings (not kept: it changes)
       const user = (url.searchParams.get('user') || '').trim();
       if (!/^[A-Za-z0-9_ .-]{1,40}$/.test(user)) return json({ error: 'Which BGG username?' }, 400, cors, true);
       try {
-        const out = await collection(user, env);
+        const out = url.pathname === '/ratings' ? await ratings(user, env) : await collection(user, env);
         return json(out, out.pending ? 202 : 200, cors, true);
       } catch (e) {
         return json({ error: String(e && e.message || e) }, 502, cors, true);
@@ -110,19 +111,23 @@ async function bgg(path, env) {
 // What a user owns on BGG, as data/collections.js keeps it (tools/sync-collections.py),
 // with the thumbnail for games the site hasn't seen. BGG prepares a collection
 // before answering (202): asked again for a while, else { pending: true }.
-async function collection(user, env) {
-  const path = `collection?username=${encodeURIComponent(user)}&own=1&stats=1`;
-  let xml = null;
-  for (let tries = 0; tries < 6 && xml == null; tries++) {
+async function collectionXml(path, env) {
+  for (let tries = 0; tries < 6; tries++) {
     const res = await fetch(BGG + path, { headers: { Authorization: `Bearer ${env.BGG_TOKEN}`, 'User-Agent': 'BoardGameLibrary/1.0 (giannistiv.github.io)' } });
     if (res.status === 202 || res.status === 429 || res.status >= 500) { await new Promise(r => setTimeout(r, 2000)); continue; }
     if (res.status === 401) throw new Error('BGG refused the token');
     if (!res.ok) throw new Error(`BGG answered ${res.status}`);
-    xml = await res.text();
+    return res.text();
   }
+  return null;
+}
+const collectionError = (xml) => { const m = /<error>\s*<message>([\s\S]*?)<\/message>/.exec(xml); return m ? unxml(m[1]).trim() : ''; };
+
+async function collection(user, env) {
+  const xml = await collectionXml(`collection?username=${encodeURIComponent(user)}&own=1&stats=1`, env);
   if (xml == null) return { user, pending: true };
-  const err = /<error>\s*<message>([\s\S]*?)<\/message>/.exec(xml);
-  if (err) return { user, error: unxml(err[1]).trim(), games: {} };
+  const err = collectionError(xml);
+  if (err) return { user, error: err, games: {} };
   const games = {};
   const re = /<item\b([^>]*)>([\s\S]*?)<\/item>/g;
   let m;
@@ -143,6 +148,23 @@ async function collection(user, env) {
     games[id] = g;
   }
   return { user, games };
+}
+
+// What a user rated on BGG (tools/sync-ratings.py brings the same every 6 hours).
+async function ratings(user, env) {
+  const xml = await collectionXml(`collection?username=${encodeURIComponent(user)}&rated=1&stats=1`, env);
+  if (xml == null) return { user, pending: true };
+  const err = collectionError(xml);
+  if (err) return { user, error: err, ratings: {} };
+  const out = {};
+  const re = /<item\b([^>]*)>([\s\S]*?)<\/item>/g;
+  let m;
+  while ((m = re.exec(xml))) {
+    const id = Number((/\bobjectid="(\d+)"/.exec(m[1]) || [])[1]);
+    const v = num((/<rating value="([^"]*)"/.exec(m[2]) || [])[1]);
+    if (id && v) out[id] = Math.max(1, Math.min(10, Math.round(v)));
+  }
+  return { user, ratings: out };
 }
 
 // ── Reading BGG's XML ──

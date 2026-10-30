@@ -63,6 +63,39 @@ async function myBggFetch(user) {
   }
   return { pending: true };
 }
+// The ratings they gave on BGG, for the games the site knows that they haven't
+// rated here (tools/sync-ratings.py brings later ones every 6 hours). Marked
+// src 'bgg': they follow BGG's until rated here. Returns how many came.
+async function myBggRatings(user) {
+  const a = typeof acctMe === 'function' ? acctMe() : null;
+  if (!a || !a.player || typeof ratingsCache === 'undefined') return 0;
+  let data = null;
+  for (let tries = 0; tries < 4 && !data; tries++) {
+    const res = await fetch(`${BGG_PROXY}/ratings?user=${encodeURIComponent(user)}`);
+    const d = await res.json().catch(() => ({}));
+    if (res.status === 202 || d.pending) { await new Promise(r => setTimeout(r, 4000)); continue; }
+    if (!res.ok || d.error) return 0;
+    data = d;
+  }
+  if (!data) return 0;
+  const canon = a.player, shown = typeof _acctDisplay === 'function' ? _acctDisplay(canon) : canon;
+  const patch = {};
+  for (const id in data.ratings || {}) {
+    if (!findGameByBggId(id) && !PLAY_HISTORY[id]) continue;
+    const cur = ratingsCache[id] && ratingsCache[id][shown];
+    if (cur != null && !(cur && cur.src === 'bgg')) continue;   // rated (or cleared) here: that one stays
+    if (cur && cur.value === data.ratings[id]) continue;
+    patch[`${id}/${canon}`] = { value: data.ratings[id], updatedAt: 0, src: 'bgg' };
+  }
+  const keys = Object.keys(patch);
+  if (!keys.length) return 0;
+  await fbWrite('ratings', 'PATCH', patch, 'main');
+  for (const k of keys) {
+    const id = k.slice(0, k.indexOf('/'));
+    (ratingsCache[id] = ratingsCache[id] || {})[shown] = patch[k];
+  }
+  return keys.length;
+}
 function myLibSynced(bggId) { return !!_myBggGames()[Number(bggId)]; }
 function myLibHas(bggId) { return !!(_myLib && _myLib[Number(bggId)]) || myLibSynced(bggId); }
 function myLibIds() { return [...new Set([...Object.keys(_myLib || {}), ...Object.keys(_myBggGames())].map(Number))]; }
