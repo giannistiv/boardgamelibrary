@@ -1,23 +1,39 @@
 // ── Live: new plays without reloading ──
-// The plays logged in the app (plays/), the BGStats uploads (importedPlays/)
-// and the games they bring (importedGames/) are followed as they change
-// (Firebase's event stream: the whole node on connecting, then each change).
-// What changed is merged into PLAY_HISTORY the way the start-up merge does it,
-// and the screen that's open is drawn again where it was; with a game page or
-// a form open, that waits until it's closed. A phone stops the stream in the
-// background, so coming back opens it again and catches up.
+// The plays logged in the app (plays/) and the BGStats uploads (importedPlays/)
+// are followed as they change (Firebase's event stream: the whole node on
+// connecting, then each change); a game a new play brings (importedGames/) is
+// read once when it comes. What changed is merged into PLAY_HISTORY the way
+// the start-up merge does it, and the screen that's open is drawn again where
+// it was; with a game page or a form open, that waits until it's closed. A
+// phone stops the stream in the background, so coming back opens it again
+// and catches up.
+// Firebase answers over HTTP/1.1, and a browser opens at most 6 connections
+// to one server for all the tabs of a site together, each stream keeping one
+// for as long as it's open: with every tab streaming, two tabs left nothing
+// for a rating or a backing, which waited for ever. So one tab follows the
+// streams (the first one open, then the next when it closes) and passes on
+// what comes to the others.
 // A new version of the app (a deploy) is noticed when it comes back to the
 // front after a while: it reloads by itself when nothing is open, else it
 // offers to. The app added to the Home Screen has no reload button, so there
 // a pull down at the top reloads it.
 
-const LIVE_NODES = ['importedPlays', 'plays', 'importedGames'];
+const LIVE_NODES = ['importedPlays', 'plays'];
 let _playsRev = 0;            // bumped on every live change (js/play-time.js _ptSig: caches redo)
 const _liveStreams = {};
 let _liveDirty = false, _liveNew = 0, _liveHiddenAt = 0;
+let _liveOn = false, _liveLead = false, _liveAsked = false;
+const _liveChan = typeof BroadcastChannel === 'function' ? new BroadcastChannel('bgl-live') : null;
+const _liveShared = () => !!(_liveChan && navigator.locks);
 
 function liveStart() {
   if (typeof EventSource === 'undefined' || !FIREBASE_DB) return;
+  _liveOn = true;
+  if (_liveShared() && !_liveLead) {
+    // held until this tab closes; meanwhile another tab's streams come in by _liveChan
+    if (!_liveAsked) { _liveAsked = true; navigator.locks.request('bgl-live', () => { _liveLead = true; liveStart(); return new Promise(() => {}); }); }
+    return;
+  }
   for (const node of LIVE_NODES) {
     const old = _liveStreams[node];
     if (old && old.readyState !== 2) continue;   // still open (or reconnecting by itself)
@@ -30,7 +46,9 @@ function _liveOpen(node) {
   const on = (kind) => (ev) => {
     let msg = null;
     try { msg = JSON.parse(ev.data); } catch (_) {}
-    if (msg && typeof msg.path === 'string') _liveApply(node, kind, msg.path, msg.data);
+    if (!msg || typeof msg.path !== 'string') return;
+    _liveApply(node, kind, msg.path, msg.data);
+    if (_liveLead) _liveChan.postMessage({ node, kind, path: msg.path, data: msg.data });
   };
   es.addEventListener('put', on('put'));
   es.addEventListener('patch', on('patch'));
@@ -38,9 +56,16 @@ function _liveOpen(node) {
   _liveStreams[node] = es;
 }
 function _liveRestart() {
+  if (_liveShared() && !_liveLead) return liveStart();
   for (const node of LIVE_NODES) if (_liveStreams[node]) _liveStreams[node].close();
   for (const node of LIVE_NODES) _liveOpen(node);
 }
+// The tab that follows the streams passes each change on (once this tab has
+// its own copy of the plays: the start-up read comes first).
+if (_liveChan) _liveChan.onmessage = (ev) => {
+  const m = ev.data;
+  if (_liveOn && !_liveLead && m && LIVE_NODES.includes(m.node)) _liveApply(m.node, m.kind, m.path, m.data);
+};
 
 // What each node held when it was last read, as it came (the merge rewrites
 // names and places in the copies it keeps): a change is told apart from that.
@@ -112,12 +137,25 @@ function _liveMerge(node, changed, gone) {
   }
   // the app's own plays pair with the BGStats copies afresh, as at start-up
   if (node !== 'importedGames' && typeof mergeManualPlays === 'function') mergeManualPlays();
+  if (node !== 'importedGames' && [...changed.values()].some(p => p && p.bggId && !findGameByBggId(p.bggId))) _liveGamesSoon();
   _sortPlayHistory();
   added = Math.max(0, countBefore() - before);
   _playsRev++;
   _liveNew += added;
   _liveDirty = true;
   _liveSoon();
+}
+
+// A game the app hadn't seen came with a play: its name and cover are in importedGames.
+let _liveGamesTimer = null;
+function _liveGamesSoon() {
+  clearTimeout(_liveGamesTimer);
+  _liveGamesTimer = setTimeout(async () => {
+    try {
+      const res = await fetch(`${FIREBASE_DB}/importedGames.json`);
+      if (res.ok) _liveApply('importedGames', 'put', '/', await res.json());
+    } catch (_) { /* no signal: the next start-up reads them */ }
+  }, 1000);
 }
 
 // ── Drawing the screen again ──
