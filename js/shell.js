@@ -895,8 +895,10 @@ function openModal(game) {
   const playsPanel = [logHtml, boardsWho, marvelUnitedHtml, marvelChampionsHtml, spiritIslandHtml, eternalDecksHtml, aeonsEndHtml, leviathanHtml,
     boardsWho ? playHistoryHtml.replace(progressWhoHtml(myProgress), '') : playHistoryHtml].join('');
   const roveHtml = typeof buildRoveCampaignHtml === 'function' ? buildRoveCampaignHtml(game) : '';
+  const crHtml = typeof buildCrCampaignHtml === 'function' ? buildCrCampaignHtml(game) : '';
+  const campaignHtml = roveHtml || crHtml;
   const tabs = [['overview', 'Overview'], ['plays', `Plays${plays && plays.length ? ` <span class="gm-tab-n">${plays.length}</span>` : ''}`]]
-    .concat(roveHtml ? [['campaign', 'Campaign']] : [])
+    .concat(campaignHtml ? [['campaign', 'Campaign']] : [])
     .concat(game.bggId > 0 ? [['rules', 'Rules']] : []);
   if (_modalTabFor !== game.bggId) { _modalTab = ''; _modalTabFor = game.bggId; }
   const tab = tabs.some(t => t[0] === _modalTab) ? _modalTab : (plays && plays.length ? 'plays' : 'overview');
@@ -930,7 +932,7 @@ function openModal(game) {
       <div class="gm-panel" data-panel="plays"${tab === 'plays' ? '' : ' hidden'}>
         ${playsPanel.replace(logHtml, '') ? playsPanel : `${logHtml}<div class="gm-empty">No plays logged yet.${logHtml ? '' : ' They show up here after the next BGStats import.'}</div>`}
       </div>
-      ${roveHtml ? `<div class="gm-panel" data-panel="campaign"${tab === 'campaign' ? '' : ' hidden'}>${roveHtml}</div>` : ''}
+      ${campaignHtml ? `<div class="gm-panel" data-panel="campaign"${tab === 'campaign' ? '' : ' hidden'}>${campaignHtml}</div>` : ''}
       ${game.bggId > 0 ? `<div class="gm-panel" data-panel="rules"${tab === 'rules' ? '' : ' hidden'}>${buildRulesPanelHtml(game)}</div>` : ''}
     </div>
   `;
@@ -962,6 +964,7 @@ function openModal(game) {
   wireMarvelChampions();
   wireGameNews(content);
   if (roveHtml) wireRoveCampaign(content);
+  if (crHtml) wireCrCampaign(content);
   if (leviathanHtml) wireLeviathanWilds(content);
   if (Number(game.bggId) === SKY_TEAM_BGGID) wireSkyTeam(content);
   if (typeof wireProgressBoards === 'function') wireProgressBoards(content);

@@ -133,6 +133,13 @@ function scenarioPicker(bggId) {
       { key: 'stage', label: 'Stage', options: () => ED_STAGES.flatMap(s => [[`Stage ${s.id}`, `${s.id} · ${s.name}`], [`Stage ${s.id}+`, `${s.id}+ · ${s.name}`]]) },
     ] };
   }
+  if (typeof CNCR_BGGID !== 'undefined' && id === CNCR_BGGID) {
+    // "Tal'Dorei／Mission 2a": the campaign's map and where on it (js/cncr-campaign.js)
+    return { fields: [
+      { key: 'camp', label: 'Campaign', options: () => CR_MAPS.map(m => [m.name, `${m.num} · ${m.name}`]) },
+      { key: 'm', label: 'Mission', options: (vals) => (CR_MAPS.find(m => m.name === vals.camp) || { missions: [] }).missions.map(x => [`Mission ${x.n}`, `${x.n} · ${x.place}`]) },
+    ] };
+  }
   if (id === SCEN_TAKE_TIME) {
     const n = (k) => Array.from({ length: k }, (_, i) => [String(i + 1), String(i + 1)]);
     return { sep: '-', fields: [{ key: 'f', label: 'Folder', options: () => n(10) }, { key: 'c', label: 'Clock', options: () => n(4) }] };
