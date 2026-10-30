@@ -240,7 +240,10 @@ function findGameByBggId(bggId) {
 function _collectionGame(id) {
   if (!_collectionGame.idx) {
     _collectionGame.idx = new Map();
-    const C = typeof BGG_COLLECTIONS !== 'undefined' ? BGG_COLLECTIONS : {};
+    const C = { ...(typeof BGG_COLLECTIONS !== 'undefined' ? BGG_COLLECTIONS : {}) };
+    // and one linked on this phone since the last sync (js/my-library.js)
+    const local = typeof myBggLocal === 'function' ? myBggLocal() : null;
+    if (local && local.games && !C[local.user]) C[local.user] = local.games;
     for (const user in C) for (const k in C[user]) if (!_collectionGame.idx.has(Number(k))) {
       _collectionGame.idx.set(Number(k), { categories: [], mechanics: [], ...C[user][k], id: 'coll_' + k });
     }

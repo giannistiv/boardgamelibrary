@@ -4,6 +4,7 @@
 // small service holds the token (the BGG_TOKEN secret) and answers the
 // site's two questions:
 //   GET /search?q=brass   → { results: [{ id, name, year, exp, img, players, time, rated }] }
+//   GET /collection?user=X → { user, games: { id: { name, bggId, year, players, playTime, bggRating, urlImage } } } (202 { pending } while BGG prepares it)
 //   GET /thing?id=1,2     → { items: [{ id, name, year, exp, img, image, players, playTime, weight, rating, rated, designers, mechanics, categories, desc }] }
 // Only the site's own pages may use it (ALLOWED_ORIGINS). Answers are kept
 // for a day, so the same search doesn't ask BGG again.
@@ -44,6 +45,18 @@ export default {
     }
     if (request.method !== 'GET') return json({ error: 'GET only' }, 405, cors);
     if (!env.BGG_TOKEN) return json({ error: 'The BGG token is missing (wrangler secret put BGG_TOKEN).' }, 500, cors);
+
+    if (url.pathname === '/collection') {
+      // someone's BGG collection, the moment they link it in Profile settings (not kept: it changes)
+      const user = (url.searchParams.get('user') || '').trim();
+      if (!/^[A-Za-z0-9_ .-]{1,40}$/.test(user)) return json({ error: 'Which BGG username?' }, 400, cors, true);
+      try {
+        const out = await collection(user, env);
+        return json(out, out.pending ? 202 : 200, cors, true);
+      } catch (e) {
+        return json({ error: String(e && e.message || e) }, 502, cors, true);
+      }
+    }
 
     const key = url.pathname + url.search;
     const kept = memo.get(key);
@@ -92,6 +105,44 @@ async function bgg(path, env) {
     return res.text();
   }
   throw new Error('BGG is busy: try again in a moment');
+}
+
+// What a user owns on BGG, as data/collections.js keeps it (tools/sync-collections.py),
+// with the thumbnail for games the site hasn't seen. BGG prepares a collection
+// before answering (202): asked again for a while, else { pending: true }.
+async function collection(user, env) {
+  const path = `collection?username=${encodeURIComponent(user)}&own=1&stats=1`;
+  let xml = null;
+  for (let tries = 0; tries < 6 && xml == null; tries++) {
+    const res = await fetch(BGG + path, { headers: { Authorization: `Bearer ${env.BGG_TOKEN}`, 'User-Agent': 'BoardGameLibrary/1.0 (giannistiv.github.io)' } });
+    if (res.status === 202 || res.status === 429 || res.status >= 500) { await new Promise(r => setTimeout(r, 2000)); continue; }
+    if (res.status === 401) throw new Error('BGG refused the token');
+    if (!res.ok) throw new Error(`BGG answered ${res.status}`);
+    xml = await res.text();
+  }
+  if (xml == null) return { user, pending: true };
+  const err = /<error>\s*<message>([\s\S]*?)<\/message>/.exec(xml);
+  if (err) return { user, error: unxml(err[1]).trim(), games: {} };
+  const games = {};
+  const re = /<item\b([^>]*)>([\s\S]*?)<\/item>/g;
+  let m;
+  while ((m = re.exec(xml))) {
+    const id = Number((/\bobjectid="(\d+)"/.exec(m[1]) || [])[1]);
+    const x = m[2];
+    if (!id || !/<status\b[^>]*\bown="1"/.test(x)) continue;
+    const text = (t) => { const r = new RegExp(`<${t}[^>]*>([\\s\\S]*?)</${t}>`).exec(x); return r ? unxml(r[1]).trim() : ''; };
+    const stat = (a) => num((new RegExp(`<stats\\b[^>]*\\b${a}="([^"]*)"`).exec(x) || [])[1]);
+    const minp = stat('minplayers'), maxp = stat('maxplayers'), time = stat('playingtime');
+    const avg = num((/<average value="([^"]*)"/.exec(x) || [])[1]);
+    const g = { name: text('name') || `Game #${id}`, bggId: id, year: num(text('yearpublished')) || null };
+    if (minp || maxp) { const lo = minp || maxp, hi = maxp || minp; g.players = lo === hi ? String(lo) : `${lo}-${hi}`; }
+    if (time) g.playTime = `${time} min`;
+    if (avg) g.bggRating = Math.round(avg * 10) / 10;
+    const thumb = text('thumbnail');
+    if (thumb) g.urlImage = thumb;
+    games[id] = g;
+  }
+  return { user, games };
 }
 
 // ── Reading BGG's XML ──

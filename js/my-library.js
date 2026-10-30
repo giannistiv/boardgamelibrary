@@ -29,7 +29,39 @@ function _myBggGames() {
   if (MY_HAND_WIRED[u]) return MY_HAND_WIRED[u]() || {};
   const C = typeof BGG_COLLECTIONS !== 'undefined' ? BGG_COLLECTIONS : {};
   const key = Object.keys(C).find(k => k.toLowerCase() === u);
-  return key ? C[key] : {};
+  if (key) return C[key];
+  // linked since the last sync: the collection as fetched when it was linked
+  const local = myBggLocal();
+  return local && String(local.user).toLowerCase() === u ? local.games || {} : {};
+}
+
+// ── A BGG collection the moment it's linked (Profile settings) ──
+// The service fetches it from BGG at once; it's kept on this phone until the
+// 6-hourly sync (tools/sync-collections.py) has it in data/collections.js,
+// which then keeps it in step with BGG.
+const MY_BGG_LOCAL = 'bgl-bggcoll';
+function myBggLocal() { try { return JSON.parse(localStorage.getItem(MY_BGG_LOCAL) || 'null'); } catch (_) { return null; } }
+function myBggForget() { try { localStorage.removeItem(MY_BGG_LOCAL); } catch (_) {} _myBggChanged(); }
+function _myBggChanged() {
+  _myShelf.cache = null;
+  if (typeof _collectionGame === 'function') _collectionGame.idx = null;
+  if (typeof _myLibRedraw === 'function') _myLibRedraw();
+  if (typeof _libRefresh === 'function') { _libRefresh.key = null; _libRefresh(); }
+  if (typeof _navSync === 'function') _navSync();
+}
+// → { count } | { pending: true } | { error }
+async function myBggFetch(user) {
+  for (let tries = 0; tries < 4; tries++) {
+    const res = await fetch(`${BGG_PROXY}/collection?user=${encodeURIComponent(user)}`);
+    const data = await res.json().catch(() => ({}));
+    if (res.status === 202 || data.pending) { await new Promise(r => setTimeout(r, 4000)); continue; }   // BGG is still preparing it
+    if (!res.ok) return { error: data.error || `HTTP ${res.status}` };
+    if (data.error) return { error: data.error };
+    try { localStorage.setItem(MY_BGG_LOCAL, JSON.stringify({ user, at: Date.now(), games: data.games || {} })); } catch (_) {}
+    _myBggChanged();
+    return { count: Object.keys(data.games || {}).length };
+  }
+  return { pending: true };
 }
 function myLibSynced(bggId) { return !!_myBggGames()[Number(bggId)]; }
 function myLibHas(bggId) { return !!(_myLib && _myLib[Number(bggId)]) || myLibSynced(bggId); }

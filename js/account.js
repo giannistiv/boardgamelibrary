@@ -507,8 +507,14 @@ async function acctSaveBgg() {
     _acct.bgg = name;
     _acctRemember(_acct);
     input.blur();
-    say(name ? `Saved. ${name}'s collection comes to My games with the next BGG sync, within a few hours.` : 'Unlinked.');
-    if (typeof _myShelf === 'function') { _myShelf.cache = null; if (typeof _myLibRedraw === 'function') _myLibRedraw(); }
+    if (!name) { if (typeof myBggForget === 'function') myBggForget(); say('Unlinked.'); return; }
+    // the games now, from BGG; the 6-hourly sync keeps them in step from here (js/my-library.js)
+    say('Saved. Getting your collection from BGG…');
+    const got = typeof myBggFetch === 'function' ? await myBggFetch(name) : { pending: true };
+    say(got.error ? `Saved, but BGG said: ${got.error}. Check the username; the collection comes with the next sync if BGG has it.`
+      : got.pending ? 'Saved. BGG is still preparing your collection: it comes to My games within a few hours, with the next sync.'
+      : got.count ? `${got.count} game${got.count !== 1 ? 's' : ''} from your BGG collection are in My games now. They stay in step with BGG, every 6 hours.`
+      : `Saved, but BGG shows no games owned by ${name}. Is the collection public, with games marked "Own"?`);
   } catch (e) { say(e.message); }
 }
 // Next to Profile settings, for Στιβ and Δημητρης: send your join link.
