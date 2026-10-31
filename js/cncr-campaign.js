@@ -6,8 +6,10 @@
 // the fail counter, the treasure, the shops, the items, and the three heroes'
 // sheets. While the game page is open it follows the campaign as it changes
 // (Firebase's event stream), so a heart lost or an XP token taken on one phone
-// shows on everyone's. Each party carries on its own campaign; it opens on the
-// viewer's own (the latest they're at the table for). The heroes and each
+// shows on everyone's. Each party carries on its own campaign: they're listed
+// as tabs, and one opens when it's tapped (it can be stopped, and picked up
+// again). Each mission won or lost is logged as a play, offered to BG Stats
+// as a QR code. The heroes and each
 // mission's rules are in data/cncr.js, loaded when the tab opens; the maps are
 // here, since Log a play's mission list needs them too.
 
@@ -23,20 +25,20 @@ const _crM = (n, place, title, more) => {
 // ones, the locked ones (lock: what opens them), and the shops, each before
 // a boss fight.
 const CR_MAPS = [
-  { key: 'taldorei', name: 'Tal\'Dorei', num: 1, missions: [
+  { key: 'taldorei', name: 'Tal\'Dorei', num: 1, color: '#a3326a', missions: [
     _crM('1', 'Whitestone', 'Guard Duty'), _crM('2A', 'Drynna', 'Fishy Clues'), _crM('2B', 'Westruun', 'Just Act Natural'),
     _crM('3', 'Stilben', 'Hidden in the Crowd', { boss: true }),
     _crM('4A', 'Syngorn', 'Knocking on Doors'), _crM('4B', 'Kymal', 'Den of Thieves'), _crM('4C', 'Byroden', 'Timely Rescue', { lock: 'unharmed', hard: true }),
     _crM('5', 'Kraghammer', 'Snooping Around'), _crM('6', 'Emon', 'A Meeting Long Overdue', { boss: true, finale: true })],
     shops: [{ k: 's1', at: 'Stilben', name: 'Dockside Market', before: 3 }, { k: 's2', at: 'Emon', name: 'Gilmore\'s Glorious Goods', before: 6 }] },
-  { key: 'wildemount', name: 'Wildemount', num: 2, missions: [
+  { key: 'wildemount', name: 'Wildemount', num: 2, color: '#5f8a2e', missions: [
     _crM('1', 'Port Zoon', 'In the Name of Science'), _crM('2A', 'Ruins of Shattengrod', 'Reading Is Good for You'), _crM('2B', 'Zadash', 'It Had to Be Spiders…'),
     _crM('2C', 'Rumblecusp', 'Walk of Trust', { lock: 'map' }),
     _crM('3', 'Rexxentrum', 'Needle in the Stacks', { boss: true }),
     _crM('4A-1', 'Icehaven', 'Expedition Delayed'), _crM('4A-2', 'Icehaven', 'Through Blinding Snow'), _crM('4B', 'Uthodurn', 'The Labyrinth', { hard: true }),
     _crM('5A', 'Aeor Crash Site', 'Vessa\'s Legacy', { boss: true, finale: true }), _crM('5B', 'Mutalos', 'Vessa\'s People', { boss: true, finale: true })],
     shops: [{ k: 's1', at: 'Rexxentrum', name: 'Thaydeen\'s Endless Emporium', before: 3 }, { k: 's2', at: 'Syrinlya', name: 'The Buyer', before: 5, haldane: true }] },
-  { key: 'marquet', name: 'Marquet', num: 3, missions: [
+  { key: 'marquet', name: 'Marquet', num: 3, color: '#1e86a0', missions: [
     _crM('1', 'Foothills of Serpentwind Peaks', 'The Spring Festival'), _crM('2A', 'Heartmoor Hamlet', 'Among the Druids'), _crM('2B', 'Jrusar', 'Militia\'s Aid'),
     _crM('3', 'Ank\'Harel', 'Defiled Sanctuary', { boss: true }),
     _crM('4A-1', 'Gelvaan', 'The Chained Forest'), _crM('4A-2', 'Gelvaan', 'Guiding Light'), _crM('4B-1', 'Bassuras', 'Embracing Darkness'), _crM('4B-2', 'Bassuras', 'The One Who Chose You'),
@@ -67,16 +69,17 @@ const CR_OUT_MAP = { wildemount: ['quest'], marquet: ['chained', 'gone'] };
 let _crData = null;          // data/cncr.js
 let _crCamps = null;         // crCampaigns from Firebase: {id: campaign}
 let _crSrc = {};             // id → the store it lives in ('main' | 'spare', see fbWrite)
-let _crId = null;            // the campaign on screen; null: the start form
+let _crId = null;            // the campaign open; null: none (or the start form, with _crDraft)
 let _crTab = 'map';          // 'map' | 'heroes' | 'items' | 'notes'
 let _crHero = null;          // the hero slot shown on the Heroes tab
-let _crDraft = null;         // the start form
+let _crDraft = null;         // the start form, while it's open
 let _crRw = null;            // the reward being taken on this phone
 let _crKind = 'always';      // the item being added: green ('always') or orange ('once')
 let _crPanel = null;         // the tab on screen
 let _crLate = false;         // a change came in while typing: drawn when the field's left
 let _crES = null, _crESid = null, _crWatch = null;
 let _crSaveTimers = {};
+let _crPlaysStale = false;   // a mission's play was logged: the game page's Plays tab is drawn again when opened
 
 const _crMapOf = (c) => CR_MAPS.find(m => m.key === (c && c.map)) || CR_MAPS[0];
 const _crMis = (c, k) => _crMapOf(c).missions.find(m => m.k === k) || null;
@@ -122,20 +125,14 @@ async function _crLoad(force) {
     }
   }
   if (_crId && !_crCamps[_crId]) _crId = null;
-  if (!_crId && !_crDraft) {
-    // the viewer's own campaign, the one played most recently
-    const me = _crMe();
-    _crId = Object.keys(_crCamps).filter(id => me && _crPeople(_crCamps[id]).includes(me))
-      .sort((a, b) => (_crCamps[b].updated || 0) - (_crCamps[a].updated || 0))[0] || null;
-  }
 }
 
 // Write some fields of the campaign: {path: value}, path relative to it
 // ("done/2a", "heroes/h0/xp"); null removes. Firebase applies them together
 // without touching the rest, so two phones filling in different boxes don't
 // overwrite each other.
-async function _crPatch(updates) {
-  const id = _crId, c = _crCamps[id];
+async function _crPatch(updates, id = _crId) {
+  const c = _crCamps[id];
   if (!c) return;
   for (const [path, v] of Object.entries(updates)) _crSetAt(c, path.split('/'), v);
   c.updated = Date.now();
@@ -329,26 +326,58 @@ function wireCrCampaign(content) {
   panel.addEventListener('click', (ev) => _crClick(panel, ev));
   panel.addEventListener('change', (ev) => _crChange(panel, ev));
   panel.addEventListener('input', (ev) => _crInput(panel, ev));
+  // a mission's play logged since the page opened: its Plays tab drawn again
+  const tabs = content.querySelector('.gm-tabs');
+  if (tabs) tabs.addEventListener('click', (ev) => {
+    const t = ev.target.closest('.gm-tab');
+    if (!t || t.dataset.tab !== 'plays' || !_crPlaysStale) return;
+    _crPlaysStale = false;
+    _modalTab = 'plays';
+    _modalTabFor = CNCR_BGGID;
+    openModal(findGameByBggId(CNCR_BGGID));
+  });
   panel.addEventListener('focusout', () => setTimeout(() => {
     const a = document.activeElement;
     if (_crLate && !(a && panel.contains(a) && /^(INPUT|TEXTAREA)$/.test(a.tagName))) _crRender(panel);
   }, 250));
 }
 
-function _crLabel(c) {
-  const heroes = CR_SLOTS.map(s => (c.heroes || {})[s]).filter(h => h && h.id).map(_crHeroName);
-  return `${c.name || heroes.join(', ') || 'A party'} · ${_crMapOf(c).name}${c.status === 'won' ? ' · won' : c.status === 'lost' ? ' · lost' : ''}`;
+// Where a campaign stands, in a few words: for its tab.
+function _crState(c) {
+  if (c.status === 'won') return 'won';
+  if (c.status === 'lost') return 'lost';
+  if (c.status === 'stopped') return `stopped ${_crShortDate(c.stopped)}`;
+  const ph = _crPhase(c);
+  if (ph.reward) return `${ph.reward.n} won: reward to take`;
+  if (ph.play) return `playing ${ph.play.n}`;
+  if (ph.shop) return `shop at ${ph.shop.at}`;
+  if (ph.next.m) return `next: ${ph.next.m.n} ${ph.next.m.place}`;
+  return 'where next?';
 }
-function _crPickerHtml() {
+// The campaigns as tabs: yours first, the stopped and finished ones apart.
+function _crTabsHtml() {
   const esc = _escapeHtml;
   const me = _crMe();
-  const ids = Object.keys(_crCamps).sort((a, b) => (_crCamps[b].updated || 0) - (_crCamps[a].updated || 0));
-  const mine = ids.filter(id => me && _crPeople(_crCamps[id]).includes(me)), others = ids.filter(id => !mine.includes(id));
-  const opt = (id) => `<option value="${esc(id)}"${id === _crId ? ' selected' : ''}>${esc(_crLabel(_crCamps[id]))}</option>`;
-  const group = (label, list) => !list.length ? '' : mine.length && others.length ? `<optgroup label="${label}">${list.map(opt).join('')}</optgroup>` : list.map(opt).join('');
-  return `<select class="rv-in rv-pick cr-pick" data-cr-camp aria-label="Campaign">
-    ${group('Yours', mine)}${group('Other parties', others)}
-    <option value="__new"${_crId ? '' : ' selected'}>+ A new campaign</option></select>`;
+  const mine = (c) => !!(me && _crPeople(c).includes(me));
+  const ids = Object.keys(_crCamps).sort((a, b) => {
+    const A = _crCamps[a], B = _crCamps[b];
+    return (mine(B) - mine(A)) || ((B.updated || 0) - (A.updated || 0));
+  });
+  const tab = (id) => {
+    const c = _crCamps[id], map = _crMapOf(c);
+    const heroes = CR_SLOTS.map(s => (c.heroes || {})[s]).filter(h => h && h.id).map(_crHeroName).join(', ');
+    const who = [c.gm ? `GM ${c.gm}` : '', _crList(c.players).join(', ')].filter(Boolean).join(' · ');
+    return `<button type="button" class="cr-camp${id === _crId ? ' on' : ''}${c.status ? ` ended ${c.status}` : ''}" data-cr-camp="${esc(id)}" style="--cr-c:${map.color}" aria-expanded="${id === _crId}">
+      <b>${esc(c.name || heroes || 'A party')}</b>
+      <span>${esc(map.name)} · ${esc(_crState(c))}</span>
+      ${who ? `<span class="cr-camp-who">${esc(who)}</span>` : ''}</button>`;
+  };
+  const active = ids.filter(id => !_crCamps[id].status), ended = ids.filter(id => _crCamps[id].status);
+  const isNew = !_crId && !!_crDraft;
+  return `<div class="cr-camps">${active.map(tab).join('')}
+      <button type="button" class="cr-camp cr-camp-new${isNew ? ' on' : ''}" data-cr-camp="__new" aria-expanded="${isNew}"><b>+ A new campaign</b><span>Tal'Dorei, Wildemount or Marquet</span></button></div>
+    ${ended.length ? `<div class="rv-sub">Stopped and finished</div><div class="cr-camps">${ended.map(tab).join('')}</div>` : ''}
+    ${!_crId && !_crDraft && ids.length ? '<div class="rv-hint cr-camps-hint">Tap a campaign to open it.</div>' : ''}`;
 }
 
 function _crRender(panel) {
@@ -358,7 +387,7 @@ function _crRender(panel) {
   const c = _crId && _crCamps[_crId];
   if (!c) {
     _crUnfollow();
-    panel.innerHTML = `${Object.keys(_crCamps).length ? `<div class="rv-head cr-head-new">${_crPickerHtml()}</div>` : ''}${_crStartHtml()}<div class="rv-toast" hidden></div>${_crCreditHtml()}`;
+    panel.innerHTML = `${_crTabsHtml()}${_crDraft ? _crStartHtml() : ''}<div class="rv-toast" hidden></div>${_crCreditHtml()}`;
     _crWire(panel);
     return;
   }
@@ -368,14 +397,16 @@ function _crRender(panel) {
   const body = { map: _crCampHtml, heroes: _crHeroesHtml, items: _crItemsHtml, notes: _crNotesHtml }[_crTab](c, edit);
   const players = _crList(c.players);
   panel.innerHTML = `
+    ${_crTabsHtml()}
+    <div class="cr-open" style="--cr-m:${_crMapOf(c).color}">
     <div class="rv-head">
       <input class="rv-party" data-cr-text="name" value="${esc(c.name || '')}" placeholder="Party name" ${edit ? '' : 'readonly'} aria-label="Party name">
-      ${_crPickerHtml()}
     </div>
     <div class="cr-sub">Campaign ${_crMapOf(c).num}: ${esc(_crMapOf(c).name)}${c.gm ? ` · GM ${esc(c.gm)}` : ''}${players.length ? ` · ${players.map(esc).join(', ')}` : ''}</div>
     ${edit ? '' : `<div class="rv-ro">${_crMe() ? 'Only the people at its table can fill in this campaign.' : 'Log in to fill in the campaign.'}</div>`}
     <div class="rv-tabs" role="tablist">${tabs.map(([k, l]) => `<button type="button" class="rv-tab${_crTab === k ? ' on' : ''}" data-cr-tab="${k}">${l}</button>`).join('')}</div>
     <div class="rv-body${edit ? '' : ' rv-readonly'}">${body}</div>
+    </div>
     <div class="rv-toast" hidden></div>
     ${_crCreditHtml()}`;
   _crWire(panel);
@@ -448,7 +479,6 @@ function _crPeopleHtml(names, xAttr, addAttr, placeholder, edit) {
 function _crStartHtml() {
   const esc = _escapeHtml;
   const me = _crMe();
-  if (!_crDraft) _crDraft = { map: 'taldorei', name: '', heroes: [...CR_FIRST], gm: '', players: me ? [me] : [] };
   const d = _crDraft;
   const mine = Object.values(_crCamps || {}).filter(c => me && _crPeople(c).includes(me));
   const heroes = _crData.heroes.map(H => {
@@ -480,6 +510,7 @@ function _crCampHtml(c, edit) {
   let top = '';
   if (ph.end === 'won') top = `<div class="cr-end won">The campaign is won. &#127881;</div>`;
   else if (ph.end === 'lost') top = `<div class="cr-end lost">The campaign is lost: the fail counter ran out.</div>`;
+  else if (ph.end === 'stopped') top = `<div class="cr-end stopped">Stopped on ${esc(_crShortDate(c.stopped))}: it's all kept as it was.${edit ? '<button type="button" class="rv-btn rv-btn-sm" data-cr-resume>Pick it up again</button>' : ''}</div>`;
   else if (ph.reward) top = _crRewardHtml(c, ph.reward, edit);
   else if (ph.play) top = _crMissionHtml(c, ph.play, edit, true);
   else if (ph.shop) top = _crShopHtml(c, ph.shop, edit);
@@ -491,7 +522,7 @@ function _crCampHtml(c, edit) {
   }
   const mode = ph.play ? 'play' : ph.shop && !ph.end ? 'shop' : 'between';
   const fails = c.fails || 0;
-  const log = Object.values(c.log || {}).sort((a, b) => b.at - a.at).slice(0, 10);
+  const log = Object.entries(c.log || {}).sort((a, b) => b[1].at - a[1].at).slice(0, 10);
   const party = `<div class="rv-sec">The party</div>${_crPartyHtml(c, edit, mode)}`;
   // during a mission the party comes first: its hearts and XP are what's tapped
   return `${_crTableHtml(c, edit)}
@@ -507,8 +538,66 @@ function _crCampHtml(c, edit) {
       <span class="cr-coins-n"><b>${c.coins || 0}</b> coin${c.coins === 1 ? '' : 's'}</span>
       <button type="button" class="rv-dot" data-cr-coins="1" aria-label="One coin more">+</button>
     </div>
-    ${log.length ? `<div class="rv-sec">Lately</div><div class="cr-log">${log.map(l => { const m = _crMis(c, l.m); return `<div class="cr-log-row"><span>${esc(_crShortDate(l.at))}</span><span>${esc(m ? `${m.n} · ${m.place}` : l.m)}${l.gm ? `<i> · GM ${esc(l.gm)}</i>` : ''}</span><b class="${l.won ? 'won' : 'lost'}">${l.won ? 'won' : 'lost'}</b></div>`; }).join('')}</div>` : ''}`;
+    ${log.length ? `<div class="rv-sec">Lately</div><div class="cr-log">${log.map(([ts, l]) => { const m = _crMis(c, l.m); return `<div class="cr-log-row"><span>${esc(_crShortDate(l.at))}</span><span>${esc(m ? `${m.n} · ${m.place}` : l.m)}${l.gm ? `<i> · GM ${esc(l.gm)}</i>` : ''}</span><b class="${l.won ? 'won' : 'lost'}">${l.won ? 'won' : 'lost'}</b><span class="cr-log-acts">${_crLogActs(ts, l, edit)}</span></div>`; }).join('')}</div>` : ''}
+    ${edit && !c.status ? '<button type="button" class="rv-link cr-stop" data-cr-stop>Stop this campaign</button>' : ''}`;
 }
+// A mission's line: its play (BG Stats' QR code, and the pencil for whoever
+// may change it), or a button to log it.
+function _crLogActs(ts, l, edit) {
+  if (l.play) {
+    const i = _crPlayIdx(l.play);
+    if (i < 0) return '';
+    return (typeof bgsSendBtnHtml === 'function' ? bgsSendBtnHtml(CNCR_BGGID, i) : '')
+      + (typeof logPlayEditBtnHtml === 'function' ? logPlayEditBtnHtml(PLAY_HISTORY[CNCR_BGGID][i]) : '');
+  }
+  const signed = typeof acctMe === 'function' && acctMe();
+  return edit && signed ? `<button type="button" class="cr-mini" data-cr-logplay="${_escapeHtml(ts)}">Log the play</button>` : '';
+}
+const _crPlayIdx = (id) => (PLAY_HISTORY[CNCR_BGGID] || []).findIndex(e => e.mp === id);
+
+// ── A mission's play: logged in the app (js/log-play.js) and offered to BG Stats ──
+// Everyone at the table, the GM too (a co-operative game: the whole table
+// wins or loses together), the campaign and mission as Log a play writes them
+// ("Tal'Dorei／Mission 2A"), from when the mission was started.
+async function _crLogPlay(id, ts) {
+  const c = _crCamps[id], l = c && (c.log || {})[ts];
+  if (!l || l.play) return null;
+  if (typeof logPlaySave !== 'function' || !(typeof acctMe === 'function' && acctMe())) return { err: 'Sign in to have the mission logged as a play.' };
+  const m = _crMis(c, l.m);
+  const start = l.from && l.from < l.at && l.at - l.from < 12 * 3600e3 ? l.from : l.at;
+  const d = new Date(start), pad = (n) => String(n).padStart(2, '0');
+  const date = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const gm = l.gm || c.gm || '';
+  const names = [...new Set([gm, ..._crList(c.players)].filter(Boolean))];
+  if (!names.length && _crMe()) names.push(_crMe());
+  const heroes = CR_SLOTS.map(s => (c.heroes || {})[s]).filter(h => h && h.id).map(_crHeroName).join(', ');
+  const rec = {
+    bggId: CNCR_BGGID, date, t: `${date} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`,
+    sc: names.map(n => ({ n, w: !!l.won, ...(n === gm ? { r: 'GM' } : {}) })),
+    b: `${_crMapOf(c).name}／Mission ${m ? m.n : String(l.m).toUpperCase()}`,
+    c: `${c.name ? `${c.name}: ` : ''}${heroes}${m ? ` · ${m.title}` : ''}`,
+  };
+  const mins = start === l.from ? Math.round((l.at - l.from) / 60000) : 0;
+  if (mins >= 1) rec.d = mins;
+  try {
+    const r = await logPlaySave(rec);
+    await _crPatch({ [`log/${ts}/play`]: r.id }, id);
+    _crPlaysStale = true;
+    return r;
+  } catch (e) {
+    return { err: `The play wasn't logged: ${e.message || 'try again'}. The "Log the play" button on the mission's line tries again.` };
+  }
+}
+// After Won or Lost: the play logged, and BG Stats' QR code for it.
+async function _crAfterMission(id, ts) {
+  const r = await _crLogPlay(id, ts);
+  if (!r) return;
+  if (r.err) { _crToast(r.err); _crRedraw(); return; }
+  _crRedraw();
+  const i = _crPlayIdx(r.id);
+  if (i >= 0 && typeof openBgsShare === 'function') openBgsShare(CNCR_BGGID, i);
+}
+
 function _crShortDate(v) {
   if (!v) return '';
   const d = typeof v === 'number' ? new Date(v) : new Date(`${v}T12:00:00`);
@@ -886,6 +975,18 @@ async function _crClick(panel, ev) {
     t.parentElement.querySelectorAll('[data-cr-item-kind]').forEach(b => b.classList.toggle('on', b === t));
     return;
   }
+  if (ds.crCamp) {
+    // a campaign's tab: opens it, or closes it when it's the one open
+    const id = ds.crCamp;
+    if (id === '__new') {
+      const open = !_crId && _crDraft;
+      _crId = null;
+      _crDraft = open ? null : { map: 'taldorei', name: '', heroes: [...CR_FIRST], gm: '', players: _crMe() ? [_crMe()] : [] };
+    } else if (_crId === id) _crId = null;
+    else { _crId = id; _crDraft = null; _crHero = null; _crTab = 'map'; _crRw = null; }
+    _crRender(panel);
+    return;
+  }
   if (!_crId) return _crDraftClick(panel, t, ds);
   if (ds.crRwTime || ds.crRwPick || ds.crRwHero || ds.crRwKeep || ds.crRwFlag !== undefined) {
     // the reward as this phone fills it in, saved when it's taken
@@ -905,7 +1006,22 @@ async function _crClick(panel, ev) {
   const hero = (s) => c.heroes[s];
   const up = {};
   let note = '', ok = false;
-  if (ds.crPersonX) {
+  let after = null;   // a mission's line, whose play is logged once it's saved
+  if (ds.crStop !== undefined) {
+    if (!confirm('Stop this campaign? Everything stays as it is, under "Stopped and finished", and it can be picked up again any time.')) return;
+    up.status = 'stopped';
+    up.stopped = Date.now();
+    up.playing = null;
+    note = 'Stopped. Pick it up again from its tab any time.';
+    ok = true;
+  } else if (ds.crResume !== undefined) {
+    up.status = null;
+    up.stopped = null;
+  } else if (ds.crLogplay) {
+    t.disabled = true;
+    _crAfterMission(_crId, ds.crLogplay);
+    return;
+  } else if (ds.crPersonX) {
     const me = _crMe();
     if (ds.crPersonX === me && !confirm('Take yourself off this campaign? You won\'t be able to fill it in after that.')) return;
     up.players = _crList(c.players).filter(p => p !== ds.crPersonX);
@@ -927,6 +1043,7 @@ async function _crClick(panel, ev) {
     up.playing = m.k;
     up.next = m.k;
     up.split = null;
+    up.from = Date.now();   // when it began: the play's time and length
     const healed = [];
     for (const s of CR_SLOTS) {
       const h = hero(s);
@@ -937,13 +1054,15 @@ async function _crClick(panel, ev) {
     }
     note = `Mission ${m.n} on. ${healed.join('. ')}${healed.length ? '. ' : ''}Good luck!`;
     ok = true;
-  } else if (ds.crCancel !== undefined) up.playing = null;
+  } else if (ds.crCancel !== undefined) { up.playing = null; up.from = null; }
   else if (ds.crWon) {
     const m = _crMis(c, ds.crWon), d = _crRules(c, m.k);
     up[`done/${m.k}`] = _crToday();
     up.playing = null;
     up.next = null;
-    up[`log/${Date.now()}`] = { m: m.k, won: true, at: Date.now(), by: _crMe() || '', ...(c.gm ? { gm: c.gm } : {}) };
+    up.from = null;
+    after = String(Date.now());
+    up[`log/${after}`] = { m: m.k, won: true, at: Date.now(), by: _crMe() || '', ...(c.gm ? { gm: c.gm } : {}), ...(c.from ? { from: c.from } : {}) };
     if (_crFinale(c, m)) { up.status = 'won'; note = 'The campaign is won!'; }
     else if (d.reward || d.ask) { up.reward = m.k; _crRw = null; note = 'Mission won! Now the reward.'; }
     ok = true;
@@ -952,7 +1071,9 @@ async function _crClick(panel, ev) {
     const n = Math.min((c.fails || 0) + 1, CR_FAILS.length), f = CR_FAILS[n - 1];
     up.fails = n;
     up.playing = null;
-    up[`log/${Date.now()}`] = { m: m.k, won: false, at: Date.now(), by: _crMe() || '', ...(c.gm ? { gm: c.gm } : {}) };
+    up.from = null;
+    after = String(Date.now());
+    up[`log/${after}`] = { m: m.k, won: false, at: Date.now(), by: _crMe() || '', ...(c.gm ? { gm: c.gm } : {}), ...(c.from ? { from: c.from } : {}) };
     if (f.lost) up.status = 'lost';
     else {
       _crHeal(c, up, f.heal);
@@ -1072,9 +1193,11 @@ async function _crClick(panel, ev) {
     if (value) up.coins = (c.coins || 0) + value;
   }
   if (!Object.keys(up).length) return;
-  _crPatch(up);
+  const id = _crId;
+  const saved = _crPatch(up);
   _crRender(panel);
   if (note) _crToast(note, ok);
+  if (after) saved.then(() => _crAfterMission(id, after));
 }
 // The XP tokens a hero's waiting with, marked on their track.
 function _crSpend(c, s, up) {
@@ -1127,11 +1250,7 @@ async function _crDraftClick(panel, t, ds) {
 }
 
 function _crChange(panel, ev) {
-  const t = ev.target;
-  if (t.matches('[data-cr-camp]')) {
-    if (t.value === '__new') { _crId = null; _crDraft = null; } else { _crId = t.value; _crHero = null; }
-    _crRender(panel);
-  } else if (t.matches('[data-cr-who="gm"]')) _crWhoSet(panel, 'gm', t.value, true);
+  if (ev.target.matches('[data-cr-who="gm"]')) _crWhoSet(panel, 'gm', ev.target.value, true);
 }
 
 // Typing in the party name or the notes: saved a moment after you stop.

@@ -4,6 +4,7 @@ const GAME_PLAYER_NAME = '__GAME__';
 function _leaderboardRanksForPlay(sc, bggId, play) {
   if (!Array.isArray(sc) || sc.length < 1) return null;
   if (play && isNoResultPlay(play, bggId)) return null;   // nobody won or lost
+  sc = resultSeats(sc);   // a storyteller is in no ranking
   const isAuztralia = bggId && AUZTRALIA_BGG_IDS.has(Number(bggId));
   const winners = sc.filter(s => s && s.w === true);
   if (winners.length === 0) {

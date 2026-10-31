@@ -534,8 +534,9 @@ function showStatsView(playerName, visiting) {
       // Classify play: PvP = competitive multi-player game (>=2 players, mixed
       // win flags). Excludes solo games and coop (everyone won/lost together).
       const isSoloPlay = play.sc.length === 1;
-      const noResult    = isNoResultPlay(play, bggId);  // neither won nor lost
-      const allSameFlag = play.sc.every(s => !!s.w === !!play.sc[0].w);
+      const noResult    = isNoResultPlay(play, bggId, playerEntry);  // neither won nor lost (a storyteller too)
+      const rs          = resultSeats(play.sc);
+      const allSameFlag = rs.length > 0 && rs.every(s => !!s.w === !!rs[0].w);
       const isCoopPlay  = !isSoloPlay && !noResult && allSameFlag;
       const isPvP       = !isSoloPlay && !noResult && !isCoopPlay;
       if (isPvP) {
@@ -575,9 +576,10 @@ function showStatsView(playerName, visiting) {
   // together OR everyone lost together). A coop *win* is the all-won subset.
   // Plays with mixed flags (some won, some lost) are competitive (incl. team games).
   const coopPlays = recentPlays.filter(p => {
-    if (p.noResult || !p.allScores || p.allScores.length < 2) return false;
-    const first = !!p.allScores[0].w;
-    return p.allScores.every(s => !!s.w === first);
+    const rs = resultSeats(p.allScores);
+    if (p.noResult || rs.length < 2) return false;
+    const first = !!rs[0].w;
+    return rs.every(s => !!s.w === first);
   });
   const coopWins = coopPlays.filter(p => p.won).length;
   // Win rate ignores plays with no result (no win/loss to score).
@@ -667,7 +669,7 @@ function showStatsView(playerName, visiting) {
         if (!play || !Array.isArray(play.sc)) continue;
         const me = play.sc.find(s => s.n === loggedInPlayer);
         const them = play.sc.find(s => s.n === playerName);
-        if (!me || !them) continue;
+        if (!me || !them || isNoResultSeat(me) || isNoResultSeat(them)) continue;
         h2hPlays.push({ date: play.date, t: play.t, e: play.e, sc: play.sc });
       }
     }
@@ -680,7 +682,8 @@ function showStatsView(playerName, visiting) {
     for (const p of h2hPlays) {
       const me = p.sc.find(s => s.n === loggedInPlayer);
       const them = p.sc.find(s => s.n === playerName);
-      const allSame = p.sc.every(s => !!s.w === !!p.sc[0].w);
+      const rs = resultSeats(p.sc);
+      const allSame = rs.every(s => !!s.w === !!rs[0].w);
       if (allSame) continue; // coop / all-lost
       const meW = !!me.w, themW = !!them.w;
       if (meW && !themW) {

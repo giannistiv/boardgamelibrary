@@ -1164,6 +1164,7 @@
   .lp-close:hover{background:var(--card)}
   .lp-body{flex:1 1 auto;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:1.3rem 1.25rem 1.6rem;display:flex;flex-direction:column;gap:1.9rem}
   .lp-part{display:flex;flex-direction:column;gap:0.75rem;min-width:0}
+  .lp-part[hidden]{display:none}
   .lp-h{margin:0;font-size:0.72rem;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:var(--text-3)}
   .lp-hrow{display:flex;align-items:center;justify-content:space-between;gap:0.5rem}
   .lp-field{display:flex;flex-direction:column;gap:0.4rem;min-width:0}
@@ -1218,6 +1219,8 @@
   .lp-score{flex:1;min-width:0;min-height:46px;padding:0.5rem 0.8rem}
   .lp-win{flex:0 0 auto;min-width:7.2rem;min-height:46px;padding:0 1rem;border-radius:12px;border:1px solid var(--line-2);background:transparent;color:var(--text-3);font:inherit;font-size:0.92rem;font-weight:600;cursor:pointer;white-space:nowrap}
   .lp-win.on{background:var(--win-soft);border-color:var(--win);color:var(--win)}
+  .lp-st{min-width:0;padding:0 0.8rem}
+  .lp-st.on{background:var(--accent-soft);border-color:var(--accent-line);color:var(--accent)}
   .lp-x{flex:0 0 auto;width:40px;height:40px;margin:-0.3rem -0.35rem -0.3rem 0;border:none;border-radius:50%;background:transparent;color:var(--text-3);font-size:1.4rem;cursor:pointer;line-height:1}
   .lp-x:hover{background:var(--card-2)}
   .lp-role{min-height:44px;font-size:15px}
@@ -1472,8 +1475,21 @@
   .rv-credit a{color:var(--text-3)}
   /* ── Codenames: Critical Role campaign (js/cncr-campaign.js; the shell is Rove's .rv-*) ── */
   .cr-sub{font-size:0.74rem;color:var(--text-3);margin-top:0.3rem}
-  .cr-head-new{margin-bottom:0.6rem}
-  .cr-head-new .rv-pick{max-width:100%;flex:1}
+  /* the campaigns, as tabs: one opens when tapped */
+  .cr-camps{display:grid;grid-template-columns:repeat(auto-fill,minmax(13rem,1fr));gap:0.4rem}
+  .cr-camp{display:flex;flex-direction:column;gap:0.1rem;padding:0.55rem 0.7rem;border-radius:var(--r);border:1px solid var(--line-2);border-left:4px solid var(--cr-c,var(--line-3));background:var(--card-2);color:var(--text);font:inherit;text-align:left;cursor:pointer;min-width:0}
+  .cr-camp b{font-size:0.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .cr-camp span{font-size:0.7rem;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .cr-camp .cr-camp-who{color:var(--text-4)}
+  .cr-camp.on{background:var(--card-3);border-color:var(--cr-c,var(--accent));box-shadow:inset 0 0 0 1px var(--cr-c,var(--accent))}
+  .cr-camp.ended{opacity:0.7}
+  .cr-camp.ended.on{opacity:1}
+  .cr-camp.won span:nth-child(2){color:var(--win)}
+  .cr-camp-new{border-style:dashed;border-left-style:dashed}
+  .cr-camp-new b{color:var(--accent)}
+  .cr-camps-hint{margin-top:0.5rem}
+  .cr-open{margin-top:0.8rem;padding-top:0.8rem;border-top:2px solid var(--cr-m,var(--line-2))}
+  .cr-stop{margin-top:1.2rem}
   .rv-readonly .cr-chip,.rv-readonly .cr-pm-name{pointer-events:auto}
   .cr .rv-toast.ok{background:var(--win-soft);color:var(--win)}
   .cr-start .rv-sub{margin-top:1rem}
@@ -1602,6 +1618,7 @@
   .cr-end{padding:0.8rem;border-radius:var(--r);font-weight:700;text-align:center}
   .cr-end.won{background:var(--win-soft);color:var(--win)}
   .cr-end.lost{background:var(--loss-soft);color:var(--loss)}
+  .cr-end.stopped{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:0.6rem;background:var(--card-2);color:var(--text-2);font-weight:600}
   .cr-fails{display:flex;flex-direction:column;gap:0.3rem}
   .cr-fail{display:flex;align-items:center;gap:0.55rem;padding:0.35rem 0.2rem;border:0;background:none;color:var(--text-2);font:inherit;font-size:0.76rem;text-align:left;cursor:pointer}
   .cr-fail.on{color:var(--text)}
@@ -1611,7 +1628,9 @@
   .cr-coins-n{font-size:0.85rem;color:var(--text-2)}
   .cr-coins-n b{font-size:1.15rem;color:var(--text)}
   .cr-log{display:flex;flex-direction:column;gap:0.25rem;font-size:0.74rem}
-  .cr-log-row{display:grid;grid-template-columns:3.6rem minmax(0,1fr) auto;gap:0.5rem;color:var(--text-2)}
+  .cr-log-row{display:grid;grid-template-columns:3.6rem minmax(0,1fr) auto auto;align-items:center;gap:0.5rem;color:var(--text-2);min-height:1.9rem}
+  .cr-log-acts{display:flex;align-items:center;justify-content:flex-end}
+  .cr-log-acts .bgs-send,.cr-log-acts .lp-edit{margin-left:0.3rem}
   .cr-log-row .won{color:var(--win)}
   .cr-log-row .lost{color:var(--loss)}
   .cr-log-row i{font-style:normal;color:var(--text-3)}

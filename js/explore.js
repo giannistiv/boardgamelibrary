@@ -81,7 +81,7 @@ function showGamesView() {
         if (HIDDEN_PLAYERS.has(s.n)) continue;
         if (!playerStats[s.n]) playerStats[s.n] = { plays: 0, wins: 0, decided: 0, games: new Set() };
         playerStats[s.n].plays++;
-        if (decided) playerStats[s.n].decided++;
+        if (decided && !isNoResultSeat(s)) playerStats[s.n].decided++;
         if (s.w) playerStats[s.n].wins++;
         playerStats[s.n].games.add(Number(bggId));
       }

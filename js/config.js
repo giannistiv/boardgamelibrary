@@ -98,10 +98,26 @@ function sameGameIds(bggId) {
 function isNoResultGame(bggId) {
   return NO_RESULT_GAMES.has(Number(bggId));
 }
+// A seat that plays but neither wins nor loses: Blood on the Clocktower's
+// Storyteller, a moderator or narrator running the game for the others. BG
+// Stats has no mark for it, so the role says it (written there, or picked in
+// Log a play). It counts as a play for them, never as a result, and is left
+// out when the others' results are read (co-op or not, ratings, rivals).
+const NO_RESULT_ROLE = /^(storyteller|moderator|narrator)$/i;
+function isNoResultSeat(s) {
+  return !!(s && s.r && NO_RESULT_ROLE.test(String(s.r).trim()));
+}
+// Games with such a seat: Log a play offers it on each player.
+const STORYTELLER_GAMES = new Map([[240980, 'Storyteller']]);   // Blood on the Clocktower
+// The seats that are in a play's result: everyone but those.
+function resultSeats(sc) {
+  return (sc || []).filter(s => s && !isNoResultSeat(s));
+}
 // Neither a win nor a loss: a no-result game, or a play marked no result
-// (only while nobody has a win in it).
-function isNoResultPlay(play, bggId) {
+// (only while nobody has a win in it); for one seat, also a storyteller's.
+function isNoResultPlay(play, bggId, seat) {
   if (isNoResultGame(bggId)) return true;
+  if (seat && isNoResultSeat(seat)) return true;
   return !!(play && play.nr && !(play.sc || []).some(s => s && s.w));
 }
 // Campaign / legacy games played across a fixed number of stages. The current

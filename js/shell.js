@@ -675,7 +675,7 @@ function _gameMyPlays(plays, bggId) {
   const mine = plays.filter(p => p.sc.some(isMe));
   if (!mine.length) return null;
   // Plays with no result count as plays, not as wins or losses.
-  const decided = mine.filter(p => !isNoResultPlay(p, bggId)).length;
+  const decided = mine.filter(p => !isNoResultPlay(p, bggId, p.sc.find(isMe))).length;
   return { mine, decided, wins: mine.filter(p => p.sc.some(s => isMe(s) && s.w)).length };
 }
 
@@ -1019,7 +1019,7 @@ function getAllPlayers() {
       for (const s of play.sc) {
         if (!playerMap[s.n]) playerMap[s.n] = { plays: 0, wins: 0, decided: 0, games: new Set() };
         playerMap[s.n].plays++;
-        if (decided) playerMap[s.n].decided++;
+        if (decided && !isNoResultSeat(s)) playerMap[s.n].decided++;
         if (s.w) playerMap[s.n].wins++;
         playerMap[s.n].games.add(Number(bggId));
       }

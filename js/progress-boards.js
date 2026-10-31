@@ -80,7 +80,7 @@ const _pbWon = (p) => (p.sc || []).some(s => s && s.w);
 function _pbCoop(plays) {
   const multi = plays.filter(p => (p.sc || []).length > 1);
   if (!multi.length) return true;
-  return multi.filter(p => p.sc.every(s => !!s.w === !!p.sc[0].w)).length >= multi.length * 0.8;
+  return multi.filter(p => { const rs = resultSeats(p.sc); return rs.every(s => !!s.w === !!rs[0].w); }).length >= multi.length * 0.8;
 }
 function _pbOrder(plays) {
   if (typeof byPlayOrder === "function") return plays.slice().sort(byPlayOrder);

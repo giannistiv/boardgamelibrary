@@ -463,6 +463,7 @@ function _lpRenderPlayers() {
   if (!box) return;
   const esc = _escapeHtml;
   const lost = _lp.gameWon && _lp.sc.length && !_lp.sc.some(p => p.w);
+  const st = STORYTELLER_GAMES.get(Number(_lp.bggId));   // a seat that neither wins nor loses
   box.innerHTML = (_lp.sc.map((p, i) => `<div class="lp-prow${p.w ? ' won' : ''}" data-i="${i}">
       <div class="lp-pmain">
         <span class="lp-avatar" aria-hidden="true">${avatarInner(p.n)}</span>
@@ -471,7 +472,8 @@ function _lpRenderPlayers() {
       </div>
       <div class="lp-pscore">
         <input class="lp-input lp-score" value="${esc(p.s)}" placeholder="Score" maxlength="40" inputmode="decimal" aria-label="${esc(p.n)}'s score">
-        <button type="button" class="lp-win${p.w ? ' on' : ''}" data-lp-win="${i}" aria-pressed="${p.w}">&#9733; ${p.w ? 'Won' : 'Winner?'}</button>
+        ${st && isNoResultSeat(p) ? '' : `<button type="button" class="lp-win${p.w ? ' on' : ''}" data-lp-win="${i}" aria-pressed="${p.w}">&#9733; ${p.w ? 'Won' : 'Winner?'}</button>`}
+        ${st ? `<button type="button" class="lp-win lp-st${isNoResultSeat(p) ? ' on' : ''}" data-lp-st="${i}" aria-pressed="${isNoResultSeat(p)}" title="Plays, but neither wins nor loses">${esc(st)}</button>` : ''}
       </div>
       ${_lp.roles ? `<input class="lp-input lp-role" value="${esc(p.r || '')}" placeholder="Character, faction, colour…" maxlength="120" aria-label="${esc(p.n)}'s character">` : ''}
     </div>`).join('') || '<div class="lp-hint">Add the players below.</div>')
@@ -503,7 +505,7 @@ function _lpSay(text) {
 async function _lpClick(e) {
   const ov = document.getElementById('lp-overlay');
   if (e.target === ov) { _lpClose(); return; }
-  const b = e.target.closest('[data-lp], [data-lp-game], [data-lp-win], [data-lp-del]');
+  const b = e.target.closest('[data-lp], [data-lp-game], [data-lp-win], [data-lp-st], [data-lp-del]');
   if (!b) return;
   const what = b.dataset.lp;
   if (what === 'close') { _lpClose(); return; }
@@ -513,7 +515,7 @@ async function _lpClick(e) {
   if (what === 'addp') { _lpAddPlayer(); return; }
   if (what === 'allwon' || what === 'alllost') {
     _lpSyncPlayers();
-    _lp.sc.forEach(p => { p.w = what === 'allwon'; });
+    _lp.sc.forEach(p => { p.w = what === 'allwon' && !isNoResultSeat(p); });
     _lp.gameWon = what === 'alllost';
     _lpRenderPlayers();
     return;
@@ -534,6 +536,17 @@ async function _lpClick(e) {
     const p = _lp.sc[Number(b.dataset.lpWin)];
     p.w = !p.w;
     _lp.gameWon = false;
+    _lpRenderPlayers();
+    return;
+  }
+  if (b.dataset.lpSt) {
+    // the Storyteller: in the play, out of its result (kept as the role, as BG Stats has it)
+    _lpSyncPlayers();
+    const p = _lp.sc[Number(b.dataset.lpSt)];
+    if (isNoResultSeat(p)) p.r = '';
+    else { p.r = STORYTELLER_GAMES.get(Number(_lp.bggId)); p.w = false; _lp.roles = true; }
+    const rb = document.querySelector('#lp-overlay [data-lp="roles"]');
+    if (rb) rb.textContent = _lp.roles ? 'Hide characters' : '+ Characters';
     _lpRenderPlayers();
     return;
   }
@@ -595,6 +608,28 @@ async function _lpSave() {
     _lpSay(err.message || 'The save failed. Try again.');
   }
 }
+// A play saved from elsewhere in the app, without the form (a campaign's
+// mission, js/cncr-campaign.js): saved, counted and announced like one from
+// the form. rec: { bggId, date, t, sc: [{n, w, s?, r?}], d?, l?, b?, c? }.
+// Resolves to { id, pending } (pending: kept on the phone, no signal).
+async function logPlaySave(rec) {
+  const a = typeof acctMe === 'function' ? acctMe() : null;
+  if (!a) throw new Error('Sign in to have the play logged.');
+  rec = { ...rec, sc: rec.sc.map(p => ({ ...p, n: typeof _origCanon === 'function' ? _origCanon(p.n) : p.n })), by: a.uid, at: Date.now() };
+  try {
+    if (typeof ensureKnownGame === 'function') await ensureKnownGame(rec.bggId, null);
+    const id = (await acctWrite('plays', 'POST', rec)).name;
+    manualPlaysCache[id] = rec;
+    _lpMerge(id, rec);
+    _sortPlayHistory();
+    const moments = _lpMoments(id, rec);
+    if (typeof notifyPlayLogged === 'function') notifyPlayLogged(id, (findGameByBggId(rec.bggId) || {}).name || '', moments[0] && moments[0].text);
+    return { id, moments };
+  } catch (err) {
+    if (!_lpOffline(err)) throw err;
+    return { id: _lpKeep(rec, null, null, true), pending: true };
+  }
+}
 // What a play just saved did: a record, a first win, a streak… (js/play-moments.js)
 function _lpMoments(id, rec) {
   if (typeof playMoments !== 'function') return [];
@@ -613,12 +648,13 @@ function _lpOffline(err) {
   return (typeof navigator !== 'undefined' && navigator.onLine === false)
     || /network|failed to fetch|load failed|offline|internet/i.test(String((err && (err.code || err.message)) || ''));
 }
-function _lpKeep(rec, id, game) {
+function _lpKeep(rec, id, game, quiet) {
   const key = id || `local-${Date.now()}`;
   _lpQueueSave(_lpQueue().filter(x => x.key !== key).concat([{ key, put: !!id && !id.startsWith('local-'), rec, game: game || null }]));
   manualPlaysCache[key] = { ...rec, pending: true };
   _lpMerge(key, manualPlaysCache[key]);
   _sortPlayHistory();
+  if (quiet) return key;   // saved from elsewhere (logPlaySave): that says it
   _lpClose();
   _lpRefresh(rec.bggId);
   if (typeof _acctToast === 'function') _acctToast('No signal, so the play is kept on this phone.\nIt goes up by itself when you\'re back online.', 7000);

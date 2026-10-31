@@ -50,7 +50,7 @@ function computeWrapped(playerName, year) {
     const est = playTimeEstimate(p.orig);   // the same estimate as the profile's Time at the table
     const mins = est ? est.min : _estPlayMinutes(g);
     // A play with no result is neither a win nor a loss.
-    const noResult = isNoResultPlay(p.orig, p.bggId);
+    const noResult = isNoResultPlay(p.orig, p.bggId, p.me);   // a storyteller's too
     if (p.me.w) wins++;
     if (!noResult) { decided++; gameDecided[p.bggId] = (gameDecided[p.bggId] || 0) + 1; }
     minutes += mins;
@@ -81,7 +81,8 @@ function computeWrapped(playerName, year) {
     if (tableSize > maxTable) { maxTable = tableSize; biggestTablePlay = { game: g, bggId: p.bggId, date: p.date, size: tableSize }; }
     const isSolo = p.sc.length === 1;
     if (isSolo) solo++;
-    const allSame = p.sc.every(s => !!s.w === !!p.sc[0].w);
+    const rs = resultSeats(p.sc);
+    const allSame = rs.every(s => !!s.w === !!rs[0].w);
     // (a competitive game's play marked no result stays competitive)
     const isCoop = !isSolo && allSame && !(noResult && !isNoResultGame(p.bggId));
     if (isCoop) { coop++; if (p.me.w) coopWins++; if (!noResult) coopDecided++; }
@@ -93,7 +94,7 @@ function computeWrapped(playerName, year) {
       if (!isOwner && isOwnerCo) continue; // exclude the owner from others' crew
       comp[s.n] = (comp[s.n] || 0) + 1;
       compMin[s.n] = (compMin[s.n] || 0) + mins;
-      if (isPvP && !noResult) {
+      if (isPvP && !noResult && !isNoResultSeat(s)) {
         const r = rivalStats[s.n] || (rivalStats[s.n] = { games: 0, myWins: 0, theirWins: 0 });
         r.games++; if (p.me.w) r.myWins++; if (s.w) r.theirWins++;
       }

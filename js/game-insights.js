@@ -23,9 +23,10 @@ function buildRolesHtml(game, plays) {
         any = true;
         const r = tags.get(t) || { name: t, plays: 0, wins: 0, dec: 0, mine: 0, myWins: 0, myDec: 0 };
         r.plays++;
-        r.dec += dec;
+        const d = isNoResultSeat(s) ? 0 : dec;   // the Storyteller neither wins nor loses
+        r.dec += d;
         if (s.w) r.wins++;
-        if (s.n === me) { r.mine++; r.myDec += dec; if (s.w) r.myWins++; }
+        if (s.n === me) { r.mine++; r.myDec += d; if (s.w) r.myWins++; }
         tags.set(t, r);
       }
     }

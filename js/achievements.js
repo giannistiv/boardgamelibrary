@@ -174,12 +174,13 @@ function computeAchievements(playerName) {
   const globalStreaks = {};
   for (const p of allPlays) {
     const isSolo = p.sc.length === 1;
-    const allSame = p.sc.every(s => !!s.w === !!p.sc[0].w);
+    const rs = resultSeats(p.sc);   // a storyteller has no streak to keep or break
+    const allSame = rs.every(s => !!s.w === !!rs[0].w);
     const isCoop = !isSolo && allSame;
     if (!isSolo && !isCoop) {
-      const me = p.sc.find(s => s.n === playerName);
+      const me = rs.find(s => s.n === playerName);
       if (me && me.w) {
-        for (const s of p.sc) {
+        for (const s of rs) {
           if (!s || s.n === playerName) continue;
           if ((globalStreaks[s.n] || 0) >= 3) {
             mark('streak-breaker', p.date);
@@ -188,7 +189,7 @@ function computeAchievements(playerName) {
         }
       }
       // Update streaks for everyone in this play.
-      for (const s of p.sc) {
+      for (const s of rs) {
         if (!s || !s.n) continue;
         if (s.w) globalStreaks[s.n] = (globalStreaks[s.n] || 0) + 1;
         else globalStreaks[s.n] = 0;
@@ -232,12 +233,14 @@ function computeAchievements(playerName) {
 
     const meWon = !!p.me.w;
     const isSolo = p.sc.length === 1;
-    const allSame = p.sc.every(s => !!s.w === !!p.sc[0].w);
+    const rs = resultSeats(p.sc);
+    const allSame = rs.every(s => !!s.w === !!rs[0].w);
     const isCoop = !isSolo && allSame;
+    const meOut = isNoResultSeat(p.me);   // the storyteller: neither won nor lost
 
     if (meWon) totalWins++;
     if (isCoop && meWon) coopWins++;
-    if (isCoop && !meWon && !isNoResultPlay(p.orig, p.bggId)) mark('tragic-hero', p.date);
+    if (isCoop && !meWon && !isNoResultPlay(p.orig, p.bggId, p.me)) mark('tragic-hero', p.date);
 
     if (!perGameWR[p.bggId]) perGameWR[p.bggId] = { plays: 0, wins: 0 };
     perGameWR[p.bggId].plays++;
@@ -252,7 +255,7 @@ function computeAchievements(playerName) {
     }
 
     // Competitive plays drive streaks + the Stiv Slayer marker.
-    if (!isCoop && !isSolo) {
+    if (!isCoop && !isSolo && !meOut) {
       if (meWon) {
         if (curLossStreak >= 5) mark('comeback-kid', p.date);
         curStreak++;

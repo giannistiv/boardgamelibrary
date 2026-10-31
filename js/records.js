@@ -46,9 +46,10 @@ function _recTile(icon, label, value, sub, title) {
 function _recIsCoop(game, plays) {
   let teamWins = 0;
   for (const p of plays) {
-    const w = p.sc.filter(s => s.w).length;
-    if (w && w < p.sc.length) return false;
-    if (w && p.sc.length > 1) teamWins++;
+    const rs = resultSeats(p.sc);
+    const w = rs.filter(s => s.w).length;
+    if (w && w < rs.length) return false;
+    if (w && rs.length > 1) teamWins++;
   }
   return teamWins > 0 || (Array.isArray(game.categories) && game.categories.includes('Co-op'));
 }
@@ -158,7 +159,7 @@ function buildGameRecordsHtml(game, plays) {
     const seqs = new Map();
     for (const p of asc) {
       if (!p.sc.some(s => s.w)) continue;
-      for (const s of named(p)) {
+      for (const s of named(p).filter(x => !isNoResultSeat(x))) {
         if (!seqs.has(s.n)) seqs.set(s.n, []);
         seqs.get(s.n).push(!!s.w);
       }

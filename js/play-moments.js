@@ -64,7 +64,7 @@ function playMoments(bggId, entry) {
     let k = 0;
     for (let i = order.indexOf(entry); i >= 0; i--) {
       const s = order[i].sc.find(x => x.n === n);
-      if (!s) continue;
+      if (!s || isNoResultSeat(s)) continue;   // a game told as the Storyteller breaks nothing
       if (s.w) k++; else break;
     }
     if (k >= 3) (streaks[k] = streaks[k] || []).push(n);
