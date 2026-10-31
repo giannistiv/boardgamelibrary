@@ -134,10 +134,10 @@ function scenarioPicker(bggId) {
     ] };
   }
   if (typeof CNCR_BGGID !== 'undefined' && id === CNCR_BGGID) {
-    // "Tal'Dorei／Mission 2a": the campaign's map and where on it (js/cncr-campaign.js)
+    // "Tal'Dorei／Mission 2A": the campaign's map and where on it (js/cncr-campaign.js)
     return { fields: [
       { key: 'camp', label: 'Campaign', options: () => CR_MAPS.map(m => [m.name, `${m.num} · ${m.name}`]) },
-      { key: 'm', label: 'Mission', options: (vals) => (CR_MAPS.find(m => m.name === vals.camp) || { missions: [] }).missions.map(x => [`Mission ${x.n}`, `${x.n} · ${x.place}`]) },
+      { key: 'm', label: 'Mission', options: (vals) => (CR_MAPS.find(m => m.name === vals.camp) || { missions: [] }).missions.map(x => [`Mission ${x.n}`, `${x.n} · ${x.place}: ${x.title}`]) },
     ] };
   }
   if (id === SCEN_TAKE_TIME) {
