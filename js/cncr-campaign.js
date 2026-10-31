@@ -202,6 +202,7 @@ function _crUnfollow() {
   _crESid = null;
 }
 document.addEventListener('visibilitychange', () => { if (document.hidden) _crUnfollow(); else if (_crShown()) _crFollow(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && _crZoom && _crPanel && _crPanel.isConnected) { e.stopPropagation(); _crZoom = null; _crRender(_crPanel); } }, true);
 
 function _crApply(id, kind, path, data) {
   const before = JSON.stringify(_crCamps[id] || null);
@@ -384,6 +385,10 @@ function _crRender(panel) {
   const esc = _escapeHtml;
   _crPanel = panel;
   _crLate = false;
+  // the artwork open full screen stays where it was scrolled to
+  const zw = panel.querySelector('.cr-artwrap.zoom');
+  const zs = zw ? [zw.scrollLeft, zw.scrollTop] : null;
+  queueMicrotask(() => { const z = zs && panel.querySelector('.cr-artwrap.zoom'); if (z) { z.scrollLeft = zs[0]; z.scrollTop = zs[1]; } });
   const c = _crId && _crCamps[_crId];
   if (!c) {
     _crUnfollow();
@@ -812,31 +817,52 @@ function _crPickBtns(s, i, S) {
     <button type="button" class="cr-mini" data-cr-pick="${s}|${i}|M">&#11041; Roll modifier</button>`;
 }
 
+// ── The map: CGE's printable one, marked as the party would mark it ──
+// Missions crossed off, the road taken drawn on it, the mission ahead
+// circled, the shops used, the fail counter and the treasure. A tap on a
+// mission works like on the paper map's list: choose the road, take one off.
+// Where each circle is comes from the PDF (data/cncr.js art).
+const CR_ART = 'images/cncr/';
+let _crZoom = null;          // the artwork open full screen: 'map' | 'sheet'
+const _crBox = (b) => `left:${(b[0] * 100).toFixed(2)}%;top:${(b[1] * 100).toFixed(2)}%;width:${(b[2] * 100).toFixed(2)}%;height:${(b[3] * 100).toFixed(2)}%`;
+const _crCtr = (b) => [b[0] * 100 + b[2] * 50, b[1] * 100 + b[3] * 50];
+function _crArtWrap(kind, A, alt, inner) {
+  const zoom = _crZoom === kind;
+  return `<div class="cr-artwrap${zoom ? ' zoom' : ''}" data-cr-artwrap="${kind}">
+    <div class="cr-art" style="aspect-ratio:${A.w}/${A.h}">
+      <img src="${CR_ART}${A.img}" alt="${_escapeHtml(alt)}" draggable="false">
+      ${inner}
+    </div>
+    <button type="button" class="cr-zoom" data-cr-zoom="${kind}" aria-label="${zoom ? 'Close' : 'Full screen'}">${zoom ? '&times;' : '&#10530; Full screen'}</button>
+  </div>`;
+}
 function _crRouteHtml(c) {
   const esc = _escapeHtml;
   const map = _crMapOf(c);
+  const A = _crData.art.maps[map.key];
   const st = _crMissionStates(c);
   const done = c.done || {};
   const ph = _crPhase(c);
   const cur = ph.play || (ph.next && ph.next.m);
-  const chip = (m) => {
-    const s = st[m.k];
-    const isNext = cur && cur.k === m.k;
-    return `<button type="button" class="cr-mis cr-${s}${isNext ? ' next' : ''}${m.lock ? ' cr-lockd' : ''}" data-cr-mis="${m.k}" ${s === 'later' || s === 'closed' ? 'aria-disabled="true"' : ''}${s === 'locked' ? ` title="${esc(CR_LOCKS[m.lock])}"` : ''}>
-      <span class="cr-mis-n">${esc(m.n)}${m.boss ? ' <i aria-label="boss fight">&#9760;</i>' : ''}${m.hard ? ' <i aria-label="extremely difficult">!</i>' : ''}</span><span class="cr-mis-place">${esc(m.place)}</span>
-      <span class="cr-mis-st">${s === 'done' ? `&#10003; ${esc(_crShortDate(done[m.k]))}` : s === 'closed' ? 'other road' : s === 'locked' ? '&#128274; locked' : isNext ? (ph.play ? 'playing' : 'next') : s === 'open' ? 'open' : ''}</span>
-    </button>`;
-  };
-  const stages = [...new Set(map.missions.map(m => m.stage))].sort((a, b) => a - b);
-  const shopAt = (s) => map.shops.filter(x => x.before === s).map(x => `<button type="button" class="cr-shop${(c.shops || {})[x.k] ? ' on' : ''}" data-cr-shop="${x.k}"><span class="rv-check">${(c.shops || {})[x.k] ? '&#10003;' : ''}</span>Shop: ${esc(x.at)}</button>`).join('');
-  const route = stages.map(s => {
-    const ms = map.missions.filter(m => m.stage === s);
-    const branches = [...new Set(ms.map(m => m.branch))];
-    return `${shopAt(s)}<div class="cr-stage">${branches.map((b, i) => `${i ? '<span class="cr-or">or</span>' : ''}<div class="cr-branch">${ms.filter(m => m.branch === b).map(chip).join('')}</div>`).join('')}</div>`;
-  }).join('<div class="cr-step" aria-hidden="true"></div>');
+  // the road taken, mission by mission, and on to the one ahead
+  const taken = map.missions.filter(m => done[m.k]).sort((x, y) => x.stage - y.stage || x.part - y.part || String(done[x.k]).localeCompare(String(done[y.k])));
+  const pts = taken.map(m => _crCtr(A.m[m.k]));
+  const ahead = cur && !c.status && A.m[cur.k] ? _crCtr(A.m[cur.k]) : null;
+  const svg = `<svg class="cr-roads" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+      ${pts.length > 1 ? `<polyline points="${pts.map(p => p.join(',')).join(' ')}" vector-effect="non-scaling-stroke"/>` : ''}
+      ${pts.length && ahead ? `<line class="ahead" x1="${pts[pts.length - 1][0]}" y1="${pts[pts.length - 1][1]}" x2="${ahead[0]}" y2="${ahead[1]}" vector-effect="non-scaling-stroke"/>` : ''}
+    </svg>`;
+  const pins = map.missions.map(m => {
+    const s = st[m.k], isNext = cur && cur.k === m.k && !c.status;
+    const say = s === 'done' ? `done ${_crShortDate(done[m.k])}` : s === 'closed' ? 'the other road' : s === 'locked' ? CR_LOCKS[m.lock] : isNext ? (ph.play ? 'playing now' : 'next') : s === 'open' ? 'open: tap to go there' : 'still ahead';
+    return `<button type="button" class="cr-pin cr-${s}${isNext ? ' next' : ''}" style="${_crBox(A.m[m.k])}" data-cr-mis="${m.k}" title="${esc(`${m.n} ${m.place}: ${m.title} (${say})`)}" aria-label="${esc(`Mission ${m.n}, ${m.place}: ${say}`)}">${s === 'done' ? '&#10003;' : s === 'locked' ? '?' : ''}</button>`;
+  }).join('');
+  const shops = map.shops.map(x => `<button type="button" class="cr-pin cr-pin-shop${(c.shops || {})[x.k] ? ' on' : ''}" style="${_crBox(A.shops[x.k])}" data-cr-shop="${x.k}" title="${esc(`Shop: ${x.at}`)}" aria-label="${esc(`Shop at ${x.at}`)}">${(c.shops || {})[x.k] ? '&#10003;' : ''}</button>`).join('');
+  const fails = A.fails.map((b, i) => `<button type="button" class="cr-pin cr-pin-fail${i < (c.fails || 0) ? ' on' : ''}" style="${_crBox(b)}" data-cr-fail="${i + 1}" aria-label="Fail counter box ${i + 1}">${i < (c.fails || 0) ? '&#10007;' : ''}</button>`).join('');
+  const coins = `<span class="cr-pin-coins" style="${_crBox(A.treasure)}"><b>${c.coins || 0}</b></span>`;
   const locked = map.missions.filter(m => st[m.k] === 'locked');
-  return `<div class="cr-route">${route}</div>
-    ${locked.map(m => `<div class="rv-hint">&#128274; ${esc(m.n)} ${esc(m.place)}: ${esc(CR_LOCKS[m.lock])}</div>`).join('')}`;
+  return `${_crArtWrap('map', A, `The ${map.name} map`, svg + pins + shops + fails + coins)}
+    ${locked.map(m => `<div class="rv-hint">? ${esc(m.n)} ${esc(m.place)}: ${esc(CR_LOCKS[m.lock])}</div>`).join('')}`;
 }
 
 // ── Heroes: one sheet each ──
@@ -855,31 +881,64 @@ function _crHeroesHtml(c, edit) {
   return `<div class="cr-chips">${chips}</div>${_crHero ? _crSheetHtml(c, _crHero, edit) : ''}`;
 }
 
+// A hero's sheet: CGE's printable one, marked as the party marks the paper.
+// The roll modifier ringed (the old ones crossed out), a token on each heart
+// (red, or flipped when lost), the XP boxes filled in, FCG's Stress tokens,
+// Nott's 1 and 20 crossed out, the items in their slots, and the abilities
+// still folded away veiled. Tap a heart, a box or a token to change it. Under
+// it, what the paper can't say: the XP count, the choices to make, the text.
 function _crSheetHtml(c, slot, edit) {
   const esc = _escapeHtml;
   const h = (c.heroes || {})[slot] || {};
   const H = _crHeroDef(h.id);
   if (!H) return '';
   const S = _crHeroState(h, H);
+  const P = _crData.art.heroes[H.id];
   const color = (S.veth && H.altColor) || H.color;
-
-  const mods = H.mods.map((v, i) => `<span class="cr-mod${i === S.mods - 1 ? ' cur' : i < S.mods - 1 ? ' past' : ' locked'}">${_crSigned(v)}</span>`).join('');
-  const held = Object.entries(c.items || {}).filter(([, it]) => it && it.on === slot);
+  const held = Object.entries(c.items || {}).filter(([, it]) => it && it.on === slot).map(([, it]) => it);
   const outs = [...new Set([...(CR_OUT_MAP[_crMapOf(c).key] || []), ...(h.out ? [h.out] : [])])];
-
-  // the XP track, row by row as on the sheet
-  const glyph = (b) => ({ M: '&#11041;', H: '&#9829;', S: '&#9635;', T: '&#9728;', C: '<i>&#9829;</i><i>&#11041;</i>', X: '<i>&#9728;</i><i>&#11041;</i>' })[b.got] || (/[123]/.test(b.got) ? b.got : '');
-  let i = 0;
-  const rows = H.track.split('|').map(row => `<div class="cr-xp-row">${[...row].map(() => {
-    const b = S.boxes[i], at = i++;
-    const up = b.s !== '.';
-    const ask = S.pending.includes(at);
-    return `<button type="button" class="cr-xp${up ? ' up' : ''}${b.on ? ' on' : ''}${ask ? ' ask' : ''}${/[123]/.test(b.s) ? ' ab' : ''}" data-cr-xp="${slot}|${at}" title="XP box ${at + 1}">${glyph(b)}</button>`;
-  }).join('')}</div>`).join('');
-  const upcoming = S.boxes.findIndex((b, k) => k >= S.xp && b.s !== '.');
-  const what = (s) => /[123]/.test(s) ? `ability ${s}` : { M: 'a better roll modifier', H: 'a heart', S: 'an item slot', T: 'a Stress token', C: 'a heart or a roll modifier', X: 'a Stress token or a roll modifier' }[s];
+  const glyph = { M: '&#11041;', H: '&#9829;', T: '&#9728;' };
   const ask = S.pending[0];
 
+  // ── marks on the sheet ──
+  const mods = P.mods.map((b, i) => i < S.mods ? `<span class="cr-o-mod${i ? '' : ' first'}${i === S.mods - 1 ? ' cur' : ' past'}" style="${_crBox(b)}"></span>` : '').join('');
+  const hearts = P.hearts.map((b, i) => {
+    if (i >= S.hearts) return '';
+    const lost = i >= S.hearts - S.dmg;
+    return `<button type="button" class="cr-o-heart${lost ? ' lost' : ''}${i >= H.hearts[0] ? ' earned' : ''}" style="${_crBox(b)}" data-cr-dmg="${slot}|${lost ? -1 : 1}" aria-label="${lost ? 'Heal this heart' : 'Lose this heart'}"><span>&#9829;</span></button>`;
+  }).join('');
+  const xp = P.xp.map((b, i) => {
+    const x = S.boxes[i];
+    const chosen = x.on && (x.s === 'C' || x.s === 'X') && glyph[x.got];
+    return `<button type="button" class="cr-o-xp${x.on ? ' on' : ''}${S.pending.includes(i) ? ' ask' : ''}${i === S.xp ? ' nxt' : ''}" style="${_crBox(b)}" data-cr-xp="${slot}|${i}" aria-label="XP box ${i + 1}">${chosen ? `<i>${chosen}</i>` : ''}</button>`;
+  }).join('');
+  const stress = (P.stress || []).map((b, k) => {
+    if (k >= S.stress) return '';
+    const on = k < (h.on || 0);
+    return `<button type="button" class="cr-o-token${on ? ' charged' : ''}${k ? '' : ' printed'}" style="${_crBox(b)}" data-cr-stress="${slot}|${on ? -1 : 1}" aria-label="${on ? 'Charged: tap to calm' : 'Calm: tap to charge'}">${on ? '&#9889;' : k ? '&#9728;' : ''}</button>`;
+  }).join('');
+  const curse = (P.curse || []).map((b, k) => {
+    const n = k ? '20' : '1';
+    return `<button type="button" class="cr-o-curse${h['curse' + n] ? ' on' : ''}" style="${_crBox(b)}" data-cr-curse="${slot}|${n}" aria-label="${h['curse' + n] ? `Un-cross ${n}` : `Cross out ${n}`}"></button>`;
+  }).join('');
+  const veth = S.veth && P.nimble ? `<span class="cr-o-cross" style="${_crBox(P.nimble)}"></span><span class="cr-o-glow" style="${_crBox(P.lucky)}"></span>
+      <span class="cr-o-cross thin" style="${_crBox(P.names[0])}"></span><span class="cr-o-glow" style="${_crBox(P.names[1])}"></span>` : '';
+  const slots = P.slots.map((b, k) => {
+    if (k >= S.slots) return '';
+    const it = held[k];
+    return `<span class="cr-o-slot${k ? ' earned' : ''}" style="${_crBox(b)}">${it ? `<em class="${it.kind === 'once' ? 'once' : ''}">${esc(it.name)}</em>` : ''}</span>`;
+  }).join('');
+  const tabs = P.tabs.map((b, k) => {
+    if (S.abil >= k + 1) return '';
+    const at = S.boxes.findIndex(x => x.s === String(k + 1));
+    return `<div class="cr-o-veil" style="${_crBox(b)}"><span>&#128274; XP box ${at + 1}${at >= S.xp ? ` &middot; ${at + 1 - S.xp} more XP` : ''}</span></div>`;
+  }).join('');
+  const out = h.out ? `<div class="cr-o-out"><span>${esc(CR_OUT[h.out])}</span></div>` : '';
+  const sheet = _crArtWrap('sheet', P, `${H.name}'s hero sheet`, mods + hearts + xp + stress + curse + veth + slots + tabs + out);
+
+  // ── what the paper can't say ──
+  const upcoming = S.boxes.findIndex((b, k) => k >= S.xp && b.s !== '.');
+  const what = (s) => /[123]/.test(s) ? `ability ${s}` : { M: 'a better roll modifier', H: 'a heart', S: 'an item slot', T: 'a Stress token', C: 'a heart or a roll modifier', X: 'a Stress token or a roll modifier' }[s];
   const table = (rows) => rows ? `<table class="cr-tbl">${rows.map(([a, b]) => `<tr><th>${esc(a)}</th><td>${esc(b)}</td></tr>`).join('')}</table>` : '';
   const grid = (cells) => {
     if (!cells) return '';
@@ -887,12 +946,6 @@ function _crSheetHtml(c, slot, edit) {
     return `<div class="cr-grid" aria-hidden="true">${[0, 1, 2, 3, 4].map(r => [0, 1, 2, 3, 4].map(k => `<span class="${(r === 0 || r === 4) && (k === 0 || k === 4) ? 'gap' : on.has(`${r}-${k}`) ? 'on' : ''}"></span>`).join('')).join('')}</div>`;
   };
   const trait = S.veth ? H.altTrait : H.trait;
-  const curse = H.alt ? `<div class="cr-box">
-      <div class="cr-box-title">Lifting the curse</div>
-      <div class="cr-curse">${['1', '20'].map(n => `<button type="button" class="cr-curse-n${h['curse' + n] ? ' on' : ''}" data-cr-curse="${slot}|${n}">${n}</button>`).join('')}
-        <span class="rv-hint">${S.veth ? 'Both crossed off: Nott is Veth again.' : 'Tap a number when anyone rolls it.'}</span></div>
-      <div class="cr-text">${esc(H.curse)}</div>
-    </div>` : '';
   const abilities = H.abilities.map((a, k) => {
     const n = k + 1, open = S.abil >= n;
     const at = S.boxes.findIndex(b => b.s === String(n));
@@ -904,31 +957,24 @@ function _crSheetHtml(c, slot, edit) {
   const others = _crData.heroes.filter(x => x.id === h.id || !CR_SLOTS.some(s => s !== slot && ((c.heroes || {})[s] || {}).id === x.id));
 
   return `<div class="cr-sheet" style="--cr-c:${esc(color)}">
-    <div class="cr-sheet-head">
-      <div class="cr-sheet-id">
-        <span class="cr-sheet-name">${S.veth ? `<s>${esc(H.name)}</s> ${esc(H.alt)}` : esc(H.name)}</span>
-        <span class="cr-sheet-blurb">${esc(H.blurb)}</span>
-      </div>
+    ${sheet}
+    <div class="cr-sheet-facts">
+      <span><b>${_crSigned(S.mod)}</b> roll${H.id === 'grog' && S.dmg ? ' (with Tough)' : ''}</span>
+      <span><b>${S.hearts - S.dmg}</b> of ${S.hearts} &#9829;</span>
+      <span><b>${S.slots}</b> item slot${S.slots === 1 ? '' : 's'}${held.length > S.slots ? ' <em class="cr-warn">too many items</em>' : ''}</span>
     </div>
+    <div class="cr-xp-top">
+      <span class="cr-lbl">XP</span>
+      <button type="button" class="rv-dot" data-cr-xpstep="${slot}|-1" aria-label="One XP less"${S.xp ? '' : ' disabled'}>&minus;</button>
+      <span class="cr-xp-n"><b>${S.xp}</b> / ${S.total}</span>
+      <button type="button" class="rv-dot" data-cr-xpstep="${slot}|1" aria-label="One XP more"${S.xp < S.total ? '' : ' disabled'}>+</button>
+      ${upcoming >= 0 ? `<span class="cr-note">${upcoming + 1 - S.xp} more for ${what(S.boxes[upcoming].s)}</span>` : '<span class="cr-note">the track is full</span>'}
+    </div>
+    ${h.tok ? `<div class="cr-note cr-tok-note">${h.tok} XP token${h.tok === 1 ? '' : 's'} waiting: marked here when you level up, or when the next mission starts.</div>` : ''}
+    ${ask == null ? '' : `<div class="cr-ask"><span>XP box ${ask + 1}: which one?</span>${_crPickBtns(slot, ask, S)}</div>`}
     ${outs.length ? `<div class="cr-row"><span class="cr-lbl">Status</span><span class="cr-seg cr-seg-sm">${['', ...outs].map(o => `<button type="button" class="cr-seg-b${(h.out || '') === o ? ' on' : ''}" data-cr-out="${slot}|${o}">${o ? esc(CR_OUT[o]) : 'in the party'}</button>`).join('')}</span></div>` : ''}
-    <div class="cr-row"><span class="cr-lbl">Roll</span><span class="cr-mods">${mods}</span>${H.id === 'grog' && S.dmg ? `<span class="cr-note">now ${_crSigned(S.mod)}: +2 for each lost heart</span>` : ''}</div>
-    <div class="cr-row"><span class="cr-lbl">Hearts</span><span class="cr-hearts">${_crHeartsHtml(slot, S, H)}</span><span class="cr-note">${S.hearts - S.dmg} of ${S.hearts}</span></div>
-    ${H.stress ? `<div class="cr-row"><span class="cr-lbl">Stress</span><span class="cr-tokens">${_crStressHtml(slot, h, S, H)}</span>${(h.on || 0) > 0 ? `<span class="cr-note">threshold ${[0, 5, 9, 15, 22][Math.min(h.on, 4)]}</span>` : ''}</div>` : ''}
-    <div class="cr-row"><span class="cr-lbl">Items</span><span class="cr-note">${S.slots} slot${S.slots === 1 ? '' : 's'}${held.length ? `: ${held.map(([, it]) => esc(it.name)).join(', ')}` : ''}</span>${held.length > S.slots ? '<span class="cr-warn">too many</span>' : ''}</div>
-    <div class="cr-xpbox">
-      <div class="cr-xp-top">
-        <span class="cr-lbl">XP</span>
-        <button type="button" class="rv-dot" data-cr-xpstep="${slot}|-1" aria-label="One XP less"${S.xp ? '' : ' disabled'}>&minus;</button>
-        <span class="cr-xp-n"><b>${S.xp}</b> / ${S.total}</span>
-        <button type="button" class="rv-dot" data-cr-xpstep="${slot}|1" aria-label="One XP more"${S.xp < S.total ? '' : ' disabled'}>+</button>
-        ${upcoming >= 0 ? `<span class="cr-note">${upcoming + 1 - S.xp} more for ${what(S.boxes[upcoming].s)}</span>` : '<span class="cr-note">the track is full</span>'}
-      </div>
-      ${rows}
-      ${h.tok ? `<div class="cr-note cr-tok-note">${h.tok} XP token${h.tok === 1 ? '' : 's'} waiting: marked here when you level up, or when the next mission starts.</div>` : ''}
-      ${ask == null ? '' : `<div class="cr-ask"><span>XP box ${ask + 1}: which one?</span>${_crPickBtns(slot, ask, S)}</div>`}
-    </div>
-    ${curse}
     ${trait ? `<div class="cr-box"><div class="cr-box-title">${esc(trait.name)}${S.veth ? ` <span class="cr-note">instead of <s>${esc(H.trait.name)}</s></span>` : ''}</div><div class="cr-text">${esc(trait.text)}</div>${table(trait.table)}</div>` : ''}
+    ${H.alt ? `<div class="cr-box"><div class="cr-box-title">Lifting the curse</div><div class="cr-text">${esc(H.curse)}${S.veth ? ' Done: Nott is Veth again.' : ''}</div></div>` : ''}
     <div class="rv-sub">Abilities</div>
     ${abilities}
     ${edit && !S.xp && !h.tok ? `<div class="rv-sub">A different hero?</div><div class="cr-seg cr-seg-wrap">${others.map(x => `<button type="button" class="cr-seg-b${x.id === h.id ? ' on' : ''}" data-cr-swap="${slot}|${x.id}" style="--cr-c:${esc(x.color)}">${esc(x.short || x.name)}</button>`).join('')}</div>` : ''}
@@ -966,9 +1012,10 @@ async function _crClick(panel, ev) {
   const t = ev.target.closest('button');
   if (!t || !panel.contains(t) || t.disabled) return;
   const ds = t.dataset;
-  if (ds.crTab) { _crTab = ds.crTab; _crRender(panel); return; }
-  if (ds.crHero) { _crHero = ds.crHero; _crRender(panel); return; }
-  if (ds.crOpen) { _crHero = ds.crOpen; _crTab = 'heroes'; _crRender(panel); panel.scrollIntoView({ block: 'start' }); return; }
+  if (ds.crZoom) { _crZoom = _crZoom ? null : ds.crZoom; _crRender(panel); return; }
+  if (ds.crTab) { _crTab = ds.crTab; _crZoom = null; _crRender(panel); return; }
+  if (ds.crHero) { _crHero = ds.crHero; _crZoom = null; _crRender(panel); return; }
+  if (ds.crOpen) { _crHero = ds.crOpen; _crTab = 'heroes'; _crZoom = null; _crRender(panel); panel.scrollIntoView({ block: 'start' }); return; }
   if (ds.crItemKind) {
     // switched in place: the name typed stays
     _crKind = ds.crItemKind;
@@ -984,6 +1031,7 @@ async function _crClick(panel, ev) {
       _crDraft = open ? null : { map: 'taldorei', name: '', heroes: [...CR_FIRST], gm: '', players: _crMe() ? [_crMe()] : [] };
     } else if (_crId === id) _crId = null;
     else { _crId = id; _crDraft = null; _crHero = null; _crTab = 'map'; _crRw = null; }
+    _crZoom = null;
     _crRender(panel);
     return;
   }
