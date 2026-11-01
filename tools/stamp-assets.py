@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""Stamp local JS/CSS references in index.html with a content hash.
+"""Stamp local JS/CSS references (and the app's icons) in index.html with a content hash.
 
     <script src="js/profile.js?v=1a2b3c4d">   <link href="styles.css?v=...">
 
 A file's URL only changes when its contents change, so after a deploy
 browsers re-fetch exactly the files that changed and keep the rest cached.
+The service worker keeps every stamped file for offline use (sw.js), so the
+logo in the top bar is stamped too: unstamped, it was a broken image offline.
 This stops a phone from mixing a new file with a stale cached one (GitHub
 Pages caches each file independently for 10 minutes).
 
@@ -25,7 +27,7 @@ import time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 INDEX = os.path.join(ROOT, 'index.html')
-ASSET_RE = re.compile(r'(src|href)="((?:js|data)/[^"?]+\.js|styles\.css|manifest\.webmanifest)(?:\?v=[0-9a-f]*)?"')
+ASSET_RE = re.compile(r'(src|href)="((?:js|data)/[^"?]+\.js|styles\.css|manifest\.webmanifest|icons/[^"?]+\.(?:svg|png))(?:\?v=[0-9a-f]*)?"')
 
 
 def content(path, worktree=False):

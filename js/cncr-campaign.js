@@ -416,7 +416,11 @@ function _crRender(panel) {
     ${_crCreditHtml()}`;
   _crWire(panel);
   _crFollow();
+  // missions without their play: once per campaign opened, and as the campaign changes
+  const sig = `${_crId}|${Object.keys(c.log || {}).length}`;
+  if (_crAutoSig !== sig) { _crAutoSig = sig; setTimeout(() => _crAutoPlays(_crId), 800); }
 }
+let _crAutoSig = '';
 function _crCreditHtml() {
   return `<div class="rv-credit">Heroes, maps and missions from Czech Games Edition's <a href="https://www.czechgames.com/games/codenames-critical-role-adventures" target="_blank" rel="noopener">rules, campaign book and printable sheets</a>, in short here: the book and the sheets have them in full.</div>`;
 }
@@ -595,12 +599,53 @@ async function _crLogPlay(id, ts) {
 }
 // After Won or Lost: the play logged, and BG Stats' QR code for it.
 async function _crAfterMission(id, ts) {
-  const r = await _crLogPlay(id, ts);
+  if (_crLogging.has(id + ts)) return;
+  _crLogging.add(id + ts);
+  const r = await _crLogPlay(id, ts).finally(() => _crLogging.delete(id + ts));
   if (!r) return;
   if (r.err) { _crToast(r.err); _crRedraw(); return; }
   _crRedraw();
   const i = _crPlayIdx(r.id);
   if (i >= 0 && typeof openBgsShare === 'function') openBgsShare(CNCR_BGGID, i);
+}
+
+// A mission left without its play (the phone that tapped Won or Lost wasn't
+// signed in, or it was played before plays were logged) is logged by the next
+// signed-in phone of someone at that table to open the campaign. It claims
+// the mission first and goes ahead only if its claim is the one still there
+// a moment later, so two phones never log the same mission twice. The phone
+// that tapped gets the first two minutes to do it itself.
+const _crLogging = new Set();    // id + log key: being logged on this phone
+const CR_AUTO_AFTER = 120e3;
+async function _crAutoPlays(id) {
+  const c = _crCamps[id];
+  const a = typeof acctMe === 'function' ? acctMe() : null;
+  if (!c || !a || !_crCanEdit(c) || typeof logPlaySave !== 'function') return;
+  let soonest = Infinity;
+  for (const [ts, l] of Object.entries(c.log || {}).sort((x, y) => x[1].at - y[1].at)) {
+    if (!l || l.play || _crLogging.has(id + ts)) continue;
+    const wait = (l.at || 0) + CR_AUTO_AFTER - Date.now();
+    if (wait > 0) { soonest = Math.min(soonest, wait); continue; }
+    if (l.claim && l.claim.uid !== a.uid && Date.now() - l.claim.at < CR_AUTO_AFTER) continue;   // another phone is on it
+    _crLogging.add(id + ts);
+    try {
+      const claim = { uid: a.uid, at: Date.now() };
+      await _crPatch({ [`log/${ts}/claim`]: claim }, id);
+      await new Promise(r => setTimeout(r, 2500));
+      const res = await fetch(`${FIREBASE_DB}/crCampaigns/${encodeURIComponent(id)}/log/${ts}.json`, { cache: 'no-store' });
+      const now = res.ok ? await res.json() : null;
+      if (!now || now.play || !now.claim || now.claim.uid !== a.uid || now.claim.at !== claim.at) continue;
+      const r = await _crLogPlay(id, ts);
+      if (r && !r.err) { await _crPatch({ [`log/${ts}/claim`]: null }, id); _crRedraw(); }
+    } catch (e) {
+      console.warn('Codenames campaign: a mission\'s play not logged', e);
+    } finally {
+      _crLogging.delete(id + ts);
+    }
+  }
+  // one played just now, by a phone that may not log it: look again when its turn comes
+  clearTimeout(_crAutoPlays.t);
+  if (soonest < Infinity) _crAutoPlays.t = setTimeout(() => { if (_crId === id && _crShown()) _crAutoPlays(id); }, soonest + 1000);
 }
 
 function _crShortDate(v) {
@@ -1066,6 +1111,7 @@ async function _crClick(panel, ev) {
     up.status = null;
     up.stopped = null;
   } else if (ds.crLogplay) {
+    if (_crLogging.has(_crId + ds.crLogplay)) return;
     t.disabled = true;
     _crAfterMission(_crId, ds.crLogplay);
     return;
