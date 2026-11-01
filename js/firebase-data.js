@@ -41,9 +41,8 @@ async function loadAllRatings() {
 // loadGameImages skips anything without a url) until its rule is added:
 // list it here, e.g. { myFeature: '_bglMyFeature' }, and reads take both.
 // Rove, the Gauntlet and the rating skips have their own nodes since 20 Oct
-// 2026. The Codenames: Critical Role campaigns wait here (30 Oct 2026) until
-// "crCampaigns" is in the rules; ones started here stay here, and still work.
-const FB_SPARE = { crCampaigns: '_bglCrCampaigns' };
+// 2026, and the Codenames: Critical Role campaigns since 1 Nov 2026.
+const FB_SPARE = {};
 const _fbDenied = new Set();   // nodes that refused a write this session: go straight to the spare
 function _fbRoot(path) { return path.split('/')[0]; }
 function _fbSpare(path) {

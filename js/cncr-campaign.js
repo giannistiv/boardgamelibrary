@@ -582,8 +582,11 @@ async function _crLogPlay(id, ts) {
     b: `${_crMapOf(c).name}／Mission ${m ? m.n : String(l.m).toUpperCase()}`,
     c: `${c.name ? `${c.name}: ` : ''}${heroes}${m ? ` · ${m.title}` : ''}`,
   };
+  // a mission takes 10 to 15 minutes (js/play-time.js PT_FIXED): timed from
+  // Start to the result, kept in that range; untimed, the middle of it
+  const span = PT_FIXED[CNCR_BGGID];
   const mins = start === l.from ? Math.round((l.at - l.from) / 60000) : 0;
-  if (mins >= 1) rec.d = mins;
+  rec.d = mins ? Math.min(span[1], Math.max(span[0], mins)) : Math.round((span[0] + span[1]) / 2);
   try {
     const r = await logPlaySave(rec);
     await _crPatch({ [`log/${ts}/play`]: r.id }, id);

@@ -28,6 +28,10 @@ const PT_SESSION = 180;         // most one sitting of a campaign game takes, in
 const PT_SLOW_MAX = 1.3;        // first plays: at most this much slower
 const PT_REPLAY = 0.75;         // the same game again that day: already set up, rules fresh
 const PT_TABLE = 3;             // the table a box time is for, when nothing says how many play it
+// Games whose plays take a known time, whatever the box says: [least, most]
+// minutes. A Codenames: Critical Role Adventures play is one mission of its
+// campaign (the user, 1 Nov 2026: 10-15 minutes, not more).
+const PT_FIXED = { 465849: [10, 15] };
 
 function _ptRange(str) {
   const nums = String(str || '').match(/\d+/g);
@@ -90,6 +94,14 @@ function _ptIsAnon(name) { return /^(anonymous|player \d+$)/i.test(name || ''); 
 // `replay`: it's not the first play of this game that day.
 function _ptEstimate(game, play, newcomers, replay) {
   const n = Math.max(1, play.sc.length);
+  const fixed = PT_FIXED[Number(game.bggId)];
+  if (fixed) {
+    // someone new: the longest; again that day: the shortest; else between
+    const est = newcomers ? fixed[1] : replay ? fixed[0] : (fixed[0] + fixed[1]) / 2;
+    const loggedRaw = Number(play.d) || 0;
+    const min = loggedRaw > 0 ? Math.min(fixed[1], Math.max(fixed[0], loggedRaw)) : est;
+    return { min, logged: loggedRaw > 0, est, box: est, heavy: 1, slow: 1, replay: !!replay, teach: 0, newcomers, n, loggedRaw, fixed };
+  }
   const w = _ptWeight(game);
   const exp = typeof isBggExpansion === 'function' && isBggExpansion(game.bggId);
   const box = _ptBoxMinutes(game, n);
@@ -150,6 +162,7 @@ function fmtPlayTime(min) {
 // What went into one play's estimate, for a tooltip.
 function playTimeWhy(e) {
   if (!e) return '';
+  if (e.fixed) return `A play of this game takes ${e.fixed[0]}–${e.fixed[1]} min${e.loggedRaw ? ` (timed ${e.loggedRaw} min)` : ''}`;
   const bits = [`BGG time at ${e.n} player${e.n !== 1 ? 's' : ''}: ${fmtPlayTime(e.box)}`];
   if (e.heavy > 1.001) bits.push(`heavy game: +${Math.round((e.heavy - 1) * 100)}%`);
   if (e.replay) bits.push(`played again that day: −${Math.round((1 - PT_REPLAY) * 100)}%`);
@@ -303,7 +316,8 @@ function _ptInner(playerName, year) {
           <li>playing the same game again the same day is ${Math.round((1 - PT_REPLAY) * 100)}% quicker: it's set up and the rules are fresh;</li>
           <li>simultaneous and real-time games barely slow down with more players;</li>
           <li>a campaign game's play is one sitting (at most ${PT_SESSION / 60} hours from the box), not the whole campaign BGG's time sometimes means;</li>
-          <li>a duration logged in BGStats is used instead when it's believable${y.logged ? ` (${y.logged} of these plays)` : ''}.</li>
+          <li>a duration logged in BGStats is used instead when it's believable${y.logged ? ` (${y.logged} of these plays)` : ''};</li>
+          <li>a few games take a set time a play, whatever their box says: a Codenames: Critical Role Adventures mission is 10 to 15 minutes.</li>
         </ul>
         <p>Everyone at the table gets the play's time. Boxes are optimistic and setup isn't counted, so the real time is higher.</p>
       </details>
