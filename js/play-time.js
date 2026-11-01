@@ -29,9 +29,8 @@ const PT_SLOW_MAX = 1.3;        // first plays: at most this much slower
 const PT_REPLAY = 0.75;         // the same game again that day: already set up, rules fresh
 const PT_TABLE = 3;             // the table a box time is for, when nothing says how many play it
 // Games whose plays take a known time, whatever the box says: [least, most]
-// minutes. A Codenames: Critical Role Adventures play is one mission of its
-// campaign (the user, 1 Nov 2026: 10-15 minutes, not more).
-const PT_FIXED = { 465849: [10, 15] };
+// minutes. Take Time: one clock (the user, 1 Nov 2026: 10-15 minutes, not more).
+const PT_FIXED = { 440540: [10, 15] };
 
 function _ptRange(str) {
   const nums = String(str || '').match(/\d+/g);
@@ -317,7 +316,7 @@ function _ptInner(playerName, year) {
           <li>simultaneous and real-time games barely slow down with more players;</li>
           <li>a campaign game's play is one sitting (at most ${PT_SESSION / 60} hours from the box), not the whole campaign BGG's time sometimes means;</li>
           <li>a duration logged in BGStats is used instead when it's believable${y.logged ? ` (${y.logged} of these plays)` : ''};</li>
-          <li>a few games take a set time a play, whatever their box says: a Codenames: Critical Role Adventures mission is 10 to 15 minutes.</li>
+          <li>a few games take a set time a play, whatever their box says: a play of Take Time is 10 to 15 minutes.</li>
         </ul>
         <p>Everyone at the table gets the play's time. Boxes are optimistic and setup isn't counted, so the real time is higher.</p>
       </details>
