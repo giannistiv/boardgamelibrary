@@ -12,7 +12,7 @@ let manualPlaysCache = {};   // id → the play as saved (and any waiting to sen
 
 async function loadManualPlays() {
   try {
-    const res = await fetch(`${FIREBASE_DB}/plays.json`, { cache: 'no-store' });
+    const res = await fetch(`${FIREBASE_DB}/plays.json`);   // on a slow connection the last copy (sw.js); js/live.js brings what changed
     manualPlaysCache = (res.ok && await res.json()) || {};
   } catch (e) {
     manualPlaysCache = {};

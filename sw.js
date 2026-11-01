@@ -1,13 +1,16 @@
 // Service worker: lets the site install as an app and keep working offline.
 //
 //   pages (index.html)       network first (always revalidated), the last copy when offline
+//                            or when the network takes longer than PAGE_WAIT
 //   css / js / data (?v=…)   cache first: a stamped URL never changes
 //   covers (images/)         cache first, the most recent MAX_COVERS kept
 //   lazy data (data/*.js     network first, the last copy when offline; rules
 //     fetched without ?v=)   and the Rove sheet's data are also stored ahead of
 //                            time, so the Rules tab works at a table with no signal
-//   Firebase reads           network first, the last answer when offline (not the live
-//                            stream of new plays: js/live.js)
+//   Firebase reads           network first, the last answer when offline or slower than
+//                            DATA_WAIT (not the live stream of new plays, js/live.js,
+//                            which brings what changed; nor a read asked for fresh:
+//                            cache 'no-store')
 //   a shared BGStats export  kept for the page, which imports it (boot.js)
 //   everything else          straight to the network
 //
@@ -25,6 +28,12 @@ const SHARED = 'bgl-shared';     // a file shared to the app from BGStats, until
 const MAX_COVERS = 600;
 const FIREBASE = 'firebasedatabase.app';
 const LAZY_DATA = ['data/rules.js', 'data/rove.js'];   // stored on install, before anyone opens them
+// On a slow connection the app opens from the copies kept here, rather than
+// waiting on the network for as long as it takes: the page and the database
+// reads get this long (ms) when there's a copy; their answer, when it comes,
+// is kept for the next time.
+const PAGE_WAIT = 1500;
+const DATA_WAIT = 1500;
 
 const assetUrls = (html) => {
   const out = new Set();
@@ -36,13 +45,14 @@ const assetUrls = (html) => {
 
 // Keep `res` (a fresh index.html) as the offline page, and bring the asset
 // cache in line with what it references.
-async function storeShell(res) {
+// keepOld: the page on screen is an older copy, still loading its own files.
+async function storeShell(res, keepOld) {
   const html = await res.clone().text();
   const shell = await caches.open(SHELL);
   await shell.put('./', res);
   const wanted = assetUrls(html);
   const assets = await caches.open(ASSETS);
-  for (const req of await assets.keys()) if (!wanted.has(req.url)) await assets.delete(req);
+  if (!keepOld) for (const req of await assets.keys()) if (!wanted.has(req.url)) await assets.delete(req);
   const have = new Set((await assets.keys()).map(r => r.url));
   await Promise.all([...wanted].filter(u => !have.has(u)).map(u => assets.add(u).catch(() => {})));
   // the lazily loaded data, if this phone doesn't have a copy yet (using it refreshes it)
@@ -89,15 +99,28 @@ async function cacheFirst(cacheName, req, after) {
   return res;
 }
 
-async function networkFirst(cacheName, req, key) {
+// wait: with a copy kept, how long the network gets before the copy answers
+// (the network's answer still goes into the cache when it comes: event).
+async function networkFirst(cacheName, req, key, wait, event) {
   const cache = await caches.open(cacheName);
-  try {
-    const res = await fetch(req);
+  const net = fetch(req).then(async (res) => {
     if (res.ok) await cache.put(key || req, res.clone());
     return res;
+  });
+  const hit = wait ? await cache.match(key || req) : null;
+  if (hit) {
+    let timer;
+    const first = await Promise.race([net.catch(() => null), new Promise(r => { timer = setTimeout(r, wait, null); })]);
+    clearTimeout(timer);
+    if (first) return first;
+    if (event) event.waitUntil(net.catch(() => {}));
+    return hit;
+  }
+  try {
+    return await net;
   } catch (e) {
-    const hit = await cache.match(key || req);
-    if (hit) return hit;
+    const late = await cache.match(key || req);
+    if (late) return late;
     throw e;
   }
 }
@@ -196,16 +219,21 @@ self.addEventListener('fetch', (event) => {
 
   if (req.mode === 'navigate' && url.origin === location.origin) {
     event.respondWith((async () => {
-      try {
-        // Ask the server every time (a quick "not modified" when nothing
-        // changed): GitHub lets browsers reuse a page for 10 minutes, which
-        // would hide an update that long.
-        const res = await fetch(req, { cache: 'no-cache' });
-        if (res.ok) event.waitUntil(storeShell(res.clone()).catch(() => {}));
-        return res;
-      } catch (e) {
-        return (await caches.match('./', { cacheName: SHELL })) || Response.error();
-      }
+      // Ask the server every time (a quick "not modified" when nothing
+      // changed): GitHub lets browsers reuse a page for 10 minutes, which
+      // would hide an update that long. A slow answer doesn't hold the app
+      // up: the copy kept opens it, and the new page is kept for next time.
+      const kept = await caches.match('./', { cacheName: SHELL });
+      const net = fetch(req, { cache: 'no-cache' });
+      const store = (res, keepOld) => { if (res && res.ok) event.waitUntil(storeShell(res.clone(), keepOld).catch(() => {})); return res; };
+      if (!kept) return net.then(res => store(res, false)).catch(() => Response.error());
+      let timer;
+      const first = await Promise.race([net.catch(() => null), new Promise(r => { timer = setTimeout(r, PAGE_WAIT, null); })]);
+      clearTimeout(timer);
+      if (first) return store(first, false);
+      // the copy kept is on screen, loading its own files: they stay until next time
+      event.waitUntil(net.then(res => store(res, true)).catch(() => {}));
+      return kept;
     })());
     return;
   }
@@ -218,7 +246,7 @@ self.addEventListener('fetch', (event) => {
   if (url.hostname.endsWith(FIREBASE) && url.pathname.endsWith('.json')) {
     // the live stream of new plays (js/live.js) never ends, so it can't be kept: straight through
     if ((req.headers.get('accept') || '').includes('text/event-stream')) return;
-    event.respondWith(networkFirst(DATA, req));
+    event.respondWith(networkFirst(DATA, req, null, req.cache === 'no-store' ? 0 : DATA_WAIT, event));
   }
 });
 

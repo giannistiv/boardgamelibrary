@@ -203,7 +203,8 @@ document.addEventListener('visibilitychange', () => {
   if (document.hidden) { _liveHiddenAt = Date.now(); return; }
   const away = _liveHiddenAt ? Date.now() - _liveHiddenAt : 0;
   // a phone drops the stream in the background: open it again (it catches up)
-  if (away > 30e3) _liveRestart(); else liveStart();
+  // (after a quick look at another app, it carries on: opening again downloads every BGStats play)
+  if (away > 120e3) _liveRestart(); else liveStart();
   if (away > 60e3) _liveCheckVersion(away);
   if (_liveDirty) _liveSoon();
 });

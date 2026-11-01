@@ -50,10 +50,12 @@ function _fbSpare(path) {
   return FB_SPARE[root] ? `gameImages/${FB_SPARE[root]}${path.slice(root.length)}` : null;
 }
 // { main, spare }: what each store holds at `path` (null when empty).
+// On a slow connection the last copy answers (sw.js DATA_WAIT); the campaign
+// pages follow their campaign live, so they catch up.
 async function fbReadBoth(path) {
   const get = async (p) => {
     try {
-      const res = await fetch(`${FIREBASE_DB}/${p}.json`, { cache: 'no-store' });
+      const res = await fetch(`${FIREBASE_DB}/${p}.json`);
       return res.ok ? await res.json() : null;
     } catch (e) { return null; }
   };
