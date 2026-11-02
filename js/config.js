@@ -165,7 +165,7 @@ function campaignProgress(bggId, plays) {
   }
   const fmt = cfg.format || 'number';
   const perFolder = cfg.perFolder || 1;
-  let current = 0, bestTag = '';
+  let current = 0, bestTag = '', first = 0;   // first: the earliest stage in these plays (a campaign joined mid-way starts later than 1)
   for (const p of plays) {
     if (cfg.wonOnly && !(p.sc || []).some(s => s.w)) continue;
     let idx = 0;
@@ -177,6 +177,7 @@ function campaignProgress(bggId, plays) {
       if (m) idx = parseFloat(m[0]);
     }
     if (idx > current) { current = idx; bestTag = String(p.b || ''); }
+    if (idx >= 1 && (!first || idx < first)) first = idx;
   }
   if (current < 1) return null;
   const capped = Math.min(current, cfg.total);
@@ -192,7 +193,8 @@ function campaignProgress(bggId, plays) {
     if (cfg.reached === 'tag' && bestTag) reachedText = `${cfg.reachedPrefix || 'Latest'}: ${bestTag}`;
     else if (cfg.reached === 'stage') reachedText = `${cfg.reachedPrefix || 'Furthest'}: ${cfg.label || ''} ${capped}`.trim();
   }
-  return { current: capped, total: cfg.total, pct, stageText, reachedText };
+  // done: the final stage reached (won, where only wins count)
+  return { current: capped, total: cfg.total, pct, stageText, reachedText, first: Math.min(first, capped), complete: capped >= cfg.total };
 }
 
 // ── Sky Team airport checklist ──

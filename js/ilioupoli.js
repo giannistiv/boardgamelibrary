@@ -1,19 +1,27 @@
+// The Ilioupoli Bros: their names come first where people are typed, and
+// Δημητρης's shelf is theirs to see. The campaigns once theirs alone are
+// everyone's since 2 Nov 2026 (js/party-campaigns.js).
 const ILIOUPOLI_MEMBERS = new Set(['Στιβ', 'Δημητρης', 'Μαντσος']);
-let _ilioSubTab = 'oathsworn'; // 'oathsworn' | 'gauntlet' | 'rove': the group's campaigns (Play → Campaigns opens them; the library they once had is on the Library's tabs)
+// The campaign page (#ilioupoli-view): Oathsworn's or the Gauntlet's
+// campaigns, one per party. Play → Campaigns opens it.
+let _ilioSubTab = 'oathsworn'; // 'oathsworn' | 'gauntlet'
 
 // ── Oathsworn boss ranking ──
 // Each Oathsworn play stores its boss in the play's "board" field as
-// "Chapter # - Boss Name". The three players each keep a personal drag-to-
-// order ranking of every boss; an Overall ranking aggregates them.
+// "Chapter # - Boss Name". Each of a party's players keeps a personal drag-to-
+// order ranking of the bosses (one per person, across their campaigns); an
+// Overall ranking aggregates the party's.
 const OATHSWORN_BGGID = 251661;
-const OATHSWORN_VOTERS = ['Στιβ', 'Δημητρης', 'Μαντσος'];
+const OATHSWORN_VOTERS = ['Στιβ', 'Δημητρης', 'Μαντσος'];   // (the first party's; boot.js renames them)
+let _oathPlays = [];          // the open campaign's plays (js/party-campaigns.js)
+let _oathVoters = [];         // and its players
 let oathswornRanks = {};      // canonical voter name → ordered [bossName, …]
 let _oathSubTab = 'campaign'; // inner tab: 'campaign' (the trail) | 'overall' | a voter name
 
 // Derive the master boss list from PLAY_HISTORY, in chapter order. Picking
 // it up live means later imported plays add their bosses automatically.
 function _oathswornBosses() {
-  const plays = (typeof PLAY_HISTORY !== 'undefined' && PLAY_HISTORY[OATHSWORN_BGGID]) || [];
+  const plays = _oathPlays;
   const seen = new Map(); // boss → earliest chapter number seen
   for (const p of plays) {
     if (!p || typeof p.b !== 'string') continue;
@@ -43,7 +51,7 @@ function _oathswornRankFor(voter) {
 // best single placement, then name.
 function _oathswornOverall() {
   const bosses = _oathswornBosses();
-  const activeVoters = OATHSWORN_VOTERS.filter(v =>
+  const activeVoters = _oathVoters.filter(v =>
     Array.isArray(oathswornRanks[v]) && oathswornRanks[v].length);
   const lists = {};
   activeVoters.forEach(v => { lists[v] = _oathswornRankFor(v); });
@@ -177,148 +185,132 @@ function _wireOathswornDrag(container, voter) {
 function showIlioupoliView() {
   const container = document.getElementById('ilioupoli-view');
   if (!container) return;
-  if (!['oathsworn', 'gauntlet', 'rove'].includes(_ilioSubTab)) _ilioSubTab = 'oathsworn';
-
-  const subTabsHtml = `
+  if (!['oathsworn', 'gauntlet'].includes(_ilioSubTab)) _ilioSubTab = 'oathsworn';
+  const kind = _ilioSubTab === 'gauntlet' ? 'gauntlet' : 'oath';
+  const K = PC_KINDS[kind];
+  const fresh = showIlioupoliView.kind !== kind;   // another game: from the top
+  showIlioupoliView.kind = kind;
+  const head = `
     <button type="button" class="ilio-back" data-ilio-back>&lsaquo; All campaigns</button>
-    <div class="bs-subtabs ilio-subtabs">
-      <button class="bs-subtab${_ilioSubTab === 'oathsworn' ? ' active' : ''}" data-ilio-sub="oathsworn">⚔️ Oathsworn</button>
-      <button class="bs-subtab${_ilioSubTab === 'gauntlet' ? ' active' : ''}" data-ilio-sub="gauntlet">🦸 Marvel Champions</button>
-      <button class="bs-subtab${_ilioSubTab === 'rove' ? ' active' : ''}" data-ilio-sub="rove">🧭 Rove</button>
+    <div class="lb-header">
+      <div class="lb-title">${_escapeHtml(K.name)}</div>
+      <div class="lb-count">A campaign for each group: start yours, or open one to follow it</div>
     </div>`;
-
-  const wireSubTabs = () => {
-    // the strip scrolls sideways on a phone: keep the open tab in view
-    const strip = container.querySelector('.ilio-subtabs');
-    const act = strip && strip.querySelector('.active');
-    if (act) strip.scrollLeft = act.offsetLeft - (strip.clientWidth - act.offsetWidth) / 2;
+  const wireBack = () => {
     const back = container.querySelector('[data-ilio-back]');
     if (back) back.addEventListener('click', () => _navGo('play', 'campaigns'));
-    container.querySelectorAll('[data-ilio-sub]').forEach(el => {
-      el.addEventListener('click', () => {
-        const s = el.dataset.ilioSub;
-        if (s !== _ilioSubTab) { _ilioSubTab = s; showIlioupoliView(); }
-      });
-    });
   };
-
-  // ── Marvel Champions sub-tab: the Gauntlet (js/mc-gauntlet.js) ──
-  if (_ilioSubTab === 'gauntlet') {
-    container.innerHTML = `
-      <div class="lb-header">
-        <div class="lb-title">Ilioupoli Bros</div>
-        <div class="lb-count">Marvel Champions Gauntlet</div>
-      </div>
-      ${subTabsHtml}
-      ${buildGauntletHtml()}`;
-    wireSubTabs();
-    wireGauntlet(container, showIlioupoliView);
-    window.scrollTo(0, 0);
-    return;
-  }
-
-  // ── Rove sub-tab: the campaign sheet (js/rove-campaign.js), as on Rove's game page ──
-  if (_ilioSubTab === 'rove') {
-    const rove = findGameByBggId(ROVE_BGGID);
-    container.innerHTML = `
-      <div class="lb-header">
-        <div class="lb-title">Ilioupoli Bros</div>
-        <div class="lb-count">Rove campaign</div>
-      </div>
-      ${subTabsHtml}
-      <div class="ilio-rove">${buildRoveCampaignHtml(rove || { bggId: ROVE_BGGID })}</div>`;
-    wireSubTabs();
-    wireRoveCampaign(container);
-    window.scrollTo(0, 0);
-    return;
-  }
-
-  // ── Oathsworn sub-tab — boss ranking ──
-  if (_ilioSubTab === 'oathsworn') {
-    const bosses = _oathswornBosses();
-    const rawPlayer = localStorage.getItem('bgl-player');
-    const me = rawPlayer ? (NAME_MAP[rawPlayer] || rawPlayer) : null;
-
-    // Inner tabs: Overall + one per voter.
-    const innerTabs = ['campaign', 'overall', ...OATHSWORN_VOTERS];
-    if (!innerTabs.includes(_oathSubTab)) _oathSubTab = 'campaign';
-    const innerTabsHtml = `
-      <div class="bs-subtabs oath-subtabs">
-        ${innerTabs.map(t => {
-          const label = t === 'campaign' ? '🌲 Campaign' : t === 'overall' ? '🏆 Overall' : t;
-          return `<button class="bs-subtab${t === _oathSubTab ? ' active' : ''}" data-oath-sub="${_escapeHtml(t)}">${_escapeHtml(label)}</button>`;
-        }).join('')}
-      </div>`;
-
-    let body;
-    if (_oathSubTab === 'campaign') {
-      // the campaign: the trail through the Deepwood, from the logged chapters (progress-boards.js)
-      const game = findGameByBggId(OATHSWORN_BGGID) || { bggId: OATHSWORN_BGGID, name: 'Oathsworn' };
-      body = (typeof buildMissionMapHtml === 'function' && buildMissionMapHtml(game, PLAY_HISTORY[OATHSWORN_BGGID] || [], { trail: true }))
-        || `<div class="bsv-empty">The trail appears once Oathsworn plays are logged with their chapter ("Chapter 12 - …").</div>`;
-    } else if (bosses.length === 0) {
-      body = `<div class="bsv-empty">No bosses yet. Once Oathsworn plays are imported with a
-        "Chapter # - Boss Name" board label, the bosses appear here to rank.</div>`;
-    } else if (_oathSubTab === 'overall') {
-      const { rows, activeVoters } = _oathswornOverall();
-      if (!activeVoters.length) {
-        body = `<div class="bsv-empty">Nobody has ranked the bosses yet. Open your own tab and
-          drag them into your preferred order.</div>`;
-      } else {
-        const initials = { 'Στιβ': 'Σ', 'Δημητρης': 'Δ', 'Μαντσος': 'Μ' };
-        body = `<div class="oath-list">` + rows.map((r, i) => {
-          const breakdown = r.placements
-            .map(p => `<span class="oath-chip" title="${_escapeHtml(p.voter)}">${initials[p.voter] || p.voter[0]} #${p.pos}</span>`)
-            .join('');
-          return `<div class="oath-overrow">
-            <div class="oath-rank">${i + 1}</div>
-            <div class="oath-name">${_escapeHtml(r.boss)}</div>
-            <div class="oath-breakdown">${breakdown}</div>
-            <div class="oath-sum" title="Sum of placements">${r.sum}</div>
-          </div>`;
-        }).join('') + `</div>
-        <div class="lb-explain">Overall order is the sum of everyone's placements — a boss
-          everyone puts near the top wins. Lower total = higher rank.</div>`;
-      }
-    } else {
-      // A voter's personal list.
-      const voter = _oathSubTab;
-      const list = _oathswornRankFor(voter);
-      const editable = me === voter;
-      body = `<div class="oath-list" id="oath-list">` + list.map((boss, i) =>
-        `<div class="oath-item${editable ? ' editable' : ''}" data-oath-boss="${_escapeHtml(boss)}">
-          <div class="oath-rank">${i + 1}</div>
-          <div class="oath-name">${_escapeHtml(boss)}</div>
-          ${editable ? '<div class="oath-grip">⠿</div>' : ''}
-        </div>`).join('') + `</div>
-        <div class="lb-explain">${editable
-          ? 'Drag the bosses into your order — top = favourite. Saved automatically.'
-          : `This is ${_escapeHtml(voter)}'s order. Only ${_escapeHtml(voter)} can change it.`}</div>`;
-    }
-
-    container.innerHTML = `
-      <div class="lb-header">
-        <div class="lb-title">Ilioupoli Bros</div>
-        <div class="lb-count">${_oathSubTab === 'campaign' ? 'Oathsworn campaign' : 'Oathsworn boss ranking'}</div>
-      </div>
-      ${subTabsHtml}
-      ${innerTabsHtml}
-      ${body}`;
-
-    wireSubTabs();
-    if (_oathSubTab === 'campaign' && typeof wireProgressBoards === 'function') wireProgressBoards(container);
-    container.querySelectorAll('[data-oath-sub]').forEach(el => {
-      el.addEventListener('click', () => {
-        const s = el.dataset.oathSub;
-        if (s !== _oathSubTab) { _oathSubTab = s; showIlioupoliView(); }
-      });
+  if (!_pc[kind]) {
+    container.innerHTML = `${head}<div class="rv-loading">Opening the campaigns&hellip;</div>`;
+    wireBack();
+    pcLoad(kind).then(() => { if (showIlioupoliView.kind === kind) showIlioupoliView(); }).catch(e => {
+      console.warn('Campaigns:', e);
+      const l = container.querySelector('.rv-loading');
+      if (l) l.textContent = 'The campaigns couldn\'t be loaded. Try again in a moment.';
     });
-    // Drag only the logged-in player's own list.
-    if (_oathSubTab !== 'overall' && me === _oathSubTab) {
-      _wireOathswornDrag(container, _oathSubTab);
-    }
-    window.scrollTo(0, 0);
     return;
+  }
+  // someone else may have changed them meanwhile: drawn again if so
+  if (Date.now() - (_pcAt[kind] || 0) > 15000) {
+    const before = JSON.stringify(_pc[kind]);
+    pcLoad(kind, true).then(() => { if (showIlioupoliView.kind === kind && JSON.stringify(_pc[kind]) !== before) showIlioupoliView(); }).catch(() => {});
+  }
+  const id = _pcOpen[kind];
+  const c = id && _pc[kind][id];
+  let body = '';
+  if (c && kind === 'gauntlet') {
+    gauntletUse(id, c);
+    body = buildGauntletHtml();
+  } else if (c) {
+    body = _ilioOathHtml(c);
+  }
+  const y = window.scrollY;
+  container.innerHTML = `${head}
+    <div class="pc-root">
+      ${pcTabsHtml(kind)}
+      ${!c && _pcDraft && _pcDraft.kind === kind ? pcStartHtml(kind) : ''}
+      ${c ? `<div class="pc-open" style="--cr-m:${K.color}">${pcHeadHtml(kind, id, c)}<div class="pc-body">${body}</div>${pcFootHtml(kind, id, c)}</div>` : ''}
+    </div>`;
+  wireBack();
+  pcWire(container.querySelector('.pc-root'), kind, showIlioupoliView);
+  if (c && kind === 'gauntlet') wireGauntlet(container, showIlioupoliView);
+  if (c && kind === 'oath') _ilioOathWire(container);
+  window.scrollTo(0, fresh ? 0 : y);
+}
+
+// ── Oathsworn: the trail, the Overall ranking and each player's own ──
+function _ilioOathHtml(c) {
+  _oathPlays = pcPlays('oath', c);
+  _oathVoters = pcPlayers(c);
+  const bosses = _oathswornBosses();
+  const me = typeof _navPlayer === 'function' ? _navPlayer() : null;
+  const innerTabs = ['campaign', 'overall', ..._oathVoters];
+  if (!innerTabs.includes(_oathSubTab)) _oathSubTab = 'campaign';
+  const innerTabsHtml = `
+    <div class="bs-subtabs oath-subtabs">
+      ${innerTabs.map(t => {
+        const label = t === 'campaign' ? '🌲 Campaign' : t === 'overall' ? '🏆 Overall' : t;
+        return `<button class="bs-subtab${t === _oathSubTab ? ' active' : ''}" data-oath-sub="${_escapeHtml(t)}">${_escapeHtml(label)}</button>`;
+      }).join('')}
+    </div>`;
+  let body;
+  if (_oathSubTab === 'campaign') {
+    // the trail through the Deepwood, from the party's logged chapters (progress-boards.js)
+    const game = findGameByBggId(OATHSWORN_BGGID) || { bggId: OATHSWORN_BGGID, name: 'Oathsworn' };
+    body = (_oathPlays.length && typeof buildMissionMapHtml === 'function' && buildMissionMapHtml(game, _oathPlays, { trail: true }))
+      || `<div class="bsv-empty">The trail appears once this party&rsquo;s Oathsworn plays are logged with their chapter (&ldquo;Chapter 12 - &hellip;&rdquo;).</div>`;
+  } else if (bosses.length === 0) {
+    body = `<div class="bsv-empty">No bosses yet. Once this party&rsquo;s plays are logged with a
+      &ldquo;Chapter # - Boss Name&rdquo; board label, the bosses appear here to rank.</div>`;
+  } else if (_oathSubTab === 'overall') {
+    const { rows, activeVoters } = _oathswornOverall();
+    if (!activeVoters.length) {
+      body = `<div class="bsv-empty">Nobody has ranked the bosses yet. Open your own tab and
+        drag them into your preferred order.</div>`;
+    } else {
+      body = `<div class="oath-list">` + rows.map((r, i) => {
+        const breakdown = r.placements
+          .map(p => `<span class="oath-chip" title="${_escapeHtml(p.voter)}">${_escapeHtml([...p.voter][0])} #${p.pos}</span>`)
+          .join('');
+        return `<div class="oath-overrow">
+          <div class="oath-rank">${i + 1}</div>
+          <div class="oath-name">${_escapeHtml(r.boss)}</div>
+          <div class="oath-breakdown">${breakdown}</div>
+          <div class="oath-sum" title="Sum of placements">${r.sum}</div>
+        </div>`;
+      }).join('') + `</div>
+      <div class="lb-explain">Overall order is the sum of everyone's placements — a boss
+        everyone puts near the top wins. Lower total = higher rank.</div>`;
+    }
+  } else {
+    // a player's own list
+    const voter = _oathSubTab;
+    const list = _oathswornRankFor(voter);
+    const editable = !!me && _origCanon(me) === _origCanon(voter);
+    body = `<div class="oath-list" id="oath-list">` + list.map((boss, i) =>
+      `<div class="oath-item${editable ? ' editable' : ''}" data-oath-boss="${_escapeHtml(boss)}">
+        <div class="oath-rank">${i + 1}</div>
+        <div class="oath-name">${_escapeHtml(boss)}</div>
+        ${editable ? '<div class="oath-grip">⠿</div>' : ''}
+      </div>`).join('') + `</div>
+      <div class="lb-explain">${editable
+        ? 'Drag the bosses into your order — top = favourite. Saved automatically.'
+        : `This is ${_escapeHtml(voter)}'s order. Only ${_escapeHtml(voter)} can change it.`}</div>`;
+  }
+  return innerTabsHtml + body;
+}
+function _ilioOathWire(container) {
+  if (_oathSubTab === 'campaign' && typeof wireProgressBoards === 'function') wireProgressBoards(container);
+  container.querySelectorAll('[data-oath-sub]').forEach(el => {
+    el.addEventListener('click', () => {
+      const s = el.dataset.oathSub;
+      if (s !== _oathSubTab) { _oathSubTab = s; showIlioupoliView(); }
+    });
+  });
+  // drag only the viewer's own list
+  const me = typeof _navPlayer === 'function' ? _navPlayer() : null;
+  if (!['campaign', 'overall'].includes(_oathSubTab) && me && _origCanon(me) === _origCanon(_oathSubTab)) {
+    _wireOathswornDrag(container, _oathSubTab);
   }
 }
 

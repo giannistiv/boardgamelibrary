@@ -4,7 +4,7 @@
 // switches between the screens that belong together (the redesign of 2 Nov
 // 2026, after friends found things in unexpected places):
 //   Library       → your own games (Στιβ: his bookcase) · Find a game
-//   Play          → Latest plays · Tonight · Campaigns
+//   Play          → Latest plays · Tonight · Campaigns (Oathsworn and the Gauntlet on #ilioupoli-view)
 //   Crowdfunding  → Campaigns · Backed · Interested · For your games
 //   Group         → Leaderboard · Players · Hours · Stats · Board South (regulars)
 //   You           → Profile · Achievements · Challenges · Settings

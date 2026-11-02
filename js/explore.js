@@ -257,7 +257,7 @@ function showGamesView() {
   const [title, sub] = {
     games: ['Find a game', 'Every game on your shelves and in your plays, and all of BoardGameGeek.'],
     tonight: ['Tonight', 'What should we play tonight? Pick how many of you are playing, whose place it is and how long you have.'],
-    campaigns: ['Campaigns', 'The campaigns you&rsquo;re playing through, and where each one stands.'],
+    campaigns: ['Campaigns', 'Your campaigns and where each one stands, and the ones you can start for your group.'],
     plays: ['Latest plays', `${playsWho === 'mine' ? 'Your' : 'Everyone&rsquo;s'} plays, newest first &middot; ${shownPlays.length.toLocaleString('en')} in all`],
     trending: ['Crowdfunding', 'The crowdfunding campaigns running now, the new games everyone&rsquo;s talking about and what&rsquo;s new for the games you own.'],
     players: ['Players', counts],
@@ -310,60 +310,158 @@ function showGamesView() {
 }
 
 
-// ── Play → Campaigns: every campaign in one place ──
-// First the campaign sheets: Codenames: Critical Role Adventures and Rove on
-// their game pages' Campaign tab, and for the Ilioupoli Bros Oathsworn and the
-// Marvel Champions Gauntlet on their own page. Then the campaigns followed
-// from the plays (CAMPAIGN_PROGRESS): how far you've got, from the plays you
-// were in (everyone's when you haven't played it).
+// ── Play → Campaigns: every campaign in one list ──
+// The four games with a campaign sheet (Codenames: Critical Role Adventures
+// and Rove on their game page's Campaign tab, Oathsworn and the Marvel
+// Champions Gauntlet on the campaign page), open to everyone: your own
+// campaign's progress, or a start. Then the campaigns followed from the plays
+// (CAMPAIGN_PROGRESS) you were in: only yours, nobody else's (the user, 2 Nov
+// 2026). A bar goes green when you've done the final scenario, and is faded
+// where your plays start mid-campaign (the earlier ones aren't logged).
+const EX_SHEETS = [
+  { kind: 'cr', id: () => (typeof CNCR_BGGID !== 'undefined' ? CNCR_BGGID : 0), what: 'The map, the heroes and each mission&rsquo;s rules' },
+  { kind: 'rove', id: () => (typeof ROVE_BGGID !== 'undefined' ? ROVE_BGGID : 0), what: 'The Rovers, the lyst and the ether' },
+  { kind: 'oath', id: () => (typeof OATHSWORN_BGGID !== 'undefined' ? OATHSWORN_BGGID : 0), what: 'The trail through the Deepwood and the boss rankings' },
+  { kind: 'gauntlet', id: () => (typeof MC_BGGID !== 'undefined' ? MC_BGGID : 0), what: 'The Gauntlet: every villain in release order, on Expert' },
+];
+let _exSheets = null;      // kind → the viewer's campaigns [{cid, name, pct, text, done, at}], once loaded
+let _exSheetsFor = null;   // whose they are
+const _exDay = (ms) => { if (!ms) return ''; const d = new Date(ms); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+
+// The viewer's campaigns of each sheet game, newest first.
+async function _exLoadSheets() {
+  const me = typeof _navPlayer === 'function' ? _navPlayer() : null;
+  const out = {};
+  const canon = (n) => (typeof _origCanon === 'function' ? _origCanon(n) : n);
+  const isMe = (n) => !!me && !!n && canon(n) === canon(me);
+  const add = (kind, cid, c, sum, name) => {
+    if (!sum) return;
+    (out[kind] = out[kind] || []).push({ cid, name, ...sum, stopped: c.status === 'stopped', at: _exDay(c.updated || c.created) });
+  };
+  await Promise.all([
+    typeof _crLoad === 'function' && _crLoad(true).then(() => {
+      for (const cid in _crCamps) {
+        const c = _crCamps[cid];
+        if (!_crList(c.players).concat(c.gm || []).some(isMe)) continue;
+        add('cr', cid, c, crSummary(c), c.name || CR_SLOTS.map(s => (c.heroes || {})[s]).filter(h => h && h.id).map(_crHeroName).join(', '));
+      }
+    }).catch(e => console.warn('Campaigns: Codenames', e)),
+    typeof _rvLoad === 'function' && _rvLoad(true).then(() => {
+      for (const cid in _rvCamps) if (_rvMine(_rvCamps[cid])) add('rove', cid, _rvCamps[cid], rvSummary(_rvCamps[cid]), _rvCamps[cid].name || _rvParty(_rvCamps[cid]).players.join(', '));
+    }).catch(e => console.warn('Campaigns: Rove', e)),
+    ...['oath', 'gauntlet'].map(kind => typeof pcLoad === 'function' && pcLoad(kind).then(camps => {
+      for (const cid in camps) if (pcIsMine(camps[cid])) add(kind, cid, camps[cid], pcSummary(kind, cid, camps[cid]), camps[cid].name || pcPlayers(camps[cid]).join(', '));
+    }).catch(e => console.warn('Campaigns:', kind, e))),
+  ]);
+  for (const k in out) out[k].sort((a, b) => (a.stopped - b.stopped) || b.at.localeCompare(a.at));
+  _exSheets = out;
+  _exSheetsFor = me;
+}
+
+// A progress bar: green when done; faded up to where your plays start.
+function _exBarHtml(pct, done, firstPct) {
+  const w = Math.max(3, Math.min(100, pct));
+  const known = firstPct > 0 && w > 0 ? Math.min(100, Math.round(firstPct / w * 100)) : 0;
+  return `<span class="ex-camp-bar${done ? ' done' : ''}"><i style="width:${w}%${known ? `;--known:${known}%` : ''}"${known ? ' class="part"' : ''}></i></span>`;
+}
+
 function _exCampaignCards() {
   const me = typeof _navPlayer === 'function' ? _navPlayer() : null;
-  const member = !!(me && typeof ILIOUPOLI_MEMBERS !== 'undefined' && ILIOUPOLI_MEMBERS.has(me));
-  const sheets = [
-    typeof CNCR_BGGID !== 'undefined' && { id: CNCR_BGGID, what: 'The map, the heroes and each mission&rsquo;s rules', open: 'game' },
-    typeof ROVE_BGGID !== 'undefined' && { id: ROVE_BGGID, what: 'The rovers, the lyst and the ether', open: 'game' },
-    member && typeof OATHSWORN_BGGID !== 'undefined' && { id: OATHSWORN_BGGID, what: 'The boss trail and your ranking &middot; Ilioupoli Bros', open: 'oathsworn' },
-    member && typeof MC_BGGID !== 'undefined' && { id: MC_BGGID, what: 'The Gauntlet &middot; Ilioupoli Bros', open: 'gauntlet' },
-  ].filter(c => c && findGameByBggId(c.id));
-  const card = (c) => {
-    const game = findGameByBggId(c.id);
-    const all = PLAY_HISTORY[c.id] || [];
-    const p = typeof progressPlaysOf === 'function' ? progressPlaysOf(all) : { plays: all, mine: false };
-    const cp = typeof campaignProgress === 'function' ? campaignProgress(c.id, p.plays) : null;
-    const last = p.plays.reduce((d, x) => (x.date > d ? x.date : d), '');
-    return { last, done: !!(cp && cp.complete), html: `<button type="button" class="ex-camp" data-ex-camp="${c.open}|${c.id}">
-      <img class="ex-camp-cover" src="images/${c.id}.jpg" alt="" loading="lazy" onerror="__imgFallback(this, ${c.id})">
-      <span class="ex-camp-main">
-        <b>${_escapeHtml(game.name)}</b>
-        ${c.what ? `<span class="ex-camp-what">${c.what}</span>` : ''}
-        ${cp ? `<span class="ex-camp-bar${cp.complete ? ' done' : ''}"><i style="width:${Math.max(3, cp.pct)}%"></i></span><span class="ex-camp-sub">${cp.complete ? _escapeHtml(cp.reachedText) : `${_escapeHtml(cp.stageText)}${cp.reachedText ? ` &middot; ${_escapeHtml(cp.reachedText)}` : ''}`}</span>` : ''}
-        <span class="ex-camp-sub">${last ? `${p.mine ? 'You last played it' : 'Last played'} ${_fmtDateShort(last)}` : 'Not played yet'}</span>
-      </span>
-      <span class="ex-camp-go" aria-hidden="true">&rsaquo;</span>
-    </button>` };
-  };
-  const sheetIds = new Set(sheets.map(c => c.id));
-  const followed = Object.keys(typeof CAMPAIGN_PROGRESS !== 'undefined' ? CAMPAIGN_PROGRESS : {}).map(Number)
-    .filter(id => !sheetIds.has(id) && findGameByBggId(id) && (PLAY_HISTORY[id] || []).length)
-    .map(id => card({ id, open: 'plays' }))
-    .sort((a, b) => (a.done - b.done) || b.last.localeCompare(a.last));
-  return { sheets: sheets.map(c => card(c).html), followed: followed.map(c => c.html) };
+  const esc = _escapeHtml;
+  const cards = [];
+  // the sheet games: yours, or a start
+  for (const S of EX_SHEETS) {
+    const id = S.id();
+    const game = id && findGameByBggId(id);
+    if (!game) continue;
+    const loaded = _exSheets && _exSheetsFor === me;
+    const mine = (loaded && _exSheets[S.kind]) || [];
+    const top = mine[0];
+    let body;
+    if (top) {
+      body = `<span class="ex-camp-party">${esc(top.name || 'Your party')}${top.stopped ? ' &middot; stopped' : ''}</span>
+        ${_exBarHtml(top.pct, top.done, 0)}
+        <span class="ex-camp-sub">${esc(top.text)}</span>
+        ${mine.length > 1 ? `<span class="ex-camp-sub">and ${mine.length - 1} more of yours</span>` : ''}`;
+    } else {
+      body = `<span class="ex-camp-what">${S.what}</span>
+        <span class="ex-camp-sub ex-camp-start">${!me ? 'Pick who you are to start one' : loaded ? 'Start a campaign for your group &rsaquo;' : 'Looking for yours&hellip;'}</span>`;
+    }
+    cards.push({
+      order: top ? (top.done ? 2 : top.stopped ? 1.5 : 0) : 1, at: top ? top.at : '',
+      html: `<button type="button" class="ex-camp${top && top.done ? ' done' : ''}" data-ex-camp="${S.kind}|${id}|${top ? esc(top.cid) : ''}">
+        <img class="ex-camp-cover" src="images/${id}.jpg" alt="" loading="lazy" onerror="__imgFallback(this, ${id})">
+        <span class="ex-camp-main"><b>${esc(game.name)}</b><span class="ex-camp-tag">Campaign sheet</span>${body}</span>
+      </button>`,
+    });
+  }
+  // followed from the plays you were in
+  const sheetIds = new Set(EX_SHEETS.map(S => S.id()));
+  if (me && typeof progressPlaysOf === 'function') {
+    for (const id of Object.keys(typeof CAMPAIGN_PROGRESS !== 'undefined' ? CAMPAIGN_PROGRESS : {}).map(Number)) {
+      if (sheetIds.has(id)) continue;
+      const game = findGameByBggId(id);
+      const p = progressPlaysOf(PLAY_HISTORY[id] || []);
+      if (!game || !p.mine) continue;   // only the ones you play
+      const cp = campaignProgress(id, p.plays);
+      if (!cp) continue;
+      const last = p.plays.reduce((d, x) => (x.date > d ? x.date : d), '');
+      const done = !!cp.complete;
+      const firstPct = !done && cp.first > 1 ? Math.round((cp.first - 1) / cp.total * 100) : 0;
+      cards.push({
+        order: done ? 2 : 0, at: last,
+        html: `<button type="button" class="ex-camp${done ? ' done' : ''}" data-ex-camp="plays|${id}|">
+          <img class="ex-camp-cover" src="images/${id}.jpg" alt="" loading="lazy" onerror="__imgFallback(this, ${id})">
+          <span class="ex-camp-main"><b>${esc(game.name)}</b>
+            ${_exBarHtml(cp.pct, done, firstPct)}
+            <span class="ex-camp-sub">${done ? esc(cp.reachedText || cp.stageText) : `${esc(cp.stageText)}${cp.reachedText ? ` &middot; ${esc(cp.reachedText)}` : ''}`}</span>
+            ${firstPct ? `<span class="ex-camp-sub ex-camp-gap">Your plays start at ${esc(_exStage(id, cp.first))}: the ones before aren&rsquo;t logged</span>` : ''}
+            <span class="ex-camp-sub">You last played it ${_fmtDateShort(last)}</span>
+          </span>
+        </button>`,
+      });
+    }
+  }
+  // what you're playing, newest first; then campaigns to start; then the finished ones
+  return cards.sort((a, b) => (a.order - b.order) || b.at.localeCompare(a.at)).map(c => c.html);
+}
+// A stage as the game counts it: "mission 6", Take Time's "folder 5, clock 1".
+function _exStage(id, n) {
+  const cfg = CAMPAIGN_PROGRESS[id] || {};
+  if (cfg.format === 'folder-clock') {
+    const per = cfg.perFolder || 1, folder = Math.ceil(n / per);
+    return `folder ${folder}, clock ${n - (folder - 1) * per}`;
+  }
+  return `${(cfg.label || 'stage').toLowerCase()} ${n}`;
 }
 function buildCampaignsTabHtml() {
-  const { sheets, followed } = _exCampaignCards();
-  return `${sheets.length ? `<div class="stats-section"><div class="stats-section-title">Campaign sheets</div><div class="ex-camps">${sheets.join('')}</div></div>` : ''}
-    ${followed.length ? `<div class="stats-section"><div class="stats-section-title">Followed from your plays</div><div class="ex-camps">${followed.join('')}</div></div>` : ''}`;
+  return `<div class="stats-section"><div class="ex-camps" id="ex-camps">${_exCampaignCards().join('')}</div></div>`;
 }
 function wireCampaignsTab(container) {
-  container.querySelectorAll('[data-ex-camp]').forEach(el => el.addEventListener('click', () => {
-    const [open, id] = el.dataset.exCamp.split('|');
-    if (open === 'oathsworn' || open === 'gauntlet') { _ilioSubTab = open; switchToIlioupoli(); return; }
+  const box = container.querySelector('#ex-camps');
+  if (!box) return;
+  box.addEventListener('click', (ev) => {
+    const el = ev.target.closest('[data-ex-camp]');
+    if (!el) return;
+    const [kind, id, cid] = el.dataset.exCamp.split('|');
+    if (kind === 'oath' || kind === 'gauntlet') {
+      _ilioSubTab = kind === 'oath' ? 'oathsworn' : 'gauntlet';
+      if (cid) { _pcOpen[kind] = cid; _pcDraft = null; }
+      switchToIlioupoli();
+      return;
+    }
     const game = findGameByBggId(Number(id));
     if (!game) return;
-    _modalTab = open === 'game' ? 'campaign' : 'plays';
+    if (kind === 'cr' && cid) { _crId = cid; _crDraft = null; }
+    if (kind === 'rove' && cid) { _rvId = cid; _rvDraft = null; }
+    _modalTab = kind === 'plays' ? 'plays' : 'campaign';
     _modalTabFor = game.bggId;
     openModal(game);
-  }));
+  });
+  // the campaigns kept on the sheets: yours, once they're in
+  _exLoadSheets().then(() => {
+    if (box.isConnected && _exploreTab === 'campaigns') box.innerHTML = _exCampaignCards().join('');
+  }).catch(() => {});
 }
 
 // ── Games Tab ──

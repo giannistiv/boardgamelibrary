@@ -5,7 +5,9 @@
 // branching campaign of quests and encounters, milestones, merchant level,
 // reward armor and weapons, the adversary ether fields, lyst, items bought,
 // the Xulc expansion's sheet and notes. Logged games of Rove ("Scenario 0.1")
-// show against their encounter. What the game is (classes, quests, items, the
+// show against their encounter: the party's own, from the day its campaign
+// began. Each party has its own campaign; they show as tabs like the
+// Codenames ones (since 2 Nov 2026), and the party can stop or delete theirs. What the game is (classes, quests, items, the
 // sheet's lists) is in data/rove.js (tools/build-rove-data.py), loaded only
 // when the tab opens.
 
@@ -20,7 +22,8 @@ let _rvData = null;          // data/rove.js
 let _rvCamps = null;         // roveCampaigns from Firebase: {id: campaign}
 let _rvSrc = {};             // id → the store it lives in ('main' | 'spare', see fbWrite)
 let _rvCampsAt = 0;
-let _rvId = null;            // the campaign on screen
+let _rvId = null;            // the campaign open (null: none, or the start form with _rvDraft)
+let _rvDraft = null;         // the start form: { name, players: [], start }
 let _rvTab = 'sheet';        // 'sheet' | 'rovers' | 'shop' | 'xulc' | 'notes'
 let _rvShopSlot = 'all';
 let _rvAsk = null;           // {id, slot}: the shop asking "bought or free?" for that Rover
@@ -55,11 +58,7 @@ async function _rvLoad(force) {
     }
     _rvCampsAt = Date.now();
   }
-  if (!_rvId || !_rvCamps[_rvId]) {
-    // the campaign played most recently
-    const ids = Object.keys(_rvCamps).sort((a, b) => (_rvCamps[b].updated || 0) - (_rvCamps[a].updated || 0));
-    _rvId = ids[0] || null;
-  }
+  if (_rvId && !_rvCamps[_rvId]) _rvId = null;
 }
 
 // Write some fields of the campaign: {path: value}, path relative to the
@@ -98,25 +97,37 @@ function _rvToast(msg) {
   _rvToast.t = setTimeout(() => { el.hidden = true; }, 3500);
 }
 
-// Logged games of Rove, oldest first, with the encounter they name ("Scenario 0.1").
-function _rvPlays() {
+// A campaign's party and its first day: its Rovers' players (a start form:
+// its own list), from the day it began (one started before that was asked:
+// all the party's games).
+const _rvCanon = (n) => (typeof _origCanon === 'function' ? _origCanon(n) : n);
+function _rvParty(c) {
+  const players = Array.isArray(c && c.players) ? c.players : Object.values((c && c.rovers) || {}).map(r => r && r.player).filter(Boolean);
+  return { players, start: (c && c.start) || '' };
+}
+// Logged games of Rove, oldest first, with the encounter they name ("Scenario
+// 0.1"): a campaign's party's (nobody else at the table, from its first day), else all.
+function _rvPlays(c) {
   const out = [];
+  const party = c ? _rvParty(c) : null;
+  const who = party && party.players.length ? new Set(party.players.map(_rvCanon)) : null;
   for (const id of ROVE_IDS) for (const p of (PLAY_HISTORY[id] || [])) {
+    if (who && !(p.date >= party.start && (p.sc || []).length && p.sc.every(s => s && who.has(_rvCanon(s.n))))) continue;
     const m = String(p.b || '').match(/(\d+)\.(\d+)\s*([ab])?/i);
     out.push({ p, date: p.date, won: (p.sc || []).some(s => s.w), enc: m ? `${m[1]}.${m[2]}${(m[3] || '').toLowerCase()}` : null, xulc: id !== ROVE_BGGID });
   }
   return out.sort((a, b) => ((a.p.t || a.date) + (a.p.e || '')).localeCompare((b.p.t || b.date) + (b.p.e || '')));
 }
 
-// The party from the latest game: who played which class.
-function _rvGuessRovers() {
-  const plays = _rvPlays();
+// The party's Rovers: each player, with the class they played in the party's latest game.
+function _rvGuessRovers(d) {
+  const plays = _rvPlays(d);
   const last = plays[plays.length - 1];
-  if (!last) return {};
   const out = {};
-  (last.p.sc || []).slice(0, 4).forEach((s, i) => {
-    const cls = _rvData.classByName[String(s.r || '').trim()];
-    out[RV_SLOTS[i]] = { player: s.n, ...(cls ? { [cls.tier]: cls.name, ...(cls.tier !== 'base' ? { base: cls.base } : {}) } : {}) };
+  d.players.slice(0, 4).forEach((n, i) => {
+    const s = last && (last.p.sc || []).find(x => _rvCanon(x.n) === _rvCanon(n));
+    const cls = s && _rvData.classByName[String(s.r || '').trim()];
+    out[RV_SLOTS[i]] = { player: n, ...(cls ? { [cls.tier]: cls.name, ...(cls.tier !== 'base' ? { base: cls.base } : {}) } : {}) };
   });
   return out;
 }
@@ -126,7 +137,24 @@ function _rvCanEdit(c) {
   const me = _rvMe();
   if (!me) return false;
   const players = Object.values((c && c.rovers) || {}).map(r => r && r.player).filter(Boolean);
-  return !players.length || players.includes(me);
+  return !players.length || players.some(p => _rvCanon(p) === _rvCanon(me)) || (!!c.by && _rvCanon(c.by) === _rvCanon(me));
+}
+function _rvMine(c) {
+  const me = _rvMe();
+  return !!me && Object.values((c && c.rovers) || {}).some(r => r && r.player && _rvCanon(r.player) === _rvCanon(me));
+}
+// Where a campaign stands, for its tab and Play → Campaigns: { pct, text, done }
+function rvSummary(c) {
+  const enc = c.enc || {};
+  const { road, next } = _rvRoad(c);
+  const onRoad = road.filter(r => r.id && !r.bonus);
+  const doneN = onRoad.filter(r => enc[_rvKey(r.id)]).length;
+  const total = 29;   // prologue 3, four quests of 5, the finale 6
+  return {
+    pct: Math.round(Math.min(doneN, total) / total * 100),
+    text: doneN >= total ? 'The campaign is done' : `${doneN} of ${total} encounters${next && next.id ? ` · next: ${next.id}` : ''}`,
+    done: doneN >= total,
+  };
 }
 
 // ── The campaign's shape: which quests are open, taken or closed ──
@@ -189,36 +217,100 @@ function wireRoveCampaign(content) {
   panel.addEventListener('input', (ev) => _rvInput(panel, ev));
 }
 
+const _rvCredit = `<div class="rv-credit">Classes, quests and items from <a href="https://www.roveassistant.com" target="_blank" rel="noopener">Rove Assistant</a>; the sheet is Addax Games' campaign sheet.</div>`;
 function _rvRender(panel) {
   const esc = _escapeHtml;
-  const c = _rvCamps[_rvId];
-  if (!c) { panel.innerHTML = _rvStartHtml(); return; }
+  const c = _rvId && _rvCamps[_rvId];
+  if (!c) {
+    panel.innerHTML = `${_rvTabsHtml()}${_rvDraft ? _rvStartHtml() : ''}<div class="rv-toast" hidden></div>${_rvCredit}`;
+    _rvWireWho(panel);
+    return;
+  }
   const edit = _rvCanEdit(c);
-  const others = Object.keys(_rvCamps).filter(id => id !== _rvId);
   const tabs = [['sheet', 'Sheet'], ['rovers', 'Rovers'], ['shop', 'Shop'], ['xulc', 'Xulc'], ['notes', 'Notes']];
   const body = { sheet: _rvSheetHtml, rovers: _rvRoversHtml, shop: _rvShopHtml, xulc: _rvXulcHtml, notes: _rvNotesHtml }[_rvTab](c, edit);
+  const party = _rvParty(c);
   panel.innerHTML = `
+    ${_rvTabsHtml()}
+    <div class="rv-open">
     <div class="rv-head">
       <input class="rv-party" data-rv-text="name" value="${esc(c.name || '')}" placeholder="Party name" ${edit ? '' : 'readonly'} aria-label="Party name">
-      ${others.length ? `<select class="rv-pick" data-rv-camp aria-label="Campaign">${Object.keys(_rvCamps).map(id => `<option value="${esc(id)}"${id === _rvId ? ' selected' : ''}>${esc(_rvCamps[id].name || 'Unnamed party')}</option>`).join('')}</select>` : ''}
     </div>
+    <div class="cr-sub">${esc(party.players.join(', '))}${party.start ? ` · since ${esc(_rvDate(party.start))}` : ''}</div>
     ${edit ? '' : `<div class="rv-ro">${_rvMe() ? 'Only the party can fill in this sheet.' : 'Log in to fill in the sheet.'}</div>`}
+    ${c.status === 'stopped' ? `<div class="cr-end stopped">Stopped on ${esc(_rvDate(c.stopped))}: it&rsquo;s all kept as it was.${edit ? '<button type="button" class="rv-btn rv-btn-sm" data-rv-resume>Pick it up again</button>' : ''}</div>` : ''}
     <div class="rv-tabs" role="tablist">${tabs.map(([k, l]) => `<button type="button" class="rv-tab${_rvTab === k ? ' on' : ''}" data-rv-tab="${k}">${l}</button>`).join('')}</div>
     <div class="rv-body${edit ? '' : ' rv-readonly'}">${body}</div>
+    ${edit ? `<div class="pc-foot">${c.status ? '' : '<button type="button" class="rv-link" data-rv-stop>Stop this campaign</button>'}<button type="button" class="rv-link pc-del" data-rv-delete>Delete this campaign</button></div>` : ''}
+    </div>
     <div class="rv-toast" hidden></div>
-    <div class="rv-credit">Classes, quests and items from <a href="https://www.roveassistant.com" target="_blank" rel="noopener">Rove Assistant</a>; the sheet is Addax Games' campaign sheet.</div>`;
+    ${_rvCredit}`;
+}
+function _rvDate(v) {
+  if (!v) return '';
+  const d = typeof v === 'number' ? new Date(v) : new Date(String(v).slice(0, 10) + 'T12:00:00');
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
+// The campaigns as tabs: yours first, the stopped ones apart; nothing opens until one is tapped.
+function _rvTabsHtml() {
+  const esc = _escapeHtml;
+  const when = (c) => c.updated || c.created || 0;
+  const ids = Object.keys(_rvCamps).sort((a, b) => (_rvMine(_rvCamps[b]) - _rvMine(_rvCamps[a])) || (when(_rvCamps[b]) - when(_rvCamps[a])));
+  const tab = (id) => {
+    const c = _rvCamps[id];
+    const who = _rvParty(c).players.join(', ');
+    return `<button type="button" class="cr-camp${id === _rvId ? ' on' : ''}${c.status ? ' ended' : ''}" data-rv-open="${esc(id)}" style="--cr-c:#c98a3a" aria-expanded="${id === _rvId}">
+      <b>${esc(c.name || who || 'A party')}</b>
+      <span>${esc(c.status === 'stopped' ? `stopped ${_rvDate(c.stopped)}` : rvSummary(c).text)}</span>
+      ${who ? `<span class="cr-camp-who">${esc(who)}</span>` : ''}</button>`;
+  };
+  const active = ids.filter(id => !_rvCamps[id].status), ended = ids.filter(id => _rvCamps[id].status);
+  const isNew = !_rvId && !!_rvDraft;
+  return `<div class="cr-camps">${active.map(tab).join('')}
+      <button type="button" class="cr-camp cr-camp-new${isNew ? ' on' : ''}" data-rv-open="__new" aria-expanded="${isNew}"><b>+ A new campaign</b><span>For your party</span></button></div>
+    ${ended.length ? `<div class="rv-sub">Stopped</div><div class="cr-camps">${ended.map(tab).join('')}</div>` : ''}
+    ${!_rvId && !_rvDraft && ids.length ? '<div class="rv-hint cr-camps-hint">Tap a campaign to open it.</div>' : ''}`;
+}
+
+// Starting one: the players (typed, with everyone offered), a name, the day it began.
 function _rvStartHtml() {
   const esc = _escapeHtml;
-  const guess = _rvGuessRovers();
-  const who = Object.values(guess).map(r => `${esc(r.player)}${r.base ? ` (${esc(r.base)})` : ''}`).join(', ');
-  const logged = _rvPlays().filter(p => p.enc && p.won).length;
-  return `<div class="rv-start">
-    <div class="rv-start-title">Start the campaign sheet</div>
-    <div class="rv-start-sub">${who ? `The party from your last game: ${who}.` : 'No games of Rove logged yet.'}${logged ? ` ${logged} encounter${logged === 1 ? '' : 's'} won in the logged games will be ticked.` : ''} You can change all of it after.</div>
-    ${_rvMe() ? `<button type="button" class="rv-btn" data-rv-start>Start</button>` : '<div class="rv-start-sub">Log in to start it.</div>'}
+  const d = _rvDraft;
+  const guess = _rvGuessRovers(d);
+  const classes = Object.values(guess).filter(r => r.base).map(r => `${esc(r.player)} (${esc(r.base)})`).join(', ');
+  const logged = d.players.length ? _rvPlays(d).filter(p => p.enc && p.won && !p.xulc).length : 0;
+  return `<div class="rv-start cr-start">
+    <div class="rv-start-title">Start a campaign</div>
+    <div class="rv-start-sub">One sheet per party: up to four Rovers. The games of these players from that day on (nobody else at the table) count.</div>
+    <div class="rv-sub">Players <span class="cr-count">${d.players.length} of 4</span></div>
+    <div class="cr-people">${d.players.map(p => `<span class="cr-person">${esc(p)}<button type="button" class="cr-person-x" data-rv-draft-x="${esc(p)}" aria-label="Take ${esc(p)} off">&times;</button></span>`).join('')}
+      ${d.players.length < 4 ? '<input class="rv-in cr-who" data-rv-who placeholder="Add a player" maxlength="40" enterkeyhint="done">' : ''}</div>
+    <div class="rv-fields pc-fields">
+      <label class="rv-field"><span>Name</span><input class="rv-in" data-rv-draft-name value="${esc(d.name)}" placeholder="Optional: the party&rsquo;s name" maxlength="40"></label>
+      <label class="rv-field"><span>From</span><input type="date" class="rv-in" data-rv-draft-start value="${esc(d.start)}"></label>
+    </div>
+    <div class="rv-hint">${classes ? `Classes from their last game: ${classes}. ` : ''}${logged ? `${logged} encounter${logged === 1 ? '' : 's'} won in their logged games will be ticked. ` : ''}You can change all of it after.</div>
+    ${_rvMe() ? `<button type="button" class="rv-btn" data-rv-start${d.players.length ? '' : ' disabled'}>Start the campaign</button>` : '<div class="rv-start-sub">Log in to start one.</div>'}
   </div>`;
+}
+function _rvWireWho(panel) {
+  const inp = panel.querySelector('input[data-rv-who]');
+  if (!inp || typeof comboAttach !== 'function') return;
+  const add = (v) => {
+    v = String(v || '').trim().replace(/\s+/g, ' ').slice(0, 40);
+    const known = [...(typeof _knownPlayerNames === 'function' ? _knownPlayerNames() : [])];
+    v = known.find(n => n.toLowerCase() === v.toLowerCase()) || v;
+    if (v && _rvDraft.players.length < 4 && !_rvDraft.players.some(p => _rvCanon(p) === _rvCanon(v))) _rvDraft.players.push(v);
+    _rvRender(panel);
+  };
+  const options = () => {
+    const me = _rvMe();
+    const all = [...(typeof _knownPlayerNames === 'function' ? _knownPlayerNames() : [])].sort((a, b) => a.localeCompare(b));
+    return [...new Set([me, ...all].filter(Boolean))].filter(n => !_rvDraft.players.some(p => _rvCanon(p) === _rvCanon(n)));
+  };
+  comboAttach(inp, { options, onPick: add, max: 80 });
+  inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); add(inp.value); } });
 }
 
 // ── Sheet: party level, the campaign, milestones, rewards, ether fields, lyst ──
@@ -228,7 +320,7 @@ function _rvSheetHtml(c, edit) {
   const enc = c.enc || {};
   const qs = _rvQuestState(c);
   const { road, next } = _rvRoad(c);
-  const plays = _rvPlays();
+  const plays = _rvPlays(c);
   const byEnc = {};
   plays.forEach(p => { if (p.enc) (byEnc[p.enc] = byEnc[p.enc] || []).push(p); });
   const onRoad = road.filter(r => r.id && !r.bonus);
@@ -502,7 +594,7 @@ function _rvXulcHtml(c, edit) {
 // ── Notes and the games logged ──
 function _rvNotesHtml(c, edit) {
   const esc = _escapeHtml;
-  const plays = _rvPlays().slice().reverse();
+  const plays = _rvPlays(c).slice().reverse();
   const D = _rvData;
   const title = (id) => { const e = Object.values(D.quests).flatMap(q => q.encounters).find(x => x.id === id); return e ? e.title : ''; };
   return `<textarea class="rv-notes" data-rv-text="notes" placeholder="Notes: story choices, keywords, what to remember next time…" ${edit ? '' : 'readonly'}>${esc(c.notes || '')}</textarea>
@@ -516,17 +608,35 @@ function _rvNotesHtml(c, edit) {
 
 // ── what a tap or an edit does ──
 async function _rvClick(panel, ev) {
-  const t = ev.target.closest('button[data-rv-tab],button[data-rv-start],button[data-rv-enc],button[data-rv-level],button[data-rv-ms],button[data-rv-msv],button[data-rv-merchant],button[data-rv-reward],button[data-rv-ether],button[data-rv-lyst],button[data-rv-lystadd],button[data-rv-fill],button[data-rv-slot],button[data-rv-own],button[data-rv-acq],button[data-rv-acq-cancel],button[data-rv-remove],button[data-rv-xon],button[data-rv-xenc],button[data-rv-xms],button[data-rv-xinf],button[data-rv-xboard],button[data-rv-xether]');
+  const t = ev.target.closest('button[data-rv-open],button[data-rv-draft-x],button[data-rv-stop],button[data-rv-resume],button[data-rv-delete],button[data-rv-tab],button[data-rv-start],button[data-rv-enc],button[data-rv-level],button[data-rv-ms],button[data-rv-msv],button[data-rv-merchant],button[data-rv-reward],button[data-rv-ether],button[data-rv-lyst],button[data-rv-lystadd],button[data-rv-fill],button[data-rv-slot],button[data-rv-own],button[data-rv-acq],button[data-rv-acq-cancel],button[data-rv-remove],button[data-rv-xon],button[data-rv-xenc],button[data-rv-xms],button[data-rv-xinf],button[data-rv-xboard],button[data-rv-xether]');
   if (!t || !panel.contains(t) || t.disabled) return;
   const ds = t.dataset;
+  if (ds.rvOpen) {
+    // a campaign's tab opens it, or closes it when it's the one open
+    if (ds.rvOpen === '__new') {
+      const open = !_rvId && _rvDraft;
+      const today = new Date();
+      _rvDraft = open ? null : { name: '', players: _rvMe() ? [_rvMe()] : [], start: `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}` };
+      _rvId = null;
+    } else {
+      _rvId = _rvId === ds.rvOpen ? null : ds.rvOpen;
+      _rvDraft = null;
+    }
+    _rvRender(panel);
+    return;
+  }
+  if (ds.rvDraftX) { _rvDraft.players = _rvDraft.players.filter(p => p !== ds.rvDraftX); _rvRender(panel); return; }
   if (ds.rvTab) { _rvTab = ds.rvTab; _rvRender(panel); return; }
   if (ds.rvSlot) { _rvShopSlot = ds.rvSlot; _rvRender(panel); return; }
   if (ds.rvStart !== undefined) {
+    const d = _rvDraft;
+    if (!d || !d.players.length) return;
     t.disabled = true;
     const enc = {};
-    _rvPlays().forEach(p => { if (p.enc && p.won && !p.xulc) enc[_rvKey(p.enc)] = p.date; });
+    _rvPlays(d).forEach(p => { if (p.enc && p.won && !p.xulc) enc[_rvKey(p.enc)] = p.date; });
     try {
-      await _rvCreate({ name: '', level: 1, rovers: _rvGuessRovers(), enc, created: Date.now(), updated: Date.now(), by: _rvMe() });
+      await _rvCreate({ name: d.name.trim(), level: 1, rovers: _rvGuessRovers(d), enc, start: d.start, created: Date.now(), updated: Date.now(), by: _rvMe() });
+      _rvDraft = null;
     } catch (e) {
       console.warn('Rove campaign: not started', e);
       t.disabled = false;
@@ -538,6 +648,20 @@ async function _rvClick(panel, ev) {
   }
   const c = _rvCamps[_rvId];
   if (!c || !_rvCanEdit(c)) return;
+  if (ds.rvDelete !== undefined) {
+    if (!confirm(`Delete “${c.name || _rvParty(c).players.join(', ') || 'this campaign'}”? Its games stay in the play log; only the campaign sheet goes.`)) return;
+    try { await fbWrite(`roveCampaigns/${_rvId}`, 'DELETE', null, _rvSrc[_rvId]); }
+    catch (e) { console.warn('Rove campaign: not deleted', e); _rvToast('Not deleted. Check the connection and try again.'); return; }
+    delete _rvCamps[_rvId];
+    _rvId = null;
+    _rvRender(panel);
+    return;
+  }
+  if (ds.rvStop !== undefined || ds.rvResume !== undefined) {
+    _rvPatch(ds.rvStop !== undefined ? { status: 'stopped', stopped: Date.now() } : { status: null, stopped: null });
+    _rvRender(panel);
+    return;
+  }
   const now = new Date();
   const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
   const up = {};
@@ -554,7 +678,7 @@ async function _rvClick(panel, ev) {
     if (!amt) return;
     _rvLystUp(c, up, amt, panel.querySelector('.rv-lyst-note').value.trim());
   }
-  else if (ds.rvFill !== undefined) _rvPlays().forEach(p => { if (p.enc && p.won && !p.xulc && !(c.enc || {})[_rvKey(p.enc)]) up[`enc/${_rvKey(p.enc)}`] = p.date; });
+  else if (ds.rvFill !== undefined) _rvPlays(c).forEach(p => { if (p.enc && p.won && !p.xulc && !(c.enc || {})[_rvKey(p.enc)]) up[`enc/${_rvKey(p.enc)}`] = p.date; });
   else if (ds.rvAcqCancel !== undefined) { _rvAsk = null; _rvRender(panel); return; }
   else if (ds.rvOwn || ds.rvAcq) {
     const [id, slot, pick] = (ds.rvOwn || ds.rvAcq).split('|');
@@ -611,7 +735,7 @@ function _rvLystUp(c, up, d, note) {
 
 function _rvChange(panel, ev) {
   const t = ev.target;
-  if (t.matches('[data-rv-camp]')) { _rvId = t.value; _rvRender(panel); return; }
+  if (t.matches('[data-rv-draft-start]')) { _rvDraft.start = t.value || _rvDraft.start; _rvRender(panel); return; }
   const c = _rvCamps[_rvId];
   if (!c || !_rvCanEdit(c)) return;
   if (t.matches('[data-rv-rover]')) {
@@ -630,6 +754,7 @@ function _rvChange(panel, ev) {
 // Typing in the party name, the notes or an infestation choice: saved a moment after you stop.
 function _rvInput(panel, ev) {
   const t = ev.target;
+  if (t.matches('[data-rv-draft-name]')) { _rvDraft.name = t.value; return; }
   const path = t.dataset && t.dataset.rvText;
   if (!path) return;
   const c = _rvCamps[_rvId];

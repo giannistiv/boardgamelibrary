@@ -355,6 +355,15 @@ function _crState(c) {
   if (ph.next.m) return `next: ${ph.next.m.n} ${ph.next.m.place}`;
   return 'where next?';
 }
+// Where a campaign stands, for Play → Campaigns: { pct, text, done }, the
+// stage reached on its map (won: all of it).
+function crSummary(c) {
+  const map = _crMapOf(c);
+  const stages = Math.max(...map.missions.map(m => m.stage));
+  const reached = Object.keys(c.done || {}).map(k => _crMis(c, k)).filter(Boolean).reduce((n, m) => Math.max(n, m.stage), 0);
+  const won = c.status === 'won';
+  return { pct: won ? 100 : Math.round(reached / stages * 100), text: `${map.name} · ${_crState(c)}`, done: won };
+}
 // The campaigns as tabs: yours first, the stopped and finished ones apart.
 function _crTabsHtml() {
   const esc = _escapeHtml;
@@ -548,7 +557,7 @@ function _crCampHtml(c, edit) {
       <button type="button" class="rv-dot" data-cr-coins="1" aria-label="One coin more">+</button>
     </div>
     ${log.length ? `<div class="rv-sec">Lately</div><div class="cr-log">${log.map(([ts, l]) => { const m = _crMis(c, l.m); return `<div class="cr-log-row"><span>${esc(_crShortDate(l.at))}</span><span>${esc(m ? `${m.n} · ${m.place}` : l.m)}${l.gm ? `<i> · GM ${esc(l.gm)}</i>` : ''}</span><b class="${l.won ? 'won' : 'lost'}">${l.won ? 'won' : 'lost'}</b><span class="cr-log-acts">${_crLogActs(ts, l, edit)}</span></div>`; }).join('')}</div>` : ''}
-    ${edit && !c.status ? '<button type="button" class="rv-link cr-stop" data-cr-stop>Stop this campaign</button>' : ''}`;
+    ${edit ? `<div class="pc-foot">${c.status ? '' : '<button type="button" class="rv-link" data-cr-stop>Stop this campaign</button>'}<button type="button" class="rv-link pc-del" data-cr-delete>Delete this campaign</button></div>` : ''}`;
 }
 // A mission's line: its play (BG Stats' QR code, and the pencil for whoever
 // may change it), or a button to log it.
@@ -1095,6 +1104,18 @@ async function _crClick(panel, ev) {
   }
   const c = _crCamps[_crId];
   if (!c || !_crCanEdit(c)) return;
+  if (ds.crDelete !== undefined) {
+    // the whole campaign goes; its missions' plays stay in the play log
+    if (!confirm(`Delete “${c.name || 'this campaign'}”? Its plays stay in the play log; only the campaign sheet goes.`)) return;
+    const id = _crId;
+    try { await fbWrite(`crCampaigns/${id}`, 'DELETE', null, _crSrc[id]); }
+    catch (e) { console.warn('Codenames campaign: not deleted', e); _crToast('Not deleted. Check the connection and try again.'); return; }
+    _crUnfollow();
+    delete _crCamps[id];
+    _crId = null;
+    _crRender(panel);
+    return;
+  }
   const map = _crMapOf(c);
   const hero = (s) => c.heroes[s];
   const up = {};

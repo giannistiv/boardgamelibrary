@@ -380,7 +380,7 @@
   .gt-dim{color:var(--text-3)}
   .gt-who{display:inline-flex;align-items:center;justify-content:center;width:1.25rem;height:1.25rem;border-radius:50%;
     font-size:0.66rem;font-weight:800;color:#0b0b0d;vertical-align:-0.2em;flex:0 0 auto}
-  .gt-p0{background:var(--gt-p0)} .gt-p1{background:var(--gt-p1)}
+  .gt-p0{background:var(--gt-p0)} .gt-p1{background:var(--gt-p1)} .gt-p2{background:#b48cf2} .gt-p3{background:#7fd48a}
   .gt-sec{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-3);margin:1.4rem 0 0.55rem;display:flex;align-items:center;gap:0.45rem}
   .gt-note{font-size:0.8rem;line-height:1.55;color:var(--text-2);background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:0.7rem 0.85rem;margin-top:0.7rem}
   .gt-note b{color:var(--text)}
@@ -1466,6 +1466,19 @@
   .cr-camps-hint{margin-top:0.5rem}
   .cr-open{margin-top:0.8rem;padding-top:0.8rem;border-top:2px solid var(--cr-m,var(--line-2))}
   .cr-stop{margin-top:1.2rem}
+  /* a campaign's own: stop and delete (Codenames, Rove, Oathsworn, the Gauntlet) */
+  .pc-foot{display:flex;justify-content:flex-end;gap:1.2rem;margin-top:1.4rem}
+  .pc-foot .rv-link{display:inline-block;margin:0}
+  .pc-del{color:var(--loss)}
+  .pc-fields{margin-top:0.8rem;text-align:left}
+  .pc-start .cr-people,.cr-start .cr-people{justify-content:center}
+  .pc-open{margin-top:0.9rem;padding-top:0.9rem;border-top:1px solid var(--line)}
+  .pc-head{margin-bottom:0.9rem}
+  .pc-party{display:flex;flex-wrap:wrap;align-items:center;gap:0.4rem 0.8rem;margin-top:0.5rem}
+  .pc-from{display:inline-flex;align-items:center;gap:0.4rem;font-size:0.72rem;font-weight:700;color:var(--text-3)}
+  .pc-head .cr-end{margin-top:0.7rem}
+  .pc-root{width:100%}
+  .rv-open{margin-top:0.9rem}
   .rv-readonly .cr-chip,.rv-readonly .cr-pm-name{pointer-events:auto}
   .cr .rv-toast.ok{background:var(--win-soft);color:var(--win)}
   .cr-start .rv-sub{margin-top:1rem}
@@ -2558,17 +2571,25 @@
   /* Library → Find a game, before a search */
   .gb-idle{margin:0.4rem 0 1.4rem;line-height:1.5}
   /* Play → Campaigns (js/explore.js) */
-  .ex-camps{display:grid;grid-template-columns:repeat(auto-fill,minmax(17rem,1fr));gap:0.5rem}
-  .ex-camp{display:flex;align-items:center;gap:0.8rem;padding:0.6rem 0.7rem;border-radius:var(--r);border:1px solid var(--line-2);background:var(--card);color:var(--text);font:inherit;text-align:left;cursor:pointer;min-width:0}
+  /* Play → Campaigns: one list, a big cover on each */
+  .ex-camps{display:grid;grid-template-columns:repeat(auto-fill,minmax(9.5rem,1fr));gap:0.7rem}
+  .ex-camp{display:flex;flex-direction:column;padding:0;border-radius:var(--r-l);border:1px solid var(--line-2);background:var(--card);color:var(--text);font:inherit;text-align:left;cursor:pointer;min-width:0;overflow:hidden;margin:0}
   .ex-camp:hover{border-color:var(--accent-line)}
-  .ex-camp-cover{width:58px;height:58px;flex:0 0 auto;border-radius:8px;object-fit:cover;background:var(--card-2)}
-  .ex-camp-main{display:flex;flex-direction:column;gap:0.18rem;min-width:0;flex:1}
-  .ex-camp-main b{font-size:0.9rem;line-height:1.25}
+  .ex-camp.done{border-color:color-mix(in srgb,var(--win) 45%,transparent)}
+  .ex-camp-cover{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;background:var(--card-2)}
+  .ex-camp-main{display:flex;flex-direction:column;gap:0.25rem;min-width:0;flex:1;padding:0.6rem 0.7rem 0.75rem}
+  .ex-camp-main b{font-size:0.92rem;line-height:1.25}
+  .ex-camp-tag{align-self:flex-start;font-size:0.6rem;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;padding:0.08rem 0.45rem;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
+  .ex-camp-party{font-size:0.8rem;font-weight:600;color:var(--text-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .ex-camp-what,.ex-camp-sub{font-size:0.72rem;color:var(--text-3);line-height:1.35}
-  .ex-camp-bar{display:block;height:6px;border-radius:3px;background:var(--card-3);overflow:hidden;margin-top:0.15rem}
-  .ex-camp-bar i{display:block;height:100%;border-radius:3px;background:var(--accent)}
+  .ex-camp-start{color:var(--accent);font-weight:600}
+  .ex-camp-gap{font-style:italic}
+  .ex-camp-bar{display:block;height:7px;border-radius:4px;background:var(--card-3);overflow:hidden;margin:0.15rem 0 0.05rem}
+  .ex-camp-bar i{display:block;height:100%;border-radius:4px;background:var(--accent)}
   .ex-camp-bar.done i{background:var(--win)}
-  .ex-camp-go{font-size:1.4rem;color:var(--text-4);flex:0 0 auto}
+  /* your plays start mid-campaign: the part before them, faded in */
+  .ex-camp-bar i.part{background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 8%,transparent) 0,color-mix(in srgb,var(--accent) 55%,transparent) var(--known),var(--accent) var(--known))}
+  @media(min-width:700px){.ex-camps{grid-template-columns:repeat(auto-fill,minmax(13rem,1fr))}}
   /* the Ilioupoli Bros' campaign page: back to them all */
   .ilio-back{display:inline-flex;align-items:center;gap:0.2rem;margin:0 0 0.6rem;padding:0.2rem 0;border:0;background:none;color:var(--text-3);font:inherit;font-size:0.8rem;font-weight:600;cursor:pointer}
   .ilio-back:hover{color:var(--accent)}
