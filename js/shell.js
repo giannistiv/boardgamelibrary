@@ -318,7 +318,7 @@ function renderShelf() {
   shelfEl.innerHTML = '';
   const otherBtn = document.getElementById('btn-other-side');
   if (otherBtn) otherBtn.style.display = _libOwnerNow !== 'stiv' ? 'none' : '';
-  if (_libOwnerNow !== 'stiv') { _renderNewArrivals(); return; }   // the bookcase is Στιβ's alone: everyone else has covers
+  if (_libOwnerNow !== 'stiv') return;   // the bookcase is Στιβ's alone: everyone else has covers
   shelfEl.style.gridTemplateColumns = _showingOtherSide ? 'repeat(3,1fr)' : 'repeat(6,1fr)';
 
   const rowRange = _showingOtherSide ? [7, 8] : [1, 6];
@@ -371,33 +371,15 @@ function renderShelf() {
       shelfEl.appendChild(cubby);
     }
   }
-  _renderNewArrivals();
 }
 
-// Games new on BGG (tools/sync-collections.py adds them with row 0) aren't in
-// a cubby yet: they wait in a strip above the shelf until they're placed.
+// A game that came in the last 3 days (tools/sync-collections.py dates it):
+// first in the covers, with a "New" badge. Only for 3 days (the user, 2 Nov
+// 2026); the strip that once held them above the shelf is gone.
+const LIB_NEW_DAYS = 3;
 function _isNewArrival(g) {
-  return !!g.newArrival && !(g.row >= 1);
-}
-function _renderNewArrivals() {
-  const wrap = document.querySelector('.shelf-wrapper');
-  if (!wrap) return;
-  let strip = document.getElementById('lib-new');
-  const games = _libOwnerNow === 'stiv' ? GAMES.filter(_isNewArrival) : [];
-  if (!games.length) { if (strip) strip.remove(); return; }
-  if (!strip) {
-    strip = document.createElement('div');
-    strip.id = 'lib-new';
-    strip.className = 'lib-new';
-    wrap.insertAdjacentElement('beforebegin', strip);
-  }
-  strip.innerHTML = `<div class="lib-new-head">New arrivals <span>not on a shelf yet</span></div>
-    <div class="lib-new-row">${games.map(g => `<button type="button" class="lib-new-game" data-game-id="${_escapeHtml(g.id)}">
-      <img src="images/${g.bggId}.jpg" alt="" loading="lazy" onerror="__imgFallback(this, ${g.bggId})"><span>${_escapeHtml(g.name)}</span></button>`).join('')}</div>`;
-  strip.querySelectorAll('.lib-new-game').forEach(el => el.addEventListener('click', () => {
-    const g = GAMES.find(x => x.id === el.dataset.gameId);
-    if (g) openModal(g);
-  }));
+  const t = g && g.newArrival ? Date.parse(g.newArrival + 'T00:00:00') : 0;
+  return !!t && Date.now() - t < LIB_NEW_DAYS * 864e5;
 }
 
 document.getElementById('btn-other-side').addEventListener('click', () => {

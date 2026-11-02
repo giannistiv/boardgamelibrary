@@ -2547,6 +2547,14 @@
   .you-set .import-section,.you-set .qr-section,.you-set .install-card{margin-top:0.6rem}
   /* Play → Latest plays: Log a play on top */
   .ex-log{display:flex;justify-content:center;margin:0 0 1rem}
+  /* Latest plays: everyone's or yours, each with its game's picture */
+  .ex-plays-who{display:flex;justify-content:center;margin:0 0 0.8rem}
+  .ex-play{display:flex;gap:0.75rem;align-items:flex-start;cursor:pointer}
+  .ex-play:hover{border-color:var(--line-2)}
+  .ex-play-img{width:48px;height:48px;flex:0 0 auto;border-radius:8px;object-fit:cover;background:var(--card-2)}
+  .ex-play-main{flex:1;min-width:0}
+  .ex-play .stats-recent-top{gap:0.6rem;align-items:flex-start}
+  .ex-play .stats-recent-date{flex:0 0 auto;padding-top:0.12rem}
   /* Library → Find a game, before a search */
   .gb-idle{margin:0.4rem 0 1.4rem;line-height:1.5}
   /* Play → Campaigns (js/explore.js) */
@@ -2774,6 +2782,11 @@
     text-decoration:underline;cursor:pointer;padding:0.28rem 0.2rem;
   }
   .gp-auto:hover{color:var(--accent)}
+  /* Tonight: whose place, typed */
+  .gp-at{display:flex;flex-wrap:wrap;align-items:center;gap:0.3rem 0.6rem;flex:1;min-width:0}
+  .gp-at .combo-wrap{flex:1 1 13rem;max-width:20rem;min-width:0}
+  .gp-at-in{width:100%;font-size:0.85rem;padding:0.45rem 0.6rem}
+  .gp-at-note{flex-basis:100%;font-size:0.74rem;color:var(--text-3);line-height:1.35}
   /* "More filters": the less-used rows, folded */
   .gp-more-filters > summary{list-style:none;cursor:pointer;padding:0.5rem 0.1rem;font-size:0.76rem;font-weight:700;color:var(--text-2);display:flex;align-items:center;gap:0.45rem}
   .gp-more-filters > summary::-webkit-details-marker{display:none}
@@ -3070,13 +3083,6 @@
   .play-duration.est{cursor:help}
 
   /* ── Library: new arrivals (owned on BGG, not on a shelf yet) ── */
-  .lib-new{width:100%;max-width:1100px;margin:0 auto 1rem;padding:0.7rem 0.9rem;border-radius:var(--r);background:var(--card);border:1px solid var(--accent-line)}
-  .lib-new-head{font-family:var(--font-display);font-weight:700;font-size:1rem;color:var(--text);margin-bottom:0.5rem}
-  .lib-new-head span{font-family:var(--font);font-size:0.72rem;font-weight:600;color:var(--text-3);margin-left:0.4rem}
-  .lib-new-row{display:flex;gap:0.6rem;overflow-x:auto;padding-bottom:2px}
-  .lib-new-game{flex:0 0 auto;width:92px;display:flex;flex-direction:column;gap:0.3rem;padding:0;border:0;background:none;color:var(--text-2);font:inherit;font-size:0.72rem;text-align:left;cursor:pointer}
-  .lib-new-game img{width:92px;height:92px;border-radius:8px;object-fit:cover;background:var(--card-3)}
-  .lib-new-game span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .lib-new-badge{position:absolute;top:6px;left:6px;padding:0.08rem 0.45rem;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-size:0.62rem;font-weight:800;letter-spacing:0.03em}
 
   /* ── Explore → Trending (BGG's hot list) ── */
@@ -3102,6 +3108,16 @@
   .gn-camp{font-size:0.7rem;font-weight:600;color:var(--win)}
   .gn-more{font-size:0.72rem;color:var(--text-3);margin-top:0.2rem}
   .gn-showall{display:block;width:100%;padding:0.6rem;border-radius:var(--r);border:1px solid var(--line-2);background:transparent;color:var(--accent);font:inherit;font-size:0.82rem;font-weight:600;cursor:pointer}
+  /* For your games: each one can be put away ("Don't care", "Have it") */
+  .gn-row{flex-wrap:wrap;row-gap:0.35rem}
+  .gn-link{display:flex;gap:0.65rem;align-items:center;flex:1 1 14rem;min-width:0;color:var(--text);text-decoration:none}
+  .gn-acts{display:flex;gap:0.35rem;align-items:center;margin-left:auto;flex:0 0 auto}
+  .gn-act{padding:0.28rem 0.65rem;border-radius:999px;border:1px solid var(--line-2);background:transparent;color:var(--text-2);font:inherit;font-size:0.72rem;font-weight:600;cursor:pointer;white-space:nowrap}
+  .gn-act:hover{color:var(--text);border-color:var(--accent-line)}
+  .gn-act:disabled{opacity:0.5;cursor:default}
+  .gn-put .gn-link{opacity:0.45}
+  .gn-put-what{font-size:0.7rem;color:var(--text-3)}
+  .gn-showput{display:block;margin:0.6rem auto 0;padding:0.4rem 0.8rem;border:0;background:none;color:var(--text-3);font:inherit;font-size:0.76rem;text-decoration:underline;cursor:pointer}
   .hot-head{display:flex;flex-direction:column;align-items:flex-start;gap:0.55rem;margin-bottom:0.9rem}
   .hot-sorts .gb-chip{font-size:0.74rem}
   .hot-updated{font-size:0.72rem;color:var(--text-3)}

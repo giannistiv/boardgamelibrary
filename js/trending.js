@@ -1,4 +1,4 @@
-// ── Explore → Trending: the games still to come out ──
+// ── Crowdfunding → Campaigns: the games still to come out ──
 // Every live crowdfunding campaign on BGG (Kickstarter, Gamefound, BackerKit)
 // and the games on BGG's hot list that aren't out yet, the best fit for you
 // first: the main mechanics of the games you play most and love, and how hot
@@ -8,9 +8,9 @@
 // job (tools/fetch-hot.py) and fetched when the tab opens, so it's the latest.
 
 let _hot = null;            // BGG_HOT once loaded
-let _hotFilter = null;      // 'live' (campaigns running now, the default) | 'new' (campaigns that turned up this past week) | 'soon' (hot on BGG, no campaign running) | 'yours' (news for the games you play, js/game-news.js) | 'interested' (the campaigns you marked Interested, js/backing.js)
+let _hotFilter = null;      // 'live' (campaigns running now, the default) | 'new' (campaigns that turned up in the last few days) | 'soon' ("New in retail": hot on BGG, no campaign running) | 'yours' (news for the games you own, js/game-news.js) | 'interested' (the campaigns you marked Interested, js/backing.js)
 let _hotBox = null;         // the tab's list, to redraw after a backing changes
-let _hotSort = 'you';       // 'you' | 'ending' | 'backers' | 'hot'
+let _hotSort = 'backers';   // live campaigns: 'backers' (the first) | 'ending' | 'you'
 
 function trendingAllowed() { return true; }   // open to everyone
 
@@ -35,7 +35,7 @@ const HOT_PLATFORMS = { kickstarter: 'Kickstarter', gamefound: 'Gamefound', back
 
 // ── What's new: campaigns that turned up in BGG's list lately (camp.since,
 // kept by tools/fetch-hot.py), and those this phone hasn't shown before ──
-const HOT_NEW_DAYS = 7;
+const HOT_NEW_DAYS = 4;   // 4 days at most (the user, 2 Nov 2026)
 const _hotIsNew = (g) => { const t = Date.parse((g.camp && g.camp.since) || ''); return !!t && Date.now() - t < HOT_NEW_DAYS * 864e5; };
 function _hotAdded(g) {
   const days = Math.floor((Date.now() - Date.parse(g.camp.since)) / 864e5);
@@ -255,15 +255,16 @@ function _renderHot(box) {
   const fresh = live.filter(_hotIsNew).sort((a, b) => b.camp.since.localeCompare(a.camp.since));
   _hotMarkSeen(live);
   const unseen = live.filter(g => _hotUnseen.has(g.id)).length;
-  if (!_hotFilter) _hotFilter = live.length ? 'live' : 'soon';
+  if (!_hotFilter) _hotFilter = live.length || !soon.length ? 'live' : 'soon';
   if ((_hotFilter === 'soon' && !soon.length) || (_hotFilter === 'new' && !fresh.length)) _hotFilter = 'live';
   const watching = typeof backingInterestedIds === 'function' ? backingInterestedIds() : [];   // only for someone who marked one
   if (_hotFilter === 'interested' && !watching.length) _hotFilter = 'live';
-  // Live, New and Coming soon are chips; For your games and Interested are
-  // Crowdfunding's own small tabs (js/nav.js), so they have none
+  // Live, New and New in retail are chips (an empty one hides); For your
+  // games and Interested are Crowdfunding's own small tabs (js/nav.js), so
+  // they have none
   const chips = ['yours', 'interested'].includes(_hotFilter) ? '' : _gbChips('hot', [['live', `Live campaigns ${live.length}`]]
     .concat(fresh.length ? [['new', `New ${fresh.length}`]] : [])
-    .concat([['soon', `Coming soon ${soon.length}`]]), v => _hotFilter === v);
+    .concat(soon.length ? [['soon', `New in retail ${soon.length}`]] : []), v => _hotFilter === v);
   if (_hotFilter === 'new') {
     const fits = _hotFits();
     box.innerHTML = `
@@ -292,27 +293,27 @@ function _renderHot(box) {
     box.innerHTML = `
       <div class="hot-head">
         ${chips ? `<div class="gb-chips">${chips}</div>` : ''}
-        <span class="hot-updated">New expansions, editions and printings of the games you play, and campaigns for them, from BGG${_news && _news.updated ? ` &middot; updated ${_hotAgo(_news.updated)}` : ''}</span>
+        <span class="hot-updated">New expansions, editions and printings of the games you own, and campaigns for them, from BGG${_news && _news.updated ? ` &middot; updated ${_hotAgo(_news.updated)}` : ''}</span>
       </div>
       ${_gnForYouHtml()}`;
     return;
   }
-  const sorts = _hotFilter === 'live'
-    ? [['you', 'Best for you'], ['ending', 'Ending soon'], ['backers', 'Most backed']]
-    : [['you', 'Best for you'], ['hot', 'Hottest']];
-  if (!sorts.some(s => s[0] === _hotSort)) _hotSort = 'you';
-  if (!taste && _hotSort === 'you') _hotSort = _hotFilter === 'live' ? 'backers' : 'hot';
+  // live campaigns sort three ways, most backed first (the user, 2 Nov 2026);
+  // New in retail is BGG's hot list order
+  const sorts = [['backers', 'Most backed'], ['ending', 'Ending soon'], ['you', 'Best for you']].filter(s => taste || s[0] !== 'you');
+  if (!sorts.some(s => s[0] === _hotSort)) _hotSort = 'backers';
+  const sort = _hotFilter === 'live' ? _hotSort : 'hot';
   const fits = _hotFits();
   const list = (_hotFilter === 'live' ? live : soon).slice().sort(
-    _hotSort === 'ending' ? (a, b) => Date.parse(a.camp.ends) - Date.parse(b.camp.ends)
-    : _hotSort === 'backers' ? (a, b) => b.camp.backers - a.camp.backers
-    : _hotSort === 'hot' ? (a, b) => a.pos - b.pos
+    sort === 'ending' ? (a, b) => Date.parse(a.camp.ends) - Date.parse(b.camp.ends)
+    : sort === 'backers' ? (a, b) => b.camp.backers - a.camp.backers
+    : sort === 'hot' ? (a, b) => a.pos - b.pos
     : (a, b) => fits.get(b.id).score - fits.get(a.id).score);
   box.innerHTML = `
       <div class="hot-head">
         ${chips ? `<div class="gb-chips">${chips}</div>` : ''}
-        <div class="gb-chips hot-sorts">${_gbChips('hotsort', sorts.filter(s => taste || s[0] !== 'you'), v => _hotSort === v)}</div>
-        <span class="hot-updated">${_hotFilter === 'live' ? 'Crowdfunding campaigns running now, from BGG' : 'On BGG&rsquo;s hot list, not out yet'} &middot; updated ${_hotAgo(_hot.updated)}${_hotFilter === 'live' && unseen ? ` &middot; <button type="button" class="hot-unseen" data-gb="hot" data-v="new">${unseen} new since you last looked</button>` : ''}</span>
+        ${_hotFilter === 'live' ? `<div class="gb-chips hot-sorts">${_gbChips('hotsort', sorts, v => _hotSort === v)}</div>` : ''}
+        <span class="hot-updated">${_hotFilter === 'live' ? 'Crowdfunding campaigns running now, from BGG' : 'New games hot on BGG, in the shops or about to be, hottest first'} &middot; updated ${_hotAgo(_hot.updated)}${_hotFilter === 'live' && unseen ? ` &middot; <button type="button" class="hot-unseen" data-gb="hot" data-v="new">${unseen} new since you last looked</button>` : ''}</span>
       </div>
       ${list.map(g => _hotCardHtml(g, libs, fits.get(g.id))).join('') || '<div class="stats-player-sub gb-empty">Nothing here right now.</div>'}`;
 }
@@ -321,7 +322,7 @@ function wireTrendingTab(container) {
   const box = container.querySelector('#hot');
   if (!box) return;
   _hotBox = box;
-  Promise.all([_loadHot(), _loadNews().catch(() => null), typeof loadBacking === 'function' ? loadBacking().catch(() => null) : null]).then(() => _renderHot(box)).catch(() => {
+  Promise.all([_loadHot(), _loadNews().catch(() => null), _gnLoadSkips().catch(() => null), typeof loadBacking === 'function' ? loadBacking().catch(() => null) : null]).then(() => _renderHot(box)).catch(() => {
     box.innerHTML = '<div class="stats-player-sub gb-empty">The list couldn&rsquo;t be loaded. Try again in a moment.</div>';
   });
   box.addEventListener('click', (e) => {
@@ -332,6 +333,14 @@ function wireTrendingTab(container) {
       return;
     }
     if (e.target.closest('[data-gn-all]')) { _gnShowAll = true; _renderHot(box); return; }
+    if (e.target.closest('[data-gn-put]')) { _gnShowPut = !_gnShowPut; _renderHot(box); return; }
+    const skip = e.target.closest('[data-gn-skip]');
+    if (skip) {
+      const [id, k] = skip.dataset.gnSkip.split('|');
+      skip.disabled = true;
+      _gnSkip(id, k).then(() => _renderHot(box));
+      return;
+    }
     if (_hotPicClick(e)) return;
     const card = e.target.closest('.hot-card');
     if (card && !e.target.closest('a')) {

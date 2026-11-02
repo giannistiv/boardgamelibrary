@@ -1,30 +1,80 @@
-// ── Marvel Champions Gauntlet (Ilioupoli Bros) ──
-// Δημητρης and Στιβ play every Marvel Champions scenario in release order, on
-// Expert, with the heroes released by then; a hero who has been played is
-// spent for the rest of the run. Progress is read from the logged plays of the
-// two of them since GAUNTLET.start, matched to the products, heroes and
-// scenarios in data/marvel-champions.js (MarvelCDB, with community win rates
-// from Marvel Champions Tracker). Before a box each of them draws three heroes
-// and picks one, then spins the aspect wheel: those draws, picks and spins are
-// kept in Firebase (mcGauntlet/events, see fbWrite), so both phones see the same result
-// and a reload can't draw again.
+// ── Marvel Champions Gauntlet ──
+// A party (one to four players) plays every Marvel Champions scenario in
+// release order, on Expert, with the heroes released by then; a hero who has
+// been played is spent for the rest of the run. Progress is read from the
+// logged plays of exactly that party since the run's first day, matched to
+// the products, heroes and scenarios in data/marvel-champions.js (MarvelCDB,
+// with community win rates from Marvel Champions Tracker). Before a box each
+// player draws three heroes and picks one, then spins the aspect wheel: those
+// draws, picks and spins are kept in Firebase, so every phone sees the same
+// result and a reload can't draw again. Anyone can start a run for their
+// group (js/party-campaigns.js, since 2 Nov 2026); the Ilioupoli Bros' run is
+// the one it began with.
 
+// The run on screen (gauntletUse): its players, its first day, where its draws
+// and spins are kept and, for the Ilioupoli Bros' run, where the rules began.
 const GAUNTLET = {
+  id: 'ilioupoli',
+  name: 'Ilioupoli Bros',
   start: '2025-12-27',
   players: ['Δημητρης', 'Στιβ'],
   short: { 'Δημητρης': 'Δ', 'Στιβ': 'Σ' },
   // The draw and the aspect wheel start with this box: Red Skull was already
-  // under way when they were agreed.
+  // under way when they were agreed. (A run started here has them from the first box.)
   rulesFrom: 'toafk',
   // Two strikes (a loss burns the aspects, a second burns the heroes) count
   // losses from this day on, and from then a loss sends the box back to its
-  // first scenario.
+  // first scenario. (A run started here: from its first day.)
   strikesFrom: '2026-10-02',
   strikes: 2,
+  events: 'mcGauntlet/events',   // a run started here: mcGauntlet/runEvents/{id}
   // How a logged play counts, where the log is wrong:
   // { date, scen (scenario id), won, note }
   fixes: [],
 };
+const _gtCanon = (n) => (typeof _origCanon === 'function' ? _origCanon(n) : n);
+const _gtSame = (a, b) => !!a && !!b && _gtCanon(a) === _gtCanon(b);
+// A run's settings, from its campaign record (js/party-campaigns.js)
+function _gtSetRun(id, c) {
+  const players = (Array.isArray(c.players) ? c.players : Object.values(c.players || {})).filter(x => typeof x === 'string' && x)
+    .map(n => (typeof _acctDisplay === 'function' ? _acctDisplay(n) : n));
+  // each player's initial (two letters where two share one)
+  const short = {};
+  players.forEach(p => {
+    const one = [...p][0].toUpperCase();
+    short[p] = players.some(o => o !== p && [...o][0].toUpperCase() === one) ? [...p].slice(0, 2).join('') : one;
+  });
+  Object.assign(GAUNTLET, {
+    id, name: c.name || '', start: c.start || '2000-01-01', players, short,
+    rulesFrom: c.rulesFrom || null, strikesFrom: c.strikesFrom || c.start || '2000-01-01',
+    events: c.events || `mcGauntlet/runEvents/${id}`,
+  });
+}
+function gauntletUse(id, c) {
+  if (GAUNTLET.id !== id || _gtEventsFor !== id) { _gtEvents = null; _gtEventsFor = null; _gtSel = {}; }
+  _gtSetRun(id, c);
+}
+// Where a run stands, for Play → Campaigns: {pct, text, done}
+function gauntletSummary(id, c) {
+  if (typeof MC_PRODUCTS === 'undefined') return null;
+  const keep = { ...GAUNTLET }, ev = _gtEvents;
+  try {
+    _gtSetRun(id, c);
+    _gtEvents = null;
+    const st = _gtState();
+    const out = st.units.filter(u => u.released);
+    const done = out.filter(u => u.done).length;
+    return {
+      pct: out.length ? Math.round(done / out.length * 100) : 0,
+      text: st.current ? `${done} of ${out.length} boxes${st.nextScen ? ` · next: ${st.nextScen.name}` : ''}` : 'Every released villain beaten',
+      done: !st.current && out.length > 0,
+    };
+  } finally {
+    Object.assign(GAUNTLET, keep);
+    _gtEvents = ev;
+  }
+}
+const _gtAll = () => (GAUNTLET.players.length === 1 ? 'you' : GAUNTLET.players.length === 2 ? 'both of you' : 'all of you');
 const GT_ASPECTS = ['Aggression', 'Justice', 'Leadership', 'Protection'];
 const GT_ASPECT_KEY = { aggression: 'Aggression', justice: 'Justice', leadership: 'Leadership', protection: 'Protection', pool: "'Pool" };
 // Heroes who don't take the dealt aspect: they count as matching any of it.
@@ -128,20 +178,24 @@ function _gtParseRole(r, cat) {
 }
 
 // ── The draw and the wheel, kept in Firebase ──
-// mcGauntlet/events/{push id} (or its spare store, see fbWrite) = {unit, player, kind: 'offer'|'pick'|'spin',
+// GAUNTLET.events/{push id} (mcGauntlet/events for the Ilioupoli Bros' run,
+// mcGauntlet/runEvents/{run} for the others) = {unit, player, kind: 'offer'|'pick'|'spin',
 // heroes (offer), hero (pick), aspect (spin), round, at, by}. Push ids sort by
-// time; when both phones save the same step, the first one counts.
-let _gtEvents = null, _gtEventsAt = 0;
+// time; when two phones save the same step, the first one counts.
+let _gtEvents = null, _gtEventsAt = 0, _gtEventsFor = null;
 let _gtSel = {};              // player → hero id tapped in their offer, not saved yet
 async function _gtLoadEvents(force) {
-  if (!force && _gtEvents && Date.now() - _gtEventsAt < 20000) return _gtEvents;
-  const { main, spare } = await fbReadBoth('mcGauntlet/events');
+  const id = GAUNTLET.id;
+  if (!force && _gtEvents && _gtEventsFor === id && Date.now() - _gtEventsAt < 20000) return _gtEvents;
+  const { main, spare } = await fbReadBoth(GAUNTLET.events);
+  if (GAUNTLET.id !== id) return _gtEvents;   // another run opened meanwhile
   _gtEvents = Object.entries({ ...(spare || {}), ...(main || {}) }).map(([key, v]) => ({ ...v, key })).sort((x, y) => x.key.localeCompare(y.key));
   _gtEventsAt = Date.now();
+  _gtEventsFor = id;
   return _gtEvents;
 }
 async function _gtSaveEvent(ev) {
-  const { json } = await fbWrite('mcGauntlet/events', 'POST', ev);
+  const { json } = await fbWrite(GAUNTLET.events, 'POST', ev);
   (_gtEvents = _gtEvents || []).push({ ...ev, key: json.name });
 }
 // The same "YYYY-MM-DD HH:MM:SS" local time the logged plays carry.
@@ -156,7 +210,7 @@ function _gtRandom(n) {
 }
 function _gtCanAct() {
   const me = typeof _navPlayer === 'function' ? _navPlayer() : null;
-  return GAUNTLET.players.includes(me) ? me : null;
+  return GAUNTLET.players.find(p => _gtSame(p, me)) || null;
 }
 
 // Each player's hero and aspect in the box you're playing, replayed from the
@@ -250,8 +304,11 @@ function _gtWheel(st, d, p) {
   const u = d.unit;
   const base = [...GT_ASPECTS, ...(u.wave >= st.poolWave ? ["'Pool"] : [])];
   const sl = d.slots[p];
-  const other = d.slots[GAUNTLET.players.find(x => x !== p)];
-  const partner = other.hero && GT_WILDCARDS.has(other.hero.id) ? [] : other.aspects;
+  // the other players' aspects (a wildcard hero's don't count)
+  const others = GAUNTLET.players.filter(x => x !== p).map(x => d.slots[x]);
+  const holder = {};
+  others.forEach(o => { if (!(o.hero && GT_WILDCARDS.has(o.hero.id))) o.aspects.forEach(a => { holder[a] = holder[a] || o.player; }); });
+  const partner = Object.keys(holder);
   // the aspects this player had in each box since the wheel started, in order
   const used = [];
   let prev = [];
@@ -269,7 +326,7 @@ function _gtWheel(st, d, p) {
   const why = {};
   base.forEach(a => {
     if (sl.burnedAspects.includes(a)) why[a] = 'burned';
-    else if (partner.includes(a)) why[a] = `${other.player}'s`;
+    else if (partner.includes(a)) why[a] = `${holder[a]}'s`;
     else if (first && prev.includes(a)) why[a] = 'had it last box';
     else if (cycle.has(a)) why[a] = 'had it this round';
   });
@@ -307,8 +364,8 @@ function _gtState() {
   const heroById = Object.fromEntries(heroes.map(h => [h.id, h]));
 
   const plays = ((typeof PLAY_HISTORY !== 'undefined' && PLAY_HISTORY[MC_BGGID]) || [])
-    .filter(p => p && p.date >= GAUNTLET.start && Array.isArray(p.sc) && p.sc.length === 2
-      && GAUNTLET.players.every(n => p.sc.some(s => s.n === n)))
+    .filter(p => p && p.date >= GAUNTLET.start && Array.isArray(p.sc) && p.sc.length === GAUNTLET.players.length
+      && GAUNTLET.players.every(n => p.sc.some(s => _gtSame(s.n, n))))
     .slice().sort((a, b) => ((a.t || a.date) + (a.e || '')).localeCompare((b.t || b.date) + (b.e || '')));
 
   const attempts = [], problems = [];
@@ -322,7 +379,7 @@ function _gtState() {
     const fix = scen && GAUNTLET.fixes.find(f => f.date === p.date && f.scen === scen.id && !won !== !f.won);
     if (fix) won = fix.won;
     const picks = GAUNTLET.players.map(n => {
-      const s = p.sc.find(x => x.n === n);
+      const s = p.sc.find(x => _gtSame(x.n, n));
       const { heroes: hs, aspects } = _gtParseRole(s && s.r, cat);
       return { player: n, heroes: hs.filter(h => !h.unknown).map(h => heroById[h.id]), unknown: hs.filter(h => h.unknown).map(h => h.unknown), aspects };
     });
@@ -363,7 +420,7 @@ function _gtState() {
   // the box in front of you: who drew and spun what, and the strikes
   const st = { cat, units, heroes, heroById, attempts: attempts.filter(x => x.scen), allAttempts: attempts, problems: [],
     current, nextScen, curWave, today,
-    rulesIdx: Math.max(0, units.findIndex(x => x.code === GAUNTLET.rulesFrom)),
+    rulesIdx: GAUNTLET.rulesFrom ? Math.max(0, units.findIndex(x => x.code === GAUNTLET.rulesFrom)) : 0,
     poolWave: (heroById.deadpool || {}).wave || 7 };
   const draft = _gtDraft(st);
   st.draft = draft;
@@ -404,8 +461,8 @@ function _gtImg(src, cls, alt) {
     : `<span class="${cls} gt-noimg">${_escapeHtml((alt || '?').split(/\s+/).map(w => w[0]).join('').slice(0, 3))}</span>`;
 }
 function _gtWho(name) {
-  const cls = name === GAUNTLET.players[0] ? 'gt-p0' : 'gt-p1';
-  return `<span class="gt-who ${cls}" title="${_escapeHtml(name)}">${GAUNTLET.short[name] || name[0]}</span>`;
+  const i = Math.max(0, GAUNTLET.players.indexOf(name));
+  return `<span class="gt-who gt-p${i}" title="${_escapeHtml(name)}">${_escapeHtml(GAUNTLET.short[name] || name[0])}</span>`;
 }
 function _gtAspectChip(a, extra = '') {
   const k = String(a || '').toLowerCase().replace(/[^a-z]/g, '');
@@ -622,7 +679,7 @@ function _gtDraftHtml(st, d) {
   const title = ready ? `Your heroes for ${u.name}` : GAUNTLET.players.some(p => d.slots[p].need === 'spin') && GAUNTLET.players.every(p => d.slots[p].hero) ? `Spin for ${u.name}` : `Draw for ${u.name}`;
   return `<div class="gt-draft">
     <div class="gt-draft-title">${esc(title)}</div>
-    ${ready ? '' : `<div class="gt-draft-sub">${me ? 'Draw three heroes, pick one, then spin the wheel for your aspect. What the wheel says is saved for both of you.' : `Log in as ${GAUNTLET.players.map(esc).join(' or ')} to draw and spin.`}</div>`}
+    ${ready ? '' : `<div class="gt-draft-sub">${me ? `Draw three heroes, pick one, then spin the wheel for your aspect. What the wheel says is saved for ${_gtAll()}.` : `Log in as ${GAUNTLET.players.map(esc).join(' or ')} to draw and spin.`}</div>`}
     <div class="gt-draft-cols">${GAUNTLET.players.map(col).join('')}</div>
   </div>`;
 }
@@ -831,23 +888,23 @@ function _gtChartHtml(st) {
 function _gtRulesHtml(st) {
   const from = st.units.find(u => u.code === GAUNTLET.rulesFrom);
   return `<div class="gt-rules">
-    <div class="gt-rules-title">The Ilioupoli Gauntlet</div>
-    <div class="gt-rules-sub">House rules, v2. Δημητρης and Στιβ against every villain, in release order.</div>
+    <div class="gt-rules-title">The Gauntlet</div>
+    <div class="gt-rules-sub">House rules, v2. ${_escapeHtml(GAUNTLET.players.join(' and ').replace(/ and (?=.* and )/g, ', '))} against every villain, in release order.</div>
     <ol>
       <li><b>Expert, in release order.</b> Every scenario on Expert: villain stages II and III, the Standard and Expert sets, the recommended modular sets. Boxes and packs come in the order they came out.</li>
       <li><b>Waves.</b> A wave starts with the Core Set and with each big box. Every hero released by the end of your current wave is in the pool, along with anyone left over from earlier waves.</li>
       <li><b>Draw three, pick one.</b> Before a box, each of you draws three heroes from the pool and picks one to play the whole box.</li>
-      <li><b>Spin for your aspect.</b> Then each of you spins the aspect wheel. You get every aspect before any repeats, never the one you had in the box before, and never the same as the other. 'Pool joins the wheel from wave 7, when Deadpool came out. Adam Warlock and Deadpool skip the wheel; Spider-Woman spins one aspect and picks her second.</li>
+      <li><b>Spin for your aspect.</b> Then each of you spins the aspect wheel. You get every aspect before any repeats, never the one you had in the box before, and never one another player has. 'Pool joins the wheel from wave 7, when Deadpool came out. Adam Warlock and Deadpool skip the wheel; Spider-Woman spins one aspect and picks her second.</li>
       <li><b>Spent on play.</b> A hero is spent the moment they're played, win or lose, and never comes back.</li>
       <li><b>Lose and start over.</b> Losing on a villain sends you back to the first scenario of the box: everything in it has to be beaten again.</li>
       <li><b>Two strikes.</b> Lose and both your aspects burn: spin again (a burned aspect can't come back for that hero). Lose again before you've beaten that villain and both heroes burn: draw three each, pick and spin a fresh wheel. Beating the villain who beat you clears the strikes.</li>
       <li><b>Time travel.</b> If the pool can't give you three heroes to draw from, the next wave lends some. A borrowed hero is spent when that wave arrives.</li>
       <li><b>Legend score.</b> A scenario won on the first try is worth 3, on the second 2, after that 1.</li>
     </ol>
-    <div class="gt-rules-sub">The draw and the wheel start with ${from ? _escapeHtml(from.name) : 'the next box'}, and the two strikes count losses from ${_gtFmtDate(GAUNTLET.strikesFrom)}; everything before counts as it was played.</div>
+    ${GAUNTLET.rulesFrom ? `<div class="gt-rules-sub">The draw and the wheel start with ${from ? _escapeHtml(from.name) : 'the next box'}, and the two strikes count losses from ${_gtFmtDate(GAUNTLET.strikesFrom)}; everything before counts as it was played.</div>` : ''}
     <div class="gt-rules-title gt-rules-title2">Logging a game</div>
     <ul>
-      <li>Log it with exactly the two of you, as Marvel Champions.</li>
+      <li>Log it with ${GAUNTLET.players.length === 1 ? 'just you' : `exactly the ${GAUNTLET.players.length} of you`}, as Marvel Champions.</li>
       <li>Board/scenario: <code>Expert／Absorbing Man／Hydra Patrol</code>. Write the scenario as this app names it; the order doesn't matter.</li>
       <li>Each player's role: <code>Hawkeye／Leadership</code>, the hero you picked and the aspect the wheel gave (Spider-Woman: both aspects).</li>
       <li>Anything the app can't read shows up under “Check the log” on the Run tab.</li>
@@ -931,7 +988,7 @@ function buildGauntletHtml() {
   return `<div class="gt-root">
     <div class="gt-head">
       <div class="gt-title">The Gauntlet</div>
-      <div class="gt-subtitle">Marvel Champions · Expert · ${_gtWho(GAUNTLET.players[0])} ${_escapeHtml(GAUNTLET.players[0])} &amp; ${_gtWho(GAUNTLET.players[1])} ${_escapeHtml(GAUNTLET.players[1])} · since ${_gtFmtDate(GAUNTLET.start)}</div>
+      <div class="gt-subtitle">Marvel Champions · Expert · ${GAUNTLET.players.map(p => `${_gtWho(p)} ${_escapeHtml(p)}`).join(' &amp; ')} · since ${_gtFmtDate(GAUNTLET.start)}</div>
     </div>
     <div class="bs-subtabs gt-tabs">${tabs.map(([k, l]) => `<button class="bs-subtab${_gtTab === k ? ' active' : ''}" data-gt-tab="${k}">${l}</button>`).join('')}</div>
     <div class="gt-body">${body}</div></div>`;
@@ -990,8 +1047,8 @@ async function _gtDraw(btn, p, rerender) {
   const f = await _gtFreshSlot(p);
   if (!f || f.sl.need !== 'draw') { _gtRerender(rerender); return; }
   // the pool, less whatever the other player is holding or has been offered
-  const other = f.d.slots[GAUNTLET.players.find(x => x !== p)];
-  const taken = new Set([other.hero, ...(other.offer || [])].filter(Boolean).map(h => h.id));
+  const others = GAUNTLET.players.filter(x => x !== p).map(x => f.d.slots[x]);
+  const taken = new Set(others.flatMap(o => [o.hero, ...(o.offer || [])]).filter(Boolean).map(h => h.id));
   const pool = f.st.heroes.filter(h => h.status === 'pool' && !taken.has(h.id));
   // time travel: when the pool runs short, the next wave lends a hand
   if (pool.length < 3) pool.push(...f.st.heroes.filter(h => h.status === 'locked' && h.wave === f.st.curWave + 1 && !taken.has(h.id)));

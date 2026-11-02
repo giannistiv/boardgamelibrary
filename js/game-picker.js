@@ -1,6 +1,6 @@
 // ── Explore → Tonight: "What should we play tonight?" ──
-// Say how many are playing, whose place it is and how long you have; it
-// ranks the games on that shelf that fit that many players and the time. Filters narrow it down: co-op or competitive, weight, and under
+// Say how many are playing, whose place it is (typed: anyone whose games the
+// app knows) and how long you have; it ranks the games on that shelf that fit that many players and the time. Filters narrow it down: co-op or competitive, weight, and under
 // "More filters" the kind of game, what you haven't played (at all or
 // lately), BGG's best player count and the group's favourites.
 // Each suggestion says why it's there:
@@ -14,7 +14,7 @@ const _gp = {
   count: 0,          // how many are playing: the last number used, else 4
   time: 0,           // 0 = any, else minutes available
   weights: new Set(),
-  at: '',            // whose place: a library key, 'all' = every shelf, '' = yours (else every shelf)
+  at: null,          // whose place: a person's name, '' = every shelf we know (null: not said yet, yours if you have games)
   campaigns: true,   // include campaign / legacy games
   style: '',         // '' | 'coop' | 'pvp'
   kinds: new Set(),  // kind letters (any of them)
@@ -39,7 +39,9 @@ function _gpLoad() {
     const saved = JSON.parse(localStorage.getItem('bgl-tonight') || 'null') || {};
     // (it used to keep who was playing: count them)
     n = Number(saved.count) || 0;
-    _gp.at = typeof saved.at === 'string' ? saved.at : '';
+    // (it used to keep a shelf's key: the person's name now)
+    const at = typeof saved.at === 'string' ? saved.at : null;
+    _gp.at = at === 'all' ? '' : at === 'mine' ? null : at && GP_LIB_OWNER[at] ? _gpShown(GP_LIB_OWNER[at]) : at;
   } catch (_) {}
   _gp.count = Math.min(10, Math.max(1, n || 4));
 }
@@ -76,15 +78,66 @@ function _gpAgo(days) {
   return `${y} year${y !== 1 ? 's' : ''} ago`;
 }
 
-function _gpActiveLibs(libs) {
-  if (_gp.at === 'all') return libs;
-  const at = libs.filter(l => l.key === _gp.at);
-  if (at.length) return at;
-  // By default your own shelf, if you have one; otherwise every shelf.
+// ── Whose place: anyone whose games the app knows ──
+// The shelves the site keeps (Στιβ's bookcase, Γιαννης's, LGeorge's, and
+// Δημητρης's for his friends), a signed-in friend's own list, the BGG
+// collections the sync keeps for those who linked one, and the games people
+// added by hand (libraries/{uid}, read when Tonight opens).
+const _gpShown = (canon) => (typeof _acctDisplay === 'function' ? _acctDisplay(canon) : canon);
+let _gpRemote = null;   // canonical name → Set of bggIds they added by hand
+async function _gpLoadRemote() {
+  if (_gpRemote) return _gpRemote;
+  try {
+    const get = (p) => fetch(`${FIREBASE_DB}/${p}.json`).then(r => (r.ok ? r.json() : null));
+    const [claims, libs] = await Promise.all([get('playerClaims'), get('libraries')]);
+    _gpRemote = {};
+    for (const name in claims || {}) {
+      const lib = (libs || {})[claims[name]];
+      if (lib && typeof lib === 'object') _gpRemote[name] = new Set(Object.keys(lib).map(Number).filter(Boolean));
+    }
+  } catch (_) { _gpRemote = {}; }
+  return _gpRemote;
+}
+// name → Set of bggIds, for everyone who has games here
+function _gpShelves(libs) {
   const me = _gbPlayer();
-  const canon = me && typeof _origCanon === 'function' ? _origCanon(me) : me;
-  const own = libs.filter(l => GP_LIB_OWNER[l.key] === canon);
-  return own.length ? own : libs;
+  const out = new Map();
+  const add = (name, ids) => {
+    if (!name || !ids || !ids.size) return;
+    const cur = out.get(name);
+    out.set(name, cur ? new Set([...cur, ...ids]) : ids);
+  };
+  for (const l of libs) add(l.key === 'mine' ? me : GP_LIB_OWNER[l.key] ? _gpShown(GP_LIB_OWNER[l.key]) : l.label, l.ids);
+  const C = typeof BGG_COLLECTIONS !== 'undefined' ? BGG_COLLECTIONS : {};
+  const lower = Object.fromEntries(Object.keys(C).map(k => [k.toLowerCase(), k]));
+  for (const [canon, user] of Object.entries(typeof BGG_USERS !== 'undefined' ? BGG_USERS : {})) {
+    const k = lower[String(user).toLowerCase()];
+    if (k && !(canon === 'Δημητρης' && !libs.some(l => l.key === 'dimitris'))) add(_gpShown(canon), new Set(Object.keys(C[k]).map(Number)));
+  }
+  for (const canon in _gpRemote || {}) add(_gpShown(canon), _gpRemote[canon]);
+  return out;
+}
+// The name as the shelves know it ("στιβ" → "Στιβ"), or null when nobody has games by that name.
+function _gpWhose(shelves, name) {
+  const fold = (x) => String(x || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
+  const q = fold(name);
+  if (!q) return null;
+  for (const k of shelves.keys()) if (fold(k) === q || fold(_origCanon(k)) === q) return k;
+  return null;
+}
+// The games at the place picked: theirs, every shelf (nobody said), or none (no games for that name yet).
+function _gpActiveIds(shelves) {
+  if (_gp.at === null) {
+    const me = _gpWhose(shelves, _gbPlayer());
+    _gp.at = me || '';   // yours by default, if you have games
+  }
+  if (!_gp.at) {
+    const ids = new Set();
+    shelves.forEach(set => set.forEach(id => ids.add(id)));
+    return ids;
+  }
+  const who = _gpWhose(shelves, _gp.at);
+  return who ? shelves.get(who) : new Set();
 }
 
 // Co-op or competitive: how the group actually plays it, else BGG, else the shelf's tags.
@@ -123,11 +176,10 @@ function _gpVotes() {
   return byGame;
 }
 
-function _gpSuggest(idx, libs) {
+function _gpSuggest(idx, shelves) {
   const n = _gp.count;
-  const active = _gpActiveLibs(libs);
-  const ids = new Set();
-  active.forEach(l => l.ids.forEach(id => ids.add(id)));
+  const ids = _gpActiveIds(shelves);
+  const anywhere = !_gp.at;
   const votes = _gpVotes();
   const out = [];
   for (const id of ids) {
@@ -199,7 +251,8 @@ function _gpSuggest(idx, libs) {
     }
     if (coop && !_gp.style) why.push({ t: 'Co-op', k: '' });
     score += (bgg - 7) * 2;
-    const owners = libs.filter(l => l.ids.has(Number(id))).map(l => l.label);
+    // whose shelf it's on, when nobody said whose place it is
+    const owners = anywhere ? [...shelves].filter(([, set]) => set.has(Number(id))).map(([name]) => name) : [];
     out.push({ g, score, why, owners });
   }
   return out.sort((a, b) => b.score - a.score || (a.g.name || '').localeCompare(b.g.name || ''));
@@ -223,16 +276,38 @@ function wireTonightTab(container) {
   if (!panel || !results) return;
   const idx = _gpIndex();
   const libs = _gbLibraries();
+  let shelves = _gpShelves(libs);
+  // the games people added by hand: once they're in, the field knows them too
+  if (!_gpRemote) _gpLoadRemote().then(() => { if (!panel.isConnected) return; shelves = _gpShelves(libs); refresh(); });
+
+  // whose place: typed, with everyone who has games offered as you type
+  const atNote = () => {
+    const ids = _gpActiveIds(shelves);
+    if (!_gp.at) return `Every shelf we know: ${shelves.size} ${shelves.size === 1 ? 'person' : 'people'}, ${ids.size} games`;
+    const who = _gpWhose(shelves, _gp.at);
+    if (!who) return `${_escapeHtml(_gp.at)} hasn&rsquo;t added their games yet. They can, in Library &rarr; + Add your games.`;
+    return `${_escapeHtml(who)}&rsquo;s games &middot; ${ids.size}`;
+  };
+  const setAt = (v) => {
+    v = String(v || '').trim();
+    const who = _gpWhose(shelves, v);
+    const next = who || v;
+    if (next === _gp.at) return;
+    _gp.at = next;
+    _gpSave();
+    refresh();
+  };
 
   const renderPanel = () => {
-    const active = _gpActiveLibs(libs).map(l => l.key);
-    const atNow = active.length > 1 ? 'all' : active[0];
     const row = (label, html) => `<div class="gb-row"><span class="gb-label">${label}</span><div class="gb-chips">${html}</div></div>`;
     const n = _gp.count;
     const moreOn = _gp.kinds.size + _gp.mechs.size + _gp.only.size + (_gp.campaigns ? 0 : 1);
     panel.innerHTML = [
       row('Players', _gbChips('count', GP_COUNTS, v => _gp.count === Number(v))),
-      row('At', _gbChips('at', libs.map(l => [l.key, `${_escapeHtml(l.label)}&rsquo;s`, `Games in ${_escapeHtml(l.label)}'s library`]).concat(libs.length > 1 ? [['all', 'Any shelf', 'Every shelf here']] : []), v => v === atNow)),
+      `<div class="gb-row gp-at-row"><span class="gb-label">At</span><div class="gp-at">
+        <input class="rv-in gp-at-in" id="gp-at" value="${_escapeHtml(_gp.at || '')}" placeholder="Whose place? Type a name" maxlength="40" enterkeyhint="done" aria-label="Whose place it is">
+        ${_gp.at ? '<button type="button" class="gp-auto" id="gp-at-any">any shelf</button>' : ''}
+        <div class="gp-at-note">${atNote()}</div></div></div>`,
       row('Style', _gbChips('style', GP_STYLES, v => _gp.style === v)),
       row('Time', _gbChips('time', GP_TIMES, v => _gp.time === Number(v))),
       row('Weight', _gbChips('weights', GB_WEIGHTS, v => _gp.weights.has(v))),
@@ -245,15 +320,20 @@ function wireTonightTab(container) {
       `</details>`,
     ].join('');
     panel.querySelector('#gp-more-filters').addEventListener('toggle', (e) => { _gp.more = e.target.open; });
+    const at = panel.querySelector('#gp-at');
+    if (typeof comboAttach === 'function') comboAttach(at, { options: () => [...shelves.keys()].sort((a, b) => a.localeCompare(b)), onPick: setAt, max: 80 });
+    at.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); at.blur(); setAt(at.value); } });
+    at.addEventListener('change', () => setAt(at.value));
   };
 
   const renderResults = (keepPage) => {
     if (!keepPage) _gp.shown = 8;
     const n = _gp.count;
-    const list = _gpSuggest(idx, libs);
+    const list = _gpSuggest(idx, shelves);
     const clear = _gpFilterCount() ? '<button type="button" class="gp-auto" id="gp-clear">clear filters</button>' : '';
+    if (_gp.at && !_gpWhose(shelves, _gp.at)) { results.innerHTML = ''; return; }   // nobody's games by that name: the note says so
     if (!list.length) {
-      results.innerHTML = `<div class="stats-player-sub gb-empty">Nothing on these shelves fits ${n} player${n !== 1 ? 's' : ''} with these filters. Try fewer filters or more shelves. ${clear}</div>`;
+      results.innerHTML = `<div class="stats-player-sub gb-empty">Nothing on this shelf fits ${n} player${n !== 1 ? 's' : ''} with these filters. Try fewer filters, or another place. ${clear}</div>`;
       const c = results.querySelector('#gp-clear');
       if (c) c.addEventListener('click', () => { _gpClearFilters(); refresh(); });
       return;
@@ -314,8 +394,8 @@ function wireTonightTab(container) {
     if (t.dataset.gb === 'count') {
       _gp.count = Number(t.dataset.v);
       _gpSave();
-    } else if (t.dataset.gb === 'at') {
-      _gp.at = t.dataset.v;
+    } else if (t.id === 'gp-at-any') {
+      _gp.at = '';
       _gpSave();
     } else if (t.id === 'gp-campaigns') {
       _gp.campaigns = !_gp.campaigns;

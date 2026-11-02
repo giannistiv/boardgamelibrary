@@ -46,10 +46,11 @@ function buildChartsHtml(days, locations, total) {
 
 // ── The shared view (#games-view) ──
 // Once "Explore", now the screens of several destinations (js/nav.js):
-//   Library → Find a game ('games')        Play → Tonight, Campaigns, Latest plays
+//   Library → Find a game ('games')        Play → Latest plays, Tonight, Campaigns
 //   Crowdfunding → its lists ('trending')   Group → Players, Stats
 let _exploreTab = 'games'; // the screen on show; survives re-renders and modal round-trips
 let _explorePlaysShown = 40;   // Latest plays: how many are on show
+let _explorePlaysWho = (() => { try { return localStorage.getItem('bgl-plays-who') === 'mine' ? 'mine' : 'all'; } catch (_) { return 'all'; } })();   // Latest plays: everyone's or yours
 
 function showGamesView() {
   const container = document.getElementById('games-view');
@@ -208,25 +209,39 @@ function showGamesView() {
       <div class="stats-section"><div class="chart-row">${buildPieHtml(allDays, totalPlays, 'Play Days')}${buildPieHtml(allLocs, totalPlays, 'Locations', 5)}</div></div>
       ${buildCuratedHtml()}`;
   };
-  // ── Play → Latest plays: everyone's, newest first ──
+  // ── Play → Latest plays: everyone's or just yours, newest first ──
+  const me = typeof _navPlayer === 'function' ? _navPlayer() : null;
+  const meCanon = me && typeof _origCanon === 'function' ? _origCanon(me) : me;
+  const isMine = (p) => (p.sc || []).some(s => s && (s.n === me || (typeof _origCanon === 'function' && _origCanon(s.n) === meCanon)));
+  const playsWho = me && _explorePlaysWho === 'mine' ? 'mine' : 'all';
+  const shownPlays = playsWho === 'mine' ? allPlays.filter(isMine) : allPlays;
   const buildPlaysTab = () => {
     const playRowHtml = (p) => {
       const scoresHtml = p.sc.map(_playScoreChipHtml).join('');
       const boardHtml = p.b ? `<span class="stats-recent-result">&nbsp;&middot; &#9876; ${_escapeHtml(p.b)}</span>` : '';
-      return `<div class="stats-recent-play" data-bgg-id="${p.game.bggId}">
-        <div class="stats-recent-top">
-          <span class="stats-recent-game">${_escapeHtml(p.game.name)}</span>
-          <span class="stats-recent-date">${_fmtDateShort(p.date)}</span>
+      const img = p.game.bggId >= 0 ? `<img class="ex-play-img" src="images/${p.game.bggId}.jpg" alt="" loading="lazy" onerror="__imgFallback(this, ${p.game.bggId})">` : '<span class="ex-play-img"></span>';
+      return `<div class="stats-recent-play ex-play" data-bgg-id="${p.game.bggId}">
+        ${img}
+        <div class="ex-play-main">
+          <div class="stats-recent-top">
+            <span class="stats-recent-game">${_escapeHtml(p.game.name)}</span>
+            <span class="stats-recent-date">${_fmtDateShort(p.date)}</span>
+          </div>
+          <div class="play-scores" style="margin-top:0.3rem">${scoresHtml}</div>
+          ${boardHtml}
         </div>
-        <div class="play-scores" style="margin-top:0.3rem">${scoresHtml}</div>
-        ${boardHtml}
       </div>`;
     };
     const logBtn = typeof logPlayBtnHtml === 'function' ? logPlayBtnHtml(null, 'plays') : '';
-    return `${logBtn ? `<div class="ex-log">${logBtn}</div>` : ''}
+    // everyone's or yours: the same list, the same rows
+    const seg = me ? `<div class="ex-plays-who"><div class="seg" role="tablist" aria-label="Whose plays">
+        <button type="button" class="seg-btn${playsWho === 'all' ? ' active' : ''}" data-plays-who="all" role="tab" aria-selected="${playsWho === 'all'}">Everyone</button>
+        <button type="button" class="seg-btn${playsWho === 'mine' ? ' active' : ''}" data-plays-who="mine" role="tab" aria-selected="${playsWho === 'mine'}">Yours</button>
+      </div></div>` : '';
+    return `${seg}${logBtn ? `<div class="ex-log">${logBtn}</div>` : ''}
       <div class="stats-section">
-        ${allPlays.slice(0, _explorePlaysShown).map(playRowHtml).join('')}
-        ${allPlays.length > _explorePlaysShown ? `<button type="button" class="gb-more" id="ex-plays-more">Show more</button>` : ''}
+        ${shownPlays.slice(0, _explorePlaysShown).map(playRowHtml).join('') || '<div class="stats-player-sub gb-empty">No plays of yours yet. Log one and it shows here.</div>'}
+        ${shownPlays.length > _explorePlaysShown ? `<button type="button" class="gb-more" id="ex-plays-more">Show more</button>` : ''}
       </div>`;
   };
 
@@ -243,8 +258,8 @@ function showGamesView() {
     games: ['Find a game', 'Every game on your shelves and in your plays, and all of BoardGameGeek.'],
     tonight: ['Tonight', 'What should we play tonight? Pick how many of you are playing, whose place it is and how long you have.'],
     campaigns: ['Campaigns', 'The campaigns you&rsquo;re playing through, and where each one stands.'],
-    plays: ['Latest plays', `Everyone&rsquo;s plays, newest first &middot; ${totalPlays.toLocaleString('en')} in all`],
-    trending: ['Crowdfunding', 'The crowdfunding campaigns running now, BGG&rsquo;s most talked-about games still to come out and what&rsquo;s new for the games you play.'],
+    plays: ['Latest plays', `${playsWho === 'mine' ? 'Your' : 'Everyone&rsquo;s'} plays, newest first &middot; ${shownPlays.length.toLocaleString('en')} in all`],
+    trending: ['Crowdfunding', 'The crowdfunding campaigns running now, the new games everyone&rsquo;s talking about and what&rsquo;s new for the games you own.'],
     players: ['Players', counts],
     stats: ['Group stats', counts],
   }[_exploreTab] || ['Find a game', ''];
@@ -258,6 +273,13 @@ function showGamesView() {
   `;
   const morePlays = container.querySelector('#ex-plays-more');
   if (morePlays) morePlays.addEventListener('click', () => { _explorePlaysShown += 40; showGamesView(); });
+  container.querySelectorAll('[data-plays-who]').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.playsWho === _explorePlaysWho) return;
+    _explorePlaysWho = b.dataset.playsWho;
+    _explorePlaysShown = 40;
+    try { localStorage.setItem('bgl-plays-who', _explorePlaysWho); } catch (_) {}
+    showGamesView();
+  }));
   if (_exploreTab === 'campaigns') wireCampaignsTab(container);
 
   // Wire game/play rows (covers every sub-tab's [data-bgg-id] rows)

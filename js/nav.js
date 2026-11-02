@@ -4,8 +4,8 @@
 // switches between the screens that belong together (the redesign of 2 Nov
 // 2026, after friends found things in unexpected places):
 //   Library       → your own games (Στιβ: his bookcase) · Find a game
-//   Play          → Tonight · Campaigns · Latest plays
-//   Crowdfunding  → Campaigns · For your games · Interested · Backed
+//   Play          → Latest plays · Tonight · Campaigns
+//   Crowdfunding  → Campaigns · Backed · Interested · For your games
 //   Group         → Leaderboard · Players · Hours · Stats · Board South (regulars)
 //   You           → Profile · Achievements · Challenges · Settings
 // The views and their switchTo…() functions are unchanged; this module only
@@ -23,7 +23,7 @@ const NAV_ITEMS = [
   ['library', 'Library'], ['play', 'Play'], ['crowd', 'Crowdfunding'], ['group', 'Group'], ['you', 'You'],
 ];
 // the small tab each destination opens on, the last one picked (else the first)
-const _navLast = { play: 'tonight', crowd: 'campaigns', group: 'leaderboard' };
+const _navLast = { play: 'plays', crowd: 'campaigns', group: 'leaderboard' };
 
 function _navPlayer() {
   const raw = localStorage.getItem('bgl-player');
@@ -70,12 +70,14 @@ function _navSubItems(group) {
     // only your own (the user, 2 Nov 2026): Στιβ's bookcase is his shelf, anyone else's are their games
     return [['shelf', typeof _libOwner === 'function' && _libOwner() === 'stiv' ? 'Your shelf' : 'Your games'], ['find', 'Find a game']];
   }
-  if (group === 'play') return [['tonight', 'Tonight'], ['campaigns', 'Campaigns'], ['plays', 'Latest plays']];
+  if (group === 'play') return [['plays', 'Latest plays'], ['tonight', 'Tonight'], ['campaigns', 'Campaigns']];
   if (group === 'crowd') {
+    // For your games last (the user, 2 Nov 2026)
     const interested = typeof backingInterestedIds === 'function' && backingInterestedIds().length;
-    return [['campaigns', 'Campaigns'], ['yours', 'For your games']]
+    return [['campaigns', 'Campaigns']]
+      .concat(typeof backingMine === 'function' && backingMine() ? [['backed', 'Backed']] : [])
       .concat(interested ? [['interested', 'Interested']] : [])
-      .concat(typeof backingMine === 'function' && backingMine() ? [['backed', 'Backed']] : []);
+      .concat([['yours', 'For your games']]);
   }
   if (group === 'group') {
     const bs = typeof _activeBoardSouthVoter === 'function' ? _activeBoardSouthVoter() : null;
