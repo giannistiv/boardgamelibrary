@@ -116,7 +116,7 @@ function _gnYourPlays() {
 }
 
 // What each person put away: newsSkips/{player}/{item id} = { k: 'nocare' | 'have', at },
-// on every phone they use (the spare store until the node's rule is in, see fbWrite).
+// on every phone they use.
 let _gnSkips = {}, _gnSkipsFor = null, _gnSkipSrc = {};
 let _gnShowPut = false;   // the ones put away, shown again (to bring one back)
 function _gnWho() {
