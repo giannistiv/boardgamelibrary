@@ -10,8 +10,9 @@
   // the shelf was picked. Keep in sync with VP_LIBRARY and _libZoomedShelf().
   (function(){
     var touch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    var mode = null;
-    try { mode = localStorage.getItem('bgl-libmode'); } catch (_) {}
+    var mode = null, stiv = false;
+    try { mode = localStorage.getItem('bgl-libmode'); stiv = localStorage.getItem('bgl-player') === 'Στιβ'; } catch (_) {}
+    if (!stiv) mode = 'covers';   // the bookcase is Στιβ's alone: everyone else has covers (shell.js _libMode)
     var phone = Math.min(screen.width, screen.height) < 700;
     var html = document.documentElement;
     if (touch && (mode ? mode === 'shelf' : !phone)) {
@@ -46,7 +47,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Board Games">
-<link rel="stylesheet" href="styles.css?v=356ac046">
+<link rel="stylesheet" href="styles.css?v=3f03e67b">
 </head>
 <body>
 <script>
@@ -223,7 +224,7 @@
     </div>
     <div class="picker-list" id="picker-list"></div>
     <button type="button" class="picker-signin" data-acct-open>Sign in or join</button>
-    <button class="picker-skip" id="picker-skip">Just browse the library</button>
+    <button class="picker-skip" id="picker-skip">Not now</button>
   </div>
 </div>
 
@@ -254,7 +255,7 @@
 <script src="js/leviathan-wilds.js?v=9e324c22"></script>
 <script src="js/rove-campaign.js?v=65e05646"></script>
 <script src="js/cncr-campaign.js?v=c3beb7d1"></script>
-<script src="js/shell.js?v=48bc4d93"></script>
+<script src="js/shell.js?v=d3c5784b"></script>
 <script src="js/records.js?v=a126c5df"></script>
 <script src="js/player-count.js?v=227fd189"></script>
 <script src="js/play-time.js?v=b0c120a1"></script>
@@ -278,7 +279,7 @@
 <script src="js/play-moments.js?v=e1ffcdeb"></script>
 <script src="js/scenarios.js?v=12eac33a"></script>
 <script src="js/log-play.js?v=3604a3ba"></script>
-<script src="js/my-library.js?v=789d36ee"></script>
+<script src="js/my-library.js?v=c4c419a7"></script>
 <script src="js/bgstats-share.js?v=c694ee61"></script>
 <script src="js/finger-chooser.js?v=d129f489"></script>
 <script src="js/game-picker.js?v=b631fbd7"></script>
@@ -289,7 +290,7 @@
 <script src="js/leaderboard.js?v=597ee9c9"></script>
 <script src="js/board-south.js?v=0cf78eaf"></script>
 <script src="js/favorites.js?v=1a760d7a"></script>
-<script src="js/nav.js?v=762719fa"></script>
+<script src="js/nav.js?v=915dbd20"></script>
 <script src="js/boot.js?v=780527d7"></script>
 </body>
 </html>

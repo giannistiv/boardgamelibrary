@@ -20,7 +20,8 @@ function myLibActive() {
 const MY_HAND_WIRED = { johnnydgame: () => (typeof GIANNIS_GAMES !== 'undefined' ? GIANNIS_GAMES : {}), kukugames: () => (typeof LGEORGE_GAMES !== 'undefined' ? LGEORGE_GAMES : {}) };
 function myBggUser() {
   const a = typeof acctMe === 'function' ? acctMe() : null;
-  if (!a) return '';
+  // not signed in: the collection the site knows for their player, to look at (adding needs an account)
+  if (!a) return (typeof BGG_USERS !== 'undefined' && typeof _navPlayer === 'function' && BGG_USERS[_navPlayer()]) || '';
   return a.bgg || (typeof BGG_USERS !== 'undefined' && (BGG_USERS[_navPlayer()] || BGG_USERS[a.player])) || '';
 }
 function _myBggGames() {
@@ -134,7 +135,10 @@ function _myLibRedraw() {
 
 // The list as shelf entries, filled in from what the site knows of each game.
 function _myShelf() {
-  if (_myShelf.cache) return _myShelf.cache;
+  // whose: another player picked on this phone has other games
+  const who = `${typeof _navPlayer === 'function' ? _navPlayer() : ''}|${_myLibUid || ''}`;
+  if (_myShelf.cache && _myShelf.cacheFor === who) return _myShelf.cache;
+  _myShelf.cacheFor = who;
   const ids = myLibIds();
   return (_myShelf.cache = ids.map(id => {
     const g = findGameByBggId(id) || { name: `Game #${id}`, bggId: id, players: '', playTime: '' };

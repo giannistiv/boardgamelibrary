@@ -3,8 +3,7 @@
 // phones (same buttons; CSS moves them). A row of small tabs under the bar
 // switches between the screens that belong together (the redesign of 2 Nov
 // 2026, after friends found things in unexpected places):
-//   Library       → the shelves (Στιβ's, Δημητρης's for the Ilioupoli Bros,
-//                   My games for a signed-in friend) · Find a game
+//   Library       → your own games (Στιβ: his bookcase) · Find a game
 //   Play          → Tonight · Campaigns · Latest plays
 //   Crowdfunding  → Campaigns · For your games · Interested · Backed
 //   Group         → Leaderboard · Players · Hours · Stats · Board South (regulars)
@@ -39,7 +38,7 @@ const _navIsOpen = (id) => { const el = document.getElementById(id); return !!(e
 function _navState() {
   const lib = document.getElementById('library-view');
   if (lib && lib.style.display !== 'none' && !document.querySelector('.stats-view.open')) {
-    return { group: 'library', sub: typeof _libShelves === 'function' && _libShelves() ? _libOwnerNow : 'shelf' };
+    return { group: 'library', sub: 'shelf' };
   }
   if (_navIsOpen('games-view')) {
     const t = typeof _exploreTab !== 'undefined' ? _exploreTab : 'games';
@@ -68,10 +67,8 @@ function _navState() {
 function _navSubItems(group) {
   const me = _navPlayer();
   if (group === 'library') {
-    const shelves = typeof _libShelves === 'function' ? _libShelves() : null;
-    const shelf = (k) => (k === 'mine' ? 'My games' : `${LIB_OWNER_NAMES[k]}'s shelf`);
-    const items = shelves ? shelves.map(k => [k, shelf(k)]) : [['shelf', shelf(typeof _libOwner === 'function' ? _libOwner() : 'stiv')]];
-    return items.concat([['find', 'Find a game']]);
+    // only your own (the user, 2 Nov 2026): Στιβ's bookcase is his shelf, anyone else's are their games
+    return [['shelf', typeof _libOwner === 'function' && _libOwner() === 'stiv' ? 'Your shelf' : 'Your games'], ['find', 'Find a game']];
   }
   if (group === 'play') return [['tonight', 'Tonight'], ['campaigns', 'Campaigns'], ['plays', 'Latest plays']];
   if (group === 'crowd') {
@@ -109,8 +106,7 @@ function _navGo(group, sub) {
     if (sub === 'ilioupoli') return _navGo('play', 'campaigns');
     if (sub === 'backed') return _navGo('crowd', 'backed');
     if (sub === 'find') return _navExplore('games');
-    if (['mine', 'stiv', 'dimitris'].includes(sub) && typeof _libShelves === 'function' && _libShelves()) { _libPick = sub; _libRefresh(); }
-    return switchToLibrary();
+    return switchToLibrary();   // 'shelf' (and the old 'mine', 'stiv', 'dimitris'): your own
   }
   if (group === 'play') return _navExplore(sub || _navLast.play);
   if (group === 'crowd') {

@@ -17,17 +17,16 @@ function _libViewer() {
   try { raw = localStorage.getItem('bgl-player'); } catch (_) {}
   return raw ? (NAME_MAP[raw] || raw) : null;
 }
+// Whose games the Library shows: the viewer's own, nobody else's (the user,
+// 2 Nov 2026). Στιβ: the real bookcase ('stiv', the shelf and its covers);
+// Δημητρης: his collection ('dimitris'); anyone else: their own list ('mine',
+// js/my-library.js), as covers. Nobody picked: 'mine', empty, so the button
+// to add games.
 function _libOwner(name) {
   const me = name !== undefined ? name : _libViewer();
-  if (!me || me === LIB_OWNER_NAMES.stiv || typeof DIMITRIS_GAMES === 'undefined') return 'stiv';
-  if (me === LIB_OWNER_NAMES.dimitris) return 'dimitris';
-  let withD = 0, withS = 0;
-  for (const id in PLAY_HISTORY) for (const p of PLAY_HISTORY[id]) {
-    if (!p || !Array.isArray(p.sc) || !p.sc.some(s => s && s.n === me)) continue;
-    if (p.sc.some(s => s && s.n === LIB_OWNER_NAMES.dimitris)) withD++;
-    if (p.sc.some(s => s && s.n === LIB_OWNER_NAMES.stiv)) withS++;
-  }
-  return withD > withS ? 'dimitris' : 'stiv';
+  if (me === LIB_OWNER_NAMES.stiv) return 'stiv';
+  if (me === LIB_OWNER_NAMES.dimitris && typeof DIMITRIS_GAMES !== 'undefined') return 'dimitris';
+  return 'mine';
 }
 // The shelf's categories for a game that has none of its own here (a
 // friend's game), worked out from BGG: game types, categories and mechanics
@@ -95,26 +94,6 @@ function _libGames() {
   if (_libOwnerNow === 'mine') return typeof _myShelf === 'function' ? _myShelf() : [];
   return _libOwnerNow === 'dimitris' ? _dimitrisShelf() : GAMES;
 }
-// The shelves a signed-in friend can open: their own games, and the shelves
-// of the people whose friend they are (js/account.js, js/my-library.js).
-// null: the Library follows the viewer as before (Στιβ, Δημητρης, or nobody
-// signed in).
-function _libChoices() {
-  if (typeof myLibActive !== 'function' || !myLibActive()) return null;
-  const a = acctMe();
-  return ['mine', ...['stiv', 'dimitris'].filter(k => acctFriendOf(k, a))];
-}
-let _libPick = null;   // the shelf picked: 'mine' | 'stiv' | 'dimitris'
-// The shelves the Library's small tabs offer: a signed-in friend's (above),
-// or for the Ilioupoli Bros both Στιβ's and Δημητρης's, their own first (the
-// other one used to be on their Ilioupoli page). null: the one shelf.
-function _libShelves() {
-  const choices = _libChoices();
-  if (choices) return choices;
-  const me = _libViewer();
-  if (!me || typeof ILIOUPOLI_MEMBERS === 'undefined' || !ILIOUPOLI_MEMBERS.has(me) || typeof DIMITRIS_GAMES === 'undefined') return null;
-  return _libOwner() === 'dimitris' ? ['dimitris', 'stiv'] : ['stiv', 'dimitris'];
-}
 // The game page for a shelf entry: the fullest record the site has of it.
 function _libGameById(id) {
   const g = _libGames().find(x => x.id === id);
@@ -123,9 +102,8 @@ function _libGameById(id) {
 // Redraw the Library when whose shelf it is changes (a login, or once the
 // imported plays have loaded and say who plays with whom).
 function _libRefresh() {
-  const shelves = _libShelves();
-  const owner = shelves ? (shelves.includes(_libPick) ? _libPick : shelves[0]) : _libOwner();
-  const key = `${owner}|${_libViewer()}`;   // the heading says "Your shelf" to Δημητρης himself
+  const owner = _libOwner();
+  const key = `${owner}|${_libViewer()}`;   // another player on this phone: their games
   if (key === _libRefresh.key) return;
   _libRefresh.key = key;
   _libOwnerNow = owner;
@@ -340,7 +318,7 @@ function renderShelf() {
   shelfEl.innerHTML = '';
   const otherBtn = document.getElementById('btn-other-side');
   if (otherBtn) otherBtn.style.display = _libOwnerNow !== 'stiv' ? 'none' : '';
-  if (_libOwnerNow !== 'stiv') { _renderListShelf(shelfEl, _libGames()); _renderNewArrivals(); return; }
+  if (_libOwnerNow !== 'stiv') { _renderNewArrivals(); return; }   // the bookcase is Στιβ's alone: everyone else has covers
   shelfEl.style.gridTemplateColumns = _showingOtherSide ? 'repeat(3,1fr)' : 'repeat(6,1fr)';
 
   const rowRange = _showingOtherSide ? [7, 8] : [1, 6];
@@ -394,31 +372,6 @@ function renderShelf() {
     }
   }
   _renderNewArrivals();
-}
-
-// A shelf with no bookcase layout (Δημητρης's): its games by name, five to a
-// cubby, six cubbies to a row, like the real shelf.
-function _renderListShelf(shelfEl, games) {
-  shelfEl.style.gridTemplateColumns = 'repeat(6,1fr)';
-  for (let i = 0; i < games.length; i += 5) {
-    const chunk = games.slice(i, i + 5);
-    const cubby = document.createElement('div');
-    cubby.className = 'cubby' + (chunk.length <= 2 ? ' horizontal-layout' : '');
-    chunk.forEach(game => {
-      const spine = document.createElement('div');
-      spine.className = `game-spine box-${game.boxSize}`;
-      spine.style.background = game.spineColor;
-      spine.dataset.gameId = game.id;
-      spine.title = game.name;
-      const text = document.createElement('span');
-      text.className = 'spine-text';
-      text.textContent = game.name;
-      spine.appendChild(text);
-      spine.addEventListener('click', () => openModal(_libGameById(game.id)));
-      cubby.appendChild(spine);
-    });
-    shelfEl.appendChild(cubby);
-  }
 }
 
 // Games new on BGG (tools/sync-collections.py adds them with row 0) aren't in
@@ -480,27 +433,23 @@ function _applyLibMode() {
     b.setAttribute('aria-selected', String(b.dataset.mode === mode));
   });
   if (mode === 'covers' && !document.getElementById('lib-covers').childElementCount) renderCovers();
-  const sub = document.getElementById('lib-sub');
-  const dim = _libOwnerNow === 'dimitris', mine = _libOwnerNow === 'mine';
+  const stiv = _libOwnerNow === 'stiv', mine = _libOwnerNow === 'mine';
   const n = _libGames().length;
-  if (sub) {
-    sub.textContent = mine ? `${n} game${n !== 1 ? 's' : ''} · your list`
-      : dim ? `${n} games · ${LIB_OWNER_NAMES.dimitris}'s library` : `${GAMES.length} games · front and back`;
-  }
+  // the real bookcase, its Shelf / Covers switch and its other side: Στιβ's alone
+  const seg = document.getElementById('lib-mode');
+  if (seg) seg.style.display = stiv ? '' : 'none';
+  const sub = document.getElementById('lib-sub');
+  if (sub) sub.textContent = !n ? '' : stiv ? `${GAMES.length} games · front and back` : `${n} game${n !== 1 ? 's' : ''}`;
   const title = document.querySelector('#library-view .page-title');
-  if (title) title.textContent = mine ? 'Your games'
-    : dim ? `${_libViewer() === LIB_OWNER_NAMES.dimitris ? 'Your' : LIB_OWNER_NAMES.dimitris + '\'s'} shelf`
-    : (_libShelves() ? `${_libViewer() === LIB_OWNER_NAMES.stiv ? 'Your' : LIB_OWNER_NAMES.stiv + '\'s'} shelf` : 'The shelf');
+  if (title) title.textContent = stiv ? 'Your shelf' : 'Your games';
   const add = document.getElementById('lib-add');
   if (add) add.hidden = !mine;
+  // none yet: only the button to add them
   const empty = document.getElementById('lib-empty');
   view.classList.toggle('lib-is-empty', mine && !n);
   if (empty) {
     empty.hidden = !(mine && !n);
-    const bgg = typeof myBggUser === 'function' ? myBggUser() : '';
-    if (mine && !n) empty.innerHTML = `<b>Your games go here</b><span>${bgg
-      ? `Your BGG collection (${_escapeHtml(bgg)}) arrives with the next BGG sync, within a few hours. Meanwhile, add games yourself.`
-      : 'Search for the games you own and add them, or link your BGG username in You → Settings and your collection comes by itself.'}</span><button type="button" class="acct-btn acct-main" data-mylib-open>+ Add a game</button>`;
+    if (mine && !n) empty.innerHTML = '<button type="button" class="acct-btn acct-main lib-empty-add" data-mylib-open>+ Add your games</button>';
   }
   applyFilters();
 }
@@ -528,6 +477,7 @@ const _isTouchDevice = () => 'ontouchstart' in window || navigator.maxTouchPoint
 // bookcase) or a grid of covers. Covers by default; a pick of the shelf is
 // remembered. On touch screens the shelf needs the zoomed-out 1200-px viewport.
 function _libMode() {
+  if (_libOwnerNow !== 'stiv') return 'covers';   // the bookcase is Στιβ's alone
   let m = null;
   try { m = localStorage.getItem('bgl-libmode'); } catch (_) {}
   return m === 'shelf' ? 'shelf' : 'covers';
@@ -1082,7 +1032,7 @@ document.getElementById('picker-search').addEventListener('input', e => {
   renderPickerList(e.target.value);
 });
 
-document.getElementById('picker-skip').addEventListener('click', () => {
+document.getElementById('picker-skip').addEventListener('click', () => {   // "Not now"
   document.getElementById('picker-overlay').classList.remove('open');
   switchToLibrary();
 });
