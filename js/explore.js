@@ -44,9 +44,12 @@ function buildChartsHtml(days, locations, total) {
   return `<div class="stats-section"><div class="chart-row">${dayPie}${locPie}</div></div>`;
 }
 
-// ── Insights View ──
-// ── Explore (merged Games + Players + Stats) ──
-let _exploreTab = 'games'; // active sub-tab (Games first, then Trending); survives re-renders and modal round-trips
+// ── The shared view (#games-view) ──
+// Once "Explore", now the screens of several destinations (js/nav.js):
+//   Library → Find a game ('games')        Play → Tonight, Campaigns, Latest plays
+//   Crowdfunding → its lists ('trending')   Group → Players, Stats
+let _exploreTab = 'games'; // the screen on show; survives re-renders and modal round-trips
+let _explorePlaysShown = 40;   // Latest plays: how many are on show
 
 function showGamesView() {
   const container = document.getElementById('games-view');
@@ -100,8 +103,12 @@ function showGamesView() {
     </div>`;
   };
 
-  // ── Games sub-tab ──
-  const buildGamesTab = () => {
+  // ── Library → Find a game: search and filters across every catalogue ──
+  const buildGamesTab = () => `${buildGameBrowserHtml()}
+      <div id="games-curated" class="stats-player-sub gb-idle">Type a name to find a game: the ones on your shelves and in your plays first, then all of BoardGameGeek. Or open Filters to browse by players, time, weight and more.</div>`;
+
+  // ── Group → Stats: the most played, the newest ratings, when and where ──
+  const buildCuratedHtml = () => {
     const cutoff = (() => {
       const d = new Date();
       d.setDate(d.getDate() - 90);
@@ -144,8 +151,7 @@ function showGamesView() {
       </div>`;
     };
 
-    return `${buildGameBrowserHtml()}
-      <div id="games-curated">
+    return `
       ${mostPlayedRecent.length > 0 ? `<div class="stats-section">
         <div class="stats-section-title">Most Played Recently</div>
         <div class="stats-player-sub" style="margin:-0.3rem 0 0.6rem">Last 90 days</div>
@@ -160,8 +166,7 @@ function showGamesView() {
       ${newestTop.length > 0 ? `<div class="stats-section">
         <div class="stats-section-title">Newest Ratings</div>
         ${newestTop.map(ratingRowHtml).join('')}
-      </div>` : ''}
-      </div>`;
+      </div>` : ''}`;
   };
 
   // ── Players sub-tab ──
@@ -201,9 +206,27 @@ function showGamesView() {
     };
     return `
       <div class="stats-section"><div class="chart-row">${buildPieHtml(allDays, totalPlays, 'Play Days')}${buildPieHtml(allLocs, totalPlays, 'Locations', 5)}</div></div>
+      ${buildCuratedHtml()}`;
+  };
+  // ── Play → Latest plays: everyone's, newest first ──
+  const buildPlaysTab = () => {
+    const playRowHtml = (p) => {
+      const scoresHtml = p.sc.map(_playScoreChipHtml).join('');
+      const boardHtml = p.b ? `<span class="stats-recent-result">&nbsp;&middot; &#9876; ${_escapeHtml(p.b)}</span>` : '';
+      return `<div class="stats-recent-play" data-bgg-id="${p.game.bggId}">
+        <div class="stats-recent-top">
+          <span class="stats-recent-game">${_escapeHtml(p.game.name)}</span>
+          <span class="stats-recent-date">${_fmtDateShort(p.date)}</span>
+        </div>
+        <div class="play-scores" style="margin-top:0.3rem">${scoresHtml}</div>
+        ${boardHtml}
+      </div>`;
+    };
+    const logBtn = typeof logPlayBtnHtml === 'function' ? logPlayBtnHtml(null, 'plays') : '';
+    return `${logBtn ? `<div class="ex-log">${logBtn}</div>` : ''}
       <div class="stats-section">
-        <div class="stats-section-title">Recent Plays</div>
-        ${allPlays.slice(0, 20).map(playRowHtml).join('')}
+        ${allPlays.slice(0, _explorePlaysShown).map(playRowHtml).join('')}
+        ${allPlays.length > _explorePlaysShown ? `<button type="button" class="gb-more" id="ex-plays-more">Show more</button>` : ''}
       </div>`;
   };
 
@@ -212,33 +235,30 @@ function showGamesView() {
     : _exploreTab === 'trending' ? buildTrendingTabHtml()
     : _exploreTab === 'stats' ? buildStatsTab()
     : _exploreTab === 'tonight' ? buildTonightTabHtml()
+    : _exploreTab === 'plays' ? buildPlaysTab()
+    : _exploreTab === 'campaigns' ? buildCampaignsTabHtml()
     : buildGamesTab();
-
-  const tabBtn = (key, label) =>
-    `<button class="explore-tab${_exploreTab === key ? ' active' : ''}" data-tab="${key}">${label}</button>`;
+  const counts = `${totalPlays.toLocaleString('en')} plays &middot; ${Object.keys(gamePlayCounts).length} games &middot; ${topPlayers.length} players`;
+  const [title, sub] = {
+    games: ['Find a game', 'Every game on your shelves and in your plays, and all of BoardGameGeek.'],
+    tonight: ['Tonight', 'What should we play tonight? Pick how many of you are playing, whose place it is and how long you have.'],
+    campaigns: ['Campaigns', 'The campaigns you&rsquo;re playing through, and where each one stands.'],
+    plays: ['Latest plays', `Everyone&rsquo;s plays, newest first &middot; ${totalPlays.toLocaleString('en')} in all`],
+    trending: ['Crowdfunding', 'The crowdfunding campaigns running now, BGG&rsquo;s most talked-about games still to come out and what&rsquo;s new for the games you play.'],
+    players: ['Players', counts],
+    stats: ['Group stats', counts],
+  }[_exploreTab] || ['Find a game', ''];
 
   container.innerHTML = `
     <div class="stats-header">
-      <div class="stats-player-name">Explore</div>
-      <div class="stats-player-sub">${_exploreTab === 'tonight'
-        ? 'What should we play tonight? Pick how many of you are playing, whose place it is and how long you have.'
-        : _exploreTab === 'trending' ? 'The crowdfunding campaigns running now, BGG&rsquo;s most talked-about games still to come out and what&rsquo;s new for the games you play.'
-        : `${totalPlays.toLocaleString('en')} plays &middot; ${Object.keys(gamePlayCounts).length} games &middot; ${topPlayers.length} players`}</div>
-    </div>
-    <div class="explore-tabs">
-      ${tabBtn('games', 'Games')}${tabBtn('trending', 'Crowdfunding')}${tabBtn('tonight', 'Tonight')}${tabBtn('players', 'Players')}${tabBtn('stats', 'Stats')}
+      <div class="stats-player-name">${title}</div>
+      <div class="stats-player-sub">${sub}</div>
     </div>
     ${tabContent}
   `;
-
-  // Sub-tab switching
-  container.querySelectorAll('.explore-tab').forEach(btn => {
-    btn.addEventListener('click', () => {
-      if (_exploreTab === btn.dataset.tab) return;
-      _exploreTab = btn.dataset.tab;
-      showGamesView();
-    });
-  });
+  const morePlays = container.querySelector('#ex-plays-more');
+  if (morePlays) morePlays.addEventListener('click', () => { _explorePlaysShown += 40; showGamesView(); });
+  if (_exploreTab === 'campaigns') wireCampaignsTab(container);
 
   // Wire game/play rows (covers every sub-tab's [data-bgg-id] rows)
   container.querySelectorAll('.stats-section [data-bgg-id]').forEach(el => {
@@ -267,6 +287,62 @@ function showGamesView() {
   }
 }
 
+
+// ── Play → Campaigns: every campaign in one place ──
+// First the campaign sheets: Codenames: Critical Role Adventures and Rove on
+// their game pages' Campaign tab, and for the Ilioupoli Bros Oathsworn and the
+// Marvel Champions Gauntlet on their own page. Then the campaigns followed
+// from the plays (CAMPAIGN_PROGRESS): how far you've got, from the plays you
+// were in (everyone's when you haven't played it).
+function _exCampaignCards() {
+  const me = typeof _navPlayer === 'function' ? _navPlayer() : null;
+  const member = !!(me && typeof ILIOUPOLI_MEMBERS !== 'undefined' && ILIOUPOLI_MEMBERS.has(me));
+  const sheets = [
+    typeof CNCR_BGGID !== 'undefined' && { id: CNCR_BGGID, what: 'The map, the heroes and each mission&rsquo;s rules', open: 'game' },
+    typeof ROVE_BGGID !== 'undefined' && { id: ROVE_BGGID, what: 'The rovers, the lyst and the ether', open: 'game' },
+    member && typeof OATHSWORN_BGGID !== 'undefined' && { id: OATHSWORN_BGGID, what: 'The boss trail and your ranking &middot; Ilioupoli Bros', open: 'oathsworn' },
+    member && typeof MC_BGGID !== 'undefined' && { id: MC_BGGID, what: 'The Gauntlet &middot; Ilioupoli Bros', open: 'gauntlet' },
+  ].filter(c => c && findGameByBggId(c.id));
+  const card = (c) => {
+    const game = findGameByBggId(c.id);
+    const all = PLAY_HISTORY[c.id] || [];
+    const p = typeof progressPlaysOf === 'function' ? progressPlaysOf(all) : { plays: all, mine: false };
+    const cp = typeof campaignProgress === 'function' ? campaignProgress(c.id, p.plays) : null;
+    const last = p.plays.reduce((d, x) => (x.date > d ? x.date : d), '');
+    return { last, done: !!(cp && cp.complete), html: `<button type="button" class="ex-camp" data-ex-camp="${c.open}|${c.id}">
+      <img class="ex-camp-cover" src="images/${c.id}.jpg" alt="" loading="lazy" onerror="__imgFallback(this, ${c.id})">
+      <span class="ex-camp-main">
+        <b>${_escapeHtml(game.name)}</b>
+        ${c.what ? `<span class="ex-camp-what">${c.what}</span>` : ''}
+        ${cp ? `<span class="ex-camp-bar${cp.complete ? ' done' : ''}"><i style="width:${Math.max(3, cp.pct)}%"></i></span><span class="ex-camp-sub">${cp.complete ? _escapeHtml(cp.reachedText) : `${_escapeHtml(cp.stageText)}${cp.reachedText ? ` &middot; ${_escapeHtml(cp.reachedText)}` : ''}`}</span>` : ''}
+        <span class="ex-camp-sub">${last ? `${p.mine ? 'You last played it' : 'Last played'} ${_fmtDateShort(last)}` : 'Not played yet'}</span>
+      </span>
+      <span class="ex-camp-go" aria-hidden="true">&rsaquo;</span>
+    </button>` };
+  };
+  const sheetIds = new Set(sheets.map(c => c.id));
+  const followed = Object.keys(typeof CAMPAIGN_PROGRESS !== 'undefined' ? CAMPAIGN_PROGRESS : {}).map(Number)
+    .filter(id => !sheetIds.has(id) && findGameByBggId(id) && (PLAY_HISTORY[id] || []).length)
+    .map(id => card({ id, open: 'plays' }))
+    .sort((a, b) => (a.done - b.done) || b.last.localeCompare(a.last));
+  return { sheets: sheets.map(c => card(c).html), followed: followed.map(c => c.html) };
+}
+function buildCampaignsTabHtml() {
+  const { sheets, followed } = _exCampaignCards();
+  return `${sheets.length ? `<div class="stats-section"><div class="stats-section-title">Campaign sheets</div><div class="ex-camps">${sheets.join('')}</div></div>` : ''}
+    ${followed.length ? `<div class="stats-section"><div class="stats-section-title">Followed from your plays</div><div class="ex-camps">${followed.join('')}</div></div>` : ''}`;
+}
+function wireCampaignsTab(container) {
+  container.querySelectorAll('[data-ex-camp]').forEach(el => el.addEventListener('click', () => {
+    const [open, id] = el.dataset.exCamp.split('|');
+    if (open === 'oathsworn' || open === 'gauntlet') { _ilioSubTab = open; switchToIlioupoli(); return; }
+    const game = findGameByBggId(Number(id));
+    if (!game) return;
+    _modalTab = open === 'game' ? 'campaign' : 'plays';
+    _modalTabFor = game.bggId;
+    openModal(game);
+  }));
+}
 
 // ── Games Tab ──
 function _fmtDateShort(d) {

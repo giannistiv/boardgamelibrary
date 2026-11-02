@@ -212,7 +212,7 @@ Promise.all([loadAllRatings(), loadRateSkips(), loadAllFavorites(), loadImported
   }
   navBooted();   // from here on, each new screen is a step back can return to
   _takeGoLink();
-  if (typeof loadBacking === 'function') loadBacking().then(() => _navSync()).catch(() => {});   // Library → Backed, for backers
+  if (typeof loadBacking === 'function') loadBacking().then(() => _navSync()).catch(() => {});   // Crowdfunding → Backed, for backers
   _takeSharedFile();
 });
 
@@ -226,11 +226,11 @@ function _takeGoLink() {
   if (kind === 'game') {
     const g = findGameByBggId(id);
     if (g) { _modalTab = 'plays'; _modalTabFor = g.bggId; openModal(g); }
-  } else if (kind === 'backed') {   // Library → Backed
-    _navGo('library', 'backed');
+  } else if (kind === 'backed') {   // Crowdfunding → Backed
+    _navGo('crowd', 'backed');
   } else if (kind === 'hot') {
     if (typeof _hotFilter !== 'undefined') _hotFilter = 'live';
-    _navGo('explore', 'trending');
+    _navGo('crowd', 'campaigns');
     if (typeof _loadHot === 'function') {
       _loadHot().then(h => { const g = (h.games || []).find(x => x.id === id); if (g) _openHotGame(g); }).catch(() => {});
     }
@@ -270,7 +270,7 @@ async function _takeSharedFile() {
     const stripped = !hadFile && chrome >= 153 && chrome < 156;
     _shareNotice('error', 'Nothing arrived from BGStats', [
       stripped
-        ? `Chrome ${chrome} dropped the file before it reached the app: a known Chrome bug in versions 153 to 155, fixed in Chrome 156. Update Chrome when 156 reaches your phone (or use Chrome Beta); until then, upload the file from your profile.`
+        ? `Chrome ${chrome} dropped the file before it reached the app: a known Chrome bug in versions 153 to 155, fixed in Chrome 156. Update Chrome when 156 reaches your phone (or use Chrome Beta); until then, upload the file in You → Settings.`
         : 'The app opened, but the share didn\'t bring a file with it. Try sharing it again. If it keeps happening, this is what arrived:',
       `<small>${_escapeHtml(note || 'no share was kept')} · Chrome ${chrome || '?'}</small>`,
     ]);
@@ -279,7 +279,7 @@ async function _takeSharedFile() {
   window._bglSharedFile = file;
   window._bglShareNote = note;
   _shareNotice('info', 'Importing the shared file…', [_escapeHtml(file.name)]);
-  if (localStorage.getItem('bgl-player')) _navGo('you', 'profile');   // else the picker is open
+  if (localStorage.getItem('bgl-player')) _navGo('you', 'settings');   // the importer is there; else the picker is open
   else _shareNotice('info', 'Who are you?', ['Pick your profile and the shared file is imported there.']);
 }
 

@@ -1,5 +1,5 @@
 const ILIOUPOLI_MEMBERS = new Set(['Στιβ', 'Δημητρης', 'Μαντσος']);
-let _ilioSubTab = 'library'; // 'library' | 'oathsworn' | 'gauntlet' | 'rove'
+let _ilioSubTab = 'oathsworn'; // 'oathsworn' | 'gauntlet' | 'rove': the group's campaigns (Play → Campaigns opens them; the library they once had is on the Library's tabs)
 
 // ── Oathsworn boss ranking ──
 // Each Oathsworn play stores its boss in the play's "board" field as
@@ -174,37 +174,14 @@ function _wireOathswornDrag(container, voter) {
   });
 }
 
-// The library this page shows: the other one from your own Library tab, so
-// Στιβ sees Δημητρης's and Δημητρης (and his circle) sees Στιβ's.
-function _ilioLib() {
-  const owner = typeof _libOwner === 'function' && _libOwner() === 'dimitris' ? 'stiv' : 'dimitris';
-  const games = owner === 'stiv' ? GAMES.filter(g => g.bggId > 0) : (typeof _dimitrisShelf === 'function' ? _dimitrisShelf() : []);
-  const byId = {};
-  games.forEach(g => { byId[g.bggId] = g; });
-  return owner === 'stiv'
-    ? { owner, who: 'Στιβ', label: "Stiv's Library", byId }
-    : { owner, who: 'Δημητρης', label: 'Dimitris Library', byId };
-}
-
-// The library tab's filters (the same as the Library's), kept while you
-// move between the tabs; and shelf or covers (covers unless you pick the shelf).
-const _ILIO_F0 = { q: '', cats: [], coop: '', players: [], diff: '', expansion: '', campaign: true, maxTime: 240 };
-let _ilioF = { ..._ILIO_F0 };
-let _ilioFiltersOpen = false;
-function _ilioLibMode() {
-  try { return localStorage.getItem('bgl-ilio-libmode') === 'shelf' ? 'shelf' : 'covers'; } catch (_) { return 'covers'; }
-}
-
 function showIlioupoliView() {
   const container = document.getElementById('ilioupoli-view');
   if (!container) return;
-  const lib = _ilioLib();
-  const games = Object.values(lib.byId);
-  games.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  if (!['oathsworn', 'gauntlet', 'rove'].includes(_ilioSubTab)) _ilioSubTab = 'oathsworn';
 
   const subTabsHtml = `
+    <button type="button" class="ilio-back" data-ilio-back>&lsaquo; All campaigns</button>
     <div class="bs-subtabs ilio-subtabs">
-      <button class="bs-subtab${_ilioSubTab === 'library' ? ' active' : ''}" data-ilio-sub="library">📚 ${lib.label}</button>
       <button class="bs-subtab${_ilioSubTab === 'oathsworn' ? ' active' : ''}" data-ilio-sub="oathsworn">⚔️ Oathsworn</button>
       <button class="bs-subtab${_ilioSubTab === 'gauntlet' ? ' active' : ''}" data-ilio-sub="gauntlet">🦸 Marvel Champions</button>
       <button class="bs-subtab${_ilioSubTab === 'rove' ? ' active' : ''}" data-ilio-sub="rove">🧭 Rove</button>
@@ -215,6 +192,8 @@ function showIlioupoliView() {
     const strip = container.querySelector('.ilio-subtabs');
     const act = strip && strip.querySelector('.active');
     if (act) strip.scrollLeft = act.offsetLeft - (strip.clientWidth - act.offsetWidth) / 2;
+    const back = container.querySelector('[data-ilio-back]');
+    if (back) back.addEventListener('click', () => _navGo('play', 'campaigns'));
     container.querySelectorAll('[data-ilio-sub]').forEach(el => {
       el.addEventListener('click', () => {
         const s = el.dataset.ilioSub;
@@ -341,167 +320,6 @@ function showIlioupoliView() {
     window.scrollTo(0, 0);
     return;
   }
-
-  const esc = _escapeHtml;
-  const f = _ilioF;
-  const mode = _ilioLibMode();
-
-  // the shelf: five spines to a cubby, like the main one
-  const PER_CUBBY = 5;
-  let cubbiesHtml = '';
-  for (let i = 0; i < games.length; i += PER_CUBBY) {
-    const chunk = games.slice(i, i + PER_CUBBY);
-    const horiz = chunk.length <= 2 ? ' horizontal-layout' : '';
-    const spines = chunk.map(g =>
-      `<div class="game-spine box-${g.boxSize || 'md'}" style="background:${g.spineColor || '#555'}"
-            data-ilio-bgg="${g.bggId}" title="${esc(g.name)}">
-        <span class="spine-text">${esc(g.name)}</span>
-      </div>`).join('');
-    cubbiesHtml += `<div class="cubby${horiz}">${spines}</div>`;
-  }
-  // the covers
-  const coversHtml = games.map(g => `<button type="button" class="lib-cover" data-ilio-bgg="${g.bggId}" title="${esc(g.name)}">
-      <span class="lib-cover-art" style="--spine:${esc(g.spineColor || '#555')}"><img src="images/${g.bggId}.jpg" alt="" loading="lazy" onerror="__imgFallback(this, ${g.bggId})"></span>
-      <span class="lib-cover-name">${esc(g.name)}</span>
-    </button>`).join('');
-
-  // the filters, as on the Library
-  const cats = CATEGORIES.filter(c => games.some(g => (g.categories || []).includes(c)));
-  const multiLabel = (vals, none) => vals.length === 0 ? none : vals.length === 1 ? esc(String(vals[0] === 8 ? '8+' : vals[0])) : `${vals.length} selected`;
-  const opt = (field, v, l) => `<option value="${v}"${String(f[field]) === v ? ' selected' : ''}>${l}</option>`;
-  const filtersHtml = `
-    <div class="filters" id="ilio-filters">
-      <div class="filter-group"><span class="filter-label">Category</span>
-        <div class="filter-multi"><button type="button" class="filter-multi-btn" data-ilio-dd="cats">${multiLabel(f.cats, 'All')} <span class="filter-arrow">&#9662;</span></button>
-          <div class="filter-multi-dropdown" data-ilio-ddlist="cats">${cats.map(c => `<label><input type="checkbox" data-ilio-cat value="${esc(c)}"${f.cats.includes(c) ? ' checked' : ''}>${esc(c)}</label>`).join('')}</div></div></div>
-      <div class="filter-group"><span class="filter-label">Type</span>
-        <select class="filter-select" data-ilio-f="coop">${opt('coop', '', 'All')}${opt('coop', 'coop', 'Co-op')}${opt('coop', 'competitive', 'Competitive')}</select></div>
-      <div class="filter-group"><span class="filter-label">Players</span>
-        <div class="filter-multi"><button type="button" class="filter-multi-btn" data-ilio-dd="players">${multiLabel(f.players, 'Any')} <span class="filter-arrow">&#9662;</span></button>
-          <div class="filter-multi-dropdown" data-ilio-ddlist="players">${[1, 2, 3, 4, 5, 6, 7, 8].map(n => `<label><input type="checkbox" data-ilio-players value="${n}"${f.players.includes(n) ? ' checked' : ''}>${n === 8 ? '8+' : n}</label>`).join('')}</div></div></div>
-      <div class="filter-group"><span class="filter-label">Difficulty</span>
-        <select class="filter-select" data-ilio-f="diff">${opt('diff', '', 'All')}${opt('diff', 'easy', 'Easy')}${opt('diff', 'medium', 'Medium')}${opt('diff', 'hard', 'Hard')}${opt('diff', 'expert', 'Expert')}</select></div>
-      <div class="filter-group"><span class="filter-label">Game</span>
-        <select class="filter-select" data-ilio-f="expansion">${opt('expansion', '', 'All')}${opt('expansion', 'core', 'Core Games')}${opt('expansion', 'expansion', 'Expansions')}</select></div>
-      <div class="filter-group"><span class="filter-label">Max Play Time</span>
-        <div class="filter-slider-wrap"><input type="range" class="filter-slider" data-ilio-f="maxTime" min="15" max="240" step="15" value="${f.maxTime}">
-          <span class="filter-slider-value" id="ilio-time-val">${f.maxTime >= 240 ? 'Any' : f.maxTime + ' min'}</span></div></div>
-      <div class="filter-group"><span class="filter-label">Include</span>
-        <div class="filter-checks"><label class="filter-check"><input type="checkbox" data-ilio-f="campaign"${f.campaign ? ' checked' : ''}> Campaign / Legacy</label></div></div>
-      <button type="button" class="filter-reset" data-ilio-reset>Reset</button>
-      <span id="ilio-f-count"></span>
-    </div>`;
-
-  container.innerHTML = `
-    <div class="lb-header">
-      <div class="lb-title">Ilioupoli Bros</div>
-      <div class="lb-count">${lib.who}'s library · ${games.length} game${games.length !== 1 ? 's' : ''}</div>
-    </div>
-    ${subTabsHtml}
-    <div class="ilio-lib${_ilioFiltersOpen ? ' filters-open' : ''}" data-mode="${mode}">
-      <div class="ilio-lib-top">
-        <div class="seg" role="tablist" aria-label="Library view">${[['shelf', 'Shelf'], ['covers', 'Covers']].map(([m, l]) =>
-          `<button type="button" class="seg-btn${mode === m ? ' active' : ''}" data-ilio-mode="${m}" role="tab" aria-selected="${mode === m}">${l}</button>`).join('')}</div>
-      </div>
-      <div class="lib-tools">
-        <div class="search-wrap">
-          <span class="search-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg></span>
-          <input type="text" class="search-input" id="ilio-search" placeholder="Search ${esc(lib.who)}'s library" value="${esc(f.q)}" autocomplete="off">
-        </div>
-        <button type="button" class="lib-filter-toggle" data-ilio-ftoggle aria-expanded="${_ilioFiltersOpen}">Filters</button>
-      </div>
-      ${filtersHtml}
-      <div class="ilio-shelf-wrap"><div class="ilio-shelf">${cubbiesHtml}</div></div>
-      <div class="lib-covers ilio-covers">${coversHtml}</div>
-    </div>`;
-
-  wireSubTabs();
-  _wireIlioLib(container.querySelector('.ilio-lib'), lib);
-  _applyIlioFilters();
-  window.scrollTo(0, 0);
-}
-
-function _wireIlioLib(root, lib) {
-  if (!root) return;
-  const f = _ilioF;
-  const closeDropdowns = (except) => root.querySelectorAll('.filter-multi-dropdown.open').forEach(d => { if (d !== except) d.classList.remove('open'); });
-  root.addEventListener('click', (e) => {
-    const t = e.target.closest('[data-ilio-mode],[data-ilio-ftoggle],[data-ilio-dd],[data-ilio-reset],[data-ilio-bgg]');
-    if (!e.target.closest('.filter-multi')) closeDropdowns();
-    if (!t) return;
-    if (t.dataset.ilioMode) {
-      try { localStorage.setItem('bgl-ilio-libmode', t.dataset.ilioMode); } catch (_) {}
-      root.dataset.mode = t.dataset.ilioMode;
-      root.querySelectorAll('[data-ilio-mode]').forEach(b => { const on = b === t; b.classList.toggle('active', on); b.setAttribute('aria-selected', String(on)); });
-      _applyIlioFilters();
-      return;
-    }
-    if (t.dataset.ilioFtoggle !== undefined) {
-      _ilioFiltersOpen = root.classList.toggle('filters-open');
-      t.setAttribute('aria-expanded', String(_ilioFiltersOpen));
-      return;
-    }
-    if (t.dataset.ilioDd) {
-      const dd = root.querySelector(`[data-ilio-ddlist="${t.dataset.ilioDd}"]`);
-      closeDropdowns(dd);
-      dd.classList.toggle('open');
-      return;
-    }
-    if (t.dataset.ilioReset !== undefined) { _ilioF = { ..._ILIO_F0 }; showIlioupoliView(); return; }
-    if (t.dataset.ilioBgg) {
-      // findGameByBggId first: a game also on another shelf opens with its fullest page
-      const id = Number(t.dataset.ilioBgg);
-      const g = findGameByBggId(id) || lib.byId[id];
-      if (g && typeof openModal === 'function') { try { openModal(g); } catch (_) {} }
-    }
-  });
-  root.addEventListener('change', (e) => {
-    const t = e.target;
-    if (t.matches('[data-ilio-cat],[data-ilio-players]')) {
-      const kind = t.matches('[data-ilio-cat]') ? 'cats' : 'players';
-      f[kind] = [...root.querySelectorAll(kind === 'cats' ? '[data-ilio-cat]:checked' : '[data-ilio-players]:checked')].map(x => kind === 'cats' ? x.value : Number(x.value));
-      const btn = root.querySelector(`[data-ilio-dd="${kind}"]`);
-      const vals = f[kind];
-      btn.innerHTML = `${vals.length === 0 ? (kind === 'cats' ? 'All' : 'Any') : vals.length === 1 ? _escapeHtml(String(vals[0] === 8 ? '8+' : vals[0])) : vals.length + ' selected'} <span class="filter-arrow">&#9662;</span>`;
-    } else if (t.dataset.ilioF === 'campaign') f.campaign = t.checked;
-    else if (t.dataset.ilioF) f[t.dataset.ilioF] = t.value;
-    else return;
-    _applyIlioFilters();
-  });
-  root.addEventListener('input', (e) => {
-    const t = e.target;
-    if (t.id === 'ilio-search') f.q = t.value.trim().toLowerCase();
-    else if (t.dataset.ilioF === 'maxTime') {
-      f.maxTime = Number(t.value);
-      root.querySelector('#ilio-time-val').textContent = f.maxTime >= 240 ? 'Any' : f.maxTime + ' min';
-    } else return;
-    _applyIlioFilters();
-  });
-}
-
-// Fade the spines and hide the covers that don't match, as the Library does.
-function _applyIlioFilters() {
-  const root = document.querySelector('#ilioupoli-view .ilio-lib');
-  if (!root) return;
-  const f = { ..._ilioF, q: (_ilioF.q || '').trim().toLowerCase() };
-  const lib = _ilioLib();
-  const covers = root.dataset.mode === 'covers';
-  let n = 0;
-  root.querySelectorAll('.game-spine[data-ilio-bgg]').forEach(el => {
-    const pass = libPasses(lib.byId[Number(el.dataset.ilioBgg)], f);
-    el.classList.toggle('faded', !pass);
-    if (pass && !covers) n++;
-  });
-  root.querySelectorAll('.lib-cover[data-ilio-bgg]').forEach(el => {
-    const pass = libPasses(lib.byId[Number(el.dataset.ilioBgg)], f);
-    el.hidden = !pass;
-    if (pass && covers) n++;
-  });
-  const k = libFilterCount(f);
-  const toggle = root.querySelector('[data-ilio-ftoggle]');
-  if (toggle) toggle.innerHTML = `Filters${k ? ` <span class="gb-badge">${k}</span>` : ''}`;
-  const countEl = root.querySelector('#ilio-f-count');
-  if (countEl) countEl.innerHTML = libFilterActive(f) ? `<span class="filter-active-count">${n} game${n !== 1 ? 's' : ''}</span>` : '';
 }
 
 // ── Stats Dashboard ──

@@ -1,26 +1,30 @@
 // ── App shell navigation ──
-// Four destinations — Library, Explore, Ranks, You — in the top bar on wide
-// screens and a bottom tab bar on phones (same buttons; CSS moves them).
-// A row of sub-tabs under the bar switches between the views that belong
-// together:
-//   Library  → Στιβ's (or Δημητρης's) shelf · Ilioupoli (members) · Backed (backers)
-//   Explore  → Games · Tonight · Players · Stats · Trending (Board South)
-//   Ranks    → Leaderboard · Hours · Board South (regulars)
-//   You      → Profile · Achievements · Challenges
+// Five destinations, in the top bar on wide screens and a bottom tab bar on
+// phones (same buttons; CSS moves them). A row of small tabs under the bar
+// switches between the screens that belong together (the redesign of 2 Nov
+// 2026, after friends found things in unexpected places):
+//   Library       → the shelves (Στιβ's, Δημητρης's for the Ilioupoli Bros,
+//                   My games for a signed-in friend) · Find a game
+//   Play          → Tonight · Campaigns · Latest plays
+//   Crowdfunding  → Campaigns · For your games · Interested · Backed
+//   Group         → Leaderboard · Players · Hours · Stats · Board South (regulars)
+//   You           → Profile · Achievements · Challenges · Settings
 // The views and their switchTo…() functions are unchanged; this module only
 // calls them and mirrors whichever view is open (a MutationObserver keeps it
 // in sync however a view got opened: a link, the back button, a modal…).
 
 const NAV_ICONS = {
   library: '<svg viewBox="0 0 24 24"><path d="M4 19V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v14M8 19V7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v12M13.4 6.6l1.9-.5a1 1 0 0 1 1.2.7l3 11.3M3 20h18"/></svg>',
-  explore: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg>',
-  ranks: '<svg viewBox="0 0 24 24"><path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20h7M10 17h4v3h-4z"/></svg>',
+  play: '<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3.5"/><circle class="dot" cx="8.7" cy="8.7" r="1.3"/><circle class="dot" cx="15.3" cy="8.7" r="1.3"/><circle class="dot" cx="12" cy="12" r="1.3"/><circle class="dot" cx="8.7" cy="15.3" r="1.3"/><circle class="dot" cx="15.3" cy="15.3" r="1.3"/></svg>',
+  crowd: '<svg viewBox="0 0 24 24"><path d="M12 3 4 7v10l8 4 8-4V7zM4 7l8 4 8-4M12 11v10"/></svg>',
+  group: '<svg viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3.3"/><path d="M2.8 19.5a6.2 6.2 0 0 1 12.4 0"/><path d="M15.2 5.4a3.3 3.3 0 0 1 0 6.3M17.4 13.6a6.2 6.2 0 0 1 3.8 5.9"/></svg>',
   you: '<svg viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg>',
 };
 const NAV_ITEMS = [
-  ['library', 'Library'], ['explore', 'Explore'], ['ranks', 'Ranks'], ['you', 'You'],
+  ['library', 'Library'], ['play', 'Play'], ['crowd', 'Crowdfunding'], ['group', 'Group'], ['you', 'You'],
 ];
-let _navLastExploreTab = 'games';
+// the small tab each destination opens on, the last one picked (else the first)
+const _navLast = { play: 'tonight', crowd: 'campaigns', group: 'leaderboard' };
 
 function _navPlayer() {
   const raw = localStorage.getItem('bgl-player');
@@ -29,24 +33,32 @@ function _navPlayer() {
 
 const _navIsOpen = (id) => { const el = document.getElementById(id); return !!(el && el.classList.contains('open')); };
 
-// Which destination (and which sub-tab) the open view belongs to.
+// Which destination (and which small tab) the open view belongs to. `deep`:
+// a screen opened from that small tab (a campaign from Campaigns), whose tab
+// takes you back.
 function _navState() {
   const lib = document.getElementById('library-view');
   if (lib && lib.style.display !== 'none' && !document.querySelector('.stats-view.open')) {
-    return { group: 'library', sub: typeof _libChoices === 'function' && _libChoices() ? _libOwnerNow : 'shelf' };
+    return { group: 'library', sub: typeof _libShelves === 'function' && _libShelves() ? _libOwnerNow : 'shelf' };
   }
-  if (_navIsOpen('ilioupoli-view')) return { group: 'library', sub: 'ilioupoli' };
-  if (_navIsOpen('backed-view')) return { group: 'library', sub: 'backed' };
-  if (_navIsOpen('games-view')) return { group: 'explore', sub: (typeof _exploreTab !== 'undefined' ? _exploreTab : 'games') };
-  if (_navIsOpen('leaderboard-view')) return { group: 'ranks', sub: _ranksTab === 'hours' ? 'hours' : 'everyone' };
-  if (_navIsOpen('boardsouth-view')) return { group: 'ranks', sub: 'boardsouth' };
+  if (_navIsOpen('games-view')) {
+    const t = typeof _exploreTab !== 'undefined' ? _exploreTab : 'games';
+    if (t === 'games') return { group: 'library', sub: 'find' };
+    if (t === 'tonight' || t === 'campaigns' || t === 'plays') return { group: 'play', sub: t };
+    if (t === 'trending') {
+      const f = typeof _hotFilter !== 'undefined' ? _hotFilter : null;
+      return { group: 'crowd', sub: f === 'yours' || f === 'interested' ? f : 'campaigns' };
+    }
+    return { group: 'group', sub: t };   // players | stats
+  }
+  if (_navIsOpen('ilioupoli-view')) return { group: 'play', sub: 'campaigns', deep: true };
+  if (_navIsOpen('backed-view')) return { group: 'crowd', sub: 'backed' };
+  if (_navIsOpen('leaderboard-view')) return { group: 'group', sub: _ranksTab === 'hours' ? 'hours' : 'leaderboard' };
+  if (_navIsOpen('boardsouth-view')) return { group: 'group', sub: 'boardsouth' };
   if (_navIsOpen('stats-view')) {
     const visiting = typeof _viewingProfile !== 'undefined' && _viewingProfile;
-    if (visiting) {
-      const src = typeof _statsViewSource !== 'undefined' ? _statsViewSource : null;
-      return { group: src === 'insights' ? 'explore' : 'ranks', sub: '', visiting: true };
-    }
-    return { group: 'you', sub: 'profile' };
+    if (visiting) return { group: 'group', sub: '', visiting: true };
+    return { group: 'you', sub: typeof _youSettings !== 'undefined' && _youSettings ? 'settings' : 'profile' };
   }
   if (_navIsOpen('achievements-view')) return { group: 'you', sub: 'achievements' };
   if (_navIsOpen('challenges-view')) return { group: 'you', sub: 'challenges' };
@@ -56,52 +68,70 @@ function _navState() {
 function _navSubItems(group) {
   const me = _navPlayer();
   if (group === 'library') {
-    const member = me && typeof ILIOUPOLI_MEMBERS !== 'undefined' && ILIOUPOLI_MEMBERS.has(me);
-    const more = (member ? [['ilioupoli', 'Ilioupoli']] : [])
+    const shelves = typeof _libShelves === 'function' ? _libShelves() : null;
+    const shelf = (k) => (k === 'mine' ? 'My games' : `${LIB_OWNER_NAMES[k]}'s shelf`);
+    const items = shelves ? shelves.map(k => [k, shelf(k)]) : [['shelf', shelf(typeof _libOwner === 'function' ? _libOwner() : 'stiv')]];
+    return items.concat([['find', 'Find a game']]);
+  }
+  if (group === 'play') return [['tonight', 'Tonight'], ['campaigns', 'Campaigns'], ['plays', 'Latest plays']];
+  if (group === 'crowd') {
+    const interested = typeof backingInterestedIds === 'function' && backingInterestedIds().length;
+    return [['campaigns', 'Campaigns'], ['yours', 'For your games']]
+      .concat(interested ? [['interested', 'Interested']] : [])
       .concat(typeof backingMine === 'function' && backingMine() ? [['backed', 'Backed']] : []);
-    // a signed-in friend: their games, and the shelves of whose friend they are
-    const choices = typeof _libChoices === 'function' ? _libChoices() : null;
-    const shelf = (k) => `${LIB_OWNER_NAMES[k]}'s shelf`;
-    const items = choices
-      ? choices.map(k => [k, k === 'mine' ? 'My games' : shelf(k)]).concat(more)
-      : [['shelf', shelf(typeof _libOwner === 'function' ? _libOwner() : 'stiv')]].concat(more);
-    return items.length > 1 ? items : [];
   }
-  if (group === 'explore') {
-    const trending = typeof trendingAllowed === 'function' && trendingAllowed() ? [['trending', 'Crowdfunding']] : [];
-    return [['games', 'Games'], ...trending, ['tonight', 'Tonight'], ['players', 'Players'], ['stats', 'Stats']];
-  }
-  if (group === 'ranks') {
+  if (group === 'group') {
     const bs = typeof _activeBoardSouthVoter === 'function' ? _activeBoardSouthVoter() : null;
-    return [['everyone', 'Leaderboard'], ['hours', 'Hours']].concat(bs ? [['boardsouth', 'Board South']] : []);
+    return [['leaderboard', 'Leaderboard'], ['players', 'Players'], ['hours', 'Hours'], ['stats', 'Stats']]
+      .concat(bs ? [['boardsouth', 'Board South']] : []);
   }
-  if (group === 'you') return me ? [['profile', 'Profile'], ['achievements', 'Achievements'], ['challenges', 'Challenges']] : [];
+  if (group === 'you') return me ? [['profile', 'Profile'], ['achievements', 'Achievements'], ['challenges', 'Challenges'], ['settings', 'Settings']] : [];
   return [];
 }
 
+// A screen of the shared view (#games-view, js/explore.js): Find a game,
+// Tonight, Campaigns, Latest plays, Crowdfunding, Players, Stats.
+function _navExplore(tab) {
+  const there = _navIsOpen('games-view');
+  _exploreTab = tab;
+  return there ? showGamesView() : switchToGames();
+}
+
 function _navGo(group, sub) {
+  // the destinations before the redesign (a back-button entry, a link)
+  if (group === 'explore') {
+    const to = { trending: ['crowd'], tonight: ['play', 'tonight'], players: ['group', 'players'], stats: ['group', 'stats'] }[sub] || ['library', 'find'];
+    return _navGo(to[0], to[1]);
+  }
+  if (group === 'ranks') return _navGo('group', sub === 'everyone' ? 'leaderboard' : sub);
+  if (group === 'tonight') return _navGo('play', 'tonight');
   if (group === 'library') {
-    if (sub === 'ilioupoli') return switchToIlioupoli();
-    if (sub === 'backed') return switchToBacked();
-    if (['mine', 'stiv', 'dimitris'].includes(sub) && typeof _libChoices === 'function' && _libChoices()) { _libPick = sub; _libRefresh(); }
+    if (sub === 'ilioupoli') return _navGo('play', 'campaigns');
+    if (sub === 'backed') return _navGo('crowd', 'backed');
+    if (sub === 'find') return _navExplore('games');
+    if (['mine', 'stiv', 'dimitris'].includes(sub) && typeof _libShelves === 'function' && _libShelves()) { _libPick = sub; _libRefresh(); }
     return switchToLibrary();
   }
-  if (group === 'tonight') return _navGo('explore', 'tonight');
-  if (group === 'explore') {
-    const tab = sub || _navLastExploreTab || 'games';
-    const alreadyThere = _navIsOpen('games-view');
-    _exploreTab = tab;
-    return alreadyThere ? showGamesView() : switchToGames();
+  if (group === 'play') return _navExplore(sub || _navLast.play);
+  if (group === 'crowd') {
+    sub = sub || _navLast.crowd;
+    if (sub === 'backed') return switchToBacked();
+    if (sub === 'yours' || sub === 'interested') _hotFilter = sub;
+    else if (!['live', 'new', 'soon'].includes(_hotFilter)) _hotFilter = null;   // the campaigns: the page picks which list
+    return _navExplore('trending');
   }
-  if (group === 'ranks') {
+  if (group === 'group') {
+    sub = sub || _navLast.group;
     if (sub === 'boardsouth') return switchToBoardSouth();
-    if (sub) _ranksTab = sub === 'hours' ? 'hours' : 'elo';
+    if (sub === 'players' || sub === 'stats') return _navExplore(sub);
+    _ranksTab = sub === 'hours' ? 'hours' : 'elo';
     return switchToLeaderboard();
   }
   if (group === 'you') {
     if (sub === 'achievements') return switchToAchievements();
     if (sub === 'challenges') return switchToChallenges();
     if (typeof _viewingProfile !== 'undefined') { _viewingProfile = null; _statsViewSource = null; }
+    _youSettings = sub === 'settings';
     return switchToStats();
   }
 }
@@ -243,7 +273,7 @@ function _navCenterTab(subnav, smooth) {
 function _navSync() {
   _navCompact();
   const st = _navState();
-  if (st.group === 'explore' && st.sub) _navLastExploreTab = st.sub;
+  if (st.sub && st.group in _navLast && !st.deep) _navLast[st.group] = st.sub;
   document.querySelectorAll('#appnav [data-nav]').forEach(b => {
     const on = b.dataset.nav === st.group;
     b.classList.toggle('active', on);
@@ -295,7 +325,7 @@ function initNav() {
   });
   document.getElementById('subnav').addEventListener('click', (e) => {
     const b = e.target.closest('.subnav-btn');
-    if (b && !b.classList.contains('active')) _navGo(b.dataset.group, b.dataset.sub);
+    if (b && (!b.classList.contains('active') || _navState().deep)) _navGo(b.dataset.group, b.dataset.sub);
   });
   document.getElementById('appbar-me').addEventListener('click', () => {
     if (!_navPlayer()) return openPicker();

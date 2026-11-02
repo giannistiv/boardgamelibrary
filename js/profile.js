@@ -477,6 +477,158 @@ function _wirePcFolds(container) {
   }));
 }
 
+// ── You → Settings ──
+// What used to hide behind the profile's cog and in a fold at its bottom:
+// the photo and name, the account (BGG username, notifications, signing out,
+// deleting it), importing a BGStats export, installing the app, sharing the
+// library, and switching player. It's the own profile view (#stats-view)
+// drawn as Settings while _youSettings is on (js/nav.js sets it).
+let _youSettings = false;
+function _youSettingsHtml(playerName, importSource) {
+  const isOwnProfile = true;
+  const tools = `
+    ${isOwnProfile && typeof buildInstallCardHtml === 'function' ? buildInstallCardHtml() : ''}
+
+    ${_origCanon(playerName) === 'Στιβ' ? `<div class="qr-section">
+      <div class="stats-section-title" style="border:none;text-align:center">Share This Library</div>
+      <div class="qr-canvas"><img id="qr-img" width="150" height="150" alt="QR Code" style="border-radius:8px"></div>
+      <div class="qr-label">Scan to open on your phone</div>
+    </div>` : ''}
+
+    <!-- ── JSON Import: Στιβ's, or a friend's own (IMPORT_SOURCES) on their own profile ── -->
+  ${importSource !== null ? (() => {
+    // Find the most recent play date across PLAY_HISTORY (a friend: across
+    // their own uploads) so they can tell from which day on to upload.
+    let latest = '';
+    for (const bggId in PLAY_HISTORY) {
+      for (const p of PLAY_HISTORY[bggId]) {
+        if (p && p.date && p.date > latest && (!importSource || p.src === importSource)) latest = p.date;
+      }
+    }
+    const latestLabel = latest ? _fmtDateShort(latest) : null;
+    const sinceLine = latestLabel
+      ? `<div class="import-last-play">Latest uploaded play: <b>${latestLabel}</b></div>`
+      : '';
+    const skipWith = importSource ? (IMPORT_SOURCES[importSource].skipWith || []).join(', ') : '';
+    return `<div class="import-section" id="importSection">
+      <div class="import-section-title">📥 ${importSource ? 'Import your BGStats export' : 'Import BGStats Play File'}</div>
+      ${sinceLine}
+      ${importSource ? `<div class="import-last-play">Your people and places are matched to the names here${skipWith ? `, and plays with ${_escapeHtml(skipWith)} are skipped (${_escapeHtml(skipWith)}'s own copy is kept)` : ''}.</div>` : ''}
+      <div class="import-drop-zone" id="importDropZone">
+        <input type="file" id="importFileInput" accept=".json,.bgsplay">
+        <div class="import-drop-icon">📂</div>
+        <div class="import-drop-label">Drop your BGStats Play export here</div>
+        <div class="import-drop-sub">or click to browse — new plays, players & games will be merged</div>
+      </div>
+      <div class="import-result" id="importResult">
+        <div class="import-result-title" id="importResultTitle"></div>
+        <div class="import-result-lines" id="importResultLines"></div>
+      </div>
+    </div>`;
+  })() : ''}`;
+  return `
+    <div class="stats-header profile-hero">
+      <div class="profile-avatar" aria-hidden="true">${avatarInner(playerName)}</div>
+      <div class="profile-id">
+        <div class="stats-player-name">Settings</div>
+        <div class="stats-player-sub">${_escapeHtml(playerName)}</div>
+      </div>
+    </div>
+    <div class="stats-section you-set">
+      <div class="stats-section-title">Your profile and account</div>
+      <div class="profile-edit-form open" id="profile-edit-form">
+        <div class="profile-edit-label">Photo</div>
+        <div class="profile-photo-row">
+          <span class="profile-photo-preview" aria-hidden="true">${avatarInner(playerName)}</span>
+          <label class="profile-edit-save profile-photo-pick">${playerPhoto(playerName) ? 'Change photo' : 'Choose a photo'}<input type="file" id="profile-photo-input" accept="image/*" hidden></label>
+          ${playerPhoto(playerName) ? '<button type="button" class="profile-edit-cancel" id="profile-photo-remove">Remove</button>' : ''}
+        </div>
+        <div class="profile-edit-err" id="profile-photo-err"></div>
+        <div class="profile-edit-label">Display name</div>
+        <input type="text" id="profile-name-input" class="profile-name-input" maxlength="40" autocomplete="off" value="${playerName.replace(/"/g, '&quot;')}">
+        <div class="profile-edit-actions">
+          <button class="profile-edit-save" id="profile-name-save">Save</button>
+          <button class="profile-edit-cancel" id="profile-name-cancel">Cancel</button>
+        </div>
+        <div class="profile-edit-err" id="profile-name-err"></div>
+        ${typeof acctSettingsHtml === 'function' ? acctSettingsHtml() : ''}
+      </div>
+    </div>
+    ${tools.trim() ? `<div class="stats-section you-set"><div class="stats-section-title">${importSource !== null ? 'Import, share and install' : 'Install the app'}</div>${tools}</div>` : ''}
+    <div class="stats-section you-set">
+      <div class="stats-section-title">On this device</div>
+      <div class="stats-player-sub">Playing as ${_escapeHtml(playerName)}. Someone else using this phone can switch.</div>
+      <button class="change-profile-btn" id="btn-change-profile">Change player</button>
+    </div>`;
+}
+function _wireYouSettings(container, playerName, importSource) {
+  const isOwnProfile = true;
+  // Wire up the importer (Στιβ's, or a friend's own)
+  if (importSource !== null && typeof window.initImporter === 'function') {
+    window.initImporter(importSource || undefined);
+  } else if (window._bglSharedFile && isOwnProfile) {
+    window._bglSharedFile = null;
+    if (typeof _shareNotice === 'function') _shareNotice('error', 'Not imported', ['BGStats files are imported by Στιβ and Δημητρης, each in their own Settings.']);
+  }
+  // The name and the photo: saved to Firebase; a rename reloads, so it
+  // reaches everything the startup builds.
+  const editForm = document.getElementById('profile-edit-form');
+  if (editForm) {
+    const input = document.getElementById('profile-name-input');
+    const errEl = document.getElementById('profile-name-err');
+    const close = () => { errEl.textContent = ''; input.value = playerName; };
+    document.getElementById('profile-name-cancel').addEventListener('click', close);
+
+    // Photo: shrink it to a small square on the phone, save it with the profile.
+    const photoInput = document.getElementById('profile-photo-input');
+    const photoErr = document.getElementById('profile-photo-err');
+    const savePhoto = async (dataUrl) => {
+      photoErr.style.color = ''; photoErr.textContent = 'Saving…';
+      const r = await _saveProfilePhoto(dataUrl);
+      if (!r.ok) { photoErr.textContent = r.err; return; }
+      if (typeof _navRenderMe === 'function') _navRenderMe();
+      showStatsView(playerName);
+    };
+    photoInput.addEventListener('change', async () => {
+      const file = photoInput.files && photoInput.files[0];
+      if (!file) return;
+      let dataUrl;
+      try { dataUrl = await _photoFromFile(file); } catch (e) { photoErr.textContent = "That image couldn't be read."; return; }
+      await savePhoto(dataUrl);
+    });
+    const removeBtn = document.getElementById('profile-photo-remove');
+    if (removeBtn) removeBtn.addEventListener('click', () => savePhoto(null));
+    const doSave = async () => {
+      const saveBtn = document.getElementById('profile-name-save');
+      saveBtn.disabled = true; errEl.style.color = ''; errEl.textContent = 'Saving…';
+      const r = await _saveProfileName(input.value);
+      if (r.ok) { window.location.reload(); }
+      else { errEl.textContent = r.err; saveBtn.disabled = false; }
+    };
+    document.getElementById('profile-name-save').addEventListener('click', doSave);
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); doSave(); }
+      else if (e.key === 'Escape') close();
+    });
+  }
+  // Generate QR code via API
+  const qrImg = document.getElementById('qr-img');
+  if (qrImg) {
+    const url = encodeURIComponent(window.location.href.split('?')[0].split('#')[0]);
+    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${url}`;
+  }
+  // Change profile button
+  const changeBtn = document.getElementById('btn-change-profile');
+  if (changeBtn) {
+    changeBtn.addEventListener('click', () => {
+      localStorage.removeItem('bgl-player');
+      if (typeof _updateBoardSouthBtnVisibility === 'function') _updateBoardSouthBtnVisibility();
+      openPicker();
+    });
+  }
+  if (typeof wireInstallCard === 'function') wireInstallCard(container);
+}
+
 function showStatsView(playerName, visiting) {
   const loggedInPlayer = localStorage.getItem('bgl-player');
   const isOwnProfile = !visiting || visiting === loggedInPlayer;
@@ -509,6 +661,13 @@ function showStatsView(playerName, visiting) {
     document.body.classList.remove('mobile-library');
     _setViewport(VP_LOCKED);
     window.scrollTo(0, 0);
+  }
+  if (isOwnProfile && window._bglSharedFile) _youSettings = true;   // a BGStats file shared to the app: its importer is on Settings
+  if (isOwnProfile && _youSettings) {
+    const container = document.getElementById('stats-view');
+    container.innerHTML = _youSettingsHtml(playerName, importSource);
+    _wireYouSettings(container, playerName, importSource);
+    return;
   }
 
   // Gather all play data for this player
@@ -764,24 +923,8 @@ function showStatsView(playerName, visiting) {
         ${isOwnProfile && typeof logPlayBtnHtml === 'function' ? logPlayBtnHtml(null, 'profile') : ''}
       </div>
       ${isOwnProfile && typeof acctInviteBtnHtml === 'function' ? acctInviteBtnHtml() : ''}
-      ${isOwnProfile ? `<button class="profile-cog" id="btn-edit-name" title="Profile settings" aria-label="Profile settings"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>` : ''}
-      ${isOwnProfile ? `<div class="profile-edit-form" id="profile-edit-form">
-        <div class="profile-edit-label">Photo</div>
-        <div class="profile-photo-row">
-          <span class="profile-photo-preview" aria-hidden="true">${avatarInner(playerName)}</span>
-          <label class="profile-edit-save profile-photo-pick">${playerPhoto(playerName) ? 'Change photo' : 'Choose a photo'}<input type="file" id="profile-photo-input" accept="image/*" hidden></label>
-          ${playerPhoto(playerName) ? '<button type="button" class="profile-edit-cancel" id="profile-photo-remove">Remove</button>' : ''}
-        </div>
-        <div class="profile-edit-err" id="profile-photo-err"></div>
-        <div class="profile-edit-label">Display name</div>
-        <input type="text" id="profile-name-input" class="profile-name-input" maxlength="40" autocomplete="off" value="${playerName.replace(/"/g, '&quot;')}">
-        <div class="profile-edit-actions">
-          <button class="profile-edit-save" id="profile-name-save">Save</button>
-          <button class="profile-edit-cancel" id="profile-name-cancel">Cancel</button>
-        </div>
-        <div class="profile-edit-err" id="profile-name-err"></div>
-        ${typeof acctSettingsHtml === 'function' ? acctSettingsHtml() : ''}
-      </div>` : ''}
+      ${isOwnProfile ? `<button class="profile-cog" id="btn-settings" title="Settings" aria-label="Settings"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>` : ''}
+
     </div>
     ${isOwnProfile && typeof acctProfileHtml === 'function' ? acctProfileHtml() : ''}
 
@@ -851,57 +994,11 @@ function showStatsView(playerName, visiting) {
       </div>
     </div>
 
-    ${isOwnProfile ? _pcFold('tools', _origCanon(playerName) === 'Στιβ' ? 'Import, share &amp; install' : 'Install the app', '', `
-    ${isOwnProfile && typeof buildInstallCardHtml === 'function' ? buildInstallCardHtml() : ''}
 
-    ${_origCanon(playerName) === 'Στιβ' ? `<div class="qr-section">
-      <div class="stats-section-title" style="border:none;text-align:center">Share This Library</div>
-      <div class="qr-canvas"><img id="qr-img" width="150" height="150" alt="QR Code" style="border-radius:8px"></div>
-      <div class="qr-label">Scan to open on your phone</div>
-    </div>` : ''}
 
-    <!-- ── JSON Import: Στιβ's, or a friend's own (IMPORT_SOURCES) on their own profile ── -->
-  ${importSource !== null ? (() => {
-    // Find the most recent play date across PLAY_HISTORY (a friend: across
-    // their own uploads) so they can tell from which day on to upload.
-    let latest = '';
-    for (const bggId in PLAY_HISTORY) {
-      for (const p of PLAY_HISTORY[bggId]) {
-        if (p && p.date && p.date > latest && (!importSource || p.src === importSource)) latest = p.date;
-      }
-    }
-    const latestLabel = latest ? fmtDate(latest) : null;
-    const sinceLine = latestLabel
-      ? `<div class="import-last-play">Latest uploaded play: <b>${latestLabel}</b></div>`
-      : '';
-    const skipWith = importSource ? (IMPORT_SOURCES[importSource].skipWith || []).join(', ') : '';
-    return `<div class="import-section" id="importSection">
-      <div class="import-section-title">📥 ${importSource ? 'Import your BGStats export' : 'Import BGStats Play File'}</div>
-      ${sinceLine}
-      ${importSource ? `<div class="import-last-play">Your people and places are matched to the names here${skipWith ? `, and plays with ${_escapeHtml(skipWith)} are skipped (${_escapeHtml(skipWith)}'s own copy is kept)` : ''}.</div>` : ''}
-      <div class="import-drop-zone" id="importDropZone">
-        <input type="file" id="importFileInput" accept=".json,.bgsplay">
-        <div class="import-drop-icon">📂</div>
-        <div class="import-drop-label">Drop your BGStats Play export here</div>
-        <div class="import-drop-sub">or click to browse — new plays, players & games will be merged</div>
-      </div>
-      <div class="import-result" id="importResult">
-        <div class="import-result-title" id="importResultTitle"></div>
-        <div class="import-result-lines" id="importResultLines"></div>
-      </div>
-    </div>`;
-  })() : ''}`) : ''}
 
-    ${isOwnProfile ? '<button class="change-profile-btn" id="btn-change-profile">Change Profile</button>' : ''}
   `;
 
-  // Wire up the importer (Στιβ's, or a friend's own)
-  if (importSource !== null && typeof window.initImporter === 'function') {
-    window.initImporter(importSource || undefined);
-  } else if (window._bglSharedFile && isOwnProfile) {
-    window._bglSharedFile = null;
-    if (typeof _shareNotice === 'function') _shareNotice('error', 'Not imported', ['BGStats files are imported by Στιβ and Δημητρης, each from their own profile.']);
-  }
 
   _wirePcFolds(container);
   wireRatingsGraph(container, playerName);
@@ -952,15 +1049,6 @@ function showStatsView(playerName, visiting) {
       .catch(() => {});
   }
 
-  // Change profile button
-  const changeBtn = document.getElementById('btn-change-profile');
-  if (changeBtn) {
-    changeBtn.addEventListener('click', () => {
-      localStorage.removeItem('bgl-player');
-      if (typeof _updateBoardSouthBtnVisibility === 'function') _updateBoardSouthBtnVisibility();
-      openPicker();
-    });
-  }
 
   // Year-in-Review "Wrapped" banner → opens the story modal.
   const wrappedBanner = container.querySelector('#wrapped-banner');
@@ -970,66 +1058,14 @@ function showStatsView(playerName, visiting) {
 
   // "Rate your last game" nudge (own profile only).
   wireRateLastGame(container, playerName, isOwnProfile, recentPlays);
-  if (typeof wireInstallCard === 'function') wireInstallCard(container);
+  const settingsBtn = container.querySelector('#btn-settings');
+  if (settingsBtn) settingsBtn.addEventListener('click', () => _navGo('you', 'settings'));
 
   // Play heatmap (year nav + tap-a-day).
   _wireHeatmap(playerName);
   wirePlayTime(playerName);
 
-  // Edit-name (own profile only): reveal an inline editor, save to Firebase,
-  // then reload so the rename propagates through the startup machinery.
-  const editBtn = document.getElementById('btn-edit-name');
-  const editForm = document.getElementById('profile-edit-form');
-  if (editBtn && editForm) {
-    const input = document.getElementById('profile-name-input');
-    const errEl = document.getElementById('profile-name-err');
-    const close = () => { editForm.classList.remove('open'); errEl.textContent = ''; input.value = playerName; };
-    editBtn.addEventListener('click', () => {
-      const opening = !editForm.classList.contains('open');
-      editForm.classList.toggle('open', opening);
-      // no focus on opening: on a phone it pops the keyboard up before you've chosen what to change
-    });
-    document.getElementById('profile-name-cancel').addEventListener('click', close);
 
-    // Photo: shrink it to a small square on the phone, save it with the profile.
-    const photoInput = document.getElementById('profile-photo-input');
-    const photoErr = document.getElementById('profile-photo-err');
-    const savePhoto = async (dataUrl) => {
-      photoErr.style.color = ''; photoErr.textContent = 'Saving…';
-      const r = await _saveProfilePhoto(dataUrl);
-      if (!r.ok) { photoErr.textContent = r.err; return; }
-      if (typeof _navRenderMe === 'function') _navRenderMe();
-      showStatsView(playerName);
-    };
-    photoInput.addEventListener('change', async () => {
-      const file = photoInput.files && photoInput.files[0];
-      if (!file) return;
-      let dataUrl;
-      try { dataUrl = await _photoFromFile(file); } catch (e) { photoErr.textContent = "That image couldn't be read."; return; }
-      await savePhoto(dataUrl);
-    });
-    const removeBtn = document.getElementById('profile-photo-remove');
-    if (removeBtn) removeBtn.addEventListener('click', () => savePhoto(null));
-    const doSave = async () => {
-      const saveBtn = document.getElementById('profile-name-save');
-      saveBtn.disabled = true; errEl.style.color = ''; errEl.textContent = 'Saving…';
-      const r = await _saveProfileName(input.value);
-      if (r.ok) { window.location.reload(); }
-      else { errEl.textContent = r.err; saveBtn.disabled = false; }
-    };
-    document.getElementById('profile-name-save').addEventListener('click', doSave);
-    input.addEventListener('keydown', e => {
-      if (e.key === 'Enter') { e.preventDefault(); doSave(); }
-      else if (e.key === 'Escape') close();
-    });
-  }
-
-  // Generate QR code via API
-  const qrImg = document.getElementById('qr-img');
-  if (qrImg) {
-    const url = encodeURIComponent(window.location.href.split('?')[0].split('#')[0]);
-    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${url}`;
-  }
 }
 
 // ── Rating System (Firebase Realtime Database) ──

@@ -626,7 +626,7 @@ function _lbBreakdownHtml(name, mode) {
       ${rows || '<div class="lb-empty">No rated plays this year.</div>'}`;
 }
 
-let _ranksTab = 'elo';   // which ranking the Ranks tab shows: 'elo' | 'hours'
+let _ranksTab = 'elo';   // which ranking the leaderboard view shows (Group → Leaderboard or Hours): 'elo' | 'hours'
 
 function showLeaderboardView() {
   // The Ranks tab: the main Elo league, or hours at the table (play-time.js).

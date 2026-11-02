@@ -104,7 +104,17 @@ function _libChoices() {
   const a = acctMe();
   return ['mine', ...['stiv', 'dimitris'].filter(k => acctFriendOf(k, a))];
 }
-let _libPick = null;   // the shelf a signed-in friend chose: 'mine' | 'stiv' | 'dimitris'
+let _libPick = null;   // the shelf picked: 'mine' | 'stiv' | 'dimitris'
+// The shelves the Library's small tabs offer: a signed-in friend's (above),
+// or for the Ilioupoli Bros both Στιβ's and Δημητρης's, their own first (the
+// other one used to be on their Ilioupoli page). null: the one shelf.
+function _libShelves() {
+  const choices = _libChoices();
+  if (choices) return choices;
+  const me = _libViewer();
+  if (!me || typeof ILIOUPOLI_MEMBERS === 'undefined' || !ILIOUPOLI_MEMBERS.has(me) || typeof DIMITRIS_GAMES === 'undefined') return null;
+  return _libOwner() === 'dimitris' ? ['dimitris', 'stiv'] : ['stiv', 'dimitris'];
+}
 // The game page for a shelf entry: the fullest record the site has of it.
 function _libGameById(id) {
   const g = _libGames().find(x => x.id === id);
@@ -113,8 +123,8 @@ function _libGameById(id) {
 // Redraw the Library when whose shelf it is changes (a login, or once the
 // imported plays have loaded and say who plays with whom).
 function _libRefresh() {
-  const choices = _libChoices();
-  const owner = choices ? (choices.includes(_libPick) ? _libPick : 'mine') : _libOwner();
+  const shelves = _libShelves();
+  const owner = shelves ? (shelves.includes(_libPick) ? _libPick : shelves[0]) : _libOwner();
   const key = `${owner}|${_libViewer()}`;   // the heading says "Your shelf" to Δημητρης himself
   if (key === _libRefresh.key) return;
   _libRefresh.key = key;
@@ -480,7 +490,7 @@ function _applyLibMode() {
   const title = document.querySelector('#library-view .page-title');
   if (title) title.textContent = mine ? 'Your games'
     : dim ? `${_libViewer() === LIB_OWNER_NAMES.dimitris ? 'Your' : LIB_OWNER_NAMES.dimitris + '\'s'} shelf`
-    : (_libChoices() ? `${LIB_OWNER_NAMES.stiv}'s shelf` : 'The shelf');
+    : (_libShelves() ? `${_libViewer() === LIB_OWNER_NAMES.stiv ? 'Your' : LIB_OWNER_NAMES.stiv + '\'s'} shelf` : 'The shelf');
   const add = document.getElementById('lib-add');
   if (add) add.hidden = !mine;
   const empty = document.getElementById('lib-empty');
@@ -490,7 +500,7 @@ function _applyLibMode() {
     const bgg = typeof myBggUser === 'function' ? myBggUser() : '';
     if (mine && !n) empty.innerHTML = `<b>Your games go here</b><span>${bgg
       ? `Your BGG collection (${_escapeHtml(bgg)}) arrives with the next BGG sync, within a few hours. Meanwhile, add games yourself.`
-      : 'Search for the games you own and add them, or link your BGG username in Profile settings and your collection comes by itself.'}</span><button type="button" class="acct-btn acct-main" data-mylib-open>+ Add a game</button>`;
+      : 'Search for the games you own and add them, or link your BGG username in You → Settings and your collection comes by itself.'}</span><button type="button" class="acct-btn acct-main" data-mylib-open>+ Add a game</button>`;
   }
   applyFilters();
 }

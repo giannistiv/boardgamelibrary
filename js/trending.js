@@ -255,19 +255,20 @@ function _renderHot(box) {
   const fresh = live.filter(_hotIsNew).sort((a, b) => b.camp.since.localeCompare(a.camp.since));
   _hotMarkSeen(live);
   const unseen = live.filter(g => _hotUnseen.has(g.id)).length;
-  const yours = _gnForYou();
-  if (!_hotFilter) _hotFilter = live.length ? 'live' : soon.length ? 'soon' : 'yours';
+  if (!_hotFilter) _hotFilter = live.length ? 'live' : 'soon';
   if ((_hotFilter === 'soon' && !soon.length) || (_hotFilter === 'new' && !fresh.length)) _hotFilter = 'live';
   const watching = typeof backingInterestedIds === 'function' ? backingInterestedIds() : [];   // only for someone who marked one
   if (_hotFilter === 'interested' && !watching.length) _hotFilter = 'live';
-  const chips = _gbChips('hot', [['live', `Live campaigns ${live.length}`]].concat(fresh.length ? [['new', `New ${fresh.length}`]] : [])
-    .concat([['soon', `Coming soon ${soon.length}`], ['yours', `For your games ${yours.length}`]])
-    .concat(watching.length ? [['interested', `Interested ${watching.length}`]] : []), v => _hotFilter === v);
+  // Live, New and Coming soon are chips; For your games and Interested are
+  // Crowdfunding's own small tabs (js/nav.js), so they have none
+  const chips = ['yours', 'interested'].includes(_hotFilter) ? '' : _gbChips('hot', [['live', `Live campaigns ${live.length}`]]
+    .concat(fresh.length ? [['new', `New ${fresh.length}`]] : [])
+    .concat([['soon', `Coming soon ${soon.length}`]]), v => _hotFilter === v);
   if (_hotFilter === 'new') {
     const fits = _hotFits();
     box.innerHTML = `
       <div class="hot-head">
-        <div class="gb-chips">${chips}</div>
+        ${chips ? `<div class="gb-chips">${chips}</div>` : ''}
         <span class="hot-updated">Campaigns that turned up in the last ${HOT_NEW_DAYS} days, newest first${unseen ? ` &middot; ${unseen} you haven&rsquo;t seen before` : ''}</span>
       </div>
       ${fresh.map(g => _hotCardHtml(g, libs, fits.get(g.id) || _hotFit(g, taste))).join('')}`;
@@ -280,7 +281,7 @@ function _renderHot(box) {
     const over = watching.filter(id => !on.some(g => g.id === id));
     box.innerHTML = `
       <div class="hot-head">
-        <div class="gb-chips">${chips}</div>
+        ${chips ? `<div class="gb-chips">${chips}</div>` : ''}
         <span class="hot-updated">The campaigns you marked Interested, ending soonest first</span>
       </div>
       ${on.map(g => _hotCardHtml(g, libs, fits.get(g.id) || _hotFit(g, taste))).join('')}
@@ -290,7 +291,7 @@ function _renderHot(box) {
   if (_hotFilter === 'yours') {
     box.innerHTML = `
       <div class="hot-head">
-        <div class="gb-chips">${chips}</div>
+        ${chips ? `<div class="gb-chips">${chips}</div>` : ''}
         <span class="hot-updated">New expansions, editions and printings of the games you play, and campaigns for them, from BGG${_news && _news.updated ? ` &middot; updated ${_hotAgo(_news.updated)}` : ''}</span>
       </div>
       ${_gnForYouHtml()}`;
@@ -309,7 +310,7 @@ function _renderHot(box) {
     : (a, b) => fits.get(b.id).score - fits.get(a.id).score);
   box.innerHTML = `
       <div class="hot-head">
-        <div class="gb-chips">${chips}</div>
+        ${chips ? `<div class="gb-chips">${chips}</div>` : ''}
         <div class="gb-chips hot-sorts">${_gbChips('hotsort', sorts.filter(s => taste || s[0] !== 'you'), v => _hotSort === v)}</div>
         <span class="hot-updated">${_hotFilter === 'live' ? 'Crowdfunding campaigns running now, from BGG' : 'On BGG&rsquo;s hot list, not out yet'} &middot; updated ${_hotAgo(_hot.updated)}${_hotFilter === 'live' && unseen ? ` &middot; <button type="button" class="hot-unseen" data-gb="hot" data-v="new">${unseen} new since you last looked</button>` : ''}</span>
       </div>
