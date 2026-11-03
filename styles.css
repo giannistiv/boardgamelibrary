@@ -2183,13 +2183,6 @@
   .stats-recent-result.won{color:#22c55e;opacity:1;font-weight:600}
   .stats-recent-result.lost{color:#f87171;opacity:0.8}
 
-  .stats-rec-row{
-    display:flex;align-items:center;gap:0.7rem;
-    padding:0.5rem 0.6rem;border-radius:8px;margin-bottom:0.3rem;
-    background:rgba(255,255,255,0.02);cursor:pointer;transition:background 0.15s;
-  }
-  .stats-rec-row:hover{background:rgba(255,255,255,0.06)}
-  .stats-rec-reason{font-size:0.65rem;opacity:0.4;font-style:italic}
 
   /* ── QR Section ── */
   .qr-section{
@@ -3901,12 +3894,12 @@
     color:var(--text);margin-bottom:0.8rem;padding-bottom:0;border-bottom:0;
   }
 
-  /* ── List rows (games, plays, recommendations) ── */
-  .stats-game-row,.stats-rec-row{
+  /* ── List rows (games, plays) ── */
+  .stats-game-row{
     gap:0.85rem;padding:0.55rem 0.7rem 0.55rem 0.55rem;border-radius:var(--r);margin-bottom:0.45rem;
     background:var(--card);border:1px solid var(--line);transition:background 0.15s,border-color 0.15s;
   }
-  .stats-game-row:hover,.stats-rec-row:hover{background:var(--card-2);border-color:var(--line-2)}
+  .stats-game-row:hover{background:var(--card-2);border-color:var(--line-2)}
 
   .stats-game-detail{font-size:0.78rem;color:var(--text-3);opacity:1}
   
@@ -3980,8 +3973,7 @@
 
   /* ── Profile on a phone: room to breathe ──
      No boxes around the header, three headline numbers (the other three as
-     one line of text), plain lists, space between sections, and the
-     less-used sections folded behind a one-line summary (see _pcFold). */
+     one line of text), plain lists and space between sections. */
   html.compact .profile-hero{background:none;border:0;padding:0.5rem 0.1rem 0;margin-bottom:1.5rem}
   html.compact .stats-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:0;margin-bottom:0.55rem}
   html.compact .stats-card{padding:0.15rem 0.3rem;background:none;border:0;border-radius:0}
@@ -3992,34 +3984,13 @@
   html.compact .stats-more{display:block;text-align:center;font-size:0.78rem;line-height:1.5;color:var(--text-3);margin:0 0.5rem 2.6rem}
   html.compact .pc-sec{margin-bottom:2.6rem}
   html.compact .pc-sec > *{margin-bottom:0}
-  html.compact .pc-sec:has(> .pc-fold){margin-bottom:0}
-  html.compact #stats-view .stats-game-row,html.compact #stats-view .stats-rec-row{
+  html.compact #stats-view .stats-game-row{
     background:none;border:0;border-bottom:1px solid var(--line);border-radius:0;margin:0;padding:0.7rem 0.1rem;gap:0.85rem;
   }
   html.compact #stats-view .stats-game-img{width:46px;height:46px;border-radius:10px}
   html.compact .lp-list > .stats-game-row:nth-child(n+6){display:none}
   html.compact .lp-list + .lpm-view-all-btn{margin-top:0.9rem}
   html.compact .pt-g:nth-child(n+4){display:none}
-
-  /* folded sections: a summary row on a phone, just the content elsewhere */
-  .pc-fold > summary{list-style:none;cursor:pointer}
-  .pc-fold > summary::-webkit-details-marker{display:none}
-  html:not(.compact) .pc-fold > summary{display:none}
-  html.compact .pc-fold{border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-top:-1px}
-  html.compact .pc-fold > summary{display:flex;align-items:center;gap:0.8rem;padding:1.05rem 0.2rem;-webkit-user-select:none;user-select:none}
-  html.compact .pc-fold-title{font-family:var(--font-display);font-weight:700;font-size:1.08rem;color:var(--text);white-space:nowrap}
-  html.compact .pc-fold-sum{flex:1;min-width:0;text-align:right;font-size:0.78rem;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  html.compact .pc-fold > summary::after{
-    content:'';flex-shrink:0;width:7px;height:7px;margin:0 0.3rem 3px auto;
-    border-right:1.6px solid var(--text-3);border-bottom:1.6px solid var(--text-3);transform:rotate(45deg);transition:transform 0.2s;
-  }
-  html.compact .pc-fold[open] > summary::after{transform:rotate(-135deg);margin-bottom:-3px}
-  html.compact .pc-fold-body{padding:0.1rem 0 1.5rem}
-  html.compact .pc-fold-body > .stats-section{margin-bottom:0}
-  html.compact .pc-fold-body > .stats-section > .stats-section-title:first-child,
-  html.compact .pc-fold-body > .stats-section > .stats-section-title:first-child + .stats-player-sub{display:none}
-  html.compact .pc-fold-body > :last-child{margin-bottom:0}
-  html.compact #stats-view > .pc-fold{margin-top:0}
 
   /* ── On this day ── */
   .otd{padding:0.9rem 1.05rem 0.5rem;border-radius:var(--r-l);background:var(--card);border:1px solid var(--line)}
@@ -4491,13 +4462,13 @@
   .lpm-overlay{padding-top:calc(1.4rem + var(--safe-t))}
   .picker-overlay{padding-top:calc(1rem + var(--safe-t));padding-bottom:calc(1rem + var(--safe-b))}
   /* no 300 ms double-tap delay on taps (the zoomed-out shelf allows pinch zoom) */
-  button,a,[role="button"],.lib-cover,.game-spine,.stats-game-row,.stats-rec-row,.gb-chip{touch-action:manipulation}
+  button,a,[role="button"],.lib-cover,.game-spine,.stats-game-row,.gb-chip{touch-action:manipulation}
   @media (hover: none) and (pointer: coarse){
     /* Safari zooms into any text field under 16px when it's focused */
     input[type="text"],input[type="search"],input:not([type]),input[type="number"],textarea,select{font-size:16px !important}
     /* hover effects stick after a tap on touch screens: turn off the ones that move or recolour */
     .lib-cover:hover .lib-cover-art,.wr-banner:hover,.fav-card:hover,.profile-hero .profile-cog:hover{transform:none}
-    .stats-game-row:hover,.stats-rec-row:hover{background:var(--card);border-color:var(--line)}
+    .stats-game-row:hover{background:var(--card);border-color:var(--line)}
     .appbar-me:hover{border-color:var(--line-2)}
     .btn-ghost:hover,.filter-reset:hover,.modal-bgg-link:hover{border-color:var(--line-2);color:inherit}
   }

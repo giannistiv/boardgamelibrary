@@ -150,8 +150,6 @@ function _navCompact() {
   const html = document.documentElement;
   const zoomed = document.body.classList.contains('mobile-library');
   html.classList.toggle('compact', zoomed || window.innerWidth < 900);
-  // the profile's folded sections are only folded on a phone
-  if (!html.classList.contains('compact')) document.querySelectorAll('.pc-fold:not([open])').forEach(d => { d.open = true; });
   if (zoomed) {
     const landscape = window.matchMedia && window.matchMedia('(orientation: landscape)').matches;
     const device = landscape ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height);

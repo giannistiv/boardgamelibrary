@@ -456,26 +456,8 @@ function wireRatingsGraph(container, playerName) {
 // Profile sections are split into a main and a side column on wide screens;
 // on narrower ones the columns dissolve and `order` restores the one-column
 // sequence (Wrapped, favorites, head-to-head, activity, rate your games,
-// latest plays, ratings, charts, recommendations).
+// latest plays, ratings, charts).
 const _pcSec = (order, html) => (html && String(html).trim()) ? `<div class="pc-sec" style="order:${order}">${html}</div>` : '';
-
-// On a phone the less-used sections fold behind a one-line summary, so the
-// profile isn't one long wall; on wide screens they're open and the summary
-// row is hidden. What's been opened stays open while the page is in use.
-const _pcFoldOpen = {};
-function _pcFold(key, title, summary, html) {
-  if (!html || !String(html).trim()) return '';
-  const open = !document.documentElement.classList.contains('compact') || _pcFoldOpen[key];
-  return `<details class="pc-fold" data-fold="${key}"${open ? ' open' : ''}>
-      <summary><span class="pc-fold-title">${title}</span>${summary ? `<span class="pc-fold-sum">${summary}</span>` : ''}</summary>
-      <div class="pc-fold-body">${html}</div>
-    </details>`;
-}
-function _wirePcFolds(container) {
-  container.querySelectorAll('.pc-fold').forEach(d => d.addEventListener('toggle', () => {
-    if (document.documentElement.classList.contains('compact')) _pcFoldOpen[d.dataset.fold] = d.open;
-  }));
-}
 
 // ── You → Settings ──
 // What used to hide behind the profile's cog and in a fold at its bottom:
@@ -789,25 +771,6 @@ function showStatsView(playerName, visiting) {
     </div>`;
   };
 
-  // Recommendations: shelf games they haven't played, never a legacy game
-  // (it can only be played through once), best-rated first but pulled towards
-  // the weight they usually play — a point of BGG rating per 0.8 of weight away.
-  const playedBggIds = new Set(Object.keys(gameStats).map(Number));
-  const usualWeight = (() => {
-    let sum = 0, n = 0;
-    for (const p of recentPlays) { const w = Number(p.game.complexity); if (w > 0) { sum += w; n++; } }
-    return n ? sum / n : 0;
-  })();
-  const isLegacy = g => /\blegacy\b/i.test(g.name || '') || (g.mechanics || []).some(m => /legacy/i.test(m));
-  const recScore = g => {
-    const w = Number(g.complexity);
-    return (g.bggRating || 0) - (usualWeight && w > 0 ? Math.abs(w - usualWeight) / 0.8 : 1);
-  };
-  const recommendations = GAMES
-    .filter(g => !playedBggIds.has(g.bggId) && g.bggRating && g.bggRating > 0 && !isExpansion(g) && !isLegacy(g))
-    .sort((a, b) => recScore(b) - recScore(a))
-    .slice(0, 6);
-
   const wrColor = (wr) => {
     if (wr >= 70) return '#22c55e';
     if (wr >= 50) return '#a3e635';
@@ -906,9 +869,6 @@ function showStatsView(playerName, visiting) {
     if (loc) playerLocs[loc] = (playerLocs[loc] || 0) + 1;
   }
   const chartsHtml = buildChartsHtml(playerDays, playerLocs, totalPlays);
-  const topOf = (o) => (Object.entries(o).sort((a, b) => b[1] - a[1])[0] || [])[0];
-  const whenSummary = [topOf(playerDays) ? `Mostly ${topOf(playerDays)}s` : '', _escapeHtml(topOf(playerLocs) || '')].filter(Boolean).join(' &middot; ');
-  const ratingStats = _ratingStats(playerName);
 
   const container = document.getElementById('stats-view');
   container.innerHTML = `
@@ -974,23 +934,8 @@ function showStatsView(playerName, visiting) {
       <div class="profile-side">
         ${_pcSec(4, h2hHtml)}
         ${_pcSec(5, buildPlayTimeHtml(playerName))}
-        ${_pcSec(9, _pcFold('ratings', 'Ratings', ratingStats.total ? `${ratingStats.total} rated &middot; avg ${ratingStats.avg}` : '', buildRatingsGraphHtml(playerName)))}
-        ${_pcSec(10, _pcFold('when', 'When &amp; where', whenSummary, chartsHtml))}
-        ${_pcSec(11, _pcFold('recs', 'Recommended for you', `${recommendations.length} to try${usualWeight ? ` &middot; weight ~${usualWeight.toFixed(1)}` : ''}`, isOwnProfile && recommendations.length > 0 ? `<div class="stats-section">
-      <div class="stats-section-title">Recommended for You</div>
-      <div class="stats-player-sub" style="margin:-0.3rem 0 0.6rem">Top-rated games from the shelf you haven't tried yet${usualWeight ? `, around the weight you usually play (${usualWeight.toFixed(1)})` : ''}</div>
-      ${recommendations.map(g => {
-        const imgSrc = g.bggId >= 0 ? `images/${g.bggId}.jpg` : '';
-        return `<div class="stats-rec-row" data-bgg-id="${g.bggId}">
-          ${imgSrc ? `<img class="stats-game-img" src="${imgSrc}" alt="" onerror="__imgFallback(this, ${g.bggId})">` : ''}
-          <div class="stats-game-info">
-            <div class="stats-game-name">${g.name}</div>
-            <div class="stats-game-detail">${g.players} players &middot; ${g.playTime} &middot; ${g.complexity}/5 weight</div>
-          </div>
-          <div class="stats-game-wr" style="color:${wrColor(Math.round((g.bggRating/10)*100))}">${g.bggRating}</div>
-        </div>`;
-      }).join('')}
-    </div>` : ''))}
+        ${_pcSec(9, buildRatingsGraphHtml(playerName))}
+        ${_pcSec(10, chartsHtml)}
       </div>
     </div>
 
@@ -1000,7 +945,6 @@ function showStatsView(playerName, visiting) {
   `;
 
 
-  _wirePcFolds(container);
   wireRatingsGraph(container, playerName);
 
   // Make game rows clickable
