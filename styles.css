@@ -1217,6 +1217,37 @@
   .lp-who-chip{display:inline-flex;align-items:center;gap:0.45rem;max-width:100%;min-height:42px;padding:0 0.85rem 0 0.3rem;border-radius:999px;border:1px solid var(--line-2);background:var(--card);color:var(--text);font:inherit;font-size:0.88rem;cursor:pointer}
   .lp-who-chip .lp-avatar{width:32px;height:32px;font-size:0.82rem}
   .lp-who-chip > span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* score sheet (js/score-sheet.js): rows down, players across, totals at the foot */
+  .lp-ssrow{margin-bottom:0.6rem}
+  .lp-ssbtn{width:100%;border-color:var(--accent);color:var(--accent-2)}
+  .ss-overlay{z-index:460}
+  .ss-wrap{flex:1 1 auto;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding-bottom:1.2rem}
+  .ss-table{border-collapse:separate;border-spacing:0;min-width:100%}
+  .ss-table th,.ss-table td{padding:0;border-bottom:1px solid var(--line)}
+  .ss-table td{text-align:center;padding:0.25rem 0.2rem}
+  .ss-table thead th{position:sticky;top:0;z-index:2;background:var(--bg-2);padding:0.55rem 0.2rem 0.45rem;border-bottom:1px solid var(--line-2)}
+  .ss-table .ss-lab{position:sticky;left:0;z-index:1;background:var(--bg-2);text-align:left;font-weight:500;font-size:0.84rem;line-height:1.25;color:var(--text);min-width:7.4rem;max-width:9.5rem;padding:0.35rem 0.6rem 0.35rem 1rem;border-right:1px solid var(--line)}
+  .ss-table thead .ss-corner{z-index:3;left:0;font-size:0.72rem;color:var(--text-3);vertical-align:bottom}
+  .ss-table .ss-lab small{color:var(--text-3);font-weight:400}
+  .ss-neg{color:#f87171;margin-right:0.2rem;font-weight:700}
+  .ss-p{min-width:3.9rem;font-weight:600;font-size:0.72rem;color:var(--text-2)}
+  .ss-p .lp-avatar{width:30px;height:30px;font-size:0.8rem;margin:0 auto 0.2rem}
+  .ss-pn{display:block;max-width:4.4rem;margin:0 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ss-in{width:100%;min-width:3.4rem;height:42px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--text);font:inherit;font-size:16px;text-align:center;padding:0}
+  .ss-in:focus{outline:none;border-color:var(--accent);background:var(--card-2)}
+  .ss-tick{width:42px;height:42px;border-radius:10px;border:1px solid var(--line-2);background:var(--card);color:var(--accent-ink);font-size:1.1rem;font-weight:700;cursor:pointer}
+  .ss-tick.on{background:var(--accent);border-color:var(--accent)}
+  .ss-h th{position:sticky;left:0;text-align:left;padding:0.95rem 1rem 0.3rem;font-size:0.7rem;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-3);font-weight:700}
+  .ss-stat .ss-lab{color:var(--text-3)}
+  .ss-stat .ss-in{background:transparent;border-style:dashed}
+  .ss-more td{text-align:left;padding:0.45rem 1rem;border-bottom:none}
+  .ss-more .lp-textbtn{position:sticky;left:1rem}
+  .ss-table tfoot th,.ss-table tfoot td{position:sticky;bottom:0;z-index:2;background:var(--bg-2);border-top:1px solid var(--line-2);border-bottom:none;padding:0.6rem 0.2rem;font-weight:700}
+  .ss-table tfoot th.ss-lab{z-index:3;padding-left:1rem}
+  .ss-tot{font-family:var(--font-display);font-size:1.15rem}
+  .ss-tot.best{color:var(--accent-2)}
+  .ss-tot.out{color:var(--text-3);text-decoration:line-through}
+  .ss-opt,.ss-from{display:block;margin:0.9rem 1rem 0}
   /* scenario and notes, folded away */
   .lp-more{gap:0}
   .lp-more > summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between}

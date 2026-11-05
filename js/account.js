@@ -127,7 +127,7 @@ async function acctWrite(path, method, data) {
   }
   const token = await user.getIdToken();
   const res = await fetch(`${FIREBASE_DB}/${path}.json?auth=${encodeURIComponent(token)}`, { method, body: data === undefined ? undefined : JSON.stringify(data) });
-  if (res.status === 401 || res.status === 403) throw new Error('The database refused it (its rules may not be updated yet).');
+  if (res.status === 401 || res.status === 403) { const e = new Error('The database refused it (its rules may not be updated yet).'); e.code = 'denied'; throw e; }
   if (!res.ok) throw new Error(`The save failed (HTTP ${res.status}).`);
   return res.json();
 }

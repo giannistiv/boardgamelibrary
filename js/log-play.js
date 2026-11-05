@@ -236,7 +236,8 @@ function logPlayEdit(id) {
   if (!p) return;
   const sc = (Array.isArray(p.sc) ? p.sc : Object.values(p.sc || {})).map(s => ({ n: NAME_MAP[s.n] || s.n, s: s.s == null ? '' : String(s.s), w: !!s.w, r: s.r || '' }));
   _lp = { id, bggId: Number(p.bggId), date: p.date, time: String(p.t || '').slice(11, 19) || _lpNow(), d: p.d || '', lenSet: !!p.d,
-    l: p.l || '', b: p.b || '', c: p.c || '', sc, roles: sc.some(s => s.r), gameWon: sc.length > 0 && !sc.some(s => s.w) };
+    l: p.l || '', b: p.b || '', c: p.c || '', sc, roles: sc.some(s => s.r), gameWon: sc.length > 0 && !sc.some(s => s.w),
+    ss: p.ss && typeof scoreSheetUnpack === 'function' ? scoreSheetUnpack(p.ss, sc) : null };
   _lpShow();
 }
 
@@ -318,6 +319,7 @@ function _lpShow() {
         </section>
         <section class="lp-part">
           <div class="lp-hrow"><h3 class="lp-h">Players</h3><button type="button" class="lp-textbtn" data-lp="roles">${_lp.roles ? 'Hide characters' : '+ Characters'}</button></div>
+          <div id="lp-ssbtn" class="lp-ssrow" hidden></div>
           <div class="lp-all">
             <button type="button" class="lp-chip" data-lp="allwon"><span aria-hidden="true">&#9733;</span> Everyone won</button>
             <button type="button" class="lp-chip" data-lp="alllost"><span aria-hidden="true">&#9760;&#65038;</span> Everyone lost</button>
@@ -377,6 +379,7 @@ function _lpRenderGame() {
   if (!box) return;
   const esc = _escapeHtml;
   _lpRenderSugg();   // the people who play this game come up
+  _lpRenderSheetBtn();
   if (_lp.bggId) {
     const g = findGameByBggId(_lp.bggId) || (_lpPicked && _lpPicked.id === _lp.bggId ? _lpPicked : { name: `Game #${_lp.bggId}` });
     const sub = [g.year, g.players ? `${g.players} players` : ''].filter(Boolean).join(' &middot; ');
@@ -547,6 +550,16 @@ function _lpRenderPlayers() {
     </div>`).join('') || '<div class="lp-hint">Add the players below.</div>')
     + (lost ? '<div class="lp-gamewon">&#9760;&#65038; The game won</div>' : '');
   _lpRenderSugg();
+  _lpRenderSheetBtn();
+}
+// The score sheet (js/score-sheet.js), once there are players to count for.
+function _lpRenderSheetBtn() {
+  const box = document.getElementById('lp-ssbtn');
+  if (!box) return;
+  const s = typeof scoreSheetFor === 'function' ? scoreSheetFor(_lp.bggId) : null;
+  box.hidden = !s || !_lp.sc.length;
+  box.innerHTML = box.hidden ? '' : `<button type="button" class="lp-chip lp-ssbtn" data-lp="sheet"><span aria-hidden="true">&#9638;</span> ${
+    scoreSheetFilled() ? 'Back to the score sheet' : s.key === 'rounds' ? 'Score it round by round' : 'Score sheet'}</button>`;
 }
 function _lpAddPlayer() {
   const input = document.getElementById('lp-pname');
@@ -584,6 +597,7 @@ async function _lpClick(e) {
   if (what === 'gsearch') { _lpGameSearch(); return; }
   if (what === 'roles') { _lpSyncPlayers(); _lp.roles = !_lp.roles; b.textContent = _lp.roles ? 'Hide characters' : '+ Characters'; _lpRenderPlayers(); return; }
   if (what === 'addp') { _lpAddPlayer(); return; }
+  if (what === 'sheet') { _lpSyncPlayers(); scoreSheetOpen(); return; }
   if (what === 'allwon' || what === 'alllost') {
     _lpSyncPlayers();
     _lp.sc.forEach(p => { p.w = what === 'allwon' && !isNoResultSeat(p); });
@@ -653,6 +667,8 @@ async function _lpSave() {
   if (l) rec.l = l;
   if (b) rec.b = b;
   if (c) rec.c = c;
+  const sheet = typeof scoreSheetFor === 'function' && _lp.ss ? scoreSheetFor(rec.bggId) : null;
+  if (sheet && sheet.key === _lp.ss.key) { const ss = scoreSheetPack(); if (ss) rec.ss = ss; }
   const picked = _lpPicked && _lpPicked.id === rec.bggId ? _lpPicked : null;
   // one still waiting to send is changed on the phone, and goes up as it is now
   if (_lp.id && _lp.id.startsWith('local-')) { _lpKeep(rec, _lp.id, picked); lpFlushQueue(); return; }
@@ -660,8 +676,8 @@ async function _lpSave() {
   try {
     if (typeof ensureKnownGame === 'function') await ensureKnownGame(rec.bggId, picked);
     let id = _lp.id;
-    if (id) await acctWrite(`plays/${id}`, 'PUT', rec);
-    else id = (await acctWrite('plays', 'POST', rec)).name;
+    if (id) await _lpWrite(`plays/${id}`, 'PUT', rec);
+    else id = (await _lpWrite('plays', 'POST', rec)).name;
     manualPlaysCache[id] = rec;
     _lpMerge(id, rec);
     _sortPlayHistory();
@@ -677,6 +693,17 @@ async function _lpSave() {
   } catch (err) {
     if (_lpOffline(err)) { _lpKeep(rec, _lp.id, picked); return; }
     _lpSay(err.message || 'The save failed. Try again.');
+  }
+}
+// A play with its score sheet (plays/{id}.ss) that the database refuses
+// (rules from before score sheets) goes up without the sheet.
+async function _lpWrite(path, method, rec) {
+  try {
+    return await acctWrite(path, method, rec);
+  } catch (err) {
+    if (err.code !== 'denied' || !rec.ss) throw err;
+    delete rec.ss;
+    return acctWrite(path, method, rec);
   }
 }
 // A play saved from elsewhere in the app, without the form (a campaign's
@@ -740,7 +767,7 @@ async function lpFlushQueue() {
     for (const item of _lpQueue()) {
       if (item.rec.by !== a.uid) continue;   // someone else's, from before they signed out here
       if (typeof ensureKnownGame === 'function') await ensureKnownGame(item.rec.bggId, item.game);
-      const id = item.put ? (await acctWrite(`plays/${item.key}`, 'PUT', item.rec), item.key) : (await acctWrite('plays', 'POST', item.rec)).name;
+      const id = item.put ? (await _lpWrite(`plays/${item.key}`, 'PUT', item.rec), item.key) : (await _lpWrite('plays', 'POST', item.rec)).name;
       _lpQueueSave(_lpQueue().filter(x => x.key !== item.key));
       _lpUnmerge(item.key);
       delete manualPlaysCache[item.key];
