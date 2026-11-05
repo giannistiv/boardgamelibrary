@@ -1202,6 +1202,21 @@
   .lp-role{min-height:44px;font-size:15px}
   .lp-gamewon{align-self:flex-start;padding:0.45rem 0.85rem;border-radius:999px;background:var(--loss-soft);color:var(--loss);font-size:0.85rem;font-weight:600}
   .lp-addp{display:flex;gap:0.5rem}
+  /* one tap for the people: your usual tables, then faces */
+  .lp-sugg{display:flex;flex-direction:column;gap:0.5rem;margin-bottom:0.6rem}
+  .lp-crew{display:flex;align-items:center;gap:0.7rem;width:100%;min-height:54px;padding:0.45rem 0.9rem 0.45rem 0.6rem;border-radius:16px;border:1px dashed var(--line-2);background:none;color:var(--text);font:inherit;text-align:left;cursor:pointer}
+  .lp-crew:active,.lp-who-chip:active{background:var(--card-2)}
+  .lp-crew-faces{display:flex;flex-shrink:0}
+  .lp-crew-faces .lp-avatar{width:32px;height:32px;font-size:0.82rem;border:2px solid var(--bg-2)}
+  .lp-crew-faces .lp-avatar + .lp-avatar{margin-left:-11px}
+  .lp-crew-names{display:flex;flex-direction:column;min-width:0;flex:1}
+  .lp-crew-names b{font-weight:600;font-size:0.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .lp-crew-names > span{font-size:0.75rem;color:var(--text-3)}
+  .lp-crew-add{flex-shrink:0;font-size:1.35rem;line-height:1;color:var(--accent-2)}
+  .lp-who{display:flex;flex-wrap:wrap;gap:0.45rem}
+  .lp-who-chip{display:inline-flex;align-items:center;gap:0.45rem;max-width:100%;min-height:42px;padding:0 0.85rem 0 0.3rem;border-radius:999px;border:1px solid var(--line-2);background:var(--card);color:var(--text);font:inherit;font-size:0.88rem;cursor:pointer}
+  .lp-who-chip .lp-avatar{width:32px;height:32px;font-size:0.82rem}
+  .lp-who-chip > span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   /* scenario and notes, folded away */
   .lp-more{gap:0}
   .lp-more > summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between}

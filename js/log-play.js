@@ -129,6 +129,71 @@ function _lpPlaces() {
   return [...last.entries()].sort((a, b) => b[1].localeCompare(a[1])).map(x => x[0]);
 }
 
+// One tap for the people (the user, 5 Nov 2026: finding them was the slow,
+// boring part): the tables you usually play at, a button each, and the people
+// you play with as faces. Both are ranked for this play: whoever you played
+// with that day first, then this game, this place, and how near the day your
+// plays together were. Typing is for anyone else.
+let _lpCrews = [];   // the tables on show, for their buttons
+function _lpSuggest() {
+  const me = _navPlayer();
+  const hidden = (n) => typeof HIDDEN_PLAYERS !== 'undefined' && HIDDEN_PLAYERS.has(n);
+  const inPlay = new Set(_lp.sc.map(p => p.n.toLowerCase()));
+  const dateEl = document.getElementById('lp-date'), placeEl = document.getElementById('lp-l');
+  const day = (dateEl && dateEl.value) || _lp.date;
+  const place = String((placeEl ? placeEl.value : _lp.l) || '').trim().toLowerCase();
+  const dayNo = (d) => Date.UTC(+d.slice(0, 4), +d.slice(5, 7) - 1, +d.slice(8, 10)) / 864e5;
+  const today = dayNo(day);
+  const people = new Map(), crews = new Map();
+  for (const id in PLAY_HISTORY) for (const p of PLAY_HISTORY[id]) {
+    if (!p.date || (me && !p.sc.some(s => s.n === me))) continue;
+    const others = p.sc.map(s => s.n).filter(n => n && n !== me && !hidden(n));
+    if (!others.length) continue;
+    // recent plays count most; this game's and this place's are remembered longer
+    const gap = Math.abs(dayNo(p.date) - today);
+    const long = Math.exp(-gap / 730);
+    const w = Math.exp(-gap / 120) + (Number(id) === _lp.bggId ? 8 * long : 0)
+      + (place && String(p.l || '').toLowerCase() === place ? 2 * long : 0) + (gap === 0 ? 1000 : 0);
+    for (const n of others) people.set(n, (people.get(n) || 0) + w);
+    if (others.length < 2) continue;
+    const key = [...new Set(others)].sort().join('\n');
+    const c = crews.get(key) || { names: key.split('\n'), score: 0, plays: 0, sameDay: false };
+    c.score += w; c.plays++; c.sameDay = c.sameDay || gap === 0;
+    crews.set(key, c);
+  }
+  const outCrews = [...crews.values()]
+    .filter(c => c.plays >= 2 || c.sameDay)
+    .filter(c => c.names.some(n => !inPlay.has(n.toLowerCase())))
+    .sort((a, b) => b.score - a.score).slice(0, 2);
+  const outPeople = [...people.entries()].filter(([n]) => !inPlay.has(n.toLowerCase()))
+    .sort((a, b) => b[1] - a[1]).slice(0, 8).map(x => x[0]);
+  if (me && !inPlay.has(me.toLowerCase())) outPeople.unshift(me);
+  return { crews: outCrews, people: outPeople, day };
+}
+function _lpRenderSugg() {
+  const box = document.getElementById('lp-sugg');
+  if (!box) return;
+  const esc = _escapeHtml;
+  const { crews, people, day } = _lpSuggest();
+  _lpCrews = crews;
+  const face = (n) => `<span class="lp-avatar" aria-hidden="true">${avatarInner(n)}</span>`;
+  box.innerHTML = crews.map((c, i) => `<button type="button" class="lp-crew" data-lp-crew="${i}">
+      <span class="lp-crew-faces">${c.names.slice(0, 3).map(face).join('')}</span>
+      <span class="lp-crew-names"><b>${esc(c.names.length > 4 ? c.names.slice(0, 3).join(', ') + ` +${c.names.length - 3}` : c.names.join(', '))}</b>
+        <span>${c.sameDay ? (day === _lpToday() ? 'Earlier today' : 'Same day') : `${c.plays} plays together`}</span></span>
+      <span class="lp-crew-add" aria-hidden="true">+</span>
+    </button>`).join('')
+    + (people.length ? `<div class="lp-who">${people.map(n => `<button type="button" class="lp-who-chip" data-lp-who="${esc(n)}">${face(n)}<span>${esc(n === _navPlayer() ? `${n} (you)` : n)}</span></button>`).join('')}</div>` : '');
+  box.hidden = !crews.length && !people.length;
+}
+function _lpAddNames(names) {
+  _lpSyncPlayers();
+  for (const n of names) if (!_lp.sc.some(p => p.n.toLowerCase() === n.toLowerCase())) _lp.sc.push({ n, s: '', w: false, r: '' });
+  _lpRenderPlayers();
+  _lpRenderLen();
+  _lpSay('');
+}
+
 function logPlayOpen(bggId) {
   const a = typeof acctMe === 'function' ? acctMe() : null;
   if (!a) { if (typeof acctOpenSheet === 'function') acctOpenSheet(); return; }
@@ -201,6 +266,7 @@ function _lpEl() {
       if (hint) hint.hidden = true;
     });
     ov.addEventListener('change', (e) => {
+      if (e.target.id === 'lp-date' || e.target.id === 'lp-l') { _lpRenderSugg(); return; }
       const s = e.target.closest('[data-sc]');
       if (!s) return;
       if (s.value) _lp.pick[s.dataset.sc] = s.value; else delete _lp.pick[s.dataset.sc];
@@ -257,6 +323,7 @@ function _lpShow() {
             <button type="button" class="lp-chip" data-lp="alllost"><span aria-hidden="true">&#9760;&#65038;</span> Everyone lost</button>
           </div>
           <div id="lp-players" class="lp-players"></div>
+          <div id="lp-sugg" class="lp-sugg" hidden></div>
           <div class="lp-addp">
             <input class="lp-input" id="lp-pname" placeholder="Add a player" maxlength="60" enterkeyhint="done">
             <button type="button" class="lp-btn" data-lp="addp">Add</button>
@@ -283,7 +350,7 @@ function _lpShow() {
       options: () => { const inPlay = new Set(_lp.sc.map(p => p.n)); return _lpPeople().filter(n => !inPlay.has(n)); },
       onPick: () => _lpAddPlayer(),
     });
-    comboAttach(document.getElementById('lp-l'), { options: _lpPlaces });
+    comboAttach(document.getElementById('lp-l'), { options: _lpPlaces, onPick: () => _lpRenderSugg() });
   }
   if (!_lpOpen) {
     _lpOpen = true;
@@ -309,6 +376,7 @@ function _lpRenderGame() {
   const box = document.getElementById('lp-game');
   if (!box) return;
   const esc = _escapeHtml;
+  _lpRenderSugg();   // the people who play this game come up
   if (_lp.bggId) {
     const g = findGameByBggId(_lp.bggId) || (_lpPicked && _lpPicked.id === _lp.bggId ? _lpPicked : { name: `Game #${_lp.bggId}` });
     const sub = [g.year, g.players ? `${g.players} players` : ''].filter(Boolean).join(' &middot; ');
@@ -478,6 +546,7 @@ function _lpRenderPlayers() {
       ${_lp.roles ? `<input class="lp-input lp-role" value="${esc(p.r || '')}" placeholder="Character, faction, colour…" maxlength="120" aria-label="${esc(p.n)}'s character">` : ''}
     </div>`).join('') || '<div class="lp-hint">Add the players below.</div>')
     + (lost ? '<div class="lp-gamewon">&#9760;&#65038; The game won</div>' : '');
+  _lpRenderSugg();
 }
 function _lpAddPlayer() {
   const input = document.getElementById('lp-pname');
@@ -505,8 +574,10 @@ function _lpSay(text) {
 async function _lpClick(e) {
   const ov = document.getElementById('lp-overlay');
   if (e.target === ov) { _lpClose(); return; }
-  const b = e.target.closest('[data-lp], [data-lp-game], [data-lp-win], [data-lp-st], [data-lp-del]');
+  const b = e.target.closest('[data-lp], [data-lp-game], [data-lp-win], [data-lp-st], [data-lp-del], [data-lp-who], [data-lp-crew]');
   if (!b) return;
+  if (b.dataset.lpWho != null) { _lpAddNames([b.dataset.lpWho]); return; }
+  if (b.dataset.lpCrew != null) { const c = _lpCrews[Number(b.dataset.lpCrew)]; if (c) _lpAddNames(c.names); return; }
   const what = b.dataset.lp;
   if (what === 'close') { _lpClose(); return; }
   if (what === 'game') { _lp.bggId = 0; _lpRenderGame(); _lpRenderLen(); if (!_isTouchDevice()) setTimeout(() => { const q = document.getElementById('lp-gq'); if (q) q.focus(); }, 30); return; }
