@@ -41,7 +41,9 @@ const BACKED_FIXED = {
       "note": "From the Wonderland's War Duel campaign: just the expansion",
       "img": "https://cf.geekdo-images.com/5Abz5vNtrRXauBzP91fy5Q__square100@2x/img/RCD27YyUZvnPYTZOsvshgwoiPe0=/200x200/filters:strip_icc()/pic9209060.png" },
     { "id": 388641, "name": "Defenders of the Dictionary", "on": "kickstarter", "url": "https://www.kickstarter.com/projects/adamsapplegames/defenders-of-the-dictionary", "at": "2026-10-10", "rel": "2027-04",
-      "img": "https://cf.geekdo-images.com/rQZ-wLXOOg9HhJmIZlU5Fw__square100@2x/img/l4vC99l8TW6FKhdTiP4AFVPwAEs=/200x200/filters:strip_icc()/pic9683745.png" }
+      "img": "https://cf.geekdo-images.com/rQZ-wLXOOg9HhJmIZlU5Fw__square100@2x/img/l4vC99l8TW6FKhdTiP4AFVPwAEs=/200x200/filters:strip_icc()/pic9683745.png" },
+    { "id": 478749, "name": "Heroes of Gravehold", "on": "gamefound", "url": "https://gamefound.com/en/projects/indie-boards-and-cards/heroes-of-gravehold", "at": "2026-11-24", "rel": "2027-08",
+      "img": "https://cf.geekdo-images.com/hAHUKJddiDkVtwXWTnYYYA__small/img/4q41ZH6xym1-Qd2NcYD0wEnA15U=/fit-in/200x150/filters:strip_icc()/pic9794888.png" }
   ],
   "Δημητρης": [
     { "id": 462710, "name": "Bullet Galaxy: Fan+ and Paw+", "on": "gamefound", "url": "https://gamefound.com/en/projects/level-99-games/bullet-galaxy", "at": "2026-07-29", "rel": "2027-03",
