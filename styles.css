@@ -1812,6 +1812,39 @@
   .cr-item-name{flex:1 1 10rem}
   .cr-item-cost{width:4.4rem;flex:0 0 auto}
   .cr-notes{width:100%;resize:vertical;line-height:1.5}
+  /* ── Mini Rogue campaigns (js/mini-rogue-campaign.js; the shell is Codenames' .cr-* and Rove's .rv-*) ── */
+  .mr-read{margin-top:0.7rem;padding-left:0.7rem;border-left:3px solid var(--line-3);font-family:var(--font-display);font-style:italic;font-size:0.84rem;line-height:1.5;color:var(--text-2)}
+  .mr-ending .cr-end{margin-top:0.8rem}
+  .mr-other .rv-link{margin-top:0.7rem}
+  .mr-result{margin-top:0.4rem;padding-top:0.2rem;border-top:1px solid var(--line)}
+  .mr-result .cr-row .cr-lbl-wide{width:auto;flex:1 1 auto;text-transform:none;letter-spacing:0;font-size:0.76rem;color:var(--text-2)}
+  .mr-pp-sum{display:flex;align-items:baseline;flex-wrap:wrap;gap:0.2rem 0.6rem;margin-top:0.7rem;font-size:0.82rem}
+  .mr-pp-sum b{font-family:var(--font-display);font-size:1.3rem;color:var(--accent)}
+  .mr-lead{margin-top:0.4rem;font-size:0.78rem;color:var(--text-2)}
+  .mr-chin{width:4.4rem;flex:0 0 auto}
+  .mr-pp{flex-wrap:wrap}
+  .mr-road{display:flex;align-items:center;flex-wrap:wrap;gap:0.3rem}
+  .mr-road-ch{min-width:1.9rem;height:1.9rem;padding:0 0.35rem;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;background:var(--card-2);border:1px solid var(--line-2);font-family:var(--font-display);font-weight:700;font-size:0.9rem}
+  .mr-road-ch.at{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+  .mr-road-to{color:var(--text-4);font-size:0.8rem}
+  .mr-paths{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0.4rem}
+  @media(max-width:520px){.mr-paths{grid-template-columns:1fr}}
+  .mr-path{padding:0.5rem 0.6rem;border-radius:var(--r);background:var(--card);border:1px solid var(--line);min-width:0}
+  .mr-path.closed{opacity:0.55}
+  .mr-path-h{font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-2);margin-bottom:0.35rem}
+  .mr-skill{display:flex;align-items:flex-start;gap:0.45rem;padding:0.3rem 0;border-top:1px solid var(--line)}
+  .mr-skill:first-of-type{border-top:0}
+  .mr-rank{flex:0 0 auto;width:1.3rem;height:1.3rem;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:var(--card-3);font-size:0.68rem;font-weight:800}
+  .mr-skill-main{display:flex;flex-direction:column;gap:0.05rem;flex:1;min-width:0}
+  .mr-skill-main b{font-size:0.8rem;overflow-wrap:anywhere}
+  .mr-skill-main span{font-size:0.68rem;line-height:1.35;color:var(--text-3)}
+  .mr-skill-add,.mr-relic-add{display:flex;flex-wrap:wrap;gap:0.4rem;align-items:center}
+  .mr-skill-add > input:first-child,.mr-relic-add > input{flex:1 1 9rem}
+  .mr-skill-text{flex:1 1 100%}
+  .mr-relics{display:flex;flex-direction:column;gap:0.4rem;margin-bottom:0.6rem}
+  .mr-relic .cr-flag{margin-top:0}
+  .mr-relic .cr-flag .cr-person-x{margin-left:auto}
+  .mr-relic-note{width:100%;box-sizing:border-box;margin-top:0.3rem}
 
   /* ── Spirit Island conquest board (js/spirit-island.js) ── */
   .si-board{margin-bottom:1.1rem;padding:0.8rem 0.9rem;border-radius:12px;background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.07)}

@@ -140,6 +140,13 @@ function scenarioPicker(bggId) {
       { key: 'm', label: 'Mission', options: (vals) => (CR_MAPS.find(m => m.name === vals.camp) || { missions: [] }).missions.map(x => [`Mission ${x.n}`, `${x.n} · ${x.place}: ${x.title}`]) },
     ] };
   }
+  if (typeof MR_BGGID !== 'undefined' && (id === MR_BGGID || id === MRC_BGGID)) {
+    // a campaign chapter, for the plays that are one (js/mini-rogue-campaign.js): "Chapter 8"
+    if (id === MRC_BGGID) return { fields: [{ ..._scNumField('Chapter'), optional: true }] };
+    return { fields: [{ key: 'm', label: 'Campaign chapter', optional: true, none: 'Not a campaign game',
+      options: () => MR_BASE_CHAPTERS.filter(c => c.kind === 'play').map(c => [`Chapter ${c.n}`, c.n]).sort((a, b) => Number(a[1]) - Number(b[1])),
+      match: (t, v) => { const a = t.match(SCEN_NUM), b = v.match(SCEN_NUM); return !!(a && b && a[1] === b[1] && /^chapter/i.test(t)); } }] };
+  }
   if (id === SCEN_TAKE_TIME) {
     const n = (k) => Array.from({ length: k }, (_, i) => [String(i + 1), String(i + 1)]);
     return { sep: '-', fields: [{ key: 'f', label: 'Folder', options: () => n(10) }, { key: 'c', label: 'Clock', options: () => n(4) }] };

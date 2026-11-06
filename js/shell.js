@@ -840,7 +840,8 @@ function openModal(game) {
     boardsWho ? playHistoryHtml.replace(progressWhoHtml(myProgress), '') : playHistoryHtml].join('');
   const roveHtml = typeof buildRoveCampaignHtml === 'function' ? buildRoveCampaignHtml(game) : '';
   const crHtml = typeof buildCrCampaignHtml === 'function' ? buildCrCampaignHtml(game) : '';
-  const campaignHtml = roveHtml || crHtml;
+  const mrHtml = typeof buildMrCampaignHtml === 'function' ? buildMrCampaignHtml(game) : '';
+  const campaignHtml = roveHtml || crHtml || mrHtml;
   const tabs = [['overview', 'Overview'], ['plays', `Plays${plays && plays.length ? ` <span class="gm-tab-n">${plays.length}</span>` : ''}`]]
     .concat(campaignHtml ? [['campaign', 'Campaign']] : [])
     .concat(game.bggId > 0 ? [['rules', 'Rules']] : []);
@@ -909,6 +910,7 @@ function openModal(game) {
   wireGameNews(content);
   if (roveHtml) wireRoveCampaign(content);
   if (crHtml) wireCrCampaign(content);
+  if (mrHtml) wireMrCampaign(content);
   if (leviathanHtml) wireLeviathanWilds(content);
   if (Number(game.bggId) === SKY_TEAM_BGGID) wireSkyTeam(content);
   if (typeof wireProgressBoards === 'function') wireProgressBoards(content);

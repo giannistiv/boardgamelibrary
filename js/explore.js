@@ -311,9 +311,9 @@ function showGamesView() {
 
 
 // ── Play → Campaigns: every campaign in one list ──
-// The four games with a campaign sheet (Codenames: Critical Role Adventures
-// and Rove on their game page's Campaign tab, Oathsworn and the Marvel
-// Champions Gauntlet on the campaign page), open to everyone: your own
+// The games with a campaign sheet (Codenames: Critical Role Adventures, Rove,
+// Mini Rogue and Mini Rogue: The Council on their game page's Campaign tab,
+// Oathsworn and the Marvel Champions Gauntlet on the campaign page), open to everyone: your own
 // campaign's progress, or a start. Then the campaigns followed from the plays
 // (CAMPAIGN_PROGRESS) you were in: only yours, nobody else's (the user, 2 Nov
 // 2026). A bar goes green when you've done the final scenario, and is faded
@@ -321,6 +321,8 @@ function showGamesView() {
 const EX_SHEETS = [
   { kind: 'cr', id: () => (typeof CNCR_BGGID !== 'undefined' ? CNCR_BGGID : 0), what: 'The map, the heroes and each mission&rsquo;s rules' },
   { kind: 'rove', id: () => (typeof ROVE_BGGID !== 'undefined' ? ROVE_BGGID : 0), what: 'The Rovers, the lyst and the ether' },
+  { kind: 'mr', id: () => (typeof MR_BGGID !== 'undefined' ? MR_BGGID : 0), what: 'Your road through the chapters, Perk Points, Skills and Relics' },
+  { kind: 'mrc', id: () => (typeof MRC_BGGID !== 'undefined' ? MRC_BGGID : 0), what: 'The chapters, Perk Points, Skills and Relics' },
   { kind: 'oath', id: () => (typeof OATHSWORN_BGGID !== 'undefined' ? OATHSWORN_BGGID : 0), what: 'The trail through the Deepwood and the boss rankings' },
   { kind: 'gauntlet', id: () => (typeof MC_BGGID !== 'undefined' ? MC_BGGID : 0), what: 'The Gauntlet: every villain in release order, on Expert' },
 ];
@@ -349,6 +351,13 @@ async function _exLoadSheets() {
     typeof _rvLoad === 'function' && _rvLoad(true).then(() => {
       for (const cid in _rvCamps) if (_rvMine(_rvCamps[cid])) add('rove', cid, _rvCamps[cid], rvSummary(_rvCamps[cid]), _rvCamps[cid].name || _rvParty(_rvCamps[cid]).players.join(', '));
     }).catch(e => console.warn('Campaigns: Rove', e)),
+    typeof _mrLoad === 'function' && _mrLoad(true).then(() => {
+      for (const cid in _mrCamps) {
+        const c = _mrCamps[cid];
+        if (!isMe(c.player)) continue;
+        add(Number(c.game) === MRC_BGGID ? 'mrc' : 'mr', cid, c, mrSummary(c), c.name || _mrCharName(c));
+      }
+    }).catch(e => console.warn('Campaigns: Mini Rogue', e)),
     ...['oath', 'gauntlet'].map(kind => typeof pcLoad === 'function' && pcLoad(kind).then(camps => {
       for (const cid in camps) if (pcIsMine(camps[cid])) add(kind, cid, camps[cid], pcSummary(kind, cid, camps[cid]), camps[cid].name || pcPlayers(camps[cid]).join(', '));
     }).catch(e => console.warn('Campaigns:', kind, e))),
@@ -454,6 +463,7 @@ function wireCampaignsTab(container) {
     if (!game) return;
     if (kind === 'cr' && cid) { _crId = cid; _crDraft = null; }
     if (kind === 'rove' && cid) { _rvId = cid; _rvDraft = null; }
+    if ((kind === 'mr' || kind === 'mrc') && cid) { _mrGame = game.bggId; _mrId = cid; _mrDraft = null; _mrTab = 'camp'; }
     _modalTab = kind === 'plays' ? 'plays' : 'campaign';
     _modalTabFor = game.bggId;
     openModal(game);
