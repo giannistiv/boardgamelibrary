@@ -43,9 +43,10 @@ async function loadAllRatings() {
 // Rove, the Gauntlet and the rating skips have their own nodes since 20 Oct
 // 2026, the Codenames: Critical Role campaigns since 1 Nov 2026, and the
 // Oathsworn campaigns and Crowdfunding's put-away news since 3 Nov 2026.
-// Score sheets counted together (js/score-sheet.js) wait here from 6 Nov 2026,
-// and the Mini Rogue campaigns (js/mini-rogue-campaign.js) too.
-const FB_SPARE = { sheets: '_bglSheets', mrCampaigns: '_bglMrCampaigns' };
+// Score sheets counted together (js/score-sheet.js) have had their own node
+// since 6 Nov 2026 too. The Mini Rogue campaigns (js/mini-rogue-campaign.js)
+// wait here.
+const FB_SPARE = { mrCampaigns: '_bglMrCampaigns' };
 const _fbDenied = new Set();   // nodes that refused a write this session: go straight to the spare
 function _fbRoot(path) { return path.split('/')[0]; }
 function _fbSpare(path) {

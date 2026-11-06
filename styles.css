@@ -4293,39 +4293,45 @@
   .pbc-lab.pbc-end{text-anchor:end}
   /* Bomb Busters: the bomb (progress-boards.js) */
   .pb-bomb svg{display:block;width:100%;height:auto}
-  .pbb-panel{fill:#1d2024;stroke:#3a3f45;stroke-width:3}
-  .pbb-screw circle{fill:#4a4f56;stroke:#2a2d31;stroke-width:1.5}
-  .pbb-screw path{stroke:#2a2d31;stroke-width:1.5}
-  .pbb-timer{fill:#0a0606;stroke:#3a2222;stroke-width:2}
-  .pbb-label{font:800 9px/1 ui-monospace,Menlo,monospace;letter-spacing:0.12em;fill:#c9483f}
-  .pbb-digits{font:800 21px/1 ui-monospace,Menlo,monospace;text-anchor:end;fill:#ff4a3d;filter:drop-shadow(0 0 5px rgba(255,74,61,0.85))}
-  .pbb{cursor:pointer}
-  .pbb-hit{fill:transparent}
-  .pbb-n{font-size:9.5px;font-weight:800;text-anchor:middle;fill:rgba(240,230,211,0.55)}
-  .pbb-cut .pbb-n{fill:#86d993}
-  .pbb-next .pbb-n,.pbb-lost .pbb-n{fill:#f0e6d3}
-  .pbb-term{fill:#8d939b;stroke:#2a2d31;stroke-width:1}
-  .pbb-wire,.pbb-half path{fill:none;stroke-width:3.6;stroke-linecap:round}
-  .pbb-todo .pbb-wire{opacity:0.35}
-  .pbb-lost .pbb-wire{opacity:0.85}
-  .pbb-next .pbb-wire{filter:drop-shadow(0 0 4px rgba(255,255,255,0.7))}
-  .pbb-cut .pbb-half{opacity:0.8}
-  .pbb-copper{fill:#d98a4a}
-  .pbb-scorch{fill:rgba(20,10,6,0.85);stroke:rgba(140,60,30,0.5);stroke-width:1.5;stroke-dasharray:1.5 2}
-  .pbb-loss{font-size:9px;font-weight:800;fill:#ff7a6e}
-  .pbb-snip{font-size:12px;text-anchor:middle;pointer-events:none}
-  .pbb.pb-sel .pbb-term{fill:#fff}
-  .pbb.pb-sel .pbb-n{fill:#fff}
-  .pbb-spark{fill:rgba(255,214,120,0.9);opacity:0}
-  .pbb-key{display:inline-block;width:14px;height:10px;border-radius:2px;vertical-align:middle}
-  .pbb-key.cut{background:linear-gradient(90deg,#3d7be0 40%,transparent 40% 60%,#3d7be0 60%)}
-  .pbb-key.burnt{background:radial-gradient(circle,#140a06 45%,rgba(140,60,30,0.6) 70%,transparent 72%)}
-  .pbb.pb-new .pbb-top{animation:pbbSnapUp .7s 1s both;transform-box:fill-box;transform-origin:50% 0}
-  .pbb.pb-new .pbb-bot{animation:pbbSnapDown .7s 1s both;transform-box:fill-box;transform-origin:50% 100%}
-  .pbb.pb-new .pbb-spark{animation:pbbSpark .9s .9s ease-out both;transform-box:fill-box;transform-origin:50% 50%}
-  @keyframes pbbSnapUp{from{transform:translateY(9px) rotate(-8deg)}to{transform:none}}
-  @keyframes pbbSnapDown{from{transform:translateY(-9px) rotate(8deg)}to{transform:none}}
-  @keyframes pbbSpark{0%{opacity:0;transform:scale(0.3)}30%{opacity:1;transform:scale(1.2)}100%{opacity:0;transform:scale(1.8)}}
+  .pb-dial{max-width:420px;margin:0.4rem auto 0}
+  .pbd-rim{fill:#15171a;stroke:#2b2f35;stroke-width:3}
+  .pbd-body{fill:#0f1012;stroke:#24272c;stroke-width:2}
+  .pbd{cursor:pointer;outline:none}
+  .pbd-seg{stroke:#0f1012;stroke-width:0.8;transition:filter .15s}
+  .pbd-todo .pbd-seg{fill:#30343b}
+  .pbd-won1 .pbd-seg{fill:#4ade80}
+  .pbd-won .pbd-seg{fill:#1f9d55}
+  .pbd-lost .pbd-seg{fill:#e5484d}
+  .pbd-next .pbd-seg{fill:#f5c542;filter:drop-shadow(0 0 6px rgba(245,197,66,0.9));animation:pbdPulse 1.6s ease-in-out infinite}
+  .pbd.pb-sel .pbd-seg,.pbd:focus-visible .pbd-seg{stroke:#fff;stroke-width:2.2}
+  .pbd-loss{fill:#ff6b5e}
+  .pbd-n{font:700 10px/1 system-ui,sans-serif;text-anchor:middle;fill:rgba(240,230,211,0.45)}
+  .pbd-n.on{fill:#86e3a5}
+  .pbd-snip{font-size:13px;text-anchor:middle;pointer-events:none}
+  .pbd-lbl{font:800 8.5px/1 ui-monospace,Menlo,monospace;letter-spacing:0.16em;text-anchor:middle;fill:#9aa0a8}
+  .pbd-lcd{fill:#090404;stroke:#3a1d1d;stroke-width:1.5}
+  .pbd-digits{font:800 25px/1 ui-monospace,Menlo,monospace;text-anchor:middle;dominant-baseline:middle;fill:#ff4a3d;filter:drop-shadow(0 0 5px rgba(255,74,61,0.8))}
+  .pbd-of{font-size:15px;fill:#c9483f}
+  .pbd-next{font:800 30px/1 ui-monospace,Menlo,monospace;text-anchor:middle;fill:#f5c542}
+  .pbd-cap{fill:#3a3f46;stroke:#1c1f23;stroke-width:1.5}
+  .pbd-fuse{fill:none;stroke:#8a6a43;stroke-width:4.5;stroke-linecap:round}
+  .pbd-fuse-tw{stroke:#c9a46c;stroke-width:1.6;stroke-dasharray:3 4}
+  .pbd-spark circle{fill:#ffd36b;filter:drop-shadow(0 0 6px #ff9b3d)}
+  .pbd-spark path{stroke:#ffb347;stroke-width:2;stroke-linecap:round}
+  .pbd-spark{animation:pbdSpark 0.9s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:50% 50%}
+  .pbd.pb-new .pbd-seg{animation:pbdLight 1.2s .8s both}
+  @keyframes pbdPulse{50%{opacity:0.55}}
+  @keyframes pbdSpark{from{transform:scale(0.75) rotate(0)}to{transform:scale(1.1) rotate(20deg)}}
+  @keyframes pbdLight{from{fill:#30343b}}
+  @media (prefers-reduced-motion:reduce){.pbd-next .pbd-seg,.pbd-spark{animation:none}}
+  .pbd-line{display:flex;justify-content:center;flex-wrap:wrap;gap:0.4rem 1.1rem;margin:0.3rem 0 0.5rem;font-size:0.8rem;color:var(--text-3)}
+  .pbd-line b{color:var(--text);font-size:0.95rem}
+  .pbd-key{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px}
+  .pbd-key.won1{background:#4ade80}
+  .pbd-key.won{background:#1f9d55}
+  .pbd-key.next{background:#f5c542}
+  .pbd-key.lost{background:#e5484d}
+  .pbd-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#ff6b5e;vertical-align:1px}
   /* Sky Team: the next flight as a boarding pass (trackers.js) */
   .sky-pass{display:flex;margin:0 0 0.8rem;border-radius:12px;overflow:hidden;background:#f3ead8;color:#1d1a14;box-shadow:0 4px 16px rgba(0,0,0,0.35)}
   .sky-pass small{display:block;font-size:0.56rem;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:#8a7f6c}
