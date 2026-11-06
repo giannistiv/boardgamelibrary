@@ -743,7 +743,7 @@ function openModal(game) {
 
     const renderPlay = (play) => {
       const hasWinner = play.sc.some(s => s.w);
-      const scoreHtml = play.sc.map(_playScoreChipHtml).join('');
+      const scoreHtml = _playScoresHtml(play.sc);
       const boardHtml = play.b ? `<div class="play-board">&#9876; ${play.b}</div>` : '';
       const noWinnerHtml = hasWinner || noResultGame ? ''
         : play.nr ? '<div class="play-no-winner play-no-result">No result</div>'

@@ -53,6 +53,7 @@ function bgsPlayData(bggId, play) {
   if (id > 0) g.bggId = id;
   const players = (play.sc || []).map(s => {
     const p = { startPlayer: false, name: s.n, sourcePlayerId: _bgsId(s.n), winner: !!s.w, role: s.r || '' };
+    if (s.tm) p.team = `Team ${s.tm}`;
     const v = _bgsScore(s.s);
     if (v !== null) p.score = v;
     return p;
@@ -163,12 +164,14 @@ function bgsPlayFile(bggId, play) {
   const sheet = _bgsSheet(id, play, uuids);
   const p = {
     uuid: _bgsUuid(`bgl-play:${link.sourcePlayId}`), modificationDate: now, entryDate: play.e || play.t || now,
-    playDate: play.t || `${play.date} 20:00:00`, usesTeams: false, durationMin: Number(play.d) || 0, ignored: false,
+    playDate: play.t || `${play.date} 20:00:00`, usesTeams: play.sc.some(s => s.tm), durationMin: Number(play.d) || 0, ignored: false,
     manualWinner: false, rounds: 0, gameRefId: 1, scoringSetting: link.game.noPoints ? 6 : 0,
     playerScores: play.sc.map((s, i) => {
       const v = _bgsScore(s.s);
-      return { score: v === null ? null : String(v), winner: !!s.w, newPlayer: false, startPlayer: false, playerRefId: i + 1,
+      const o = { score: v === null ? null : String(v), winner: !!s.w, newPlayer: false, startPlayer: false, playerRefId: i + 1,
         rank: 0, seatOrder: i, role: s.r || null, metaData: sheet ? JSON.stringify({ scoreUuid: uuids[i] }) : null };
+      if (s.tm) o.team = String(Number(s.tm) - 1 >= 0 ? Number(s.tm) - 1 : s.tm);   // BG Stats counts teams from 0
+      return o;
     }),
     expansionPlays: xs.map((x, k) => ({ gameRefId: k + 2 })),
   };

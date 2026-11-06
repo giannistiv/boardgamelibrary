@@ -38,6 +38,15 @@ function _playScoreChipHtml(s) {
   return `<span class="play-score${cls}"><span class="play-player"><span class="play-player-name">${trophy}${s.n}${score}</span>${roleHtml}</span></span>`;
 }
 
+// A play's players: in their teams when it was played in teams (sc[].tm).
+function _playScoresHtml(sc) {
+  if (!(sc || []).some(s => s && s.tm)) return (sc || []).map(_playScoreChipHtml).join('');
+  const teams = new Map();
+  for (const s of sc) { const t = String(s.tm || ''); if (!teams.has(t)) teams.set(t, []); teams.get(t).push(s); }
+  return [...teams.entries()].sort((a, b) => (a[0] || '9').localeCompare(b[0] || '9'))
+    .map(([t, list]) => `<span class="play-team">${t ? `<span class="play-team-n">Team ${_escapeHtml(t)}</span>` : ''}${list.map(_playScoreChipHtml).join('')}</span>`).join('');
+}
+
 // ── Filter helpers ──
 function parseMaxTime(playTime) {
   // "60-120 min" → 120, "40 min" → 40

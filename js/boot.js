@@ -218,6 +218,13 @@ Promise.all([loadAllRatings(), loadRateSkips(), loadAllFavorites(), loadImported
 
 // ── A link into the app, from a notification (sw.js): ?go=game:ID | backed | hot:ID ──
 function _takeGoLink() {
+  // a score sheet someone at the table is counting together (js/score-sheet.js)
+  const sheet = new URLSearchParams(location.search).get('sheet');
+  if (sheet) {
+    history.replaceState(history.state, '', location.pathname);
+    if (typeof scoreSheetJoin === 'function') scoreSheetJoin(sheet);
+    return;
+  }
   const go = new URLSearchParams(location.search).get('go');
   if (!go) return;
   history.replaceState(history.state, '', location.pathname);
@@ -480,6 +487,7 @@ window.initImporter = function(source){
           s: ps.score !== null && ps.score !== undefined ? String(ps.score) : '',
           w: !!ps.winner,
           ...(ps.role ? {r: ps.role} : {}),
+          ...(play.usesTeams && ps.team != null && ps.team !== '' ? { tm: String(Number(ps.team) + 1 || ps.team) } : {}),   // BG Stats counts teams from 0
         };
       });
 
@@ -833,7 +841,8 @@ async function _importFromSource(source, src, data, showResult, finish) {
     const sc = (play.playerScores || []).map((ps, i) => {
       const n = nameOf(people[i]) || 'Anonymous player';
       if (!known.has(n)) newNames.add(n);
-      return { n, s: ps.score !== null && ps.score !== undefined ? String(ps.score) : '', w: !!ps.winner, ...(ps.role ? { r: ps.role } : {}) };
+      return { n, s: ps.score !== null && ps.score !== undefined ? String(ps.score) : '', w: !!ps.winner, ...(ps.role ? { r: ps.role } : {}),
+        ...(play.usesTeams && ps.team != null && ps.team !== '' ? { tm: String(Number(ps.team) + 1 || ps.team) } : {}) };
     });
     const entry = { bggId, date, sc, src: source };
     if (stamp.length > 10 && stamp !== date) entry.t = stamp;

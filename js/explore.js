@@ -194,7 +194,7 @@ function showGamesView() {
   // ── Stats sub-tab ──
   const buildStatsTab = () => {
     const playRowHtml = (p) => {
-      const scoresHtml = p.sc.map(_playScoreChipHtml).join('');
+      const scoresHtml = _playScoresHtml(p.sc);
       const boardHtml = p.b ? `<span class="stats-recent-result">&nbsp;&middot; &#9876; ${p.b}</span>` : '';
       return `<div class="stats-recent-play" data-bgg-id="${p.game.bggId}">
         <div class="stats-recent-top">
@@ -217,7 +217,7 @@ function showGamesView() {
   const shownPlays = playsWho === 'mine' ? allPlays.filter(isMine) : allPlays;
   const buildPlaysTab = () => {
     const playRowHtml = (p) => {
-      const scoresHtml = p.sc.map(_playScoreChipHtml).join('');
+      const scoresHtml = _playScoresHtml(p.sc);
       const boardHtml = p.b ? `<span class="stats-recent-result">&nbsp;&middot; &#9876; ${_escapeHtml(p.b)}</span>` : '';
       const img = p.game.bggId >= 0 ? `<img class="ex-play-img" src="images/${p.game.bggId}.jpg" alt="" loading="lazy" onerror="__imgFallback(this, ${p.game.bggId})">` : '<span class="ex-play-img"></span>';
       return `<div class="stats-recent-play ex-play" data-bgg-id="${p.game.bggId}">

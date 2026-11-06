@@ -37,6 +37,7 @@ function _lpEntry(id, p) {
   const sc = (Array.isArray(p.sc) ? p.sc : Object.values(p.sc || {})).filter(s => s && s.n).map(s => {
     const o = { n: NAME_MAP[s.n] || s.n, s: s.s == null ? '' : String(s.s), w: !!s.w };
     if (s.r) o.r = s.r;
+    if (s.tm) o.tm = String(s.tm);
     return o;
   });
   const e = { date: p.date, t: p.t || `${p.date} 20:00:00`, e: p.t || `${p.date} 20:00:00`, sc, mp: id, by: p.by };
@@ -202,7 +203,8 @@ function logPlayOpen(bggId) {
   if (!a) { if (typeof acctOpenSheet === 'function') acctOpenSheet(); return; }
   const me = _navPlayer();
   _lp = { id: null, bggId: Number(bggId) || 0, date: _lpToday(), time: _lpNow(), d: '', lenSet: false, l: _lpPlaces()[0] || '', b: '', c: '',
-    sc: me ? [{ n: me, s: '', w: false, r: '' }] : [], roles: false, gameWon: false, x: [] };
+    sc: me ? [{ n: me, s: '', w: false, r: '', tm: '' }] : [], roles: false, teams: false, gameWon: false, x: [] };
+  _lpUsualSeats();
   _lpShow();
 }
 // The same game, people, characters, place and scenario as a past play;
@@ -212,9 +214,9 @@ function logPlayAgain(bggId, idx) {
   if (!play) return logPlayOpen(bggId);
   const a = typeof acctMe === 'function' ? acctMe() : null;
   if (!a) { if (typeof acctOpenSheet === 'function') acctOpenSheet(); return; }
-  const sc = play.sc.filter(s => s && s.n).map(s => ({ n: s.n, s: '', w: false, r: s.r || '' }));
+  const sc = play.sc.filter(s => s && s.n).map(s => ({ n: s.n, s: '', w: false, r: s.r || '', tm: s.tm || '' }));
   _lp = { id: null, bggId: Number(bggId), date: _lpToday(), time: _lpNow(), d: '', lenSet: false, l: play.l || _lpPlaces()[0] || '',
-    b: play.b || '', c: '', sc, roles: sc.some(s => s.r), gameWon: false,
+    b: play.b || '', c: '', sc, roles: sc.some(s => s.r), teams: sc.some(s => s.tm), gameWon: false,
     x: typeof playExpansionsOf === 'function' ? playExpansionsOf(Number(bggId), play) : [] };
   _lpShow();
 }
@@ -238,9 +240,9 @@ function _lpRecentCombos() {
 function logPlayEdit(id) {
   const p = manualPlaysCache[id];
   if (!p) return;
-  const sc = (Array.isArray(p.sc) ? p.sc : Object.values(p.sc || {})).map(s => ({ n: NAME_MAP[s.n] || s.n, s: s.s == null ? '' : String(s.s), w: !!s.w, r: s.r || '' }));
+  const sc = (Array.isArray(p.sc) ? p.sc : Object.values(p.sc || {})).map(s => ({ n: NAME_MAP[s.n] || s.n, s: s.s == null ? '' : String(s.s), w: !!s.w, r: s.r || '', tm: s.tm || '' }));
   _lp = { id, bggId: Number(p.bggId), date: p.date, time: String(p.t || '').slice(11, 19) || _lpNow(), d: p.d || '', lenSet: !!p.d,
-    l: p.l || '', b: p.b || '', c: p.c || '', sc, roles: sc.some(s => s.r), gameWon: sc.length > 0 && !sc.some(s => s.w), winSet: true,
+    l: p.l || '', b: p.b || '', c: p.c || '', sc, roles: sc.some(s => s.r), teams: sc.some(s => s.tm), gameWon: sc.length > 0 && !sc.some(s => s.w), winSet: true,
     ss: p.ss && typeof scoreSheetUnpack === 'function' ? scoreSheetUnpack(p.ss, sc) : null,
     x: (Array.isArray(p.x) ? p.x : Object.values(p.x || {})).map(Number) };
   _lpShow();
@@ -266,6 +268,11 @@ function _lpEl() {
       if (e.target.classList.contains('lp-score')) {
         const p = _lp.sc[Number(e.target.closest('.lp-prow').dataset.i)];
         if (p) { p.s = e.target.value.trim(); _lpAutoWinner(); }
+        return;
+      }
+      if (e.target.classList.contains('lp-role')) {   // typed: the one-tap characters step aside
+        const chips = e.target.parentElement.querySelector('.lp-rchips');
+        if (chips) chips.hidden = !!e.target.value.trim();
         return;
       }
       const n = e.target.closest('[data-sc-num]');
@@ -329,7 +336,7 @@ function _lpShow() {
           <div id="lp-len" class="lp-len"></div>
         </section>
         <section class="lp-part">
-          <div class="lp-hrow"><h3 class="lp-h">Players</h3><button type="button" class="lp-textbtn" data-lp="roles">${_lp.roles ? 'Hide characters' : '+ Characters'}</button></div>
+          <div class="lp-hrow"><h3 class="lp-h">Players</h3><span class="lp-hbtns"><button type="button" class="lp-textbtn" data-lp="teams">${_lp.teams ? 'No teams' : '+ Teams'}</button><button type="button" class="lp-textbtn" data-lp="roles">${_lp.roles ? 'Hide characters' : '+ Characters'}</button></span></div>
           <div id="lp-ssbtn" class="lp-ssrow" hidden></div>
           <div class="lp-all">
             <button type="button" class="lp-chip" data-lp="allwon"><span aria-hidden="true">&#9733;</span> Everyone won</button>
@@ -378,6 +385,7 @@ function _lpClose() {
   const ov = document.getElementById('lp-overlay');
   if (!ov || !_lpOpen) return;
   _lpOpen = false;
+  if (typeof scoreSheetEnd === 'function') scoreSheetEnd();   // a sheet counted together is over
   ov.classList.remove('open');
   ov._navClose = null;
   if (typeof navOverlayClosed === 'function') navOverlayClosed('lp');
@@ -558,12 +566,55 @@ function _lpRenderPlayers() {
         ${st && isNoResultSeat(p) ? '' : `<button type="button" class="lp-win${p.w ? ' on' : ''}" data-lp-win="${i}" aria-pressed="${p.w}">&#9733; ${p.w ? 'Won' : 'Winner?'}</button>`}
         ${st ? `<button type="button" class="lp-win lp-st${isNoResultSeat(p) ? ' on' : ''}" data-lp-st="${i}" aria-pressed="${isNoResultSeat(p)}" title="Plays, but neither wins nor loses">${esc(st)}</button>` : ''}
       </div>
-      ${_lp.roles ? `<input class="lp-input lp-role" value="${esc(p.r || '')}" placeholder="Character, faction, colour…" maxlength="120" aria-label="${esc(p.n)}'s character">` : ''}
+      ${_lp.teams ? `<div class="lp-teams">${_lpTeamNos().map(t => `<button type="button" class="lp-tchip${String(p.tm) === t ? ' on' : ''}" data-lp-team="${i}|${t}" aria-pressed="${String(p.tm) === t}">Team ${t}</button>`).join('')}</div>` : ''}
+      ${_lp.roles ? `<input class="lp-input lp-role" value="${esc(p.r || '')}" placeholder="Character, faction, colour…" maxlength="120" aria-label="${esc(p.n)}'s character">${_lpRoleChips(i)}` : ''}
     </div>`).join('') || '<div class="lp-hint">Add the players below.</div>')
     + (lost ? '<div class="lp-gamewon">&#9760;&#65038; The game won</div>' : '');
   _lpRenderSugg();
   _lpRenderSheetBtn();
   if (_lp.bggId) _lpAutoWinner();   // a player gone or added: the stars follow the scores
+}
+// Characters in one tap (the user, 6 Nov 2026): the ones this game has been
+// played with, the player's own most used first, then everyone's; a character
+// someone else in the play has already is left out.
+function _lpRoleChips(i) {
+  const p = _lp.sc[i];
+  if (!p || p.r || !_lp.bggId) return '';
+  const st = STORYTELLER_GAMES.get(Number(_lp.bggId));
+  const all = new Map(), theirs = new Map();
+  for (const q of PLAY_HISTORY[_lp.bggId] || []) {
+    for (const s of q.sc || []) {
+      const r = String((s && s.r) || '').trim();
+      if (!r || r === st) continue;
+      all.set(r, (all.get(r) || 0) + 1);
+      if (s.n === p.n) theirs.set(r, (theirs.get(r) || 0) + 1);
+    }
+  }
+  const taken = new Set(_lp.sc.map(q => q.r).filter(Boolean));
+  const list = [...all.keys()].filter(r => !taken.has(r))
+    .sort((a, b) => (theirs.get(b) || 0) - (theirs.get(a) || 0) || all.get(b) - all.get(a)).slice(0, 12);
+  return list.length ? `<div class="lp-rchips">${list.map(r => `<button type="button" class="lp-rchip" data-lp-role="${i}" data-role="${_escapeHtml(r)}">${_escapeHtml(r)}</button>`).join('')}</div>` : '';
+}
+// Teams 1, 2, and one more than the highest in use (up to 4).
+function _lpTeamNos() {
+  const hi = Math.max(0, ..._lp.sc.map(p => Number(p.tm) || 0));
+  return Array.from({ length: Math.min(4, Math.max(2, hi + 1)) }, (_, k) => String(k + 1));
+}
+// A game usually played with characters or in teams starts with them on.
+function _lpUsualSeats() {
+  if (!_lp || _lp.id || !_lp.bggId) return;
+  const recent = (PLAY_HISTORY[_lp.bggId] || []).slice(0, 20);
+  if (recent.length < 2) return;
+  const share = (f) => recent.filter(q => (q.sc || []).some(f)).length / recent.length;
+  if (!_lp.roles && share(s => s && s.r && !isNoResultSeat(s)) >= 0.5) _lp.roles = true;
+  if (!_lp.teams && share(s => s && s.tm) >= 0.5) {
+    _lp.teams = true;
+    _lp.sc.forEach((p, i) => { if (!p.tm) p.tm = String((i % 2) + 1); });
+  }
+  const rb = document.querySelector('#lp-overlay [data-lp="roles"]');
+  if (rb) rb.textContent = _lp.roles ? 'Hide characters' : '+ Characters';
+  const tb = document.querySelector('#lp-overlay [data-lp="teams"]');
+  if (tb) tb.textContent = _lp.teams ? 'No teams' : '+ Teams';
 }
 // The expansions played with (the user, 6 Nov 2026): one tap each, for the
 // ones you own for the game and the ones it's been played with before.
@@ -611,6 +662,10 @@ function _lpAutoWinner() {
   const low = typeof _recLowBest === 'function' && _recLowBest(PLAY_HISTORY[_lp.bggId] || [], false);
   const best = seats.length >= 2 ? (low ? Math.min : Math.max)(...seats.map(x => x.v)) : null;
   const win = new Set(seats.filter(x => x.v === best).map(x => x.i));
+  if (_lp.teams) {   // a team wins together
+    const teams = new Set([...win].map(i => String(_lp.sc[i].tm || '')).filter(Boolean));
+    _lp.sc.forEach((p, i) => { if (p.tm && teams.has(String(p.tm))) win.add(i); });
+  }
   _lp.sc.forEach((p, i) => { p.w = win.has(i); });
   _lp.gameWon = false;
   document.querySelectorAll('#lp-players .lp-prow').forEach(row => {
@@ -650,8 +705,17 @@ function _lpSay(text) {
 async function _lpClick(e) {
   const ov = document.getElementById('lp-overlay');
   if (e.target === ov) { _lpClose(); return; }
-  const b = e.target.closest('[data-lp], [data-lp-game], [data-lp-win], [data-lp-st], [data-lp-del], [data-lp-who], [data-lp-crew], [data-lp-x]');
+  const b = e.target.closest('[data-lp], [data-lp-game], [data-lp-win], [data-lp-st], [data-lp-del], [data-lp-who], [data-lp-crew], [data-lp-x], [data-lp-team], [data-lp-role]');
   if (!b) return;
+  if (b.dataset.lpRole != null) { _lpSyncPlayers(); const p = _lp.sc[Number(b.dataset.lpRole)]; if (p) p.r = b.dataset.role; _lpRenderPlayers(); return; }
+  if (b.dataset.lpTeam) {
+    _lpSyncPlayers();
+    const [i, t] = b.dataset.lpTeam.split('|');
+    const p = _lp.sc[Number(i)];
+    if (p) p.tm = String(p.tm) === t ? '' : t;
+    _lpRenderPlayers();
+    return;
+  }
   if (b.dataset.lpX) {
     const x = Number(b.dataset.lpX);
     _lp.x = (_lp.x || []).includes(x) ? _lp.x.filter(y => y !== x) : [...(_lp.x || []), x];
@@ -665,6 +729,14 @@ async function _lpClick(e) {
   if (what === 'game') { _lp.bggId = 0; _lp.x = []; _lpRenderGame(); _lpRenderLen(); if (!_isTouchDevice()) setTimeout(() => { const q = document.getElementById('lp-gq'); if (q) q.focus(); }, 30); return; }
   if (what === 'gsearch') { _lpGameSearch(); return; }
   if (what === 'roles') { _lpSyncPlayers(); _lp.roles = !_lp.roles; b.textContent = _lp.roles ? 'Hide characters' : '+ Characters'; _lpRenderPlayers(); return; }
+  if (what === 'teams') {
+    _lpSyncPlayers();
+    _lp.teams = !_lp.teams;
+    if (_lp.teams && !_lp.sc.some(p => p.tm)) _lp.sc.forEach((p, i) => { p.tm = String((i % 2) + 1); });   // split by seat to start with
+    b.textContent = _lp.teams ? 'No teams' : '+ Teams';
+    _lpRenderPlayers();
+    return;
+  }
   if (what === 'addp') { _lpAddPlayer(); return; }
   if (what === 'sheet') { _lpSyncPlayers(); scoreSheetOpen(); return; }
   if (what === 'allwon' || what === 'alllost') {
@@ -685,6 +757,8 @@ async function _lpClick(e) {
     _lp.x = [];
     _lpRenderGame();
     _lpRenderLen();
+    _lpUsualSeats();
+    _lpRenderPlayers();
     return;
   }
   if (b.dataset.lpWin) {
@@ -694,6 +768,7 @@ async function _lpClick(e) {
     _lp.winSet = true;
     const p = _lp.sc[Number(b.dataset.lpWin)];
     p.w = !p.w;
+    if (_lp.teams && p.tm) _lp.sc.forEach(q => { if (String(q.tm) === String(p.tm)) q.w = p.w; });   // a team wins together
     _lp.gameWon = false;
     _lpRenderPlayers();
     return;
@@ -733,6 +808,7 @@ async function _lpSave() {
       const o = { n: typeof _origCanon === 'function' ? _origCanon(p.n) : p.n, w: !!p.w };
       if (p.s) o.s = p.s.slice(0, 40);
       if (_lp.roles && p.r) o.r = p.r.slice(0, 120);
+      if (_lp.teams && p.tm) o.tm = String(p.tm).slice(0, 30);
       return o;
     }),
     by: _lp.id ? (manualPlaysCache[_lp.id] || {}).by || a.uid : a.uid,
@@ -772,15 +848,16 @@ async function _lpSave() {
   }
 }
 // A play the database refuses for a field its rules don't have yet goes up
-// without it: the expansions (plays/{id}.x) first, then the score sheet (.ss).
+// without it: the expansions (plays/{id}.x) first, then the score sheet (.ss),
+// then the teams (sc/{i}.tm).
 async function _lpWrite(path, method, rec) {
   for (;;) {
     try {
       return await acctWrite(path, method, rec);
     } catch (err) {
-      const drop = ['x', 'ss'].find(k => k in rec);
+      const drop = ['x', 'ss'].find(k => k in rec) || (rec.sc.some(s => 'tm' in s) ? 'tm' : '');
       if (err.code !== 'denied' || !drop) throw err;
-      delete rec[drop];
+      if (drop === 'tm') rec.sc.forEach(s => delete s.tm); else delete rec[drop];
     }
   }
 }

@@ -43,7 +43,8 @@ async function loadAllRatings() {
 // Rove, the Gauntlet and the rating skips have their own nodes since 20 Oct
 // 2026, the Codenames: Critical Role campaigns since 1 Nov 2026, and the
 // Oathsworn campaigns and Crowdfunding's put-away news since 3 Nov 2026.
-const FB_SPARE = {};
+// Score sheets counted together (js/score-sheet.js) wait here from 6 Nov 2026.
+const FB_SPARE = { sheets: '_bglSheets' };
 const _fbDenied = new Set();   // nodes that refused a write this session: go straight to the spare
 function _fbRoot(path) { return path.split('/')[0]; }
 function _fbSpare(path) {
@@ -212,7 +213,7 @@ let importedPlaysCache = {}; // uuid -> play entry (includes bggId)
 // expansions and points by category count too, so uploading an export again
 // brings them to plays saved before uploads kept them.
 function _playSignature(e) {
-  const sc = (e.sc || []).map(s => [s.n, String(s.s == null ? '' : s.s), !!s.w, s.r || '']).sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
+  const sc = (e.sc || []).map(s => [s.n, String(s.s == null ? '' : s.s), !!s.w, s.r || '', s.tm || '']).sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
   return JSON.stringify([e.date, sc, e.b || '', e.l || '', e.d || 0, (e.x || []).join(','), e.pts ? JSON.stringify(e.pts) : '']);
 }
 // An upload's points by category as the pages read them: { category: { player: points } }.
