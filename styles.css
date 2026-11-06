@@ -1248,6 +1248,20 @@
   .ss-tot.best{color:var(--accent-2)}
   .ss-tot.out{color:var(--text-3);text-decoration:line-through}
   .ss-opt,.ss-from{display:block;margin:0.9rem 1rem 0}
+  .ss-hint{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:0.15rem;font-size:0.68rem;font-weight:400;line-height:1.3;color:var(--text-3)}
+  .ss-how{margin:0.7rem 1rem 0.6rem;font-size:0.8rem;color:var(--text-2)}
+  .ss-how summary{cursor:pointer;font-weight:600;color:var(--accent-2)}
+  .ss-how ul{margin:0.4rem 0 0;padding-left:1.1rem;line-height:1.45}
+  .ss-how li{margin-bottom:0.25rem}
+  /* expansions played with (Log a play) */
+  .lp-exp{margin-top:0.7rem}
+  .lp-exp-h{font-size:0.75rem;color:var(--text-3);margin-bottom:0.4rem}
+  .lp-exp-list{display:flex;flex-wrap:wrap;gap:0.4rem}
+  .lp-xchip{min-height:38px;max-width:100%;padding:0 0.85rem;border-radius:999px;border:1px solid var(--line-2);background:var(--card);color:var(--text-2);font:inherit;font-size:0.84rem;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .lp-xchip.on{border-color:var(--accent);background:var(--accent-soft);color:var(--text);font-weight:600}
+  /* where the points come from (game page) */
+  .sp-row.neg .pt-p-bar i{background:#f87171}
+  .xp-base .pt-p-name{color:var(--text-3)}
   /* scenario and notes, folded away */
   .lp-more{gap:0}
   .lp-more > summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between}

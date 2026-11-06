@@ -44,6 +44,9 @@ function _lpEntry(id, p) {
   if (p.b) e.b = p.b;
   if (p.l) e.l = typeof canonLocation === 'function' ? canonLocation(p.l, p.date) : p.l;
   if (p.c) e.c = p.c;
+  const x = Array.isArray(p.x) ? p.x : Object.values(p.x || {});
+  if (x.length) e.x = x.map(Number);   // the expansions (js/play-extras.js)
+  if (p.ss) e.ss = p.ss;               // the score sheet, for the points by category
   if (p.pending) e.pending = true;
   return e;
 }
@@ -199,7 +202,7 @@ function logPlayOpen(bggId) {
   if (!a) { if (typeof acctOpenSheet === 'function') acctOpenSheet(); return; }
   const me = _navPlayer();
   _lp = { id: null, bggId: Number(bggId) || 0, date: _lpToday(), time: _lpNow(), d: '', lenSet: false, l: _lpPlaces()[0] || '', b: '', c: '',
-    sc: me ? [{ n: me, s: '', w: false, r: '' }] : [], roles: false, gameWon: false };
+    sc: me ? [{ n: me, s: '', w: false, r: '' }] : [], roles: false, gameWon: false, x: [] };
   _lpShow();
 }
 // The same game, people, characters, place and scenario as a past play;
@@ -211,7 +214,8 @@ function logPlayAgain(bggId, idx) {
   if (!a) { if (typeof acctOpenSheet === 'function') acctOpenSheet(); return; }
   const sc = play.sc.filter(s => s && s.n).map(s => ({ n: s.n, s: '', w: false, r: s.r || '' }));
   _lp = { id: null, bggId: Number(bggId), date: _lpToday(), time: _lpNow(), d: '', lenSet: false, l: play.l || _lpPlaces()[0] || '',
-    b: play.b || '', c: '', sc, roles: sc.some(s => s.r), gameWon: false };
+    b: play.b || '', c: '', sc, roles: sc.some(s => s.r), gameWon: false,
+    x: typeof playExpansionsOf === 'function' ? playExpansionsOf(Number(bggId), play) : [] };
   _lpShow();
 }
 // Your last few plays, one per game and group: the picks at the top of a new log.
@@ -236,8 +240,9 @@ function logPlayEdit(id) {
   if (!p) return;
   const sc = (Array.isArray(p.sc) ? p.sc : Object.values(p.sc || {})).map(s => ({ n: NAME_MAP[s.n] || s.n, s: s.s == null ? '' : String(s.s), w: !!s.w, r: s.r || '' }));
   _lp = { id, bggId: Number(p.bggId), date: p.date, time: String(p.t || '').slice(11, 19) || _lpNow(), d: p.d || '', lenSet: !!p.d,
-    l: p.l || '', b: p.b || '', c: p.c || '', sc, roles: sc.some(s => s.r), gameWon: sc.length > 0 && !sc.some(s => s.w),
-    ss: p.ss && typeof scoreSheetUnpack === 'function' ? scoreSheetUnpack(p.ss, sc) : null };
+    l: p.l || '', b: p.b || '', c: p.c || '', sc, roles: sc.some(s => s.r), gameWon: sc.length > 0 && !sc.some(s => s.w), winSet: true,
+    ss: p.ss && typeof scoreSheetUnpack === 'function' ? scoreSheetUnpack(p.ss, sc) : null,
+    x: (Array.isArray(p.x) ? p.x : Object.values(p.x || {})).map(Number) };
   _lpShow();
 }
 
@@ -258,6 +263,11 @@ function _lpEl() {
     });
     ov.addEventListener('submit', (e) => { e.preventDefault(); _lpSave(); });
     ov.addEventListener('input', (e) => {
+      if (e.target.classList.contains('lp-score')) {
+        const p = _lp.sc[Number(e.target.closest('.lp-prow').dataset.i)];
+        if (p) { p.s = e.target.value.trim(); _lpAutoWinner(); }
+        return;
+      }
       const n = e.target.closest('[data-sc-num]');
       if (!n) return;
       const v = n.value.trim().replace(',', '.');
@@ -303,6 +313,7 @@ function _lpShow() {
         <section class="lp-part">
           <h3 class="lp-h">Game</h3>
           <div id="lp-game"></div>
+          <div id="lp-exp" class="lp-exp" hidden></div>
         </section>
         <section class="lp-part" id="lp-scen-part" hidden>
           <h3 class="lp-h">Scenario</h3>
@@ -380,6 +391,7 @@ function _lpRenderGame() {
   const esc = _escapeHtml;
   _lpRenderSugg();   // the people who play this game come up
   _lpRenderSheetBtn();
+  _lpRenderExp();
   if (_lp.bggId) {
     const g = findGameByBggId(_lp.bggId) || (_lpPicked && _lpPicked.id === _lp.bggId ? _lpPicked : { name: `Game #${_lp.bggId}` });
     const sub = [g.year, g.players ? `${g.players} players` : ''].filter(Boolean).join(' &middot; ');
@@ -551,6 +563,33 @@ function _lpRenderPlayers() {
     + (lost ? '<div class="lp-gamewon">&#9760;&#65038; The game won</div>' : '');
   _lpRenderSugg();
   _lpRenderSheetBtn();
+  if (_lp.bggId) _lpAutoWinner();   // a player gone or added: the stars follow the scores
+}
+// The expansions played with (the user, 6 Nov 2026): one tap each, for the
+// ones you own for the game and the ones it's been played with before.
+function _lpRenderExp() {
+  const box = document.getElementById('lp-exp');
+  if (!box) return;
+  const id = _lp.bggId;
+  const known = new Map((typeof expansionsOf === 'function' ? expansionsOf(id) : []).map(([x, name]) => [Number(x), name]));
+  const owned = typeof _gnOwned === 'function' ? _gnOwned() : new Set();
+  const used = new Map();
+  if (id && typeof playExpansionsOf === 'function') {
+    for (const p of PLAY_HISTORY[id] || []) for (const x of playExpansionsOf(id, p)) used.set(x, (used.get(x) || 0) + 1);
+  }
+  const ids = [...new Set([..._lp.x || [], ...[...known.keys()].filter(x => owned.has(x)), ...used.keys()])];
+  box.hidden = !id || !ids.length;
+  if (box.hidden) { box.innerHTML = ''; return; }
+  const game = findGameByBggId(id);
+  const nameOf = (x) => {
+    const n = known.get(x) || ((findGameByBggId(x) || {}).name) || `Expansion #${x}`;
+    return typeof _gnShort === 'function' && game ? _gnShort(n, game.name) : n;
+  };
+  ids.sort((a, b) => (owned.has(b) - owned.has(a)) || ((used.get(b) || 0) - (used.get(a) || 0)) || nameOf(a).localeCompare(nameOf(b)));
+  box.innerHTML = `<div class="lp-exp-h">Played with</div><div class="lp-exp-list">${ids.map(x => {
+    const on = (_lp.x || []).includes(x);
+    return `<button type="button" class="lp-xchip${on ? ' on' : ''}" data-lp-x="${x}" aria-pressed="${on}">${on ? '&#10003; ' : ''}${_escapeHtml(nameOf(x))}</button>`;
+  }).join('')}</div>`;
 }
 // The score sheet (js/score-sheet.js), once there are players to count for.
 function _lpRenderSheetBtn() {
@@ -561,6 +600,30 @@ function _lpRenderSheetBtn() {
   box.innerHTML = box.hidden ? '' : `<button type="button" class="lp-chip lp-ssbtn" data-lp="sheet"><span aria-hidden="true">&#9638;</span> ${
     scoreSheetFilled() ? 'Back to the score sheet' : s.key === 'rounds' ? 'Score it round by round' : 'Score sheet'}</button>`;
 }
+// The best score gets the star as the scores are typed (the user, 6 Nov 2026:
+// no tapping ★ as well), the lowest where the lowest wins, until someone
+// picks the winners themselves. Not for a co-op, and not before two scores.
+function _lpAutoWinner() {
+  if (_lp.winSet) return;
+  const g = findGameByBggId(_lp.bggId);
+  if (g && isCoop(g)) return;
+  const seats = _lp.sc.map((p, i) => ({ i, v: isNoResultSeat(p) ? null : _recScore(p.s) })).filter(x => x.v !== null);
+  const low = typeof _recLowBest === 'function' && _recLowBest(PLAY_HISTORY[_lp.bggId] || [], false);
+  const best = seats.length >= 2 ? (low ? Math.min : Math.max)(...seats.map(x => x.v)) : null;
+  const win = new Set(seats.filter(x => x.v === best).map(x => x.i));
+  _lp.sc.forEach((p, i) => { p.w = win.has(i); });
+  _lp.gameWon = false;
+  document.querySelectorAll('#lp-players .lp-prow').forEach(row => {
+    const p = _lp.sc[Number(row.dataset.i)];
+    const btn = row.querySelector('[data-lp-win]');
+    if (!p) return;
+    row.classList.toggle('won', p.w);
+    if (btn) { btn.classList.toggle('on', p.w); btn.setAttribute('aria-pressed', String(p.w)); btn.innerHTML = `&#9733; ${p.w ? 'Won' : 'Winner?'}`; }
+  });
+  const gw = document.querySelector('#lp-players .lp-gamewon');
+  if (gw) gw.remove();
+}
+
 function _lpAddPlayer() {
   const input = document.getElementById('lp-pname');
   let name = (input.value || '').trim().replace(/\s+/g, ' ');
@@ -587,19 +650,26 @@ function _lpSay(text) {
 async function _lpClick(e) {
   const ov = document.getElementById('lp-overlay');
   if (e.target === ov) { _lpClose(); return; }
-  const b = e.target.closest('[data-lp], [data-lp-game], [data-lp-win], [data-lp-st], [data-lp-del], [data-lp-who], [data-lp-crew]');
+  const b = e.target.closest('[data-lp], [data-lp-game], [data-lp-win], [data-lp-st], [data-lp-del], [data-lp-who], [data-lp-crew], [data-lp-x]');
   if (!b) return;
+  if (b.dataset.lpX) {
+    const x = Number(b.dataset.lpX);
+    _lp.x = (_lp.x || []).includes(x) ? _lp.x.filter(y => y !== x) : [...(_lp.x || []), x];
+    _lpRenderExp();
+    return;
+  }
   if (b.dataset.lpWho != null) { _lpAddNames([b.dataset.lpWho]); return; }
   if (b.dataset.lpCrew != null) { const c = _lpCrews[Number(b.dataset.lpCrew)]; if (c) _lpAddNames(c.names); return; }
   const what = b.dataset.lp;
   if (what === 'close') { _lpClose(); return; }
-  if (what === 'game') { _lp.bggId = 0; _lpRenderGame(); _lpRenderLen(); if (!_isTouchDevice()) setTimeout(() => { const q = document.getElementById('lp-gq'); if (q) q.focus(); }, 30); return; }
+  if (what === 'game') { _lp.bggId = 0; _lp.x = []; _lpRenderGame(); _lpRenderLen(); if (!_isTouchDevice()) setTimeout(() => { const q = document.getElementById('lp-gq'); if (q) q.focus(); }, 30); return; }
   if (what === 'gsearch') { _lpGameSearch(); return; }
   if (what === 'roles') { _lpSyncPlayers(); _lp.roles = !_lp.roles; b.textContent = _lp.roles ? 'Hide characters' : '+ Characters'; _lpRenderPlayers(); return; }
   if (what === 'addp') { _lpAddPlayer(); return; }
   if (what === 'sheet') { _lpSyncPlayers(); scoreSheetOpen(); return; }
   if (what === 'allwon' || what === 'alllost') {
     _lpSyncPlayers();
+    _lp.winSet = true;
     _lp.sc.forEach(p => { p.w = what === 'allwon' && !isNoResultSeat(p); });
     _lp.gameWon = what === 'alllost';
     _lpRenderPlayers();
@@ -612,12 +682,16 @@ async function _lpClick(e) {
     const id = Number(b.dataset.lpGame);
     _lpPicked = _lpList.find(g => g.id === id) || _myLibIndex().find(g => g.id === id) || { id, name: b.querySelector('b').textContent };
     _lp.bggId = id;
+    _lp.x = [];
     _lpRenderGame();
     _lpRenderLen();
     return;
   }
   if (b.dataset.lpWin) {
     _lpSyncPlayers();
+    // the first tap after the automatic star picks the winner instead of it
+    if (!_lp.winSet) _lp.sc.forEach((q, i) => { if (i !== Number(b.dataset.lpWin)) q.w = false; });
+    _lp.winSet = true;
     const p = _lp.sc[Number(b.dataset.lpWin)];
     p.w = !p.w;
     _lp.gameWon = false;
@@ -627,6 +701,7 @@ async function _lpClick(e) {
   if (b.dataset.lpSt) {
     // the Storyteller: in the play, out of its result (kept as the role, as BG Stats has it)
     _lpSyncPlayers();
+    _lp.winSet = true;
     const p = _lp.sc[Number(b.dataset.lpSt)];
     if (isNoResultSeat(p)) p.r = '';
     else { p.r = STORYTELLER_GAMES.get(Number(_lp.bggId)); p.w = false; _lp.roles = true; }
@@ -667,6 +742,7 @@ async function _lpSave() {
   if (l) rec.l = l;
   if (b) rec.b = b;
   if (c) rec.c = c;
+  if (_lp.x && _lp.x.length) rec.x = _lp.x.slice(0, 20).map(Number);
   const sheet = typeof scoreSheetFor === 'function' && _lp.ss ? scoreSheetFor(rec.bggId) : null;
   if (sheet && sheet.key === _lp.ss.key) { const ss = scoreSheetPack(); if (ss) rec.ss = ss; }
   const picked = _lpPicked && _lpPicked.id === rec.bggId ? _lpPicked : null;
@@ -695,15 +771,17 @@ async function _lpSave() {
     _lpSay(err.message || 'The save failed. Try again.');
   }
 }
-// A play with its score sheet (plays/{id}.ss) that the database refuses
-// (rules from before score sheets) goes up without the sheet.
+// A play the database refuses for a field its rules don't have yet goes up
+// without it: the expansions (plays/{id}.x) first, then the score sheet (.ss).
 async function _lpWrite(path, method, rec) {
-  try {
-    return await acctWrite(path, method, rec);
-  } catch (err) {
-    if (err.code !== 'denied' || !rec.ss) throw err;
-    delete rec.ss;
-    return acctWrite(path, method, rec);
+  for (;;) {
+    try {
+      return await acctWrite(path, method, rec);
+    } catch (err) {
+      const drop = ['x', 'ss'].find(k => k in rec);
+      if (err.code !== 'denied' || !drop) throw err;
+      delete rec[drop];
+    }
   }
 }
 // A play saved from elsewhere in the app, without the form (a campaign's

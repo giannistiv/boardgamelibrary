@@ -34,6 +34,8 @@ function _ssGroups(sheet, n) {
 }
 function _ssReps(gi, g) { return g.rep == null ? 1 : Math.max(g.min || 1, (_ss.reps[gi] || 0)); }
 const _ssCell = (gi, r, ri) => `${gi}.${r}.${ri}`;
+// An expansion's row shows when the play has that expansion, or on "+ Expansion rows".
+const _ssShows = (row) => !row.opt || _ss.opt || !!(row.x && row.x.some(id => (_lp.x || []).includes(Number(id))));
 const _ssNum = (v) => { const x = parseFloat(String(v || '').replace(',', '.')); return isFinite(x) ? x : 0; };
 
 // Each player's total, and who won or lost outright on the sheet.
@@ -43,7 +45,7 @@ function _ssTotals(names) {
   for (const { g, gi } of _ssGroups(_ss.sheet, names.length)) {
     for (let r = 1; r <= _ssReps(gi, g); r++) {
       g.rows.forEach((row, ri) => {
-        if (row.opt && !_ss.opt) return;
+        if (!_ssShows(row)) return;
         const cell = _ss.v[_ssCell(gi, r, ri)] || {};
         names.forEach((n, i) => {
           const val = cell[n];
@@ -63,6 +65,53 @@ function _ssTotals(names) {
     }
   }
   return { tot: tot.map(x => Math.round(x * 100) / 100), won, lost, any };
+}
+
+// ── How each row scores, from the game's rules card (js/rules.js) ──
+// The card's end-of-game lines, and any other line about points, go on top
+// ("How it scores"); under a row goes the line that names it (a word of the
+// row's own: "Horizontal lines" → "…each complete horizontal line…").
+let _ssHow = [];
+const SS_STOP = new Set(['points', 'point', 'score', 'scoring', 'scored', 'track', 'total', 'each', 'your', 'with', 'from', 'game', 'player', 'players',
+  'card', 'cards', 'token', 'tokens', 'tile', 'tiles', 'final', 'bonus', 'bonuses', 'victory', 'most', 'least', 'value', 'other', 'during', 'remaining', 'left']);
+// a few words the sheets and the cards say differently
+const SS_SAME = { horizontal: 'row', vertical: 'column', colour: 'color', dollar: 'money', coin: 'money', vp: 'point' };
+const _ssStems = (t) => (String(t).toLowerCase().match(/[a-z\u0370-\u03ff]{3,}/g) || [])
+  .filter(w => w.length >= 4 || w === 'row').map(w => w.replace(/(es|s)$/, ''))
+  .filter(w => !SS_STOP.has(w) && !SS_STOP.has(w + 's')).map(w => SS_SAME[w] || w);
+// a part worth showing says what it's worth, and isn't a tie-breaker or a "then …"
+const SS_WORTH = /\d|½|\b(VP|OP)\b|point|per |each|value|minus|−/i, SS_NOT = /^(ties?|then|tiebreak)\b/i;
+// The part of a card's line that names the row ("+7 per full column" out of
+// Azul's one line for rows, columns and colours), or the whole line.
+function _ssHint(label) {
+  const stems = _ssStems(String(label).replace(/\{round(Label)?\}/g, ''));
+  if (!stems.length || !_ssHow.length) return '';
+  const hits = (t) => { const w = new Set(_ssStems(t)); return stems.filter(s => w.has(s)).length; };
+  let best = '', bestN = 0;
+  for (const line of _ssHow) {
+    const plain = line.replace(/\*\*/g, '');
+    for (const part of [plain, ...plain.split(/[;,]\s+|\.\s+/)]) {
+      if (SS_NOT.test(part.trim()) || !SS_WORTH.test(part)) continue;
+      const n = hits(part);
+      if (n > bestN || (n === bestN && n && part.length < best.length && part.length >= 12)) { best = part; bestN = n; }
+    }
+  }
+  return bestN ? best.replace(/\.$/, '') : '';
+}
+function _ssLoadHints() {
+  if (typeof _loadRules !== 'function') return;
+  const id = _lp.bggId;
+  _loadRules().then(all => {
+    const r = all && all[id];
+    if (!r || _lp.bggId !== id) return;
+    const pts = /\b(VP|OP|points?|scores?)\b/i;
+    _ssHow = [...(r.end || []), ...[...(r.round || []), ...(r.forget || [])].filter(b => pts.test(b))];
+    const ov = document.getElementById('ss-overlay');
+    if (!_ssHow.length || !ov || !ov.classList.contains('open')) return;
+    const keep = ov.querySelector('.ss-wrap').scrollTop;
+    _ssRender();
+    ov.querySelector('.ss-wrap').scrollTop = keep;
+  }).catch(() => {});
 }
 
 // ── The sheet on screen ──
@@ -90,7 +139,9 @@ function scoreSheetOpen() {
       if (next) next.focus(); else e.target.blur();
     });
   }
+  _ssHow = [];
   _ssRender();
+  _ssLoadHints();
   ov.classList.add('open');
   ov._navClose = _ssClose;
   if (typeof navOverlayOpened === 'function') navOverlayOpened('ss');
@@ -110,7 +161,7 @@ function _ssRender() {
   const names = _lp.sc.map(p => p.n);
   const game = findGameByBggId(_lp.bggId);
   const groups = _ssGroups(_ss.sheet, names.length);
-  const hasOpt = groups.some(({ g }) => g.rows.some(r => r.opt));
+  const hasOpt = groups.some(({ g }) => g.rows.some(r => r.opt && !(r.x && r.x.some(id => (_lp.x || []).includes(Number(id))))));
   const cols = names.length;
   const head = names.map((n, i) => `<th class="ss-p" scope="col" title="${esc(n)}"><span class="lp-avatar" aria-hidden="true">${avatarInner(n)}</span><span class="ss-pn">${esc(String(n).split(/[\s-]/)[0])}</span></th>`).join('');
   let body = '';
@@ -120,11 +171,13 @@ function _ssRender() {
     for (let r = 1; r <= reps; r++) {
       if (g.rep != null && g.rows.length > 1) body += `<tr class="ss-h"><th colspan="${cols + 1}">Round ${r}</th></tr>`;
       g.rows.forEach((row, ri) => {
-        if (row.opt && !_ss.opt) return;
+        if (!_ssShows(row)) return;
         const key = _ssCell(gi, r, ri);
         const cell = _ss.v[key] || {};
         const worth = typeof row.v === 'number' ? ` <small>${row.neg ? '−' : '+'}${row.v}</small>` : row.v === 'win' ? ' <small>wins</small>' : row.v === 'lose' ? ' <small>out</small>' : '';
-        const label = `${row.neg && row.t !== 'check' && row.t !== 'radio' ? '<span class="ss-neg">−</span>' : ''}${esc(String(row.l).replace(/\{round(Label)?\}/g, r))}${worth}`;
+        const hint = _ssHint(row.l);
+        const label = `${row.neg && row.t !== 'check' && row.t !== 'radio' ? '<span class="ss-neg">−</span>' : ''}${esc(String(row.l).replace(/\{round(Label)?\}/g, r))}${worth}${
+          hint ? `<span class="ss-hint" title="${esc(hint)}">${esc(hint)}</span>` : ''}`;
         body += `<tr class="${row.t === 'stat' ? 'ss-stat' : ''}"><th class="ss-lab" scope="row">${label}</th>${names.map((n, i) => {
           if (row.t === 'check' || row.t === 'radio' || row.t === 'win') {
             const on = !!cell[n];
@@ -143,6 +196,7 @@ function _ssRender() {
         <button type="button" class="lp-close" data-ss="close" aria-label="Close">&times;</button>
       </header>
       <div class="ss-wrap">
+        ${_ssHow.length ? `<details class="ss-how"><summary>How it scores</summary><ul>${_ssHow.map(b => `<li>${_rulesText(b)}</li>`).join('')}</ul></details>` : ''}
         <table class="ss-table">
           <thead><tr><th class="ss-lab ss-corner">${_ss.key === 'rounds' ? 'Points' : ''}</th>${head}</tr></thead>
           <tbody>${body}</tbody>
@@ -231,6 +285,7 @@ function _ssDone() {
       p.w = won.some(Boolean) ? won[i] : (!lost[i] && tot[i] === best);
     });
     _lp.gameWon = false;
+    _lp.winSet = true;   // the sheet settled it (an outright win beats the points)
   }
   _ssClose();
   if (typeof _lpRenderPlayers === 'function') _lpRenderPlayers();
@@ -265,6 +320,31 @@ function scoreSheetUnpack(str, sc) {
   } catch (_) {
     return null;
   }
+}
+// A saved sheet as points by category: { row: { player: points } }, rounds of
+// the same row added up; outright wins, stats-only rows and numbered rounds
+// (the rounds sheet) left out. For the game pages (js/play-extras.js).
+function scoreSheetBreakdown(str, sc) {
+  const s = scoreSheetUnpack(str, sc);
+  if (!s) return null;
+  const out = {};
+  for (const key in s.v) {
+    const [gi, , ri] = key.split('.').map(Number);
+    const row = ((s.sheet.g[gi] || {}).rows || [])[ri];
+    if (!row || row.t === 'win' || row.t === 'stat' || /\{round/.test(row.l)) continue;
+    for (const n in s.v[key]) {
+      const val = s.v[key][n];
+      let x;
+      if (row.t === 'check' || row.t === 'radio') {
+        if (!val || typeof row.v !== 'number') continue;
+        x = Math.abs(row.v);
+      } else x = _ssNum(val);
+      if (row.neg) x = -Math.abs(x);
+      const c = out[row.l] || (out[row.l] = {});
+      c[n] = Math.round(((c[n] || 0) + x) * 100) / 100;
+    }
+  }
+  return Object.keys(out).length ? out : null;
 }
 // Whether a sheet has anything in it (for the button's wording).
 function scoreSheetFilled() {

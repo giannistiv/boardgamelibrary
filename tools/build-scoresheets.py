@@ -38,6 +38,7 @@ def row_of(r):
         out['v'] = v if v in ('win', 'lose') else float(v) if '.' in str(v) else int(v)
     if r.get('showWithExpansions'):
         out['opt'] = 1
+        out['x'] = r['showWithExpansions']
     return out
 
 
@@ -115,7 +116,7 @@ def main():
                  '// start with), pmin/pmax (only at those player counts). A row: l label\n'
                  '// ({round} the round), neg (counts against you),\n'
                  '// t check (a tick worth v) | radio (one player gets v) | win (wins outright)\n'
-                 '// | stat (not added up), opt (with an expansion only).\n'
+                 '// | stat (not added up), opt (with an expansion only), x (those expansions).\n'
                  'const SCORESHEETS = {\n' + '\n'.join(lines) + '\n};\n')
     print(f'build-scoresheets: {len(best)} games')
 

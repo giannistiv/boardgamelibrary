@@ -803,6 +803,8 @@ function openModal(game) {
         ${_gamePlayStatsHtml(game, plays, noResultGame, fmtDate)}
         ${buildScoreTrendHtml(game, plays)}
         ${buildGameRecordsHtml(game, plays)}
+        ${typeof buildPointsHtml === 'function' ? buildPointsHtml(game, plays) : ''}
+        ${typeof buildExpansionsHtml === 'function' ? buildExpansionsHtml(game, plays) : ''}
         ${buildRolesHtml(game, plays)}
         ${typeof buildBestTeamsHtml === 'function' ? buildBestTeamsHtml(game, plays) : ''}
         ${buildGameTimeHtml(game, plays)}
