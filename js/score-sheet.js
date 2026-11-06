@@ -15,6 +15,11 @@ let _ss = null;   // { key, sheet, opt, reps: {gi: n}, v: {cell: {name: value}} 
 function _ssSheet(bggId) {
   return (typeof SCORESHEETS !== 'undefined' && SCORESHEETS[bggId]) || SS_ROUNDS;
 }
+// Whether the lowest total wins this game (golf-style: Skyjo, Turing Machine),
+// from which end the winners' scores sat at in its plays (js/records.js).
+function _ssLowWins() {
+  return typeof _recLowBest === 'function' && _recLowBest(PLAY_HISTORY[_lp.bggId] || [], false);
+}
 // The game's own sheet or the rounds one; none for a co-op (Everyone won / lost).
 function scoreSheetFor(bggId) {
   if (!bggId) return null;
@@ -155,7 +160,7 @@ function _ssRender() {
 function _ssShowTotals() {
   const names = _lp.sc.map(p => p.n);
   const { tot, won, lost } = _ssTotals(names);
-  const best = Math.max(...tot.filter((_, i) => !lost[i]));
+  const best = (_ssLowWins() ? Math.min : Math.max)(...tot.filter((_, i) => !lost[i]));
   document.querySelectorAll('#ss-overlay [data-ss-tot]').forEach(td => {
     const i = Number(td.dataset.ssTot);
     td.textContent = String(tot[i]);
@@ -220,7 +225,7 @@ function _ssDone() {
   const names = _lp.sc.map(p => p.n);
   const { tot, won, lost, any } = _ssTotals(names);
   if (any) {
-    const best = Math.max(...tot.filter((_, i) => !lost[i]));
+    const best = (_ssLowWins() ? Math.min : Math.max)(...tot.filter((_, i) => !lost[i]));
     _lp.sc.forEach((p, i) => {
       p.s = String(tot[i]);
       p.w = won.some(Boolean) ? won[i] : (!lost[i] && tot[i] === best);
