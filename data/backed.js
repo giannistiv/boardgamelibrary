@@ -10,7 +10,11 @@
 // Ids from 9000001 up are made up, for what isn't on BGG (the Gloomhaven RPG
 // is an RPGGeek item; sleeves and accessories). Kept as JSON so the Worker
 // can read it.
+// _rel: the delivery month on the campaign's rewards, for games backed in the
+// app that BGG gives no month for (looked up 6 Nov 2026). The backer's own
+// month and BGG's month come first.
 const BACKED_FIXED = {
+  "_rel": { "468800": "2027-08", "478965": "2027-11", "480156": "2027-12" },
   "Στιβ": [
     { "id": 401596, "name": "DCeased: A Zombicide Game", "on": "kickstarter", "url": "https://www.kickstarter.com/projects/cmon/dceased-zombicide", "at": "2023-11-30", "rel": "2027-03",
       "img": "https://cf.geekdo-images.com/tFZI-lyp2B54d6AWBaI0jw__square100@2x/img/GdbGmbL7G4mAbAWilQmmsjHp16o=/200x200/filters:strip_icc()/pic7839687.jpg" },
@@ -43,6 +47,7 @@ const BACKED_FIXED = {
     { "id": 388641, "name": "Defenders of the Dictionary", "on": "kickstarter", "url": "https://www.kickstarter.com/projects/adamsapplegames/defenders-of-the-dictionary", "at": "2026-10-10", "rel": "2027-04",
       "img": "https://cf.geekdo-images.com/rQZ-wLXOOg9HhJmIZlU5Fw__square100@2x/img/l4vC99l8TW6FKhdTiP4AFVPwAEs=/200x200/filters:strip_icc()/pic9683745.png" },
     { "id": 478749, "name": "Heroes of Gravehold", "on": "gamefound", "url": "https://gamefound.com/en/projects/indie-boards-and-cards/heroes-of-gravehold", "at": "2026-11-24", "rel": "2027-08",
+      "note": "Legend of Gravehold: with the Dark Crucible expansion",
       "img": "https://cf.geekdo-images.com/hAHUKJddiDkVtwXWTnYYYA__small/img/4q41ZH6xym1-Qd2NcYD0wEnA15U=/fit-in/200x150/filters:strip_icc()/pic9794888.png" }
   ],
   "Δημητρης": [

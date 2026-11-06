@@ -12,6 +12,7 @@ let _backing = null;        // bggId → { uid → entry }
 let _backNames = {};        // uid → name, from users/
 let _backPlayer = {};       // uid → the player they are (users/), for their profile
 let _backFixed = {};        // uid → bggId → its line in data/backed.js (for the pledge note)
+let _backRel = {};          // bggId → the campaign's delivery month (data/backed.js _rel)
 let _backingLoading = null;
 const BACKING_NOT_BGG = 9000000;   // ids from here up are made up (data/backed.js): no BGG page
 
@@ -30,6 +31,7 @@ function loadBacking(force) {
         if (users[uid] && users[uid].name) _backNames[uid] = users[uid].name;
         if (users[uid] && users[uid].player) _backPlayer[uid] = users[uid].player;
       }
+      _backRel = (fixed && fixed._rel) || {};
       _backingAddFixed(fixed, users);
       return _backing;
     }).finally(() => { _backingLoading = null; });
@@ -121,35 +123,39 @@ async function setBacking(id, state) {
 }
 
 // ── When it should arrive ──
-// The backer's own month, else BGG's for the edition (fresh), else the month
-// saved with the backing. BGG's "released" only counts with BGG's month: a
-// game in shops can still be on its way to backers.
+// The backer's own month, else BGG's month for the edition (fresh), else the
+// campaign's (data/backed.js _rel), else BGG's year, else the month saved with
+// the backing. BGG's "released" only counts with BGG's month: a game in shops
+// can still be on its way to backers.
 function backingRelease(id, e) {
   const fresh = typeof _hot !== 'undefined' && _hot && _hot.backed && _hot.backed[id];
   const g = typeof _hot !== 'undefined' && _hot && (_hot.games || []).find(x => x.id === Number(id));
-  const rel = (e && e.relMine) || (fresh && fresh.rel) || (g && g.camp && g.camp.rel) || (e && e.rel) || '';
+  const bgg = (fresh && fresh.rel) || (g && g.camp && g.camp.rel) || '';
+  const rel = (e && e.relMine) || (bgg.length > 4 ? bgg : '') || _backRel[id] || bgg || (e && e.rel) || '';
   const st = e && e.relMine ? '' : (fresh && fresh.relst) || (g && g.camp && g.camp.relst) || '';
   return { rel, st };
 }
 const _bkMonth = (y, m) => new Date(y, m - 1, 1).toLocaleString('en', { month: 'short', year: 'numeric' });
+// bar: whether it has a bar (any date; empty while the campaign hasn't ended).
 function backingCountdown(rel, st, from) {
-  if (st === 'released') return { text: 'Out now', cls: 'due', pct: 100 };
+  if (st === 'released') return { text: 'Out now', cls: 'due', pct: 100, bar: true };
   if (!rel) return { text: 'No release date yet', cls: '', pct: 0 };
   const [y, m] = rel.split('-').map(Number);
   const now = new Date();
   const cur = now.getFullYear() * 12 + now.getMonth();
-  if (!m) {
-    const text = y > now.getFullYear() ? `Due in ${y}` : y === now.getFullYear() ? 'Due this year' : `Was due in ${y}`;
-    return { text, cls: y < now.getFullYear() ? 'late' : '', pct: 0 };
-  }
-  const due = y * 12 + (m - 1), diff = due - cur, label = _bkMonth(y, m);
+  const due = y * 12 + (m ? m - 1 : 11), diff = due - cur;   // a year alone: its December
   const start = from ? new Date(from) : null;
   const span = start ? due - (start.getFullYear() * 12 + start.getMonth()) : 0;
-  const pct = span > 0 ? Math.max(0, Math.min(100, Math.round(((span - Math.max(0, diff)) / span) * 100))) : 0;
-  if (diff > 1) return { text: `Due ${label} &middot; in ${diff} months`, cls: '', pct };
-  if (diff === 1) return { text: `Due ${label} &middot; next month`, cls: 'soon', pct };
-  if (diff === 0) return { text: `Due this month (${label})`, cls: 'due', pct: 100 };
-  return { text: `Was due ${label} &middot; ${-diff} month${-diff > 1 ? 's' : ''} late`, cls: 'late', pct: 100 };
+  const pct = diff <= 0 ? 100 : span > 0 ? Math.max(0, Math.min(100, Math.round(((span - diff) / span) * 100))) : 0;
+  if (!m) {
+    const text = y > now.getFullYear() ? `Due in ${y}` : y === now.getFullYear() ? 'Due this year' : `Was due in ${y}`;
+    return { text, cls: y < now.getFullYear() ? 'late' : '', pct, bar: true };
+  }
+  const label = _bkMonth(y, m);
+  if (diff > 1) return { text: `Due ${label} &middot; in ${diff} months`, cls: '', pct, bar: true };
+  if (diff === 1) return { text: `Due ${label} &middot; next month`, cls: 'soon', pct, bar: true };
+  if (diff === 0) return { text: `Due this month (${label})`, cls: 'due', pct: 100, bar: true };
+  return { text: `Was due ${label} &middot; ${-diff} month${-diff > 1 ? 's' : ''} late`, cls: 'late', pct: 100, bar: true };
 }
 // In the backer's collection by now (their shelf, BGG collection or My games).
 function _backingHas(e, id) {
@@ -177,7 +183,7 @@ function _bkStatusHtml(id, backed, rel) {
   if (arrived.length === backed.length) return '<div class="bk-status arrived">&#10003; Arrived</div>';
   const cd = backingCountdown(rel.rel, rel.st, backed[0].at);
   return `<div class="bk-status ${cd.cls}">${cd.text}${arrived.length ? ` &middot; arrived for ${arrived.map(e => esc(e.who)).join(', ')}` : ''}</div>
-     ${cd.pct ? `<div class="bk-bar"><i style="width:${cd.pct}%"></i></div>` : ''}`;
+     ${cd.bar ? `<div class="bk-bar"><i style="width:${cd.pct}%"></i></div>` : ''}`;
 }
 // The backer's own controls: the month (when BGG has none, or they set one) and "It arrived".
 function _bkToolsHtml(id, mine) {
