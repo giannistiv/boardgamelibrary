@@ -2,8 +2,9 @@
 """What the BG Stats exports know about plays beyond the plays themselves.
 
 data/play-extras.js gets:
-  PLAY_EXTRAS     bggId -> play time ("YYYY-MM-DD HH:MM:SS", as in
-                  data/play-history.js) -> { x: [expansion ids played with],
+  PLAY_EXTRAS     bggId -> the play's entry time ("YYYY-MM-DD HH:MM:SS", its
+                  `e` in data/play-history.js: unique, where two plays of a day
+                  can share a play time) -> { x: [expansion ids played with],
                   ss: { category: { player: points } } } — the expansions from
                   the play's expansionPlays, the points from its score sheet
                   (rounds added up per row; ticks count their value; outright
@@ -31,10 +32,11 @@ ROUNDS = re.compile(r'\{(row|round|roundLabel)\}|^Round \d+$')
 
 
 def num(v):
-    try:
-        return float(str(v).replace(',', '.'))
-    except (TypeError, ValueError):
+    """A number as typed: "41", "2,5", or a sum like "14+10" (24), as js/records.js reads scores."""
+    t = re.sub(r'\s+', '', str(v if v is not None else '')).replace(',', '.')
+    if not re.fullmatch(r'-?\d+(\.\d+)?([+-]\d+(\.\d+)?)*', t):
         return None
+    return round(sum(float(x) for x in re.findall(r'[+-]?\d+(?:\.\d+)?', t)), 2)
 
 
 def breakdown(ss, uuid_name):
@@ -140,7 +142,7 @@ def main():
                     continue
             game = games.get(p.get('gameRefId')) or {}
             bgg = game.get('bggId')
-            when = p.get('playDate')
+            when = p.get('entryDate') or p.get('playDate')
             if not bgg or not when:
                 continue
             e = {}
@@ -191,7 +193,7 @@ def main():
     with open(OUT, 'w', encoding='utf-8') as fh:
         fh.write('// What the BG Stats exports know beyond the plays, and which expansions go\n'
                  '// with which game. Written by tools/build-play-extras.py; don\'t edit by hand.\n'
-                 '//   PLAY_EXTRAS[bggId][play time] = { x: [expansion ids], ss: { category: { player: points } } }\n'
+                 '//   PLAY_EXTRAS[bggId][entry time] = { x: [expansion ids], ss: { category: { player: points } } }\n'
                  '//   EXPANSIONS_OF[bggId] = [[expansion id, name], ...]\n')
         fh.write('const PLAY_EXTRAS = ' + json.dumps(extras, ensure_ascii=False, separators=(',', ':'), sort_keys=True) + ';\n')
         fh.write('const EXPANSIONS_OF = ' + json.dumps(expansions_of, ensure_ascii=False, separators=(',', ':')) + ';\n')

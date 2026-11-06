@@ -1338,6 +1338,7 @@
   .bgs-acts{display:flex;flex-direction:column;gap:0.45rem}
   .bgs-btn{display:block;text-align:center;padding:0.65rem 0.8rem;border-radius:var(--r-s);border:1px solid var(--line-2);background:var(--card-2);color:var(--text);font:inherit;font-size:0.88rem;font-weight:600;text-decoration:none;cursor:pointer}
   .bgs-btn.bgs-main{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+  .bgs-file-note{text-align:center;margin:0.1rem 0.4rem 0}
   .bgs-small{font-size:0.72rem;color:var(--text-3);margin-top:0.7rem;line-height:1.45}
   /* ── Rove campaign sheet (js/rove-campaign.js) ── */
   .rv{--rv-gold:#e2b04a;--rv-ink:#241703}

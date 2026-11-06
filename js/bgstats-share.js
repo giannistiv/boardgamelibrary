@@ -77,6 +77,137 @@ function bgsPlayLink(bggId, play) {
   return BGS_LINK + data;
 }
 
+// ── A BG Stats play file (.bgsplay) ──
+// The link can't carry a score sheet or expansions (BG Stats' createPlay takes
+// names, scores, winners and roles), so a play that has them can also go as a
+// play file: BG Stats' own way of sharing a play, laid out like its exports
+// (players, games, locations, plays). The sheet goes back in BG Stats' words,
+// with the ids its own sheet for the game uses (data/scoresheets.js). The ids
+// are made from the names, so BG Stats knows the same player or game again.
+function _bgsUuid(key) {
+  let hex = '';
+  for (let seed = 1; seed <= 4; seed++) {
+    let h = Math.imul(0x811c9dc5, seed) >>> 0;
+    for (const ch of `${key}#${seed}`) { h ^= ch.codePointAt(0); h = Math.imul(h, 0x01000193) >>> 0; }
+    hex += h.toString(16).padStart(8, '0');
+  }
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-4${hex.slice(13, 16)}-a${hex.slice(17, 20)}-${hex.slice(20, 32)}`;
+}
+const _bgsPad = (n) => String(n).padStart(2, '0');
+const _bgsLocal = (d) => `${d.getFullYear()}-${_bgsPad(d.getMonth() + 1)}-${_bgsPad(d.getDate())} ${_bgsPad(d.getHours())}:${_bgsPad(d.getMinutes())}:${_bgsPad(d.getSeconds())}`;
+
+// The play's score sheet as BG Stats keeps it, or null: only a sheet logged in
+// this app on the game's own BG Stats sheet (the rounds sheet has none there).
+function _bgsSheet(id, play, uuids) {
+  if (!play.mp || !play.ss || typeof scoreSheetUnpack !== 'function') return null;
+  const s = scoreSheetUnpack(play.ss, play.sc);
+  if (!s || s.key === 'rounds' || !s.sheet.g) return null;
+  const n = play.sc.length;
+  const type = { check: 'checkbox', radio: 'radio', win: 'radioOverall', stat: 'ignoredForTotal' };
+  const groups = [];
+  s.sheet.g.forEach((g, gi) => {
+    if ((g.pmin && n < g.pmin) || (g.pmax && n > g.pmax)) return;
+    const reps = g.rep == null ? 1 : Math.max(g.min || 1, s.reps[gi] || 0);
+    for (let r = 1; r <= reps; r++) {
+      groups.push({
+        templateId: g.tid || String(gi + 1), maxRepeat: g.mr == null ? -1 : g.mr, repetition: r,
+        hasSubTotal: false, hasSubTotalOfNonScoringFields: false, hideSingleGroupLabel: false, isExtra: false, scores: {},
+        rows: g.rows.map((row, ri) => {
+          const o = { templateId: row.id || `row${ri + 1}`, label: row.l, repetition: 1, repeatable: false, negative: !!row.neg, isExtra: false };
+          if (type[row.t]) o.type = type[row.t];
+          if (row.v != null) o.value = String(row.v);
+          if (row.x) o.showWithExpansions = row.x;
+          o.scores = {};
+          const cell = s.v[`${gi}.${r}.${ri}`] || {};
+          play.sc.forEach((p, i) => {
+            const v = cell[p.n];
+            if (v == null || v === '' || v === false) return;
+            o.scores[uuids[i]] = type[row.t] && row.t !== 'stat' ? String(row.v) : String(v);
+          });
+          return o;
+        }),
+      });
+    }
+  });
+  const sheet = s.sheet;
+  const out = { bggId: id, version: 1, langCode: 'en', defaultLanguage: 'en', scoreType: 'bestTotalWins' };
+  if (sheet.vid) out.variantId = sheet.vid;
+  if (sheet.var) out.variantLabel = sheet.var;
+  out[sheet.fmt === 'rounds' ? 'rounds' : 'groups'] = groups;
+  return out;
+}
+
+function bgsPlayFile(bggId, play) {
+  const id = Number(bggId);
+  const link = bgsPlayData(id, play);
+  const game = findGameByBggId(id) || {};
+  const now = _bgsLocal(new Date());
+  const range = (v) => { const m = String(v || '').match(/(\d+)\D*(\d+)?/); return m ? [Number(m[1]), Number(m[2] || m[1])] : [0, 0]; };
+  const [minP, maxP] = range(game.players), [minT, maxT] = range(game.playTime);
+  const gameOf = (gid, name, extra) => ({
+    uuid: _bgsUuid(`bgl-game:${gid}`), id: 0, name, modificationDate: now, usesTeams: false, bggName: name, bggId: gid, ...extra,
+  });
+  const games = [gameOf(id, link.game.name, {
+    cooperative: typeof isCoop === 'function' && !!game.categories && isCoop(game), highestWins: link.game.highestWins, noPoints: link.game.noPoints,
+    bggYear: Number(game.year) || 0, isBaseGame: 1, isExpansion: 0, minPlayerCount: minP, maxPlayerCount: maxP, minPlayTime: minT, maxPlayTime: maxT,
+  })];
+  const xs = typeof playExpansionsOf === 'function' ? playExpansionsOf(id, play) : [];
+  const named = new Map((typeof expansionsOf === 'function' ? expansionsOf(id) : []).map(([x, n]) => [Number(x), n]));
+  for (const x of xs) {
+    games.push(gameOf(x, named.get(x) || (findGameByBggId(x) || {}).name || `Expansion #${x}`,
+      { cooperative: games[0].cooperative, highestWins: link.game.highestWins, noPoints: link.game.noPoints, isBaseGame: 0, isExpansion: 1 }));
+  }
+  games.forEach((g, i) => { g.id = i + 1; });
+  const players = play.sc.map((s, i) => ({ uuid: _bgsUuid(`bgl-player:${s.n}`), id: i + 1, name: s.n, isAnonymous: /^anonymous/i.test(s.n), modificationDate: now }));
+  const uuids = players.map(p => p.uuid);
+  const sheet = _bgsSheet(id, play, uuids);
+  const p = {
+    uuid: _bgsUuid(`bgl-play:${link.sourcePlayId}`), modificationDate: now, entryDate: play.e || play.t || now,
+    playDate: play.t || `${play.date} 20:00:00`, usesTeams: false, durationMin: Number(play.d) || 0, ignored: false,
+    manualWinner: false, rounds: 0, gameRefId: 1, scoringSetting: link.game.noPoints ? 6 : 0,
+    playerScores: play.sc.map((s, i) => {
+      const v = _bgsScore(s.s);
+      return { score: v === null ? null : String(v), winner: !!s.w, newPlayer: false, startPlayer: false, playerRefId: i + 1,
+        rank: 0, seatOrder: i, role: s.r || null, metaData: sheet ? JSON.stringify({ scoreUuid: uuids[i] }) : null };
+    }),
+    expansionPlays: xs.map((x, k) => ({ gameRefId: k + 2 })),
+  };
+  if (play.b) p.board = play.b;
+  if (play.c) p.comments = play.c;
+  const locations = play.l ? [{ uuid: _bgsUuid(`bgl-place:${play.l}`), id: 1, name: play.l, modificationDate: now }] : [];
+  if (locations.length) p.locationRefId = 1;
+  if (sheet) p.scoresheet = JSON.stringify(sheet);
+  const me = typeof _navPlayer === 'function' ? _navPlayer() : null;
+  const meIdx = play.sc.findIndex(s => s.n === me);
+  return {
+    about: 'This is a Play file that can be read by Board Game Stats. If you see this text, try to use a share, export or open-in function to open it with Board Game Stats.',
+    players, locations, games, plays: [p], userInfo: { meRefId: meIdx >= 0 ? meIdx + 1 : 1 },
+  };
+}
+// What a play file adds to the link: its score sheet and expansions.
+function _bgsFileExtras(bggId, play) {
+  const xs = typeof playExpansionsOf === 'function' ? playExpansionsOf(Number(bggId), play) : [];
+  const sheet = !!(play.mp && play.ss && typeof scoreSheetUnpack === 'function' && (scoreSheetUnpack(play.ss, play.sc) || {}).key !== 'rounds');
+  return [sheet ? 'score sheet' : '', xs.length ? (xs.length === 1 ? 'expansion' : 'expansions') : ''].filter(Boolean);
+}
+// Share the file to BG Stats (the phone's share sheet), or save it where sharing files can't.
+function _bgsSendFile(bggId, play, name) {
+  const json = JSON.stringify(bgsPlayFile(bggId, play));
+  const fname = `${String(name).replace(/[^\p{L}\p{N} -]+/gu, '').trim().replace(/\s+/g, '-') || 'play'}-${play.date}.bgsplay`;
+  const file = new File([json], fname, { type: 'application/octet-stream' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    return navigator.share({ files: [file], title: `${name}, ${play.date}` }).then(() => 'shared', (e) => (e && e.name === 'AbortError' ? 'cancelled' : 'failed'));
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(file);
+  a.download = fname;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  return Promise.resolve('saved');
+}
+
 let _bgsQrLoading = null;
 function _bgsLoadQr() {
   if (typeof qrcode === 'function') return Promise.resolve(true);
@@ -113,6 +244,7 @@ function openBgsShare(bggId, idx) {
   const name = game ? game.name : `Game #${bggId}`;
   const link = bgsPlayLink(bggId, play);
   const from = _bgsFrom(play);
+  const extras = _bgsFileExtras(bggId, play);   // what only a play file carries
   const meta = [typeof _fmtDateShort === 'function' ? _fmtDateShort(play.date) : play.date, play.l, play.b].filter(Boolean).map(esc).join(' &middot; ');
   const who = (play.sc || []).map(s => `<span class="bgs-p${s.w ? ' w' : ''}">${s.w ? '&#9733; ' : ''}${esc(s.n)}${s.s !== '' && s.s != null ? ` <small>${esc(s.s)}</small>` : ''}</span>`).join('');
 
@@ -137,6 +269,8 @@ function openBgsShare(bggId, idx) {
       <div class="bgs-acts">
         <a class="bgs-btn bgs-main" href="${esc(link)}">Open in BG Stats on this phone</a>
         <button type="button" class="bgs-btn" data-bgs-share>${navigator.share ? 'Share link' : 'Copy link'}</button>
+        ${extras.length ? `<button type="button" class="bgs-btn" data-bgs-file>Send as a BG Stats file, with the ${extras.join(' and ')}</button>
+        <div class="bgs-small bgs-file-note">The QR code and the link carry the players, scores and winners. The ${extras.join(' and ')} go only in a file: share it to BG Stats${navigator.canShare ? '' : ' (it\'s saved here; open it with BG Stats)'}.</div>` : ''}
       </div>
       <div class="bgs-small">The first time, BG Stats asks which of its players, game and place each one is, and remembers it.${from ? ` This play is already in ${esc(from)}'s BG Stats.` : ''}</div>
     </div>`;
@@ -150,6 +284,16 @@ function openBgsShare(bggId, idx) {
   const onKey = (e) => { if (e.key === 'Escape') close(); };
   ov.onclick = async (e) => {
     if (e.target === ov || e.target.closest('.bgs-x')) { close(); return; }
+    const fb = e.target.closest('[data-bgs-file]');
+    if (fb) {
+      const was = fb.textContent;
+      const r = await _bgsSendFile(bggId, play, name);
+      if (r === 'saved' || r === 'failed') {
+        fb.textContent = r === 'saved' ? 'Saved: open it with BG Stats' : 'Couldn\'t share it';
+        setTimeout(() => { fb.textContent = was; }, 3000);
+      }
+      return;
+    }
     const sh = e.target.closest('[data-bgs-share]');
     if (!sh) return;
     if (navigator.share) {

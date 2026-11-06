@@ -208,10 +208,23 @@ async function deleteNote(bggId, noteId) {
 let importedPlaysCache = {}; // uuid -> play entry (includes bggId)
 
 // What a play says, ignoring bookkeeping (uuid, exact timestamp) and player
-// order: two plays with the same signature are the same record.
+// order: two plays with the same signature are the same record. Its
+// expansions and points by category count too, so uploading an export again
+// brings them to plays saved before uploads kept them.
 function _playSignature(e) {
   const sc = (e.sc || []).map(s => [s.n, String(s.s == null ? '' : s.s), !!s.w, s.r || '']).sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0));
-  return JSON.stringify([e.date, sc, e.b || '', e.l || '', e.d || 0]);
+  return JSON.stringify([e.date, sc, e.b || '', e.l || '', e.d || 0, (e.x || []).join(','), e.pts ? JSON.stringify(e.pts) : '']);
+}
+// An upload's points by category as the pages read them: { category: { player: points } }.
+function _importedPts(list) {
+  const out = {};
+  for (const r of Array.isArray(list) ? list : Object.values(list || {})) {
+    if (!r || !r.c) continue;
+    const n = Array.isArray(r.n) ? r.n : Object.values(r.n || {}), v = Array.isArray(r.v) ? r.v : Object.values(r.v || {});
+    out[r.c] = {};
+    n.forEach((name, i) => { out[r.c][NAME_MAP[name] || name] = Number(v[i]); });
+  }
+  return Object.keys(out).length ? out : null;
 }
 
 // Merges one imported play into PLAY_HISTORY and says what that did:
@@ -233,6 +246,12 @@ function _mergePlayIntoHistory(uuid, p) {
   if (p.b) entry.b = p.b;
   if (p.l) entry.l = p.l;
   if (p.src) entry.src = p.src;   // a friend's own upload (IMPORT_SOURCES)
+  // what the upload knew besides the result (js/play-extras.js)
+  if (p.det) entry.det = 1;
+  const x = Array.isArray(p.x) ? p.x : Object.values(p.x || {});
+  if (x.length) entry.x = x.map(Number);
+  const pts = p.pts ? _importedPts(p.pts) : null;
+  if (pts) entry.pts = pts;
   if (NO_RESULT_PLAYS.has(uuid)) entry.nr = true;
 
   const newNames = new Set(p.sc.map(s => s.n));

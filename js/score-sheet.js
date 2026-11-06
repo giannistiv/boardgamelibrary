@@ -36,7 +36,12 @@ function _ssReps(gi, g) { return g.rep == null ? 1 : Math.max(g.min || 1, (_ss.r
 const _ssCell = (gi, r, ri) => `${gi}.${r}.${ri}`;
 // An expansion's row shows when the play has that expansion, or on "+ Expansion rows".
 const _ssShows = (row) => !row.opt || _ss.opt || !!(row.x && row.x.some(id => (_lp.x || []).includes(Number(id))));
-const _ssNum = (v) => { const x = parseFloat(String(v || '').replace(',', '.')); return isFinite(x) ? x : 0; };
+// a cell as typed: "12", "2,5", or a sum like "14+10" (js/records.js reads scores so)
+const _ssNum = (v) => {
+  const t = String(v || '').replace(',', '.');
+  const x = typeof _recScore === 'function' ? _recScore(t) : parseFloat(t);
+  return x === null || !isFinite(x) ? 0 : x;
+};
 
 // Each player's total, and who won or lost outright on the sheet.
 function _ssTotals(names) {

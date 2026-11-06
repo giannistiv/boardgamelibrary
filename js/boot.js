@@ -492,6 +492,8 @@ window.initImporter = function(source){
       if (locName) persistedEntry.l = LOCATION_MAP[locName] || locName;
       if (play.modificationDate) persistedEntry.m = play.modificationDate;
       if (play.entryDate) persistedEntry.e = play.entryDate;
+      // its expansions and points by category (js/play-extras.js)
+      if (typeof bgsPlayExtras === 'function') Object.assign(persistedEntry, bgsPlayExtras(play, importedGamesById, (ps, i) => sc[i] && sc[i].n));
 
       const saved = importedPlaysCache[play.uuid];
       if (saved && saved.m && persistedEntry.m && saved.m > persistedEntry.m) { olderSkipped++; return; }
@@ -841,6 +843,7 @@ async function _importFromSource(source, src, data, showResult, finish) {
     if (where) entry.l = where;
     if (play.modificationDate) entry.m = play.modificationDate;
     if (play.entryDate) entry.e = play.entryDate;
+    if (typeof bgsPlayExtras === 'function') Object.assign(entry, bgsPlayExtras(play, games, (ps, i) => sc[i] && sc[i].n));
 
     const saved = importedPlaysCache[play.uuid];
     if (saved && saved.m && entry.m && saved.m > entry.m) { olderSkipped++; continue; }

@@ -6,27 +6,42 @@
 // where the points come from and how it goes with each expansion; both are
 // the viewer's own where they've played (everyone's otherwise).
 
-const _pxIndex = new Map();   // bggId → { t → extras }, and the list for near matches
+// data/play-extras.js knows a play by its entry time (e): two plays of a day
+// can share a play time, never an entry time.
+const _pxIndex = new Map();   // bggId → the entry times as numbers, for near matches
 function _pxFind(bggId, p) {
   const all = typeof PLAY_EXTRAS !== 'undefined' && PLAY_EXTRAS[bggId];
-  if (!all || !p || !p.t) return null;
-  if (all[p.t]) return all[p.t];
-  // an edited play's time can move by a few seconds: the same day, within ten minutes
+  const e = p && (p.e || p.t);
+  if (!all || !e) return null;
+  // the players have to fit: a play copied in BG Stats keeps its entry time
+  const names = new Set((p.sc || []).map(s => s.n));
+  const fits = (k) => {
+    const ss = all[k].ss;
+    return !ss || Object.values(ss).every(c => Object.keys(c).every(n => names.has((typeof NAME_MAP !== 'undefined' && NAME_MAP[n]) || n)));
+  };
+  if (all[e] && fits(e)) return all[e];
+  // a copy can be a few seconds out: the nearest within ten minutes (one with
+  // no sheet, within a minute) that isn't another play's own
   let idx = _pxIndex.get(bggId);
-  if (!idx) { idx = Object.keys(all).map(t => ({ t, ms: Date.parse(t.replace(' ', 'T')) })); _pxIndex.set(bggId, idx); }
-  const ms = Date.parse(String(p.t).replace(' ', 'T'));
-  const near = idx.find(x => x.t.slice(0, 10) === p.date && Math.abs(x.ms - ms) <= 600000);
-  return near ? all[near.t] : null;
+  if (!idx) { idx = Object.keys(all).map(k => ({ k, ms: Date.parse(k.replace(' ', 'T')) })); _pxIndex.set(bggId, idx); }
+  const ms = Date.parse(String(e).replace(' ', 'T'));
+  const theirs = new Set((PLAY_HISTORY[bggId] || []).filter(q => q !== p).map(q => q.e || q.t));
+  const near = idx.filter(x => x.k !== e && !theirs.has(x.k) && Math.abs(x.ms - ms) <= (all[x.k].ss ? 600000 : 60000))
+    .sort((a, b) => Math.abs(a.ms - ms) - Math.abs(b.ms - ms)).find(x => fits(x.k));
+  return near ? all[near.k] : null;
 }
-// The expansions a play was played with (BGG ids).
+// The expansions a play was played with (BGG ids). A play logged in the app,
+// or uploaded since uploads keep these (det), says itself; any other is
+// looked up in data/play-extras.js.
 function playExpansionsOf(bggId, p) {
-  if (p.mp) return (p.x || []).map(Number);
+  if (p.mp || p.det) return (p.x || []).map(Number);
   const e = _pxFind(bggId, p);
   return (e && e.x) || [];
 }
 // A play's points by category: { category: { player: points } }, or null.
 function playPointsOf(bggId, p) {
   if (p.mp) return p.ss && typeof scoreSheetBreakdown === 'function' ? scoreSheetBreakdown(p.ss, p.sc) : null;
+  if (p.pts || p.det) return p.pts || null;
   const e = _pxFind(bggId, p);
   if (!e || !e.ss) return null;
   const out = {};
@@ -40,6 +55,54 @@ function playPointsOf(bggId, p) {
 // played with, or on its score sheet).
 function expansionsOf(bggId) {
   return (typeof EXPANSIONS_OF !== 'undefined' && EXPANSIONS_OF[bggId]) || [];
+}
+
+// ── From a BG Stats file being uploaded (js/boot.js) ──
+// The play's expansions and its points by category, taken as
+// tools/build-play-extras.py takes them, so an upload in the app brings them
+// too. nameOf(playerScore, i): the name the play is saved with. Firebase keys
+// can't hold every category or name ("1/2 per Grain"), so the points go up as
+// a list: pts = [{ c: category, n: [names], v: [points] }].
+const PX_ROUNDS = /\{(row|round|roundLabel)\}|^Round \d+$/;
+// a number as typed: "41", "2,5", or a sum like "14+10" (js/records.js reads scores so)
+const _pxNumOf = (v) => {
+  const t = String(v == null ? '' : v).replace(',', '.');
+  if (typeof _recScore === 'function') return _recScore(t);
+  const x = parseFloat(t);
+  return isFinite(x) ? x : null;
+};
+function bgsPlayExtras(play, gamesById, nameOf) {
+  const out = { det: 1 };
+  const xs = (play.expansionPlays || []).map(x => Number((gamesById[x.gameRefId] || {}).bggId)).filter(x => x > 0);
+  if (xs.length) out.x = [...new Set(xs)].sort((a, b) => a - b);
+  let ss = null;
+  try { ss = play.scoresheet ? JSON.parse(play.scoresheet) : null; } catch (_) { ss = null; }
+  if (!ss) return out;
+  const byUuid = {};
+  (play.playerScores || []).forEach((ps, i) => {
+    let meta = {};
+    try { meta = JSON.parse(ps.metaData || '{}'); } catch (_) { /* no sheet link */ }
+    if (meta.scoreUuid) byUuid[meta.scoreUuid] = nameOf(ps, i);
+  });
+  const pts = new Map();
+  for (const g of ss.groups || ss.rounds || []) {
+    for (const r of g.rows || []) {
+      const label = String(r.label || '').trim(), t = r.type;
+      if (!label || PX_ROUNDS.test(label) || t === 'radioOverall' || t === 'ignoredForTotal') continue;
+      for (const uuid in r.scores || {}) {
+        const name = byUuid[uuid], v = r.scores[uuid];
+        if (!name || v === '' || v == null || v === false || String(v).toLowerCase() === 'false') continue;
+        let x = _pxNumOf(t === 'checkbox' || t === 'radio' ? r.value : v);
+        if (x === null) continue;
+        if (r.negative) x = -Math.abs(x);
+        const c = pts.get(label) || new Map();
+        c.set(name, Math.round(((c.get(name) || 0) + x) * 100) / 100);
+        pts.set(label, c);
+      }
+    }
+  }
+  if (pts.size) out.pts = [...pts].map(([c, m]) => ({ c, n: [...m.keys()], v: [...m.values()] }));
+  return out;
 }
 
 const _pxMe = (n, me, meCanon) => n === me || (typeof _origCanon === 'function' && _origCanon(n) === meCanon);

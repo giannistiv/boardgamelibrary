@@ -21,7 +21,7 @@ GENERIC = re.compile(r'\{row\}')
 
 
 def row_of(r):
-    out = {'l': r.get('label', '').strip()}
+    out = {'l': r.get('label', '').strip(), 'id': r.get('templateId', '')}
     if r.get('negative'):
         out['neg'] = 1
     t = r.get('type')
@@ -57,7 +57,7 @@ def sheet_of(ss):
             rows.append(row_of(r))
         if not rows:
             continue
-        o = {'rows': rows}
+        o = {'rows': rows, 'tid': g.get('templateId', '1'), 'mr': g.get('maxRepeat', -1)}
         # BG Stats' maxRepeat: -1 a block once, 0 rounds without end, N up to N rounds
         rep = g.get('maxRepeat', -1)
         if rep >= 0:
@@ -101,13 +101,18 @@ def main():
                 continue
             when = p.get('playDate', '')
             if bgg not in best or when > best[bgg][0]:
-                best[bgg] = (when, game.get('name', ''), sheet, ss.get('variantLabel'))
+                best[bgg] = (when, game.get('name', ''), sheet, ss.get('variantLabel'),
+                             'rounds' if ss.get('rounds') else 'groups', ss.get('variantId'))
     lines = []
     for bgg in sorted(best, key=lambda k: best[k][1].lower()):
-        _, name, sheet, variant = best[bgg]
+        _, name, sheet, variant, fmt, vid = best[bgg]
         entry = {'g': sheet}
         if variant:
             entry['var'] = variant
+        if vid:
+            entry['vid'] = vid
+        if fmt == 'rounds':
+            entry['fmt'] = 'rounds'
         lines.append(f'  {bgg}: {json.dumps(entry, ensure_ascii=False, separators=(",", ":"))},   // {name}')
     with open(OUT, 'w', encoding='utf-8') as fh:
         fh.write('// Score sheets for Log a play, by BGG id: the rows of the BG Stats score\n'
@@ -117,6 +122,8 @@ def main():
                  '// ({round} the round), neg (counts against you),\n'
                  '// t check (a tick worth v) | radio (one player gets v) | win (wins outright)\n'
                  '// | stat (not added up), opt (with an expansion only), x (those expansions).\n'
+                 '// BG Stats\' own ids, to send a sheet back (js/bgstats-share.js): fmt\n'
+                 '// (rounds), vid (variant), a group\'s tid and mr (maxRepeat), a row\'s id.\n'
                  'const SCORESHEETS = {\n' + '\n'.join(lines) + '\n};\n')
     print(f'build-scoresheets: {len(best)} games')
 
