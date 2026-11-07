@@ -1827,20 +1827,53 @@
   .mr-road-ch{min-width:1.9rem;height:1.9rem;padding:0 0.35rem;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;background:var(--card-2);border:1px solid var(--line-2);font-family:var(--font-display);font-weight:700;font-size:0.9rem}
   .mr-road-ch.at{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
   .mr-road-to{color:var(--text-4);font-size:0.8rem}
-  .mr-paths{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0.4rem}
-  @media(max-width:520px){.mr-paths{grid-template-columns:1fr}}
-  .mr-path{padding:0.5rem 0.6rem;border-radius:var(--r);background:var(--card);border:1px solid var(--line);min-width:0}
-  .mr-path.closed{opacity:0.55}
-  .mr-path-h{font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-2);margin-bottom:0.35rem}
-  .mr-skill{display:flex;align-items:flex-start;gap:0.45rem;padding:0.3rem 0;border-top:1px solid var(--line)}
-  .mr-skill:first-of-type{border-top:0}
-  .mr-rank{flex:0 0 auto;width:1.3rem;height:1.3rem;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:var(--card-3);font-size:0.68rem;font-weight:800}
-  .mr-skill-main{display:flex;flex-direction:column;gap:0.05rem;flex:1;min-width:0}
-  .mr-skill-main b{font-size:0.8rem;overflow-wrap:anywhere}
-  .mr-skill-main span{font-size:0.68rem;line-height:1.35;color:var(--text-3)}
-  .mr-skill-add,.mr-relic-add{display:flex;flex-wrap:wrap;gap:0.4rem;align-items:center}
-  .mr-skill-add > input:first-child,.mr-relic-add > input{flex:1 1 9rem}
-  .mr-skill-text{flex:1 1 100%}
+  /* the skill tree: a Tier 1 Skill, then two branches of Tier 2 and Tier 3 */
+  .mr-tree{display:flex;flex-direction:column;gap:0.6rem}
+  .mr-tpath{padding:0.55rem;border-radius:var(--r);background:var(--card);border:1px solid var(--line);border-top:3px solid var(--mr-p);min-width:0}
+  .mr-tpath.closed{opacity:0.5}
+  .mr-path-h{font-size:0.7rem;font-weight:800;text-transform:uppercase;letter-spacing:0.07em;color:var(--mr-p);margin-bottom:0.4rem}
+  .mr-branches{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0.4rem;margin-top:0.4rem}
+  .mr-branch{display:flex;flex-direction:column;gap:0.4rem;min-width:0}
+  .mr-node{display:flex;flex-direction:column;gap:0.15rem;width:100%;padding:0.45rem 0.55rem;border-radius:8px;border:1px dashed var(--line-3);background:var(--card-2);color:var(--text-2);font:inherit;text-align:left;cursor:pointer;min-width:0}
+  .mr-node-h{display:flex;align-items:baseline;justify-content:space-between;gap:0.4rem}
+  .mr-node-h b{font-size:0.8rem;color:var(--text)}
+  .mr-cost{flex:0 0 auto;font-size:0.66rem;font-weight:800;color:var(--text-3)}
+  .mr-node-t{font-size:0.68rem;line-height:1.35}
+  .mr-node-why{font-size:0.62rem;font-weight:700;color:var(--text-4)}
+  .mr-node.on{border:1px solid var(--mr-p);background:color-mix(in srgb,var(--mr-p) 18%,var(--card-2));color:var(--text)}
+  .mr-node.on .mr-cost{color:var(--mr-p);font-size:0.8rem}
+  .mr-node.can{border-style:solid;border-color:var(--mr-p)}
+  .mr-node.can .mr-cost{color:var(--accent)}
+  .mr-node.no{opacity:0.6}
+  /* The Council's sheet: the stats, Notoriety, the Inventory */
+  .mr-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(10.5rem,1fr));gap:0.35rem 0.8rem}
+  .mr-stat{display:flex;align-items:center;gap:0.4rem}
+  .mr-stat .cr-lbl{width:3.2rem}
+  .mr-stat .cr-lbl i{display:block;font-style:normal;font-weight:600;text-transform:none;letter-spacing:0;font-size:0.6rem;color:var(--text-3);white-space:nowrap}
+  .mr-stat .rv-dot{width:1.7rem;height:1.7rem}
+  .mr-potions{margin-top:0.2rem}
+  .mr-item .rv-in{flex:1 1 10rem}
+  .mr-noto{display:flex;gap:0.3rem}
+  .mr-noto-n{width:2.3rem;height:2.3rem;border-radius:8px;border:1px solid var(--line-2);background:var(--card-2);color:var(--text-3);font:inherit;font-family:var(--font-display);font-weight:700;font-size:1rem;cursor:pointer}
+  .mr-noto-n.on{color:#1b1406}
+  .mr-noto-n.on.n1{background:#5fae3e;border-color:#5fae3e}
+  .mr-noto-n.on.n2{background:#a3b83a;border-color:#a3b83a}
+  .mr-noto-n.on.n3{background:#e2b235;border-color:#e2b235}
+  .mr-noto-n.on.n4{background:#e57a35;border-color:#e57a35}
+  .mr-noto-n.on.n5{background:#d8443a;border-color:#d8443a;color:#fff}
+  .mr-noto-n.at{box-shadow:0 0 0 2px var(--text)}
+  .mr-inv{display:flex;flex-direction:column;gap:0.3rem}
+  .mr-inv .cr-flag{margin-top:0}
+  .mr-startstats{margin-top:0.8rem;font-size:0.74rem;color:var(--text-3)}
+  .mr-startstats summary{cursor:pointer}
+  .mr-startstats .mr-stats{margin-top:0.5rem}
+  .mr-fx{margin-top:0.6rem;font-size:0.74rem;color:var(--accent)}
+  .mr-test{margin-top:0.8rem;padding:0.6rem 0.65rem;border-radius:8px;border:1px solid var(--accent-line);background:var(--accent-soft)}
+  .mr-test-q{display:flex;flex-direction:column;gap:0.15rem;font-size:0.78rem;line-height:1.45;color:var(--text-2)}
+  .mr-test-q b{color:var(--text)}
+  .mr-test .cr-result-btns{margin-top:0.6rem}
+  .mr-shut{opacity:0.5}
+  .mr-road-die{color:var(--loss);font-size:1rem;padding:0 0.15rem}
   .mr-relics{display:flex;flex-direction:column;gap:0.4rem;margin-bottom:0.6rem}
   .mr-relic .cr-flag{margin-top:0}
   .mr-relic .cr-flag .cr-person-x{margin-left:auto}
