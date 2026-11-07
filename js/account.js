@@ -160,8 +160,13 @@ async function _acctOnUser(user) {
     return;
   }
   const provider = (user.providerData[0] || {}).providerId === 'google.com' ? 'google' : 'email';
-  let rec = null;
-  try { rec = await _acctGet(`users/${user.uid}`); } catch (_) { rec = (_acctCached() || {}).uid === user.uid ? _acctCached() : null; }
+  // their account record; a read that fails right after signing in (a slow
+  // connection) is tried again before they're taken for someone new
+  let rec;
+  for (let tries = 0; rec === undefined && tries < 3; tries++) {
+    try { rec = (await _acctGet(`users/${user.uid}`)) || null; } catch (_) { if (tries < 2) await new Promise(r => setTimeout(r, 1200)); }
+  }
+  if (rec === undefined) rec = (_acctCached() || {}).uid === user.uid ? _acctCached() : null;
   _acct = { ...(rec || {}), uid: user.uid, email: user.email || '', provider, photoURL: user.photoURL || '' };
   if (!rec || !rec.player) { acctOpenSheet('player'); return; }
   const join = acctJoinPending();
@@ -174,13 +179,16 @@ async function _acctOnUser(user) {
   }
   try { sessionStorage.removeItem('bgl-join'); } catch (_) {}
   if (!wasHere) _acctFresh = true;
-  _acctApply();
+  _acctApply(!wasHere);
   if (_acctOpen) _acctClose();
 }
 
 // The account's player becomes this device's player, and everything that
-// depends on who's looking redraws.
-function _acctApply() {
+// depends on who's looking redraws. fresh: just signed in on this device, so
+// what's open (a profile, the Library) still says "Sign in" even when the
+// player is the one this phone had already: it's drawn again too (the user,
+// 6 Nov 2026: it took a refresh to see they were signed in).
+function _acctApply(fresh) {
   _acctRemember(_acct);
   if (typeof notifySync === 'function' && _acctAuth && _acctAuth.currentUser) notifySync();
   const before = localStorage.getItem('bgl-player');
@@ -193,6 +201,8 @@ function _acctApply() {
   if (before !== name && typeof showStatsView === 'function') {
     document.getElementById('picker-overlay').classList.remove('open');
     showStatsView(name);
+  } else if (fresh && typeof redrawOpenViews === 'function') {
+    redrawOpenViews();
   }
 }
 
@@ -414,7 +424,7 @@ async function _acctClaim(name, isNew) {
     _acctFresh = true;
     try { sessionStorage.removeItem('bgl-join'); } catch (_) {}
     _acctClose();
-    _acctApply();
+    _acctApply(true);
     _acctToast(`Welcome, ${rec.name}!`);
   } catch (err) { _acctSay(err.message || 'The save failed. Try again.'); }
 }
