@@ -1542,6 +1542,7 @@ const GIANNIS_GAMES = {
   170624:{name:"Crusaders: Thy Will Be Done",bggId:170624,year:2018,complexity:2.46,players:"2-4",playTime:"60 min",bggRating:7.5},
   289240:{name:"Crusaders: Thy Will Be Done – Divine Influence",bggId:289240,year:2022,complexity:2.86,players:"2-4",playTime:"60 min",bggRating:7.9},
   192457:{name:"Cry Havoc",bggId:192457,year:2016,complexity:3.3,players:"2-4",playTime:"120 min",bggRating:7.1},
+  139976:{name:"Cthulhu Wars",bggId:139976,year:2015,complexity:3.14,players:"2-4",playTime:"120 min",bggRating:7.8},
   404509:{name:"Cthulhu: Dark Providence",bggId:404509,year:2025,complexity:3.27,players:"1-5",playTime:"120 min",bggRating:7.5},
   30380:{name:"Cuba",bggId:30380,year:2007,complexity:3.26,players:"2-5",playTime:"120 min",bggRating:7.1},
   111799:{name:"Cuba Libre",bggId:111799,year:2013,complexity:3.61,players:"1-4",playTime:"180 min",bggRating:7.6},
