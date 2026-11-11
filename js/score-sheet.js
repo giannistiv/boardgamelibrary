@@ -67,7 +67,7 @@ const _ssNum = (v) => {
 
 // Each player's total, and who won or lost outright on the sheet.
 function _ssTotals(names) {
-  const tot = names.map(() => 0), won = names.map(() => false), lost = names.map(() => false), filled = names.map(() => false);
+  const tot = names.map(() => 0), won = names.map(() => false), lost = names.map(() => false), filled = names.map(() => false), zero = names.map(() => false);
   let any = false;
   for (const { g, gi } of _ssGroups(_ss.sheet, names.length)) {
     for (let r = 1; r <= _ssReps(gi, g); r++) {
@@ -83,6 +83,7 @@ function _ssTotals(names) {
           if (row.t === 'check' || row.t === 'radio' || row.t === 'win') {
             if (row.v === 'win') won[i] = true;
             else if (row.v === 'lose') lost[i] = true;
+            else if (row.v === 'zero') { lost[i] = true; zero[i] = true; }   // knocked out in Clank! Legacy: the total is 0
             else tot[i] += (row.neg ? -1 : 1) * Math.abs(_ssNum(row.v));
             return;
           }
@@ -92,7 +93,7 @@ function _ssTotals(names) {
       });
     }
   }
-  return { tot: tot.map(x => Math.round(x * 100) / 100), won, lost, any, filled };
+  return { tot: tot.map((x, i) => (zero[i] ? 0 : Math.round(x * 100) / 100)), won, lost, any, filled };
 }
 
 // ── How each row scores, from the game's rules card (js/rules.js) ──
@@ -217,7 +218,7 @@ function _ssRender() {
         if (!_ssShows(row)) return;
         const key = _ssCell(gi, r, ri);
         const cell = _ss.v[key] || {};
-        const worth = typeof row.v === 'number' ? ` <small>${row.neg ? '−' : '+'}${row.v}</small>` : row.v === 'win' ? ' <small>wins</small>' : row.v === 'lose' ? ' <small>out</small>' : '';
+        const worth = typeof row.v === 'number' ? ` <small>${row.neg ? '−' : '+'}${row.v}</small>` : row.v === 'win' ? ' <small>wins</small>' : row.v === 'lose' || row.v === 'zero' ? ' <small>out</small>' : '';
         const hint = _ssHint(row.l);
         const label = `${row.neg && row.t !== 'check' && row.t !== 'radio' ? '<span class="ss-neg">−</span>' : ''}${esc(String(row.l).replace(/\{round(Label)?\}/g, r))}${worth}${
           hint ? `<span class="ss-hint" title="${esc(hint)}">${esc(hint)}</span>` : ''}`;

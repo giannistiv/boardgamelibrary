@@ -84,6 +84,23 @@ def sheet_of(ss):
     return out
 
 
+# Sheets of our own, for games no BG Stats export has one for: own: 1 (never
+# sent to BG Stats as one of its sheets). Clank! Legacy's scoring is its
+# rulebook's: the Artifact, cards, tokens (the Mug for escaping, market items,
+# secrets) and gold; knocked out without an Artifact or in the Danger Zone,
+# you score 0 (v 'zero': a tick that makes the total 0).
+OWN = {
+    266507: ('Clank! Legacy: Acquisitions Incorporated', {'g': [{'rows': [
+        {'l': 'Knocked out: scores 0', 't': 'check', 'v': 'zero'},
+        {'l': 'Artifact'},
+        {'l': 'Mug (escaped to HQ)', 't': 'check', 'v': 20},
+        {'l': 'Cards'},
+        {'l': 'Other tokens'},
+        {'l': 'Gold'},
+    ]}], 'own': 1}),
+}
+
+
 def main():
     files = sys.argv[1:] or [os.path.join(ROOT, 'BGStatsExport.json')]
     best = {}   # bggId -> (playDate, name, sheet)
@@ -104,6 +121,9 @@ def main():
                 best[bgg] = (when, game.get('name', ''), sheet, ss.get('variantLabel'),
                              'rounds' if ss.get('rounds') else 'groups', ss.get('variantId'))
     lines = []
+    for bgg, (name, entry) in OWN.items():
+        if bgg not in best:
+            lines.append(f'  {bgg}: {json.dumps(entry, ensure_ascii=False, separators=(",", ":"))},   // {name} (our own)')
     for bgg in sorted(best, key=lambda k: best[k][1].lower()):
         _, name, sheet, variant, fmt, vid = best[bgg]
         entry = {'g': sheet}

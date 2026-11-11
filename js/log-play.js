@@ -207,6 +207,19 @@ function logPlayOpen(bggId) {
   _lpUsualSeats();
   _lpShow();
 }
+// A play with its game, people, characters and scenario filled in: a
+// campaign's next game (js/clank-legacy.js). tab: the game page's tab to go
+// back to once it's saved.
+function logPlayWith(o) {
+  const a = typeof acctMe === 'function' ? acctMe() : null;
+  if (!a) { if (typeof acctOpenSheet === 'function') acctOpenSheet(); return; }
+  const roles = o.roles || {};
+  _lp = { id: null, bggId: Number(o.bggId), date: _lpToday(), time: _lpNow(), d: '', lenSet: false, l: o.l || _lpPlaces()[0] || '', b: o.b || '', c: '',
+    sc: (o.names || []).map(n => ({ n, s: '', w: false, r: roles[n] || '', tm: '' })), roles: Object.values(roles).some(Boolean), teams: false,
+    gameWon: false, x: [], tab: o.tab || '' };
+  _lpUsualSeats();
+  _lpShow();
+}
 // The same game, people, characters, place and scenario as a past play;
 // today, and no scores or winners yet.
 function logPlayAgain(bggId, idx) {
@@ -968,7 +981,7 @@ function _lpRefresh(bggId) {
   const modalOpen = document.getElementById('modal-overlay').classList.contains('open');
   if (modalOpen && bggId) {
     const g = findGameByBggId(bggId);
-    if (g) { _modalTab = 'plays'; _modalTabFor = g.bggId; openModal(g); }
+    if (g) { _modalTab = (_lp && _lp.tab) || 'plays'; _modalTabFor = g.bggId; openModal(g); }
   }
   const stats = document.getElementById('stats-view');
   if (stats && stats.classList.contains('open') && typeof showStatsView === 'function') {

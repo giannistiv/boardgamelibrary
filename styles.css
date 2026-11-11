@@ -1812,6 +1812,84 @@
   .cr-item-name{flex:1 1 10rem}
   .cr-item-cost{width:4.4rem;flex:0 0 auto}
   .cr-notes{width:100%;resize:vertical;line-height:1.5}
+  /* ── Clank! Legacy (js/clank-legacy.js) ── */
+  .cl-sec{margin-top:1.2rem}
+  .cl-next{display:flex;gap:0.9rem;align-items:flex-start;margin-top:0.9rem;padding:0.85rem 0.95rem;border-radius:14px;background:var(--card);border:1px solid var(--line)}
+  .cl-next-n{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;min-width:4.6rem;padding:0.4rem 0.3rem;border-radius:12px;background:linear-gradient(160deg,#d9a441,#9c6a1f);color:#1b1206;text-align:center}
+  .cl-next-n small{font-size:0.62rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;opacity:0.8}
+  .cl-next-n b{font-family:var(--font-display);font-size:1.25rem;line-height:1.1}
+  .cl-next-do{flex:1;min-width:0}
+  .cl-steps{margin:0 0 0.6rem;padding-left:1.15rem;font-size:0.84rem;line-height:1.45;color:var(--text-2)}
+  .cl-steps li{margin-bottom:0.45rem}
+  .cl-steps b{color:var(--text)}
+  .cl-review{margin-top:0.9rem;padding:0.85rem 0.95rem;border-radius:14px;background:var(--card);border:1px solid var(--line)}
+  .cl-review.last{border-color:#c8962e}
+  .cl-rev-head{display:flex;align-items:center;flex-wrap:wrap;gap:0.3rem 0.7rem;margin-bottom:0.6rem}
+  .cl-rev-head > b{font-family:var(--font-display);font-size:1.1rem}
+  .cl-rev-head > span{font-size:0.8rem;color:var(--text-3)}
+  .cl-rev-head .cl-acts{margin-left:auto;display:flex;gap:0.3rem}
+  .cl-spot,.cl-side{display:flex;flex-wrap:wrap;align-items:center;gap:0.35rem;margin-top:0.4rem;font-size:0.8rem}
+  .cl-spot-note{flex:1 1 9rem;min-width:0}
+  .cl-chip{min-height:34px;padding:0 0.75rem;border-radius:999px;border:1px solid var(--line-2);background:none;color:var(--text-2);font:inherit;font-size:0.8rem;cursor:pointer}
+  .cl-chip.on{border-color:#c8962e;background:rgba(200,150,46,0.18);color:var(--text);font-weight:600}
+  .cl-rev{display:flex;flex-direction:column;gap:0.45rem;margin-top:0.5rem}
+  .cl-rev-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:0.3rem 0.6rem;padding:0.5rem 0.6rem;border-radius:10px;background:var(--card-2)}
+  .cl-rev-who{display:flex;flex-direction:column;min-width:0}
+  .cl-rev-who b{color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cl-rev-who small{font-size:0.72rem;color:var(--text-3)}
+  .cl-rev-pts{font-family:var(--font-display);font-weight:700;font-size:1.05rem;color:var(--text)}
+  .cl-rev-pts.zero{color:#f87171}
+  .cl-mve{color:#e2b04a}
+  .cl-rev-sum{font-weight:800;color:#e2b04a}
+  .cl-ticks{grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:0.3rem}
+  .cl-tick{display:inline-flex;align-items:center;min-height:30px;padding:0 0.6rem;border-radius:999px;border:1px solid var(--line);font:inherit;font-size:0.74rem;color:var(--text-4);background:none}
+  .cl-tick.on{color:#1b1206;background:#d9a441;border-color:#d9a441;font-weight:700}
+  .cl-tap{cursor:pointer}
+  .cl-extra{display:inline-flex;align-items:center;gap:0.25rem;font-size:0.74rem;color:var(--text-3)}
+  .cl-step{width:30px;height:30px;border-radius:50%;border:1px solid var(--line-2);background:none;color:var(--text);font:inherit;font-size:1rem;line-height:1;cursor:pointer}
+  .cl-step:disabled{opacity:0.35}
+  .cl-loose{margin-top:0.8rem;font-size:0.8rem;color:var(--text-3)}
+  .cl-as{padding:0.6rem 0;border-bottom:1px solid var(--line)}
+  .cl-as-head{display:flex;align-items:center;flex-wrap:wrap;gap:0.4rem 0.6rem}
+  .cl-as-head small{color:var(--text-3);font-size:0.78rem}
+  .cl-char{flex:1 1 8rem;min-width:0;max-width:12rem;min-height:32px;font-size:0.8rem}
+  .cl-as-n{margin-left:auto;font-weight:800;color:#e2b04a}
+  .cl-rank{padding:0.1rem 0.5rem;border-radius:999px;font-size:0.68rem;font-weight:800;letter-spacing:0.05em;text-transform:uppercase}
+  .cl-r-copper{background:#b8733a;color:#fff}
+  .cl-r-silver{background:#c0c6cf;color:#1b1d21}
+  .cl-r-gold{background:#e2b04a;color:#1b1206}
+  .cl-track{display:flex;flex-wrap:wrap;gap:2px;margin:0.45rem 0 0.3rem}
+  .cl-box{width:13px;height:13px;border-radius:3px;border:1.5px solid var(--line-2);background:transparent}
+  .cl-box.cl-c{border-color:#b8733a}
+  .cl-box.cl-s{border-color:#c0c6cf}
+  .cl-box.cl-g{border-color:#e2b04a}
+  .cl-box.on{background:var(--text-3)}
+  .cl-box.cl-c.on{background:#b8733a}
+  .cl-box.cl-s.on{background:#c0c6cf}
+  .cl-box.cl-g.on{background:#e2b04a}
+  .cl-box.cl-mark{box-shadow:0 0 0 2px rgba(226,176,74,0.35)}
+  .cl-as-sub{font-size:0.75rem;color:var(--text-3)}
+  .cl-xs{display:flex;flex-wrap:wrap;gap:0.3rem}
+  .cl-x{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:6px;background:rgba(248,113,113,0.15);color:#f87171;font-weight:800}
+  .cl-contracts{display:flex;flex-wrap:wrap;gap:0.35rem;margin-bottom:0.45rem}
+  .cl-cadd{width:100%}
+  .cl-chars{display:grid;grid-template-columns:repeat(auto-fill,minmax(10rem,1fr));gap:0.5rem}
+  .cl-mrs{display:flex;flex-direction:column;gap:0.35rem;margin-top:0.8rem}
+  .cl-mr{border-radius:12px;border:1px solid var(--line);background:var(--card)}
+  .cl-mr.todo{display:flex;justify-content:space-between;padding:0.55rem 0.8rem;color:var(--text-4);background:none;border-style:dashed}
+  .cl-mr.todo span{font-size:0.75rem;color:#e2b04a}
+  .cl-mr-line{display:flex;flex-wrap:wrap;align-items:baseline;gap:0.15rem 0.6rem;width:100%;padding:0.6rem 0.8rem;border:0;background:none;color:var(--text);font:inherit;text-align:left;cursor:pointer}
+  .cl-mr-when{font-size:0.75rem;color:var(--text-3)}
+  .cl-mr-scores{flex-basis:100%;font-size:0.84rem;color:var(--text-2)}
+  .cl-mr-scores b{color:var(--text)}
+  .cl-mr-scores b.zero{color:#f87171}
+  .cl-mr-more{flex-basis:100%;font-size:0.74rem;color:var(--text-3)}
+  .cl-mr.open .cl-review{margin:0 0.5rem 0.5rem;border:0;background:var(--card-2)}
+  .cl-mr-loose{display:flex;flex-wrap:wrap;align-items:center;gap:0.3rem 0.7rem;padding:0.55rem 0.8rem;margin-bottom:0.35rem;font-size:0.82rem}
+  .cl-assign{margin-left:auto;display:flex;align-items:center;gap:0.35rem}
+  .cl-table{display:flex;flex-direction:column;gap:0.25rem}
+  .cl-trow{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:0.8rem;font-size:0.84rem;padding:0.35rem 0;border-bottom:1px solid var(--line)}
+  .cl-trow span{color:var(--text-3);text-align:right}
   /* ── Mini Rogue campaigns (js/mini-rogue-campaign.js; the shell is Codenames' .cr-* and Rove's .rv-*) ── */
   .mr-read{margin-top:0.7rem;padding-left:0.7rem;border-left:3px solid var(--line-3);font-family:var(--font-display);font-style:italic;font-size:0.84rem;line-height:1.5;color:var(--text-2)}
   .mr-ending .cr-end{margin-top:0.8rem}

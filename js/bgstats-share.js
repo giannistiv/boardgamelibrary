@@ -102,7 +102,7 @@ const _bgsLocal = (d) => `${d.getFullYear()}-${_bgsPad(d.getMonth() + 1)}-${_bgs
 function _bgsSheet(id, play, uuids) {
   if (!play.mp || !play.ss || typeof scoreSheetUnpack !== 'function') return null;
   const s = scoreSheetUnpack(play.ss, play.sc);
-  if (!s || s.key === 'rounds' || !s.sheet.g) return null;
+  if (!s || s.key === 'rounds' || !s.sheet.g || s.sheet.own) return null;   // a sheet of our own isn't one of BG Stats'
   const n = play.sc.length;
   const type = { check: 'checkbox', radio: 'radio', win: 'radioOverall', stat: 'ignoredForTotal' };
   const groups = [];
@@ -190,7 +190,8 @@ function bgsPlayFile(bggId, play) {
 // What a play file adds to the link: its score sheet and expansions.
 function _bgsFileExtras(bggId, play) {
   const xs = typeof playExpansionsOf === 'function' ? playExpansionsOf(Number(bggId), play) : [];
-  const sheet = !!(play.mp && play.ss && typeof scoreSheetUnpack === 'function' && (scoreSheetUnpack(play.ss, play.sc) || {}).key !== 'rounds');
+  const u = play.mp && play.ss && typeof scoreSheetUnpack === 'function' ? scoreSheetUnpack(play.ss, play.sc) : null;
+  const sheet = !!(u && u.key !== 'rounds' && !u.sheet.own);   // BG Stats' own sheets only
   return [sheet ? 'score sheet' : '', xs.length ? (xs.length === 1 ? 'expansion' : 'expansions') : ''].filter(Boolean);
 }
 // Share the file to BG Stats (the phone's share sheet), or save it where sharing files can't.

@@ -325,6 +325,7 @@ const EX_SHEETS = [
   { kind: 'mrc', id: () => (typeof MRC_BGGID !== 'undefined' ? MRC_BGGID : 0), what: 'The chapters, Perk Points, Skills and Relics' },
   { kind: 'oath', id: () => (typeof OATHSWORN_BGGID !== 'undefined' ? OATHSWORN_BGGID : 0), what: 'The trail through the Deepwood and the boss rankings' },
   { kind: 'gauntlet', id: () => (typeof MC_BGGID !== 'undefined' ? MC_BGGID : 0), what: 'The Gauntlet: every villain in release order, on Expert' },
+  { kind: 'clank', id: () => (typeof CL_BGGID !== 'undefined' ? CL_BGGID : 0), what: 'Mission Reports, Associate Status and the Dran Enterprises Track' },
 ];
 let _exSheets = null;      // kind → the viewer's campaigns [{cid, name, pct, text, done, at}], once loaded
 let _exSheetsFor = null;   // whose they are
@@ -358,6 +359,9 @@ async function _exLoadSheets() {
         add(Number(c.game) === MRC_BGGID ? 'mrc' : 'mr', cid, c, mrSummary(c), c.name || _mrCharName(c));
       }
     }).catch(e => console.warn('Campaigns: Mini Rogue', e)),
+    typeof _clLoad === 'function' && _clLoad(true).then(() => {
+      for (const cid in _clCamps) if (_clMine(_clCamps[cid])) add('clank', cid, _clCamps[cid], clSummary(_clCamps[cid]), _clCamps[cid].name || _clList(_clCamps[cid].players).join(', '));
+    }).catch(e => console.warn('Campaigns: Clank! Legacy', e)),
     ...['oath', 'gauntlet'].map(kind => typeof pcLoad === 'function' && pcLoad(kind).then(camps => {
       for (const cid in camps) if (pcIsMine(camps[cid])) add(kind, cid, camps[cid], pcSummary(kind, cid, camps[cid]), camps[cid].name || pcPlayers(camps[cid]).join(', '));
     }).catch(e => console.warn('Campaigns:', kind, e))),
@@ -464,6 +468,7 @@ function wireCampaignsTab(container) {
     if (kind === 'cr' && cid) { _crId = cid; _crDraft = null; }
     if (kind === 'rove' && cid) { _rvId = cid; _rvDraft = null; }
     if ((kind === 'mr' || kind === 'mrc') && cid) { _mrGame = game.bggId; _mrId = cid; _mrDraft = null; _mrTab = 'camp'; }
+    if (kind === 'clank' && cid) { _clId = cid; _clDraft = null; _clTab = 'camp'; }
     _modalTab = kind === 'plays' ? 'plays' : 'campaign';
     _modalTabFor = game.bggId;
     openModal(game);

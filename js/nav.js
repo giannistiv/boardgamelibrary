@@ -177,8 +177,10 @@ function _navOpenOverlays() {
 }
 function _navModalOpen() { return _navIsOpen('modal-overlay'); }
 // The history entry for something opening now: 'view', 'modal' or an overlay name.
+// modal: the game page was open under it (an overlay opened from it), so
+// coming back to this entry keeps it open.
 function navEntry(kind) {
-  return { bgl: kind, view: _navKey(_navState()), stack: _navOpenOverlays(), id: ++_navSeq + '-' + Date.now() };
+  return { bgl: kind, view: _navKey(_navState()), stack: _navOpenOverlays(), modal: kind === 'modal' || _navModalOpen(), id: ++_navSeq + '-' + Date.now() };
 }
 // An overlay opened: give it an entry, so back closes it.
 function navOverlayOpened(kind) {

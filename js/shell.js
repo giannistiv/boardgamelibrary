@@ -531,8 +531,9 @@ function closeModal() {
 }
 window.addEventListener('popstate', e => {
   const overlay = document.getElementById('modal-overlay');
-  // back to the game page's own entry (from pictures opened on it): it stays
-  if (overlay.classList.contains('open') && !(e.state && e.state.bgl === 'modal')) {
+  // back to the game page's own entry (from pictures opened on it), or to an
+  // overlay opened on it (Log a play, from its score sheet): it stays
+  if (overlay.classList.contains('open') && !(e.state && (e.state.bgl === 'modal' || e.state.modal))) {
     overlay.classList.remove('open');
     document.body.classList.remove('modal-open');
     _restoreAfterModal();
@@ -841,7 +842,8 @@ function openModal(game) {
   const roveHtml = typeof buildRoveCampaignHtml === 'function' ? buildRoveCampaignHtml(game) : '';
   const crHtml = typeof buildCrCampaignHtml === 'function' ? buildCrCampaignHtml(game) : '';
   const mrHtml = typeof buildMrCampaignHtml === 'function' ? buildMrCampaignHtml(game) : '';
-  const campaignHtml = roveHtml || crHtml || mrHtml;
+  const clHtml = typeof buildClCampaignHtml === 'function' ? buildClCampaignHtml(game) : '';
+  const campaignHtml = roveHtml || crHtml || mrHtml || clHtml;
   const tabs = [['overview', 'Overview'], ['plays', `Plays${plays && plays.length ? ` <span class="gm-tab-n">${plays.length}</span>` : ''}`]]
     .concat(campaignHtml ? [['campaign', 'Campaign']] : [])
     .concat(game.bggId > 0 ? [['rules', 'Rules']] : []);
@@ -911,6 +913,7 @@ function openModal(game) {
   if (roveHtml) wireRoveCampaign(content);
   if (crHtml) wireCrCampaign(content);
   if (mrHtml) wireMrCampaign(content);
+  if (clHtml) wireClCampaign(content);
   if (leviathanHtml) wireLeviathanWilds(content);
   if (Number(game.bggId) === SKY_TEAM_BGGID) wireSkyTeam(content);
   if (typeof wireProgressBoards === 'function') wireProgressBoards(content);

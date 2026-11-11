@@ -32,6 +32,7 @@ const SCEN_NUMBERED = {
   209010: ['Mission', 10],               // Mechs vs. Minions (and its Tutorial)
   339789: ['Adventure', 8],              // Welcome to the Moon
   456440: ['Year', 10],                  // Cozy Stickerville
+  266507: ['Game', 12],                  // Clank! Legacy: Acquisitions Incorporated (a campaign of 10 or more)
 };
 // Numbered, but how many isn't known here: the word, and a number to fill in.
 const SCEN_NUMBERED_OPEN = {

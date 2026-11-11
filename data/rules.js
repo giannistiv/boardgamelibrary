@@ -6520,5 +6520,60 @@ const RULES = {
    "Staying isn't safe: your cards can still be swapped, stolen or discarded.",
    "Flip Four: actions and modifiers in it resolve after all four cards."
   ]
+ },
+ "266507": {
+  "src": "the Clank! Legacy: Acquisitions Incorporated rulebook (Dire Wolf)",
+  "goal": "Grab an **Artifact** and get back to **HQ** alive, with more points than anyone: the winner is the franchise's **Most Valuable Employee**. Keep the noise down: Clank! feeds the dragon.",
+  "turn": [
+   "Play all 5 cards, in any order, for Skill, Swords, Boots, Gold, Clank! and draws.",
+   "Take each action as often as you can pay for it, between cards or after them.",
+   "End: resolve any Contract that triggers at the end of a turn, discard your play area, draw 5, refill the Adventure Row to 6 (an **Event** happens at once); a new dragon symbol means one attack."
+  ],
+  "actions": [
+   [
+    "Acquire",
+    "Skill buys blue cards from the Adventure Row or yellow ones from the Reserve, into your discard pile."
+   ],
+   [
+    "Fight",
+    "Swords beat a red monster for its DEFEAT reward; the Reserve's Cultist can be fought again and again."
+   ],
+   [
+    "Move",
+    "1 Boot a path (footprints: 2 or 3); monster icons hurt unless you pay Swords; open water needs a **Canoe**; arrows are one-way; entering a **Forest** ends your moving for the turn."
+   ],
+   [
+    "Coach",
+    "On a Coach space: 1 Boot plus the Gold shown on both Coach spaces takes you to any other one."
+   ],
+   [
+    "Market",
+    "In a Town: an item for 7 Gold, one of each kind."
+   ],
+   [
+    "Artifact",
+    "Take one any time you're on its space (not only on entering); just one, and it raises the dragon's rage."
+   ]
+  ],
+  "roundTitle": "Dragon attacks",
+  "round": [
+   "All the Clank! goes in the Dragon Bag; draw as many cubes as the Rage Track shows, plus one per **Danger** card in the row. Each coloured cube is a damage to its player.",
+   "The rage rises with each Artifact taken and each Gold Dragon Egg found.",
+   "An empty Dragon Bag after an attack ends the game: everyone still in is knocked out."
+  ],
+  "end": [
+   "You're off the clock when you **escape** (back at HQ with an Artifact: take a **Mug**, 20 points, and your Clank! comes out) or are **knocked out** (your Health Meter is full).",
+   "Off the clock, on your turns you draw 4 cubes from the Dragon Bag (6 with two players) for those still in.",
+   "Knocked out without an Artifact, or in the **Danger Zone**: 0 points.",
+   "Score: the Artifact, card points, tokens (the Mug, market items, secrets) and Gold. A tie: the more valuable Artifact wins.",
+   "In the campaign the game then has its own end steps: the Campaign tab walks you through them."
+  ],
+  "forget": [
+   "**Waypoints** (numbered spaces): stop and read that passage in the Book of Secrets, then carry on.",
+   "A space's reward (a secret, gold, healing, a card) comes once a turn, on entering it.",
+   "**Trash** isn't for good (it's back next game); **destroy** is.",
+   "Once you leave HQ you can't come back without an Artifact.",
+   "Damage that isn't the dragon's comes from your own cubes, and you can't choose to take it if it would knock you out."
+  ]
  }
 };
