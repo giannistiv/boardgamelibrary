@@ -1484,7 +1484,6 @@ const GIANNIS_GAMES = {
   1324:{name:"Café International: Das Kartenspiel",bggId:1324,year:2001,complexity:1.32,players:"2-5",playTime:"45 min",bggRating:5.7},
   260605:{name:"Camel Up (Second Edition)",bggId:260605,year:2018,complexity:1.51,players:"3-8",playTime:"45 min",bggRating:7.5},
   377028:{name:"Cangaceiros",bggId:377028,year:2023,complexity:3.19,players:"2-5",playTime:"120 min",bggRating:6.8},
-  337330:{name:"Canvas: Reflections – Deluxe Edition",bggId:337330,year:2022,complexity:1.8,players:"1-5",playTime:"30 min",bggRating:7.9},
   269789:{name:"Caravan",bggId:269789,year:2019,complexity:1.77,players:"2-4",playTime:"45 min",bggRating:6.6},
   822:{name:"Carcassonne",bggId:822,year:2000,complexity:1.89,players:"2-5",playTime:"45 min",bggRating:7.4},
   310873:{name:"Carnegie",bggId:310873,year:2022,complexity:3.82,players:"1-4",playTime:"120 min",bggRating:8.0},
