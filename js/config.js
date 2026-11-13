@@ -141,6 +141,8 @@ function isNoResultPlay(play, bggId, seat) {
 // `complete` short-circuits to a finished 100% state (green bar) — for
 //   campaigns the user has fully cleared, or ones whose plays carry no stage
 //   tags to compute progress from. `completeText` is the line under the bar.
+//   `finished` is the day of the finale (its last play then), so a replay
+//   later can't move it; Wrapped's Campaign Finished slide reads it.
 //   456440 = Cozy Stickerville (10 in-game years)
 //   440540 = Take Time (10 folders × 4 clocks = 40 missions, win-gated)
 //   413246 = Bomb Busters (66 missions, win-gated)
@@ -158,9 +160,9 @@ const CAMPAIGN_PROGRESS = {
   251661: { total: 21, label: 'Chapter', format: 'number', reached: 'tag', reachedPrefix: 'Latest' },
   284083: { total: 50, label: 'Mission', format: 'number', wonOnly: true },
   429293: { total: 18, label: 'Chapter', format: 'number', wonOnly: true },
-  291457: { complete: true, completeText: '✓ Campaign finished' },
-  295770: { complete: true, completeText: '✓ Campaign finished' },
-  241451: { complete: true, completeText: '✓ Legacy finished' },
+  291457: { complete: true, completeText: '✓ Campaign finished', finished: '2026-05-21' },
+  295770: { complete: true, completeText: '✓ Campaign finished', finished: '2023-12-31' },
+  241451: { complete: true, completeText: '✓ Legacy finished', finished: '2023-02-21' },
 };
 function campaignProgress(bggId, plays) {
   const cfg = CAMPAIGN_PROGRESS[Number(bggId)];

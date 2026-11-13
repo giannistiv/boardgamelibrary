@@ -21,6 +21,19 @@ function _estPlayMinutes(game) {
   return v.length > 1 ? (v[0] + v[v.length - 1]) / 2 : v[0];
 }
 
+// An expansion's name: under the game it was played with, else under any
+// game it's listed for (another edition), else its own entry.
+function _wrExpansionName(exId, baseId) {
+  const hit = (list) => ((list || []).find(e => String(e[0]) === String(exId)) || [])[1];
+  if (typeof expansionsOf === 'function') {
+    const n = hit(expansionsOf(baseId));
+    if (n) return n;
+  }
+  if (typeof EXPANSIONS_OF !== 'undefined') for (const b in EXPANSIONS_OF) { const n = hit(EXPANSIONS_OF[b]); if (n) return n; }
+  const g = typeof findGameByBggId === 'function' ? findGameByBggId(exId) : null;
+  return (g && g.name) || null;
+}
+
 function computeWrapped(playerName, year) {
   year = String(year || _wrappedYear());
   const isOwner = _origCanon(playerName) === WRAPPED_OWNER || playerName === WRAPPED_OWNER;
@@ -134,7 +147,7 @@ function computeWrapped(playerName, year) {
   const topDesigner = sortEnt(designer)[0] || null;
   const topExpId = sortEnt(expCount)[0] || null;
   const topExpansion = topExpId ? { bggId: topExpId[0], count: topExpId[1], baseBggId: expBase[topExpId[0]],
-    name: ((typeof expansionsOf === 'function' && expansionsOf(expBase[topExpId[0]])) || []).find(e => String(e[0]) === String(topExpId[0]))?.[1] || null } : null;
+    name: _wrExpansionName(topExpId[0], expBase[topExpId[0]]) } : null;
   const mechCount = Object.keys(mech).length;
   const marathon = sortEnt(byDateMin)[0] || null; // [date, minutes]
 
@@ -198,60 +211,77 @@ function computeWrapped(playerName, year) {
   let ch = null; try { ch = computeChallenges(playerName, year); } catch (_) {}
 
   // ── Campaigns: how far you pushed this year ──
-  // 'Staged' campaigns (CAMPAIGN_PROGRESS, js/config.js — Bomb Busters, Take
-  // Time, Oathsworn, The Crew, the Fellowship, Cozy Stickerville) have a
-  // known length, so where you stood before this year vs now gives a real
-  // stage count and percentage, won either way. 'Complete'-type legacy
-  // campaigns (Gloomhaven: Jaws of the Lion, Frosthaven, Aeon's End Legacy)
-  // don't track a stage at all — only whether every play of them this
-  // player has is from this year, meaning it was both started and finished
-  // within it. 'Open' campaigns (Clank! Legacy, Mini Rogue, Codenames:
-  // Critical Role Adventures) have no fixed length, so it's a play count and
-  // the furthest number tagged this year. All three read only PLAY_HISTORY
-  // (no Firebase), so Wrapped stays instant; a franchise's deeper state
-  // (Associate Status, Perk Points, villains beaten…) stays on its own tab.
+  // Read from PLAY_HISTORY only (no Firebase), so Wrapped stays instant; a
+  // franchise's deeper state (Associate Status, Perk Points, villains
+  // beaten…) stays on its own tab. Nothing after the year counts: Wrapped
+  // stays open into January, when the new year's plays already exist.
+  //  - Staged (CAMPAIGN_PROGRESS, js/config.js: Bomb Busters, Take Time,
+  //    Oathsworn, The Crew, the Fellowship, Cozy Stickerville): a known
+  //    length, so where this player stood on 1 January vs on 31 December,
+  //    from their own plays, as campaignProgress() reads them (the game
+  //    page's bar). Someone who joined part-way is counted from where they
+  //    joined, not from stage 1.
+  //  - Finished (the `complete` ones: Jaws of the Lion, Frosthaven, Aeon's
+  //    End Legacy): only when the campaign's finale (`finished`) fell in this
+  //    year and this player was at the table for it.
+  //  - Open (no fixed length: Clank! Legacy, Mini Rogue, Codenames: Critical
+  //    Role Adventures): the sessions this year and the latest one's number
+  //    (not the highest: Mini Rogue's chapters are a gamebook's, branching).
+  //    Mini Rogue's sessions are attempts (a death replays a chapter).
+  const yStart = `${year}-01-01`, yEnd = `${year}-12-31`;
   let campaignPush = null, campaignFinished = null, campaignOpen = null;
   if (typeof CAMPAIGN_PROGRESS !== 'undefined' && typeof campaignProgress === 'function') {
+    const stageName = (cfg, idx) => {
+      if (cfg.format === 'folder-clock') {
+        const per = cfg.perFolder || 1, f = Math.ceil(idx / per);
+        return `Folder ${f}, clock ${idx - (f - 1) * per}`;
+      }
+      return `${cfg.label || 'Stage'} ${idx}`;
+    };
     for (const bid in CAMPAIGN_PROGRESS) {
       const cfg = CAMPAIGN_PROGRESS[bid];
-      const mine = (PLAY_HISTORY[bid] || []).filter(p => p && p.date && Array.isArray(p.sc) && p.sc.some(s => s && s.n === playerName));
-      if (!mine.length) continue;
-      const thisYear = mine.filter(p => p.date.slice(0, 4) === year);
+      const all = (PLAY_HISTORY[bid] || []).filter(p => p && p.date && Array.isArray(p.sc) && p.date <= yEnd);
+      const mine = all.filter(p => p.sc.some(s => s && s.n === playerName));
+      const thisYear = mine.filter(p => p.date >= yStart);
       if (!thisYear.length) continue;
       if (cfg.complete) {
-        const firstEverDate = mine.reduce((a, p) => (!a || p.date < a) ? p.date : a, '');
-        if (firstEverDate.slice(0, 4) === year) {
-          const cand = { bggId: Number(bid), game: findGameByBggId(bid), count: thisYear.length };
-          if (!campaignFinished || cand.count > campaignFinished.count) campaignFinished = cand;
-        }
+        const end = cfg.finished || all.reduce((a, p) => (p.date > a ? p.date : a), '');
+        if (end < yStart || end > yEnd || !mine.some(p => p.date === end)) continue;
+        const upTo = (ps) => ps.filter(p => p.date <= end).length;
+        const cand = { bggId: Number(bid), game: findGameByBggId(bid), mine: upTo(mine), total: upTo(all),
+          oneYear: all.every(p => p.date >= yStart || p.date > end) };
+        if (!campaignFinished || cand.mine > campaignFinished.mine) campaignFinished = cand;
         continue;
       }
-      const before = mine.filter(p => p.date.slice(0, 4) !== year);
       const cpThrough = campaignProgress(bid, mine);
       if (!cpThrough) continue;
+      const before = mine.filter(p => p.date < yStart);
       const cpBefore = campaignProgress(bid, before);
-      const startStage = cpBefore ? cpBefore.current : 0;
-      const gained = cpThrough.current - startStage;
+      // where they stood on 1 January: their furthest stage then, or (new to
+      // it, or no stage reached yet) just before their first stage this year
+      const from = cpBefore ? cpBefore.current : Math.max(0, (cpThrough.first || 1) - 1);
+      const gained = cpThrough.current - from;
       if (gained > 0 && (!campaignPush || gained > campaignPush.gained)) {
-        campaignPush = { bggId: Number(bid), game: findGameByBggId(bid), startStage, endStage: cpThrough.current,
-          total: cpThrough.total, pct: cpThrough.pct, stageText: cpThrough.stageText,
-          justFinished: cpThrough.complete && !(cpBefore && cpBefore.complete), gained };
+        campaignPush = { bggId: Number(bid), game: findGameByBggId(bid), gained, pct: cpThrough.pct, stageText: cpThrough.stageText,
+          fromName: from ? stageName(cfg, from) : '', toName: stageName(cfg, cpThrough.current),
+          joinedName: !before.length && from ? stageName(cfg, from + 1) : '', newToIt: !before.length,
+          justFinished: cpThrough.complete && !(cpBefore && cpBefore.complete) };
       }
     }
   }
   const WR_OPEN_CAMPAIGNS = {
-    266507: { re: /(?:^|／|\s)Game\s*0*(\d+)\b/i, label: 'Game' },             // Clank! Legacy: Acquisitions Incorporated
-    417020: { re: /(?:^|／|\s)Chapter\s*0*(\d+)\b/i, label: 'Chapter' },       // Mini Rogue: The Council
-    311715: { re: /(?:^|／|\s)Chapter\s*0*(\d+)\b/i, label: 'Chapter' },       // Mini Rogue
-    465849: { re: /(?:^|／|\s)Mission\s*0*(\d+)\b/i, label: 'Mission' },      // Codenames: Critical Role Adventures
+    266507: { re: /(?:^|／|\s)Game\s*0*(\d+)\b/i, label: 'Game', unit: 'game' },          // Clank! Legacy: Acquisitions Incorporated
+    417020: { re: /(?:^|／|\s)Chapter\s*0*(\d+)\b/i, label: 'Chapter', unit: 'session' }, // Mini Rogue: The Council
+    311715: { re: /(?:^|／|\s)Chapter\s*0*(\d+)\b/i, label: 'Chapter', unit: 'session' }, // Mini Rogue
+    465849: { re: /(?:^|／|\s)Mission\s*0*(\d+)\b/i, label: 'Mission', unit: 'session' }, // Codenames: Critical Role Adventures
   };
   for (const bid in WR_OPEN_CAMPAIGNS) {
     const cfgO = WR_OPEN_CAMPAIGNS[bid];
-    const thisYear = (PLAY_HISTORY[bid] || []).filter(p => p && p.date && p.date.slice(0, 4) === year && Array.isArray(p.sc) && p.sc.some(s => s && s.n === playerName));
+    const thisYear = (PLAY_HISTORY[bid] || []).filter(p => p && p.date && p.date >= yStart && p.date <= yEnd && Array.isArray(p.sc) && p.sc.some(s => s && s.n === playerName));
     if (!thisYear.length) continue;
-    let furthest = 0;
-    for (const p of thisYear) { const m = String(p.b || '').match(cfgO.re); if (m && Number(m[1]) > furthest) furthest = Number(m[1]); }
-    const cand = { bggId: Number(bid), game: findGameByBggId(bid), count: thisYear.length, furthest, label: cfgO.label };
+    let latest = 0;
+    for (const p of thisYear.slice().sort(byPlayOrder)) { const m = String(p.b || '').match(cfgO.re); if (m) latest = Number(m[1]); }
+    const cand = { bggId: Number(bid), game: findGameByBggId(bid), count: thisYear.length, latest, label: cfgO.label, unit: cfgO.unit };
     if (!campaignOpen || cand.count > campaignOpen.count) campaignOpen = cand;
   }
 
@@ -660,39 +690,45 @@ function openWrappedModal(playerName, isOwnProfile) {
       ${d.milestones.length > ms.length ? `<div class="wr-lead">…and ${d.milestones.length - ms.length} more.</div>` : ''}`);
   }
 
-  // Campaign finished this year (a legacy game with no stage of its own —
-  // Gloomhaven: Jaws of the Lion, Frosthaven, Aeon's End Legacy)
+  // Campaign finished this year: its finale fell in the year, and you were
+  // there (Jaws of the Lion, Frosthaven, Aeon's End Legacy)
   if (d.campaignFinished) {
     const cf = d.campaignFinished;
     slide(G.gold, `
       <div class="wr-badge">&#127942;</div>
       <div class="wr-kicker">CAMPAIGN FINISHED</div>
       <div class="wr-big" style="font-size:1.6rem">${_escapeHtml((cf.game && cf.game.name) || 'Your campaign')}</div>
-      <div class="wr-label">started and finished in ${_escapeHtml(d.year)}</div>
-      <div class="wr-lead">All ${cf.count} session${cf.count === 1 ? '' : 's'} of it happened this year — start to credits, in one go.</div>`);
+      <div class="wr-label">${cf.oneYear ? 'started and finished' : 'finished'} in ${_escapeHtml(d.year)}</div>
+      <div class="wr-lead">${cf.mine === cf.total
+        ? `All ${cf.total} session${cf.total === 1 ? '' : 's'}, start to credits${cf.oneYear ? ', in one year' : ''}.`
+        : `You were there for ${cf.mine} of its ${cf.total} sessions, and for the finale.`}</div>`);
   }
 
-  // Campaign push (Bomb Busters, Take Time, Oathsworn, The Crew, the
-  // Fellowship, Cozy Stickerville — a known length, so a real stage count)
+  // Campaign push: a known length, so a real stage count (Bomb Busters,
+  // Take Time, Oathsworn, The Crew, the Fellowship, Cozy Stickerville)
   if (d.campaignPush) {
     const cp = d.campaignPush;
+    const lead = cp.newToIt
+      ? (cp.joinedName ? `Joined at ${cp.joinedName} this year and reached ${cp.toName}.` : `Started it this year and reached ${cp.toName}.`)
+      : cp.fromName ? `From ${cp.fromName} to ${cp.toName} this year &mdash; <b>+${cp.gained}</b>.`
+      : `From the very start to ${cp.toName} this year.`;
     slide(G.forest, `
       <div class="wr-kicker">${cp.justFinished ? 'CAMPAIGN COMPLETE' : 'CAMPAIGN PUSH'}</div>
       <div class="wr-big" style="font-size:1.4rem">${_escapeHtml((cp.game && cp.game.name) || 'Your campaign')}</div>
       <div class="wr-label">${_escapeHtml(cp.stageText)}</div>
       <div class="wr-cpbar-wrap"><div class="wr-cpbar" style="width:${cp.pct}%"></div></div>
-      <div class="wr-lead">${cp.startStage > 0 ? `From stage ${cp.startStage} to ${cp.endStage} this year &mdash; <b>+${cp.gained}</b>.` : `Started it this year, and already reached stage ${cp.endStage}.`}${cp.justFinished ? ` You crossed the line in ${_escapeHtml(d.year)}.` : ''}</div>`);
+      <div class="wr-lead">${lead}${cp.justFinished ? ` The last one fell in ${_escapeHtml(d.year)}.` : ''}</div>`);
   }
 
-  // Open campaign (Clank! Legacy, Mini Rogue, Codenames: Critical Role
-  // Adventures — no fixed length, so just the sessions and how far)
+  // Open campaign: no fixed length, so the sessions and how far (Clank!
+  // Legacy, Mini Rogue, Codenames: Critical Role Adventures)
   if (d.campaignOpen) {
     const co = d.campaignOpen;
     slide(G.purple, `
       <div class="wr-kicker">STILL WRITING THE STORY</div>
       <div class="wr-num">${cnum(co.count)}</div>
-      <div class="wr-label">${_escapeHtml(co.label)}${co.count === 1 ? '' : 's'} of <b>${_escapeHtml((co.game && co.game.name) || 'your campaign')}</b> this year</div>
-      <div class="wr-lead">${co.furthest ? `Furthest reached: ${_escapeHtml(co.label)} ${co.furthest}. ` : ''}The next one's already waiting.</div>`);
+      <div class="wr-label">${co.unit}${co.count === 1 ? '' : 's'} of <b>${_escapeHtml((co.game && co.game.name) || 'your campaign')}</b> this year</div>
+      <div class="wr-lead">${co.latest ? `Latest: ${_escapeHtml(co.label)} ${co.latest}. ` : ''}The next one's already waiting.</div>`);
   }
 
   // Busiest day
