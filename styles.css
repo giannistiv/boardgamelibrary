@@ -3650,6 +3650,8 @@
   .wr-splitkey{display:flex;flex-wrap:wrap;justify-content:center;gap:0.5rem 1rem;font-size:0.78rem;font-weight:600}
   .wr-splitkey span{display:inline-flex;align-items:center;gap:0.35rem}
   .wr-splitkey i{width:11px;height:11px;border-radius:3px;display:inline-block}
+  .wr-cpbar-wrap{height:14px;border-radius:7px;overflow:hidden;margin:1rem 0 0.2rem;background:rgba(0,0,0,0.25)}
+  .wr-cpbar{height:100%;border-radius:7px;background:linear-gradient(90deg,#ffe08a,#fff);transition:width 0.5s}
   .wr-quests{display:flex;justify-content:center;gap:1.3rem;margin-top:1.2rem}
   .wr-quest{display:flex;flex-direction:column;align-items:center;gap:0.3rem}
   .wr-qnum{font-size:2.1rem;font-weight:800}
