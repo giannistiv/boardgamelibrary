@@ -1329,7 +1329,10 @@ const EXTRA_GAMES = {
     categories:["Party","Family","Puzzle"],players:"2-8",playTime:"20-30 min",
     complexity:1.5,bggRating:7.0,spineColor:"#2080C0",boxSize:"sm",
     mechanics:["Trivia","Team Play"]},
-  // Sold from Στιβ's shelf (2026-09): kept so their plays keep full details.
+  // Sold from Στιβ's shelf (marked Previously owned on BGG): kept so their plays keep full details. tools/sync-collections.py moves them here.
+  343562:{id:"horrified_am",name:"Horrified: American Monsters",bggId:343562,categories:["Co-op", "Family", "Thematic"],players:"1-5",playTime:"60 min",complexity:2.25,spineColor:"#3f243f",boxSize:"md",designer:"Michael Mulvihill",year:2021,bggRating:7.5,mechanics:["Action Points", "Cooperative Game", "Pick-up and Deliver", "Point to Point Movement", "Solo / Solitaire Game"],description:"Creatures of American folklore — Bigfoot, Mothman, the Chupacabra, the Jersey Devil, the Banshee of the Badlands, and the Ozark Howler — terrorize the countryside. Players cooperate using actions to move, collect items, and work toward each monster's unique defeat condition. Like the original Horrified but with American cryptids and new mechanics for each creature. Scales from family-friendly to challenging depending on how many monsters you include."},
+  275974:{id:"margraves_of_valeria",name:"Margraves of Valeria",bggId:275974,categories:["Strategy", "Euro", "Worker Placement"],players:"2-5",playTime:"60-120 min",complexity:2.7,spineColor:"#26697f",boxSize:"md",designer:"Isaias Vallejo",year:2020,bggRating:7.4,mechanics:["Area Movement", "Deck, Bag, and Pool Building", "Worker Placement"],description:"Set in the fantasy world of Valeria, players are military commanders building influence by deploying knights to slay monsters and activate location abilities. The core mechanic is hand-building — you start with a basic deck of command cards and add more powerful ones through play, then place workers using those cards. Earn favor with four guilds to score. Approachable for mid-weight gamers who enjoy deck growth paired with worker placement."},
+  181260:{id:"burano",name:"Burano",bggId:181260,categories:["Strategy", "Euro"],players:"2-4",playTime:"90-120 min",complexity:3.79,spineColor:"#7b422f",boxSize:"md",designer:"Yu-Chen Tseng, Eros Lin",year:2015,bggRating:6.7,mechanics:["Action Points", "Area Majority / Influence", "Pick-up and Deliver", "Point to Point Movement", "Set Collection"],description:"Players develop the colorful island of Burano near Venice by building houses, managing fishing boats, and producing lace. A point-to-point movement system sends workers between island locations to gather fish, thread, and goods. Completed houses and fulfilled orders generate prestige. A moderate Euro with set collection and area scoring. For players who enjoy resource conversion games with a Mediterranean flavor and attractive components."},
   281442:{id:"trismegistus",name:"Trismegistus: The Ultimate Formula",bggId:281442,year:2019,designer:"Federico Pierlorenzi, Daniele Tascini",
     description:"Players are alchemists competing to master the art of transmutation and claim the title of Hermes Trismegistus's successor. Each round, dice are rolled and players draft them by color — each color corresponds to one of three alchemical stages, and the die value determines how many steps you advance. Use acquired elements to perform experiments, complete publications, and craft artifacts for points. A follow mechanism lets others benefit from your chosen action at reduced effect. For players who enjoy dice drafting and heavy engine-building with interconnected systems.",
     categories:["Strategy","Euro","Dice"],players:"1-4",playTime:"90-120 min",
@@ -2299,17 +2302,6 @@ const GAMES = [
    ,mechanics:["End Game Bonuses", "Hand Management", "Income", "Network and Route Building", "Solo / Solitaire Game", "Turn Order: Claim Action"]
    ,description:"With the surface overpopulated, players build civilization beneath the ocean. Each turn you place a card into one of fifteen action slots — matching the card color to the slot color lets you take both the slot action and the card effect. You build domed cities, connect them with tunnels, and manage three types of resources across multiple rounds. Appeals to players who enjoy tight action selection and long-term engine building."},
 
-  {id:"horrified_am",name:"Horrified: American Monsters"
-   ,row:1,col:2,categories:["Co-op", "Family", "Thematic"]
-   ,players:"1-5",playTime:"60 min"
-   ,complexity:2.25,bggId:343562
-   ,spineColor:"#3f243f",boxSize:"md"
-   ,designer:"Michael Mulvihill"
-   ,year:2021
-   ,bggRating:7.5
-   ,mechanics:["Action Points", "Cooperative Game", "Pick-up and Deliver", "Point to Point Movement", "Solo / Solitaire Game"]
-   ,description:"Creatures of American folklore — Bigfoot, Mothman, the Chupacabra, the Jersey Devil, the Banshee of the Badlands, and the Ozark Howler — terrorize the countryside. Players cooperate using actions to move, collect items, and work toward each monster's unique defeat condition. Like the original Horrified but with American cryptids and new mechanics for each creature. Scales from family-friendly to challenging depending on how many monsters you include."},
-
   {id:"dominant_species",name:"Dominant Species"
    ,row:1,col:2,categories:["Strategy", "Area Control", "Worker Placement"]
    ,players:"2-6",playTime:"120-240 min"
@@ -2353,17 +2345,6 @@ const GAMES = [
    ,bggRating:7.3
    ,mechanics:["Grid Movement", "King of the Hill", "Multiple Maps", "Scenario / Mission / Campaign Game", "Slide / Push", "Square Grid"]
    ,description:"Two time travelers try to eliminate each other across three boards representing past, present, and future. On your turn, you move one piece on each board, pushing opponents off the grid to remove them from that timeline. Killing your rival in all three eras wins the game. A campaign of escalating scenarios introduces new rules and twists each session. Best for two players who enjoy abstract puzzles with narrative."},
-
-  {id:"margraves_of_valeria",name:"Margraves of Valeria"
-   ,row:1,col:3,categories:["Strategy", "Euro", "Worker Placement"]
-   ,players:"2-5",playTime:"60-120 min"
-   ,complexity:2.7,bggId:275974
-   ,spineColor:"#26697f",boxSize:"md"
-   ,designer:"Isaias Vallejo"
-   ,year:2020
-   ,bggRating:7.4
-   ,mechanics:["Area Movement", "Deck, Bag, and Pool Building", "Worker Placement"]
-   ,description:"Set in the fantasy world of Valeria, players are military commanders building influence by deploying knights to slay monsters and activate location abilities. The core mechanic is hand-building — you start with a basic deck of command cards and add more powerful ones through play, then place workers using those cards. Earn favor with four guilds to score. Approachable for mid-weight gamers who enjoy deck growth paired with worker placement."},
 
   {id:"this_war_of_mine",name:"This War of Mine: The Board Game"
    ,row:1,col:3,categories:["Co-op", "Thematic", "Campaign"]
@@ -3191,17 +3172,6 @@ const GAMES = [
    ,mechanics:["Action Queue", "Area Majority / Influence", "Layering", "Network and Route Building", "Simultaneous Action Selection", "Solo / Solitaire Game"]
    ,description:"Players run smartphone companies in the early days of the mobile industry. Each round, everyone simultaneously programs their turn by stacking planning tiles — each tile sets one decision: price, production volume, tech research, or geographic expansion. All decisions resolve at once, creating market competition for regions and price points. Five rounds, then final scoring based on market share and research. For players who enjoy simultaneous action selection and economic games where reading the competition matters."},
 
-  {id:"burano",name:"Burano"
-   ,row:6,col:4,categories:["Strategy", "Euro"]
-   ,players:"2-4",playTime:"90-120 min"
-   ,complexity:3.79,bggId:181260
-   ,spineColor:"#7b422f",boxSize:"md"
-   ,designer:"Yu-Chen Tseng, Eros Lin"
-   ,year:2015
-   ,bggRating:6.7
-   ,mechanics:["Action Points", "Area Majority / Influence", "Pick-up and Deliver", "Point to Point Movement", "Set Collection"]
-   ,description:"Players develop the colorful island of Burano near Venice by building houses, managing fishing boats, and producing lace. A point-to-point movement system sends workers between island locations to gather fish, thread, and goods. Completed houses and fulfilled orders generate prestige. A moderate Euro with set collection and area scoring. For players who enjoy resource conversion games with a Mediterranean flavor and attractive components."},
-
   {id:"azul",name:"Azul"
    ,row:6,col:4,categories:["Family", "Abstract", "Puzzle"]
    ,players:"2-4",playTime:"30-45 min"
@@ -3319,7 +3289,6 @@ const GAMES = [
   {id:"splendor_marvel_os",name:"Splendor: Marvel",bggId:293296,year:2020,designer:"Marc André",row:2,col:6,otherSide:true,categories:["Strategy","Card Game","Family"],players:"2-4",playTime:"30 min",complexity:1.8,bggRating:7.6,spineColor:"#1a1a8b",boxSize:"sm",mechanics:["Card Drafting","Engine Building","Set Collection"],description:"A Marvel-themed reimplementation of Splendor where players collect infinity gems to recruit heroes and complete the Infinity Gauntlet. Adds new Avengers Assemble location tiles."},
   {id:"legacy_of_yu_os",name:"Legacy of Yu",bggId:354934,year:2023,designer:"Shem Phillips",row:2,col:6,otherSide:true,categories:["Solo","Strategy"],players:"1-1",playTime:"60 min",complexity:2.88,bggRating:8.1,spineColor:"#b8860b",boxSize:"sm",mechanics:["Deck Building","Hand Management","Campaign"],description:"A solo-only campaign game about the legendary Chinese figure Yu the Great. Players manage workers and resources across a branching campaign to build canals and control devastating floods."},
   {id:"pandemic_legacy_s1_os",name:"Pandemic Legacy: Season 1",bggId:161936,year:2015,designer:"Rob Daviau, Matt Leacock",row:2,col:6,otherSide:true,categories:["Co-op","Strategy","Campaign"],players:"2-4",playTime:"60 min",complexity:2.8,bggRating:8.6,spineColor:"#2a1a00",boxSize:"sm",mechanics:["Cooperative Game","Legacy Game","Hand Management","Variable Player Powers"],description:"A campaign evolution of Pandemic where the world map, rules, and characters permanently change across a 12-month story. Stickers, destroyed cities, and evolving abilities create a deeply personal narrative."},
-  {id:"terracotta_army_os",name:"Terracotta Army",bggId:350458,year:2022,designer:"Przemysław Fornal, Adam Kwapiński",row:2,col:6,otherSide:true,categories:["Strategy","Euro","Worker Placement"],players:"1-4",playTime:"90-120 min",complexity:3.3,bggRating:7.4,spineColor:"#8b6914",boxSize:"sm",mechanics:["Worker Placement","Area Control","Resource Management"],description:"Players craft the famous Terracotta Army of Emperor Qin, placing warrior figures in the mausoleum while managing resources and competing for the emperor's favor through area majority."},
   {id:"kings_dilemma_os",name:"The King's Dilemma",bggId:245655,year:2019,designer:"Hjalmar Hach, Lorenzo Silva",row:2,col:6,otherSide:true,categories:["Strategy","Thematic"],players:"3-5",playTime:"45-60 min",complexity:2.2,bggRating:7.6,spineColor:"#c8a850",boxSize:"sm",mechanics:["Negotiation","Voting","Legacy Game","Hand Management"],description:"A legacy negotiation game where players are members of the king's council voting on dilemmas that permanently shape the kingdom. Secret agendas and alliances shift across an evolving political narrative."},
   {id:"lands_of_galzyr_os",name:"Lands of Galzyr",bggId:281474,year:2022,designer:"Seppo Kuukasjärvi, Sami Laakso",row:2,col:6,otherSide:true,categories:["Adventure","Thematic"],players:"1-4",playTime:"60-150 min",complexity:1.71,bggRating:7.9,spineColor:"#5c3317",boxSize:"sm",mechanics:["Dice Rolling","Variable Player Powers","Storytelling"],description:"An open-world adventure game with anthropomorphic animal characters exploring a fantasy world through an ever-evolving story. Decisions are remembered across sessions with no campaign end."},
   // ── Row 3, Col 2 ──

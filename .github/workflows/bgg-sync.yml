@@ -1,8 +1,9 @@
 # Keeps the site in step with BGG without anyone committing:
 #   - the games still to come out for Explore → Trending: BGG's live crowdfunding
 #     campaigns and the hot list's unreleased games (tools/fetch-hot.py, no token needed)
-#   - the friends' libraries, and new games on Στιβ's BGG collection as
-#     "new arrivals" (tools/sync-collections.py, needs the BGG_TOKEN secret)
+#   - the friends' libraries, new games on Στιβ's BGG collection as "new
+#     arrivals", and the ones he marks Previously owned off his shelf
+#     (tools/sync-collections.py, needs the BGG_TOKEN secret)
 #   - what's new for the games we play: new expansions, editions and printings
 #     (tools/fetch-game-news.py, no token needed; a share of the games each run)
 #   - the notes on our BGG plays of a few games, e.g. Spirit Island's adversary

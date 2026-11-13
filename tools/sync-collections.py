@@ -17,7 +17,10 @@ hand-placed cubbies, and his BGG collection doesn't match it. Instead, a game
 that newly appears among his owned games on BGG (johnstiv) is added as a "new
 arrival": on no shelf yet (row 0), shown first in the library, waiting to be
 placed. What BGG listed last time is kept in tools/owned-baseline.json; the
-first run only records it.
+first run only records it. A shelf game he marks "Previously owned" on BGG
+(and doesn't own again) leaves GAMES for EXTRA_GAMES' sold section, so its
+plays keep their details, and any Board South votes for it go too. BGG's
+"owned" alone can't say a game left: many shelf games aren't marked owned.
 
 A game the collection marks as owned but the list lacks is added (name, year,
 players, play time and rating from the collection, weight from the game's BGG
@@ -462,6 +465,152 @@ def git(*args):
     return subprocess.run(['git', *args], cwd=ROOT, capture_output=True)
 
 
+# ── Στιβ's sold games: off the shelf ──
+# The user, 13 Nov 2026: games sold still showed in the Library and on the
+# shelves. New arrivals only ever added, and BGG's "owned" can't say a game
+# left (69 shelf games aren't marked owned there at all). BGG's "Previously
+# owned" can: a shelf game marked so, and not owned again, leaves GAMES for
+# EXTRA_GAMES' sold section (so its plays keep their details), and any Board
+# South votes for it in Στιβ's library go too.
+SOLD_HEAD = "  // Sold from Στιβ's shelf (marked Previously owned on BGG): kept so their plays keep full details."
+SOLD_PREFIX = "  // Sold from Στιβ's shelf"
+SHELF_ONLY = ('row', 'col', 'otherSide', 'newArrival')   # where it stood, not what it is
+SHELF_VOTES = 'boardSouthVotes'   # Στιβ's library's Board South votes (js/favorites.js)
+
+
+def sold_games(username, token):
+    """The ids the user marks as previously owned on BGG and doesn't own."""
+    root = bgg(f'collection?username={username}&prevowned=1', token)
+    out = set()
+    for item in root.findall('item'):
+        st = item.find('status')
+        if st is not None and st.get('prevowned') == '1' and st.get('own') != '1':
+            out.add(_int(item.get('objectid')))
+    return out
+
+
+def _js_entries(block):
+    """[(start, end)] of each top-level {...} in an array's body, skipping // comments."""
+    out, i, n = [], 0, len(block)
+    while i < n:
+        if block.startswith('//', i):
+            j = block.find('\n', i)
+            i = n if j < 0 else j
+            continue
+        if block[i] != '{':
+            i += 1
+            continue
+        depth, j, quote = 0, i, None
+        while j < n:
+            ch = block[j]
+            if quote:
+                if ch == '\\':
+                    j += 2
+                    continue
+                if ch == quote:
+                    quote = None
+            elif ch in '"\'':
+                quote = ch
+            elif ch == '{':
+                depth += 1
+            elif ch == '}':
+                depth -= 1
+                if depth == 0:
+                    break
+            j += 1
+        out.append((i, j + 1))
+        i = j + 1
+    return out
+
+
+def _js_obj(text):
+    """A JS object literal as data/games.js writes them (bare keys, double
+    quotes, maybe trailing commas) → a dict, keys in order."""
+    out, i, quote, prev = [], 0, None, ''
+    while i < len(text):
+        ch = text[i]
+        if quote:
+            out.append(ch)
+            if ch == '\\':
+                out.append(text[i + 1])
+                i += 2
+                continue
+            if ch == quote:
+                quote = None
+            i += 1
+            continue
+        if ch == '"':
+            quote = ch
+            out.append(ch)
+            prev = '"'
+            i += 1
+            continue
+        m = re.match(r'[A-Za-z_$][\w$]*', text[i:])
+        if m:
+            word, j = m.group(0), i + len(m.group(0))
+            bare_key = prev in ('{', ',') and text[j:].lstrip().startswith(':')
+            out.append(json.dumps(word) if bare_key else word)
+            prev = 'w'
+            i = j
+            continue
+        if ch in '}]':
+            while out and out[-1].isspace():
+                out.pop()
+            if out and out[-1] == ',':
+                out.pop()
+        out.append(ch)
+        if not ch.isspace():
+            prev = ch
+        i += 1
+    return json.loads(''.join(out))
+
+
+def _extra_line(gid, d):
+    """An EXTRA_GAMES line for a game leaving the shelf: what it is, not where it stood."""
+    keys = ['id', 'name', 'bggId'] + [k for k in d if k not in ('id', 'name', 'bggId') and k not in SHELF_ONLY]
+    j = lambda v: json.dumps(v, ensure_ascii=False)
+    return f'  {gid}:{{' + ','.join(f'{k}:{j(d[k])}' for k in keys if k in d) + '},'
+
+
+def plan_sold(src, sold, owned):
+    """(new src, [(bggId, name)]) with each shelf game in `sold`, and not owned
+    again, moved from GAMES to EXTRA_GAMES' sold section."""
+    m = re.search(r'const GAMES = \[\n(.*?)\n\];', src, re.S)
+    block = m.group(1)
+    leaving = []
+    for a, b in _js_entries(block):
+        g = re.search(r'\bbggId:\s*(\d+)', block[a:b])
+        gid = int(g.group(1)) if g else 0
+        if gid and gid in sold and gid not in owned:
+            leaving.append((a, b, gid, _js_obj(block[a:b])))
+    if not leaving:
+        return src, []
+    for a, b, _, _ in reversed(leaving):
+        start = block.rfind('\n', 0, a) + 1   # the entry's line, its comma and newline
+        end = b + (block[b:b + 1] == ',')
+        while end < len(block) and block[end] in ' \t':
+            end += 1
+        end += block[end:end + 1] == '\n'
+        if block[start - 2:start] == '\n\n' and block[end:end + 1] == '\n':
+            end += 1   # one blank line between multi-line entries, not two
+        block = block[:start] + block[end:]
+    src = src[:m.start(1)] + block + src[m.end(1):]
+
+    em = re.search(r'const EXTRA_GAMES = \{\n(.*?)\n\};', src, re.S)
+    body = em.group(1)
+    have = {int(x) for x in re.findall(r'^  (\d+):\{', body, re.M)}
+    lines = [_extra_line(gid, d) for _, _, gid, d in leaving if gid not in have]
+    if lines:
+        head = next((l for l in body.split('\n') if l.startswith(SOLD_PREFIX)), None)
+        if head is None:
+            body = body + '\n' + SOLD_HEAD + '\n' + '\n'.join(lines)
+        else:
+            at = body.index(head) + len(head)
+            body = body[:at] + '\n' + '\n'.join(lines) + body[at:]
+        src = src[:em.start(1)] + body + src[em.end(1):]
+    return src, [(gid, d.get('name', '?')) for _, _, gid, d in leaving]
+
+
 def main():
     args = sys.argv[1:]
     auto, dry = '--auto' in args, '--dry-run' in args
@@ -539,6 +688,7 @@ def main():
 
     # Στιβ's new arrivals
     label = f'GAMES ({SHELF_OWNER})'
+    owned_now = None
     try:
         owned_now, first, lines = new_arrivals(token, src)
         if first:
@@ -567,6 +717,39 @@ def main():
     except Exception as e:
         say(f'{label}: skipped ({type(e).__name__}: {e})')
         all_ok = False
+
+    # Στιβ's sold games: off the shelf (needs what he owns now, so a copy
+    # bought again is never taken off)
+    label = f'GAMES ({SHELF_OWNER}) sold'
+    if owned_now is not None:
+        try:
+            sold_src, gone = plan_sold(src, sold_games(SHELF_OWNER, token), owned_now)
+            ids = {gid for gid, _ in gone}
+            names = ', '.join(n for _, n in gone)
+            if not gone:
+                if not auto:
+                    print(f'{label}: none on the shelf')
+            elif dry:
+                say(f'{label}: would take {len(gone)} off the shelf and out of the Board South votes: {names}')
+            else:
+                votes = read_votes(SHELF_VOTES)
+                voted = votes is not None and any(set(picks) & ids for picks in votes.values())
+                if votes is None or (voted and not drop_votes(SHELF_VOTES, votes, ids)):
+                    say(f'{label}: warning: could not update the Board South votes; {names} stay on the shelf until next time')
+                    all_ok = False
+                else:
+                    say(f'{label}: -{len(gone)} off the shelf (Previously owned on BGG)'
+                        + (', and out of the Board South votes' if voted else ''))
+                    for _, n in gone:
+                        say(f'    - {n}')
+                    src = sold_src
+                    changed = True
+        except (Pending, AuthError) as e:
+            say(f'{label}: {e}; will try again next time')
+            all_ok = False
+        except Exception as e:
+            say(f'{label}: skipped ({type(e).__name__}: {e})')
+            all_ok = False
 
     if changed and not dry:
         with open(GAMES_JS, 'w', encoding='utf-8') as f:
