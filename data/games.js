@@ -2058,7 +2058,6 @@ const LGEORGE_GAMES = {
   218509:{name:"Empires of the Void II",bggId:218509,year:2018,complexity:3.47,players:"2-5",playTime:"180 min",bggRating:7.4},
   245271:{name:"Forbidden Sky",bggId:245271,year:2018,complexity:2.52,players:"2-5",playTime:"60 min",bggRating:6.4},
   250458:{name:"Gùgōng",bggId:250458,year:2018,complexity:3.08,players:"1-5",playTime:"90 min",bggRating:7.4},
-  401175:{name:"Islebound: Emerald Edition",bggId:401175,year:2024,complexity:2.67,players:"2-4",playTime:"90 min",bggRating:7.6},
   411894:{name:"Kinfire Council",bggId:411894,year:2025,complexity:3.25,players:"2-6",playTime:"120 min",bggRating:7.8},
   238799:{name:"Messina 1347",bggId:238799,year:2021,complexity:3.61,players:"1-4",playTime:"140 min",bggRating:7.5},
   322076:{name:"On the Underground: Paris / New York",bggId:322076,year:2024,complexity:2.5,players:"2-5",playTime:"60 min",bggRating:7.5},
