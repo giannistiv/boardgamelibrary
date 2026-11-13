@@ -1,7 +1,7 @@
 let _chOpenCard = null; // which card's detail panel stays expanded across re-renders
 
-function computeChallenges(playerName) {
-  const year = String(new Date().getFullYear());
+function computeChallenges(playerName, year) {
+  year = String(year || new Date().getFullYear());
   const gameName = (id) => { const g = findGameByBggId(id); return (g && g.name) || ('Game #' + id); };
 
   const plays = [];

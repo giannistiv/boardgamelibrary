@@ -44,6 +44,7 @@ function computeWrapped(playerName, year) {
   let wSum = 0, wN = 0, heaviest = null, lightest = null;
   let oldest = null, newest = null;
   const rivalStats = {}; // opponent → {games, myWins, theirWins}
+  const expCount = {}, expBase = {}; // expansion bggId → plays, → its base game's bggId
 
   for (const p of plays) {
     const g = findGameByBggId(p.bggId);
@@ -60,6 +61,9 @@ function computeWrapped(playerName, year) {
     if (g && g.complexity) { wSum += g.complexity; wN++;
       if (!heaviest || g.complexity > heaviest.complexity) heaviest = g;
       if (!lightest || g.complexity < lightest.complexity) lightest = g;
+    }
+    if (typeof playExpansionsOf === 'function') {
+      for (const exId of playExpansionsOf(p.bggId, p.orig)) { expCount[exId] = (expCount[exId] || 0) + 1; expBase[exId] = p.bggId; }
     }
     if (g && g.year && g.year > 1900) {
       if (!oldest || g.year < oldest.year) oldest = g;
@@ -94,7 +98,8 @@ function computeWrapped(playerName, year) {
       if (!isOwner && isOwnerCo) continue; // exclude the owner from others' crew
       comp[s.n] = (comp[s.n] || 0) + 1;
       compMin[s.n] = (compMin[s.n] || 0) + mins;
-      if (isPvP && !noResult && !isNoResultSeat(s)) {
+      const sameTeam = p.me.tm && s.tm && String(s.tm) === String(p.me.tm);
+      if (isPvP && !noResult && !isNoResultSeat(s) && !sameTeam) {
         const r = rivalStats[s.n] || (rivalStats[s.n] = { games: 0, myWins: 0, theirWins: 0 });
         r.games++; if (p.me.w) r.myWins++; if (s.w) r.theirWins++;
       }
@@ -127,6 +132,9 @@ function computeWrapped(playerName, year) {
   const coopRatio = totalPlays ? coop / totalPlays : 0;
   const newRatio = topGames.length ? newToMe.length / topGames.length : 0;
   const topDesigner = sortEnt(designer)[0] || null;
+  const topExpId = sortEnt(expCount)[0] || null;
+  const topExpansion = topExpId ? { bggId: topExpId[0], count: topExpId[1], baseBggId: expBase[topExpId[0]],
+    name: ((typeof expansionsOf === 'function' && expansionsOf(expBase[topExpId[0]])) || []).find(e => String(e[0]) === String(topExpId[0]))?.[1] || null } : null;
   const mechCount = Object.keys(mech).length;
   const marathon = sortEnt(byDateMin)[0] || null; // [date, minutes]
 
@@ -187,7 +195,7 @@ function computeWrapped(playerName, year) {
     .filter(h => h.date.slice(0, 4) === year && h.kind !== 'first')
     .sort((a, b) => (b.kind === 'all') - (a.kind === 'all') || b.n - a.n);
 
-  let ch = null; try { ch = computeChallenges(playerName); } catch (_) {}
+  let ch = null; try { ch = computeChallenges(playerName, year); } catch (_) {}
 
   const bsNames = (typeof _allBoardSouthVoterNames === 'function') ? _allBoardSouthVoterNames() : new Set();
   const isBoardSouth = bsNames.has(playerName) || (typeof playerName === 'string' && playerName.includes(' - BS'));
@@ -219,7 +227,7 @@ function computeWrapped(playerName, year) {
     marathonHours: marathon ? Math.round(marathon[1] / 60) : 0, marathonDate: marathon ? marathon[0] : null,
     marathonPlays: marathon ? byDate[marathon[0]] : 0,
     lastYearPlays, lastYearHours: Math.round(lastYearMin / 60), rank, topDesigner, mechCount, oldest, newest,
-    topByTime, milestones
+    topByTime, milestones, topExpansion
   };
 }
 
@@ -392,6 +400,18 @@ function openWrappedModal(playerName, isOwnProfile) {
       <div class="wr-big" style="font-size:1.5rem">${_escapeHtml((lf.game && lf.game.name) || 'a new game')}</div>
       <div class="wr-label">discovered ${_escapeHtml(_fmtDateShort(lf.firstDate))} &middot; played ${lf.count}&times;</div>
       <div class="wr-lead">Some games you just know from the first turn.</div>`);
+  }
+
+  // Expansion of the year — the one you reached for most
+  if (d.topExpansion && d.topExpansion.name && d.topExpansion.count >= 3) {
+    const ex = d.topExpansion;
+    const base = findGameByBggId(ex.baseBggId);
+    slide(G.pink, `
+      <div class="wr-kicker">EXPANSION OF THE YEAR</div>
+      <div class="wr-cover-wrap"><img class="wr-cover" src="${cover(ex.bggId)}" onerror="__imgFallback(this, ${ex.bggId})"></div>
+      <div class="wr-big" style="font-size:1.4rem">${_escapeHtml(ex.name)}</div>
+      <div class="wr-label">on the table ${ex.count}&times;${base ? ` with <b>${_escapeHtml(base.name)}</b>` : ''}</div>
+      <div class="wr-lead">The box never stayed closed this year.</div>`);
   }
 
   // Genre/decade traveler — span between oldest & newest game played
