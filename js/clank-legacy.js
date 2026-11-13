@@ -9,20 +9,23 @@
 //     Contract or a passage gave during the game;
 //   - each player's Associate Status: promoted to Copper, Silver and Gold on
 //     their 5th, 11th and 18th checkmark (Dire Wolf's FAQ);
-//   - the Dran Enterprises Track: an X for a game where anyone scored 0;
-//   - the Contracts carried over to the next game.
+//   - the Dran Enterprises Track: an X for a game where anyone scored 0.
+// The Contracts aren't listed (the user, 13 Nov 2026: too much to write
+// down); the cards stay in the box with the Reserve.
 // Nothing of the story is here: the Book of Secrets has it, read as the game
 // says. The steps are the rulebook's ("End of a Campaign Game"), in short.
 //
-// A game is a play logged as "Game N" (Log a play's game list): its scores
-// and winner come from the play, so it's counted on the score sheet like any
-// other and goes to BG Stats the same way. The rest is the campaign's, in
-// Firebase, followed live while the tab is open:
+// A game is a play logged as "Game N". The tab logs it itself: the franchise's
+// players are already there, so only the points are typed (the user, 13 Nov
+// 2026, after Game 1: Log a play asked for the people again). Saving opens
+// BG Stats' QR code at once, as the Mini Rogue campaign does. The scores and
+// winner come from the play; the rest is the campaign's, in Firebase,
+// followed live while the tab is open:
 //   clankCampaigns/{id} = { name: the franchise, players: [..], chars: {key: name on the deck box},
 //     start, by, created, updated, status?: 'stopped', stopped?,
 //     games: { N: { goals: {key: true}, extra: {key: n}, spot: player, spotNote, side: 'over' | 'under', done } },
 //     assign: { playKey: N }   (a play logged without its game number)
-//     contracts: { id: { t, at } }, notes }
+//     notes }   (an old campaign may still carry contracts: {}; unused)
 // key: a player's original name as a Firebase key (_acctKey).
 
 const CL_BGGID = 266507;
@@ -38,6 +41,8 @@ let _clId = null;             // the campaign open; null: none (or the start for
 let _clTab = 'camp';          // 'camp' | 'reports' | 'notes'
 let _clDraft = null;          // the start form, while it's open
 let _clGameOpen = null;       // the game whose report is open on the Mission Reports tab
+let _clLog = null;            // the next game's points while they're typed in the tab:
+                              // { id, n, rows: {key: {s, out}}, win: [key] | null (the best score), date, l }
 let _clPanel = null;
 let _clLate = false;          // a change came in while typing: drawn when the field's left
 let _clES = null, _clESid = null, _clWatch = null;
@@ -389,26 +394,25 @@ function _clCampHtml(c, edit) {
   const next = _clNext(S.games);
   const last = S.games[S.games.length - 1];
   const reviewFirst = last && !((c.games || {})[last.n] || {}).done;
-  const contracts = Object.entries(c.contracts || {}).sort((a, b) => (a[1].at || 0) - (b[1].at || 0));
   const signed = typeof acctMe === 'function' && acctMe();
+  const logging = _clLog && _clLog.id === _clId && _clLog.n === next;
   const nextHtml = `<div class="cl-next">
       <div class="cl-next-n"><small>Next</small><b>Game ${next}</b>${next > CL_GAMES ? '<small>after the ten</small>' : ''}</div>
       <div class="cl-next-do">
         <ol class="cl-steps">
           <li>Read Game ${next}&rsquo;s Prologue: the Mission Reports say which passage, and it says which side of the board.</li>
-          <li>${contracts.length ? `Put the ${contracts.length} Contract${contracts.length === 1 ? '' : 's'} carried over above the board (below) and read ${contracts.length === 1 ? 'it' : 'them'} aloud.` : 'No Contracts carried over.'}</li>
+          ${S.games.length ? '<li>Put any Contracts carried over above the board and read them aloud.</li>' : ''}
           <li>Each player takes their own deck box${S.games.length ? '' : ' and writes their character&rsquo;s name on it'}.</li>
         </ol>
-        ${edit && signed ? `<button type="button" class="rv-btn" data-cl-log>Log Game ${next}</button><div class="rv-hint">Log it once it&rsquo;s played: the score sheet counts the points. Its Employee Reviews come up here.</div>`
+        ${edit && signed ? (logging ? '' : `<button type="button" class="rv-btn" data-cl-log>Log Game ${next}</button><div class="rv-hint">Once it&rsquo;s played: just everyone&rsquo;s points. Its Employee Reviews come up here.</div>`)
           : edit ? '<div class="rv-hint">Sign in to log the game.</div>' : ''}
       </div>
-    </div>`;
+    </div>${logging && edit && signed ? _clLogHtml(c, next) : ''}`;
   const reviewHtml = last ? _clReviewHtml(c, last, S, edit, true) : '';
   return `${reviewFirst ? reviewHtml + nextHtml : nextHtml + (last ? reviewHtml : '')}
     ${S.loose.length ? `<div class="cl-loose">${S.loose.length} play${S.loose.length === 1 ? '' : 's'} of yours without a game number: the Mission Reports tab sets ${S.loose.length === 1 ? 'it' : 'them'}.</div>` : ''}
     ${_clStatusHtml(c, S, edit)}
     ${_clDranHtml(S)}
-    ${_clContractsHtml(c, contracts, edit)}
     ${edit ? `<div class="cl-sec"><div class="rv-sub">The franchise&rsquo;s players</div>
       ${_clPeopleHtml(_clList(c.players), 'data-cl-x', 'data-cl-who="camp"', true)}
       <label class="pc-from">Its plays count from <input type="date" class="rv-in" data-cl-from value="${esc(c.start || '')}" max="${_clToday()}"></label></div>` : ''}
@@ -454,7 +458,7 @@ function _clReviewHtml(c, g, S, edit, isLast) {
       ${promos.length ? `<li><b>Promoted!</b> ${promos.map(p => `${esc(p.n)} reaches <span class="cl-rank cl-r-${p.name.toLowerCase()}">${p.name}</span> (the ${_clOrd(p.at)} checkmark): read the entry shown there on the deck box.`).join(' ')}</li>` : ''}
       <li><b>Reset</b>: every deck back to its ten starting cards; no tokens are kept.</li>
       ${zero ? '<li class="cl-dranstep"><b>Someone scored 0</b>: add one X to the Dran Enterprises Track (the rulebook&rsquo;s back cover) and read the passage it shows.</li>' : ''}
-      <li><b>Contracts still in the row</b> carry over to the next game: keep them in the list below.</li>
+      <li><b>Contracts still in the row</b> carry over to the next game: they stay in the box with your Reserve.</li>
     </ol>
     ${edit && isLast && !x.done ? `<button type="button" class="rv-btn rv-btn-sm" data-cl-done="${g.n}">Reviews done</button>` : ''}
   </div>`;
@@ -488,12 +492,88 @@ function _clDranHtml(S) {
   return `<div class="cl-sec cl-dran"><div class="rv-sub">Dran Enterprises Track</div>
     <div class="cl-xs">${S.dran ? S.xs.map(n => `<span class="cl-x" title="Game ${n}">&#10007;</span>`).join('') : '<span class="cr-note">No X yet: nobody has scored 0.</span>'}</div></div>`;
 }
-function _clContractsHtml(c, contracts, edit) {
+// ── Logging the next game in the tab: the franchise's players, their points ──
+function _clLogStart(c, n) {
+  const { games } = _clGames(c);
+  const prev = games.length ? games[games.length - 1].p : null;
+  const rows = {};
+  for (const name of _clList(c.players)) rows[_clKey(name)] = { s: '', out: false };
+  _clLog = { id: _clId, n, rows, win: null, date: _clToday(),
+    l: (prev && prev.l) || (typeof _lpPlaces === 'function' ? _lpPlaces()[0] : '') || '' };
+}
+const _clLogPts = (v) => (typeof _recScore === 'function' ? _recScore(v) : (isFinite(parseFloat(v)) ? parseFloat(v) : null));
+// Who's starred: the ones picked, or else the best score (a tie stars both).
+function _clLogWinners(c, L) {
+  const playing = _clList(c.players).map(_clKey).filter(k => L.rows[k] && !L.rows[k].out);
+  if (L.win) return new Set(L.win.filter(k => playing.includes(k)));
+  let best = null;
+  for (const k of playing) { const v = _clLogPts(L.rows[k].s); if (v !== null && (best === null || v > best)) best = v; }
+  return new Set(best === null ? [] : playing.filter(k => _clLogPts(L.rows[k].s) === best));
+}
+function _clLogReady(c, L) {
+  const playing = _clList(c.players).map(_clKey).filter(k => L.rows[k] && !L.rows[k].out);
+  return playing.length > 0 && playing.every(k => _clLogPts(L.rows[k].s) !== null) && !!L.date;
+}
+function _clLogHtml(c, n) {
   const esc = _escapeHtml;
-  return `<div class="cl-sec"><div class="rv-sub">Contracts carried over</div>
-    ${contracts.length ? `<div class="cl-contracts">${contracts.map(([id, k]) => `<span class="cr-person">${esc(k.t)}${edit ? `<button type="button" class="cr-person-x" data-cl-cdel="${esc(id)}" aria-label="Done with it">&times;</button>` : ''}</span>`).join('')}</div>` : '<div class="cr-note">None in the row.</div>'}
-    ${edit ? '<input class="rv-in cl-cadd" data-cl-cadd placeholder="A Contract left in the row (its name)" maxlength="60" enterkeyhint="done">' : ''}
-    <div class="rv-hint">The cards stay in the box with your Reserve; this is just the list. Tap × once one&rsquo;s completed.</div></div>`;
+  const L = _clLog;
+  const wins = _clLogWinners(c, L);
+  const rows = _clList(c.players).map(name => {
+    const k = _clKey(name), r = L.rows[k] || { s: '', out: false }, ch = _clChar(c, name);
+    return `<div class="cl-log-row${r.out ? ' out' : ''}">
+      <button type="button" class="cl-log-who" data-cl-lout="${esc(k)}" aria-pressed="${!r.out}" title="${r.out ? 'Tap: they played after all' : 'Tap if they sat this one out'}"><b>${esc(name)}</b><small>${r.out ? 'sat this one out' : esc(ch)}</small></button>
+      <input class="rv-in cl-log-s" data-cl-ls="${esc(k)}" value="${esc(r.s)}" inputmode="numeric" placeholder="points" maxlength="12" aria-label="${esc(name)}'s points"${r.out ? ' disabled' : ''}>
+      <button type="button" class="cl-log-star${wins.has(k) ? ' on' : ''}" data-cl-lwin="${esc(k)}" aria-pressed="${wins.has(k)}" aria-label="${esc(name)} won"${r.out ? ' disabled' : ''}>&#9733;</button>
+    </div>`;
+  }).join('');
+  return `<div class="cl-log">
+    <div class="cl-log-title">Game ${n}: the points</div>
+    <div class="cl-log-rows">${rows}</div>
+    <div class="rv-fields pc-fields">
+      <label class="rv-field"><span>Date</span><input type="date" class="rv-in" data-cl-ldate value="${esc(L.date)}" max="${_clToday()}"></label>
+      <label class="rv-field"><span>Where</span><input class="rv-in" data-cl-lplace value="${esc(L.l)}" placeholder="Optional" maxlength="60"></label>
+    </div>
+    <div class="cl-log-acts"><button type="button" class="rv-btn" data-cl-lsave${_clLogReady(c, L) ? '' : ' disabled'}>Save Game ${n}</button><button type="button" class="rv-link" data-cl-lcancel>Cancel</button></div>
+    <div class="rv-hint">Knocked out in the Depths: 0. The best score gets the &#9733;; tap a star to change it. Tap a name if they sat this one out. Then BG Stats&rsquo; QR code opens. <button type="button" class="rv-link" data-cl-lsheet>Count it on the score sheet instead</button></div>
+  </div>`;
+}
+// Typing a score: the stars and the Save button follow, without drawing the form again.
+function _clLogSync(panel, c) {
+  const L = _clLog;
+  if (!L) return;
+  const wins = _clLogWinners(c, L);
+  panel.querySelectorAll('[data-cl-lwin]').forEach(b => { const on = wins.has(b.dataset.clLwin); b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
+  const save = panel.querySelector('[data-cl-lsave]');
+  if (save) save.disabled = !_clLogReady(c, L);
+}
+async function _clLogSave(panel, c, btn) {
+  const L = _clLog;
+  if (!L || !_clLogReady(c, L) || typeof logPlaySave !== 'function') return;
+  const wins = _clLogWinners(c, L);
+  const sc = _clList(c.players).filter(n => !(L.rows[_clKey(n)] || {}).out).map(n => {
+    const k = _clKey(n), seat = { n, s: String(L.rows[k].s).trim(), w: wins.has(k) };
+    if (_clChar(c, n)) seat.r = _clChar(c, n);
+    return seat;
+  });
+  const d = new Date(), pad = (x) => String(x).padStart(2, '0');
+  const rec = { bggId: CL_BGGID, date: L.date, t: `${L.date} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`, b: `Game ${L.n}`, sc };
+  if (L.l.trim()) rec.l = L.l.trim().slice(0, 60);
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  let r;
+  try { r = await logPlaySave(rec); }
+  catch (e) {
+    btn.disabled = false;
+    btn.textContent = `Save Game ${L.n}`;
+    _clToast(`Not saved: ${e.message || 'check the connection and try again'}.`);
+    return;
+  }
+  _clLog = null;
+  _clRender(panel);
+  if (r.pending) _clToast('No signal, so the game is kept on this phone. It goes up by itself when you\'re back online.', true);
+  else _clToast(`Game ${rec.b.slice(5)} saved.${r.moments && r.moments[0] ? ` ${r.moments[0].text}` : ''}`, true);
+  const i = (PLAY_HISTORY[CL_BGGID] || []).findIndex(e => e.mp === r.id);
+  if (i >= 0 && typeof openBgsShare === 'function') openBgsShare(CL_BGGID, i);
 }
 
 // ── Mission Reports: the games so far, each opening to its report ──
@@ -583,12 +663,37 @@ async function _clClick(panel, ev) {
   if (ds.clGame) { const n = Number(ds.clGame); _clGameOpen = _clGameOpen === n ? null : n; _clRender(panel); return; }
   const c = _clCamps[_clId];
   if (!c || !_clCanEdit(c)) return;
-  if (ds.clLog !== undefined) {
-    const { games } = _clGames(c);
-    const names = _clList(c.players);
+  if (ds.clLog !== undefined) { _clLogStart(c, _clNext(_clGames(c).games)); _clRender(panel); return; }
+  if (ds.clLcancel !== undefined) { _clLog = null; _clRender(panel); return; }
+  if (ds.clLsave !== undefined) { await _clLogSave(panel, c, t); return; }
+  if (ds.clLout && _clLog) {
+    const r = _clLog.rows[ds.clLout];
+    if (r) r.out = !r.out;
+    _clRender(panel);
+    return;
+  }
+  if (ds.clLwin && _clLog) {
+    const cur = _clLogWinners(c, _clLog);
+    if (cur.has(ds.clLwin)) cur.delete(ds.clLwin); else cur.add(ds.clLwin);
+    _clLog.win = [...cur];
+    _clLogSync(panel, c);
+    return;
+  }
+  if (ds.clLsheet !== undefined) {
+    // Log a play with the score sheet, the franchise already in it
+    const L = _clLog;
+    const names = _clList(c.players).filter(n => !(L && (L.rows[_clKey(n)] || {}).out));
     const roles = {};
     for (const n of names) if (_clChar(c, n)) roles[n] = _clChar(c, n);
-    if (typeof logPlayWith === 'function') logPlayWith({ bggId: CL_BGGID, names, roles, b: `Game ${_clNext(games)}`, tab: 'campaign' });
+    const n = _clNext(_clGames(c).games);
+    _clLog = null;
+    // saved: BG Stats' QR code, as from the tab
+    const after = (id) => {
+      const i = (PLAY_HISTORY[CL_BGGID] || []).findIndex(e => e.mp === id);
+      if (i >= 0 && typeof openBgsShare === 'function') openBgsShare(CL_BGGID, i);
+    };
+    if (typeof logPlayWith === 'function') logPlayWith({ bggId: CL_BGGID, names, roles, b: `Game ${n}`, l: L ? L.l : '', tab: 'campaign', after });
+    if (typeof scoreSheetOpen === 'function') setTimeout(() => scoreSheetOpen(), 0);
     return;
   }
   if (ds.clSide) {
@@ -606,8 +711,6 @@ async function _clClick(panel, ev) {
     await _clPatch({ [`games/${n}/extra/${k}`]: v || null });
   } else if (ds.clDone) {
     await _clPatch({ [`games/${ds.clDone}/done`]: true });
-  } else if (ds.clCdel) {
-    await _clPatch({ [`contracts/${ds.clCdel}`]: null });
   } else if (ds.clX) {
     const left = _clList(c.players).filter(p => p !== ds.clX);
     if (left.length < 2) { _clToast('A franchise keeps two players at least.'); return; }
@@ -638,6 +741,9 @@ function _clInput(panel, ev) {
   if (t.matches('[data-cl-draft-char]')) { _clDraft.chars[t.dataset.clDraftChar] = t.value; return; }
   const c = _clCamps && _clCamps[_clId];
   if (!c || !_clCanEdit(c)) return;
+  if (_clLog && t.matches('[data-cl-ls]')) { const r = _clLog.rows[t.dataset.clLs]; if (r) r.s = t.value; _clLogSync(panel, c); return; }
+  if (_clLog && t.matches('[data-cl-ldate]')) { _clLog.date = t.value; _clLogSync(panel, c); return; }
+  if (_clLog && t.matches('[data-cl-lplace]')) { _clLog.l = t.value; return; }
   // typed fields go up a moment after the typing stops
   const later = (key, path, v) => {
     clearTimeout(_clTimers[key]);
@@ -659,14 +765,3 @@ async function _clChange(panel, ev) {
     _clRender(panel);
   }
 }
-// A Contract added to the list (Enter).
-document.addEventListener('keydown', (e) => {
-  if (e.key !== 'Enter' || !e.target.matches || !e.target.matches('.cl [data-cl-cadd]')) return;
-  e.preventDefault();
-  const v = e.target.value.trim().slice(0, 60);
-  const c = _clCamps && _clCamps[_clId];
-  if (!v || !c || !_clCanEdit(c)) return;
-  const id = `k${Date.now().toString(36)}`;
-  e.target.value = '';
-  _clPatch({ [`contracts/${id}`]: { t: v, at: Date.now() } }).then(() => { if (_clPanel) _clRender(_clPanel); });
-});

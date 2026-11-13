@@ -216,7 +216,7 @@ function logPlayWith(o) {
   const roles = o.roles || {};
   _lp = { id: null, bggId: Number(o.bggId), date: _lpToday(), time: _lpNow(), d: '', lenSet: false, l: o.l || _lpPlaces()[0] || '', b: o.b || '', c: '',
     sc: (o.names || []).map(n => ({ n, s: '', w: false, r: roles[n] || '', tm: '' })), roles: Object.values(roles).some(Boolean), teams: false,
-    gameWon: false, x: [], tab: o.tab || '' };
+    gameWon: false, x: [], tab: o.tab || '', after: typeof o.after === 'function' ? o.after : null };
   _lpUsualSeats();
   _lpShow();
 }
@@ -847,6 +847,7 @@ async function _lpSave() {
     _lpMerge(id, rec);
     _sortPlayHistory();
     const moments = _lp.id ? [] : _lpMoments(id, rec);
+    const after = _lp.id ? null : _lp.after;   // logPlayWith's caller, told about a new play
     // the others in it hear about it (js/notify.js), with what it did
     if (!_lp.id && typeof notifyPlayLogged === 'function') notifyPlayLogged(id, (findGameByBggId(rec.bggId) || {}).name || '', moments[0] && moments[0].text);
     _lpClose();
@@ -855,6 +856,7 @@ async function _lpSave() {
       if (moments.length) _acctToast(['Play saved.', ...moments.map(m => `${m.icon} ${m.text}`)].join('\n'), 8000);
       else _acctToast(_lp.id ? 'Saved the changes.' : 'Play saved. It counts everywhere now.');
     }
+    if (after) setTimeout(() => after(id), 0);
   } catch (err) {
     if (_lpOffline(err)) { _lpKeep(rec, _lp.id, picked); return; }
     _lpSay(err.message || 'The save failed. Try again.');
