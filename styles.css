@@ -1941,6 +1941,7 @@
   .mr-stat .cr-lbl i{display:block;font-style:normal;font-weight:600;text-transform:none;letter-spacing:0;font-size:0.6rem;color:var(--text-3);white-space:nowrap}
   .mr-stat .rv-dot{width:1.7rem;height:1.7rem}
   .mr-potions{margin-top:0.2rem}
+  .mr-lvl{margin-top:0.45rem}
   .mr-item .rv-in{flex:1 1 10rem}
   .mr-noto{display:flex;gap:0.3rem}
   .mr-noto-n{width:2.3rem;height:2.3rem;border-radius:8px;border:1px solid var(--line-2);background:var(--card-2);color:var(--text-3);font:inherit;font-family:var(--font-display);font-weight:700;font-size:1rem;cursor:pointer}
@@ -1967,6 +1968,69 @@
   .mr-relic .cr-flag{margin-top:0}
   .mr-relic .cr-flag .cr-person-x{margin-left:auto}
   .mr-relic-note{width:100%;box-sizing:border-box;margin-top:0.3rem}
+  /* ── Gloomhaven: Buttons & Bugs campaigns (js/buttons-bugs-campaign.js; the shell is Codenames' .cr-*, Rove's .rv-*, a little of Mini Rogue's .mr-*) ── */
+  /* the deck: 20 cards, won, skipped, up next, ahead */
+  .bb-deck{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:0.25rem}
+  .bb-tile{position:relative;aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;border-radius:6px;border:1px dashed var(--line-3);color:var(--text-4);font-family:var(--font-display);font-weight:700;font-size:0.8rem;min-width:0}
+  .bb-tile.won{border:1px solid var(--win);background:var(--win-soft);color:var(--win)}
+  .bb-tile.won::after{content:'\2713';position:absolute;top:1px;right:3px;font-size:0.55rem}
+  .bb-tile.skip{border:1px solid var(--line-2);background:var(--card-2);text-decoration:line-through;opacity:0.65}
+  .bb-tile.at{border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink)}
+  .bb-legend{display:flex;align-items:center;flex-wrap:wrap;gap:0.25rem 0.45rem;margin-top:0.45rem;font-size:0.66rem;color:var(--text-3)}
+  .bb-key{display:inline-block;width:0.6rem;height:0.75rem;border-radius:2px;margin-left:0.3rem}
+  .bb-key:first-child{margin-left:0}
+  .bb-key.won{background:var(--win-soft);border:1px solid var(--win)}
+  .bb-key.skip{background:var(--card-2);border:1px solid var(--line-2)}
+  .bb-key.at{background:var(--accent)}
+  /* the scenario: a story card to read first, the card's rules, what the level comes to */
+  .bb-story{margin-top:0.8rem;padding:0.6rem 0.65rem;border-radius:8px;border:1px solid var(--accent-line);background:var(--accent-soft)}
+  .bb-story > b{font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--accent)}
+  .bb-story .mr-read{margin-top:0.4rem}
+  .bb-story .mr-fx{margin-top:0.45rem}
+  .bb-chars .cr-seg-b{flex:0 1 auto}
+  .bb-chars .cr-seg-b.on{color:var(--cr-c,var(--text))}
+  .bb-facts .cr-fact{grid-template-columns:4.9rem minmax(0,1fr)}
+  .bb-level{margin-top:0.35rem}
+  /* the setup: who, the level 2 cards, the items, the difficulty */
+  .bb-prep{margin-top:0.9rem;border-top:1px solid var(--line)}
+  .bb-prep > .rv-sub:first-child{margin-top:0.8rem}
+  .bb-chips{display:flex;flex-wrap:wrap;gap:0.3rem}
+  .bb-chip{display:inline-flex;align-items:center;gap:0.3rem;padding:0.32rem 0.6rem;border-radius:999px;border:1px solid var(--line-2);background:var(--card-2);color:var(--text-2);font:inherit;font-size:0.72rem;font-weight:600;line-height:1.25;text-align:left;cursor:pointer;max-width:100%}
+  .bb-chip i{font-style:normal;font-size:0.6rem;font-weight:800;color:var(--text-4)}
+  .bb-chip.on{border-color:var(--accent);background:var(--accent-soft);color:var(--text);box-shadow:inset 0 0 0 1px var(--accent)}
+  .bb-chip.on i{color:var(--accent)}
+  .bb-chip.no{opacity:0.45}
+  .bb-chip-add{border-style:dashed;color:var(--text-3)}
+  .bb-chip-static{cursor:default}
+  .bb-chip-x{margin:-0.2rem -0.3rem -0.2rem 0;padding:0 0.25rem;border:0;background:none;color:var(--text-3);font:inherit;font-size:0.9rem;line-height:1;cursor:pointer}
+  .bb-diff{display:flex;align-items:center;gap:0.5rem}
+  .bb-diff .cr-n{min-width:2rem}
+  .bb-diff-name{font-size:0.76rem;font-weight:700;color:var(--text-2)}
+  .bb-diff-name.d1{color:var(--loss)}
+  .bb-diff-name.d-1{color:var(--win)}
+  .bb-rounds{width:4.5rem;flex:0 0 auto}
+  /* the Items tab */
+  .bb-items{display:flex;flex-direction:column;gap:0.35rem}
+  .bb-item{display:flex;flex-direction:column;gap:0.15rem;padding:0.5rem 0.6rem;border-radius:var(--r);background:var(--card);border:1px solid var(--line);border-left:4px solid #4f8fa8}
+  .bb-item.k1{border-left-color:#d0763a}
+  .bb-item.k2{border-left-color:#c8463a}
+  .bb-item.on{border-color:var(--accent-line);border-left-color:var(--accent);background:var(--accent-soft)}
+  .bb-item-h{display:flex;align-items:baseline;justify-content:space-between;gap:0.5rem}
+  .bb-item-h b{font-size:0.84rem}
+  .bb-eq{flex:0 0 auto;font-size:0.6rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--accent)}
+  .bb-item-k{font-size:0.64rem;font-weight:700;color:var(--text-3)}
+  .bb-item-t{font-size:0.76rem;line-height:1.4;color:var(--text-2)}
+  /* the Characters tab */
+  .bb-charlist{display:flex;flex-direction:column;gap:0.45rem}
+  .bb-charrow{padding:0.5rem 0.6rem;border-radius:var(--r);background:var(--card);border:1px solid var(--line);border-left:4px solid var(--cr-c)}
+  .bb-charrow-h{display:flex;align-items:baseline;flex-wrap:wrap;gap:0.2rem 0.6rem;margin-bottom:0.35rem}
+  .bb-charrow-h b{font-size:0.88rem;color:var(--cr-c)}
+  .bb-charrow .bb-chips:empty{display:none}
+  .bb-pairs{display:flex;flex-direction:column;gap:0.3rem}
+  .bb-pair{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:0.45rem;font-size:0.76rem}
+  .bb-pair > span:not(.bb-pair-to){display:flex;flex-direction:column;min-width:0}
+  .bb-pair i{font-style:normal;font-size:0.64rem;color:var(--text-3)}
+  .bb-pair-to{color:var(--text-4)}
 
   /* ── Spirit Island conquest board (js/spirit-island.js) ── */
   .si-board{margin-bottom:1.1rem;padding:0.8rem 0.9rem;border-radius:12px;background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.07)}

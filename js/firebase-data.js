@@ -45,8 +45,9 @@ async function loadAllRatings() {
 // Oathsworn campaigns and Crowdfunding's put-away news since 3 Nov 2026.
 // Score sheets counted together (js/score-sheet.js) have had their own node
 // since 6 Nov 2026 too, and the Clank! Legacy and Mini Rogue campaigns
-// (js/clank-legacy.js, js/mini-rogue-campaign.js) since 11 Nov 2026.
-const FB_SPARE = {};
+// (js/clank-legacy.js, js/mini-rogue-campaign.js) since 11 Nov 2026. The
+// Buttons & Bugs campaigns (js/buttons-bugs-campaign.js) wait here.
+const FB_SPARE = { bbCampaigns: '_bglBbCampaigns' };
 const _fbDenied = new Set();   // nodes that refused a write this session: go straight to the spare
 function _fbRoot(path) { return path.split('/')[0]; }
 function _fbSpare(path) {

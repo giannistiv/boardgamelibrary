@@ -843,7 +843,8 @@ function openModal(game) {
   const crHtml = typeof buildCrCampaignHtml === 'function' ? buildCrCampaignHtml(game) : '';
   const mrHtml = typeof buildMrCampaignHtml === 'function' ? buildMrCampaignHtml(game) : '';
   const clHtml = typeof buildClCampaignHtml === 'function' ? buildClCampaignHtml(game) : '';
-  const campaignHtml = roveHtml || crHtml || mrHtml || clHtml;
+  const bbHtml = typeof buildBbCampaignHtml === 'function' ? buildBbCampaignHtml(game) : '';
+  const campaignHtml = roveHtml || crHtml || mrHtml || clHtml || bbHtml;
   const tabs = [['overview', 'Overview'], ['plays', `Plays${plays && plays.length ? ` <span class="gm-tab-n">${plays.length}</span>` : ''}`]]
     .concat(campaignHtml ? [['campaign', 'Campaign']] : [])
     .concat(game.bggId > 0 ? [['rules', 'Rules']] : []);
@@ -914,6 +915,7 @@ function openModal(game) {
   if (crHtml) wireCrCampaign(content);
   if (mrHtml) wireMrCampaign(content);
   if (clHtml) wireClCampaign(content);
+  if (bbHtml) wireBbCampaign(content);
   if (leviathanHtml) wireLeviathanWilds(content);
   if (Number(game.bggId) === SKY_TEAM_BGGID) wireSkyTeam(content);
   if (typeof wireProgressBoards === 'function') wireProgressBoards(content);

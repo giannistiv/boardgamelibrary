@@ -201,7 +201,7 @@ const MR_COUNCIL_CHAPTERS = [
   { n: '21', kind: 'play', place: 'The Sacrificial Pit', side: 'Cathedral', floors: 1, read: 'The Loremaster\'s last whisper: "another trap…" The floor opens beneath you.',
     fx: { hp: -3 }, setup: ['Lose 3 HP.', 'Start at Floor 4, Area 8.'], goal: 'Reach the King\'s Remains, and do not start the Combat.', win: '30' },
   { n: '30', kind: 'play', place: 'The Dark Alleys', side: 'City', floors: 8, final: true, read: 'The King seizes you by the throat and drains your strength. You wake in the Dark Alleys, as if in a dream.',
-    fx: { set: { xp: 0 } }, setup: ['Lose all XP: reset it to 0.', 'Start at Floor 1, Area 1.'],
+    fx: { set: { xp: 0, level: 1 } }, setup: ['Lose all XP: reset it to 0 (Level 1).', 'Start at Floor 1, Area 1.'],
     special: ['Defeat the King\'s Remains at the end of Area 10, then set up the Cathedral mat at Floor 1, Area 1, and reset your XP to 1.'],
     goal: 'Defeat the King\'s Remains on the Cathedral mat.', win: '37', bossName: 'the King\'s Remains' },
   { n: '37', kind: 'end', place: 'The Sacrificial Pit', read: 'The High Priestess takes the Og\'s Blood: the Church of the Sacred Stone reclaims its dominion. She sends you through a purplish portal: "The Oroa await."' },
@@ -293,7 +293,6 @@ const _mrChar = (id) => MR_CHARS.find(x => x.id === id) || null;
 const _mrCharName = (c) => { const ch = _mrChar(c && c.char); return ch ? ch.name : (c && c.charName) || 'Adventurer'; };
 const _mrCh = (c, n) => _mrG(c).chapters.find(x => x.n === String(n)) || null;
 const _mrMe = () => (typeof _navPlayer === 'function' ? _navPlayer() : null);
-const _mrLevel = (xp) => (xp >= 18 ? 3 : xp >= 6 ? 2 : 1);
 const _mrList = (v) => (Array.isArray(v) ? v : Object.values(v || {}));
 function _mrDate(v) {
   if (!v) return '';
@@ -313,8 +312,20 @@ function _mrLead(c, to) {
   if (typeof to === 'string') return to;
   return to[c.char] || null;
 }
-// Perk Points for a game: a point per Floor completed, a point per Level past the first.
-const _mrPP = (floors, level) => Math.max(0, floors || 0) + Math.max(0, (level || 1) - 1);
+// Perk Points for a game: a point per Floor completed, and a point per Level
+// gained in the chapter. Mini Rogue's chapters start at Level 1 (from = 1);
+// The Council's carry the Level on, so only the Levels gained since the
+// chapter started count (the sheet: "1 for every Level up").
+const _mrPP = (floors, level, from = 1) => Math.max(0, floors || 0) + Math.max(0, (level || 1) - (from || 1));
+// The Council's Level, carried from chapter to chapter: the sheet's, else the
+// highest one saved since the campaign (re)started (campaigns from before the
+// sheet kept it).
+function _mrLvl(c) {
+  const st = c.stats || {};
+  if (st.level) return st.level;
+  const since = c.restarted || 0;
+  return Math.max(1, ...Object.values(c.log || {}).filter(l => l && l.at > since && l.level).map(l => l.level));
+}
 // The chapters reached, in order ('†': a death that restarted the campaign).
 function _mrRoad(c) {
   const out = [];
@@ -391,7 +402,7 @@ function _mrCheck(c, cond) {
 // "−3 Gold · HP 20 · Council Token"
 function _mrFxText(fx) {
   if (!fx) return '';
-  const name = { hp: 'HP', xp: 'XP', food: 'Food', gold: 'Gold', armor: 'Armor' };
+  const name = { hp: 'HP', xp: 'XP', food: 'Food', gold: 'Gold', armor: 'Armor', level: 'Level' };
   const out = [];
   for (const k of Object.keys(name)) if (fx[k]) out.push(`${fx[k] > 0 ? '+' : '−'}${Math.abs(fx[k])} ${name[k]}`);
   for (const [k, v] of Object.entries(fx.set || {})) out.push(k === 'potions' ? 'no Potions' : `${name[k]} ${v}`);
@@ -596,7 +607,7 @@ function _mrCampHtml(c, edit) {
     ${edit ? `<div class="pc-foot">${c.status ? '' : '<button type="button" class="rv-link" data-mr-stop>Stop this campaign</button>'}<button type="button" class="rv-link pc-del" data-mr-delete>Delete this campaign</button></div>` : ''}`;
 }
 function _mrResText(c, l) {
-  const lv = `Level ${l.level || 1}`;
+  const lv = l.lvlFrom && l.lvlFrom !== l.level ? `Level ${l.lvlFrom} → ${l.level}` : `Level ${l.level || 1}`;
   if (l.won) return `won · ${lv}`;
   const ch = _mrCh(c, l.ch);
   if (l.boss) return `killed by ${(ch && ch.bossName) || 'the Boss'} · ${lv}`;
@@ -707,7 +718,9 @@ function _mrResultHtml(c, ch, edit) {
   const g = _mrG(c);
   const span = g.sheet ? ch.floors || 0 : ch.last - (ch.start || 1) + 1;
   if (!_mrRes || _mrRes.id !== _mrId || _mrRes.ch !== String(c.at)) {
-    _mrRes = { id: _mrId, ch: String(c.at), out: null, floors: 0, level: g.sheet ? _mrLevel(_mrStats(c).xp || 0) : 1, pick: null };
+    // The Council: the Level when the chapter started (kept then), and where it is now
+    const from = g.sheet ? c.lvlFrom || _mrLvl(c) : 1;
+    _mrRes = { id: _mrId, ch: String(c.at), out: null, floors: 0, from, level: g.sheet ? Math.max(from, _mrLvl(c)) : 1, pick: null };
   }
   const r = _mrRes;
   const outs = [['won', 'Won']].concat(ch.boss ? [['boss', `Killed by ${ch.bossName || 'the Boss'}`]] : []).concat([['died', 'Died']]);
@@ -718,20 +731,22 @@ function _mrResultHtml(c, ch, edit) {
       : `<div class="cr-ask-q">Where does the book send you?</div><div class="cr-seg">${[...new Set(Object.values(ch.win))].map(n => `<button type="button" class="cr-seg-b${r.pick === n ? ' on' : ''}" data-mr-res-pick="${n}">Chapter ${n}</button>`).join('')}</div>`;
   } else if (r.out === 'boss') lead = `Then chapter ${esc(ch.boss)}.`;
   else if (r.out === 'died') lead = g.sheet ? 'Then the campaign starts over from chapter 1: your starting stats, an empty Inventory, Notoriety back to 1. Skills and Perk Points stay.' : 'Then the chapter again.';
-  // a won fight with no exploration earns no Perk Points
+  // a won fight with no exploration earns no Perk Points (the Level it gains stays on the sheet)
   const noPP = r.out === 'won' && span === 0;
-  const pp = noPP ? 0 : _mrPP(r.floors, r.level);
+  const pp = noPP ? 0 : _mrPP(r.floors, r.level, r.from);
+  const gained = Math.max(0, r.level - r.from);
+  const lvlRow = (label, attr, v) => `<div class="cr-row"><span class="cr-lbl cr-lbl-wide">${label}</span>
+      <span class="cr-seg cr-seg-sm">${[1, 2, 3].map(n => `<button type="button" class="cr-seg-b${v === n ? ' on' : ''}" ${attr}="${n}">${n}</button>`).join('')}</span></div>`;
   return `<div class="mr-result">
     <div class="cr-ask-q">How did it go?</div>
     <div class="cr-seg">${outs.map(([k, l]) => `<button type="button" class="cr-seg-b${r.out === k ? ' on' : ''}" data-mr-res-out="${k}">${esc(l)}</button>`).join('')}</div>
     ${r.out ? `
-    ${noPP ? '<div class="rv-hint">No exploration in this chapter: winning it earns no Perk Points.</div>' : `
+    ${noPP ? `<div class="rv-hint">No exploration in this chapter: winning it earns no Perk Points.</div>${g.sheet ? lvlRow('Level now', 'data-mr-res-level', r.level) : ''}` : `
     <div class="cr-row"><span class="cr-lbl cr-lbl-wide">Floors completed${span ? ` <span class="cr-note">(of ${span})</span>` : ''}</span>
       <button type="button" class="rv-dot" data-mr-res-floors="-1" aria-label="One less"${r.floors > 0 ? '' : ' disabled'}>&minus;</button><b class="cr-n">${r.floors}</b>
       <button type="button" class="rv-dot" data-mr-res-floors="1" aria-label="One more"${r.floors < Math.max(span, 4) ? '' : ' disabled'}>+</button></div>
-    <div class="cr-row"><span class="cr-lbl cr-lbl-wide">Level reached</span>
-      <span class="cr-seg cr-seg-sm">${[1, 2, 3].map(n => `<button type="button" class="cr-seg-b${r.level === n ? ' on' : ''}" data-mr-res-level="${n}">${n}</button>`).join('')}</span></div>
-    <div class="mr-pp-sum"><b>+${pp}</b> Perk Point${pp === 1 ? '' : 's'}<span class="cr-note">${r.floors} for the Floors, ${Math.max(0, r.level - 1)} for the Levels</span></div>`}
+    ${g.sheet ? lvlRow('Level when it started', 'data-mr-res-from', r.from) + lvlRow('Level now', 'data-mr-res-level', r.level) : lvlRow('Level reached', 'data-mr-res-level', r.level)}
+    <div class="mr-pp-sum"><b>+${pp}</b> Perk Point${pp === 1 ? '' : 's'}<span class="cr-note">${r.floors} for the Floors, ${gained} for the Level${gained === 1 ? '' : 's'} ${g.sheet ? 'gained' : 'past the first'}</span></div>`}
     <div class="mr-lead">${lead}</div>
     <button type="button" class="rv-btn cr-begin" data-mr-save>Save the result</button>` : ''}
     <button type="button" class="rv-link" data-mr-cancel>Not playing it after all</button>
@@ -742,12 +757,14 @@ function _mrResultHtml(c, ch, edit) {
 function _mrCharHtml(c, edit) {
   const esc = _escapeHtml;
   const st = _mrStats(c), start = _mrStartStats(c), inv = c.inv || {}, noto = c.noto || 1;
-  const lvl = _mrLevel(st.xp || 0);
-  const rows = MR_STATS.map(([k, label, lo, hi]) => `<div class="mr-stat"><span class="cr-lbl">${label}${k === 'xp' ? `<i>Level ${lvl}</i>` : k === 'hp' ? `<i>start ${start.hp}</i>` : ''}</span>
+  const lvl = _mrLvl(c);
+  const rows = MR_STATS.map(([k, label, lo, hi]) => `<div class="mr-stat"><span class="cr-lbl">${label}${k === 'hp' ? `<i>start ${start.hp}</i>` : ''}</span>
       <button type="button" class="rv-dot" data-mr-stat="${k}|-1" aria-label="One ${label} less"${st[k] > lo ? '' : ' disabled'}>&minus;</button><b class="cr-n">${st[k] || 0}</b>
       <button type="button" class="rv-dot" data-mr-stat="${k}|1" aria-label="One ${label} more"${st[k] < hi ? '' : ' disabled'}>+</button></div>`).join('');
   return `<div class="rv-sec">The ${esc(_mrCharName(c))}</div>
     <div class="mr-stats">${rows}</div>
+    <div class="cr-row mr-lvl"><span class="cr-lbl">Level</span><span class="cr-seg cr-seg-sm">${[1, 2, 3].map(n => `<button type="button" class="cr-seg-b${lvl === n ? ' on' : ''}" data-mr-lvl="${n}">${n}</button>`).join('')}</span>
+      <span class="cr-note">carried from chapter to chapter</span></div>
     <div class="rv-sub">Potions <span class="cr-note">two at most</span></div>
     <div class="cr-seg cr-seg-sm mr-potions">${MR_POTIONS.map(([k, l]) => `<button type="button" class="cr-seg-b${st.potions.includes(k) ? ' on' : ''}" data-mr-potion="${k}">${l}</button>`).join('')}</div>
     <label class="cr-row mr-item"><span class="cr-lbl">Item</span><input class="rv-in" data-mr-text="stats/item" value="${esc(st.item || '')}" placeholder="The Item card you carry" maxlength="40" ${edit ? '' : 'readonly'}></label>
@@ -888,7 +905,7 @@ async function _mrClick(panel, ev) {
   }
   if (!_mrId) return _mrDraftClick(panel, t, ds);
   // the result as this phone fills it in, saved with "Save the result"
-  if (ds.mrResOut || ds.mrResFloors || ds.mrResLevel || ds.mrResPick) {
+  if (ds.mrResOut || ds.mrResFloors || ds.mrResLevel || ds.mrResFrom || ds.mrResPick) {
     const r = _mrRes, c = _mrCamps[_mrId];
     if (!r || !c) return;
     const ch = _mrCh(c, c.at), g = _mrG(c);
@@ -901,6 +918,7 @@ async function _mrClick(panel, ev) {
       else r.floors = Math.min(r.floors, Math.max(0, span - 1));
     } else if (ds.mrResFloors) r.floors = Math.max(0, Math.min(Math.max(span, 4), r.floors + Number(ds.mrResFloors)));
     else if (ds.mrResLevel) r.level = Number(ds.mrResLevel);
+    else if (ds.mrResFrom) { r.from = Number(ds.mrResFrom); r.level = Math.max(r.level, r.from); }
     else r.pick = ds.mrResPick;
     _mrRender(panel);
     return;
@@ -935,6 +953,7 @@ async function _mrClick(panel, ev) {
     up.road = [...road, n];
     up.playing = null;
     up.fight = null;
+    up.lvlFrom = null;
     const to = _mrCh(c, n);
     if (to && to.kind === 'end') { up.status = 'won'; up.ending = n; ok = true; return 'An ending: the campaign is won!'; }
     if (to && to.kind === 'story' && to.fx && !fix && g.sheet) { _mrApply(c, to.fx, up); return `Chapter ${n}: ${_mrFxText(to.fx)}.`; }
@@ -972,7 +991,7 @@ async function _mrClick(panel, ev) {
     ok = true;
   } else if (ds.mrFail !== undefined) {
     if (ch.test.retry) { _mrApply(c, ch.test.retry, up); note = `${_mrFxText(ch.test.retry)}. Try again.`; }
-    else { up.playing = Date.now(); up.fight = true; _mrRes = null; note = 'Failed: fight!'; }
+    else { up.playing = Date.now(); up.fight = true; if (g.sheet) up.lvlFrom = _mrLvl(c); _mrRes = null; note = 'Failed: fight!'; }
   } else if (ds.mrFinish !== undefined) {
     if (!c.status && !confirm('Mark the campaign as won?')) return;
     up.status = 'won';
@@ -989,9 +1008,10 @@ async function _mrClick(panel, ev) {
       said.push(`You gain the ${up[`relics/${ch.relic}`].name}.`);
     }
     if (ch.fx && g.sheet) { _mrApply(c, ch.fx, up); said.push(`${_mrFxText(ch.fx)}.`); }
+    if (g.sheet) up.lvlFrom = up['stats/level'] || _mrLvl(c);
     note = `Chapter ${c.at} on. ${said.join(' ')} Good luck!`;
     ok = true;
-  } else if (ds.mrCancel !== undefined) { up.playing = null; up.fight = null; _mrRes = null; }
+  } else if (ds.mrCancel !== undefined) { up.playing = null; up.fight = null; up.lvlFrom = null; _mrRes = null; }
   else if (ds.mrSave !== undefined) {
     const r = _mrRes;
     if (!r || !r.out) return;
@@ -1001,11 +1021,12 @@ async function _mrClick(panel, ev) {
       if (!next) { _mrToast('Where does the book send you? Pick the chapter.'); return; }
     } else if (r.out === 'boss') next = ch.boss;
     const span = g.sheet ? ch.floors || 0 : ch.last - (ch.start || 1) + 1;
-    const pp = r.out === 'won' && span === 0 ? 0 : _mrPP(r.floors, r.level);
+    const pp = r.out === 'won' && span === 0 ? 0 : _mrPP(r.floors, r.level, r.from);
     after = String(Date.now());
     const first = g.sheet ? 1 : ch.start || 1;
     up[`log/${after}`] = { ch: String(c.at), won: r.out === 'won', ...(r.out === 'boss' ? { boss: true } : {}), ...(r.out !== 'won' && span ? { floor: first + r.floors } : {}),
-      ...(c.fight ? { fight: true } : {}), level: r.level, pp, at: Date.now(), from: c.playing || Date.now(), by: _mrMe() || '' };
+      ...(c.fight ? { fight: true } : {}), ...(g.sheet ? { lvlFrom: r.from } : {}), level: r.level, pp, at: Date.now(), from: c.playing || Date.now(), by: _mrMe() || '' };
+    if (g.sheet) up['stats/level'] = r.level;   // The Council: the Level carries on
     up.perks = (c.perks || 0) + pp;
     _mrRes = null;
     const ppText = `+${pp} Perk Point${pp === 1 ? '' : 's'}${pp ? ': spend them on the Skills tab' : ''}.`;
@@ -1017,8 +1038,9 @@ async function _mrClick(panel, ev) {
     } else if (r.out === 'died' && g.sheet) {
       // The Council: the campaign starts over, keeping the Skills and the Perk Points
       const start = _mrStartStats(c);
-      Object.assign(up, { at: '1', road: [...road, '†', '1'], playing: null, fight: null, inv: null, noto: 1,
-        stats: { hp: start.hp, xp: 0, armor: start.armor, food: start.food, gold: start.gold, potions: start.potions, item: '' } });
+      delete up['stats/level'];
+      Object.assign(up, { at: '1', road: [...road, '†', '1'], playing: null, fight: null, lvlFrom: null, inv: null, noto: 1, restarted: Date.now() + 1,
+        stats: { hp: start.hp, xp: 0, level: 1, armor: start.armor, food: start.food, gold: start.gold, potions: start.potions, item: '' } });
       note = `${ppText} The campaign starts over from chapter 1.`;
     } else {
       const arrived = next !== String(c.at) ? moveTo(next) : '';
@@ -1030,7 +1052,8 @@ async function _mrClick(panel, ev) {
     const s = MR_STATS.find(x => x[0] === k);
     const base = ds.mrStat ? _mrStats(c) : _mrStartStats(c);
     up[`${ds.mrStat ? 'stats' : 'start'}/${k}`] = Math.max(s[2], Math.min(s[3], (base[k] || 0) + Number(d)));
-  } else if (ds.mrPotion) {
+  } else if (ds.mrLvl) up['stats/level'] = Number(ds.mrLvl);
+  else if (ds.mrPotion) {
     const p = _mrStats(c).potions;
     if (p.includes(ds.mrPotion)) up['stats/potions'] = p.filter(x => x !== ds.mrPotion);
     else if (p.length >= 2) { _mrToast('Two Potions at most: drop one first.'); return; }
@@ -1087,7 +1110,7 @@ async function _mrDraftClick(panel, t, ds) {
     t.disabled = true;
     const g = MR_GAMES[_mrGame];
     const c = { game: _mrGame, name: d.name.trim(), player: d.player, char: d.char, at: '1', road: ['1'], perks: 0, created: Date.now(), updated: Date.now(), by: _mrMe() };
-    if (g.sheet) Object.assign(c, { start: d.start, stats: { ...d.start, xp: 0, item: '' }, noto: 1 });
+    if (g.sheet) Object.assign(c, { start: d.start, stats: { ...d.start, xp: 0, level: 1, item: '' }, noto: 1 });
     try {
       const { store, json } = await fbWrite('mrCampaigns', 'POST', c);
       _mrCamps[json.name] = c;
