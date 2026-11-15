@@ -53,7 +53,7 @@ function bgsPlayData(bggId, play) {
   if (id > 0) g.bggId = id;
   const players = (play.sc || []).map(s => {
     const p = { startPlayer: false, name: s.n, sourcePlayerId: _bgsId(s.n), winner: !!s.w, role: s.r || '' };
-    if (s.tm) p.team = `Team ${s.tm}`;
+    if (s.tm) p.team = /^\d+$/.test(String(s.tm)) ? `Team ${s.tm}` : String(s.tm);
     const v = _bgsScore(s.s);
     if (v !== null) p.score = v;
     return p;
@@ -160,6 +160,7 @@ function bgsPlayFile(bggId, play) {
   }
   games.forEach((g, i) => { g.id = i + 1; });
   const players = play.sc.map((s, i) => ({ uuid: _bgsUuid(`bgl-player:${s.n}`), id: i + 1, name: s.n, isAnonymous: /^anonymous/i.test(s.n), modificationDate: now }));
+  const teamNames = [...new Set(play.sc.map(s => String(s.tm || '')).filter(t => t && !/^\d+$/.test(t)))];   // Good, Evil
   const uuids = players.map(p => p.uuid);
   const sheet = _bgsSheet(id, play, uuids);
   const p = {
@@ -170,7 +171,7 @@ function bgsPlayFile(bggId, play) {
       const v = _bgsScore(s.s);
       const o = { score: v === null ? null : String(v), winner: !!s.w, newPlayer: false, startPlayer: false, playerRefId: i + 1,
         rank: 0, seatOrder: i, role: s.r || null, metaData: sheet ? JSON.stringify({ scoreUuid: uuids[i] }) : null };
-      if (s.tm) o.team = String(Number(s.tm) - 1 >= 0 ? Number(s.tm) - 1 : s.tm);   // BG Stats counts teams from 0
+      if (s.tm) o.team = String(/^\d+$/.test(String(s.tm)) ? Math.max(0, Number(s.tm) - 1) : teamNames.indexOf(String(s.tm)));   // BG Stats counts teams from 0; named ones in their order
       return o;
     }),
     expansionPlays: xs.map((x, k) => ({ gameRefId: k + 2 })),

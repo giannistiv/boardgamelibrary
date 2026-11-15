@@ -846,9 +846,10 @@ function openModal(game) {
   const clHtml = typeof buildClCampaignHtml === 'function' ? buildClCampaignHtml(game) : '';
   const bbHtml = typeof buildBbCampaignHtml === 'function' ? buildBbCampaignHtml(game) : '';
   const dtHtml = typeof buildDtmHtml === 'function' ? buildDtmHtml(game) : '';
-  const campaignHtml = roveHtml || crHtml || mrHtml || clHtml || bbHtml || dtHtml;
+  const bcHtml = typeof buildBotcHtml === 'function' ? buildBotcHtml(game) : '';
+  const campaignHtml = roveHtml || crHtml || mrHtml || clHtml || bbHtml || dtHtml || bcHtml;
   const tabs = [['overview', 'Overview'], ['plays', `Plays${plays && plays.length ? ` <span class="gm-tab-n">${plays.length}</span>` : ''}`]]
-    .concat(campaignHtml ? [['campaign', 'Campaign']] : [])
+    .concat(campaignHtml ? [['campaign', bcHtml ? 'Town Square' : 'Campaign']] : [])
     .concat(game.bggId > 0 ? [['rules', 'Rules']] : []);
   if (_modalTabFor !== game.bggId) { _modalTab = ''; _modalTabFor = game.bggId; }
   const tab = tabs.some(t => t[0] === _modalTab) ? _modalTab : (plays && plays.length ? 'plays' : 'overview');
@@ -919,6 +920,7 @@ function openModal(game) {
   if (clHtml) wireClCampaign(content);
   if (bbHtml) wireBbCampaign(content);
   if (dtHtml) wireDtm(content);
+  if (bcHtml) wireBotc(content);
   if (leviathanHtml) wireLeviathanWilds(content);
   if (toyHtml) wireToyBattle(content);
   if (Number(game.bggId) === SKY_TEAM_BGGID) wireSkyTeam(content);

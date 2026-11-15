@@ -146,6 +146,10 @@ function scenarioPicker(bggId) {
     return { fields: [{ key: 'm', label: 'Campaign chapter', optional: true, none: 'Not a campaign game', options: () => mrChapterOptions(id),
       match: (t, v) => { const a = t.match(SCEN_NUM), b = v.match(SCEN_NUM); return !!(a && b && a[1] === b[1] && /^chapter/i.test(t)); } }] };
   }
+  if (typeof BOTC_BGGID !== 'undefined' && id === BOTC_BGGID) {
+    // the script: "Trouble Brewing" (the Town Square tab reads it, js/botc.js); another one goes in "Anything else"
+    return { fields: [{ key: 'script', label: 'Script', optional: true, none: 'Another script', options: () => BOTC_SCRIPTS.filter(s => s[0] !== 'all').map(s => [s[1], s[1]]) }] };
+  }
   if (typeof TOY_BGGID !== 'undefined' && id === TOY_BGGID) {
     // "Castle Field", or "Castle Field／No special bases" (js/toy-battle.js); the dice pick one
     return { fields: [

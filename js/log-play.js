@@ -897,7 +897,7 @@ async function logPlaySave(rec) {
   rec = { ...rec, sc: rec.sc.map(p => ({ ...p, n: typeof _origCanon === 'function' ? _origCanon(p.n) : p.n })), by: a.uid, at: Date.now() };
   try {
     if (typeof ensureKnownGame === 'function') await ensureKnownGame(rec.bggId, null);
-    const id = (await acctWrite('plays', 'POST', rec)).name;
+    const id = (await _lpWrite('plays', 'POST', rec)).name;
     manualPlaysCache[id] = rec;
     _lpMerge(id, rec);
     _sortPlayHistory();

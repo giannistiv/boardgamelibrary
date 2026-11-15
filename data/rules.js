@@ -6575,5 +6575,50 @@ const RULES = {
    "Once you leave HQ you can't come back without an Artifact.",
    "Damage that isn't the dragon's comes from your own cubes, and you can't choose to take it if it would knock you out."
   ]
+ },
+ "240980": {
+  "src": "the Blood on the Clocktower rules and the official wiki (The Pandemonium Institute)",
+  "goal": "Two teams, and nobody knows who's who. **Good** (Townsfolk and Outsiders) wins when the **Demon dies**. **Evil** (the Demon and its Minions) wins when only **two players are left alive**. Everyone wins or loses with their team, dead or alive.",
+  "turnTitle": "Each night",
+  "turn": [
+   "Everyone closes their eyes; the **Storyteller** wakes characters in the night order on the script, quietly, by gestures.",
+   "First night: the Minions learn who the Demon is, and the Demon learns its Minions and three good characters not in play, to bluff as.",
+   "Later nights: the **Demon** chooses someone to die; characters act and learn things, which can be false if they're drunk or poisoned."
+  ],
+  "actions": [
+   [
+    "Talk",
+    "By day anything goes: claim a character (truly or not), compare notes, whisper in private."
+   ],
+   [
+    "Nominate",
+    "Each living player may nominate once a day, and each player may be nominated once a day."
+   ],
+   [
+    "Vote",
+    "Hands go up as the Storyteller's hand passes round the circle; vote for as many nominees as you like."
+   ],
+   [
+    "Execute",
+    "At the end of the day the nominee with the most votes dies, if at least half the living players voted for them; a tie means nobody."
+   ]
+  ],
+  "roundTitle": "When you're dead",
+  "round": [
+   "Keep talking and keep playing: you still win or lose with your team.",
+   "You lose your ability and can't nominate.",
+   "You keep **one vote** for the rest of the game: spend it well."
+  ],
+  "end": [
+   "Good wins the moment the Demon dies (unless a character keeps the game going, like the Scarlet Woman becoming the Demon).",
+   "Evil wins the moment only two players are alive; Travellers don't count.",
+   "A few characters end it their own way: the Saint executed, the Mayor with three alive and no execution, and more on the other scripts."
+  ],
+  "forget": [
+   "The **Drunk** doesn't know: they think they're a Townsfolk and may get false information. The Lunatic thinks they're the Demon.",
+   "Poisoned players lose their ability without knowing it.",
+   "The Storyteller is on nobody's side and can be asked anything privately.",
+   "Trouble Brewing is the place to start; the other scripts get trickier."
+  ]
  }
 };

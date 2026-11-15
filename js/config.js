@@ -43,8 +43,11 @@ function _playScoresHtml(sc) {
   if (!(sc || []).some(s => s && s.tm)) return (sc || []).map(_playScoreChipHtml).join('');
   const teams = new Map();
   for (const s of sc) { const t = String(s.tm || ''); if (!teams.has(t)) teams.set(t, []); teams.get(t).push(s); }
-  return [...teams.entries()].sort((a, b) => (a[0] || '9').localeCompare(b[0] || '9'))
-    .map(([t, list]) => `<span class="play-team">${t ? `<span class="play-team-n">Team ${_escapeHtml(t)}</span>` : ''}${list.map(_playScoreChipHtml).join('')}</span>`).join('');
+  // numbered teams in order; named ones (Blood on the Clocktower's Good and Evil) the winners first
+  const named = (t) => !!t && !/^\d+$/.test(t);
+  const won = (list) => list.some(s => s && s.w) ? 0 : 1;
+  return [...teams.entries()].sort((a, b) => (named(a[0]) && named(b[0]) ? won(a[1]) - won(b[1]) : 0) || (a[0] || '9').localeCompare(b[0] || '9'))
+    .map(([t, list]) => `<span class="play-team${named(t) ? ' play-team-' + _escapeHtml(t.toLowerCase()) : ''}">${t ? `<span class="play-team-n">${named(t) ? '' : 'Team '}${_escapeHtml(t)}</span>` : ''}${list.map(_playScoreChipHtml).join('')}</span>`).join('');
 }
 
 // ── Filter helpers ──
