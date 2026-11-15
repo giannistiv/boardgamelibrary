@@ -69,6 +69,9 @@ function bgsPlayData(bggId, play) {
   if (Number(play.d) > 0) out.durationMin = Number(play.d);
   if (play.b) out.board = play.b;
   if (play.l) out.location = play.l;
+  // its note (Dice Throne's result, a Mini Rogue chapter's): BG Stats 4.1+ takes `comments`;
+  // kept short, as BG Stats asks, so the QR code stays readable
+  if (play.c) out.comments = String(play.c).length > 200 ? String(play.c).slice(0, 199) + '…' : String(play.c);
   return out;
 }
 
@@ -166,11 +169,12 @@ function bgsPlayFile(bggId, play) {
   const p = {
     uuid: _bgsUuid(`bgl-play:${link.sourcePlayId}`), modificationDate: now, entryDate: play.e || play.t || now,
     playDate: play.t || `${play.date} 20:00:00`, usesTeams: play.sc.some(s => s.tm), durationMin: Number(play.d) || 0, ignored: false,
-    manualWinner: false, rounds: 0, gameRefId: 1, scoringSetting: link.game.noPoints ? 6 : 0,
+    manualWinner: false, rounds: 0, gameRefId: 1, scoringSetting: link.game.noPoints && games[0].cooperative ? 6 : 0,
     playerScores: play.sc.map((s, i) => {
       const v = _bgsScore(s.s);
-      const o = { score: v === null ? null : String(v), winner: !!s.w, newPlayer: false, startPlayer: false, playerRefId: i + 1,
-        rank: 0, seatOrder: i, role: s.r || null, metaData: sheet ? JSON.stringify({ scoreUuid: uuids[i] }) : null };
+      const o = { score: v === null ? null : String(v), winner: !!s.w, newPlayer: false, startPlayer: false, playerRefId: i + 1, rank: 0, seatOrder: i };
+      if (s.r) o.role = s.r;
+      if (sheet) o.metaData = JSON.stringify({ scoreUuid: uuids[i] });
       if (s.tm) o.team = String(/^\d+$/.test(String(s.tm)) ? Math.max(0, Number(s.tm) - 1) : teamNames.indexOf(String(s.tm)));   // BG Stats counts teams from 0; named ones in their order
       return o;
     }),
