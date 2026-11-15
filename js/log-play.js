@@ -576,17 +576,18 @@ function _lpRenderPlayers() {
   const esc = _escapeHtml;
   const lost = _lp.gameWon && _lp.sc.length && !_lp.sc.some(p => p.w);
   const st = STORYTELLER_GAMES.get(Number(_lp.bggId));   // a seat that neither wins nor loses
+  // the winner: a star by the name (the user, 15 Nov 2026: "Winner?" was too long)
   box.innerHTML = (_lp.sc.map((p, i) => `<div class="lp-prow${p.w ? ' won' : ''}" data-i="${i}">
       <div class="lp-pmain">
         <span class="lp-avatar" aria-hidden="true">${avatarInner(p.n)}</span>
         <span class="lp-pn">${esc(p.n)}</span>
+        ${st && isNoResultSeat(p) ? '' : `<button type="button" class="lp-star${p.w ? ' on' : ''}" data-lp-win="${i}" aria-pressed="${p.w}" aria-label="${esc(p.n)} won" title="${p.w ? 'Won' : 'Tap if they won'}">&#9733;</button>`}
         <button type="button" class="lp-x" data-lp-del="${i}" aria-label="Remove ${esc(p.n)}">&times;</button>
       </div>
-      <div class="lp-pscore">
+      ${_lp.scores === false && !st ? '' : `<div class="lp-pscore">
         ${_lp.scores === false ? '' : `<input class="lp-input lp-score" value="${esc(p.s)}" placeholder="Score" maxlength="40" inputmode="decimal" aria-label="${esc(p.n)}'s score">`}
-        ${st && isNoResultSeat(p) ? '' : `<button type="button" class="lp-win${p.w ? ' on' : ''}" data-lp-win="${i}" aria-pressed="${p.w}">&#9733; ${p.w ? 'Won' : 'Winner?'}</button>`}
         ${st ? `<button type="button" class="lp-win lp-st${isNoResultSeat(p) ? ' on' : ''}" data-lp-st="${i}" aria-pressed="${isNoResultSeat(p)}" title="Plays, but neither wins nor loses">${esc(st)}</button>` : ''}
-      </div>
+      </div>`}
       ${_lp.teams ? `<div class="lp-teams">${_lpTeamNos().map(t => `<button type="button" class="lp-tchip${String(p.tm) === t ? ' on' : ''}" data-lp-team="${i}|${t}" aria-pressed="${String(p.tm) === t}">Team ${t}</button>`).join('')}</div>` : ''}
       ${_lp.roles ? `<input class="lp-input lp-role" value="${esc(p.r || '')}" placeholder="Character, faction, colour…" maxlength="120" aria-label="${esc(p.n)}'s character">${_lpRoleChips(i)}` : ''}
     </div>`).join('') || '<div class="lp-hint">Add the players below.</div>')
@@ -776,7 +777,7 @@ function _lpAutoWinner() {
     const btn = row.querySelector('[data-lp-win]');
     if (!p) return;
     row.classList.toggle('won', p.w);
-    if (btn) { btn.classList.toggle('on', p.w); btn.setAttribute('aria-pressed', String(p.w)); btn.innerHTML = `&#9733; ${p.w ? 'Won' : 'Winner?'}`; }
+    if (btn) { btn.classList.toggle('on', p.w); btn.setAttribute('aria-pressed', String(p.w)); btn.title = p.w ? 'Won' : 'Tap if they won'; }
   });
   const gw = document.querySelector('#lp-players .lp-gamewon');
   if (gw) gw.remove();

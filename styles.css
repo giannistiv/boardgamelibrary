@@ -1190,14 +1190,17 @@
   .lp-pmain{display:flex;align-items:center;gap:0.7rem}
   .lp-avatar{width:38px;height:38px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;overflow:hidden;background:var(--accent-soft);color:var(--accent-2);font-family:var(--font-display);font-weight:700;font-size:1rem}
   .lp-avatar img{width:100%;height:100%;object-fit:cover}
-  .lp-pn{flex:1;min-width:0;font-weight:600;font-size:1rem;line-height:1.3;overflow-wrap:anywhere}
+  .lp-pn{flex:0 1 auto;min-width:0;font-weight:600;font-size:1rem;line-height:1.3;overflow-wrap:anywhere}
+  .lp-star{flex:0 0 auto;width:40px;height:40px;margin:-0.3rem -0.3rem -0.3rem -0.35rem;border:none;border-radius:50%;background:transparent;color:var(--text-4);font-size:1.5rem;line-height:1;cursor:pointer;transition:color .15s,transform .15s}
+  .lp-star:hover{background:var(--card-2)}
+  .lp-star.on{color:var(--win);transform:scale(1.12)}
   .lp-pscore{display:flex;gap:0.6rem}
   .lp-score{flex:1;min-width:0;min-height:46px;padding:0.5rem 0.8rem}
   .lp-win{flex:0 0 auto;min-width:7.2rem;min-height:46px;padding:0 1rem;border-radius:12px;border:1px solid var(--line-2);background:transparent;color:var(--text-3);font:inherit;font-size:0.92rem;font-weight:600;cursor:pointer;white-space:nowrap}
   .lp-win.on{background:var(--win-soft);border-color:var(--win);color:var(--win)}
   .lp-st{min-width:0;padding:0 0.8rem}
   .lp-st.on{background:var(--accent-soft);border-color:var(--accent-line);color:var(--accent)}
-  .lp-x{flex:0 0 auto;width:40px;height:40px;margin:-0.3rem -0.35rem -0.3rem 0;border:none;border-radius:50%;background:transparent;color:var(--text-3);font-size:1.4rem;cursor:pointer;line-height:1}
+  .lp-x{flex:0 0 auto;width:40px;height:40px;margin:-0.3rem -0.35rem -0.3rem auto;border:none;border-radius:50%;background:transparent;color:var(--text-3);font-size:1.4rem;cursor:pointer;line-height:1}
   .lp-x:hover{background:var(--card-2)}
   .lp-role{min-height:44px;font-size:15px}
   .lp-gamewon{align-self:flex-start;padding:0.45rem 0.85rem;border-radius:999px;background:var(--loss-soft);color:var(--loss);font-size:0.85rem;font-weight:600}
