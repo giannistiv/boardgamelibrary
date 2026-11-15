@@ -1921,6 +1921,7 @@
   .dt-up{font-size:0.7rem;padding:0.1rem 0.45rem;border-radius:999px;background:rgba(236,111,60,0.18);color:#f19a72}
   .dt-g-who{font-size:0.78rem;color:var(--text-2);margin:0.25rem 0 0.4rem}
   .dt-g-who i{color:var(--text-3)}
+  .dt-g-box{font-size:0.72rem;color:var(--text-3);margin:-0.2rem 0 0.4rem}
   .dt-res{display:flex;flex-wrap:wrap;gap:0.3rem}
   .dt-res .cl-chip{min-height:32px;font-size:0.74rem}
   .dt-assign{display:flex;align-items:center;gap:0.4rem;font-size:0.8rem;margin-bottom:0.4rem}

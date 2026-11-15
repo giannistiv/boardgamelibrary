@@ -21,7 +21,10 @@
 // The villains are the ones confirmed by players' reports; three aren't
 // public, so the tab asks for them the first time and remembers them.
 //
-// A Mission is a play logged here (or in Log a play: "Mission／Villain"). Its
+// A Mission is a play logged here (or in Log a play: "Mission／Villain"), or
+// one logged under a Marvel Dice Throne hero box (BG Stats offers those) whose
+// scenario names a Mission or its villain and whose players all shared the
+// result: the user's first ones were logged under the X-Men box. Its
 // scores and heroes are the play's; what the play can't hold is kept in
 // Firebase, followed live while the tab is open:
 //   dtm/plays/{playKey} = { m: mission key, up: levels added, s1, s2, perfect, x2 }
@@ -55,6 +58,11 @@ const DTM_MISSIONS = [
   ['darkness', 'Darkness Falls', 5, 'Dormammu', 'Baron Mordo'],
   ['hulk', 'Hulk’s Legacy', 5, ''],
 ].map(([k, name, lvl, boss, foe1, note]) => ({ k, name, lvl, boss, foe1: foe1 || '', note: note || '' }));
+// other names the plays give a villain
+const DTM_AKA = { ock: ['Doc Ock', 'Dr. Octopus', 'Dr Octopus', 'Otto Octavius'], morlock: ['Mr. Sinister', 'Mr Sinister'], vibranium: ['Ulysses Klaue', 'Klaue'],
+  maggia: ['Wilson Fisk'], cosmic: ['MODOK'], sentinels: ['Master-Mold'], goblin: ['Norman Osborn'] };
+// Missions, and the Marvel Dice Throne boxes its games can be logged under
+const DTM_FAMILY = [403495, 348406, 360153, 360152, 403511, 360061, 403494];
 const DTM_HEALTH = { 1: 45, 2: 30, 3: 25, 4: 20 };   // starting Health by the number of heroes
 // the Marvel heroes (the boxes here); any other Dice Throne hero can be typed
 const DTM_HEROES = ['Black Panther', 'Black Widow', 'Captain Marvel', 'Cyclops', 'Deadpool', 'Doctor Strange', 'Gambit', 'Iceman',
@@ -132,19 +140,39 @@ function _dtmDie(lvl, small) {
 
 // ── The plays: Missions logged ──
 function _dtmPlayKey(p) { return String(p.mp || p._uuid || p.e || p.t || p.date).replace(/[.#$\[\]\/ ]/g, '_'); }
+const _dtmFrom = new WeakMap();   // a play → the game it's logged under
 function _dtmPlays() {
-  return (PLAY_HISTORY[DTM_BGGID] || []).filter(p => p && p.date && Array.isArray(p.sc) && p.sc.length).slice().sort(byPlayOrder);
+  const out = [];
+  for (const id of DTM_FAMILY) for (const p of PLAY_HISTORY[id] || []) {
+    if (!p || !p.date || !Array.isArray(p.sc) || !p.sc.length) continue;
+    if (id !== DTM_BGGID && !_dtmIsMission(p)) continue;
+    _dtmFrom.set(p, id);
+    out.push(p);
+  }
+  return out.sort(byPlayOrder);
 }
-// Which Mission a play was: its record, else its scenario field (a Mission's name or its villain).
-function _dtmMissionOf(p) {
+// A hero box's play that was a Mission: one marked so here, or one naming a
+// Mission or its villain where everyone shared the result (co-op, not a duel).
+function _dtmIsMission(p) {
   const r = ((_dtm && _dtm.plays) || {})[_dtmPlayKey(p)];
-  if (r && r.m) return _dtmMission(r.m);
-  const parts = String(p.b || '').split(/\s*[／|]\s*/).map(_dtmNorm).filter(Boolean);
+  if (r && r.m) return true;
+  const ws = p.sc.map(s => !!(s && s.w));
+  return !!_dtmMatchB(p.b) && ws.every(w => w === ws[0]);
+}
+// The Mission a scenario field names: a Mission's name, or its villain by any name.
+function _dtmMatchB(b) {
+  const parts = String(b || '').split(/\s*[／|]\s*/).map(_dtmNorm).filter(Boolean);
   for (const part of parts) {
-    const m = DTM_MISSIONS.find(x => _dtmNorm(x.name) === part || (_dtmBoss(x) && _dtmNorm(_dtmBoss(x)) === part));
+    const m = DTM_MISSIONS.find(x => [x.name, _dtmBoss(x), ...(DTM_AKA[x.k] || [])].some(n => n && _dtmNorm(n) === part));
     if (m) return m;
   }
   return null;
+}
+// Which Mission a play was: its record, else its scenario field.
+function _dtmMissionOf(p) {
+  const r = ((_dtm && _dtm.plays) || {})[_dtmPlayKey(p)];
+  if (r && r.m) return _dtmMission(r.m);
+  return _dtmMatchB(p.b);
 }
 // What a play did: { m, up, s1, s2, perfect, x2, lvl (its total difficulty) }
 function _dtmRec(p) {
@@ -438,13 +466,16 @@ function _dtmGameHtml(p, loose) {
   const esc = _escapeHtml;
   const r = _dtmRec(p);
   const key = _dtmPlayKey(p);
-  const idx = (PLAY_HISTORY[DTM_BGGID] || []).indexOf(p);
+  const from = _dtmFrom.get(p) || DTM_BGGID;
+  const idx = (PLAY_HISTORY[from] || []).indexOf(p);
   const edit = !!_dtmMe();
-  const acts = (idx >= 0 && typeof bgsSendBtnHtml === 'function' ? bgsSendBtnHtml(DTM_BGGID, idx) : '') + (p.mp && typeof logPlayEditBtnHtml === 'function' ? logPlayEditBtnHtml(p) : '');
+  const acts = (idx >= 0 && typeof bgsSendBtnHtml === 'function' ? bgsSendBtnHtml(from, idx) : '') + (p.mp && typeof logPlayEditBtnHtml === 'function' ? logPlayEditBtnHtml(p) : '');
+  const box = from !== DTM_BGGID ? findGameByBggId(from) : null;
   const res = _dtmResultOf(r);
   return `<div class="dt-g">
     <div class="dt-g-head"><b>${esc(_dtmDate(p.date))}</b>${r.up ? `<span class="dt-up">+${r.up} → level ${r.lvl}</span>` : ''}${r.x2 ? '<span class="dt-up">double PP</span>' : ''}<span class="cl-acts">${acts}</span></div>
     <div class="dt-g-who">${p.sc.map(s => `${esc(s.n)}${s.r ? ` <i>${esc(s.r)}</i>` : ''}`).join(' · ')}</div>
+    ${box ? `<div class="dt-g-box">Logged as ${esc(box.name)}${p.b ? `: “${esc(p.b)}”` : ''}</div>` : ''}
     ${loose && edit ? `<label class="dt-assign">Which Mission? <select class="rv-in" data-dt-assign="${esc(key)}"><option value="">?</option>${DTM_MISSIONS.map(m => `<option value="${m.k}">${esc(m.name)}</option>`).join('')}</select></label>` : ''}
     <div class="dt-res">${DTM_RESULTS.map(([k, l]) => `<button type="button" class="cl-chip${res === k ? ' on' : ''}" data-dt-res="${esc(key)}|${k}"${edit ? '' : ' disabled'}>${l}</button>`).join('')}</div>
   </div>`;

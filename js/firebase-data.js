@@ -47,7 +47,7 @@ async function loadAllRatings() {
 // since 6 Nov 2026 too, and the Clank! Legacy and Mini Rogue campaigns
 // (js/clank-legacy.js, js/mini-rogue-campaign.js) since 11 Nov 2026. The
 // Buttons & Bugs campaigns (js/buttons-bugs-campaign.js) wait here.
-const FB_SPARE = { bbCampaigns: '_bglBbCampaigns', dtm: '_bglDtm' };
+const FB_SPARE = { bbCampaigns: '_bglBbCampaigns' };
 const _fbDenied = new Set();   // nodes that refused a write this session: go straight to the spare
 function _fbRoot(path) { return path.split('/')[0]; }
 function _fbSpare(path) {
