@@ -146,6 +146,13 @@ function scenarioPicker(bggId) {
     return { fields: [{ key: 'm', label: 'Campaign chapter', optional: true, none: 'Not a campaign game', options: () => mrChapterOptions(id),
       match: (t, v) => { const a = t.match(SCEN_NUM), b = v.match(SCEN_NUM); return !!(a && b && a[1] === b[1] && /^chapter/i.test(t)); } }] };
   }
+  if (typeof DTM_BGGID !== 'undefined' && id === DTM_BGGID) {
+    // "Ock Knocks Knox／Doctor Octopus": the Missions tab reads both (js/dtm-missions.js)
+    return { fields: [
+      { key: 'm', label: 'Mission', options: () => DTM_MISSIONS.map(m => [m.name, m.name, `Level ${m.lvl}: ${DTM_LEVELS[m.lvl][0]}`]) },
+      { key: 'boss', label: 'Villain', optional: true, options: (vals) => { const m = DTM_MISSIONS.find(x => x.name === vals.m); const b = m && _dtmBoss(m); return b ? [[b, b]] : []; } },
+    ] };
+  }
   if (id === SCEN_TAKE_TIME) {
     const n = (k) => Array.from({ length: k }, (_, i) => [String(i + 1), String(i + 1)]);
     return { sep: '-', fields: [{ key: 'f', label: 'Folder', options: () => n(10) }, { key: 'c', label: 'Clock', options: () => n(4) }] };

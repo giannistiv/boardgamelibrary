@@ -327,6 +327,7 @@ const EX_SHEETS = [
   { kind: 'gauntlet', id: () => (typeof MC_BGGID !== 'undefined' ? MC_BGGID : 0), what: 'The Gauntlet: every villain in release order, on Expert' },
   { kind: 'clank', id: () => (typeof CL_BGGID !== 'undefined' ? CL_BGGID : 0), what: 'Mission Reports, Associate Status and the Dran Enterprises Track' },
   { kind: 'bb', id: () => (typeof BB_BGGID !== 'undefined' ? BB_BGGID : 0), what: 'The deck of scenarios, the items you&rsquo;ve unlocked and every attempt' },
+  { kind: 'dtm', id: () => (typeof DTM_BGGID !== 'undefined' ? DTM_BGGID : 0), what: 'The 20 Missions, their villains, and everyone&rsquo;s Perk Sheet' },
 ];
 let _exSheets = null;      // kind → the viewer's campaigns [{cid, name, pct, text, done, at}], once loaded
 let _exSheetsFor = null;   // whose they are
@@ -366,6 +367,10 @@ async function _exLoadSheets() {
     typeof _bbLoad === 'function' && _bbLoad(true).then(() => {
       for (const cid in _bbCamps) if (isMe(_bbCamps[cid].player)) add('bb', cid, _bbCamps[cid], bbSummary(_bbCamps[cid]), _bbCamps[cid].name || _bbCharName(_bbLast(_bbCamps[cid])));
     }).catch(e => console.warn('Campaigns: Buttons & Bugs', e)),
+    typeof _dtmLoad === 'function' && _dtmLoad(true).then(() => {
+      const sum = dtmSummary(me);
+      if (sum) add('dtm', 'sheet', { updated: Date.now() }, sum, 'Your Perk Sheet');
+    }).catch(e => console.warn('Campaigns: Dice Throne Missions', e)),
     ...['oath', 'gauntlet'].map(kind => typeof pcLoad === 'function' && pcLoad(kind).then(camps => {
       for (const cid in camps) if (pcIsMine(camps[cid])) add(kind, cid, camps[cid], pcSummary(kind, cid, camps[cid]), camps[cid].name || pcPlayers(camps[cid]).join(', '));
     }).catch(e => console.warn('Campaigns:', kind, e))),
@@ -474,6 +479,7 @@ function wireCampaignsTab(container) {
     if ((kind === 'mr' || kind === 'mrc') && cid) { _mrGame = game.bggId; _mrId = cid; _mrDraft = null; _mrTab = 'camp'; }
     if (kind === 'clank' && cid) { _clId = cid; _clDraft = null; _clTab = 'camp'; }
     if (kind === 'bb' && cid) { _bbId = cid; _bbDraft = null; _bbTab = 'camp'; _bbRes = null; }
+    if (kind === 'dtm') { _dtmTab = 'missions'; _dtmWho = typeof _navPlayer === 'function' ? _navPlayer() : null; }
     _modalTab = kind === 'plays' ? 'plays' : 'campaign';
     _modalTabFor = game.bggId;
     openModal(game);
