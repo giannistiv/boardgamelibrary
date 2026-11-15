@@ -146,6 +146,13 @@ function scenarioPicker(bggId) {
     return { fields: [{ key: 'm', label: 'Campaign chapter', optional: true, none: 'Not a campaign game', options: () => mrChapterOptions(id),
       match: (t, v) => { const a = t.match(SCEN_NUM), b = v.match(SCEN_NUM); return !!(a && b && a[1] === b[1] && /^chapter/i.test(t)); } }] };
   }
+  if (typeof TOY_BGGID !== 'undefined' && id === TOY_BGGID) {
+    // "Castle Field", or "Castle Field／No special bases" (js/toy-battle.js); the dice pick one
+    return { fields: [
+      { key: 'map', label: 'Terrain', random: () => toyRandomTerrain().name, options: () => TOY_TERRAINS.map(t => [t.name, t.name]) },
+      { key: 'sb', label: 'Special bases', optional: true, none: 'With their effects', options: () => [[TOY_NO_BASES, 'Without (first games)']] },
+    ] };
+  }
   if (typeof DTM_BGGID !== 'undefined' && id === DTM_BGGID) {
     // "Ock Knocks Knox／Doctor Octopus": the Missions tab reads both (js/dtm-missions.js)
     return { fields: [

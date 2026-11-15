@@ -1884,6 +1884,45 @@
   .cl-log-star.on{border-color:#e2b04a;background:rgba(226,176,74,0.18);color:#e2b04a}
   .cl-log-star:disabled{opacity:0.3}
   .cl-log-acts{display:flex;align-items:center;gap:0.9rem;margin:0.7rem 0 0.4rem}
+  /* ── Toy Battle's Terrains (js/toy-battle.js): the game's own bright toy-box look ── */
+  .toy{margin:0.2rem 0 1rem;padding:0.85rem 0.8rem 0.75rem;border-radius:20px;color:#26302a;
+    background:radial-gradient(circle at 1px 1px,rgba(110,150,70,0.16) 1px,transparent 1.5px) 0 0/9px 9px,linear-gradient(#fffdf4,#f4efdc);
+    border:4px solid #6fae35;box-shadow:inset 0 0 0 2px #a6d86a,0 5px 0 #4b7f22,0 10px 22px rgba(0,0,0,0.35);
+    font-family:ui-rounded,"SF Pro Rounded","Arial Rounded MT Bold",system-ui,sans-serif}
+  .toy-head{display:flex;align-items:baseline;flex-wrap:wrap;gap:0.2rem 0.6rem;margin:0 0.15rem 0.65rem}
+  .toy-head b{font-size:1.2rem;font-weight:900;letter-spacing:0.01em;color:#fff;
+    -webkit-text-stroke:5px #4b7f22;paint-order:stroke fill;text-shadow:0 2px 0 #3b6619}
+  .toy-head span{font-size:0.78rem;font-weight:700;color:#5d7046}
+  .toy-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0.5rem}
+  .toy-tile{position:relative;display:flex;flex-direction:column;align-items:center;gap:0.25rem;min-width:0;padding:0.35rem 0.3rem 0.4rem;
+    border-radius:14px;border:2px solid color-mix(in srgb,var(--toy-c) 55%,#fff);border-bottom-width:5px;border-bottom-color:color-mix(in srgb,var(--toy-c) 75%,#000);
+    background:#fff;color:#26302a;font:inherit;cursor:pointer;transition:transform 0.12s,box-shadow 0.12s}
+  .toy-tile img{width:100%;aspect-ratio:1;border-radius:10px;object-fit:cover;display:block}
+  .toy-tile .toy-name{font-size:0.7rem;font-weight:800;line-height:1.1;text-align:center;min-height:2.2em;display:flex;align-items:center}
+  .toy-badge{font-size:0.62rem;font-weight:800;padding:0.05rem 0.45rem;border-radius:999px;background:color-mix(in srgb,var(--toy-c) 18%,#fff);color:color-mix(in srgb,var(--toy-c) 70%,#000)}
+  .toy-tile.fresh .toy-badge{background:#fff3c4;color:#8a6200}
+  .toy-tile.on{transform:translateY(-3px) scale(1.03);border-color:var(--toy-c);box-shadow:0 0 0 3px color-mix(in srgb,var(--toy-c) 45%,transparent)}
+  .toy-tile.landed{animation:toy-pop 0.45s ease-out}
+  @keyframes toy-pop{0%{transform:scale(0.9)}55%{transform:translateY(-4px) scale(1.12)}100%{transform:translateY(-3px) scale(1.03)}}
+  @media (prefers-reduced-motion: reduce){.toy-tile,.toy-tile.landed{transition:none;animation:none}}
+  .toy-dice{display:flex;align-items:center;justify-content:center;gap:0.45rem;width:100%;min-height:48px;margin-top:0.75rem;border-radius:14px;
+    border:0;border-bottom:5px solid #c47a00;background:linear-gradient(#ffd34d,#ffb31a);color:#4a2c00;font:inherit;font-size:1rem;font-weight:900;cursor:pointer}
+  .toy-dice span{font-size:1.3rem}
+  .toy-dice:active{transform:translateY(2px);border-bottom-width:3px}
+  .toy-dice:disabled{opacity:0.8;cursor:default}
+  .toy-sel{display:flex;gap:0.75rem;align-items:flex-start;margin-top:0.75rem;padding:0.65rem;border-radius:14px;background:#fff;border:2px solid var(--toy-c)}
+  .toy-sel img{width:84px;height:84px;flex:0 0 auto;border-radius:12px;object-fit:cover}
+  .toy-sel > div{display:flex;flex-direction:column;gap:0.3rem;min-width:0}
+  .toy-sel b{font-size:1.05rem;font-weight:900;color:color-mix(in srgb,var(--toy-c) 80%,#000)}
+  .toy-sel span{font-size:0.82rem;line-height:1.35;color:#3d4a40}
+  .toy-go{align-self:flex-start;min-height:40px;margin-top:0.2rem;padding:0 0.9rem;border-radius:12px;border:0;border-bottom:4px solid color-mix(in srgb,var(--toy-c) 70%,#000);
+    background:var(--toy-c);color:#fff;font:inherit;font-size:0.85rem;font-weight:800;cursor:pointer}
+  .toy-note{margin:0.55rem 0.15rem 0;font-size:0.7rem;font-weight:600;color:#6f7d63}
+  @media (max-width:360px){.toy-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  .lp-field:has(.lp-sc-row),.lp-field:has(.lp-sc-row) ~ .lp-field{grid-column:1 / -1}   /* the dice's field, and those after it, get rows of their own */
+  .lp-sc-row{display:flex;gap:0.4rem;align-items:stretch}
+  .lp-sc-row select{flex:1;min-width:0}
+  .lp-dice{flex:0 0 auto;width:46px;border-radius:10px;border:1px solid var(--line-2);background:var(--card-2);font-size:1.25rem;cursor:pointer}
   /* ── Marvel Dice Throne Missions (js/dtm-missions.js) ── */
   .dt-top{display:flex;align-items:center;flex-wrap:wrap;gap:0.4rem 0.8rem;margin:0.4rem 0 0.8rem}
   .dt-top .rv-hint{flex:1 1 12rem;margin:0}

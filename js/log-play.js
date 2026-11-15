@@ -476,8 +476,11 @@ function _lpRenderScen() {
       html += `<option value="${esc(v)}"${_lp.pick[f.key] === v ? ' selected' : ''}>${esc(text)}</option>`;
     }
     if (group) html += '</optgroup>';
-    return `<label class="lp-field"><span>${esc(f.label)}</span><select class="lp-input" data-sc="${f.key}">
-        <option value="">${esc(f.optional ? f.none || 'None' : 'Pick…')}</option>${html}</select></label>`;
+    const sel = `<select class="lp-input" data-sc="${f.key}">
+        <option value="">${esc(f.optional ? f.none || 'None' : 'Pick…')}</option>${html}</select>`;
+    // a field that can be left to chance (Toy Battle's Terrain): the dice next to it
+    return `<label class="lp-field"><span>${esc(f.label)}</span>${f.random
+      ? `<span class="lp-sc-row">${sel}<button type="button" class="lp-dice" data-sc-rand="${f.key}" aria-label="A random ${esc(f.label.toLowerCase())}" title="A random one">&#127922;</button></span>` : sel}</label>`;
   }).join('');
 }
 
@@ -718,8 +721,16 @@ function _lpSay(text) {
 async function _lpClick(e) {
   const ov = document.getElementById('lp-overlay');
   if (e.target === ov) { _lpClose(); return; }
-  const b = e.target.closest('[data-lp], [data-lp-game], [data-lp-win], [data-lp-st], [data-lp-del], [data-lp-who], [data-lp-crew], [data-lp-x], [data-lp-team], [data-lp-role]');
+  const b = e.target.closest('[data-lp], [data-lp-game], [data-lp-win], [data-lp-st], [data-lp-del], [data-lp-who], [data-lp-crew], [data-lp-x], [data-lp-team], [data-lp-role], [data-sc-rand]');
   if (!b) return;
+  if (b.dataset.scRand) {   // the dice: a random pick for this field
+    e.preventDefault();
+    const f = ((_lp.scenCfg && _lp.scenCfg.fields) || []).find(x => x.key === b.dataset.scRand);
+    const opts = f ? f.options(_lp.pick || {}) : [];
+    const v = f && (typeof f.random === 'function' ? f.random(opts) : (opts[Math.floor(Math.random() * opts.length)] || [])[0]);
+    if (v) { _lp.pick[f.key] = v; _lp.scenGuessed = false; _lpRenderScen(); }
+    return;
+  }
   if (b.dataset.lpRole != null) { _lpSyncPlayers(); const p = _lp.sc[Number(b.dataset.lpRole)]; if (p) p.r = b.dataset.role; _lpRenderPlayers(); return; }
   if (b.dataset.lpTeam) {
     _lpSyncPlayers();

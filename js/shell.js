@@ -837,7 +837,8 @@ function openModal(game) {
     game.complexity > 0 ? gmFact('weight', `Weight ${Number(game.complexity).toFixed(1)}`) : '',
   ].join('');
   const logHtml = typeof logPlayBtnHtml === 'function' ? logPlayBtnHtml(game) : '';
-  const playsPanel = [logHtml, boardsWho, marvelUnitedHtml, marvelChampionsHtml, spiritIslandHtml, eternalDecksHtml, aeonsEndHtml, leviathanHtml,
+  const toyHtml = typeof buildToyBattleHtml === 'function' ? buildToyBattleHtml(game) : '';
+  const playsPanel = [logHtml, toyHtml, boardsWho, marvelUnitedHtml, marvelChampionsHtml, spiritIslandHtml, eternalDecksHtml, aeonsEndHtml, leviathanHtml,
     boardsWho ? playHistoryHtml.replace(progressWhoHtml(myProgress), '') : playHistoryHtml].join('');
   const roveHtml = typeof buildRoveCampaignHtml === 'function' ? buildRoveCampaignHtml(game) : '';
   const crHtml = typeof buildCrCampaignHtml === 'function' ? buildCrCampaignHtml(game) : '';
@@ -919,6 +920,7 @@ function openModal(game) {
   if (bbHtml) wireBbCampaign(content);
   if (dtHtml) wireDtm(content);
   if (leviathanHtml) wireLeviathanWilds(content);
+  if (toyHtml) wireToyBattle(content);
   if (Number(game.bggId) === SKY_TEAM_BGGID) wireSkyTeam(content);
   if (typeof wireProgressBoards === 'function') wireProgressBoards(content);
   updateFavButton(game.bggId);
