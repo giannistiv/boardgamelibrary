@@ -469,3 +469,18 @@ function _bcChange(panel, ev) {
   const t = ev.target, L = _bcLog;
   if (L && t.matches('[data-bc-flip]')) { L.seats[Number(t.dataset.bcFlip)].flip = t.checked; _bcRender(panel); }
 }
+
+// From Log a play (js/log-play.js, _lpHandoff): the people, the day and the place so far.
+function botcLogFrom(ctx) {
+  _bcStart();
+  const names = (ctx.names || []).filter(Boolean);
+  if (names.length > 1) _bcLog.seats = names.map(n => ({ n, c: '', thinks: '', flip: false, trav: '' }));
+  if (ctx.st) _bcLog.st = ctx.st;
+  if (ctx.date) _bcLog.date = ctx.date;
+  if (ctx.l) _bcLog.l = ctx.l;
+  _bcTab = 'games';
+  _modalTab = 'campaign';
+  _modalTabFor = BOTC_BGGID;
+  const g = findGameByBggId(BOTC_BGGID);
+  if (g) openModal(g);
+}

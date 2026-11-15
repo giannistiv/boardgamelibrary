@@ -153,7 +153,8 @@ function scenarioPicker(bggId) {
   if (typeof TOY_BGGID !== 'undefined' && id === TOY_BGGID) {
     // "Castle Field", or "Castle Field／No special bases" (js/toy-battle.js); the dice pick one
     return { fields: [
-      { key: 'map', label: 'Terrain', random: () => toyRandomTerrain().name, options: () => TOY_TERRAINS.map(t => [t.name, t.name]) },
+      { key: 'map', label: 'Terrain', random: () => toyRandomTerrain().name, options: () => TOY_TERRAINS.map(t => [t.name, t.name]),
+        preview: (v) => { const t = TOY_TERRAINS.find(x => x.name === v); return t ? `images/toybattle/${t.k}.jpg` : ''; } },
       { key: 'sb', label: 'Special bases', optional: true, none: 'With their effects', options: () => [[TOY_NO_BASES, 'Without (first games)']] },
     ] };
   }

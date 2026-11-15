@@ -333,6 +333,7 @@ function _lpShow() {
         <section class="lp-part">
           <h3 class="lp-h">Game</h3>
           <div id="lp-game"></div>
+          <div id="lp-handoff"></div>
           <div id="lp-exp" class="lp-exp" hidden></div>
         </section>
         <section class="lp-part" id="lp-scen-part" hidden>
@@ -349,7 +350,7 @@ function _lpShow() {
           <div id="lp-len" class="lp-len"></div>
         </section>
         <section class="lp-part">
-          <div class="lp-hrow"><h3 class="lp-h">Players</h3><span class="lp-hbtns"><button type="button" class="lp-textbtn" data-lp="teams">${_lp.teams ? 'No teams' : '+ Teams'}</button><button type="button" class="lp-textbtn" data-lp="roles">${_lp.roles ? 'Hide characters' : '+ Characters'}</button></span></div>
+          <div class="lp-hrow"><h3 class="lp-h">Players</h3><span class="lp-hbtns" id="lp-hbtns"></span></div>
           <div id="lp-ssbtn" class="lp-ssrow" hidden></div>
           <div class="lp-all">
             <button type="button" class="lp-chip" data-lp="allwon"><span aria-hidden="true">&#9733;</span> Everyone won</button>
@@ -410,6 +411,9 @@ function _lpRenderGame() {
   const box = document.getElementById('lp-game');
   if (!box) return;
   const esc = _escapeHtml;
+  if (_lp.fitFor !== _lp.bggId) _lpApplyFit();
+  _lpRenderHeadBtns();
+  _lpRenderHandoff();
   _lpRenderSugg();   // the people who play this game come up
   _lpRenderSheetBtn();
   _lpRenderExp();
@@ -480,7 +484,7 @@ function _lpRenderScen() {
         <option value="">${esc(f.optional ? f.none || 'None' : 'Pick…')}</option>${html}</select>`;
     // a field that can be left to chance (Toy Battle's Terrain): the dice next to it
     return `<label class="lp-field"><span>${esc(f.label)}</span>${f.random
-      ? `<span class="lp-sc-row">${sel}<button type="button" class="lp-dice" data-sc-rand="${f.key}" aria-label="A random ${esc(f.label.toLowerCase())}" title="A random one">&#127922;</button></span>` : sel}</label>`;
+      ? `<span class="lp-sc-row">${f.preview && _lp.pick[f.key] && f.preview(_lp.pick[f.key]) ? `<img class="lp-sc-img" src="${esc(f.preview(_lp.pick[f.key]))}" alt="">` : ''}${sel}<button type="button" class="lp-dice" data-sc-rand="${f.key}" aria-label="A random ${esc(f.label.toLowerCase())}" title="A random one">&#127922;</button></span>` : sel}</label>`;
   }).join('');
 }
 
@@ -558,7 +562,8 @@ function _lpSyncPlayers() {
   document.querySelectorAll('#lp-players .lp-prow').forEach(row => {
     const p = _lp.sc[Number(row.dataset.i)];
     if (!p) return;
-    p.s = row.querySelector('.lp-score').value.trim();
+    const sIn = row.querySelector('.lp-score');
+    if (sIn) p.s = sIn.value.trim();
     const r = row.querySelector('.lp-role');
     if (r) p.r = r.value.trim();
   });
@@ -578,7 +583,7 @@ function _lpRenderPlayers() {
         <button type="button" class="lp-x" data-lp-del="${i}" aria-label="Remove ${esc(p.n)}">&times;</button>
       </div>
       <div class="lp-pscore">
-        <input class="lp-input lp-score" value="${esc(p.s)}" placeholder="Score" maxlength="40" inputmode="decimal" aria-label="${esc(p.n)}'s score">
+        ${_lp.scores === false ? '' : `<input class="lp-input lp-score" value="${esc(p.s)}" placeholder="Score" maxlength="40" inputmode="decimal" aria-label="${esc(p.n)}'s score">`}
         ${st && isNoResultSeat(p) ? '' : `<button type="button" class="lp-win${p.w ? ' on' : ''}" data-lp-win="${i}" aria-pressed="${p.w}">&#9733; ${p.w ? 'Won' : 'Winner?'}</button>`}
         ${st ? `<button type="button" class="lp-win lp-st${isNoResultSeat(p) ? ' on' : ''}" data-lp-st="${i}" aria-pressed="${isNoResultSeat(p)}" title="Plays, but neither wins nor loses">${esc(st)}</button>` : ''}
       </div>
@@ -623,14 +628,96 @@ function _lpUsualSeats() {
   if (recent.length < 2) return;
   const share = (f) => recent.filter(q => (q.sc || []).some(f)).length / recent.length;
   if (!_lp.roles && share(s => s && s.r && !isNoResultSeat(s)) >= 0.5) _lp.roles = true;
-  if (!_lp.teams && share(s => s && s.tm) >= 0.5) {
+  // (not Blood on the Clocktower's Good and Evil: its Town Square keeps those)
+  if (!_lp.teams && !STORYTELLER_GAMES.has(Number(_lp.bggId)) && share(s => s && s.tm) >= 0.5) {
     _lp.teams = true;
     _lp.sc.forEach((p, i) => { if (!p.tm) p.tm = String((i % 2) + 1); });
   }
-  const rb = document.querySelector('#lp-overlay [data-lp="roles"]');
-  if (rb) rb.textContent = _lp.roles ? 'Hide characters' : '+ Characters';
-  const tb = document.querySelector('#lp-overlay [data-lp="teams"]');
-  if (tb) tb.textContent = _lp.teams ? 'No teams' : '+ Teams';
+  _lpRenderHeadBtns();
+}
+
+// ── What a game's play needs (the user, 15 Nov 2026: it asked for a score in
+// games without scores, and for teams in games without teams) ──
+// Scores: where the game has a score sheet, or where its plays so far have
+// them (a quarter at least); with no plays to go by, unless BGG calls it
+// co-operative or a Storyteller runs it. Teams: where its plays have had
+// them, or BGG calls it team-based. A small "+ Scores" stays for the odd one.
+function _lpFit(bggId) {
+  const id = Number(bggId);
+  const plays = (PLAY_HISTORY[id] || []).slice(0, 30);
+  const g = findGameByBggId(id) || {};
+  const mechNames = (g.mechanics || []).map(String);
+  const mech = typeof bggMechanics === 'function' ? bggMechanics(id) : new Set();
+  const coop = (typeof bggIsCoop === 'function' && bggIsCoop(id)) || (typeof isCoop === 'function' && !!g.categories && isCoop(g)) || mechNames.includes('Cooperative Game');
+  const sheet = typeof SCORESHEETS !== 'undefined' && !!SCORESHEETS[id];
+  const scored = plays.filter(p => (p.sc || []).some(s => s && /\d/.test(String(s.s == null ? '' : s.s)))).length;
+  const scores = sheet ? true : plays.length >= 2 ? scored / plays.length >= 0.25 : !coop && !STORYTELLER_GAMES.has(id);
+  const teams = mech.has(2019) || mechNames.includes('Team-Based Game') || plays.some(p => (p.sc || []).some(s => s && s.tm));
+  return { scores, teams };
+}
+function _lpApplyFit() {
+  _lp.fitFor = _lp.bggId;
+  if (!_lp.bggId) { _lp.scores = true; _lp.teamsFit = true; return; }
+  const f = _lpFit(_lp.bggId);
+  _lp.scores = f.scores || _lp.sc.some(p => String(p.s || '').trim() !== '');   // a play already scored keeps its boxes
+  _lp.teamsFit = f.teams || !!_lp.teams || _lp.sc.some(p => p.tm);
+}
+function _lpRenderHeadBtns() {
+  const box = document.getElementById('lp-hbtns');
+  if (!box || !_lp) return;
+  box.innerHTML = `${_lp.scores === false ? '<button type="button" class="lp-textbtn" data-lp="scores">+ Scores</button>' : ''}${
+    _lp.teamsFit !== false || _lp.teams ? `<button type="button" class="lp-textbtn" data-lp="teams">${_lp.teams ? 'No teams' : '+ Teams'}</button>` : ''}<button type="button" class="lp-textbtn" data-lp="roles">${_lp.roles ? 'Hide characters' : '+ Characters'}</button>`;
+}
+
+// ── Games with a logger of their own (the user, 15 Nov 2026: the nice screen
+// inside the game, from Log a play too) ──
+// Picking one shows a card that hands the play over to its tab, with the
+// people, the day and the place so far. Not from that tab itself, nor when
+// changing a play already logged.
+function _lpHandoff(bggId) {
+  const id = Number(bggId);
+  const tab = (title, what, start) => ({ title, what, start });
+  const open = (gid) => () => { _modalTab = 'campaign'; _modalTabFor = gid; const g = findGameByBggId(gid); if (g) openModal(g); };
+  if (typeof BOTC_BGGID !== 'undefined' && id === BOTC_BGGID && typeof botcLogFrom === 'function')
+    return tab('Log it on the Town Square', 'A character a tap from the script, then Good or Evil won: the stars and the teams follow.', botcLogFrom);
+  if (typeof DTM_BGGID !== 'undefined' && id === DTM_BGGID && typeof dtmLogFrom === 'function')
+    return tab('Play a Mission', 'The Mission, how hard, each hero: the Perk Points are worked out for everyone.', dtmLogFrom);
+  if (typeof CL_BGGID !== 'undefined' && id === CL_BGGID)
+    return tab('Log it in the campaign', 'Game N for your franchise, with its Employee Reviews after.', open(id));
+  if (typeof MR_BGGID !== 'undefined' && (id === MR_BGGID || id === MRC_BGGID))
+    return tab('Play it in the campaign', 'Each chapter is logged from the campaign as you play it.', open(id));
+  if (typeof CNCR_BGGID !== 'undefined' && id === CNCR_BGGID)
+    return tab('Play it in the campaign', 'Each mission is logged from the campaign’s map.', open(id));
+  if (typeof BB_BGGID !== 'undefined' && id === BB_BGGID)
+    return tab('Play it in the campaign', 'Each scenario is logged from the campaign.', open(id));
+  return null;
+}
+function _lpRenderHandoff() {
+  const box = document.getElementById('lp-handoff');
+  if (!box) return;
+  const h = _lp && _lp.bggId && !_lp.id && !_lp.tab ? _lpHandoff(_lp.bggId) : null;
+  const esc = _escapeHtml;
+  box.innerHTML = h ? `<button type="button" class="lp-handoff" data-lp="handoff">
+      <img src="images/${Number(_lp.bggId)}.jpg" alt="" onerror="this.style.visibility='hidden'">
+      <span><b>${esc(h.title)}</b><small>${esc(h.what)}</small></span><span class="lp-handoff-go" aria-hidden="true">&rsaquo;</span></button>` : '';
+}
+function _lpHandOver() {
+  const h = _lpHandoff(_lp.bggId);
+  if (!h) return;
+  _lpSyncPlayers();
+  const ctx = {
+    bggId: _lp.bggId,
+    names: _lp.sc.filter(p => !isNoResultSeat(p)).map(p => p.n),
+    st: (_lp.sc.find(p => isNoResultSeat(p)) || {}).n || '',
+    date: (document.getElementById('lp-date') || {}).value || _lpToday(),
+    l: ((document.getElementById('lp-l') || {}).value || '').trim(),
+  };
+  // the form's own back entry goes first, then the game's page opens
+  let done = false;
+  const go = () => { if (!done) { done = true; h.start(ctx); } };
+  window.addEventListener('popstate', () => setTimeout(go, 0), { once: true });
+  setTimeout(go, 450);
+  _lpClose();
 }
 // The expansions played with (the user, 6 Nov 2026): one tap each, for the
 // ones you own for the game and the ones it's been played with before.
@@ -663,7 +750,7 @@ function _lpRenderSheetBtn() {
   const box = document.getElementById('lp-ssbtn');
   if (!box) return;
   const s = typeof scoreSheetFor === 'function' ? scoreSheetFor(_lp.bggId) : null;
-  box.hidden = !s || !_lp.sc.length;
+  box.hidden = !s || !_lp.sc.length || (s.key === 'rounds' && _lp.scores === false);
   box.innerHTML = box.hidden ? '' : `<button type="button" class="lp-chip lp-ssbtn" data-lp="sheet"><span aria-hidden="true">&#9638;</span> ${
     scoreSheetFilled() ? 'Back to the score sheet' : s.key === 'rounds' ? 'Score it round by round' : 'Score sheet'}</button>`;
 }
@@ -752,12 +839,14 @@ async function _lpClick(e) {
   if (what === 'close') { _lpClose(); return; }
   if (what === 'game') { _lp.bggId = 0; _lp.x = []; _lpRenderGame(); _lpRenderLen(); if (!_isTouchDevice()) setTimeout(() => { const q = document.getElementById('lp-gq'); if (q) q.focus(); }, 30); return; }
   if (what === 'gsearch') { _lpGameSearch(); return; }
-  if (what === 'roles') { _lpSyncPlayers(); _lp.roles = !_lp.roles; b.textContent = _lp.roles ? 'Hide characters' : '+ Characters'; _lpRenderPlayers(); return; }
+  if (what === 'roles') { _lpSyncPlayers(); _lp.roles = !_lp.roles; _lpRenderHeadBtns(); _lpRenderPlayers(); return; }
+  if (what === 'scores') { _lpSyncPlayers(); _lp.scores = true; _lpRenderHeadBtns(); _lpRenderPlayers(); _lpRenderSheetBtn(); return; }
+  if (what === 'handoff') { _lpHandOver(); return; }
   if (what === 'teams') {
     _lpSyncPlayers();
     _lp.teams = !_lp.teams;
     if (_lp.teams && !_lp.sc.some(p => p.tm)) _lp.sc.forEach((p, i) => { p.tm = String((i % 2) + 1); });   // split by seat to start with
-    b.textContent = _lp.teams ? 'No teams' : '+ Teams';
+    _lpRenderHeadBtns();
     _lpRenderPlayers();
     return;
   }

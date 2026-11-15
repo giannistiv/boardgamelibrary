@@ -760,3 +760,17 @@ async function _dtmChange(panel, ev) {
     _dtmRender(panel);
   }
 }
+
+// From Log a play (js/log-play.js, _lpHandoff): the people, the day and the place so far.
+function dtmLogFrom(ctx) {
+  _dtmLogStart(null);
+  const names = (ctx.names || []).filter(Boolean);
+  if (names.length > 1) _dtmLog.party = names.slice(0, 4).map(n => ({ n, hero: _dtmLastHero(n) }));
+  if (ctx.date) _dtmLog.date = ctx.date;
+  if (ctx.l) _dtmLog.l = ctx.l;
+  _dtmTab = 'missions';
+  _modalTab = 'campaign';
+  _modalTabFor = DTM_BGGID;
+  const g = findGameByBggId(DTM_BGGID);
+  if (g) openModal(g);
+}
