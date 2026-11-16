@@ -6620,5 +6620,95 @@ const RULES = {
    "The Storyteller is on nobody's side and can be asked anything privately.",
    "Trouble Brewing is the place to start; the other scripts get trickier."
   ]
+ },
+ "391137": {
+  "src": "the Galactic Cruise rulebook (Kinson Key Games)",
+  "goal": "Earn the most **VP** over three company years: launching Ships, satisfying Guests, building Developments, Reputation and progress. The **Progress Track** is the clock: each of its 3 sections ends with a scoring meeting (**AGM**). You start at 5 VP; Reputation 0/1/2/3 in turn order.",
+  "turn": [
+   "**Advance Ships**: each Ship of yours in space moves its Pilot one Stop along its Cruise (see On a Cruise).",
+   "Then one of: **Assign a Worker** and take up to 2 actions, **Launch a Ship**, or **Call a Meeting**.",
+   "**Company Goals**: for each goal you now meet (once each a game), move its Progress Cube onto the Progress Track. That reveals another Wings, and the goal's tracker steps up for everyone."
+  ],
+  "actions": [
+   [
+    "Assigning a Worker",
+    "From your Break Room to any of the 6 Network locations without a Worker of yours. A rival's Worker there is **bumped** home (they gain a Funding Bonus). Use the 2 actions there, plus a neighbouring location's when a Development links them: yours free, otherwise pay each owner 2/1/0 Money (your Reputation 0–6 / 7–14 / 15+). Actions can repeat, in any order."
+   ],
+   [
+    "Build a Development",
+    "The leftmost one of any Resource row; pay its column's cost in Money and/or that Resource. Into a Network area or under a Technology, never where you already have one. First in an area covers the Reputation icon: +1 Reputation. The first under a Technology invents it, for everyone. Each one built lets you store 1 more of that Resource."
+   ],
+   [
+    "Hire an Expert Worker",
+    "Right one: 2 Money per Development still in your Food and Oxygen rows. Left one: 3 Money per Upgrade Token still in the bottom 4 spaces of your Launch Tower. It goes to your Break Room (Funding Bonus) and has this game's Expert ability."
+   ],
+   [
+    "Purchase Supplies",
+    "1 Money for 2 Resources and/or 1 Money for 2 Ads (each once). Resources you can't store are lost."
+   ],
+   [
+    "Acquire Blueprints",
+    "Up to 2 from the display, free. Hold at most 5 at the end of your turn."
+   ],
+   [
+    "Build Ship Segments",
+    "Up to 2: pay a held Blueprint's cost (or one from the display, plus the Reputation and Money beside it), flip it and build it between the Cockpit and Engine of a Ship that's at home. Max 3 Segments a Ship. 2 Segments make the first Cabin; each one more adds a Cabin."
+   ],
+   [
+    "Acquire New Ship",
+    "A Cockpit + Engine pair from the display (max 3 Ships). Gain the Engine's bonus and flip it. The Cockpit stays on its −5 side until that Ship first launches."
+   ],
+   [
+    "Gain Resources",
+    "Up to 3 from the Storage Silo, only what you have room for."
+   ],
+   [
+    "Refill Storage Silo",
+    "Discard an Agenda Card: raise one Silo Resource to 5, gain 1 Money per step raised, and 1 Reputation."
+   ],
+   [
+    "Schedule a Cruise",
+    "Put your Cruise Consultant by an unscheduled Cruise (one at a time, no switching). Flip one Upgrade Token in your Launch Tower and gain its bonus."
+   ],
+   [
+    "Advertise for a Cruise",
+    "Add 1–2 Guests to a Cruise with room (unscheduled, or yours): from the Queue for 1/2/3 Ads by section, or the supply for 4. Each Guest: +1 Money per Destination on that Cruise, +1 Reputation if it has the Guest's Destination."
+   ],
+   [
+    "Draw Agenda Cards",
+    "Up to 2 from the display, or the top of the discard for 1 Reputation each. Never from the deck."
+   ],
+   [
+    "Refill Agenda Cards",
+    "Gain the bonuses under the empty display spaces, discard the rest, deal 4 new."
+   ],
+   [
+    "Launch a Ship (instead of a Worker)",
+    "Worker into your Launch Elevator; no Network actions. Put your scheduled Cruise above a Ship at home with a Cabin and board Guests (at least 1, one per Cabin): pre-sold ones free (max 2), more from the Queue or supply at their Ad cost. Put a Progress Cube on the track. Pay Food 1 per Guest +1, Oxygen 1 per Segment, Fuel as the Cruise shows. Score the Cockpit (first launch: flip off its −5). The flipped Upgrade Token moves onto the Engine; the Worker becomes the Pilot. Then a new Cruise comes out: matching Guests in the Queue move down a section, and as many new Guests join the top as just boarded."
+   ],
+   [
+    "Call a Meeting (instead)",
+    "A must when your Break Room is empty. All your Workers in the Network come home (a Funding Bonus each), then take one action at a location linked to one of your Developments (no paying rivals)."
+   ]
+  ],
+  "roundTitle": "On a Cruise",
+  "round": [
+   "**Destination**: you may leave the Engine's Upgrade Token on one of its Upgrades (max 3 there; or keep it for a later Destination on this Cruise). Score any Guests aboard: 1 Ad if it's their Destination, 2 if not; each scores **3 VP + 1 per Upgrade Token** on that Destination.",
+   "**Day in Space** (not a Destination): each Guest gives its bonus from the Marketing Board (Money, Resource or Ad, set at random each game) once per matching icon on the Ship.",
+   "**Back to Earth**: the Pilot returns to your Break Room (Funding Bonus), the Cruise is discarded, the Guests go back. The Ship can be built on and launched again."
+  ],
+  "end": [
+   "Cubes fill the Progress Track section by section. At the end of the turn a section fills: **AGM**, each player scores their cubes in it × their revealed Wings (1 + goals done); the most Reputation (ties too) counts one extra cube.",
+   "When section 3 fills: finish the round. Then everyone brings their Workers home (Funding Bonuses), takes one last turn, and moves each Ship in space one final Stop.",
+   "Final AGM: section 3 (overflow too) as above; each Cockpit's criteria (−5 if that Ship never launched); the VP on your Segments; the Reputation track's VP; the VP of your rightmost empty Development column; 1 VP per 3 leftover Resources, Money, Ads, Agenda Cards and Blueprints.",
+   "Ties: most cubes on the track, then Reputation, then Cockpit VP, then later in turn order."
+  ],
+  "forget": [
+   "**Funding Bonus**: each Worker coming home to your Break Room gives 1 Money, Ad, VP or Resource, as your Launch Tower shows: an option whose token is flipped is out until it's removed, and then it gives 2.",
+   "**Reputation**, once a turn, any time: slide down the track and take every bonus of one type you pass. 1 Reputation also refreshes the Blueprint display or takes an Agenda Card from the discard. At 18 every gain is 1 VP; at 0 every loss costs 1 VP.",
+   "Agenda Cards: for their text only during the action shown top right; for their Resource any time on your turn. Hand limit 5 at the end of your turn.",
+   "A pre-sold Guest you don't take on board costs 2 Reputation and goes to the top of the Queue.",
+   "2 players: grey NPC Workers sit in the Network. Bump one and it moves clockwise, bumping your opponent's Worker there. After AGM A and B, NPC Developments come out and an NPC Worker becomes an Expert."
+  ]
  }
 };
