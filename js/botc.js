@@ -26,6 +26,9 @@ const BOTC_COUNTS = { 5: [3, 0, 1, 1], 6: [3, 1, 1, 1], 7: [5, 0, 1, 1], 8: [5, 
 const BOTC_THINKS = { drunk: 't', lunatic: 'd', marionette: 'to' };
 const BOTC_ALIAS = { gravedigger: 'undertaker' };   // a name some plays use for the Undertaker
 const BOTC_WIKI = 'https://wiki.bloodontheclocktower.com/';
+// The official icons, one per character in BOTC_CHARS order, on a grid of
+// BOTC_TOKEN_COLS in images/botc/tokens.jpg (tools/build-botc-tokens.py).
+const BOTC_TOKEN_N = 156, BOTC_TOKEN_COLS = 13;
 
 let _bcTab = 'games';     // 'games' | 'stats' | 'setup'
 let _bcLog = null;        // a game being logged: { script, scriptName, st, seats: [{n, c, thinks, flip, trav}], win, date, l }
@@ -42,11 +45,11 @@ let _bcIdx = null;
 function _bcChars() {
   if (!_bcIdx) {
     _bcIdx = new Map();
-    for (const [id, name, team, ed, setup] of (typeof BOTC_CHARS !== 'undefined' ? BOTC_CHARS : [])) {
-      const c = { id, name, team, ed, setup };
+    (typeof BOTC_CHARS !== 'undefined' ? BOTC_CHARS : []).forEach(([id, name, team, ed, setup], i) => {
+      const c = { id, name, team, ed, setup, i };
       _bcIdx.set(id, c);
       _bcIdx.set(_bcNorm(name), c);
-    }
+    });
   }
   return _bcIdx;
 }
@@ -172,10 +175,17 @@ function _bcToast(msg, ok) {
   _bcToast.t = setTimeout(() => { el.hidden = true; }, 6000);
 }
 
-// A character token: its team's colour, its initials, its name under it.
+// A character token: the character's own icon on parchment, ringed in its
+// team's colour; its initials when there's no icon for it.
 function _bcToken(c, cls) {
   const T = c ? BOTC_TEAMS[c.team] : null;
-  return `<span class="bc-tok${cls ? ' ' + cls : ''}" style="--bc-c:${T ? T[2] : '#666'}">${c ? _escapeHtml(_bcShort(c.name)) : '?'}</span>`;
+  const k = `bc-tok${cls ? ' ' + cls : ''}`, col = `--bc-c:${T ? T[2] : '#666'}`;
+  if (c && c.i < BOTC_TOKEN_N) {
+    const rows = Math.ceil(BOTC_TOKEN_N / BOTC_TOKEN_COLS);
+    const x = (c.i % BOTC_TOKEN_COLS) / (BOTC_TOKEN_COLS - 1) * 100, y = Math.floor(c.i / BOTC_TOKEN_COLS) / (rows - 1) * 100;
+    return `<span class="${k} ic" role="img" aria-label="${_escapeHtml(c.name)}" title="${_escapeHtml(c.name)}" style="${col};background-position:${+x.toFixed(3)}% ${+y.toFixed(3)}%"></span>`;
+  }
+  return `<span class="${k}" style="${col}">${c ? _escapeHtml(_bcShort(c.name)) : '?'}</span>`;
 }
 
 // ── The games, each as its town square ──
