@@ -42,7 +42,8 @@ function _progressFamilyPlays(bggId) {
   return out;
 }
 
-const PB_SKIP = new Set([373106, 338960, 285774, 162886, 424981, 365670, 439995, 358737, 241451, 390092]);
+const PB_SKIP = new Set([373106, 338960, 285774, 162886, 424981, 365670, 439995, 358737, 241451, 390092,
+  268504, 359609]);   // Domianne's Tower and Arkham Horror have their own boards (js/game-boards.js)
 // How many missions a game has, where it's known (more in CAMPAIGN_PROGRESS).
 // chapters × per: Take Time's 10 folders of 4 clocks.
 const PB_TOTALS = {
@@ -57,8 +58,16 @@ const PB_DIFFICULTY = /^(easy|normal|medium|moderate|hard|very hard|expert|heroi
 // Games with names for their missions, in order.
 const PB_NAMES = {
   339789: ['The Launch', 'The Journey', 'The Colony', 'The Mine', 'The Dome', 'The Virus', 'The Escape', 'The Battle'],   // Welcome to the Moon
+  209778: ['Discovery', 'Several exits', 'Pass your Action tile', 'Dwarf & Elf special abilities', 'Mage special ability',   // Magic Maze
+    'Barbarian special ability', 'Maximum Surveillance', 'Divination', 'Follow the leader!', 'Trick the Guards', 'Rearrangement mode',
+    'Gestures only', 'Multidimensional mall', 'No communication', 'You have beautiful eyes', 'Vortex out of service', 'Groups forbidden'],
+  // The Fellowship of the Ring trick-taking game: only where its rulebook's notes
+  // place a chapter (Bilbo's party, Old Man Willow, Barliman, the Witch-king,
+  // Elrond, Moria's Bridge, Gimli in Lórien, the River cards)
+  429293: ['The Shire', '', '', '', 'Old Forest', '', 'Bree', 'Weathertop', '', 'Rivendell', '', '', '', 'Moria', 'Lothlórien', '', 'Great River', ''],
 };
 const PB_MOON = 339789;   // drawn as the trip from the Earth to the Moon
+const PB_LOTR = 429293;   // The Fellowship of the Ring: the road from the Shire
 const PB_CREW = 284083;   // The Crew: the voyage out to Planet Nine
 const PB_BOMB = 413246;   // Bomb Busters: a bomb, a wire per mission
 
@@ -207,9 +216,10 @@ function buildMissionMapHtml(game, plays, opts) {
     else say += e.losses ? ` · ${e.losses} loss${e.losses > 1 ? 'es' : ''} so far` : ' · played, no result yet';
     return say;
   };
-  const drawn = clocks || id === PB_MOON || id === PB_CREW || id === PB_BOMB;
+  const drawn = clocks || id === PB_MOON || id === PB_CREW || id === PB_BOMB || id === PB_LOTR;
   const rows = clocks ? _pbClocksHtml(cells, byKey, nextCell, last, per, coop, capOf, fresh)
     : id === PB_MOON ? _pbMoonHtml(cells, byKey, nextCell, capOf, fresh)
+    : id === PB_LOTR ? _pbLotrHtml(cells, byKey, nextCell, capOf, fresh, coop)
     : id === PB_CREW ? _pbCrewHtml(cells, byKey, nextCell, capOf, fresh, coop)
     : id === PB_BOMB ? _pbBombHtml(cells, byKey, nextCell, capOf, fresh, won, total)
     : `<div class="pb-grid">${cells.map(cellHtml).join('')}</div>`;
@@ -403,6 +413,39 @@ function _pbMoonHtml(cells, byKey, nextCell, capOf, fresh) {
         <g class="pbm-earth"><circle cx="40" cy="262" r="64"/><path d="M2 228 q18 -16 40 -6 q10 14 -6 26 q-22 6 -34 -20Z M56 286 q16 -18 34 -4 q-4 18 -24 22Z"/></g>
         <g class="pbm-moon"><circle cx="472" cy="58" r="42"/><circle class="pbm-crater" cx="456" cy="46" r="9"/><circle class="pbm-crater" cx="488" cy="74" r="6"/><circle class="pbm-crater" cx="480" cy="36" r="4"/><circle class="pbm-crater" cx="454" cy="78" r="5"/></g>`;
   return _pbVoyageHtml({ cells, byKey, nextCell, capOf, fresh, coop: false, pts, stopIdx, W: 520, H: 300, cls: 'pb-moonmap', deco, names: PB_NAMES[PB_MOON], r: 15 });
+}
+
+// The Fellowship of the Ring: the road east from the Shire, chapter by
+// chapter, past Bree and Weathertop to Rivendell, under the Misty Mountains
+// through Moria, into Lothlórien and down the Great River. The Ring marks how
+// far the company has got. A drawing of our own (no map from the books).
+function _pbLotrHtml(cells, byKey, nextCell, capOf, fresh, coop) {
+  const S = [[34, 236], [64, 210], [96, 232], [126, 204], [150, 170], [180, 196], [208, 162], [236, 128], [262, 158], [292, 128],
+    [318, 98], [344, 70], [372, 92], [392, 128], [414, 166], [436, 200], [462, 230], [494, 258]];
+  const stops = cells.map((_, i) => S[Math.min(i, S.length - 1)]);
+  const STEP = 14, pts = [], stopIdx = [];
+  // a smooth road through the stops (Catmull-Rom)
+  for (let i = 0; i < stops.length; i++) {
+    stopIdx.push(pts.length);
+    if (i === stops.length - 1) { pts.push(stops[i]); break; }
+    const p0 = stops[Math.max(0, i - 1)], p1 = stops[i], p2 = stops[i + 1], p3 = stops[Math.min(stops.length - 1, i + 2)];
+    for (let k = 0; k < STEP; k++) {
+      const t = k / STEP, t2 = t * t, t3 = t2 * t;
+      pts.push([0, 1].map(j => 0.5 * ((2 * p1[j]) + (-p0[j] + p2[j]) * t + (2 * p0[j] - 5 * p1[j] + 4 * p2[j] - p3[j]) * t2 + (-p0[j] + 3 * p1[j] - 3 * p2[j] + p3[j]) * t3)));
+    }
+  }
+  const peaks = [[300, 70], [322, 52], [346, 40], [370, 50], [392, 66], [412, 84]].map(([x, y]) => `<path class="pbl-peak" d="M${x - 16} ${y + 34}L${x} ${y}L${x + 16} ${y + 34}Z"/>`).join('');
+  const trees = (cx, cy) => [[-14, 4], [0, -4], [14, 4], [-6, 14], [8, 14]].map(([dx, dy]) => `<circle class="pbl-tree" cx="${cx + dx}" cy="${cy + dy}" r="7"/>`).join('');
+  const deco = `<rect class="pbl-land" x="0" y="0" width="520" height="300" rx="14"/>
+        <g class="pbl-shire"><circle cx="34" cy="262" r="20"/><circle cx="58" cy="270" r="14"/></g>
+        ${trees(150, 196)}${trees(414, 194)}
+        <g class="pbl-hills">${peaks}</g>
+        <path class="pbl-river" d="M430 150 C 450 190, 440 220, 470 246 S 500 280, 520 290"/>
+        <path class="pbl-river pbl-river-2" d="M262 190 C 280 200, 300 190, 318 210"/>
+        ${[['The Shire', 62, 292], ['Old Forest', 150, 230], ['Bree', 208, 141], ['Weathertop', 236, 107], ['Rivendell', 334, 150],
+          ['Moria', 356, 138], ['Lothlórien', 462, 166], ['Great River', 470, 290]].map(([t, x, y]) => `<text class="pbl-label" x="${x}" y="${y}">${t}</text>`).join('')}`;
+  // (the places are drawn on the map; PB_NAMES gives them to the captions and Log a play)
+  return _pbVoyageHtml({ cells, byKey, nextCell, capOf, fresh, coop, pts, stopIdx, W: 520, H: 300, cls: 'pb-lotrmap', deco, names: null, r: 12, marker: '&#128141;' });
 }
 
 // The Crew: 50 missions winding out through the solar system, ten to a row,

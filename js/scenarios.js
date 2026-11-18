@@ -67,6 +67,9 @@ const _scIsWord = (t, word) => SCEN_NUM.test(t) && t.trim().split(/\s+/)[0].toLo
 function scenarioPicker(bggId) {
   const id = Number(bggId);
   if (!id) return null;
+  // a game with its own board keeps its own lists there (js/game-boards.js)
+  const own = typeof gbScenarioPicker === 'function' ? gbScenarioPicker(id) : null;
+  if (own) return own;
   const num = SCEN_NUMBERED[id];
   if (num) {
     const [word, n, label] = num;

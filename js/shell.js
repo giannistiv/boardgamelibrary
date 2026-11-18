@@ -829,8 +829,11 @@ function openModal(game) {
   const spiritIslandHtml = buildSpiritIslandHtml(game.bggId, progressPlays);
   const leviathanHtml = typeof buildLeviathanWildsHtml === 'function' ? buildLeviathanWildsHtml(game, progressPlays) : '';
   const moonHtml = typeof buildMoonHtml === 'function' ? buildMoonHtml(game, progressPlays, plays || []) : '';
+  // a game's own tool for the table, and its own board (js/game-boards.js)
+  const gbToolHtml = typeof gameToolHtml === 'function' ? gameToolHtml(game) : '';
+  const gbBoardHtml = typeof gameBoardHtml === 'function' ? gameBoardHtml(game, progressPlays, plays || []) : '';
   // the boards above the play history say whose progress they show, once
-  const boardsWho = marvelUnitedHtml || marvelChampionsHtml || spiritIslandHtml || eternalDecksHtml || aeonsEndHtml || leviathanHtml
+  const boardsWho = marvelUnitedHtml || marvelChampionsHtml || spiritIslandHtml || eternalDecksHtml || aeonsEndHtml || leviathanHtml || gbBoardHtml
     ? progressWhoHtml(_muLineFor(game.bggId) || _isAeonsEnd(game.bggId) ? progressPlaysOf(_progressFamilyPlays(game.bggId)) : myProgress) : '';
 
   const facts = [
@@ -842,7 +845,7 @@ function openModal(game) {
   const toyHtml = typeof buildToyBattleHtml === 'function' ? buildToyBattleHtml(game) : '';
   // Welcome to the Moon's Adventures go under its trip from the Earth (the mission map)
   const historyHtml = moonHtml ? playHistoryHtml.replace('<!--moon-->', moonHtml) : playHistoryHtml;
-  const playsPanel = [logHtml, toyHtml, boardsWho, marvelUnitedHtml, marvelChampionsHtml, spiritIslandHtml, eternalDecksHtml, aeonsEndHtml, leviathanHtml,
+  const playsPanel = [logHtml, toyHtml, gbToolHtml, boardsWho, gbBoardHtml, marvelUnitedHtml, marvelChampionsHtml, spiritIslandHtml, eternalDecksHtml, aeonsEndHtml, leviathanHtml,
     boardsWho ? historyHtml.replace(progressWhoHtml(myProgress), '') : historyHtml].join('');
   const roveHtml = typeof buildRoveCampaignHtml === 'function' ? buildRoveCampaignHtml(game) : '';
   const crHtml = typeof buildCrCampaignHtml === 'function' ? buildCrCampaignHtml(game) : '';
@@ -929,6 +932,7 @@ function openModal(game) {
   if (toyHtml) wireToyBattle(content);
   if (Number(game.bggId) === SKY_TEAM_BGGID) wireSkyTeam(content);
   if (typeof wireMoon === 'function') wireMoon(content);
+  if (typeof wireGameBoards === 'function') wireGameBoards(content, game);
   if (typeof wireProgressBoards === 'function') wireProgressBoards(content);
   updateFavButton(game.bggId);
   wireFavButton();

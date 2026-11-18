@@ -214,9 +214,11 @@ function logPlayWith(o) {
   const a = typeof acctMe === 'function' ? acctMe() : null;
   if (!a) { if (typeof acctOpenSheet === 'function') acctOpenSheet(); return; }
   const roles = o.roles || {};
-  _lp = { id: null, bggId: Number(o.bggId), date: _lpToday(), time: _lpNow(), d: '', lenSet: false, l: o.l || _lpPlaces()[0] || '', b: o.b || '', c: '',
-    sc: (o.names || []).map(n => ({ n, s: '', w: false, r: roles[n] || '', tm: '' })), roles: Object.values(roles).some(Boolean), teams: false,
-    gameWon: false, x: [], tab: o.tab || '', after: typeof o.after === 'function' ? o.after : null };
+  // o.won: a co-op's result known already (Magic Maze's timer: escaped or caught)
+  const known = typeof o.won === 'boolean';
+  _lp = { id: null, bggId: Number(o.bggId), date: _lpToday(), time: _lpNow(), d: '', lenSet: false, l: o.l || _lpPlaces()[0] || '', b: o.b || '', c: o.c || '',
+    sc: (o.names || []).map(n => ({ n, s: '', w: known && o.won, r: roles[n] || '', tm: '' })), roles: Object.values(roles).some(Boolean), teams: false,
+    gameWon: known && !o.won, winSet: known, x: [], tab: o.tab || '', after: typeof o.after === 'function' ? o.after : null };
   _lpUsualSeats();
   _lpShow();
 }
