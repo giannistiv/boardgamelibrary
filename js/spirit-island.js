@@ -109,7 +109,8 @@ function buildSpiritIslandHtml(bggId, plays) {
   if (Number(bggId) !== SI_BGGID) return '';
   const esc = _escapeHtml;
   const games = _siGames(plays);
-  if (!games.length) return '';
+  // the viewer's games; none yet is an empty board, as long as anyone's played
+  if (!games.length && !(PLAY_HISTORY[SI_BGGID] || []).length) return '';
   const wins = games.filter(g => g.won);
   const shown = (box, used) => SI_OWNED.has(box) || used;
 
@@ -177,7 +178,7 @@ function buildSpiritIslandHtml(bggId, plays) {
     </div>`).join('');
 
   const hardest = wins.slice().sort((a, b) => b.diff - a.diff || b.date.localeCompare(a.date))[0];
-  const never = ladders.filter(l => !l.gs.length).map(l => l.a.name);
+  const never = games.length ? ladders.filter(l => !l.gs.length).map(l => l.a.name) : [];
   return `
     <div class="si-board">
       <div class="st-head"><span class="st-title">&#127755; Spirit Island conquest</span></div>
@@ -198,9 +199,9 @@ function buildSpiritIslandHtml(bggId, plays) {
       <div class="si-legend"><span><i class="si-cx si-cx-L">L</i>Low</span><span><i class="si-cx si-cx-M">M</i>Moderate</span><span><i class="si-cx si-cx-H">H</i>High</span><span><i class="si-cx si-cx-V">V</i>Very high complexity</span></div>
       <div class="si-sec">Scenarios <span class="si-hint">with difficulty</span></div>
       <div class="si-scens">${scenHtml}</div>
-      <div class="si-sec">Every game by difficulty</div>
+      ${games.length ? `<div class="si-sec">Every game by difficulty</div>
       <svg class="si-chart" viewBox="-6 -8 ${W + 12} ${H + 16}" aria-label="Difficulty of every game"><polyline points="${line}"/>${dots}</svg>
-      <div class="si-games">${log}</div>
+      <div class="si-games">${log}</div>` : ''}
       <div class="si-note">Difficulty is the adversary level's plus the scenario's. Levels come from the notes on the BGG plays; a game without one counts as played in order. Write the level in the play's notes as “Level 3” to keep it exact.</div>
     </div>`;
 }

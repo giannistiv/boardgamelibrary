@@ -177,7 +177,7 @@ function _skyTeamPassHtml(plays, next) {
     return t && t.code === next.code && (t.diff || _skyTeamEasiestDiff(t.code)) === next.diff && !(p.sc || []).some(s => s.w);
   }).length;
   const last = asc[asc.length - 1];
-  const crew = last ? (last.sc || []).map(s => s.n).filter(Boolean) : [];
+  const crew = last ? (last.sc || []).map(s => s.n).filter(Boolean) : [typeof _ptViewer === 'function' && _ptViewer()].filter(Boolean);
   const diff = SKY_TEAM_DIFFS[next.diff];
   const flight = `ST ${String(next.n).padStart(3, '0')}`;
   return `<div class="sky-pass" title="The next flight in the logbook">
@@ -234,11 +234,14 @@ function wireSkyTeam(root) {
 const SLAY_SPIRE_BGGID = 338960;
 const SLAY_SPIRE_ASCENSIONS = 10;
 // Ascensions cleared in the past but not captured in the logged plays (e.g.
-// played before tagging, or tagged without the Act III boss). New runs are
-// detected automatically from play tags, so this only backfills history.
-const SLAY_SPIRE_EXTRA_CLEARED = [3];
+// played before tagging, or tagged without the Act III boss), by whom. New
+// runs are detected automatically from play tags, so this only backfills
+// history, and only on that player's own ladder.
+const SLAY_SPIRE_EXTRA_CLEARED = { 'Στιβ': [3] };
 function buildSlaySpireHtml(plays) {
-  const cleared = new Set(SLAY_SPIRE_EXTRA_CLEARED);
+  const me = typeof _ptViewer === 'function' ? _ptViewer() : null;
+  const meCanon = me && typeof _origCanon === 'function' ? _origCanon(me) : me;
+  const cleared = new Set((meCanon && SLAY_SPIRE_EXTRA_CLEARED[meCanon]) || []);
   let heartDone = false;
   for (const p of (plays || [])) {
     if (!(p.sc || []).some(s => s.w)) continue; // only won runs count
@@ -335,8 +338,9 @@ function _muPill(name, done, color, sub){
 function buildMarvelUnitedHtml(bggId){
   const line = _muLineFor(bggId);
   if (!line) return '';
-  const plays = progressPlaysOf(PLAY_HISTORY[line.playBggId] || []).plays;   // the viewer's, when they've played
-  if (!plays.length) return '';
+  const all = PLAY_HISTORY[line.playBggId] || [];
+  if (!all.length) return '';
+  const plays = progressPlaysOf(all).plays;   // the viewer's (none yet: an empty board)
   const playedHeroes = new Set();
   const defeatedVillains = new Set();
   const villainCanon = new Set(line.villains.map(v => v.key || _muCanon(v.name)));
@@ -784,7 +788,7 @@ function buildAeonsEndHtml(bggId){
   // spoiler-laden Legacy campaign (tracked separately, name-free).
   const faced = {}; // norm → {name, won, wonNormal, wonIncreased, attempts}
   let legacyPlays = 0, legacyWins = 0;
-  const counted = new Set(progressPlaysOf(_progressFamilyPlays(bggId)).plays);   // the viewer's, when they've played
+  const counted = new Set(progressPlaysOf(_progressFamilyPlays(bggId)).plays);   // the viewer's (none yet: an empty codex)
   for (const id in PLAY_HISTORY){
     if (!_isAeonsEnd(id)) continue;
     const isLegacy = Number(id) === AE_LEGACY_BGGID;

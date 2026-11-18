@@ -722,8 +722,9 @@ function openModal(game) {
   let playHistoryHtml = '';
   const plays = PLAY_HISTORY[game.bggId];
   // Progress (a campaign's bar, mission maps, the game's own boards) is the
-  // viewer's: the plays they were in. Someone who hasn't played it, or with
-  // nobody chosen, sees everyone's. (The play list and records stay everyone's.)
+  // viewer's: the plays they were in. Someone who hasn't played it yet, or
+  // nobody signed in, gets an empty board of their own, never anyone else's.
+  // (The play list and records stay everyone's.)
   const myProgress = progressPlaysOf(plays || []);
   const progressPlays = myProgress.plays;
   const noResultGame = isNoResultGame(game.bggId);
@@ -766,7 +767,7 @@ function openModal(game) {
     // A mission map or a hero × boss board, when the plays carry one
     // (progress-boards.js). A mission map has its own bar, so it takes the
     // campaign bar's place.
-    const progressHtml = typeof buildProgressBoardHtml === 'function' ? buildProgressBoardHtml(game, progressPlays) : '';
+    const progressHtml = typeof buildProgressBoardHtml === 'function' ? buildProgressBoardHtml(game, progressPlays, plays) : '';
 
     // Campaign progress bar (e.g. Cozy Stickerville's 10 in-game years).
     const cp = progressHtml.includes('pb-missions') ? null : campaignProgress(game.bggId, progressPlays);

@@ -31,12 +31,12 @@ function toyTerrainOf(p) {
   const parts = String((p && p.b) || '').split(/\s*[／|]\s*/).map(_toyNorm);
   return TOY_TERRAINS.find(t => parts.includes(_toyNorm(t.name))) || null;
 }
-// Each Terrain's plays and wins: the viewer's own when they've played it, else everyone's.
+// Each Terrain's plays and wins: always the viewer's own (none yet: every Terrain new).
 function _toyStats() {
   const me = _toyMe();
   const all = (PLAY_HISTORY[TOY_BGGID] || []).filter(p => p && Array.isArray(p.sc));
-  const mine = me ? all.filter(p => p.sc.some(s => s && _toyCanon(s.n) === _toyCanon(me))) : [];
-  const plays = mine.length ? mine : all;
+  const plays = me ? all.filter(p => p.sc.some(s => s && _toyCanon(s.n) === _toyCanon(me))) : [];
+  const mine = plays;
   const by = {};
   let last = null;
   for (const p of plays.slice().sort(byPlayOrder)) {
@@ -82,7 +82,7 @@ function _toyInner() {
       <img src="images/toybattle/${sel.k}.jpg" alt="">
       <div><b>${esc(sel.name)}</b><span>${esc(sel.base)}</span>
         ${signed ? `<button type="button" class="toy-go" data-toy-log>Log a game on ${esc(sel.name)}</button>` : ''}</div></div>` : '';
-  return `<div class="toy-head"><b>The Terrains</b><span>${S.mine ? 'Your games on each' : S.any ? 'Everyone’s games on each' : 'Pick one, or let the dice decide'}</span></div>
+  return `<div class="toy-head"><b>The Terrains</b><span>${S.mine ? 'Your games on each' : 'Pick one, or let the dice decide'}</span></div>
     <div class="toy-grid">${tiles}</div>
     <button type="button" class="toy-dice" data-toy-roll${_toyRolling ? ' disabled' : ''}><span aria-hidden="true">&#127922;</span> Random Terrain</button>
     ${detail}

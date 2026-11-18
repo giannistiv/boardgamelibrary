@@ -166,7 +166,9 @@ function buildExpansionsHtml(game, plays) {
   if (!plays || plays.length < 2) return '';
   const id = game.bggId;
   const named = new Map(expansionsOf(id).map(([x, name]) => [Number(x), name]));
-  const mineOnly = typeof progressPlaysOf === 'function' ? progressPlaysOf(plays) : { plays, mine: false };
+  // a figure, not progress: the viewer's plays, or everyone's (said so) when they have none
+  const own = typeof progressPlaysOf === 'function' ? progressPlaysOf(plays) : { plays, mine: false };
+  const mineOnly = own.mine ? own : { plays, mine: false };
   const use = mineOnly.plays;
   const me = typeof _ptViewer === 'function' ? _ptViewer() : null;
   const meCanon = me && typeof _origCanon === 'function' ? _origCanon(me) : me;

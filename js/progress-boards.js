@@ -11,20 +11,27 @@
 // Champions, Marvel United, Spirit Island, Aeon's End, Rove, Eternal Decks)
 // and Leviathan Wilds are left out.
 
-// Whose progress a game's page shows: the viewer's own plays when they've
-// played it ({plays, mine: true}), else everyone's ({plays, mine: false}).
+// Whose progress a game's page shows: always the viewer's own, the plays they
+// were in ({plays, mine: true}). Someone who hasn't played it yet gets their
+// own empty board ({plays: [], mine: false}), never someone else's progress
+// (the user, 18 Nov 2026: visitors saw Στιβ's Sky Team, "not theirs"); with
+// nobody signed in there's nobody's to show, so it starts empty too (anon).
+// `all` is everyone's plays, only for what a board needs to know about the
+// game itself (that it's played mission by mission, its heroes and bosses).
 function progressPlaysOf(plays) {
+  const all = plays || [];
   const me = typeof _ptViewer === 'function' ? _ptViewer() : null;
-  if (!me || !plays || !plays.length) return { plays: plays || [], mine: false };
+  if (!me) return { plays: [], all, mine: false, anon: true };
   const meCanon = typeof _origCanon === 'function' ? _origCanon(me) : me;
-  const mine = plays.filter(p => (p.sc || []).some(s => s && (s.n === me || (typeof _origCanon === 'function' && _origCanon(s.n) === meCanon))));
-  return mine.length ? { plays: mine, mine: true } : { plays, mine: false };
+  const mine = all.filter(p => (p.sc || []).some(s => s && (s.n === me || (typeof _origCanon === 'function' && _origCanon(s.n) === meCanon))));
+  return { plays: mine, all, mine: mine.length > 0 };
 }
-// A line above the boards: yours, or everyone's because you haven't played it.
+// A line above the boards: yours, or yours still empty.
 function progressWhoHtml(p) {
   return p.mine
     ? `<div class="pb-who">Your progress, from the ${p.plays.length} play${p.plays.length !== 1 ? 's' : ''} you were in</div>`
-    : `<div class="pb-who">Everyone&rsquo;s progress${typeof _ptViewer === 'function' && _ptViewer() ? ' (you haven&rsquo;t played it yet)' : ''}</div>`;
+    : p.anon ? '<div class="pb-who">Your progress shows here once you&rsquo;ve signed in</div>'
+    : '<div class="pb-who">Your progress: you haven&rsquo;t played it yet</div>';
 }
 // The plays a board counts across boxes: Marvel United's line, every Aeon's End.
 function _progressFamilyPlays(bggId) {
@@ -100,20 +107,26 @@ function _pbMission(p) {
   return null;
 }
 
+// `plays` are the ones counted (the viewer's, maybe none); opts.all, everyone's,
+// tell what kind of game it is, so a board can start empty.
 function buildMissionMapHtml(game, plays, opts) {
   const trail = !!(opts && opts.trail);
   const id = Number(game && game.bggId);
-  if (!id || PB_SKIP.has(id) || !plays || plays.length < 3) return '';
+  const every = (opts && opts.all) || plays;
+  plays = plays || [];
+  if (!id || PB_SKIP.has(id) || !every || every.length < 3) return '';
+  const everyTagged = every.filter(p => p.b);
+  const everyNumbered = everyTagged.map(_pbMission).filter(Boolean);
+  // a mission game: most of its tagged plays name a numbered mission
+  if (everyNumbered.length < 3 || everyNumbered.length < everyTagged.length * 0.6) return '';
   const tagged = plays.filter(p => p.b);
   const parsed = tagged.map(p => ({ p, m: _pbMission(p) }));
   const numbered = parsed.filter(x => x.m);
-  // a mission game: most of its tagged plays name a numbered mission
-  if (numbered.length < 3 || numbered.length < tagged.length * 0.6) return '';
   // a game with no winner (Cozy Stickerville) is played through, not beaten
-  const coop = !(typeof isNoResultGame === 'function' && isNoResultGame(id)) && _pbCoop(plays);
-  const clocks = numbered.some(x => x.m.clock);
+  const coop = !(typeof isNoResultGame === 'function' && isNoResultGame(id)) && _pbCoop(every);
+  const clocks = everyNumbered.some(m => m.clock);
   const cfg = (typeof CAMPAIGN_PROGRESS !== 'undefined' && CAMPAIGN_PROGRESS[id]) || {};
-  const per = clocks ? (cfg.perFolder || Math.max(...numbered.map(x => x.m.sub))) : 0;
+  const per = clocks ? (cfg.perFolder || Math.max(...everyNumbered.map(m => m.sub))) : 0;
 
   // every play of each mission, in order
   const byKey = new Map();
@@ -134,9 +147,10 @@ function buildMissionMapHtml(game, plays, opts) {
 
   // the whole map: 1..total, or as far as you've got and a little beyond
   const known = clocks ? (cfg.total ? cfg.total / per : 0) : (cfg.total || PB_TOTALS[id] || 0);
-  const maxN = Math.max(...numbered.map(x => x.m.n));
-  const done = !!cfg.complete;
-  const last = Math.max(known, done || !coop ? maxN : maxN + 1);
+  const maxN = Math.max(0, ...numbered.map(x => x.m.n));
+  // a campaign marked finished is finished for the ones who played it
+  const done = !!cfg.complete && numbered.length > 0;
+  const last = Math.max(known, done || !coop ? maxN : maxN + 1, 1);
   const cells = [];
   if (clocks) {
     for (let c = 1; c <= last; c++) for (let s = 1; s <= per; s++) cells.push({ key: `${c}-${s}`, n: c, sub: s, label: `${c}-${s}` });
@@ -168,7 +182,7 @@ function buildMissionMapHtml(game, plays, opts) {
   const hardest = [...byKey.values()].filter(e => e.losses).sort((a, b) => b.losses - a.losses || b.n - a.n).slice(0, 3);
   const firstTry = [...byKey.values()].filter(e => e.won && e.tries === 1).length;
   const esc = _escapeHtml;
-  const unit = (cfg.label || (tagged[0] && (String(tagged[0].b).match(/^[A-Za-z]+/) || [''])[0]) || 'Mission').replace(/^./, ch => ch.toUpperCase());
+  const unit = (cfg.label || (everyTagged[0] && (String(everyTagged[0].b).match(/^[A-Za-z]+/) || [''])[0]) || 'Mission').replace(/^./, ch => ch.toUpperCase());
 
   // beaten (or, with no winner to beat, played) since this device last looked
   const fresh = pbFresh(trail ? `${id}:trail` : id, cells.filter(c => (byKey.get(c.key) || {}).won).map(c => c.key));
@@ -500,17 +514,32 @@ function _pbBoss(p) {
   return toks.slice().sort((a, b) => a.localeCompare(b)).join(' · ');
 }
 
-function buildHeroBossHtml(game, plays) {
+// `plays` are the ones counted (the viewer's); `all`, everyone's, give the
+// roster: every hero and boss the game's been played with, so a new player
+// sees all of it still to try.
+function buildHeroBossHtml(game, plays, all) {
   const id = Number(game && game.bggId);
-  if (!id || PB_SKIP.has(id) || !plays || plays.length < 3) return '';
+  const every = all || plays;
+  plays = plays || [];
+  if (!id || PB_SKIP.has(id) || !every || every.length < 3) return '';
   if (typeof _muLineFor === 'function' && _muLineFor(id)) return '';
   if (typeof _isAeonsEnd === 'function' && _isAeonsEnd(id)) return '';
-  const rows = plays.filter(p => p.b && (p.sc || []).some(s => s && s.r)).map(p => ({ p, boss: _pbBoss(p), won: _pbWon(p) })).filter(x => x.boss);
-  if (rows.length < 3) return '';
-  const coop = _pbCoop(plays);
+  const rowsOf = (ps) => ps.filter(p => p.b && (p.sc || []).some(s => s && s.r)).map(p => ({ p, boss: _pbBoss(p), won: _pbWon(p) })).filter(x => x.boss);
+  const everyRows = rowsOf(every);
+  if (everyRows.length < 3) return '';
+  const rows = every === plays ? everyRows : rowsOf(plays);
+  const coop = _pbCoop(every);
   const heroes = new Map(), bosses = new Map(), pairs = new Map();
   const canon = new Map();   // the same hero logged in different case is one hero
   const heroName = (t) => { const k = t.toLowerCase(); if (!canon.has(k)) canon.set(k, t); return canon.get(k); };
+  for (const row of everyRows) {
+    const boss = heroName(row.boss);
+    if (!bosses.has(boss)) bosses.set(boss, { name: boss, n: 0, w: 0 });
+    for (const s of row.p.sc) for (const t of _pbHeroes(s)) {
+      const name = heroName(t);
+      if (!heroes.has(name)) heroes.set(name, { name, n: 0, w: 0, who: new Map() });
+    }
+  }
   for (const row of rows) {
     const { p, won } = row;
     const boss = row.boss = heroName(row.boss);
@@ -543,7 +572,7 @@ function buildHeroBossHtml(game, plays) {
   const foe = (/arkham|mansions of madness|mage knight|heroes of might|massive darkness|zombicide|sword & sorcery/i.test(game.name || '')
     || B.some(b => /scenario|campaign|conquest|chapter|mission|episode|quest|\d/i.test(b.name))) ? 'scenario' : 'boss';
   const foes = foe === 'boss' ? 'bosses' : 'scenarios';
-  const unbeaten = B.filter(b => !b.w);
+  const unbeaten = B.filter(b => b.n && !b.w);
   const pct = (w, n) => n ? Math.round(w / n * 100) + '%' : '–';
   const cell = (h, b) => {
     const x = pairs.get(h.name + '\u0000' + b.name);
@@ -559,12 +588,12 @@ function buildHeroBossHtml(game, plays) {
     </table></div>`
     : `<div class="pb-bosslist">${B.map((b, i) => {
       const hs = H.filter(h => pairs.has(h.name + '\u0000' + b.name));
-      return `<div class="pb-boss"><div class="pb-boss-top"><b>${esc(b.name)}</b><span class="pb-dim">${b.n} game${b.n > 1 ? 's' : ''} · ${pct(b.w, b.n)} won</span></div>
+      return `<div class="pb-boss"><div class="pb-boss-top"><b>${esc(b.name)}</b><span class="pb-dim">${b.n ? `${b.n} game${b.n > 1 ? 's' : ''} · ${pct(b.w, b.n)} won` : 'not tried yet'}</span></div>
         <div class="pb-chips">${hs.map(h => { const x = pairs.get(h.name + '\u0000' + b.name); return `<span class="pb-chip pb-${x.w ? 'won' : 'lost'}">${esc(h.name)}</span>`; }).join('')}</div></div>${i === 5 && B.length > 6 ? `<details class="pb-more"><summary>All ${B.length} ${foes}</summary>` : ''}`;
     }).join('')}${B.length > 6 ? '</details>' : ''}</div>`;
   const heroList = H.map(h => {
     const who = [...h.who.entries()].sort((a, b) => b[1] - a[1]).map(([n]) => n).slice(0, 3).join(', ');
-    return `<div class="pb-hero"><span class="pb-hero-name">${esc(h.name)}</span><span class="pb-dim">${h.n} game${h.n > 1 ? 's' : ''} · ${pct(h.w, h.n)} won${who ? ` · ${esc(who)}` : ''}</span></div>`;
+    return `<div class="pb-hero"><span class="pb-hero-name">${esc(h.name)}</span><span class="pb-dim">${h.n ? `${h.n} game${h.n > 1 ? 's' : ''} · ${pct(h.w, h.n)} won${who ? ` · ${esc(who)}` : ''}` : 'not played yet'}</span></div>`;
   }).join('');
 
   return `<div class="pb-board">
@@ -582,6 +611,6 @@ function buildHeroBossHtml(game, plays) {
 }
 
 // The board this game gets, if any.
-function buildProgressBoardHtml(game, plays) {
-  return buildMissionMapHtml(game, plays) || buildHeroBossHtml(game, plays);
+function buildProgressBoardHtml(game, plays, all) {
+  return buildMissionMapHtml(game, plays, { all }) || buildHeroBossHtml(game, plays, all);
 }
