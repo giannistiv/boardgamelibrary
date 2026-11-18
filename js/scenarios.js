@@ -222,6 +222,8 @@ function scenarioMissing(cfg, vals) {
 function scenarioGuess(bggId, me) {
   const cfg = scenarioPicker(bggId);
   if (!cfg || !cfg.numbered || !me) return null;
+  // Welcome to the Moon: every Adventure has a winner, so the next is the one after your last
+  if (typeof moonNextAdventure === 'function' && Number(bggId) === MOON_BGGID) return { m: `Adventure ${moonNextAdventure(me)}` };
   const plays = ((typeof PLAY_HISTORY !== 'undefined' && PLAY_HISTORY[bggId]) || [])
     .filter(p => p && Array.isArray(p.sc) && p.sc.some(s => s.n === me));
   const re = cfg.fields[0].num ? new RegExp(`(?:^|／)\\s*${cfg.numbered}\\s*0*(\\d+)`, 'i') : /(?:mission|scenario|campaign|chapter|adventure|case|episode|quest|year)\s*(\d+)/i;

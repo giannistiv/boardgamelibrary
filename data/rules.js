@@ -6710,5 +6710,171 @@ const RULES = {
    "A pre-sold Guest you don't take on board costs 2 Reputation and goes to the top of the Queue.",
    "2 players: grey NPC Workers sit in the Network. Bump one and it moves clockwise, bumping your opponent's Worker there. After AGM A and B, NPC Developments come out and an NPC Worker becomes an Expert."
   ]
+ },
+ "339789": {
+  "src": "the Welcome to the Moon rulebook (Blue Cocker Games), and the designers' answers on BGG for the campaign",
+  "goal": "Eight **Adventures**, each on its own sheet with its own rules, from the launch on Earth to the battle for new worlds. Each turn everyone takes one of the same three number/action pairs and writes the number on their own sheet. Most points wins the Adventure (in Adventure #1, the first rocket to launch). Play them one by one, or in order as a campaign for stars.",
+  "turnTitle": "Each turn (everyone at once)",
+  "turn": [
+   "**Flip** the top card of each of the 3 piles in front of it, action side up: 3 number/action pairs. A pile runs out: shuffle each of the 3 discard piles on its own into a new pile.",
+   "**Pick one pair** (several players can pick the same one) and **write its number** in an empty space. In a zone, numbers go up from lowest to highest and never repeat; you can leave gaps and skip numbers.",
+   "If one of the 3 numbers fits anywhere, you must take it. If none fits, cross off your next **System Error** box and take no action.",
+   "**Use the action** if you like, only if you wrote that pair's number.",
+   "**Incidents**: the Adventure's own effects (sabotages, extractions, viruses…) happen now.",
+   "**Missions**: whoever first meets a mission, all those in the same turn, writes its high value in A, B or C; then flip the card, later players get the low value. Each mission once; you keep its points even if you stop meeting it."
+  ],
+  "actions": [
+   [
+    "Robot",
+    "Connects, builds, cuts or explores: what it does is the Adventure's."
+   ],
+   [
+    "Water / Plant",
+    "Collects a resource, only when the number went in a space meant for it. Their number can go elsewhere (and another action's number in their space), just without the action."
+   ],
+   [
+    "Energy",
+    "Improves other actions or their values."
+   ],
+   [
+    "Astronaut",
+    "Change the number by −2 to +2 before writing it (not below 0; 16 and 17 are possible). Most Adventures add a bonus, so it can be worth taking at ±0."
+   ],
+   [
+    "Planning",
+    "Also write an **X** in an empty space this turn; an X counts as a numbered space. Some Adventures charge points for it."
+   ]
+  ],
+  "end": [
+   "The game ends at the end of the turn in which someone has done all 3 missions, crossed off all their System Error boxes, or filled every space.",
+   "Add up the missions and each scoring area, and take off the first visible System Error value (Adventure #1: the sum of them).",
+   "Tie: fewest System Error boxes crossed off wins, then the win is shared. In any ranking (most astronauts, most zones…), everyone tied first gets first place's points, then the next ones second place's."
+  ],
+  "forget": [
+   "Writing a number is **compulsory** whenever one of the three fits, even in a bad spot.",
+   "Players who meet a mission in the same turn all take its high value.",
+   "An X from Planning counts as numbered for zones, quarters and missions.",
+   "Each Adventure's rules overrule these standard ones where they differ."
+  ],
+  "expTitle": "The Adventures",
+  "exp": [
+   {
+    "head": "#1 The Launch",
+    "lines": [
+     "**No actions**: each of the rocket's 9 floors is a zone tied to an action, and a number goes on a floor of its pair's action. The bottom floor is wild.",
+     "Can't write? **Circle** a System Error box (any one) instead.",
+     "**Finish a quarter** of a floor and use its effects at once: **Building** = an X anywhere; **Activation** = fill the arrow of an inactive rocket in a quarter not yet finished; **Active rocket** = cross off that many rockets in the scoring area, bottom line up (a finished line crosses its score box), then your circled System Errors, then the 8 rockets by the final score.",
+     "**Sabotage**: announced in Incidents; everyone else circles a System Error and crosses that sabotage off for good. Triggered by several players in one turn: they're spared, the others hit once.",
+     "**Missions** score nothing: they give an Active Rocket effect (rockets and/or circled errors crossed off).",
+     "**Launch** = every rocket below the 150 box crossed off and no circled System Error left: you win. Several launch together: most of the 8 extra rockets crossed off.",
+     "No launch: score = the lowest rocket score still visible, −5 for each circled System Error not crossed off."
+    ]
+   },
+   {
+    "head": "#2 The Journey",
+    "lines": [
+     "The trajectory from the Earth to the Moon starts as one long zone. You start with 1 Energy circled; each time 2 are circled, cross them off and **draw a line** between any 2 spaces to split a zone. Smaller zones are numbered on their own.",
+     "Your first 2 System Errors each give an Energy.",
+     "**Water**: circle the tank of the space you wrote in.",
+     "**Robot**: circle a robot towards any station. The first to circle all of a station's robots take its high multiplier; the others get the low one.",
+     "**Plant**: circle a plant in a station linked to the zone you wrote in (at first all 4 are).",
+     "**Astronaut**: also cross off an Astronaut; every 2 = circle a Wild action.",
+     "**Scoring**: each station's plants × its multiplier (nothing without all its robots) · the circled tanks' values · 1 per space of your longest complete zone · most complete zones 20 / 10 / 5 (at least one needed)."
+    ]
+   },
+   {
+    "head": "#3 The Colony",
+    "lines": [
+     "Every row of buildings (left to right) and every column (bottom to top) is a zone: a number must fit both. The rocket, the observatory and the 2 X buildings count as numbered.",
+     "The first to number every building of a quarter take 15 points; later players 5.",
+     "**Water**: circle the tank in the building you wrote in. **Plant**: circle that quarter's next greenhouse, top down (1 plant each, the 4th is 2).",
+     "**Robot**: draw a tunnel out from your network (2 start at the landing site). A numbered, connected antenna building circles its antenna; the observatory circles 3.",
+     "**Energy**: cross off the next box (lowest value first) of Plants, Water or Antennas.",
+     "**Astronaut**: cross one off. **Planning**: cross off the lowest Planning box: it costs points at the end.",
+     "**Scoring**: plants, tanks and antennas × each area's lowest visible value · quarter bonuses · most astronauts 20 / 10 / 5 · minus the lowest visible Planning value."
+    ]
+   },
+   {
+    "head": "#4 The Mine",
+    "lines": [
+     "The mine's 3 levels are zones (left to right). A number on a pearl or ruby circles it. **Water / Plant**: circle the one just above or below your cavity.",
+     "**Incidents**: a column with all 3 spaces numbered is extracted: cross off its circled resources, circle as many in the matching factories (top down), circle its pump.",
+     "A main factory's filling bonus goes to the first to circle the resource tied to it; everyone else crosses it off.",
+     "**Energy / Robot**: cross one off in any factory. A main factory with all crossed off is upgraded (its bottom value counts); a secondary one gives its bonus at once.",
+     "**Astronaut / Planning**: cross one off in its control centre. Astronauts score 0 each (3 when upgraded); Planning costs 3 each (0 when upgraded).",
+     "**Scoring**: each resource factory's circled resources × its value, plus its filling bonus · the astronaut and planning centres."
+    ]
+   },
+   {
+    "head": "#5 The Dome",
+    "lines": [
+     "Each skyscraper is a zone, bottom to top. Its first number goes on one of the 2 starting levels (just above or just below the surface), then only next to a numbered level.",
+     "The first to reach a skyscraper's top or bottom level take its high bonus; later players the low one.",
+     "**Water / Plant**: circle one in the tower level linked to the level you wrote in.",
+     "**Robot**: build a dome section at the surface or next to a built one: an even number builds an even section (2 circles), an odd number an odd one (1 circle).",
+     "**Planning**: an X on a starting level or next to a numbered one, and cut an unbuilt dome section in half (each section once).",
+     "**Energy**: cross off the next boxes in one area, top down: Missions (2 at a level), the Tower (3), Astronauts (2) or the Dome.",
+     "**Scoring**: missions at their area's lowest visible value (high or low symbol) · tower levels with 1, 2 or 3 symbols × each column's value · skyscraper bonuses · most astronauts the 1st column's value, others the 2nd · minus unbuilt dome sections × the highest visible value."
+    ]
+   },
+   {
+    "head": "#6 The Virus",
+    "lines": [
+     "**Set-up**: each player picks a quarter with an empty virus target, draws the grey virus there (active) and crosses off a housing space in it.",
+     "5 floors, each a zone (left to right) across its 2–3 quarters; crossed-off spaces are skipped.",
+     "**Energy**: circle one in the quarter you wrote in (each starts with 1). **Robot**: close a walkway anywhere (a floor still numbers as one zone).",
+     "**Plant / Water**: circle it in that quarter (water only on a tank space) and cross the next symbol off in scoring; a finished line gives its Robot or Energy at once.",
+     "Crossing a **virus activation** symbol activates that virus for everyone (once). A **Propagation** symbol spreads every virus for everyone else. A mission done for the first time activates its virus for all, then spreads.",
+     "Your 2nd and 3rd System Errors spread the viruses on your sheet only.",
+     "**Spreading**: each active virus, top floor first, left to right, crosses off a space in its quarter; a full quarter passes it to every quarter behind an open walkway.",
+     "A full quarter (numbered or crossed off) is **evacuated** at once: numbered spaces × its circled energies.",
+     "**Scoring**: lowest visible plant/water box · every quarter (unfinished ones evacuated now) · −1 per infected space."
+    ]
+   },
+   {
+    "head": "#7 The Escape",
+    "lines": [
+     "Each starship is a zone (left to right) of 2–3 modules and a greenhouse. You can only number a module or greenhouse reached through activated airlocks: at first, the lowest starship's 2 modules.",
+     "**Robot** (also a number on a Robot space, and your first 2 System Errors): activate an airlock next to something already connected.",
+     "The first to number a greenhouse circle its ×2; others cross it off.",
+     "**Water**: circle the tank in your space. **Plant**: circle a plant in that starship's greenhouse (connected or not). **Energy**: circle a reactor at the end of that starship.",
+     "**Planning**: an X in a space you can reach, and cross off the lowest Planning box. **Astronaut**: every 2 crossed off = a Wild action (any of the 6, whenever).",
+     "**Scoring**: numbered greenhouses 2 / 4 / 7 for 1 / 2 / 3 plants (×2 doubles) · full modules 2 / 4 / 7 by their starship's circled reactors, doubled by a circled tank · minus the lowest visible Planning value."
+    ]
+   },
+   {
+    "head": "#8 The Battle",
+    "lines": [
+     "You play 2 sheets, each shared with a neighbour (asteroids to the middle), in turn: your left one first, then the right. The Captain moves the Captain card to the sheet in play.",
+     "**Draw your insignia** instead of a number: on a planet that takes that number, in its first free space from the red-outlined one; a Bonus symbol there is yours too.",
+     "A planet's last space filled: the most insignia (its moon included) control it and go on its flag; a tie shares it.",
+     "**Plant / Water**: cross off one on that planet and your lowest box. **Robot**: your insignia on the next asteroid from your side, with its bonuses. **Energy**: raise a planet colour's value. **Planning**: your insignia on a moon (2 spots, not on a finished planet) and cross the lowest Planning box. **Astronaut**: also circle one, to use as a ±2 later.",
+     "Ends when someone has all 3 missions, both System Errors on one sheet, or every planet full on one sheet.",
+     "**Scoring**, both sheets: plant and water boxes · each colour's planets × its value (unfinished planets awarded now) · minus Planning."
+    ]
+   },
+   {
+    "head": "Solo: ASTRA",
+    "lines": [
+     "Pick an ASTRA Opponent (its number is the level) and the Adventure's ASTRA card: together they're ASTRA's scoring area.",
+     "One deck, action side up, with the 3 ASTRA Effect cards shuffled into its bottom third.",
+     "Each turn draw 3: use one for its number and another for its action, and give the third to ASTRA.",
+     "An ASTRA Effect card: apply this Adventure's effect at once and draw another. The second time round (your discards reshuffled with them once) it also flips its A, B or C mission.",
+     "Solo bonuses (each Adventure says how) let you put a card back in the box instead of giving it to ASTRA.",
+     "Ends when the deck runs out a second time, or by a standard end. ASTRA scores its cards × the Opponent's values, plus the Adventure card's fixed value and level × its value. Adventure #1 is a race on ASTRA's own track."
+    ]
+   },
+   {
+    "head": "Campaign",
+    "lines": [
+     "The Campaign Book plays the 8 Adventures in order. Start with the introduction campaign: it teaches each Adventure and unlocks nothing.",
+     "After each Adventure, stars as printed on its sheet: only the winner in Adventure #1; from Adventure #3 the top three (with 2 players, no third-place stars). Save on the Dashboard, a new one for each campaign.",
+     "The winner becomes Captain (the \"you\" of the book) once you save; a tied first place keeps the Captain.",
+     "Most stars wins the run of 8; a tie goes to the best result in Adventure #8. A full campaign is 3 runs, their stars added up.",
+     "Solo: a win moves ASTRA up a level for the next Adventure, a loss down one (not below 1), and ASTRA takes the first-place stars."
+    ],
+    "src": "the rulebook and the designers' answers on BGG"
+   }
+  ]
  }
 };

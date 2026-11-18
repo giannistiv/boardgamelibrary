@@ -1082,6 +1082,61 @@
   .acct-del-go{padding:0.42rem 1.1rem;border-radius:999px;border:none;background:var(--loss);color:#fff;font:inherit;font-size:0.82rem;font-weight:600;cursor:pointer}
   .acct-del-go:disabled{opacity:0.6}
   .pb-who{font-size:0.78rem;color:var(--text-3);margin:0.9rem 0 0.4rem}
+  /* ── Welcome to the Moon: adventure by adventure (js/moon.js) ── */
+  .moon{margin-bottom:1.1rem;padding:0.8rem 0.9rem;border-radius:12px;background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.07);min-width:0}
+  .moon .st-count{background:none;color:var(--text-4);font-weight:600;padding:0}
+  .moon-rows{display:flex;flex-direction:column;gap:0.3rem}
+  .moon-row{display:flex;align-items:center;gap:0.6rem;width:100%;padding:0.5rem 0.6rem;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,0.025);color:var(--text);text-align:left;font:inherit;cursor:pointer;min-width:0}
+  .moon-row:disabled{cursor:default;opacity:0.55}
+  .moon-row.played{border-color:var(--line-2);background:rgba(255,255,255,0.05)}
+  .moon-row.won{border-color:var(--accent-line);background:var(--accent-soft)}
+  .moon-row.open{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+  .moon-ic{flex:0 0 2rem;height:2rem;display:grid;place-items:center;border-radius:50%;background:rgba(255,255,255,0.06);font-size:1.05rem}
+  .moon-row:not(.played):not(.won) .moon-ic{filter:grayscale(1);opacity:0.6}
+  .moon-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:0.1rem}
+  .moon-main b{font-size:0.86rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .moon-main b small{font-size:0.68rem;color:var(--text-3);font-weight:700;margin-right:0.15rem}
+  .moon-main > span{font-size:0.72rem;color:var(--text-3)}
+  .moon-won{color:var(--accent)}
+  .moon-rec{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;line-height:1.1}
+  .moon-rec b{font-size:0.95rem;font-weight:800}
+  .moon-rec span{font-size:0.62rem;color:var(--text-3);max-width:5.5rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .moon-detail{padding:0.3rem 0.2rem 0.7rem 0.6rem;margin:0 0 0.2rem 1rem;border-left:2px solid var(--accent-line);min-width:0}
+  .moon-detail .gi-block{margin-top:0.6rem}
+  .moon-sub{font-size:0.7rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-3);margin:0.6rem 0 0.3rem}
+  .moon-sub span{text-transform:none;letter-spacing:0;font-weight:600;color:var(--text-4)}
+  .moon-game{display:flex;align-items:baseline;gap:0.5rem;font-size:0.78rem;padding:0.2rem 0;border-bottom:1px solid var(--line);min-width:0}
+  .moon-gdate{flex:0 0 5.6rem;color:var(--text-3);font-size:0.72rem}
+  .moon-place{flex:0 0 3.6rem;font-weight:700;font-size:0.74rem}
+  .moon-place small{font-weight:600;color:var(--text-4);margin-left:0.2rem}
+  .moon-place.p1{color:var(--accent)}
+  .moon-gwho{flex:1;min-width:0;color:var(--text-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .moon-top{display:flex;align-items:baseline;gap:0.5rem;font-size:0.78rem;padding:0.15rem 0;min-width:0}
+  .moon-top b{flex:0 0 2.6rem;text-align:right;font-weight:800}
+  .moon-top span:not(.moon-rank){flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .moon-top small{color:var(--text-4);font-size:0.68rem;flex-shrink:0}
+  .moon-rank{flex:0 0 1.1rem;height:1.1rem;display:grid;place-items:center;border-radius:50%;background:rgba(255,255,255,0.07);font-size:0.62rem;font-weight:800;color:var(--text-3)}
+  .moon-rules{margin-top:0.6rem;background:none;border:0;padding:0.2rem 0;color:var(--accent);font:inherit;font-size:0.78rem;font-weight:700;cursor:pointer}
+  .moon-note{font-size:0.72rem;color:var(--text-4);margin-top:0.55rem}
+  .moon-sec{font-size:0.82rem;font-weight:700;color:var(--accent);margin:1rem 0 0.45rem}
+  .moon-sec span{font-size:0.7rem;font-weight:600;color:var(--text-4);margin-left:0.3rem}
+  .moon-run{padding:0.6rem 0.65rem;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid var(--line);margin-bottom:0.4rem;min-width:0}
+  .moon-run-top{display:flex;justify-content:space-between;align-items:baseline;gap:0.5rem;font-size:0.82rem;min-width:0}
+  .moon-run-top b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .moon-run-top span{font-size:0.7rem;color:var(--text-3);flex-shrink:0}
+  .moon-run-who{font-size:0.72rem;color:var(--text-3);margin:0.1rem 0 0.45rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .moon-steps{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:0.25rem}
+  .moon-step{display:flex;flex-direction:column;align-items:center;gap:0.05rem;padding:0.25rem 0.1rem;border-radius:8px;border:1px dashed var(--line-2);min-width:0}
+  .moon-step b{font-size:0.78rem;font-weight:800;color:var(--text-4)}
+  .moon-step span{font-size:0.56rem;color:var(--text-3);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .moon-step.done{border:1px solid var(--accent-line);background:var(--accent-soft)}
+  .moon-face{width:16px;height:16px;border-radius:50%;object-fit:cover;display:inline-block;vertical-align:middle;margin:0 -2px}
+  .moon-step.done b{color:var(--accent)}
+  .moon-step.next{border:1px solid var(--info);background:var(--info-soft)}
+  .moon-step.next b,.moon-step.next span{color:var(--info)}
+  .moon-run-foot{display:flex;flex-wrap:wrap;gap:0.3rem 0.8rem;font-size:0.72rem;color:var(--text-3);margin-top:0.45rem}
+  .moon-run-foot b{color:var(--text)}
+
   .play-pending{font-size:0.76rem;font-weight:600;color:var(--accent-2);margin:0.15rem 0 0.35rem}
   .acct-card{display:flex;flex-wrap:wrap;align-items:center;gap:0.6rem 0.8rem;margin:0 0 1rem;padding:0.75rem 0.9rem;border-radius:var(--r);border:1px solid var(--line-2);background:var(--card)}
   .acct-card > div{flex:1 1 200px;display:flex;flex-direction:column;gap:0.15rem;min-width:0}
@@ -1136,6 +1191,7 @@
   .lp-head{flex:0 0 auto;display:grid;grid-template-columns:44px 1fr 44px;align-items:center;padding:calc(0.55rem + var(--safe-t)) 0.6rem 0.55rem;border-bottom:1px solid var(--line)}
   @media (min-width:640px){ .lp-head{padding-top:0.55rem} }
   .lp-title{text-align:center;font-family:var(--font-display);font-weight:700;font-size:1.15rem}
+  .ss-var{display:block;font-family:var(--font);font-weight:600;font-size:0.72rem;color:var(--text-3);letter-spacing:0.02em}
   .lp-close{width:44px;height:44px;border:none;border-radius:50%;background:transparent;color:var(--text-2);font-size:1.7rem;line-height:1;cursor:pointer}
   .lp-close:hover{background:var(--card)}
   .lp-body{flex:1 1 auto;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:1.3rem 1.25rem 1.6rem;display:flex;flex-direction:column;gap:1.9rem}

@@ -18,22 +18,42 @@ const SS_MAX = 6000;   // the longest sheet the database takes (characters)
 // phone's column) }. Log a play keeps its own in _lp.ss.
 let _ss = null;
 
-function _ssSheet(bggId) {
-  return (typeof SCORESHEETS !== 'undefined' && SCORESHEETS[bggId]) || SS_ROUNDS;
+// A sheet by its key: a game's id, or "id:variant" for a game with a sheet
+// per scenario (Welcome to the Moon's "339789:adventure3").
+function _ssSheet(key) {
+  const [id, vid] = String(key).split(':');
+  const vars = vid && typeof SCORESHEET_VARS !== 'undefined' && SCORESHEET_VARS[id];
+  return (vars && vars[vid]) || (typeof SCORESHEETS !== 'undefined' && SCORESHEETS[id]) || SS_ROUNDS;
+}
+// The variant sheet for a scenario, by its number ("Adventure 3" → adventure3).
+function _ssVariantOf(bggId, b) {
+  const vars = typeof SCORESHEET_VARS !== 'undefined' && SCORESHEET_VARS[bggId];
+  const m = vars && String(b || '').match(/(\d+)/);
+  if (!m) return null;
+  return Object.keys(vars).find(v => (v.match(/(\d+)$/) || [])[1] === String(Number(m[1]))) || null;
+}
+// The scenario Log a play has picked for this game, as written with the play.
+function _ssBoardNow(bggId) {
+  if (typeof _lp === 'undefined' || !_lp || Number(_lp.bggId) !== Number(bggId)) return '';
+  const typed = document.getElementById('lp-b');   // what's in the box now, not as the play was opened
+  return [...Object.values(_lp.pick || {}), typed ? typed.value : _lp.b || ''].filter(Boolean).join('／');
 }
 // Whether the lowest total wins this game (golf-style: Skyjo, Turing Machine),
 // from which end the winners' scores sat at in its plays (js/records.js).
 function _ssLowWins() {
   return typeof _recLowBest === 'function' && _recLowBest(PLAY_HISTORY[_ss.bggId] || [], false);
 }
-// Each player's average and best total in this game (2+ scored plays), for under their total.
-function _ssPaceOf(bggId, names) {
-  const low = typeof _recLowBest === 'function' && _recLowBest(PLAY_HISTORY[bggId] || [], false);
+// Each player's average and best total in this game (2+ scored plays), for under their total;
+// on a scenario's own sheet (key "id:variant"), in that scenario only.
+function _ssPaceOf(bggId, names, key) {
+  const vid = String(key || '').split(':')[1];
+  const plays = (PLAY_HISTORY[bggId] || []).filter(p => !vid || _ssVariantOf(bggId, p.b) === vid);
+  const low = typeof _recLowBest === 'function' && _recLowBest(plays, false);
   const canon = (n) => (typeof _origCanon === 'function' ? _origCanon(n) : n);
   return names.map(n => {
     const c = canon(n);
     const xs = [];
-    for (const p of PLAY_HISTORY[bggId] || []) {
+    for (const p of plays) {
       const s = (p.sc || []).find(q => q && (q.n === n || canon(q.n) === c));
       const v = s && typeof _recScore === 'function' ? _recScore(s.s) : null;
       if (v !== null && v !== undefined) xs.push(v);
@@ -43,10 +63,14 @@ function _ssPaceOf(bggId, names) {
   });
 }
 // The game's own sheet or the rounds one; none for a co-op (Everyone won / lost).
-function scoreSheetFor(bggId) {
+// A game with a sheet per scenario takes the one for the scenario picked (b,
+// or Log a play's), its first one until one is.
+function scoreSheetFor(bggId, b) {
   if (!bggId) return null;
   const g = findGameByBggId(bggId);
   if (g && isCoop(g) && !(typeof SCORESHEETS !== 'undefined' && SCORESHEETS[bggId])) return null;
+  const vid = _ssVariantOf(bggId, b == null ? _ssBoardNow(bggId) : b);
+  if (vid) return { key: `${bggId}:${vid}`, sheet: _ssSheet(`${bggId}:${vid}`) };
   return { key: (typeof SCORESHEETS !== 'undefined' && SCORESHEETS[bggId]) ? bggId : 'rounds', sheet: _ssSheet(bggId) };
 }
 
@@ -155,7 +179,7 @@ function scoreSheetOpen() {
   _ss.names = _lp.sc.map(p => p.n);
   _ss.bggId = _lp.bggId;
   _ss.x = (_lp.x || []).map(Number);
-  _ss.pace = _ssPaceOf(_ss.bggId, _ss.names);
+  _ss.pace = _ssPaceOf(_ss.bggId, _ss.names, _ss.key);
   if (_ssLive && _ssLive.host) _ssLivePushAll();   // players added or gone meanwhile
   _ssShow();
 }
@@ -236,7 +260,7 @@ function _ssRender() {
   ov.innerHTML = `<div class="lp-sheet ss-sheet">
       <header class="lp-head">
         <span class="lp-headside"></span>
-        <div class="lp-title">${esc(game ? game.name : 'Score sheet')}</div>
+        <div class="lp-title">${esc(game ? game.name : 'Score sheet')}${_ss.sheet.var && String(_ss.key).includes(':') ? `<small class="ss-var">${esc(_ss.sheet.var.replace(/^[^:]*:\s*/, ''))}</small>` : ''}</div>
         <button type="button" class="lp-close" data-ss="close" aria-label="Close">&times;</button>
       </header>
       <div class="ss-wrap">
@@ -607,11 +631,11 @@ async function scoreSheetJoin(code) {
   const me = typeof _navPlayer === 'function' ? _navPlayer() : null;
   const meCanon = me && typeof _origCanon === 'function' ? _origCanon(me) : me;
   _ss = {
-    key: d.k, sheet: d.k === 'rounds' ? SS_ROUNDS : _ssSheet(Number(d.k)), opt: !!d.o, reps: {}, v: {}, names,
+    key: d.k, sheet: d.k === 'rounds' ? SS_ROUNDS : _ssSheet(d.k), opt: !!d.o, reps: {}, v: {}, names,
     bggId: Number(d.g), x: [], join: true, host: d.h || '',
     me: names.findIndex(n => n === me || (typeof _origCanon === 'function' && _origCanon(n) === meCanon)),
   };
-  _ss.pace = _ssPaceOf(_ss.bggId, names);
+  _ss.pace = _ssPaceOf(_ss.bggId, names, _ss.key);
   _ssLive = { code, store: main ? 'main' : 'spare', host: false, data: d };
   _ssApplyRemote();
   _ssShow();

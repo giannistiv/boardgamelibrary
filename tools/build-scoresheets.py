@@ -42,7 +42,7 @@ def row_of(r):
     return out
 
 
-def sheet_of(ss):
+def sheet_of(ss, heads=False):
     groups = ss.get('groups') or ss.get('rounds') or []
     out, seen = [], set()
     for g in groups:
@@ -58,6 +58,8 @@ def sheet_of(ss):
         if not rows:
             continue
         o = {'rows': rows, 'tid': g.get('templateId', '1'), 'mr': g.get('maxRepeat', -1)}
+        if heads and (g.get('label') or '').strip():
+            o['h'] = g['label'].strip()   # "Missions", "Plants": a variant sheet's blocks keep their names
         # BG Stats' maxRepeat: -1 a block once, 0 rounds without end, N up to N rounds
         rep = g.get('maxRepeat', -1)
         if rep >= 0:
@@ -101,9 +103,31 @@ OWN = {
 }
 
 
+# A game whose BG Stats sheet depends on the scenario (Welcome to the Moon's
+# 8 Adventures, a sheet each) keeps every one, by variant id, in
+# SCORESHEET_VARS; Log a play takes the one for the scenario picked
+# (js/score-sheet.js, _ssVariantOf). Variants no export has are our own,
+# from the rulebook (own: 1). Welcome to the Moon's last three Adventures:
+_MISSIONS = {'rows': [{'l': 'A'}, {'l': 'B'}, {'l': 'C'}], 'h': 'Missions'}
+OWN_VARS = {
+    339789: {
+        'adventure6': {'var': 'Adventure #6: The Virus', 'own': 1, 'g': [_MISSIONS, {'rows': [
+            {'l': 'Plants and water'}, {'l': 'Evacuated quarters'}, {'l': 'Infected housing spaces', 'neg': 1},
+            {'l': 'System Errors', 'neg': 1}]}]},
+        'adventure7': {'var': 'Adventure #7: The Escape', 'own': 1, 'g': [_MISSIONS, {'rows': [
+            {'l': 'Greenhouses'}, {'l': 'Modules'}, {'l': 'Planning', 'neg': 1}, {'l': 'System Errors', 'neg': 1}]}]},
+        'adventure8': {'var': 'Adventure #8: The Battle', 'own': 1, 'g': [
+            {'rows': [{'l': 'A'}, {'l': 'B'}, {'l': 'C'}], 'h': 'Missions (both sheets)'}, {'rows': [
+            {'l': 'Plants and water'}, {'l': 'Planets'}, {'l': 'Planning', 'neg': 1}, {'l': 'System Errors', 'neg': 1}],
+            'h': 'Both sheets added up'}]},
+    },
+}
+
+
 def main():
     files = sys.argv[1:] or [os.path.join(ROOT, 'BGStatsExport.json')]
     best = {}   # bggId -> (playDate, name, sheet)
+    variants = {}   # bggId -> {variant id: (playDate, entry)}
     for f in files:
         d = json.load(open(f, encoding='utf-8'))
         games = {g['id']: g for g in d.get('games', [])}
@@ -117,6 +141,17 @@ def main():
             if not bgg or not sheet:
                 continue
             when = p.get('playDate', '')
+            vid = ss.get('variantId')
+            if vid:
+                v = variants.setdefault(bgg, {})
+                if vid not in v or when > v[vid][0]:
+                    entry = {'g': sheet_of(ss, heads=True)}
+                    if ss.get('variantLabel'):
+                        entry['var'] = ss['variantLabel']
+                    entry['vid'] = vid
+                    if ss.get('rounds'):
+                        entry['fmt'] = 'rounds'
+                    v[vid] = (when, entry)
             if bgg not in best or when > best[bgg][0]:
                 best[bgg] = (when, game.get('name', ''), sheet, ss.get('variantLabel'),
                              'rounds' if ss.get('rounds') else 'groups', ss.get('variantId'))
@@ -134,6 +169,18 @@ def main():
         if fmt == 'rounds':
             entry['fmt'] = 'rounds'
         lines.append(f'  {bgg}: {json.dumps(entry, ensure_ascii=False, separators=(",", ":"))},   // {name}')
+    vlines = []
+    for bgg in sorted(set(variants) | set(OWN_VARS)):
+        v = {vid: e for vid, (_, e) in sorted(variants.get(bgg, {}).items())}
+        for vid, e in OWN_VARS.get(bgg, {}).items():
+            v.setdefault(vid, e)
+        if len(v) < 2:
+            continue
+        name = best[bgg][1] if bgg in best else ''
+        vlines.append(f'  {bgg}: {{   // {name}')
+        for vid in sorted(v):
+            vlines.append(f'    {json.dumps(vid)}: {json.dumps(v[vid], ensure_ascii=False, separators=(",", ":"))},')
+        vlines.append('  },')
     with open(OUT, 'w', encoding='utf-8') as fh:
         fh.write('// Score sheets for Log a play, by BGG id: the rows of the BG Stats score\n'
                  '// sheet last used for each game (tools/build-scoresheets.py). A group of\n'
@@ -144,7 +191,11 @@ def main():
                  '// | stat (not added up), opt (with an expansion only), x (those expansions).\n'
                  '// BG Stats\' own ids, to send a sheet back (js/bgstats-share.js): fmt\n'
                  '// (rounds), vid (variant), a group\'s tid and mr (maxRepeat), a row\'s id.\n'
-                 'const SCORESHEETS = {\n' + '\n'.join(lines) + '\n};\n')
+                 'const SCORESHEETS = {\n' + '\n'.join(lines) + '\n};\n'
+                 '// A sheet for each scenario, where BG Stats has one per variant (Welcome to\n'
+                 '// the Moon\'s Adventures): { bggId: { variant id: sheet } }, picked by the\n'
+                 '// scenario\'s number; h names a block, own: 1 a sheet of our own.\n'
+                 'const SCORESHEET_VARS = {\n' + '\n'.join(vlines) + '\n};\n')
     print(f'build-scoresheets: {len(best)} games')
 
 

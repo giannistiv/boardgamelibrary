@@ -109,8 +109,13 @@ const _pxMe = (n, me, meCanon) => n === me || (typeof _origCanon === 'function' 
 const _pxNum = (x) => (Math.round(x * 10) / 10).toLocaleString('en');
 
 // ── Where the points come from ──
-function buildPointsHtml(game, plays) {
-  if (!plays || plays.length < 2) return '';
+// A game with a different sheet for each scenario (Welcome to the Moon's
+// Adventures) gets this per scenario on its own board (opts.scenario: the
+// plays given are one scenario's; opts.min: fewest scored plays to show).
+function buildPointsHtml(game, plays, opts) {
+  const one = !!(opts && opts.scenario), min = (opts && opts.min) || 2;
+  if (!one && typeof SCORESHEET_VARS !== 'undefined' && SCORESHEET_VARS[game.bggId]) return '';
+  if (!plays || plays.length < min) return '';
   const id = game.bggId;
   const me = typeof _ptViewer === 'function' ? _ptViewer() : null;
   const meCanon = me && typeof _origCanon === 'function' ? _origCanon(me) : me;
@@ -134,9 +139,9 @@ function buildPointsHtml(game, plays) {
     }
     if (mineHere) mineN++;
   }
-  if (n < 2 || !cats.size) return '';
+  if (n < min || !cats.size) return '';
   const avg = (a) => a.reduce((s, x) => s + x, 0) / a.length;
-  const yours = mineN >= 2;
+  const yours = mineN >= Math.min(2, min);
   const rows = [...cats.entries()].filter(([, c]) => c.all.length)
     .map(([cat, c]) => ({ cat, all: avg(c.all), mine: c.mine.length ? avg(c.mine) : null, best: c.best }))
     .sort((a, b) => Math.abs(yours ? b.mine || 0 : b.all) - Math.abs(yours ? a.mine || 0 : a.all));

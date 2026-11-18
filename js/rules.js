@@ -60,9 +60,11 @@ function rulesCardHtml(game, r, openExp, base) {
   const sec = (title, body) => body ? `<section class="rules-sec"><h4>${title}</h4>${body}</section>` : '';
   const actions = r.actions && r.actions.length
     ? `<dl class="rules-acts">${r.actions.map(([name, what]) => `<dt>${_rulesText(name)}</dt><dd>${_rulesText(what)}</dd>`).join('')}</dl>` : '';
-  const exps = (r.exp || []).map(e => `<details class="rules-exp"${e.id === openExp ? ' open' : ''}>
-      <summary>With ${_rulesText(e.name)}</summary>${list(e.lines || [])}
-      <div class="rules-exp-src">From ${_rulesText(e.src || 'its rulebook')}.</div></details>`).join('');
+  // fold-outs: an expansion's changes ("With …"), or a part of the game that
+  // has rules of its own (Welcome to the Moon's Adventures: head, no id)
+  const exps = (r.exp || []).map(e => `<details class="rules-exp"${e.id && e.id === openExp ? ' open' : ''}>
+      <summary>${e.head ? _rulesText(e.head) : `With ${_rulesText(e.name)}`}</summary>${list(e.lines || [])}
+      ${e.src || !e.head ? `<div class="rules-exp-src">From ${_rulesText(e.src || 'its rulebook')}.</div>` : ''}</details>`).join('');
   return `<div class="rules-head"><span class="rules-title">&#128220; Rules</span><span class="rules-sub">quick reference</span></div>
     ${base ? `<p class="rules-base">This expansion's changes are folded out under ${_escapeHtml(base.name)}'s card below.</p>` : ''}
     ${r.goal ? `<p class="rules-goal">${_rulesText(r.goal)}</p>` : ''}
@@ -71,6 +73,6 @@ function rulesCardHtml(game, r, openExp, base) {
     ${sec(_rulesText(r.roundTitle || 'End of a round'), r.round && r.round.length ? list(r.round) : '')}
     ${sec('End of the game', r.end && r.end.length ? list(r.end) : '')}
     ${sec('Easy to forget', r.forget && r.forget.length ? list(r.forget) : '')}
-    ${sec('Expansions', exps)}
+    ${sec(_rulesText(r.expTitle || 'Expansions'), exps)}
     <div class="rules-src">From ${_rulesText(r.src || 'the rulebook')}. Spot a mistake? Add a note below. &middot; <a href="${aids}" target="_blank" rel="noopener">Player aids on BGG &#8599;</a></div>`;
 }
