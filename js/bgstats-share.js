@@ -266,12 +266,22 @@ function openBgsShare(bggId, idx) {
     ov.setAttribute('aria-modal', 'true');
     document.body.appendChild(ov);
   }
+  // two ways to share it: a picture for the chats (js/share-card.js), or the play for BG Stats
+  const pic = typeof shareCardPlay === 'function';
+  let tab = 'bgs';
+  try { tab = pic && localStorage.getItem('bgl-share-tab') !== 'bgs' ? 'pic' : 'bgs'; } catch (_) { tab = pic ? 'pic' : 'bgs'; }
   ov.innerHTML = `<div class="bgs-sheet">
-      <div class="bgs-head"><span class="bgs-title">Send to BG Stats</span><button type="button" class="bgs-x" aria-label="Close">&times;</button></div>
+      <div class="bgs-head"><span class="bgs-title">${pic ? 'Share this play' : 'Send to BG Stats'}</span><button type="button" class="bgs-x" aria-label="Close">&times;</button></div>
       <div class="bgs-play">
         <img class="bgs-cover" src="images/${Number(bggId)}.jpg" alt="" onerror="this.style.visibility='hidden'">
         <div><div class="bgs-name">${esc(name)}</div><div class="bgs-meta">${meta}</div></div>
       </div>
+      ${pic ? `<div class="sc-tabs" role="tablist">
+        <button type="button" role="tab" class="sc-tab${tab === 'pic' ? ' on' : ''}" data-sc-tab="pic" aria-selected="${tab === 'pic'}">Picture</button>
+        <button type="button" role="tab" class="sc-tab${tab === 'bgs' ? ' on' : ''}" data-sc-tab="bgs" aria-selected="${tab === 'bgs'}">BG Stats</button>
+      </div>
+      <div class="sc-panel" data-sc-panel="pic"${tab === 'pic' ? '' : ' hidden'}>${shareCardPanelHtml()}</div>` : ''}
+      <div data-sc-panel="bgs"${tab === 'bgs' ? '' : ' hidden'}>
       <div class="bgs-players">${who}</div>
       <div class="bgs-qr" aria-label="QR code with the play">Making the QR code…</div>
       <div class="bgs-hint">Scan it with the other phone's camera: BG Stats opens with this play, ready to import.</div>
@@ -282,6 +292,7 @@ function openBgsShare(bggId, idx) {
         <div class="bgs-small bgs-file-note">The QR code and the link carry the players, scores and winners. The ${extras.join(' and ')} go only in a file: share it to BG Stats${navigator.canShare ? '' : ' (it\'s saved here; open it with BG Stats)'}.</div>` : ''}
       </div>
       <div class="bgs-small">The first time, BG Stats asks which of its players, game and place each one is, and remembers it.${from ? ` This play is already in ${esc(from)}'s BG Stats.` : ''}</div>
+      </div>
     </div>`;
 
   const close = () => {
@@ -293,6 +304,14 @@ function openBgsShare(bggId, idx) {
   const onKey = (e) => { if (e.key === 'Escape') close(); };
   ov.onclick = async (e) => {
     if (e.target === ov || e.target.closest('.bgs-x')) { close(); return; }
+    const tb = e.target.closest('[data-sc-tab]');
+    if (tb) {
+      const k = tb.dataset.scTab;
+      ov.querySelectorAll('[data-sc-tab]').forEach(x => { const on = x === tb; x.classList.toggle('on', on); x.setAttribute('aria-selected', String(on)); });
+      ov.querySelectorAll('[data-sc-panel]').forEach(x => { x.hidden = x.dataset.scPanel !== k; });
+      try { localStorage.setItem('bgl-share-tab', k); } catch (_) {}
+      return;
+    }
     const fb = e.target.closest('[data-bgs-file]');
     if (fb) {
       const was = fb.textContent;
@@ -318,6 +337,9 @@ function openBgsShare(bggId, idx) {
   ov.classList.add('open');
   navOverlayOpened('bgs');
 
+  if (pic) shareCardWire(ov.querySelector('[data-sc-panel="pic"]'), () => shareCardPlay(bggId, play), shareTextPlay(bggId, play),
+    typeof _scFileName === 'function' ? _scFileName(name, play.date) : 'play.png');
+
   _bgsLoadQr().then((ok) => {
     const box = ov.querySelector('.bgs-qr');
     if (!box) return;
@@ -329,8 +351,9 @@ function openBgsShare(bggId, idx) {
 // The small button on a play (game page, full play log).
 function bgsSendBtnHtml(bggId, idx) {
   if (idx < 0) return '';
-  return `<button type="button" class="bgs-send" data-bgs-send="${Number(bggId)}|${idx}" title="Send to BG Stats" aria-label="Send this play to BG Stats">`
-    + '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 2h5v5H2zM9 2h5v5H9zM2 9h5v5H2z" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M4 4h1v1H4zM11 4h1v1h-1zM4 11h1v1H4zM9 9h2v2H9zM12 12h2v2h-2zM12 9h2v1h-2zM9 12h1v2H9z" fill="currentColor"/></svg></button>';
+  // a share arrow: a picture for the chats, or the play for BG Stats (its QR code)
+  return `<button type="button" class="bgs-send" data-bgs-send="${Number(bggId)}|${idx}" title="Share this play (a picture, or to BG Stats)" aria-label="Share this play">`
+    + '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 10V2.5M5 5l3-3 3 3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 7.5H4a1 1 0 0 0-1 1v4.5a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V8.5a1 1 0 0 0-1-1h-1.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>';
 }
 
 // Caught before the row's own click (the full play log opens the game on a tap).
