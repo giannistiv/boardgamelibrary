@@ -78,7 +78,8 @@ function difficultyBucket(complexity) {
 // with no win condition). Imported games carry no categories, so coop can't be
 // auto-detected — list these explicitly so plays aren't scored as losses.
 //   456440 = Cozy Stickerville · 415776 = Kingdom Legacy: Feudal Kingdom
-const NO_RESULT_GAMES = new Set([456440, 415776]);
+//   370591 = Dorfromantik: The Board Game (a score to beat, no winner)
+const NO_RESULT_GAMES = new Set([456440, 415776, 370591]);
 // Single plays with no result: a game that has winners, logged without one.
 // Built-in plays carry `nr: true`; imported plays are listed by their uuid.
 const NO_RESULT_PLAYS = new Set([

@@ -100,6 +100,17 @@ OWN = {
         {'l': 'Other tokens'},
         {'l': 'Gold'},
     ]}], 'own': 1}),
+    # Dorfromantik's score pad (rulebook, End of Game): one score for the whole
+    # table (shared: 1), the circles to cross on the Campaign sheet kept beside
+    # it (a stat, not points; js/game-boards.js adds them up)
+    370591: ('Dorfromantik: The Board Game', {'g': [
+        {'h': 'Completed tasks (B)', 'rows': [{'l': 'Forest tasks'}, {'l': 'Grain tasks'}, {'l': 'Village tasks'},
+                                              {'l': 'Track tasks'}, {'l': 'Stream tasks'}]},
+        {'h': 'Flags and the longest (C, D)', 'rows': [{'l': 'Green Flags'}, {'l': 'Yellow Flags'}, {'l': 'Red Flags'},
+                                                       {'l': 'Longest Track'}, {'l': 'Longest Stream'}]},
+        {'h': 'Unlocked (E)', 'rows': [{'l': 'Unlocked components'}]},
+        {'h': 'Campaign sheet', 'rows': [{'l': 'Circles crossed off', 't': 'stat'}]},
+    ], 'own': 1, 'shared': 1}),
 }
 
 

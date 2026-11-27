@@ -38,6 +38,7 @@ const SCEN_NUMBERED = {
 const SCEN_NUMBERED_OPEN = {
   377470: 'Scenario',   // Sail
   253344: 'Episode',    // Cthulhu: Death May Die
+  370591: 'Game',       // Dorfromantik: the campaign's game number (the crown on the score sheet)
 };
 const SCEN_TAKE_TIME = 440540;   // Take Time: "2-3", the folder and the clock
 const SCEN_STS_BOSSES = [
@@ -227,6 +228,14 @@ function scenarioGuess(bggId, me) {
   if (!cfg || !cfg.numbered || !me) return null;
   // Welcome to the Moon: every Adventure has a winner, so the next is the one after your last
   if (typeof moonNextAdventure === 'function' && Number(bggId) === MOON_BGGID) return { m: `Adventure ${moonNextAdventure(me)}` };
+  // a game nobody wins (Dorfromantik's campaign): the one after your last
+  if (typeof isNoResultGame === 'function' && isNoResultGame(bggId)) {
+    const re = new RegExp(`(?:^|／)\\s*${cfg.numbered}\\s*0*(\\d+)`, 'i');
+    const last = ((typeof PLAY_HISTORY !== 'undefined' && PLAY_HISTORY[bggId]) || [])
+      .filter(p => p && Array.isArray(p.sc) && p.sc.some(s => s.n === me) && re.test(p.b || ''))
+      .sort((a, b) => ((b.t || b.date) + (b.e || '')).localeCompare((a.t || a.date) + (a.e || '')))[0];
+    return { m: `${cfg.numbered} ${last ? Number((last.b.match(re) || [])[1]) + 1 : 1}` };
+  }
   const plays = ((typeof PLAY_HISTORY !== 'undefined' && PLAY_HISTORY[bggId]) || [])
     .filter(p => p && Array.isArray(p.sc) && p.sc.some(s => s.n === me));
   const re = cfg.fields[0].num ? new RegExp(`(?:^|／)\\s*${cfg.numbered}\\s*0*(\\d+)`, 'i') : /(?:mission|scenario|campaign|chapter|adventure|case|episode|quest|year)\s*(\d+)/i;

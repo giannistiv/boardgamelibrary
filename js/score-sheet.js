@@ -12,6 +12,10 @@
 
 const SS_ROUNDS = { g: [{ rows: [{ l: 'Round {round}' }], rep: 0, min: 3 }] };
 const SS_MAX = 6000;   // the longest sheet the database takes (characters)
+// A sheet with shared: 1 has one column for the whole table (Dorfromantik:
+// one score together); Done gives its total to everyone.
+const SS_TOGETHER = 'Together';
+const _ssNamesFor = (sheet, names) => (sheet && sheet.shared ? [SS_TOGETHER] : names);
 
 // The sheet on screen: { key, sheet, opt, reps: {gi: n}, v: {cell: {name: value}},
 // names, bggId, x (its expansions), pace, join (opened from a link), me (that
@@ -61,6 +65,16 @@ function _ssPaceOf(bggId, names, key) {
     if (xs.length < 2) return null;
     return { avg: Math.round((xs.reduce((a, b) => a + b, 0) / xs.length) * 10) / 10, best: (low ? Math.min : Math.max)(...xs), low };
   });
+}
+// A shared sheet's average and best: the table's score in each play.
+function _ssPaceShared(bggId) {
+  const xs = [];
+  for (const p of PLAY_HISTORY[bggId] || []) {
+    const v = Math.max(...(p.sc || []).map(s => (typeof _recScore === 'function' ? _recScore(s.s) : null)).filter(x => x !== null && x !== undefined));
+    if (isFinite(v)) xs.push(v);
+  }
+  if (xs.length < 2) return null;
+  return { avg: Math.round((xs.reduce((a, b) => a + b, 0) / xs.length) * 10) / 10, best: Math.max(...xs), low: false };
 }
 // The game's own sheet or the rounds one; none for a co-op (Everyone won / lost).
 // A game with a sheet per scenario takes the one for the scenario picked (b,
@@ -176,10 +190,10 @@ function scoreSheetOpen() {
     _lp.ss = { key: s.key, sheet: s.sheet, opt: false, reps: {}, v: {} };
   }
   _ss = _lp.ss;
-  _ss.names = _lp.sc.map(p => p.n);
+  _ss.names = _ssNamesFor(_ss.sheet, _lp.sc.map(p => p.n));
   _ss.bggId = _lp.bggId;
   _ss.x = (_lp.x || []).map(Number);
-  _ss.pace = _ssPaceOf(_ss.bggId, _ss.names, _ss.key);
+  _ss.pace = _ss.sheet.shared ? [_ssPaceShared(_ss.bggId)] : _ssPaceOf(_ss.bggId, _ss.names, _ss.key);
   if (_ssLive && _ssLive.host) _ssLivePushAll();   // players added or gone meanwhile
   _ssShow();
 }
@@ -367,7 +381,9 @@ function _ssDone() {
   _ssFlush();
   const names = _ss.names;
   const { tot, won, lost, any } = _ssTotals(names);
-  if (any) {
+  if (any && _ss.sheet.shared) {
+    _lp.sc.forEach(p => { p.s = String(tot[0]); });   // one score for the whole table; the result stays as it is
+  } else if (any) {
     const best = (_ssLowWins() ? Math.min : Math.max)(...tot.filter((_, i) => !lost[i]));
     _lp.sc.forEach((p, i) => {
       p.s = String(tot[i]);
@@ -653,7 +669,7 @@ async function scoreSheetJoin(code) {
 function scoreSheetPack() {
   const s = _lp.ss;
   if (!s) return '';
-  const names = _lp.sc.map(p => p.n);
+  const names = _ssNamesFor(s.sheet, _lp.sc.map(p => p.n));
   const v = {};
   for (const key in s.v) {
     const row = names.map(n => s.v[key][n] == null ? null : s.v[key][n]);
@@ -667,10 +683,11 @@ function scoreSheetUnpack(str, sc) {
   try {
     const o = JSON.parse(str);
     const sheet = o.k === 'rounds' ? SS_ROUNDS : _ssSheet(o.k);
+    const names = _ssNamesFor(sheet, (sc || []).map(p => p && p.n));
     const v = {};
     for (const key in o.v || {}) {
       v[key] = {};
-      o.v[key].forEach((x, i) => { if (x != null && sc[i]) v[key][sc[i].n] = x; });
+      o.v[key].forEach((x, i) => { if (x != null && names[i]) v[key][names[i]] = x; });
     }
     return { key: o.k, sheet, opt: !!o.o, reps: o.r || {}, v };
   } catch (_) {

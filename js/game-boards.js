@@ -22,7 +22,7 @@ function gameToolHtml(game) {
 }
 function gameBoardHtml(game, mine, all) {
   const d = game && GB[Number(game.bggId)];
-  if (!d || !d.board || !(all || []).length) return '';
+  if (!d || !d.board || (!(all || []).length && !d.always)) return '';   // always: shown before anyone's played
   const html = d.board(game, mine || [], all || []);
   return html ? `<div class="gb gb-board" data-gb="${game.bggId}">${html}</div>` : '';
 }
@@ -757,5 +757,103 @@ gbRegister(MIND_BGGID, {
       </div>
       <div class="gb-sub">Recruiters</div>
       ${[...recruiters.values()].sort((a, b) => b.w - a.w || b.n - a.n).map(r => `<div class="mind-r"><b>${_gbEsc(r.name)}</b><span>${r.w} won of ${r.n}</span></div>`).join('')}`;
+  },
+});
+
+// ════════════════════════════ Dorfromantik: the campaign ════════════════════════════
+// The user, 27 Nov 2026, before a weekend of it: "Prepare me something". Each
+// game logged with its score sheet (data/scoresheets.js: the pad's B tasks,
+// C flags, D longest Track and Stream, E unlocked, and the circles crossed on
+// the Campaign sheet) becomes a bar here, game by game, with the High Score
+// List row it lands in. The circles per row are printed on the Campaign sheet
+// (not published), so the app adds up the ones you write down.
+const DORF_BGGID = 370591;
+const DORF_PARTS = [['tasks', 'Tasks', 0], ['flags', 'Flags', 1], ['long', 'Track & Stream', 1], ['open', 'Unlocked', 2]];
+function _dorfGame(p) {
+  const total = Math.max(...(p.sc || []).map(_gbScore).filter(v => v != null), -Infinity);
+  const out = { p, total: isFinite(total) ? total : null, n: Number((String(p.b || '').match(/\bgame\s*0*(\d+)/i) || [])[1]) || 0,
+    tasks: 0, flags: 0, long: 0, open: 0, circles: null, rows: {}, sheet: false };
+  const s = p.ss && typeof scoreSheetUnpack === 'function' ? scoreSheetUnpack(p.ss, p.sc) : null;
+  if (!s || !s.sheet || !s.sheet.g) return out;
+  out.sheet = true;
+  s.sheet.g.forEach((g, gi) => g.rows.forEach((row, ri) => {
+    const cell = s.v[`${gi}.1.${ri}`] || {};
+    const raw = Object.values(cell)[0];
+    if (raw == null || raw === '') return;
+    const v = typeof _recScore === 'function' ? _recScore(raw) : Number(raw);
+    if (v == null || !isFinite(v)) return;
+    out.rows[row.l] = v;
+    if (row.t === 'stat') { if (/circle/i.test(row.l)) out.circles = v; return; }
+    if (gi === 0) out.tasks += v;
+    else if (gi === 1) { if (/flag/i.test(row.l)) out.flags += v; else out.long += v; }
+    else out.open += v;
+  }));
+  return out;
+}
+// A campaign: the same table, game numbers going up (Game 1 starts a new one).
+function _dorfCampaigns(plays) {
+  const camps = [];
+  const when = (g) => (g.p.t || g.p.date) + (g.p.e || '');
+  // in play order; games logged at the same time by their number
+  for (const g of plays.map(_dorfGame).sort((a, b) => when(a).localeCompare(when(b)) || a.n - b.n)) {
+    const who = new Set(g.p.sc.map(s => _gbCanon(s.n)));
+    const cur = camps[camps.length - 1];
+    const last = cur && cur.games[cur.games.length - 1];
+    const same = last && [...who].filter(n => last.who.has(n)).length >= Math.min(2, who.size, last.who.size);
+    if (!cur || !same || g.n === 1 && last.n >= 1) camps.push({ games: [] });
+    g.who = who;
+    camps[camps.length - 1].games.push(g);
+  }
+  return camps;
+}
+gbRegister(DORF_BGGID, {
+  always: true,
+  board: (game, mine) => {
+    const head = _gbHead('&#127806; Your campaign', mine.length ? '' : 'Game 1 next');
+    if (!mine.length) {
+      return `${head}${_gbNote('Log each game with the <b>score sheet</b> in Log a play: the tasks, Flags, longest Track and Stream, and the circles you crossed on the Campaign sheet. Your campaign builds up here, game by game. The Rules tab has the turn and the scoring.')}`;
+    }
+    const camps = _dorfCampaigns(mine);
+    const camp = camps[camps.length - 1];
+    const G = camp.games;
+    const scored = G.filter(g => g.total != null);
+    const best = scored.reduce((b, g) => (!b || g.total > b.total ? g : b), null);
+    const avg = scored.length ? scored.reduce((a, g) => a + g.total, 0) / scored.length : null;
+    const circles = G.reduce((a, g) => a + (g.circles || 0), 0);
+    const anyCircles = G.some(g => g.circles != null);
+    const max = Math.max(1, ...scored.map(g => g.total));
+    const bars = G.map((g, k) => {
+      const num = g.n || k + 1;
+      if (g.total == null) return `<div class="dorf-bar empty" title="Game ${num}: no score logged"><span class="dorf-stack"></span><b>&ndash;</b><small>${num}</small></div>`;
+      const segs = g.sheet ? DORF_PARTS.map(([key]) => g[key] > 0 ? `<i class="dorf-${key}" style="height:${(g[key] / max * 100).toFixed(1)}%"></i>` : '').join('')
+        : `<i class="dorf-total" style="height:${(g.total / max * 100).toFixed(1)}%"></i>`;
+      const tip = `Game ${num} · ${_gbNum(g.total)}${g.sheet ? ` · tasks ${g.tasks}, Flags ${g.flags}, Track & Stream ${g.long}${g.open ? `, unlocked ${g.open}` : ''}` : ''}${g.circles != null ? ` · ${g.circles} circles` : ''} · ${_gbDate(g.p.date)}`;
+      return `<div class="dorf-bar${g === best ? ' best' : ''}" title="${_gbEsc(tip)}"><span class="dorf-stack">${segs}</span><b>${_gbNum(g.total)}</b><small>${num}</small></div>`;
+    }).join('');
+    // the High Score List: each game in the row its score rounds down to
+    const rows = {};
+    G.forEach((g, k) => { if (g.total != null) (rows[Math.floor(g.total / 10) * 10] = rows[Math.floor(g.total / 10) * 10] || []).push(g.n || k + 1); });
+    const list = Object.keys(rows).map(Number).sort((a, b) => b - a).map(r => `<div class="dorf-hs"><b>${r}</b><span>${rows[r].map(n => `<em>${n}</em>`).join('')}</span></div>`).join('');
+    // best in each part of the pad
+    const top = (label) => { let b = null; for (const g of G) { const v = g.rows[label]; if (v != null && (!b || v > b.v)) b = { v, g }; } return b; };
+    const bests = [['Longest Track', '&#128642;'], ['Longest Stream', '&#127754;'], ['Green Flags', '&#127794;'], ['Yellow Flags', '&#127806;'], ['Red Flags', '&#127968;']]
+      .map(([l, ic]) => { const b = top(l); return b ? `<span class="dorf-b">${ic} ${_gbEsc(l)} <b>${_gbNum(b.v)}</b></span>` : ''; }).join('');
+    const taskBest = G.reduce((b, g) => (g.sheet && (!b || g.tasks > b.tasks) ? g : b), null);
+    const last = G[G.length - 1];
+    const nextN = (last.n || G.length) + 1;
+    const ppl = [...new Map(G.flatMap(g => g.p.sc.map(s => [_gbCanon(s.n), s.n]))).values()];
+    return `${head}
+      <div class="dorf-who">${ppl.map(_gbFirst).join(', ')} · since ${_gbDate(G[0].p.date)}${camps.length > 1 ? ` · ${camps.length - 1} earlier campaign${camps.length > 2 ? 's' : ''}` : ''}</div>
+      <div class="gb-stats">
+        <div class="pb-stat"><b>${G.length}</b><span>Games</span></div>
+        <div class="pb-stat"><b>${best ? _gbNum(best.total) : '–'}</b><span>High score</span></div>
+        <div class="pb-stat"><b>${avg != null ? _gbNum(avg) : '–'}</b><span>Average</span></div>
+        ${anyCircles ? `<div class="pb-stat"><b>${circles}</b><span>Circles crossed</span></div>` : ''}
+      </div>
+      <div class="dorf-bars">${bars}</div>
+      <div class="dorf-key"><span><i class="dorf-tasks"></i>Tasks</span><span><i class="dorf-flags"></i>Flags</span><span><i class="dorf-long"></i>Track &amp; Stream</span><span><i class="dorf-open"></i>Unlocked</span></div>
+      ${bests || taskBest ? `<div class="gb-sub">Bests</div><div class="dorf-bests">${taskBest ? `<span class="dorf-b">&#9989; Tasks <b>${_gbNum(taskBest.tasks)}</b></span>` : ''}${bests}</div>` : ''}
+      ${list ? `<div class="gb-sub">High Score List <span>the row each game went in, as on the Campaign sheet</span></div><div class="dorf-hss">${list}</div>` : ''}
+      ${_gbNote(`Next: <b>Game ${nextN}</b>. Before you start, tick on the score sheet everything you&rsquo;ve unlocked so far${anyCircles ? '' : '; and write the circles you crossed in the sheet&rsquo;s last row, to see them add up here'}.`)}`;
   },
 });

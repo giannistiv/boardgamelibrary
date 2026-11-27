@@ -6876,5 +6876,38 @@ const RULES = {
     "src": "the rulebook and the designers' answers on BGG"
    }
   ]
+ },
+ "370591": {
+  "src": "the Dorfromantik: The Board Game rulebook (Pegasus Spiele)",
+  "goal": "Together you grow one landscape of hex tiles and complete the residents' tasks. Points come from completed tasks, flagged areas you close off, and your longest Track and Stream. Nobody wins or loses: it's a campaign, and each game's score moves you along the Campaign sheet to unlock five sealed boxes. **Never open a box until the sheet says so.**",
+  "turnTitle": "On your turn",
+  "turn": [
+   "**Reveal one tile and place it.** Talk it over, but whoever's turn it is decides.",
+   "**Which tile**: in the first 3 turns, a **Task tile**. After that, a Task tile whenever fewer than 3 Task tiles with markers are on the table; otherwise a **Landscape tile**.",
+   "A Task tile takes a matching **Task marker** at once, number up (4, 5 or 6).",
+   "**Placing**: touch at least 1 edge of the map, so it stays one group. **Tracks and Streams must meet their own kind** on every edge; Forest, Grain, Village and Meadow edges can go anywhere.",
+   "A task is done when its territory, Track or Stream has **exactly** its number of tiles: move the marker to your completed markers, sorted by type. One tile can complete several."
+  ],
+  "roundTitle": "Tasks and Flags",
+  "round": [
+   "A **territory** is tiles of one type (Forest, Grain or Village) joined by matching edges.",
+   "You **can't place a Task tile** where its area is already bigger than its new marker asks, or where it closes the area off smaller than that.",
+   "An area that grows past a marker's number, or is closed off below it by a Landscape tile, loses that marker: back in the box.",
+   "Several Task tiles can share an area. Out of Task tiles: carry on with Landscape tiles only.",
+   "**Flags** (green Forest, yellow Grain, red Village) only score if their territory is **closed off**, with no open edge left."
+  ],
+  "end": [
+   "The game ends the moment you must reveal a Landscape tile and none are left. If the last one completes or cancels a task, keep placing Task tiles while they still complete or cancel tasks.",
+   "**Score** (a sheet a game): **B** the completed Task markers by type · **C** each Flag in a closed territory scores that territory's tiles · **D** the tiles in your longest Track and your longest Stream · **E** unlocked components, once you have any.",
+   "Then the **Campaign sheet**: write the game number in the High Score List row your score rounds down to (128 → 120). That row says how many circles to cross on the Advancement track: from the hiker at the bottom left, one after another, skipping the green hexes. After the second green hex the track forks, so choose your way.",
+   "A **green hex** reached: the 1st opens **Box 1**, the 2nd **Box 2**, every later one an Achievement card from **Box 3**. Three circles on the track give a **Red Heart** (also from Box 3)."
+  ],
+  "forget": [
+   "At setup, put **3 Landscape tiles back unseen**, and only then mix in any Special tiles you've unlocked.",
+   "Task markers are mixed facedown and kept apart by colour.",
+   "Everything unlocked is used in every later game of the campaign: tick it on the score sheet before you start.",
+   "Achievement cards still locked lie faceup by the map; meet one in a game and turn it over.",
+   "Keep the Task tiles moving: any left unrevealed at the end never come into play."
+  ]
  }
 };
