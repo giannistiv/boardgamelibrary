@@ -40,7 +40,9 @@ function _lpEntry(id, p) {
     if (s.tm) o.tm = String(s.tm);
     return o;
   });
-  const e = { date: p.date, t: p.t || `${p.date} 20:00:00`, e: p.t || `${p.date} 20:00:00`, sc, mp: id, by: p.by };
+  // (a time before 6 on its own day is the night after it: plays saved before lpPlayMoment)
+  const t = p.t && String(p.t).slice(0, 10) === p.date ? lpPlayMoment(p.date, String(p.t).slice(11, 19)) : p.t || `${p.date} 20:00:00`;
+  const e = { date: p.date, t, e: t, sc, mp: id, by: p.by };
   if (p.d) e.d = p.d;
   if (p.b) e.b = p.b;
   if (p.l) e.l = typeof canonLocation === 'function' ? canonLocation(p.l, p.date) : p.l;
@@ -104,6 +106,43 @@ let _lpOpen = false;
 
 const _lpPad = (n) => String(n).padStart(2, '0');
 function _lpToday() { const d = new Date(); return `${d.getFullYear()}-${_lpPad(d.getMonth() + 1)}-${_lpPad(d.getDate())}`; }
+// The day a play counts for: after midnight and before 6 in the morning it's
+// still the night before (the user, 28 Nov 2026: "games at 1am logged as the
+// previous date").
+const LP_NIGHT_ENDS = 6;
+function _lpPlayDay() {
+  const d = new Date();
+  if (d.getHours() < LP_NIGHT_ENDS) d.setDate(d.getDate() - 1);
+  return `${d.getFullYear()}-${_lpPad(d.getMonth() + 1)}-${_lpPad(d.getDate())}`;
+}
+function _lpNextDay(date) {
+  const d = new Date(`${date}T12:00:00`);
+  d.setDate(d.getDate() + 1);
+  return `${d.getFullYear()}-${_lpPad(d.getMonth() + 1)}-${_lpPad(d.getDate())}`;
+}
+// A play's moment: its day and the time, a time before 6 being the night
+// after that day, so a 1 am game sorts after the evening's (Bomb Busters,
+// 27 Nov 2026: missions logged at 00:27 and 1:19 sorted before 23:45's).
+function lpPlayMoment(date, time) {
+  return `${String(time) < `${_lpPad(LP_NIGHT_ENDS)}:00:00` ? _lpNextDay(date) : date} ${time}`;
+}
+
+// What was logged here last, by whoever's logging, if it was in the last few
+// hours: a new play starts with its people, place and day (the user, 28 Nov
+// 2026: "when I log a new play and I just logged a previous one, the people
+// and the place is the same").
+const LP_SAME_SITTING = 4 * 3600000;
+function _lpLastSitting() {
+  const a = typeof acctMe === 'function' ? acctMe() : null;
+  if (!a) return null;
+  let last = null;
+  for (const id in manualPlaysCache) {
+    const p = manualPlaysCache[id];
+    if (!p || p.by !== a.uid || !(Number(p.at) > 0)) continue;
+    if (!last || p.at > last.at) last = p;
+  }
+  return last && Date.now() - last.at < LP_SAME_SITTING ? last : null;
+}
 function _lpNow() { const d = new Date(); return `${_lpPad(d.getHours())}:${_lpPad(d.getMinutes())}:${_lpPad(d.getSeconds())}`; }
 
 // The people you play with, most often first; then everyone else.
@@ -130,7 +169,28 @@ function _lpPlaces() {
     const k = (p.sc.some(s => s.n === me) ? '1' : '0') + (p.t || p.date);
     if (!last.has(p.l) || last.get(p.l) < k) last.set(p.l, k);
   }
-  return [...last.entries()].sort((a, b) => b[1].localeCompare(a[1])).map(x => x[0]);
+  const places = [...last.entries()].sort((a, b) => b[1].localeCompare(a[1])).map(x => x[0]);
+  // Board South only when someone from Board South is at the table (the user, 28 Nov 2026)
+  return _lpWithBoardSouth() ? places : places.filter(l => l !== LP_BOARD_SOUTH);
+}
+const LP_BOARD_SOUTH = 'Board South';
+let _lpBsPeople = null;
+// The people who've played at Board South, the viewer apart.
+function _lpBoardSouthPeople() {
+  if (_lpBsPeople) return _lpBsPeople;
+  const canon = (n) => (typeof _origCanon === 'function' ? _origCanon(n) : n);
+  _lpBsPeople = new Set();
+  for (const id in PLAY_HISTORY) for (const p of PLAY_HISTORY[id]) {
+    if (p.l !== LP_BOARD_SOUTH) continue;
+    for (const s of p.sc || []) if (s && s.n) _lpBsPeople.add(canon(s.n));
+  }
+  return _lpBsPeople;
+}
+function _lpWithBoardSouth() {
+  const me = _navPlayer();
+  const canon = (n) => (typeof _origCanon === 'function' ? _origCanon(n) : n);
+  const bs = _lpBoardSouthPeople();
+  return !!(_lp && (_lp.sc || []).some(p => p && p.n && p.n !== me && bs.has(canon(p.n))));
 }
 
 // One tap for the people (the user, 5 Nov 2026: finding them was the slow,
@@ -184,7 +244,7 @@ function _lpRenderSugg() {
   box.innerHTML = crews.map((c, i) => `<button type="button" class="lp-crew" data-lp-crew="${i}">
       <span class="lp-crew-faces">${c.names.slice(0, 3).map(face).join('')}</span>
       <span class="lp-crew-names"><b>${esc(c.names.length > 4 ? c.names.slice(0, 3).join(', ') + ` +${c.names.length - 3}` : c.names.join(', '))}</b>
-        <span>${c.sameDay ? (day === _lpToday() ? 'Earlier today' : 'Same day') : `${c.plays} plays together`}</span></span>
+        <span>${c.sameDay ? (day === _lpPlayDay() ? 'Earlier today' : 'Same day') : `${c.plays} plays together`}</span></span>
       <span class="lp-crew-add" aria-hidden="true">+</span>
     </button>`).join('')
     + (people.length ? `<div class="lp-who">${people.map(n => `<button type="button" class="lp-who-chip" data-lp-who="${esc(n)}">${face(n)}<span>${esc(n === _navPlayer() ? `${n} (you)` : n)}</span></button>`).join('')}</div>` : '');
@@ -202,8 +262,12 @@ function logPlayOpen(bggId) {
   const a = typeof acctMe === 'function' ? acctMe() : null;
   if (!a) { if (typeof acctOpenSheet === 'function') acctOpenSheet(); return; }
   const me = _navPlayer();
-  _lp = { id: null, bggId: Number(bggId) || 0, date: _lpToday(), time: _lpNow(), d: '', lenSet: false, l: _lpPlaces()[0] || '', b: '', c: '',
-    sc: me ? [{ n: me, s: '', w: false, r: '', tm: '' }] : [], roles: false, teams: false, gameWon: false, x: [] };
+  const last = _lpLastSitting();
+  const names = last ? (Array.isArray(last.sc) ? last.sc : Object.values(last.sc || {})).map(s => (s && s.n ? NAME_MAP[s.n] || s.n : '')).filter(Boolean) : [];
+  if (me && !names.includes(me)) names.unshift(me);
+  _lp = { id: null, bggId: Number(bggId) || 0, date: (last && last.date) || _lpPlayDay(), time: _lpNow(), d: '', lenSet: false, l: '', b: '', c: '',
+    sc: names.map(n => ({ n, s: '', w: false, r: '', tm: '' })), roles: false, teams: false, gameWon: false, x: [] };
+  _lp.l = (last && last.l) || _lpPlaces()[0] || '';
   _lpUsualSeats();
   _lpShow();
 }
@@ -216,9 +280,11 @@ function logPlayWith(o) {
   const roles = o.roles || {};
   // o.won: a co-op's result known already (Magic Maze's timer: escaped or caught)
   const known = typeof o.won === 'boolean';
-  _lp = { id: null, bggId: Number(o.bggId), date: _lpToday(), time: _lpNow(), d: '', lenSet: false, l: o.l || _lpPlaces()[0] || '', b: o.b || '', c: o.c || '',
+  const last = _lpLastSitting();
+  _lp = { id: null, bggId: Number(o.bggId), date: (last && last.date) || _lpPlayDay(), time: _lpNow(), d: '', lenSet: false, l: '', b: o.b || '', c: o.c || '',
     sc: (o.names || []).map(n => ({ n, s: '', w: known && o.won, r: roles[n] || '', tm: '' })), roles: Object.values(roles).some(Boolean), teams: false,
     gameWon: known && !o.won, winSet: known, x: [], tab: o.tab || '', after: typeof o.after === 'function' ? o.after : null };
+  _lp.l = o.l || (last && last.l) || _lpPlaces()[0] || '';
   _lpUsualSeats();
   _lpShow();
 }
@@ -230,9 +296,11 @@ function logPlayAgain(bggId, idx) {
   const a = typeof acctMe === 'function' ? acctMe() : null;
   if (!a) { if (typeof acctOpenSheet === 'function') acctOpenSheet(); return; }
   const sc = play.sc.filter(s => s && s.n).map(s => ({ n: s.n, s: '', w: false, r: s.r || '', tm: s.tm || '' }));
-  _lp = { id: null, bggId: Number(bggId), date: _lpToday(), time: _lpNow(), d: '', lenSet: false, l: play.l || _lpPlaces()[0] || '',
+  const last = _lpLastSitting();
+  _lp = { id: null, bggId: Number(bggId), date: (last && last.date) || _lpPlayDay(), time: _lpNow(), d: '', lenSet: false, l: '',
     b: play.b || '', c: '', sc, roles: sc.some(s => s.r), teams: sc.some(s => s.tm), gameWon: false,
     x: typeof playExpansionsOf === 'function' ? playExpansionsOf(Number(bggId), play) : [] };
+  _lp.l = play.l || _lpPlaces()[0] || '';
   _lpShow();
 }
 // Your last few plays, one per game and group: the picks at the top of a new log.
@@ -277,6 +345,9 @@ function _lpEl() {
       if (e.key !== 'Enter') return;
       if (e.target.id === 'lp-pname') { e.preventDefault(); _lpAddPlayer(); }
       else if (e.target.id === 'lp-gq') { e.preventDefault(); _lpGameSearch(); }
+      // Return in a field puts the keyboard away; only Save saves (the user, 28 Nov
+      // 2026: a place typed and Return saved the play half-edited, before the day)
+      else if (e.target.matches('input:not([type=checkbox]):not([type=radio])')) { e.preventDefault(); e.target.blur(); }
     });
     ov.addEventListener('submit', (e) => { e.preventDefault(); _lpSave(); });
     ov.addEventListener('input', (e) => {
@@ -712,7 +783,7 @@ function _lpHandOver() {
     bggId: _lp.bggId,
     names: _lp.sc.filter(p => !isNoResultSeat(p)).map(p => p.n),
     st: (_lp.sc.find(p => isNoResultSeat(p)) || {}).n || '',
-    date: (document.getElementById('lp-date') || {}).value || _lpToday(),
+    date: (document.getElementById('lp-date') || {}).value || _lpPlayDay(),
     l: ((document.getElementById('lp-l') || {}).value || '').trim(),
   };
   // the form's own back entry goes first, then the game's page opens
@@ -919,7 +990,7 @@ async function _lpSave() {
   if (date > _lpToday()) { _lpSay('That day hasn\'t come yet.'); return; }
   if (!_lp.sc.length) { _lpSay('Add the players.'); return; }
   const rec = {
-    bggId: _lp.bggId, date, t: `${date} ${_lp.time}`,
+    bggId: _lp.bggId, date, t: lpPlayMoment(date, _lp.time),
     sc: _lp.sc.map(p => {
       const o = { n: typeof _origCanon === 'function' ? _origCanon(p.n) : p.n, w: !!p.w };
       if (p.s) o.s = p.s.slice(0, 40);

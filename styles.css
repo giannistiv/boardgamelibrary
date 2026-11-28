@@ -3395,7 +3395,19 @@
   .you-set .change-profile-btn{margin:0.8rem 0 0}
   .you-set .import-section,.you-set .qr-section,.you-set .install-card{margin-top:0.6rem}
   /* Play → Latest plays: Log a play on top */
-  .ex-log{display:flex;justify-content:center;margin:0 0 1rem}
+  .ex-log{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:0.5rem;margin:0 0 1rem}
+  /* Latest plays: picking several for BG Stats */
+  .ex-pick-start{padding:0.55rem 0.9rem;border-radius:999px;border:1px solid var(--line-2);background:var(--card);color:var(--text-2);font:inherit;font-size:0.84rem;font-weight:600;cursor:pointer}
+  .ex-pick-hint{font-size:0.78rem;color:var(--text-3);text-align:center;margin:-0.4rem 0 0.8rem}
+  .ex-check{flex:0 0 22px;width:22px;height:22px;margin-top:0.55rem;border-radius:50%;border:2px solid var(--line-3)}
+  .ex-picked{background:var(--accent-soft);border-radius:var(--r-s)}
+  .ex-picked .ex-check{border-color:var(--accent);background:var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-7' fill='none' stroke='%23241703' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/14px no-repeat}
+  .ex-pickbar{position:sticky;bottom:calc(var(--tabbar-h) + var(--safe-b) + 10px);z-index:5;margin-top:0.6rem;padding:0.7rem 0.8rem;border-radius:var(--r);background:var(--bg-2);border:1px solid var(--accent-line);box-shadow:0 10px 30px rgba(0,0,0,0.5)}
+  .ex-pickbar-top{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.55rem;font-size:0.85rem}
+  .ex-pickbar-top b{flex:1}
+  .ex-pick-day,.ex-pick-x{padding:0.35rem 0.7rem;border-radius:999px;border:1px solid var(--line-2);background:var(--card);color:var(--text-2);font:inherit;font-size:0.78rem;font-weight:600;cursor:pointer}
+  .ex-pickbar .bgs-btn{width:100%}
+  .ex-pickbar .bgs-btn[disabled]{opacity:0.45;cursor:default}
   /* Latest plays: everyone's or yours, each with its game's picture */
   .ex-plays-who{display:flex;justify-content:center;margin:0 0 0.8rem}
   .ex-play{display:flex;gap:0.75rem;align-items:flex-start;cursor:pointer}

@@ -192,6 +192,52 @@ function bgsPlayFile(bggId, play) {
     players, locations, games, plays: [p], userInfo: { meRefId: meIdx >= 0 ? meIdx + 1 : 1 },
   };
 }
+// Several plays in one file (the user, 28 Nov 2026: "select multiple plays and
+// add them all together in BG Stats"): each play's file, merged the way BG
+// Stats' exports hold them, every player, game and place once (their ids are
+// made from their names, so the same one is the same everywhere).
+function bgsPlaysFile(list) {
+  const out = { about: '', players: [], locations: [], games: [], plays: [], userInfo: { meRefId: 1 } };
+  const ref = { players: new Map(), locations: new Map(), games: new Map() };
+  const add = (kind, item) => {
+    if (!ref[kind].has(item.uuid)) { const copy = { ...item, id: out[kind].length + 1 }; out[kind].push(copy); ref[kind].set(item.uuid, copy.id); }
+    return ref[kind].get(item.uuid);
+  };
+  const me = typeof _navPlayer === 'function' ? _navPlayer() : null;
+  for (const [bggId, play] of list) {
+    const f = bgsPlayFile(bggId, play);
+    out.about = f.about;
+    const pid = (i) => add('players', f.players[i - 1]);
+    const gid = (i) => add('games', f.games[i - 1]);
+    for (const p of f.plays) {
+      const q = { ...p, gameRefId: gid(p.gameRefId), playerScores: p.playerScores.map(x => ({ ...x, playerRefId: pid(x.playerRefId) })),
+        expansionPlays: (p.expansionPlays || []).map(x => ({ ...x, gameRefId: gid(x.gameRefId) })) };
+      if (p.locationRefId) q.locationRefId = add('locations', f.locations[p.locationRefId - 1]);
+      out.plays.push(q);
+    }
+  }
+  const mine = out.players.find(p => p.name === me);
+  if (mine) out.userInfo.meRefId = mine.id;
+  return out;
+}
+// Share them as one file to BG Stats (the phone's share sheet), or save it.
+function bgsSendPlays(list) {
+  const json = JSON.stringify(bgsPlaysFile(list));
+  const days = [...new Set(list.map(([, p]) => p.date))].sort();
+  const fname = `plays-${days[0]}${days.length > 1 ? `-to-${days[days.length - 1]}` : ''}-${list.length}.bgsplay`;
+  const file = new File([json], fname, { type: 'application/octet-stream' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    return navigator.share({ files: [file], title: `${list.length} plays for BG Stats` }).then(() => 'shared', (e) => (e && e.name === 'AbortError' ? 'cancelled' : 'failed'));
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(file);
+  a.download = fname;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  return Promise.resolve('saved');
+}
 // What a play file adds to the link: its score sheet and expansions.
 function _bgsFileExtras(bggId, play) {
   const xs = typeof playExpansionsOf === 'function' ? playExpansionsOf(Number(bggId), play) : [];

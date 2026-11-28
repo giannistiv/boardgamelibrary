@@ -50,6 +50,7 @@ function buildChartsHtml(days, locations, total) {
 //   Crowdfunding → its lists ('trending')   Group → Players, Stats
 let _exploreTab = 'games'; // the screen on show; survives re-renders and modal round-trips
 let _explorePlaysShown = 40;   // Latest plays: how many are on show
+let _exSel = null;             // Latest plays: the plays picked for BG Stats (a Set), or null when not picking
 let _explorePlaysWho = (() => { try { return localStorage.getItem('bgl-plays-who') === 'mine' ? 'mine' : 'all'; } catch (_) { return 'all'; } })();   // Latest plays: everyone's or yours
 
 function showGamesView() {
@@ -68,7 +69,7 @@ function showGamesView() {
       || { id: 'bgg_' + bggId, name: 'Game #' + bggId, bggId: Number(bggId), spineColor: '#555', categories: [] };
     for (const play of PLAY_HISTORY[bggId]) {
       totalPlays++;
-      allPlays.push({ game, date: play.date, t: play.t, e: play.e, sc: play.sc, b: play.b || '' });
+      allPlays.push({ game, date: play.date, t: play.t, e: play.e, sc: play.sc, b: play.b || '', play });
       if (!gamePlayCounts[bggId]) gamePlayCounts[bggId] = { game, count: 0 };
       gamePlayCounts[bggId].count++;
 
@@ -216,12 +217,13 @@ function showGamesView() {
   const playsWho = me && _explorePlaysWho === 'mine' ? 'mine' : 'all';
   const shownPlays = playsWho === 'mine' ? allPlays.filter(isMine) : allPlays;
   const buildPlaysTab = () => {
-    const playRowHtml = (p) => {
+    const playRowHtml = (p, i) => {
       const scoresHtml = _playScoresHtml(p.sc);
       const boardHtml = p.b ? `<span class="stats-recent-result">&nbsp;&middot; &#9876; ${_escapeHtml(p.b)}</span>` : '';
       const img = p.game.bggId >= 0 ? `<img class="ex-play-img" src="images/${p.game.bggId}.jpg" alt="" loading="lazy" onerror="__imgFallback(this, ${p.game.bggId})">` : '<span class="ex-play-img"></span>';
-      return `<div class="stats-recent-play ex-play" data-bgg-id="${p.game.bggId}">
-        ${img}
+      const on = _exSel && _exSel.has(p.play);
+      return `<div class="stats-recent-play ex-play${_exSel ? ' ex-picking' : ''}${on ? ' ex-picked' : ''}" data-bgg-id="${p.game.bggId}" data-ex-i="${i}"${_exSel ? ` role="checkbox" aria-checked="${!!on}"` : ''}>
+        ${_exSel ? '<span class="ex-check" aria-hidden="true"></span>' : ''}${img}
         <div class="ex-play-main">
           <div class="stats-recent-top">
             <span class="stats-recent-game">${_escapeHtml(p.game.name)}</span>
@@ -238,11 +240,23 @@ function showGamesView() {
         <button type="button" class="seg-btn${playsWho === 'all' ? ' active' : ''}" data-plays-who="all" role="tab" aria-selected="${playsWho === 'all'}">Everyone</button>
         <button type="button" class="seg-btn${playsWho === 'mine' ? ' active' : ''}" data-plays-who="mine" role="tab" aria-selected="${playsWho === 'mine'}">Yours</button>
       </div></div>` : '';
-    return `${seg}${logBtn ? `<div class="ex-log">${logBtn}</div>` : ''}
+    // several plays at once into BG Stats, as one file (js/bgstats-share.js)
+    const lastDay = shownPlays.length ? shownPlays[0].date : '';
+    const lastDayN = shownPlays.filter(p => p.date === lastDay).length;
+    const pickBtn = shownPlays.length && typeof bgsSendPlays === 'function'
+      ? (_exSel ? '' : '<button type="button" class="ex-pick-start" data-ex-pick="start">Select plays for BG Stats</button>') : '';
+    const bar = _exSel ? `<div class="ex-pickbar" role="region" aria-label="Plays picked for BG Stats">
+        <div class="ex-pickbar-top"><b data-ex-count>${_exSel.size} picked</b>
+          ${lastDay ? `<button type="button" class="ex-pick-day" data-ex-pick="day">${_fmtDateShort(lastDay)}&rsquo;s ${lastDayN}</button>` : ''}
+          <button type="button" class="ex-pick-x" data-ex-pick="cancel">Cancel</button></div>
+        <button type="button" class="bgs-btn bgs-main" data-ex-pick="send"${_exSel.size ? '' : ' disabled'}>Send to BG Stats as one file</button>
+      </div>` : '';
+    return `${seg}${logBtn || pickBtn ? `<div class="ex-log">${logBtn}${pickBtn}</div>` : ''}
+      ${_exSel ? '<div class="ex-pick-hint">Tap the plays to pick them. They go to BG Stats together, in one file.</div>' : ''}
       <div class="stats-section">
         ${shownPlays.slice(0, _explorePlaysShown).map(playRowHtml).join('') || '<div class="stats-player-sub gb-empty">No plays of yours yet. Log one and it shows here.</div>'}
         ${shownPlays.length > _explorePlaysShown ? `<button type="button" class="gb-more" id="ex-plays-more">Show more</button>` : ''}
-      </div>`;
+      </div>${bar}`;
   };
 
   if (_exploreTab === 'trending' && !(typeof trendingAllowed === 'function' && trendingAllowed())) _exploreTab = 'games';
@@ -282,9 +296,46 @@ function showGamesView() {
   }));
   if (_exploreTab === 'campaigns') wireCampaignsTab(container);
 
+  // Latest plays: picking plays for BG Stats
+  container.querySelectorAll('[data-ex-pick]').forEach(b => b.addEventListener('click', async () => {
+    const k = b.dataset.exPick;
+    if (k === 'start') { _exSel = new Set(); showGamesView(); return; }
+    if (k === 'cancel') { _exSel = null; showGamesView(); return; }
+    if (k === 'day') {
+      const day = shownPlays.length ? shownPlays[0].date : '';
+      const those = shownPlays.filter(p => p.date === day);
+      const all = those.every(p => _exSel.has(p.play));
+      those.forEach(p => { if (all) _exSel.delete(p.play); else _exSel.add(p.play); });
+      showGamesView();
+      return;
+    }
+    if (k === 'send' && _exSel && _exSel.size) {
+      const list = shownPlays.filter(p => _exSel.has(p.play)).reverse().map(p => [p.game.bggId, p.play]);   // oldest first
+      const was = b.textContent;
+      const r = await bgsSendPlays(list);
+      if (r === 'shared' || r === 'saved') {
+        if (typeof _acctToast === 'function') _acctToast(r === 'saved' ? `Saved ${list.length} plays: open the file with BG Stats.` : `Sent ${list.length} plays to BG Stats.`);
+        _exSel = null;
+        showGamesView();
+      } else if (r === 'failed') { b.textContent = 'Couldn’t share it'; setTimeout(() => { b.textContent = was; }, 2500); }
+    }
+  }));
+
   // Wire game/play rows (covers every sub-tab's [data-bgg-id] rows)
   container.querySelectorAll('.stats-section [data-bgg-id]').forEach(el => {
     el.addEventListener('click', () => {
+      if (_exSel && el.dataset.exI != null) {   // picking: a tap picks the play, or puts it back
+        const p = shownPlays[Number(el.dataset.exI)];
+        if (!p) return;
+        if (_exSel.has(p.play)) _exSel.delete(p.play); else _exSel.add(p.play);
+        el.classList.toggle('ex-picked', _exSel.has(p.play));
+        el.setAttribute('aria-checked', String(_exSel.has(p.play)));
+        const c = container.querySelector('[data-ex-count]');
+        if (c) c.textContent = `${_exSel.size} picked`;
+        const send = container.querySelector('[data-ex-pick="send"]');
+        if (send) send.disabled = !_exSel.size;
+        return;
+      }
       const game = findGameByBggId(el.dataset.bggId);
       if (game) openModal(game);
     });

@@ -56,10 +56,12 @@ function comboAttach(input, opts) {
       active = (active + (e.key === 'ArrowDown' ? 1 : -1) + opts2.length) % opts2.length;
       opts2.forEach((b, i) => b.classList.toggle('on', i === active));
       opts2[active].scrollIntoView({ block: 'nearest' });
-    } else if (e.key === 'Enter' && active >= 0) {
+    } else if (e.key === 'Enter' && (active >= 0 || typed)) {
+      // Return takes the one highlighted, or the top match for what was typed
+      // ("Stiv" → "Stiv's Home"), not the half-typed text
       e.preventDefault();
       e.stopPropagation();
-      pick(list._shown[active]);
+      pick(list._shown[active >= 0 ? active : 0]);
     }
   });
   // a press on a choice mustn't blur the field first (that would close the list)
