@@ -51,6 +51,8 @@ function buildChartsHtml(days, locations, total) {
 let _exploreTab = 'games'; // the screen on show; survives re-renders and modal round-trips
 let _explorePlaysShown = 40;   // Latest plays: how many are on show
 let _exSel = null;             // Latest plays: the plays picked for BG Stats (a Set), or null when not picking
+let _exPressAt = 0;            // when a long press started picking (the tap that ends it isn't a pick)
+const EX_PRESS_MS = 480;
 let _explorePlaysWho = (() => { try { return localStorage.getItem('bgl-plays-who') === 'mine' ? 'mine' : 'all'; } catch (_) { return 'all'; } })();   // Latest plays: everyone's or yours
 
 function showGamesView() {
@@ -243,16 +245,20 @@ function showGamesView() {
     // several plays at once into BG Stats, as one file (js/bgstats-share.js)
     const lastDay = shownPlays.length ? shownPlays[0].date : '';
     const lastDayN = shownPlays.filter(p => p.date === lastDay).length;
-    const pickBtn = shownPlays.length && typeof bgsSendPlays === 'function'
-      ? (_exSel ? '' : '<button type="button" class="ex-pick-start" data-ex-pick="start">Select plays for BG Stats</button>') : '';
+    // a long press on a play starts picking (the user, 28 Nov 2026: instead of a button)
+    const pickBtn = '';
     const bar = _exSel ? `<div class="ex-pickbar" role="region" aria-label="Plays picked for BG Stats">
         <div class="ex-pickbar-top"><b data-ex-count>${_exSel.size} picked</b>
           ${lastDay ? `<button type="button" class="ex-pick-day" data-ex-pick="day">${_fmtDateShort(lastDay)}&rsquo;s ${lastDayN}</button>` : ''}
           <button type="button" class="ex-pick-x" data-ex-pick="cancel">Cancel</button></div>
-        <button type="button" class="bgs-btn bgs-main" data-ex-pick="send"${_exSel.size ? '' : ' disabled'}>Send to BG Stats as one file</button>
+        <div class="ex-pick-acts">
+          <button type="button" class="bgs-btn bgs-main" data-ex-pick="send"${_exSel.size ? '' : ' disabled'}>Send as one file</button>
+          <button type="button" class="bgs-btn" data-ex-pick="each"${_exSel.size ? '' : ' disabled'}>One by one</button>
+        </div>
       </div>` : '';
     return `${seg}${logBtn || pickBtn ? `<div class="ex-log">${logBtn}${pickBtn}</div>` : ''}
-      ${_exSel ? '<div class="ex-pick-hint">Tap the plays to pick them. They go to BG Stats together, in one file.</div>' : ''}
+      ${_exSel ? '<div class="ex-pick-hint">Tap the plays to pick them. They go to BG Stats together, in one file.</div>'
+        : shownPlays.length && typeof bgsSendPlays === 'function' ? '<div class="ex-pick-hint">Press and hold a play to pick several for BG Stats.</div>' : ''}
       <div class="stats-section">
         ${shownPlays.slice(0, _explorePlaysShown).map(playRowHtml).join('') || '<div class="stats-player-sub gb-empty">No plays of yours yet. Log one and it shows here.</div>'}
         ${shownPlays.length > _explorePlaysShown ? `<button type="button" class="gb-more" id="ex-plays-more">Show more</button>` : ''}
@@ -309,21 +315,49 @@ function showGamesView() {
       showGamesView();
       return;
     }
+    const picked = () => shownPlays.filter(p => _exSel.has(p.play)).reverse().map(p => [p.game.bggId, p.play]);   // oldest first
+    if (k === 'each' && _exSel && _exSel.size) { openBgsOneByOne(picked()); return; }
     if (k === 'send' && _exSel && _exSel.size) {
-      const list = shownPlays.filter(p => _exSel.has(p.play)).reverse().map(p => [p.game.bggId, p.play]);   // oldest first
-      const was = b.textContent;
+      const list = picked();
       const r = await bgsSendPlays(list);
       if (r === 'shared' || r === 'saved') {
-        if (typeof _acctToast === 'function') _acctToast(r === 'saved' ? `Saved ${list.length} plays: open the file with BG Stats.` : `Sent ${list.length} plays to BG Stats.`);
-        _exSel = null;
-        showGamesView();
-      } else if (r === 'failed') { b.textContent = 'Couldn’t share it'; setTimeout(() => { b.textContent = was; }, 2500); }
+        if (typeof _acctToast === 'function') _acctToast(r === 'saved'
+          ? `Saved ${list.length} plays as one file in your downloads: open it with BG Stats. Or send them one by one.`
+          : `Sent ${list.length} plays to BG Stats.`, 7000);
+        if (r === 'shared') { _exSel = null; showGamesView(); }
+      }
     }
   }));
+
+  // Latest plays: press and hold a play to start picking, with it picked
+  if (_exploreTab === 'plays' && typeof bgsSendPlays === 'function') {
+    container.querySelectorAll('.ex-play[data-ex-i]').forEach(el => {
+      let timer = null, at = null;
+      const stop = () => { clearTimeout(timer); timer = null; };
+      el.addEventListener('pointerdown', (e) => {
+        if (e.button > 0 || _exSel) return;
+        at = [e.clientX, e.clientY];
+        stop();
+        timer = setTimeout(() => {
+          timer = null;
+          const p = shownPlays[Number(el.dataset.exI)];
+          if (!p) return;
+          _exSel = new Set([p.play]);
+          _exPressAt = Date.now();
+          if (navigator.vibrate) navigator.vibrate(25);
+          showGamesView();
+        }, EX_PRESS_MS);
+      });
+      el.addEventListener('pointermove', (e) => { if (timer && at && Math.hypot(e.clientX - at[0], e.clientY - at[1]) > 10) stop(); });
+      ['pointerup', 'pointercancel', 'pointerleave'].forEach(t => el.addEventListener(t, stop));
+      el.addEventListener('contextmenu', (e) => e.preventDefault());   // a phone's own long-press menu
+    });
+  }
 
   // Wire game/play rows (covers every sub-tab's [data-bgg-id] rows)
   container.querySelectorAll('.stats-section [data-bgg-id]').forEach(el => {
     el.addEventListener('click', () => {
+      if (_exSel && Date.now() - _exPressAt < 700) return;   // the release of the long press that started picking
       if (_exSel && el.dataset.exI != null) {   // picking: a tap picks the play, or puts it back
         const p = shownPlays[Number(el.dataset.exI)];
         if (!p) return;

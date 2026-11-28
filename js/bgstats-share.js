@@ -148,12 +148,14 @@ function bgsPlayFile(bggId, play) {
   const now = _bgsLocal(new Date());
   const range = (v) => { const m = String(v || '').match(/(\d+)\D*(\d+)?/); return m ? [Number(m[1]), Number(m[2] || m[1])] : [0, 0]; };
   const [minP, maxP] = range(game.players), [minT, maxT] = range(game.playTime);
+  // laid out like BG Stats' own play files (every field its games carry there)
   const gameOf = (gid, name, extra) => ({
-    uuid: _bgsUuid(`bgl-game:${gid}`), id: 0, name, modificationDate: now, usesTeams: false, bggName: name, bggId: gid, ...extra,
+    uuid: _bgsUuid(`bgl-game:${gid}`), id: 0, name, modificationDate: now, usesTeams: false, urlThumb: '', urlImage: '',
+    bggName: name, bggYear: 0, bggId: gid, designers: '', rating: 0, minAge: 0, ...extra,
   });
   const games = [gameOf(id, link.game.name, {
     cooperative: typeof isCoop === 'function' && !!game.categories && isCoop(game), highestWins: link.game.highestWins, noPoints: link.game.noPoints,
-    bggYear: Number(game.year) || 0, isBaseGame: 1, isExpansion: 0, minPlayerCount: minP, maxPlayerCount: maxP, minPlayTime: minT, maxPlayTime: maxT,
+    bggYear: Number(game.year) || 0, designers: game.designer || '', isBaseGame: 1, isExpansion: 0, minPlayerCount: minP, maxPlayerCount: maxP, minPlayTime: minT, maxPlayTime: maxT,
   })];
   const xs = typeof playExpansionsOf === 'function' ? playExpansionsOf(id, play) : [];
   const named = new Map((typeof expansionsOf === 'function' ? expansionsOf(id) : []).map(([x, n]) => [Number(x), n]));
@@ -225,18 +227,50 @@ function bgsSendPlays(list) {
   const json = JSON.stringify(bgsPlaysFile(list));
   const days = [...new Set(list.map(([, p]) => p.date))].sort();
   const fname = `plays-${days[0]}${days.length > 1 ? `-to-${days[days.length - 1]}` : ''}-${list.length}.bgsplay`;
-  const file = new File([json], fname, { type: 'application/octet-stream' });
-  if (navigator.canShare && navigator.canShare({ files: [file] })) {
-    return navigator.share({ files: [file], title: `${list.length} plays for BG Stats` }).then(() => 'shared', (e) => (e && e.name === 'AbortError' ? 'cancelled' : 'failed'));
+  return _bgsShareOrSave(new File([json], fname, { type: 'application/octet-stream' }), `${list.length} plays for BG Stats`);
+}
+// The sure way: each play's own link (BG Stats' documented createPlay link, the
+// QR code's), one after another; the ones opened are ticked off.
+function openBgsOneByOne(list) {
+  let ov = document.getElementById('bgs-seq-overlay');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.id = 'bgs-seq-overlay';
+    ov.className = 'bgs-overlay';
+    ov.setAttribute('role', 'dialog');
+    ov.setAttribute('aria-modal', 'true');
+    document.body.appendChild(ov);
   }
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(file);
-  a.download = fname;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
-  return Promise.resolve('saved');
+  const esc = _escapeHtml;
+  ov.innerHTML = `<div class="bgs-sheet">
+      <div class="bgs-head"><span class="bgs-title">${list.length} plays, one by one</span><button type="button" class="bgs-x" aria-label="Close">&times;</button></div>
+      <div class="bgs-hint">Tap each one: BG Stats opens with that play, ready to save. Come back here for the next.</div>
+      <div class="bgs-seq">${list.map(([id, p], i) => {
+        const g = findGameByBggId(Number(id));
+        const who = (p.sc || []).map(s => `${s.w ? '★' : ''}${String(s.n).split(/\s/)[0]}`).join(', ');
+        return `<div class="bgs-seq-row" data-seq="${i}">
+            <img class="bgs-cover" src="images/${Number(id)}.jpg" alt="" onerror="this.style.visibility='hidden'">
+            <div class="bgs-seq-main"><b>${esc(g ? g.name : `Game #${id}`)}</b><span>${esc([typeof _fmtDateShort === 'function' ? _fmtDateShort(p.date) : p.date, p.b].filter(Boolean).join(' · '))}</span><small>${esc(who)}</small></div>
+            <a class="bgs-btn bgs-main bgs-seq-go" href="${esc(bgsPlayLink(id, p))}" data-seq-go="${i}">${i + 1}</a>
+          </div>`;
+      }).join('')}</div>
+      <div class="bgs-small">The first time, BG Stats asks which of its players, game and place each one is, and remembers it.</div>
+    </div>`;
+  const close = () => {
+    ov.classList.remove('open');
+    ov._navClose = null;
+    if (typeof navOverlayClosed === 'function') navOverlayClosed('bgs-seq');
+  };
+  ov.onclick = (e) => {
+    if (e.target === ov || e.target.closest('.bgs-x')) { close(); return; }
+    const go = e.target.closest('[data-seq-go]');
+    if (!go) return;
+    const row = go.closest('.bgs-seq-row');
+    if (row) { row.classList.add('sent'); go.textContent = '✓'; }
+  };
+  ov._navClose = close;
+  ov.classList.add('open');
+  if (typeof navOverlayOpened === 'function') navOverlayOpened('bgs-seq');
 }
 // What a play file adds to the link: its score sheet and expansions.
 function _bgsFileExtras(bggId, play) {
@@ -245,22 +279,32 @@ function _bgsFileExtras(bggId, play) {
   const sheet = !!(u && u.key !== 'rounds' && !u.sheet.own);   // BG Stats' own sheets only
   return [sheet ? 'score sheet' : '', xs.length ? (xs.length === 1 ? 'expansion' : 'expansions') : ''].filter(Boolean);
 }
-// Share the file to BG Stats (the phone's share sheet), or save it where sharing files can't.
-function _bgsSendFile(bggId, play, name) {
-  const json = JSON.stringify(bgsPlayFile(bggId, play));
-  const fname = `${String(name).replace(/[^\p{L}\p{N} -]+/gu, '').trim().replace(/\s+/g, '-') || 'play'}-${play.date}.bgsplay`;
-  const file = new File([json], fname, { type: 'application/octet-stream' });
-  if (navigator.canShare && navigator.canShare({ files: [file] })) {
-    return navigator.share({ files: [file], title: `${name}, ${play.date}` }).then(() => 'shared', (e) => (e && e.name === 'AbortError' ? 'cancelled' : 'failed'));
-  }
+// A play file to BG Stats: the phone's share sheet; where the phone won't share
+// this kind of file (Android shares only some, the user, 28 Nov 2026: "it threw
+// an error that it couldn't do it"), it's saved instead, to open with BG Stats.
+function _bgsSave(file) {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(file);
-  a.download = fname;
+  a.download = file.name;
   document.body.appendChild(a);
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
-  return Promise.resolve('saved');
+  return 'saved';
+}
+async function _bgsShareOrSave(file, title) {
+  let can = false;
+  try { can = !!(navigator.canShare && navigator.canShare({ files: [file] })); } catch (_) {}
+  if (can) {
+    try { await navigator.share({ files: [file], title }); return 'shared'; }
+    catch (e) { if (e && e.name === 'AbortError') return 'cancelled'; }
+  }
+  return _bgsSave(file);
+}
+function _bgsSendFile(bggId, play, name) {
+  const json = JSON.stringify(bgsPlayFile(bggId, play));
+  const fname = `${String(name).replace(/[^\p{L}\p{N} -]+/gu, '').trim().replace(/\s+/g, '-') || 'play'}-${play.date}.bgsplay`;
+  return _bgsShareOrSave(new File([json], fname, { type: 'application/octet-stream' }), `${name}, ${play.date}`);
 }
 
 let _bgsQrLoading = null;
@@ -362,9 +406,9 @@ function openBgsShare(bggId, idx) {
     if (fb) {
       const was = fb.textContent;
       const r = await _bgsSendFile(bggId, play, name);
-      if (r === 'saved' || r === 'failed') {
-        fb.textContent = r === 'saved' ? 'Saved: open it with BG Stats' : 'Couldn\'t share it';
-        setTimeout(() => { fb.textContent = was; }, 3000);
+      if (r === 'saved') {
+        fb.textContent = 'Saved to your downloads: open it with BG Stats';
+        setTimeout(() => { fb.textContent = was; }, 4000);
       }
       return;
     }

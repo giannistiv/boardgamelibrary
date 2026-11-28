@@ -3397,6 +3397,7 @@
   /* Play → Latest plays: Log a play on top */
   .ex-log{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:0.5rem;margin:0 0 1rem}
   /* Latest plays: picking several for BG Stats */
+  .ex-play{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
   .ex-pick-start{padding:0.55rem 0.9rem;border-radius:999px;border:1px solid var(--line-2);background:var(--card);color:var(--text-2);font:inherit;font-size:0.84rem;font-weight:600;cursor:pointer}
   .ex-pick-hint{font-size:0.78rem;color:var(--text-3);text-align:center;margin:-0.4rem 0 0.8rem}
   .ex-check{flex:0 0 22px;width:22px;height:22px;margin-top:0.55rem;border-radius:50%;border:2px solid var(--line-3)}
@@ -3406,7 +3407,16 @@
   .ex-pickbar-top{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.55rem;font-size:0.85rem}
   .ex-pickbar-top b{flex:1}
   .ex-pick-day,.ex-pick-x{padding:0.35rem 0.7rem;border-radius:999px;border:1px solid var(--line-2);background:var(--card);color:var(--text-2);font:inherit;font-size:0.78rem;font-weight:600;cursor:pointer}
-  .ex-pickbar .bgs-btn{width:100%}
+  .ex-pick-acts{display:flex;gap:0.45rem}
+  .ex-pick-acts .bgs-btn{flex:1}
+  .bgs-seq{display:flex;flex-direction:column;gap:0.45rem;margin:0.6rem 0}
+  .bgs-seq-row{display:flex;align-items:center;gap:0.6rem;padding:0.5rem;border-radius:var(--r-s);background:var(--card);border:1px solid var(--line)}
+  .bgs-seq-main{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
+  .bgs-seq-main b{font-size:0.86rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .bgs-seq-main span,.bgs-seq-main small{font-size:0.72rem;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .bgs-seq-go{flex:0 0 auto;min-width:44px;padding:0.55rem 0.7rem}
+  .bgs-seq-row.sent{opacity:0.55}
+  .bgs-seq-row.sent .bgs-seq-go{background:var(--win-soft);border-color:var(--win);color:var(--win)}
   .ex-pickbar .bgs-btn[disabled]{opacity:0.45;cursor:default}
   /* Latest plays: everyone's or yours, each with its game's picture */
   .ex-plays-who{display:flex;justify-content:center;margin:0 0 0.8rem}
